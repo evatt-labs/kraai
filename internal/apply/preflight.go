@@ -8,11 +8,12 @@ import (
 	"github.com/evatt-labs/kraai/internal/plan"
 )
 
-// preflight walks the whole plan before Apply touches anything, and refuses
-// the run outright if either condition in the package doc's "The pre-flight
-// gate" section holds. Returning early here, before a single Create/Delete
-// call is made, is what keeps a refusal cheap: nothing has to be rolled
-// back, because nothing happened.
+// preflight walks the whole plan before Apply touches anything and refuses
+// the run outright on an unreadable resource, or on a replacement the
+// caller did not permit.
+//
+// Refusing before a single Create or Delete is what keeps a refusal cheap:
+// nothing has to be rolled back, because nothing happened.
 func preflight(p *plan.Plan, allowReplace bool) error {
 	var failed, blockedReplace []string
 

@@ -9,55 +9,43 @@ import (
 )
 
 // groupKey identifies one expansion group: the (service, binding) pair a
-// single Registry.Resolve call's results share — expandCompute resolves
-// one group per service (Binding == ServiceKey there), expandBinding one
-// group per manifest binding. A resource.Registration.DependsOn key
-// resolves only within its own item's group, never across the whole
-// manifest: see that field's doc comment for why (a service's Lambda
-// permission depends on that service's own function, not every function
-// in the manifest).
+// single Registry.Resolve call's results share. expandCompute resolves one
+// group per service (Binding == ServiceKey there), expandBinding one group
+// per manifest binding.
+//
+// A DependsOn key resolves only within its own item's group, never across
+// the whole manifest — a service's Lambda permission depends on that
+// service's own function, not on every function in the manifest.
 type groupKey struct {
 	serviceKey string
 	binding    string
 }
 
-// computeWaves assigns every item in items a Wave: the length of the
-// longest chain of dependencies that must finish first, so that a node
-// with no dependencies gets wave 0 and every other node gets one more
-// than the largest wave among the things it depends on.
+// computeWaves assigns every item a Wave: the length of the longest chain
+// of dependencies that must finish first, so a node with no dependencies
+// gets wave 0 and every other node gets one more than the largest wave
+// among the things it depends on.
 //
-// Two kinds of edges are resolved, both into the same graph:
+// Two kinds of edges go into the same graph:
 //
-//   - Type edges: each item's own resource.Registration.DependsOn,
+//   - Type edges, from each item's own resource.Registration.DependsOn,
 //     resolved against the other items in its own group (see groupKey).
-//     A dependency naming a type this group never planned (because it was
-//     filtered out by When/Triggers/SelectedBy, or because this
-//     registration is simply requesting a type another provider
-//     supplies) contributes no edge — there is no node for it to point
-//     at, which is correct: a filtered-out registration contributes no
-//     node and no edge to anything.
-//   - Service edges: serviceDependsOn (manifest.Service.DependsOn,
-//     already validated to name real, non-self services at load time)
-//     connects every item belonging to a named service to every item
-//     belonging to each service it depends on.
+//   - Service edges, from serviceDependsOn (manifest.Service.DependsOn,
+//     validated at load time), connecting every item of a named service to
+//     every item of each service it depends on.
 //
-// Kahn's algorithm, run in layers rather than one node at a time: a node
-// enters the current layer exactly when every dependency it has has
-// already been assigned an earlier layer, which is the standard
-// longest-path-via-BFS-levels property of a topological sort — the layer
-// a node lands in does not depend on the order nodes are visited within a
-// layer, only on the graph's actual shape, so wave assignment is
-// deterministic for a given manifest regardless of map iteration order
-// upstream.
+// A dependency naming a type the group never planned contributes no edge:
+// a registration filtered out by When/Triggers/SelectedBy, or supplied by
+// another provider, has no node to point at.
 //
-// Cycle detection is a side effect of the algorithm terminating early
-// (Kahn's own well-known property: len(sorted) < len(nodes) if and only
-// if a cycle exists), not a separate pass. When it happens the returned
-// error names every resource still unresolved when the algorithm
-// stalled — not a search for the cycle's minimal subset, but the full set
-// of items that could not be ordered, which by construction includes
-// every item that actually took part in the cycle plus anything that
-// itself, transitively, depended on one of them.
+// It runs Kahn's algorithm in layers rather than one node at a time, so
+// the layer a node lands in depends only on the graph's shape and not on
+// visit order — wave assignment is deterministic for a given manifest
+// whatever the map iteration order upstream.
+//
+// A cycle stalls the sort rather than being detected separately; the error
+// then names every item left unresolved, which is the cycle plus anything
+// transitively behind it.
 func computeWaves(items []plannedItem, serviceDependsOn map[string][]string) ([]int, error) {
 	n := len(items)
 	waves := make([]int, n)
@@ -155,12 +143,8 @@ func buildGraph(items []plannedItem, serviceDependsOn map[string][]string) (adj 
 	return adj, indegree
 }
 
-// cycleError builds the loud, named error a stalled topological sort
-// requires: every item still unresolved (indegree > 0, or indegree == 0
-// but never reached — which cannot happen once assigned above, since a
-// zero-indegree node is always placed in some layer — so in practice
-// exactly the indegree > 0 set) is named, sorted for a deterministic
-// message across runs.
+// cycleError names every item a stalled topological sort left unresolved,
+// sorted so the message is identical across runs.
 func cycleError(items []plannedItem, indegree []int) error {
 	var names []string
 	for i, d := range indegree {

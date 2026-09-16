@@ -10,12 +10,9 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// defaultConcurrency bounds mutating calls within one phase when the
-// caller does not set one explicitly. Mirrors
-// internal/plan/planner.go's defaultConcurrency exactly, including its
-// rationale (D13): goroutines are cheap, provider rate limits are not, and
-// a first-time caller should not have to discover a sane limit by getting
-// rate-limited — this time against Create/Delete instead of Get.
+// defaultConcurrency bounds mutating calls within one wave when the caller
+// sets no limit of its own. Mirrors plan.defaultConcurrency, for the same
+// reason: goroutines are cheap, provider rate limits are not.
 const defaultConcurrency = 10
 
 // Applier executes plans against a fixed registry.
@@ -29,10 +26,10 @@ type Applier struct {
 type Option func(*Applier)
 
 // WithConcurrency sets the maximum number of mutating calls in flight at
-// once within a single phase. Non-positive values are ignored, leaving the
-// default in place — the same contract as plan.WithConcurrency, for the
-// same reason: SetLimit(0) would deadlock and a negative value would mean
-// unlimited, both of which contradict D13's "bounded" intent.
+// once within a single wave. Non-positive values are ignored, the same
+// contract as plan.WithConcurrency: SetLimit(0) permits no goroutines at
+// all and a negative limit means unbounded, so neither is a limit a caller
+// can have meant.
 func WithConcurrency(n int) Option {
 	return func(a *Applier) {
 		if n > 0 {
@@ -88,12 +85,9 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 	// singleton).
 	locker := resource.NewScopeLocker()
 
-	// Waves run in ascending order (mirroring internal/plan/planner.go's own
-	// wave loop); once one has a failure, no later wave starts — see the
-	// package doc's "Execution order and failure semantics" section. This
-	// replaces the old fixed three-phase loop: byWave's length is derived
-	// from the plan itself (internal/plan/graph.go's computeWaves), not a
-	// constant set of stages.
+	// Waves run in ascending order; once one has a failure, no later wave
+	// starts. byWave's length comes from the plan itself, not from a fixed
+	// set of stages.
 	waveFailed := false
 	for wave := range byWave {
 		idxs := byWave[wave]
@@ -109,17 +103,12 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 		}
 	}
 
-	// A cancelled run is not a completed apply, for the same reason
-	// Planner.Plan refuses to hand back a partial plan on cancellation
-	// (see its own comment): every entry Apply already wrote either
-	// reflects a real mutation that happened or a real failure/skip that
-	// occurred, so nothing here is fabricated — but reporting success (a
-	// nil error) for a run the caller asked to stop would be wrong
-	// regardless of how accurate the partial Result is. The already-
-	// applied mutations are not undone by this; they simply are not
-	// summarized as a normal result for this invocation, exactly as a
-	// cancelled plan's Get calls already happened but are not summarized
-	// as a normal plan.
+	// A cancelled run is not a completed apply. Every entry already written
+	// reflects a real mutation or a real failure, so nothing here is
+	// fabricated, but reporting success for a run the caller asked to stop
+	// would be wrong however accurate the partial Result is. Mutations
+	// already applied are not undone — they are simply not summarized as a
+	// normal result for this invocation.
 	if err := ctx.Err(); err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "applying was cancelled")
 	}
@@ -128,10 +117,8 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 
 // indexByWave groups action indices by wave, preserving each action's
 // original position in actions/results so per-action output stays aligned
-// regardless of how the input plan happened to be ordered. The returned
-// slice is indexed directly by wave number (0..max), unlike the old
-// phase-keyed map, since a wave count is derived per plan rather than
-// fixed.
+// however the input plan was ordered. The returned slice is indexed
+// directly by wave number.
 func indexByWave(actions []plan.Action) [][]int {
 	maxWave := 0
 	for _, a := range actions {
@@ -157,14 +144,12 @@ func skipWave(actions []plan.Action, idxs []int, results []ActionResult) {
 // runWave executes every action at idxs concurrently, bounded by
 // a.concurrency, and reports whether any of them failed.
 //
-// Mirrors internal/plan/planner.go's getWave almost exactly, including its
-// central property: the errgroup.Group's function always returns nil
-// regardless of the action's outcome. A failure is recorded in results and
-// in this call's own return value, never propagated through the group —
-// propagating it would cancel the group's context and abort every sibling
-// action still in flight in the same wave, which is exactly the "let one
-// failure take out unrelated resources" behaviour wave-level (not
-// action-level) failure handling exists to avoid.
+// The errgroup function always returns nil, whatever the action's outcome:
+// a failure is recorded in results and in this call's return value, never
+// propagated through the group. Propagating it would cancel the group's
+// context and abort every sibling still in flight in the same wave, which
+// is the "one failure takes out unrelated resources" behaviour that
+// handling failure per wave rather than per action exists to avoid.
 func (a *Applier) runWave(
 	ctx context.Context, actions []plan.Action, idxs []int, results []ActionResult,
 	outputs *resource.Outputs, secrets *secretIndex, locker *resource.ScopeLocker,
@@ -193,10 +178,9 @@ func (a *Applier) runWave(
 }
 
 // execute runs one action to completion and reports its outcome. It never
-// returns an error itself — every failure is captured in the returned
-// ActionResult, so a caller running many of these concurrently (runPhase)
-// never has to decide what an error from this call would even mean for its
-// siblings.
+// returns an error: every failure is captured in the returned
+// ActionResult, so a caller running many of these concurrently never has to
+// decide what an error here would mean for the siblings.
 func (a *Applier) execute(
 	ctx context.Context, act plan.Action, outputs *resource.Outputs, secrets *secretIndex,
 	locker *resource.ScopeLocker,
@@ -214,12 +198,10 @@ func (a *Applier) execute(
 
 	key := bindingKey{ServiceKey: act.ServiceKey, Binding: act.Binding}
 	spec := act.Spec
-	// Populate this action's own credentials from whatever an earlier
-	// action for any of its readable bindings has produced so far — see the
-	// package doc's secret-scoping section. Harmless when nothing is
-	// registered yet: forAction returns nil, and Spec.Secret already
-	// reports a clear "no such credential" error naming the binding if this
-	// action turns out to need one anyway.
+	// Populate this action's credentials from whatever an earlier action
+	// for any of its readable bindings has produced. Harmless when nothing
+	// is registered yet: forAction returns nil, and Spec.Secret reports a
+	// clear error naming the binding if this action needs one anyway.
 	spec.Secrets = secrets.forAction(act.ServiceKey, act.Binding, effectiveReadsBindings(act))
 
 	state, outcome, err := a.mutate(ctx, act, reg, spec, locker)
@@ -231,10 +213,9 @@ func (a *Applier) execute(
 	}
 	result.Outcome = outcome
 
-	// Every successful action — created, replaced, or left unchanged —
-	// records its state and harvests its secrets. ActionNoChange included:
-	// a second apply must be able to wire a consumer from a resource that
-	// already existed and needed no change (see the package doc).
+	// Every successful action records its state and harvests its secrets,
+	// ActionNoChange included: a second apply must be able to wire a
+	// consumer from a resource that already existed and needed no change.
 	outputs.Put(state)
 	if producer, ok := reg.Resource.(resource.SecretProducer); ok {
 		for name, secret := range producer.Secrets(state) {
@@ -248,14 +229,11 @@ func (a *Applier) execute(
 // act.ReadsBindings as the planner set it, or act.Binding alone as an
 // explicit fallback when the planner left it empty or nil.
 //
-// internal/plan/planner.go always populates ReadsBindings today (see
-// Item's doc comment), but this package does not trust that invariant
-// blindly across the package boundary — the same defensive stance mutate
-// takes toward ActionNoChange's Current field below (Rule 5: avoid silent
-// assumptions). Falling back to act.Binding rather than an empty slice
-// means an action whose plan predates this field, or that some future
-// planner path forgets to set it, keeps seeing exactly its own binding's
-// secrets instead of silently seeing none.
+// The planner always populates ReadsBindings today, but that invariant is
+// not trusted blindly across a package boundary. Falling back to
+// act.Binding rather than to an empty slice means an action whose plan
+// predates the field, or that some future planner path forgets to set,
+// still sees its own binding's secrets instead of silently seeing none.
 func effectiveReadsBindings(act plan.Action) []string {
 	if len(act.ReadsBindings) > 0 {
 		return act.ReadsBindings
@@ -268,18 +246,12 @@ func effectiveReadsBindings(act plan.Action) []string {
 // error. The returned Outcome is meaningful even on error, purely so
 // execute's wrapped error message can say which verb failed.
 //
-// # Scope locking
-//
 // reg.ScopeFor(spec) resolves once per call and, when non-empty, serializes
-// the entire case below through locker.Do — for ActionReplace that means
-// Delete and Create both run inside the same held lock, as one operation,
-// rather than as two separately-locked calls: the whole point of a replace
-// is that the old and new resource share an identity, so nothing else
-// touching that identity's scope may run between the delete and the create
-// that follows it either. See resource.Registration.Scope's doc comment
-// for why this exists at all (the live 423 it prevents) and
-// resource.ScopeLocker's for why locking never nests — this call takes at
-// most one scope lock, held for its own duration only.
+// the whole switch below through locker.Do. For ActionReplace that puts
+// Delete and Create inside one held lock rather than two: old and new share
+// an identity, so nothing else touching that scope may run between them
+// either. Locking never nests — this call takes at most one scope lock,
+// held for its own duration.
 func (a *Applier) mutate(
 	ctx context.Context, act plan.Action, reg resource.Registration, spec resource.Spec,
 	locker *resource.ScopeLocker,
@@ -298,13 +270,11 @@ func (a *Applier) mutate(
 		return state, OutcomeCreated, err
 
 	case plan.ActionNoChange:
-		// No provider call: the point of ActionNoChange is that nothing
-		// needs to change. act.Current is guaranteed non-nil by
-		// plan.ActionKind's own contract (ActionNoChange only follows a
-		// Get that found something) — guarded here anyway because trusting
-		// an invariant silently, across a package boundary, is exactly
-		// the kind of assumption Rule 5 exists to catch. No scope lock
-		// either: there is no mutating call to serialize.
+		// No provider call, and no scope lock: there is nothing to
+		// serialize. act.Current is non-nil by plan.ActionKind's contract,
+		// since ActionNoChange only follows a Get that found something, but
+		// it is guarded anyway rather than trusted across a package
+		// boundary.
 		if act.Current == nil {
 			return nil, OutcomeUnchanged, kerrors.New(
 				"action for %q is ActionNoChange but carries no Current state — invalid plan",
@@ -314,8 +284,8 @@ func (a *Applier) mutate(
 
 	case plan.ActionReplace:
 		// Delete then Create, never Update: every registered type refuses
-		// Update with resource.ErrImmutable (see the package doc), so a
-		// replace is genuinely a new resource under the same Ref.
+		// Update with resource.ErrImmutable, so a replace is genuinely a
+		// new resource under the same Ref.
 		var state *resource.State
 		err := locker.Do(scope, func() error {
 			if err := res.Delete(ctx, act.Ref); err != nil {

@@ -7,13 +7,9 @@ import (
 
 // Render turns a Plan into plain, human-readable text.
 //
-// Deliberately not a method on Plan and not called anywhere else in this
-// package: computing a plan and presenting it are different jobs with
-// different audiences: apply needs the structured Actions, a human at a
-// terminal needs a formatted summary, and a future command layer may want
-// JSON or a TUI instead of either. Keeping this a free function operating
-// on the finished Plan means none of those callers has to recompute
-// anything, and adding a second renderer never touches Planner or Plan.
+// A free function rather than a method so a second renderer — JSON, a TUI —
+// can be added without touching Planner or Plan, and so no caller has to
+// recompute the walk to present it differently.
 func Render(p *Plan) string {
 	if p == nil || len(p.Actions) == 0 {
 		return "no resources declared\n"
