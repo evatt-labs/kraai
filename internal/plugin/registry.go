@@ -81,8 +81,8 @@ type registryEntry struct {
 }
 
 // Registry resolves a set of string keys to Handles, assembled from
-// built-ins plus a project's plugins:, in declared order (docs/
-// workstreams.yaml). Each key holds a stack of registrations in
+// built-ins plus a project's plugins:, in declared order. Each key holds
+// a stack of registrations in
 // registration order; the active one is always the top of the stack, so
 // removing the top registration (Deregister) uncovers whatever was
 // registered before it — a plugin overriding a built-in, then removed,

@@ -25,8 +25,8 @@ import (
 // before that lands.
 var debugFlag bool
 
-// NewRootCommand builds the kraai root command. Subsequent workstreams add
-// plan/apply/destroy/status/gc as children of this command.
+// NewRootCommand builds the kraai root command, which the verb subcommands
+// attach themselves to as children.
 func NewRootCommand() *cobra.Command {
 	debugFlag = false
 

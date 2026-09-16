@@ -158,8 +158,7 @@ func Registrations(client *Client) []resource.Registration {
 			// state, and S3 silently generates a bucket name of its own for
 			// an absent BucketName rather than rejecting the request. See
 			// injectDerivedName's own doc comment for the full failure mode
-			// this closed, and docs/workstreams.yaml's aws-provider-core
-			// entry for the finding.
+			// this closed.
 			Lookup:   resource.LookupByName,
 			Resource: &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: client},
 		},

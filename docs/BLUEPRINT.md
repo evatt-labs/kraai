@@ -1,7 +1,7 @@
 # kraai blueprint: the Go rewrite
 
 Status: draft for review. Nothing in this document is implemented yet.
-Companion file: `docs/workstreams.yaml`. Supersedes the archived Node-era
+Supersedes the archived Node-era
 blueprint entirely — that document was historical reference only, never a
 migration target, and was removed once this one replaced it
 (`git log -- docs/archive/node-cli` still has it). When a decision here

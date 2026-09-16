@@ -37,24 +37,20 @@ import (
 	"time"
 )
 
-// TestWarmCallOverheadBudget is the first half of acceptance criterion 4:
-// a hard regression guard asserting warm per-call overhead stays small,
-// per D29's measured 56ns warm-call figure. It calls a trivial, argument-
-// free exported function directly (fixtureNoopExport) rather than going
-// through Plugin.Invoke's full alloc/write/call/read/dealloc sequence —
-// that sequence is itself several wazero calls plus host-side bounds
-// checking and is expected to cost more (BenchmarkInvokeRoundTrip below
-// reports its real number); this test isolates the one thing D29 and
-// docs/workstreams.yaml's acceptance criterion actually describe:
-// wazero's own per-call dispatch overhead once a module is compiled and
-// instantiated.
+// TestWarmCallOverheadBudget guards against warm per-call overhead
+// regressing, measured at 56ns when this package was written.
 //
-// The threshold is a regression guard, not a reproduction of the
-// appendix's exact 56ns: CI hardware varies enough that asserting "tens
-// of nanoseconds" precisely would be flaky. 5 microseconds is roughly two
-// orders of magnitude above the measured figure — comfortably wide enough
-// to absorb noise, while still failing hard if warm call overhead
-// regressed to the microsecond range this package should never see.
+// It calls a trivial argument-free export directly rather than going
+// through Plugin.Invoke's full alloc/write/call/read/dealloc sequence,
+// which costs more and is measured by BenchmarkInvokeRoundTrip below. What
+// this isolates is wazero's own per-call dispatch, once a module is
+// compiled and instantiated.
+//
+// The threshold is a regression guard, not a reproduction of the 56ns: CI
+// hardware varies enough that asserting tens of nanoseconds would be
+// flaky. 5 microseconds sits about two orders of magnitude above the
+// measured figure — wide enough to absorb noise, tight enough to fail if
+// overhead regressed to the microsecond range.
 func TestWarmCallOverheadBudget(t *testing.T) {
 	ctx := t.Context()
 	host := newTestHost(t)
