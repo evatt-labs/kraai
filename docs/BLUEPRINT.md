@@ -290,6 +290,22 @@ targets and belongs in memory, built from the already-parsed manifest.
   thousand vectors is sufficient is an open question, and given the corpus
   size it probably is.
 
+## Capability definitions (proposal, not a decision)
+
+Drafted 2026-09-16. Full text: `docs/proposals/capability-definitions.md`.
+
+kraai's capability vocabulary is a closed set of five, hardcoded in
+`manifest.Providers` and `manifest.Service`. A provider cannot introduce
+one. The proposal is to let providers declare capabilities as static data
+with a structural JSON Schema, in the shape Kubernetes CRDs use, so that
+`objects` stops being a dumping ground for DNS zones and TLS certificates,
+one vendor type can play two roles cleanly, and settings stop silently
+doing nothing.
+
+Nothing is decided. Read the proposal before building against it; it
+carries the evidence, the Go design, the migration sequence and the open
+questions.
+
 ## Appendix: plugin runtime measurements (2026-09-13)
 
 Measured on a 24-thread i7-14650HX, wazero v1.12.0, Go 1.26.8, guest compiled
