@@ -19,7 +19,7 @@ import "errors"
 var ErrImmutable = errors.New("resource type cannot be updated in place")
 
 // SecretProducer is implemented by a Resource whose state includes values
-// that must not be stored (D32).
+// that must not be stored.
 //
 // An optional interface rather than a method on Resource: most types have no
 // credentials, and requiring every one of them to return an empty map would
