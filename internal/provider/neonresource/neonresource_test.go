@@ -271,6 +271,90 @@ func TestBranchMissingProjectIsAnError(t *testing.T) {
 	}
 }
 
+// neonWithRegion is standardNeon's shape with an explicit project
+// region_id, for the region-verification tests below.
+func neonWithRegion(regionID, branches string) func(call) (int, string) {
+	return func(c call) (int, string) {
+		switch {
+		case strings.HasSuffix(c.path, "/projects"):
+			return 200, `{"projects":[{"id":"p-1","name":"my-project","org_id":"org-1","region_id":"` +
+				regionID + `"}],"pagination":{"cursor":""}}`
+		case strings.HasSuffix(c.path, "/branches") && c.method == "GET":
+			return 200, `{"branches":` + branches + `,"pagination":{"cursor":""}}`
+		}
+		return 200, `{}`
+	}
+}
+
+// TestBranchRegionMatchesPasses is the positive control: a manifest that
+// declares the project's real region must not be rejected.
+func TestBranchRegionMatchesPasses(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-east-2", `[]`))
+	s := settings()
+	s.Region = "aws-us-east-2"
+	b := &branchResource{client: nc, settings: s}
+
+	if _, err := b.Get(t.Context(), resource.Ref{Name: "env-a"}); err != nil {
+		t.Fatalf("a matching region was rejected: %v", err)
+	}
+}
+
+// TestBranchRegionMismatchFails is this round's motivating bug, closed
+// rather than merely no longer silently accepted:
+// providers.database.settings.region declared a region kraai never
+// verified against the project it actually resolved, so a manifest could
+// assert one region and get another with no error at all.
+func TestBranchRegionMismatchFails(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-west-2", `[]`))
+	s := settings()
+	s.Region = "aws-us-east-2"
+	b := &branchResource{client: nc, settings: s}
+
+	_, err := b.Get(t.Context(), resource.Ref{Name: "env-a"})
+	if err == nil {
+		t.Fatal("expected an error for a region mismatch")
+	}
+	for _, want := range []string{"aws-us-east-2", "aws-us-west-2"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error %q does not name %q", err.Error(), want)
+		}
+	}
+}
+
+// TestBranchRegionMismatchFailsEveryVerb proves the check is not a Get-only
+// side effect: resolveProject is the one function every verb funnels
+// through, so Create and Delete must refuse a region mismatch too, exactly
+// as they already refuse a missing project (TestBranchMissingProjectIsAnError).
+func TestBranchRegionMismatchFailsEveryVerb(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-west-2", `[]`))
+	s := settings()
+	s.Region = "aws-us-east-2"
+	b := &branchResource{client: nc, settings: s}
+
+	if _, err := b.Get(t.Context(), resource.Ref{Name: "env-a"}); err == nil {
+		t.Error("Get accepted a region mismatch")
+	}
+	if _, err := b.Create(t.Context(), resource.Spec{Binding: "DB", Name: "env-a"}); err == nil {
+		t.Error("Create accepted a region mismatch")
+	}
+	if err := b.Delete(t.Context(), resource.Ref{Name: "env-a"}); err == nil {
+		t.Error("Delete accepted a region mismatch")
+	}
+}
+
+// TestBranchRegionAbsentIsValid pins "no opinion" for the common case: a
+// manifest that never declares providers.database.settings.region — every
+// manifest before this round's bug was found — must plan exactly as it
+// always did, regardless of which region the project actually lives in.
+func TestBranchRegionAbsentIsValid(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-west-2", `[]`))
+	b := &branchResource{client: nc, settings: settings()} // settings() sets no Region
+
+	if _, err := b.Get(t.Context(), resource.Ref{Name: "env-a"}); err != nil {
+		t.Fatalf("an absent region declaration was rejected: %v", err)
+	}
+}
+
 func TestBranchDeleteAbsentIsSuccess(t *testing.T) {
 	nc, seen := neonClient(t, standardNeon(`[]`))
 	b := &branchResource{client: nc, settings: settings()}
@@ -698,6 +782,67 @@ func TestDecodeSettingsNamesEveryMissingField(t *testing.T) {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("error should name %q: %v", want, err)
 		}
+	}
+}
+
+// TestDecodeSettingsRejectsUnknownKeyWithSuggestion is this workstream's
+// proof that the schema mechanism is generic rather than AWS-specific
+// (docs/proposals/capability-definitions.md's own test strategy names
+// this explicitly): a Neon provider settings map gets the identical
+// "unrecognized key(s) ... did you mean ... — recognized keys" treatment
+// internal/provider/aws's compute settings get, from the same
+// resource.Schema type, with no Neon-specific allowlist code anywhere in
+// this package.
+func TestDecodeSettingsRejectsUnknownKeyWithSuggestion(t *testing.T) {
+	_, err := DecodeSettings(map[string]any{
+		"project": "p", "database": "d", "role": "r",
+		"orgid": "o", // wrong case: the real key is "orgId"
+	})
+	if err == nil {
+		t.Fatal("expected an error for an unrecognized key")
+	}
+	for _, want := range []string{
+		"unrecognized key(s)", "orgid", "did you mean orgId?", "recognized keys",
+	} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error %q missing %q", err.Error(), want)
+		}
+	}
+}
+
+// TestDecodeSettingsRejectsWrongTypedValue pins "a valid key with a
+// wrong-typed value rejected rather than coerced" against this provider
+// too — decodeSettings' own str() helper would otherwise silently read a
+// non-string project as "", surfacing as a confusing "missing" error
+// instead of naming the real problem.
+func TestDecodeSettingsRejectsWrongTypedValue(t *testing.T) {
+	_, err := DecodeSettings(map[string]any{
+		"project": 12345, "database": "d", "role": "r",
+	})
+	if err == nil {
+		t.Fatal("expected an error for a wrong-typed project")
+	}
+	if strings.Contains(err.Error(), "missing") {
+		t.Fatalf("wrong-typed project was reported as missing rather than rejected: %q", err.Error())
+	}
+}
+
+// TestDecodeSettingsAcceptsRegion is the regression fixture for this
+// round's own bug: kraai-api's real kraai.yaml.j2 declares
+// providers.database.settings.region, and databaseSettingsSchema's first
+// version rejected it as unrecognized. region must decode without error
+// (and BranchSettings.Region must actually carry it — resolveProject in
+// branch.go is what does something with it, tested in
+// TestBranchRegionMatchesPasses/TestBranchRegionMismatchFails).
+func TestDecodeSettingsAcceptsRegion(t *testing.T) {
+	got, err := DecodeSettings(map[string]any{
+		"project": "p", "database": "d", "role": "r", "region": "aws-us-east-2",
+	})
+	if err != nil {
+		t.Fatalf("DecodeSettings rejected a declared region: %v", err)
+	}
+	if got.Region != "aws-us-east-2" {
+		t.Fatalf("Region = %q, want %q", got.Region, "aws-us-east-2")
 	}
 }
 

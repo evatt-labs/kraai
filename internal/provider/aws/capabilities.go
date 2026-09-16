@@ -23,12 +23,26 @@ func Capabilities() []resource.CapabilityDef {
 			Name: manifest.CapabilityObjects,
 			Summary: "S3-backed static site stack: bucket, CloudFront distribution, " +
 				"ACM certificate, and the Route 53 zone and records fronting it.",
+			// No ProviderSettings: no registration under this capability
+			// reads a settings map at all (expandBinding passes a nil
+			// config for "objects" — internal/plan/planner.go). Binding
+			// validates the one thing a service's `objects:` entry
+			// actually carries today (settings_schema.go).
+			Binding: objectsBindingSchema,
 		},
 		{
 			Name: manifest.CapabilityCompute,
 			Summary: "Lambda function behind an HTTP front door (API Gateway or a " +
 				"function URL) or an EventBridge schedule, with its own IAM " +
 				"execution role and artifact bucket.",
+			// ProviderSettings is the live replacement for
+			// settings_validate.go's validateKnownSettings — see
+			// computeSettingsSchema's own doc comment (settings_schema.go)
+			// for what it unions and why. No Binding: compute is one
+			// block per service (manifest.Service.Compute), not a
+			// `services.<svc>.compute[]` list, so there is no per-entry
+			// binding shape to validate.
+			ProviderSettings: computeSettingsSchema,
 		},
 	}
 }

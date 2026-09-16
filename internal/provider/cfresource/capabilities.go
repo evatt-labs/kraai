@@ -15,18 +15,22 @@ func Capabilities() []resource.CapabilityDef {
 		{
 			Name:    manifest.CapabilityDatabase,
 			Summary: "Cloudflare D1, a serverless SQLite database, reached over the sqlite driver.",
+			Binding: databaseBindingSchema,
 		},
 		{
 			Name:    manifest.CapabilityKeyValue,
 			Summary: "Cloudflare Workers KV namespace.",
+			Binding: keyvalueBindingSchema,
 		},
 		{
 			Name:    manifest.CapabilityObjects,
 			Summary: "Cloudflare R2 bucket: S3-compatible object storage with no egress fee.",
+			Binding: objectsBindingSchema,
 		},
 		{
 			Name:    manifest.CapabilityQueues,
 			Summary: "Cloudflare Queues: a message queue bound to a Worker.",
+			Binding: queuesBindingSchema,
 		},
 	}
 }

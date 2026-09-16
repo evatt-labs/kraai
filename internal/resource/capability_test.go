@@ -2,6 +2,7 @@ package resource
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -155,5 +156,94 @@ func TestNewCatalogRejectsAnEmptyCapabilityName(t *testing.T) {
 
 	if _, err := NewCatalog(bad); err == nil {
 		t.Fatal("expected an error for a capability with no Name")
+	}
+}
+
+// nonStructuralSchema builds a schema NewCatalog must reject: a top-level
+// oneOf, which docs/proposals/capability-definitions.md's structural-schema
+// constraint forbids.
+func nonStructuralSchema() *Schema {
+	return NewSchema("bad", map[string]any{
+		"type": "object",
+		"oneOf": []any{
+			map[string]any{"required": []any{"a"}},
+			map[string]any{"required": []any{"b"}},
+		},
+	})
+}
+
+// TestNewCatalogRejectsANonStructuralProviderSettingsSchema proves the
+// proposal's "validate the constraint at registration" requirement: a
+// provider shipping a non-structural ProviderSettings schema fails when
+// NewCatalog builds the catalog — which runs before a single manifest is
+// parsed (Capabilities' own doc comment) — not the first time some
+// manifest happens to exercise that capability's settings.
+func TestNewCatalogRejectsANonStructuralProviderSettingsSchema(t *testing.T) {
+	bad := fakeProvider{name: "bad", defs: []CapabilityDef{
+		{Name: "compute", Summary: "broken", ProviderSettings: nonStructuralSchema()},
+	}}
+
+	_, err := NewCatalog(bad)
+	if err == nil {
+		t.Fatal("expected an error for a non-structural providerSettings schema")
+	}
+	for _, want := range []string{"bad", "compute", "providerSettings"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error %q missing %q", err.Error(), want)
+		}
+	}
+}
+
+// TestNewCatalogRejectsANonStructuralBindingSchema is
+// TestNewCatalogRejectsANonStructuralProviderSettingsSchema's counterpart
+// for the other schema field CapabilityDef carries.
+func TestNewCatalogRejectsANonStructuralBindingSchema(t *testing.T) {
+	bad := fakeProvider{name: "bad", defs: []CapabilityDef{
+		{Name: "objects", Summary: "broken", Binding: nonStructuralSchema()},
+	}}
+
+	_, err := NewCatalog(bad)
+	if err == nil {
+		t.Fatal("expected an error for a non-structural binding schema")
+	}
+	for _, want := range []string{"bad", "objects", "binding"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error %q missing %q", err.Error(), want)
+		}
+	}
+}
+
+// TestNewCatalogCompilesValidSchemas is the positive counterpart: a
+// well-formed structural schema on either field does not stop the
+// capability from resolving normally through the catalog.
+func TestNewCatalogCompilesValidSchemas(t *testing.T) {
+	settings := NewSchema("good settings", map[string]any{
+		"type":                 "object",
+		"properties":           map[string]any{"region": map[string]any{"type": "string"}},
+		"additionalProperties": false,
+	})
+	binding := NewSchema("good binding", map[string]any{
+		"type":                 "object",
+		"properties":           map[string]any{"binding": map[string]any{"type": "string"}},
+		"required":             []any{"binding"},
+		"additionalProperties": false,
+	})
+	good := fakeProvider{name: "good", defs: []CapabilityDef{
+		{Name: "objects", Summary: "fine", ProviderSettings: settings, Binding: binding},
+	}}
+
+	cat, err := NewCatalog(good)
+	if err != nil {
+		t.Fatalf("NewCatalog: %v", err)
+	}
+	entries := cat.Providers("objects")
+	if len(entries) != 1 {
+		t.Fatalf("Providers(objects) = %+v, want 1 entry", entries)
+	}
+	if err := entries[0].Capability.ProviderSettings.Validate(map[string]any{"bogus": true}); err == nil {
+		t.Fatal("the catalog-resolved ProviderSettings schema did not reject an unknown key")
+	}
+	if err := entries[0].Capability.Binding.Validate(map[string]any{"binding": "b"}); err != nil {
+		t.Fatalf("the catalog-resolved Binding schema rejected a valid entry: %v", err)
 	}
 }
