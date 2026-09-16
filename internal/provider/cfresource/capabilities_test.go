@@ -48,3 +48,48 @@ func TestCapabilitiesCoverEveryRegisteredCapability(t *testing.T) {
 		}
 	}
 }
+
+// TestCapabilitiesAttachEveryBindingSchema pins that all four capabilities
+// this package declares carry a Binding schema (every one of them is a
+// `services.<svc>.<name>[]` list, unlike aws's compute) and none carry a
+// ProviderSettings schema, matching settings_schema.go's own doc comment
+// for why: nothing in this package reads a provider-level settings map.
+func TestCapabilitiesAttachEveryBindingSchema(t *testing.T) {
+	for _, def := range Capabilities() {
+		if def.ProviderSettings != nil {
+			t.Errorf("capability %q has a ProviderSettings schema, but this provider reads no "+
+				"provider-level settings map anywhere", def.Name)
+		}
+		if def.Binding == nil {
+			t.Errorf("capability %q has no Binding schema", def.Name)
+		}
+	}
+}
+
+func TestDatabaseBindingSchema(t *testing.T) {
+	if err := databaseBindingSchema.Validate(map[string]any{"binding": "DB", "driver": "sqlite"}); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+	if err := databaseBindingSchema.Validate(map[string]any{
+		"binding": "DB", "caching": map[string]any{"disabled": true, "maxAge": 60},
+	}); err != nil {
+		t.Fatalf("a valid caching block was rejected: %v", err)
+	}
+	if err := databaseBindingSchema.Validate(map[string]any{}); err == nil {
+		t.Fatal("expected an error for a missing binding")
+	}
+	if err := databaseBindingSchema.Validate(map[string]any{
+		"binding": "DB", "engine": "sqlite", // "engine" is not a recognized key
+	}); err == nil {
+		t.Fatal("expected an error for an unrecognized key")
+	}
+}
+
+func TestQueuesBindingSchema(t *testing.T) {
+	if err := queuesBindingSchema.Validate(map[string]any{"binding": "q", "consumer": true}); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+	if err := queuesBindingSchema.Validate(map[string]any{"binding": "q", "consumer": "yes"}); err == nil {
+		t.Fatal("expected an error for a wrong-typed consumer value")
+	}
+}

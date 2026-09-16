@@ -128,19 +128,6 @@ const (
 	packageZip = "zip"
 )
 
-// lambdaSettingKeys are every key decodeLambdaSettings understands out of a
-// compute Spec's merged settings map. Declared once, here, so
-// validateKnownSettings (settings_validate.go) can check a manifest's
-// settings against the union of every decoder that reads the same map
-// without decodeLambdaSettings or DecodeSettings (settings.go) ever having
-// to reference each other's vocabulary directly — see that file's own doc
-// comment for the design this replaced and why.
-var lambdaSettingKeys = []string{
-	"runtime", "architecture", "layerArn", "memorySize", "timeout",
-	"env", "envSecrets", "managedPolicyArns", "httpFrontDoor",
-	"reservedConcurrency", "package",
-}
-
 // normalizeHTTPFrontDoor maps an unset value to the documented default,
 // leaving anything else (valid or not) unchanged for the caller to
 // validate. Shared by decodeLambdaSettings (which validates and errors on
@@ -163,8 +150,9 @@ func normalizeHTTPFrontDoor(raw string) string {
 // the one decoder that actually holds every key a manifest author could
 // have written for this vendor, DecodeSettings' "region" and
 // lambdaurl.go's "functionUrlAuthType" included. That is why the
-// unknown-key check (validateKnownSettings) runs from here rather than
-// from DecodeSettings or at registry-assembly time.
+// unknown-key check (computeSettingsSchema.Validate, settings_schema.go)
+// runs from here rather than from DecodeSettings or at registry-assembly
+// time.
 //
 // This function alone is called from more than one place —
 // lambdaFunctionResource.translate (Create/Update) and
@@ -190,7 +178,7 @@ func normalizeHTTPFrontDoor(raw string) string {
 // Requiring one made such a function unplannable, which the real consumer
 // manifest hit immediately on its schedule-triggered service.
 func decodeLambdaSettings(settings map[string]any) (LambdaSettings, error) {
-	if err := validateKnownSettings(settings); err != nil {
+	if err := computeSettingsSchema.Validate(settings); err != nil {
 		return LambdaSettings{}, err
 	}
 

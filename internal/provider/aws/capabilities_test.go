@@ -1,6 +1,10 @@
 package aws
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/evatt-labs/kraai/internal/manifest"
+)
 
 // TestCapabilitiesRequireNoCredentialsOrClient proves the proposal's core
 // constraint holds for this package: Capabilities builds the complete
@@ -40,5 +44,42 @@ func TestCapabilitiesCoverEveryRegisteredCapability(t *testing.T) {
 			t.Errorf("registration %s uses capability %q, which Capabilities() does not declare",
 				reg.Key(), reg.Capability)
 		}
+	}
+}
+
+// TestCapabilitiesAttachesComputeProviderSettingsSchema pins which schema
+// lands on which field of which capability, straight through Capabilities()
+// — not just against the package-level var in settings_schema.go — so a
+// future edit that wires the wrong schema onto the wrong CapabilityDef
+// fails here.
+func TestCapabilitiesAttachesComputeProviderSettingsSchema(t *testing.T) {
+	for _, def := range Capabilities() {
+		switch def.Name {
+		case manifest.CapabilityCompute:
+			if def.ProviderSettings != computeSettingsSchema {
+				t.Error("compute capability's ProviderSettings is not computeSettingsSchema")
+			}
+			if def.Binding != nil {
+				t.Error("compute takes no per-service bindings, so Binding should be nil")
+			}
+		case manifest.CapabilityObjects:
+			if def.Binding != objectsBindingSchema {
+				t.Error("objects capability's Binding is not objectsBindingSchema")
+			}
+		}
+	}
+}
+
+// TestObjectsBindingSchema pins the one shape a service's `objects:` entry
+// carries today (manifest.ObjectStore: {binding}).
+func TestObjectsBindingSchema(t *testing.T) {
+	if err := objectsBindingSchema.Validate(map[string]any{"binding": "bucket"}); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+	if err := objectsBindingSchema.Validate(map[string]any{}); err == nil {
+		t.Fatal("expected an error for a missing binding")
+	}
+	if err := objectsBindingSchema.Validate(map[string]any{"binding": "bucket", "versioned": true}); err == nil {
+		t.Fatal("expected an error for an unrecognized key")
 	}
 }

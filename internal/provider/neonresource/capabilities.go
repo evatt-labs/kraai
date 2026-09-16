@@ -18,6 +18,13 @@ func Capabilities() []resource.CapabilityDef {
 			Name: Capability,
 			Summary: "Neon Postgres branch, fronted by a Cloudflare Hyperdrive " +
 				"connection pooler when compute is also Cloudflare.",
+			// ProviderSettings is the live schema decodeSettings
+			// (branch.go) validates providers.database.settings against —
+			// see databaseSettingsSchema's own doc comment
+			// (settings_schema.go) for why this is this workstream's
+			// proof that the mechanism is generic, not AWS-specific.
+			ProviderSettings: databaseSettingsSchema,
+			Binding:          databaseBindingSchema,
 		},
 	}
 }

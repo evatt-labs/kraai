@@ -10,19 +10,6 @@ import (
 // TypeLambdaURL is AWS::Lambda::Url's Cloud Control TypeName.
 const TypeLambdaURL = "AWS::Lambda::Url"
 
-// lambdaURLSettingKeys are the keys this file's translate reads out of a
-// compute Spec's merged settings map. Declared for the same reason
-// lambdaSettingKeys (compute_settings.go) and providerSettingKeys
-// (settings.go) are: providers.compute.settings is one free-form map with
-// three readers in this package now, not two, and validateKnownSettings
-// (settings_validate.go) unions all three so none of them has to know the
-// others' vocabulary. Found the hard way: functionUrlAuthType was a real,
-// working setting this file already read that the unknown-key check would
-// otherwise have rejected as unrecognized the first time a manifest author
-// used it, the same silent-then-loud bug this package exists to fix, one
-// key over.
-var lambdaURLSettingKeys = []string{"functionUrlAuthType"}
-
 // defaultFunctionURLAuthType is used when a manifest's compute settings
 // name no functionUrlAuthType.
 //

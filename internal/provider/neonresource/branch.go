@@ -83,6 +83,15 @@ func checkDriver(config map[string]any) error {
 
 // decodeSettings reads BranchSettings out of a Spec's config.
 func decodeSettings(config map[string]any) (BranchSettings, error) {
+	// Unrecognized-key and wrong-type rejection, generically — see
+	// databaseSettingsSchema's own doc comment (settings_schema.go). Runs
+	// first, before the required-field check below, so a typo'd key is
+	// reported as unrecognized rather than as its correctly-spelled
+	// neighbor simply being "missing."
+	if err := databaseSettingsSchema.Validate(config); err != nil {
+		return BranchSettings{}, err
+	}
+
 	s := BranchSettings{
 		Project:  str(config, "project"),
 		Database: str(config, "database"),

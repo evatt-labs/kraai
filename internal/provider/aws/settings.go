@@ -20,14 +20,6 @@ type Settings struct {
 	Region string
 }
 
-// providerSettingKeys are every key DecodeSettings understands out of a
-// provider's settings map. Declared here, alongside DecodeSettings itself,
-// for the same reason compute_settings.go declares lambdaSettingKeys next
-// to decodeLambdaSettings — see validateKnownSettings's own doc comment
-// (settings_validate.go) for how the two lists come together without
-// either decoder reading the other's.
-var providerSettingKeys = []string{"region"}
-
 // DecodeSettings reads Settings out of a manifest provider's Settings map.
 // Exported so a caller assembling the registry can validate settings before
 // wiring anything up, rather than at first use.

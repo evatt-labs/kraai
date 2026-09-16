@@ -701,6 +701,48 @@ func TestDecodeSettingsNamesEveryMissingField(t *testing.T) {
 	}
 }
 
+// TestDecodeSettingsRejectsUnknownKeyWithSuggestion is this workstream's
+// proof that the schema mechanism is generic rather than AWS-specific
+// (docs/proposals/capability-definitions.md's own test strategy names
+// this explicitly): a Neon provider settings map gets the identical
+// "unrecognized key(s) ... did you mean ... — recognized keys" treatment
+// internal/provider/aws's compute settings get, from the same
+// resource.Schema type, with no Neon-specific allowlist code anywhere in
+// this package.
+func TestDecodeSettingsRejectsUnknownKeyWithSuggestion(t *testing.T) {
+	_, err := DecodeSettings(map[string]any{
+		"project": "p", "database": "d", "role": "r",
+		"orgid": "o", // wrong case: the real key is "orgId"
+	})
+	if err == nil {
+		t.Fatal("expected an error for an unrecognized key")
+	}
+	for _, want := range []string{
+		"unrecognized key(s)", "orgid", "did you mean orgId?", "recognized keys",
+	} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error %q missing %q", err.Error(), want)
+		}
+	}
+}
+
+// TestDecodeSettingsRejectsWrongTypedValue pins "a valid key with a
+// wrong-typed value rejected rather than coerced" against this provider
+// too — decodeSettings' own str() helper would otherwise silently read a
+// non-string project as "", surfacing as a confusing "missing" error
+// instead of naming the real problem.
+func TestDecodeSettingsRejectsWrongTypedValue(t *testing.T) {
+	_, err := DecodeSettings(map[string]any{
+		"project": 12345, "database": "d", "role": "r",
+	})
+	if err == nil {
+		t.Fatal("expected an error for a wrong-typed project")
+	}
+	if strings.Contains(err.Error(), "missing") {
+		t.Fatalf("wrong-typed project was reported as missing rather than rejected: %q", err.Error())
+	}
+}
+
 // Creating without a derived name would produce a config nothing can find
 // again, so it fails before the credential is even resolved.
 func TestHyperdriveCreateRequiresADerivedName(t *testing.T) {

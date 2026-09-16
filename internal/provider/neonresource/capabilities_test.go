@@ -46,3 +46,27 @@ func TestCapabilitiesCoverEveryRegisteredCapability(t *testing.T) {
 		}
 	}
 }
+
+// TestCapabilitiesAttachesDatabaseSchemas pins which schema lands on which
+// field, straight through Capabilities().
+func TestCapabilitiesAttachesDatabaseSchemas(t *testing.T) {
+	defs := Capabilities()
+	if len(defs) != 1 {
+		t.Fatalf("Capabilities() = %+v, want exactly one entry", defs)
+	}
+	if defs[0].ProviderSettings != databaseSettingsSchema {
+		t.Error("database capability's ProviderSettings is not databaseSettingsSchema")
+	}
+	if defs[0].Binding != databaseBindingSchema {
+		t.Error("database capability's Binding is not databaseBindingSchema")
+	}
+}
+
+func TestDatabaseBindingSchema(t *testing.T) {
+	if err := databaseBindingSchema.Validate(map[string]any{"binding": "DB", "driver": "postgres"}); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+	if err := databaseBindingSchema.Validate(map[string]any{}); err == nil {
+		t.Fatal("expected an error for a missing binding")
+	}
+}
