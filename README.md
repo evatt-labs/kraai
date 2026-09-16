@@ -155,7 +155,9 @@ Designed and **not** built — each has a tracking issue:
 - Lifecycle hooks ([#111](https://github.com/evatt-labs/kraai/issues/111))
 - Adopting existing resources ([#112](https://github.com/evatt-labs/kraai/issues/112))
 
-The `unbuilt` and `dead-field` labels track the rest.
+The `unbuilt` and `dead-field` labels track the rest, and the
+[public roadmap](https://github.com/orgs/evatt-labs/projects/1) shows what is
+being worked on in what order.
 
 ## Documentation
 
