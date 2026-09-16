@@ -44,5 +44,14 @@ func Capabilities() []resource.CapabilityDef {
 			// binding shape to validate.
 			ProviderSettings: computeSettingsSchema,
 		},
+		{
+			Name: manifest.CapabilityNetwork,
+			Summary: "Private VPC with a public subnet: internet gateway, route " +
+				"table and the default route making the subnet reachable.",
+			// No ProviderSettings beyond the provider-level "region"
+			// DecodeSettings already checks: the address plan is per
+			// binding, not per provider, so it lives in Binding.
+			Binding: networkBindingSchema,
+		},
 	}
 }

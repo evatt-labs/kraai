@@ -79,6 +79,7 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 
 	outputs := resource.NewOutputs()
 	secrets := newSecretIndex()
+	attrs := newAttrIndex()
 	// One locker per run: scoped mutual exclusion only has to hold across
 	// this Apply call's own concurrent goroutines (see
 	// resource.ScopeLocker's doc comment on why it is not a shared
@@ -98,7 +99,7 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 			skipWave(p.Actions, idxs, results)
 			continue
 		}
-		if a.runWave(ctx, p.Actions, idxs, results, outputs, secrets, locker) {
+		if a.runWave(ctx, p.Actions, idxs, results, outputs, secrets, attrs, locker) {
 			waveFailed = true
 		}
 	}
@@ -152,7 +153,8 @@ func skipWave(actions []plan.Action, idxs []int, results []ActionResult) {
 // handling failure per wave rather than per action exists to avoid.
 func (a *Applier) runWave(
 	ctx context.Context, actions []plan.Action, idxs []int, results []ActionResult,
-	outputs *resource.Outputs, secrets *secretIndex, locker *resource.ScopeLocker,
+	outputs *resource.Outputs, secrets *secretIndex, attrs *attrIndex,
+	locker *resource.ScopeLocker,
 ) bool {
 	g := &errgroup.Group{}
 	g.SetLimit(a.concurrency)
@@ -161,7 +163,7 @@ func (a *Applier) runWave(
 	for pos, i := range idxs {
 		pos, i := pos, i
 		g.Go(func() error {
-			res := a.execute(ctx, actions[i], outputs, secrets, locker)
+			res := a.execute(ctx, actions[i], outputs, secrets, attrs, locker)
 			results[i] = res
 			failed[pos] = res.Outcome == OutcomeFailed
 			return nil
@@ -183,6 +185,7 @@ func (a *Applier) runWave(
 // decide what an error here would mean for the siblings.
 func (a *Applier) execute(
 	ctx context.Context, act plan.Action, outputs *resource.Outputs, secrets *secretIndex,
+	attrs *attrIndex,
 	locker *resource.ScopeLocker,
 ) ActionResult {
 	result := ActionResult{Item: act.Item, Ref: act.Ref}
@@ -202,7 +205,13 @@ func (a *Applier) execute(
 	// for any of its readable bindings has produced. Harmless when nothing
 	// is registered yet: forAction returns nil, and Spec.Secret reports a
 	// clear error naming the binding if this action needs one anyway.
-	spec.Secrets = secrets.forAction(act.ServiceKey, act.Binding, effectiveReadsBindings(act))
+	reads := effectiveReadsBindings(act)
+	spec.Secrets = secrets.forAction(act.ServiceKey, act.Binding, reads)
+	// Identifiers published by resources this one depends on. Absent until
+	// the dependency has actually run, which the wave ordering guarantees
+	// for anything named in DependsOn; Spec.Attribute names what is missing
+	// if a type reads something it never declared.
+	spec.Attributes = attrs.forAction(act.ServiceKey, act.Binding, reads)
 
 	state, outcome, err := a.mutate(ctx, act, reg, spec, locker)
 	if err != nil {
@@ -217,6 +226,9 @@ func (a *Applier) execute(
 	// ActionNoChange included: a second apply must be able to wire a
 	// consumer from a resource that already existed and needed no change.
 	outputs.Put(state)
+	if state != nil {
+		attrs.put(key, act.Ref.Key(), state.Attributes)
+	}
 	if producer, ok := reg.Resource.(resource.SecretProducer); ok {
 		for name, secret := range producer.Secrets(state) {
 			secrets.put(key, name, secret)

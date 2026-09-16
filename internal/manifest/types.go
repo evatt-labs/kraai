@@ -36,6 +36,7 @@ type Providers struct {
 	KeyValue *Provider `yaml:"keyvalue,omitempty"`
 	Objects  *Provider `yaml:"objects,omitempty"`
 	Queues   *Provider `yaml:"queues,omitempty"`
+	Network  *Provider `yaml:"network,omitempty"`
 }
 
 // Capability names, matching the keys above and the capabilities resource
@@ -54,6 +55,13 @@ const (
 	CapabilityKeyValue = "keyvalue"
 	CapabilityObjects  = "objects"
 	CapabilityQueues   = "queues"
+	// CapabilityNetwork covers the private network a service's other
+	// resources sit inside. Unlike the capabilities above it fulfils no
+	// request the service's code makes at runtime — nothing connects to a
+	// VPC the way it connects to a database — but it is provisioned,
+	// ordered and torn down exactly like one, and a service is where the
+	// manifest already says which resources belong together.
+	CapabilityNetwork = "network"
 )
 
 // Provider is one capability's vendor and that vendor's configuration.
@@ -93,6 +101,8 @@ func (p Providers) For(capability string) (*Provider, bool) {
 		configured = p.Objects
 	case CapabilityQueues:
 		configured = p.Queues
+	case CapabilityNetwork:
+		configured = p.Network
 	default:
 		return nil, false
 	}
@@ -125,6 +135,7 @@ func (p Providers) Capabilities() []string {
 	for _, capability := range []string{
 		CapabilityCompute, CapabilityDatabase,
 		CapabilityKeyValue, CapabilityObjects, CapabilityQueues,
+		CapabilityNetwork,
 	} {
 		if _, ok := p.For(capability); ok {
 			out = append(out, capability)
@@ -150,6 +161,7 @@ type Service struct {
 	KeyValue  []KeyValue    `yaml:"keyvalue,omitempty"`
 	Objects   []ObjectStore `yaml:"objects,omitempty"`
 	Queues    []Queue       `yaml:"queues,omitempty"`
+	Networks  []Network     `yaml:"network,omitempty"`
 
 	// DependsOn names other services in this manifest that must be fully
 	// provisioned before this one. The escape hatch for ordering that is
@@ -313,6 +325,21 @@ type KeyValue struct {
 // ObjectStore is one entry of a service's `objects:` list.
 type ObjectStore struct {
 	Binding string `yaml:"binding"`
+}
+
+// Network is a service's own private network: one VPC and the subnet its
+// other resources are placed in.
+//
+// CIDRs are the manifest author's to choose and kraai's to pass through
+// unread — an address plan has to be reconcilable with whatever else the
+// account already routes, which is knowledge no tool holds. The provider
+// rejects a block it cannot use.
+type Network struct {
+	Binding string `yaml:"binding"`
+	// Cidr is the VPC's address range, e.g. "10.20.0.0/16".
+	Cidr string `yaml:"cidr"`
+	// Subnet is the public subnet's range, which must sit inside Cidr.
+	Subnet string `yaml:"subnet"`
 }
 
 // Queue is one entry of a service's `queues:` list.

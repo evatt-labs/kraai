@@ -217,6 +217,14 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer nam
 			}
 			out = append(out, items...)
 		}
+		for _, n := range svc.Networks {
+			items, err := p.expandBinding(m, environmentName, svcKey, n.Binding, manifest.CapabilityNetwork,
+				map[string]any{"cidr": n.Cidr, "subnet": n.Subnet}, namer)
+			if err != nil {
+				return nil, annotate(err, svcKey, "network", n.Binding)
+			}
+			out = append(out, items...)
+		}
 	}
 	return out, nil
 }
@@ -324,6 +332,9 @@ func declaredBindings(svc manifest.Service) []string {
 	}
 	for _, q := range svc.Queues {
 		bindings = append(bindings, q.Binding)
+	}
+	for _, n := range svc.Networks {
+		bindings = append(bindings, n.Binding)
 	}
 	sort.Strings(bindings)
 	return bindings

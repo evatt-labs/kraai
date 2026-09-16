@@ -290,11 +290,36 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 	if err != nil {
 		return nil, err
 	}
+	properties = r.readBackIfEmpty(ctx, identifier, properties)
 	return &resource.State{
 		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: spec.Name},
 		ID:         identifier,
 		Attributes: properties,
 	}, nil
+}
+
+// readBackIfEmpty fetches a just-created resource's properties when the
+// create itself reported none.
+//
+// Cloud Control populates a create's ResourceModel for some types and leaves
+// it empty for others — every EC2 type here returns nothing, so a VPC would
+// publish no VpcId and every resource depending on it would fail with
+// nothing to point at. A read costs one call on the create path only, and
+// only for the types that need it.
+//
+// A failed read-back is not a failed create: the resource exists either way,
+// and reporting an error here would make apply try to create it again. The
+// dependent that needed the missing value fails on its own terms instead,
+// naming what it could not resolve.
+func (r *resourceType) readBackIfEmpty(ctx context.Context, identifier string, properties map[string]any) map[string]any {
+	if len(properties) > 0 || identifier == "" {
+		return properties
+	}
+	fetched, found, err := r.client.GetResource(ctx, r.typeName, identifier)
+	if err != nil || !found {
+		return properties
+	}
+	return fetched
 }
 
 // injectDerivedName ensures a LookupByName type's desired state carries
