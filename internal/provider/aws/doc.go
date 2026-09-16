@@ -5,10 +5,9 @@
 // Cloud Control exposes uniform GetResource/CreateResource/UpdateResource/
 // DeleteResource/ListResources across 1,598 FULLY_MUTABLE public resource
 // types, which maps 1:1 onto internal/resource's per-verb Resource interface
-// (verified against the live Evatt Labs account, 2026-09-13 — see
-// docs/workstreams.yaml's aws-provider-core findings). So this package is one
+// (verified against a live account, 2026-09-13). So this package is one
 // generic Resource implementation, parameterized per registration by its
-// CloudFormation TypeName and its identity lookup strategy (D26); adding a
+// CloudFormation TypeName and its identity lookup strategy; adding a
 // resource type is a registry entry, never a new client.
 //
 // # The write path

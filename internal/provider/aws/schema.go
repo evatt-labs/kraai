@@ -11,12 +11,9 @@ import "strings"
 //
 // Assumes every schema property path is rooted at "/properties/" with no
 // further "properties" segment between nested levels — CloudFormation's own
-// documented resource-schema convention. This workstream's live-account
-// findings (docs/workstreams.yaml) confirm createOnlyProperties paths exist
-// and are useful, but the samples gathered there are all single-level
-// ("/properties/DistributionConfig"); a genuinely nested createOnlyProperties
-// entry has not been independently verified against a live schema. Flagged
-// in this workstream's PR description as an assumption, not a verified fact.
+// documented resource-schema convention. Every createOnlyProperties entry
+// sampled from a live account has been single-level, so a genuinely nested
+// one is unverified: treat this as an assumption, not an observed fact.
 func schemaPropertyPath(pointer string) []string {
 	const prefix = "/properties/"
 	if !strings.HasPrefix(pointer, prefix) {
