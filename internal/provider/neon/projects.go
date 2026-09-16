@@ -17,6 +17,19 @@ type Project struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	OrgID string `json:"org_id"`
+	// RegionID is the Neon region the project — and therefore every branch
+	// forked from it — actually runs in, e.g. "aws-us-east-2". Verified
+	// against the live /api/v2/projects response (2026-09-16): the field
+	// exists and is populated on every project this account holds.
+	//
+	// Read by internal/provider/neonresource.branchResource.resolveProject
+	// to verify a manifest's declared providers.database.settings.region
+	// against reality — see that function's own doc comment for why
+	// verification, not selection: this client has no CreateProject at
+	// all (kraai only ever finds an existing project), so a branch's
+	// region is never an input kraai controls, only a fact it can confirm
+	// or contradict.
+	RegionID string `json:"region_id"`
 }
 
 // Organization is a Neon organization.

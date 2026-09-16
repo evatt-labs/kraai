@@ -17,14 +17,24 @@ import "github.com/evatt-labs/kraai/internal/resource"
 // configures Neon at all, not only ones that reach a particular resource
 // type's decide().
 //
-// orgId is optional (see BranchSettings.OrgID's own doc comment); the
-// other three are required — enforced here by "required" as well as by
-// decodeSettings' own existing missing-field check below, deliberately
-// left in place rather than removed: it names every missing field in one
-// message ("neon branch is missing required settings: [database role]"),
-// which this workstream's brief does not ask to change, while the schema
-// closes the gap that check never covered — an unrecognized key, and a
+// orgId and region are optional (see BranchSettings.OrgID's and
+// BranchSettings.Region's own doc comments); project/database/role are
+// required — enforced here by "required" as well as by decodeSettings'
+// own existing missing-field check below, deliberately left in place
+// rather than removed: it names every missing field in one message
+// ("neon branch is missing required settings: [database role]"), which
+// this workstream's brief does not ask to change, while the schema closes
+// the gap that check never covered — an unrecognized key, and a
 // wrong-typed one.
+//
+// region was the very unrecognized key this schema's first version
+// caught, against the real kraai-api manifest: `providers.database.
+// settings.region: aws-us-east-2` had been silently ignored since before
+// this package tracked a Region field at all. Recognizing it here is not
+// enough on its own — see BranchSettings.Region and resolveProject
+// (branch.go) for where the declared value is actually verified against
+// Neon's own record of the project's region, which is what closes the
+// bug rather than merely no longer flagging it as unrecognized.
 var databaseSettingsSchema = resource.NewSchema("neon database settings", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -32,6 +42,7 @@ var databaseSettingsSchema = resource.NewSchema("neon database settings", map[st
 		"database": map[string]any{"type": "string"},
 		"role":     map[string]any{"type": "string"},
 		"orgId":    map[string]any{"type": "string"},
+		"region":   map[string]any{"type": "string"},
 	},
 	"additionalProperties": false,
 })

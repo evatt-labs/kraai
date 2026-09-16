@@ -52,6 +52,29 @@ type BranchSettings struct {
 	// OrgID is optional. /projects refuses to list without an organization,
 	// and a caller that has already resolved it skips a lookup by passing it.
 	OrgID string
+	// Region is optional and verified, never selected. kraai-api's own
+	// kraai.yaml.j2 declared providers.database.settings.region since
+	// before this field existed, and nothing anywhere read it — a real,
+	// silent instance of the reservedConcurrency/naming.prefix class,
+	// found by this workstream's own schema rejecting the manifest that
+	// carried it (see docs/proposals/capability-definitions.md and this
+	// package's settings_schema.go).
+	//
+	// The client has no CreateProject at all — FindProjectByName is the
+	// only way this package ever reaches a project, and a branch inherits
+	// its parent project's region unconditionally. Region is therefore
+	// never an input kraai could act on at creation; it is a fact kraai
+	// can check. resolveProject (below) verifies the found project's
+	// neon.Project.RegionID against this value when it is set, and fails
+	// loudly, by name, on a mismatch — the manifest asserting a region and
+	// getting a different one silently is exactly the failure mode this
+	// field exists to close.
+	//
+	// Empty means no opinion, the same contract every other optional
+	// setting in this package already has: a manifest that never mentions
+	// region is not asserting anything about it, so there is nothing to
+	// verify.
+	Region string
 }
 
 // Driver is the wire protocol a service reaches this database through. A
@@ -97,6 +120,7 @@ func decodeSettings(config map[string]any) (BranchSettings, error) {
 		Database: str(config, "database"),
 		Role:     str(config, "role"),
 		OrgID:    str(config, "orgId"),
+		Region:   str(config, "region"),
 	}
 	var missing []string
 	if s.Project == "" {
@@ -166,14 +190,55 @@ type branchResource struct {
 	settings BranchSettings
 }
 
-// resolveProject finds the project this branch lives in.
+// resolveProject finds the project this branch lives in, and verifies its
+// real region against b.settings.Region when the manifest declared one.
 //
 // Looked up on every verb rather than cached. It is one request, identity is
 // never read from storage (D7), and a cache would have to be invalidated on
 // exactly the event kraai cannot observe — someone renaming the project in
 // Neon's console between two commands.
+//
+// # Why the region check lives here, not in a SpecValidator
+//
+// branchResource declares no plan.SpecValidator (unlike
+// internal/provider/aws's lambdaFunctionResource): SpecValidator's own
+// contract is "no I/O" (validate.go), and there is no way to know a
+// project's actual region without asking Neon. resolveProject is instead
+// the one function every verb this package exposes already funnels
+// through — Get, Create and Delete all call it before doing anything
+// else — so putting the check here is what makes it unconditional in the
+// sense this package can actually offer: every real command that touches
+// a branch resolves the project first, and a `kraai plan` against a fresh
+// environment still calls Get (internal/plan's decide, unconditionally,
+// before branching on whether the branch itself exists), so a
+// region mismatch is caught on the very first plan, not only once
+// something has already been created.
 func (b *branchResource) resolveProject(ctx context.Context) (*neon.Project, error) {
-	return b.client.FindProjectByName(ctx, b.settings.Project, b.settings.OrgID)
+	project, err := b.client.FindProjectByName(ctx, b.settings.Project, b.settings.OrgID)
+	if err != nil {
+		return nil, err
+	}
+	if err := verifyRegion(b.settings.Region, project); err != nil {
+		return nil, err
+	}
+	return project, nil
+}
+
+// verifyRegion rejects project when the manifest declared a region
+// (wantRegion != "") that does not match the project's actual
+// neon.Project.RegionID. wantRegion == "" always passes — no declared
+// opinion is nothing to verify, the same contract every other optional
+// setting in this package keeps.
+func verifyRegion(wantRegion string, project *neon.Project) error {
+	if wantRegion == "" {
+		return nil
+	}
+	if project.RegionID != wantRegion {
+		return kerrors.Validation(
+			"neon project %q is in region %q, but the manifest declares region %q",
+			project.Name, project.RegionID, wantRegion)
+	}
+	return nil
 }
 
 // Get reports the branch's state, or (nil, nil) when it does not exist.
