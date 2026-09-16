@@ -20,8 +20,8 @@ jobs:
       # etc.) since the last release. On every push to main it opens or
       # updates a "release PR" that bumps package.json and CHANGELOG.md.
       # Merging that PR is what actually cuts a release: this same action
-      # then tags it and publishes the GitHub Release, which is what
-      # triggers publish.yml's npm publish.
+      # then tags it, and that tag push is what triggers release.yml to
+      # build, sign and publish the binaries.
       #
       # token is explicitly a PAT, not the default GITHUB_TOKEN: GitHub
       # does not run other workflows in response to a push made with the

@@ -1,0 +1,54 @@
+name: Release
+
+# Tag push, plus a manual escape hatch — never `pull_request` or
+# `pull_request_target`. This is the most load-bearing part of this file: a
+# trigger an external contributor could influence would mean a fork's code
+# running with release credentials in scope. workflow_dispatch takes no
+# inputs, so it can only run against a ref the dispatcher explicitly picks,
+# and dispatching already requires write access — the same trust level as
+# pushing the tag. It exists to recover a release whose tag push did not
+# trigger this workflow without deleting and recreating the tag.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      # Creating the GitHub Release and uploading its archives.
+      contents: write
+      # Keyless cosign signing: the OIDC token is the identity the
+      # signature is bound to, so there is no key material in this repo.
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # GoReleaser derives the version and the changelog from tags and
+          # history, and a shallow clone has neither.
+          fetch-depth: 0
+          # GoReleaser authenticates to the API with GITHUB_TOKEN below, not
+          # with git credentials, so nothing here needs them left on disk.
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      # Must precede GoReleaser: the signs: pipe shells out to this binary
+      # and has no per-run skip, so a missing cosign fails the release after
+      # the archives are already built.
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

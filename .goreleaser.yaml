@@ -1,8 +1,7 @@
-# GoReleaser config for kraai (docs/BLUEPRINT.md D1). No release-triggering
-# workflow exists yet (that's a future workstream once cosign/GH credentials
-# are in place) — this file is validated locally via `goreleaser release
-# --snapshot --clean` for now. See the go-module-scaffold PR description for
-# exactly what's stubbed pending real credentials.
+# GoReleaser config for kraai. Driven by .github/workflows/release.yml on a
+# v* tag push; validate changes locally with
+# `goreleaser release --snapshot --clean --skip=sign`, since keyless signing
+# needs an OIDC identity that only exists inside a real Actions run.
 version: 2
 
 project_name: kraai
@@ -40,11 +39,9 @@ checksum:
 
 # Keyless cosign signing (Sigstore, OIDC-based — no key material stored in
 # this repo). config.Sign has no per-run `skip` field, so this pipe always
-# runs when GoReleaser executes; there's no OIDC identity or cosign binary
-# available outside a real GitHub Actions run, so local/CI verification of
-# this scaffolding uses `goreleaser release --snapshot --clean --skip=sign`.
-# STUBBED: untested end-to-end pending a release workflow that installs
-# cosign and grants `id-token: write` for keyless signing.
+# runs when GoReleaser executes; the release workflow installs cosign and
+# grants `id-token: write` for it. Outside Actions there is no OIDC identity,
+# so a local run needs `--skip=sign`.
 signs:
   - id: checksums
     cmd: cosign
@@ -62,17 +59,3 @@ release:
   github:
     owner: evatt-labs
     name: kraai
-
-# STUBBED: evatt-labs/homebrew-tap does not exist yet. Publishing is
-# skipped for snapshot builds regardless, but a real release will fail here
-# until that tap repo is created and a token with push access to it is
-# wired into the (not-yet-existing) release workflow. `brews:` (formulas)
-# is deprecated as of GoReleaser v2.16 in favor of `homebrew_casks:`.
-homebrew_casks:
-  - name: kraai
-    repository:
-      owner: evatt-labs
-      name: homebrew-tap
-    directory: Casks
-    homepage: https://github.com/evatt-labs/kraai
-    description: kraai is a multi-cloud devops control plane.
