@@ -314,11 +314,27 @@ one hand-written implementation per service.
 ## Install
 
 ```
+brew install evatt-labs/tap/kraai
+```
+
+```
 go install github.com/evatt-labs/kraai/cmd/kraai@latest
 ```
 
-Released builds are cross-platform single binaries via GoReleaser. kraai is
-not distributed through npm.
+Or download an archive from a [release](https://github.com/evatt-labs/kraai/releases).
+Releases are cross-platform single binaries for macOS and Linux on amd64 and
+arm64. kraai is not distributed through npm.
+
+Each release ships a `checksums.txt` signed with cosign, keylessly, against
+the release workflow's own identity — no key material exists anywhere to be
+stolen. Verify one with:
+
+```
+cosign verify-blob checksums.txt \
+  --bundle checksums.txt.bundle \
+  --certificate-identity-regexp '^https://github.com/evatt-labs/kraai/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
 
 ## Status
 
