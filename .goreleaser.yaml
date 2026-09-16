@@ -69,3 +69,9 @@ release:
   github:
     owner: evatt-labs
     name: kraai
+  # GoReleaser defaults this to false, which marks every tag as the latest
+  # release — a v0.6.0-rc.1 would be offered as the recommended download
+  # ahead of the last stable one. "auto" reads the semver prerelease
+  # segment, so anything with a -rc, -beta or -alpha suffix is published as
+  # a prerelease and leaves the stable release alone.
+  prerelease: auto
