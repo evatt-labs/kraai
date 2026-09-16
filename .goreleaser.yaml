@@ -75,3 +75,36 @@ release:
   # segment, so anything with a -rc, -beta or -alpha suffix is published as
   # a prerelease and leaves the stable release alone.
   prerelease: auto
+
+# Publishing the cask needs push access to a second repository, which the
+# release workflow's GITHUB_TOKEN does not have — hence a separate secret.
+#
+# skip_upload is computed rather than fixed so a missing token skips Homebrew
+# and still ships the release. GoReleaser runs this pipe after uploading the
+# archives, so failing here would leave a release that looks complete and is
+# not; that is the failure this expression exists to prevent. Prereleases are
+# skipped for the same reason `brew install` should never resolve to an rc.
+homebrew_casks:
+  - name: kraai
+    skip_upload: '{{ if or (eq .Env.HOMEBREW_TAP_TOKEN "") (ne .Prerelease "") }}true{{ else }}false{{ end }}'
+    repository:
+      owner: evatt-labs
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Casks
+    binaries:
+      - kraai
+    homepage: https://github.com/evatt-labs/kraai
+    description: Declare environments as manifests and apply them with one command.
+    hooks:
+      post:
+        # The release archives are cosign-signed but not Apple-notarized, so
+        # Gatekeeper quarantines the binary and the first run is refused with
+        # a dialog rather than an error. Stripping the attribute is what
+        # makes `brew install` produce a runnable binary; proper notarization
+        # would remove the need for it.
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr",
+                           args: ["-dr", "com.apple.quarantine", "#{staged_path}/kraai"]
+          end
