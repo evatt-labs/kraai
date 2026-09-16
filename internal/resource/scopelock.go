@@ -4,40 +4,25 @@ import "sync"
 
 // ScopeLocker serializes mutating calls that share a Registration.Scope
 // value, so two operations kraai itself issues concurrently for the same
-// scope (see Registration.Scope's doc comment for the live 423 this
-// prevents) never overlap, while operations in different scopes — or with
-// no scope at all — are unaffected.
+// scope never overlap, while operations in different scopes — or with no
+// scope at all — are unaffected. This is mutual exclusion, not ordering:
+// which of two same-scope operations runs first is unspecified, only that
+// they never run at once (see docs/ARCHITECTURE.md, "Ordering is a
+// dependency graph", for the Neon 423 this exists to prevent).
 //
-// # One shared implementation
+// internal/apply and internal/destroy both use it: a phase's errgroup runs
+// many actions concurrently, and either package can issue a mutating call
+// against a scoped registration.
 //
-// internal/apply and internal/destroy both need this: a phase's errgroup
-// runs many actions concurrently in either package, and either package can
-// issue a mutating call (Create/Delete) against a scoped registration. Both
-// import internal/resource already, and ScopeLocker depends on nothing
-// beyond sync — no plan, no manifest, no vendor package — so it lives here
-// rather than as a new package one level up that both would have to import
-// instead, or as two independent copies that would inevitably drift.
+// A caller constructs a new ScopeLocker per Apply/Destroy call (via
+// NewScopeLocker) rather than sharing one across the process — a
+// per-process singleton would accumulate one *sync.Mutex per distinct
+// scope string ever seen, for scopes that run's already finished.
 //
-// # Lifetime: one per run, not a package-level singleton
-//
-// A caller constructs a new ScopeLocker for each Apply/Destroy call (via
-// NewScopeLocker) rather than sharing one across the process. Locking
-// within one run's set of concurrent goroutines is the whole requirement —
-// nothing here needs to serialize two unrelated invocations against each
-// other, and a per-process singleton would otherwise accumulate one
-// *sync.Mutex per distinct scope string ever seen, for the life of the
-// process, for scopes that will never be locked again once that run ends.
-//
-// # Deadlock safety
-//
-// Do takes at most one scope's lock for the duration of fn and releases it
-// via defer, so it is released on every path out of fn — a normal return,
-// an error return, a panic unwinding through Do, or fn returning because
-// ctx was cancelled partway through. Since a caller only ever calls Do once
-// per operation (see internal/apply's and internal/destroy's execute/mutate),
-// no goroutine ever holds two scope locks at once, which rules out lock-
-// ordering deadlocks by construction: there is only ever one lock to
-// acquire, never a second to wait on while already holding the first.
+// Do holds at most one scope's lock for the duration of fn, released via
+// defer on every path out — return, error, or panic. A caller only ever
+// calls Do once per operation, so no goroutine holds two scope locks at
+// once, which rules out lock-ordering deadlocks by construction.
 type ScopeLocker struct {
 	mu    sync.Mutex
 	locks map[string]*sync.Mutex
@@ -57,9 +42,7 @@ func NewScopeLocker() *ScopeLocker {
 // fn's own error is returned unchanged; Do adds no error of its own. A
 // panic inside fn propagates out of Do exactly as it would without a lock
 // — Do never recovers it — after the deferred unlock has already run, so
-// the panic is observable to the caller instead of being swallowed here
-// (see Rule 5/20: past defect hunts in this codebase have found silently
-// swallowed exceptions, which this is written to not repeat).
+// the panic is observable to the caller rather than swallowed here.
 func (l *ScopeLocker) Do(scope string, fn func() error) error {
 	if scope == "" {
 		return fn()

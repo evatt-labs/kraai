@@ -11,86 +11,42 @@ import (
 // one-line description of what that provider's implementation of it
 // actually provisions.
 //
-// Modelled on a Kubernetes CustomResourceDefinition (see
-// docs/proposals/capability-definitions.md, "The model: capability
-// definitions"): a CRD lets something outside the API server introduce a
-// new kind, with a schema, that the core treats as first-class without
-// understanding its semantics. CapabilityDef is the same shape — a
-// provider is the operator that supplies semantics, and internal/manifest
-// stays as ignorant of what "compute" or "objects" means as the
-// Kubernetes API server is of what a CRD's kind actually does.
+// Modelled on a Kubernetes CustomResourceDefinition: a provider is the
+// operator that supplies semantics, and internal/manifest stays as
+// ignorant of what "compute" or "objects" means as the Kubernetes API
+// server is of what a CRD's kind actually does. See
+// docs/proposals/capability-definitions.md for the full design and why
+// the schema is structural JSON Schema rather than OpenAPI.
 //
-// # Why the schema fields exist now, and did not in workstream 1
-//
-// ProviderSettings and Binding were deliberately absent from workstream 1
-// (capability-definitions): adding a *Schema field with no Schema type,
-// no validator and no call site would have been exactly the failure mode
-// this whole mechanism exists to close — `reservedConcurrency` and
-// `naming.prefix` were both declared, both documented as load-bearing, and
-// both read by nothing, and both were found by reading source rather than
-// by a test. A nil field with nothing behind it is indistinguishable from
-// "this provider genuinely validates nothing here."
-//
-// This workstream (capability-schemas) is what changes that: Schema
-// (schema.go) is a real, structurally-checked, compiled-once validator,
-// Catalog.add below forces every declared schema to compile before a
-// capability is usable at all, and internal/provider/aws's compute
-// capability wires ProviderSettings into ValidateSpec
-// (plan.SpecValidator) — a live call site every `kraai plan` already
-// reaches, replacing the hand-written allowlist
-// (settings_validate.go) this proposal names as the motivating case.
-//
-// Not every capability below has both fields populated. A nil field here
-// means exactly what it always has — "nothing to validate" — and is never
-// a placeholder for validation a future workstream will add: where a
-// capability has no per-service bindings at all (aws's compute is one
-// service-level block, not a list), or its provider settings carry no
-// vendor-specific vocabulary beyond what a different call site already
-// type-checks, the honest answer is nil, not a schema accepting anything.
-// See each provider's own capabilities.go for which fields it populates
-// and why.
+// A nil ProviderSettings or Binding means "nothing to validate for this
+// capability," never a placeholder for validation a future change will
+// add — see each provider's own capabilities.go for which fields it
+// populates and why.
 type CapabilityDef struct {
 	// Name is the manifest key this capability is selected by — "compute",
-	// "objects", "database". Matches internal/manifest's CapabilityCompute
-	// et al. today; from workstream 3 on, that package's vocabulary is
-	// expected to be driven by the union of every registered
-	// CapabilityDef.Name rather than a fixed struct, so this must be one of
-	// the same strings, never a provider-invented one.
+	// "objects", "database" — matching internal/manifest's CapabilityCompute
+	// et al.
 	Name string
 	// ProviderSettings, when non-nil, validates one entry of a manifest's
-	// `providers.<Name>.settings` map for this provider — the free-form
-	// block D5/D34 keep outside internal/manifest's own vocabulary.
-	// Structural (Schema.compileNow enforces this at Catalog build time,
-	// via ensureCompiled), so an unknown key is always reported the same
-	// way regardless of which provider declared the schema: see
-	// Schema.unrecognizedKeyError.
+	// `providers.<Name>.settings` map for this provider. Structural
+	// (Catalog.add compiles it at build time via ensureCompiled), so an
+	// unknown key is always reported the same way regardless of which
+	// provider declared the schema — see Schema.unrecognizedKeyError.
 	ProviderSettings *Schema
 	// Binding, when non-nil, validates one entry of a service's
-	// `services.<svc>.<Name>[]` bindings for this provider — nil means
-	// this capability takes no per-service bindings at all (aws's compute
-	// is a single block per service, not a list, so it declares no
-	// Binding schema regardless of vendor).
+	// `services.<svc>.<Name>[]` bindings for this provider — nil means this
+	// capability takes no per-service bindings at all (aws's compute is a
+	// single block per service, not a list).
 	//
-	// No call site in this workstream reads Binding yet: internal/manifest
-	// still parses `services.<svc>.<name>[]` into fixed Go structs
-	// (manifest.Database, manifest.ObjectStore, ...), not the free-form
-	// maps a schema validates against — opening that up is workstream 3
-	// ("open-the-manifest"), explicitly out of this workstream's scope.
-	// Declared and compiled now, the same as ProviderSettings, so
-	// workstream 3 wires an already-proven validator rather than
-	// designing one under manifest-refactor pressure; see this
-	// workstream's PR description for why this one field is scaffolding
-	// ahead of its caller in a way ProviderSettings is not, and why that
-	// is a narrower version of the gap this mechanism exists to close, not
-	// a recurrence of it — every Binding schema here is compiled,
-	// structurally checked, and unit-tested against Schema.Validate
-	// directly, unlike a bare struct field with no validator behind it at
-	// all.
+	// No call site reads Binding yet: internal/manifest still parses
+	// `services.<svc>.<name>[]` into fixed Go structs, not the free-form
+	// maps a schema validates against. It is compiled and unit-tested the
+	// same as ProviderSettings so a future caller wires an already-proven
+	// validator, but until that caller exists a Binding schema here
+	// validates nothing in practice.
 	Binding *Schema
 	// Summary is one line describing what this provider's implementation of
-	// Name actually provisions — shown by `kraai capabilities`, and,
-	// eventually, in the error naming valid capabilities when a manifest
-	// names one that is not registered.
+	// Name actually provisions — shown by `kraai capabilities`.
 	Summary string
 }
 
@@ -98,27 +54,22 @@ type CapabilityDef struct {
 // capabilities it can fulfil.
 //
 // Deliberately narrower than a vendor package's existing
-// Registrations(client, ...) shape: both methods here take no client, no
-// context, and reach no network, because a capability must be knowable
-// before internal/assemble.Registry ever builds anything — the manifest is
-// parsed, and would need validating against the registered capability set,
-// before a single credential is read or a single client constructed. See
-// docs/proposals/capability-definitions.md, "Declarations are static
-// data". A test in every implementing package proves this: the complete
-// capability set builds with no clients, no credentials, and no network.
+// Registrations(client, ...) shape: neither method here takes a client or
+// context, because a capability must be knowable — and a manifest
+// validated against it — before a single credential is read or client
+// constructed. See docs/proposals/capability-definitions.md, "Declarations
+// are static data".
 type Provider interface {
 	// Name identifies which vendor declared these capabilities — the same
-	// string as that vendor package's own Provider constant
-	// (aws.Provider, cfresource.Provider, neonresource.Provider), never a
-	// second, independently-spelled copy.
+	// string as that vendor package's own Provider constant (aws.Provider,
+	// cfresource.Provider, neonresource.Provider), never a second,
+	// independently-spelled copy.
 	Name() string
 	// Capabilities lists every capability this provider's registrations can
 	// fulfil. A provider that adds a registration under a new capability
 	// must add it here too, or the registration and its declaration drift
-	// silently — see this package's own per-provider "Capabilities cover
-	// Registrations" test each vendor package carries, which is exactly the
-	// class of drift this mechanism exists to catch (concretely: workstream
-	// 6 decomposing "objects" into "dns"/"tls"/"cdn").
+	// silently — see each vendor package's own "Capabilities cover
+	// Registrations" test.
 	Capabilities() []CapabilityDef
 }
 
@@ -156,23 +107,13 @@ type CatalogEntry struct {
 }
 
 // Catalog is the resolved set of every capability declared by every
-// registered Provider — the data model behind `kraai capabilities`, and,
-// from workstream 3 on, what internal/manifest validates a manifest's
-// capability vocabulary against.
+// registered Provider — the data model behind `kraai capabilities`.
 //
 // Built once from an explicit, caller-supplied list of Providers (see
-// internal/assemble.Declarations), not assembled through package init()
-// side effects. init()-based registration is order-dependent on import
-// order, cannot be tested in isolation from the packages that register
-// themselves, and is invisible at any single call site — a reader has to
-// go looking for `func init()` across every provider package to learn
-// what is registered at all. An explicit slice is greppable, its assembly
-// order is visible where it is built, and a test can construct a Catalog
-// from a handful of fakes without importing a single real provider
-// package. This also keeps the catalog importable by a caller
-// (internal/cli today; internal/manifest's loader from workstream 3 on)
-// without that caller needing to trigger provider package init() as a
-// side effect of an unrelated import.
+// internal/assemble.Declarations), never through package init() side
+// effects: an explicit slice is greppable, its assembly order is visible
+// where it is built, and a test can construct a Catalog from fakes without
+// importing a single real provider package.
 type Catalog struct {
 	byCapability map[string][]CatalogEntry
 }
@@ -198,17 +139,10 @@ func NewCatalog(providers ...Provider) (*Catalog, error) {
 	return c, nil
 }
 
-// add merges one provider's declarations into c.
-//
-// Also where a schema's structural-schema constraint is enforced "at
-// registration, not at first use" (docs/proposals/capability-definitions.md):
-// ProviderSettings and Binding are compiled here, via ensureCompiled, before
-// this capability is usable through the catalog at all. NewCatalog runs
-// before a single manifest is parsed (Capabilities' own doc comment), so a
-// provider shipping a non-structural or otherwise invalid schema fails here
-// — the same place a duplicate capability name or an empty Name already
-// does — never silently, and never only once some manifest happens to
-// exercise it.
+// add merges one provider's declarations into c, compiling ProviderSettings
+// and Binding via ensureCompiled so an invalid schema fails here — at
+// catalog construction, before a single manifest is parsed — rather than
+// silently, the first time some manifest happens to exercise it.
 func (c *Catalog) add(p Provider) error {
 	seen := map[string]bool{}
 	for _, def := range p.Capabilities() {

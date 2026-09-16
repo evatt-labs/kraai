@@ -23,45 +23,21 @@ var messagePrinter = message.NewPrinter(language.English)
 // (a provider's `providers.<name>.settings` map) or CapabilityDef.Binding
 // (one entry of a service's `<name>[]` bindings).
 //
-// See docs/proposals/capability-definitions.md, "Schemas are structural JSON
-// Schema", for why JSON Schema and not OpenAPI: OpenAPI 3.1 schemas *are*
-// JSON Schema 2020-12, so nothing is lost expressively, and the surrounding
-// API-description apparatus — kin-openapi pulls gorilla/mux, an HTTP router
-// for validating requests against routes, machinery kraai would never touch
-// — is not. Verified directly rather than taken on the proposal's word: a
-// throwaway module importing only github.com/santhosh-tekuri/jsonschema/v6's
-// root package compiles against a single external dependency
-// (golang.org/x/text, for localized error strings) per `go list -deps`; the
-// same exercise against github.com/getkin/kin-openapi's openapi3 package
-// pulls go-openapi/jsonpointer, go-openapi/swag, oasdiff/yaml(+yaml3) and
-// jsonschema/v6 itself (kin-openapi now builds its own schema validation on
-// this exact library), and its full module graph (`go list -m all`, not
-// just what one entry point compiles) includes github.com/gorilla/mux,
-// confirming the proposal's router claim. See this workstream's PR
-// description for the full comparison.
+// JSON Schema rather than OpenAPI: OpenAPI 3.1 schemas are JSON Schema
+// 2020-12, so nothing is lost expressively, and kraai already consumes JSON
+// Schema elsewhere (the CloudFormation resource provider schemas fetched
+// for primaryIdentifier and createOnlyProperties). See
+// docs/proposals/capability-definitions.md for the full comparison against
+// OpenAPI's own tooling.
 //
-// # Why a Go value, not raw JSON bytes
+// A provider package builds a Schema as Go data (map[string]any), not an
+// embedded .json file, so it lives next to the code whose settings it
+// describes and is covered by gofmt/go vet like everything else.
 //
-// A provider package's Capabilities() builds a schema as Go data
-// (map[string]any) rather than an embedded .json file or a string literal,
-// for the same reason resource.CapabilityDef and resource.Registration are
-// themselves Go literals: the schema lives next to the code whose settings
-// it describes, is covered by gofmt/go vet like everything else in the
-// package, and needs no separate embed/parse step at init time. It is also
-// the same shape (map[string]any) a manifest's own free-form settings
-// arrive in, so a schema document and the data it validates share one
-// vocabulary throughout this codebase.
-//
-// # Compiled once, not per manifest entry
-//
-// Compilation (and the structural-schema check below) happens at most once
-// per Schema value, memoized behind ensureCompiled's sync.Once, regardless
-// of how many times Validate is called or how many manifests a single
-// process plans. A provider package builds each Schema as a package-level
-// var, so "once" here means once per process, not once per capability
-// declaration read — see docs/proposals/capability-definitions.md's "The
-// schema validator is constructed once per capability at registration and
-// reused, not rebuilt per manifest entry."
+// Compilation and structural-schema validation happen at most once per
+// Schema value, memoized behind ensureCompiled's sync.Once — a provider
+// package builds each Schema as a package-level var, so "once" means once
+// per process, not once per manifest entry.
 type Schema struct {
 	// label names what this schema validates, for its error messages —
 	// "aws compute settings", "neon database settings". Matches the prefix
@@ -101,22 +77,12 @@ func NewSchema(label string, doc map[string]any) *Schema {
 // Catalog.add that shares this Schema across capabilities) do the work
 // exactly once.
 //
-// # Why lazy compilation, with Catalog forcing it explicitly, rather than
-// compiling eagerly inside NewSchema
-//
-// NewSchema returns no error, matching resource.CapabilityDef's own
-// no-error construction (a provider's Capabilities() method returns
-// []CapabilityDef directly, not (..., error)) and Go's usual
-// literal-construction idiom for a value type. A compile failure is a bug
-// in the provider package that wrote the schema, not a runtime condition —
-// exactly the class of mistake resource.Registry.validate (registry.go)
-// already catches "at the point it is added rather than the point it is
-// first used." Catalog.add is this package's equivalent registration
-// point for a CapabilityDef, and — like Registry.Register — it already
-// returns an error a caller must check, so forcing compilation there
-// reports a malformed schema through the exact same channel a duplicate
-// capability name or an empty Name already does, rather than introducing a
-// second, panic-based failure mode for schemas alone.
+// NewSchema returns no error, matching CapabilityDef's own no-error
+// construction. A compile failure is a bug in the provider package that
+// wrote the schema, not a runtime condition, so Catalog.add forces
+// compilation at the same point it already catches a duplicate capability
+// name or an empty Name — registration time, not first use — rather than
+// introducing a second, panic-based failure mode for schemas alone.
 func (s *Schema) ensureCompiled() error {
 	s.once.Do(func() {
 		s.compileErr = s.compileNow()
@@ -172,8 +138,8 @@ func (s *Schema) Validate(data map[string]any) error {
 	verr, ok := err.(*jsonschema.ValidationError)
 	if !ok {
 		// Not expected from this library's Validate, but handled rather
-		// than assumed away (Rule 20): a caller still gets a real error
-		// naming this schema, not a silently swallowed one.
+		// than assumed away: a caller still gets a real error naming this
+		// schema, not a silently swallowed one.
 		return kerrors.Wrap(err, kerrors.CodeValidation, "%s", s.label)
 	}
 
@@ -373,35 +339,23 @@ func levenshtein(a, b string) int {
 	return prev[len(rb)]
 }
 
-// validateStructural enforces the subset of Kubernetes' structural-schema
-// constraint this workstream adopts (docs/proposals/capability-definitions.md,
-// "Schemas are structural JSON Schema"): every schema node states its own
-// "type", and the root schema declares neither "oneOf" nor "anyOf".
+// validateStructural enforces kraai's structural-schema constraint — every
+// schema node states its own "type", and the root schema declares neither
+// "oneOf" nor "anyOf" — a narrower subset of Kubernetes' own
+// structural-schema rule; see docs/proposals/capability-definitions.md,
+// "Schemas are structural JSON Schema", for the full comparison.
 //
-// # Why this subset, not the full Kubernetes rule set
+// Every node typed means a schema can never validate a value whose shape
+// is ambiguous. No root oneOf/anyOf means the root document has exactly
+// one way to be valid, which is what makes a single, deterministic
+// "recognized keys" list — and therefore the unrecognized-key suggestion —
+// possible at all. Nested oneOf/anyOf are not rejected: no schema here
+// uses one, and rejecting a combinator nothing uses would be speculative
+// scope.
 //
-// Kubernetes' structural schema is a large, CRD-specific specification
-// covering pruning, defaulting and x-kubernetes-* extensions kraai has no
-// equivalent of. What kraai borrows is narrower and stated explicitly by
-// the proposal: every node typed (so a schema can never validate a value
-// whose shape is ambiguous — no untyped node that could be an object, a
-// string or nothing at all) and no top-level oneOf/anyOf (so the root
-// document has exactly one way to be valid, which is what makes a single,
-// deterministic "recognized keys" list — and therefore the unrecognized-key
-// suggestion — possible at all; a root oneOf between two incompatible
-// property sets would have no single answer to "what keys does this
-// accept"). Nested oneOf/anyOf are not rejected: this workstream's schemas
-// never nest one, and rejecting a combinator no schema here would ever use
-// is speculative scope the proposal does not ask for (see this package's
-// own precedent set by resource.CapabilityDef's deferred ProviderSettings
-// field — Rule 2, simplicity first).
-//
-// # Why enforced here, not by the jsonschema/v6 compiler itself
-//
-// The compiler accepts any valid JSON Schema; structural is kraai's own,
-// stricter contract on top of that, the same relationship
-// resource.LookupStrategy.Valid() has to an arbitrary string — the
-// underlying type permits more than this codebase allows itself to use.
+// Enforced here rather than by the jsonschema/v6 compiler itself: the
+// compiler accepts any valid JSON Schema, and structural is kraai's own,
+// stricter contract on top of that.
 func validateStructural(doc map[string]any) error {
 	if err := validateStructuralNode(doc, ""); err != nil {
 		return err

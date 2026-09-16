@@ -16,91 +16,45 @@ type Registration struct {
 	// Empty means Provider, which is the common case.
 	//
 	// The two differ when fulfilling a capability takes resources from more
-	// than one API. Choosing Neon for Postgres also requires a Cloudflare
-	// Hyperdrive configuration in front of it: that registration's Provider
-	// is "cloudflare", because that is whose API creates it, but its Vendor
-	// is "neon", because choosing Neon is what asks for it. Without the
-	// distinction a manifest saying `postgres: {vendor: neon}` resolves to
-	// the branch alone and the configuration fronting it is never planned —
-	// which is exactly what happened, and what a test in the adapter that
-	// introduced it wrongly asserted as correct.
+	// than one API: choosing Neon for Postgres also requires a Cloudflare
+	// Hyperdrive configuration in front of it, whose Provider is
+	// "cloudflare" (that is whose API creates it) but whose Vendor is
+	// "neon" (choosing Neon is what asks for it). See docs/ARCHITECTURE.md,
+	// "Capabilities, vendors, and resources".
 	Vendor string
 	// Capability is what this type fulfils in a manifest — "postgres",
 	// "keyvalue", "objects", "queues", "compute". It is how a manifest entry
-	// that names no vendor reaches a vendor's implementation (Q1).
+	// that names no vendor reaches a vendor's implementation.
 	Capability string
 	// DependsOn names other registrations, by Key() ("provider/type"), that
 	// an instance of this type needs to exist before it can be created.
-	//
-	// # Why replaced Phase (2026-09-15)
-	//
-	// This field, and the graph internal/plan builds from it, replace
-	// resource.Phase entirely. Phase ordered provisioning into three fixed,
-	// hardcoded stages — database, storage, compute — run in sequence, with
-	// no ordering at all between two registrations in the same stage. That
-	// model ran out against a real deployment: a fresh `kraai apply` against
-	// a live AWS account took three runs to converge, because both
-	// AWS::Lambda::Permission registrations sit in PhaseCompute alongside
-	// the function and API Gateway they authorize, with no guarantee either
-	// existed yet when the permission's Create ran. Phase was also already
-	// being used as a priority number rather than a category: the IAM
-	// execution role and the S3 artifact bucket were declared PhaseStorage
-	// despite being neither storage nor a category match, purely so they
-	// would run before the function that needs them — both carried comments
-	// admitting exactly that. Adding a genuine third level of dependency
-	// (as the Lambda-permission case needed) had no expression under a
-	// two-or-three-stage model short of inventing a fourth phase.
-	//
-	// DependsOn says what an instance needs, directly, instead of which
-	// numbered bucket a human decided it belonged in. The IAM role and the
-	// artifact bucket now depend on nothing and are depended upon, instead
-	// of being filed under a storage category they never belonged to.
-	//
-	// # Instance-level, not type-level
-	//
-	// A dependency here names a type, but internal/plan resolves it to a
-	// concrete instance: a service's Lambda permission depends on
-	// "aws/AWS::Lambda::Function", and the planner resolves that against
-	// the function belonging to that same service, not every function in
-	// the manifest. Concretely, the planner resolves a dependency within
-	// the same expansion group that produced this registration's own
-	// plannedItem — the same (service, binding) pair a single
-	// Registry.Resolve call already scopes its results to (see
-	// internal/plan/planner.go's expand/expandCompute/expandBinding and
-	// internal/plan/graph.go's computeWaves). A provider/type key alone
-	// would be ambiguous the moment a manifest declares two services with
-	// compute; scoping resolution to the instance's own group is what
-	// keeps "the function" unambiguous without this package ever knowing
-	// what a service or a binding is.
+	// Resolved by internal/plan to a concrete instance within the same
+	// (service, binding) expansion group, never a whole-manifest type
+	// match — see docs/ARCHITECTURE.md, "Ordering is a dependency graph".
+	// Replaces an earlier fixed-phase ordering model that ran out against
+	// a real deployment: two registrations sharing one phase had no
+	// ordering guarantee between them, which took a fresh `kraai apply`
+	// three runs to converge.
 	//
 	// A registration whose named dependency was itself filtered out by
-	// When/Triggers/SelectedBy contributes no edge for it — there is no
-	// node to point at, and that is correct: a Lambda::Permission gated to
-	// the API Gateway front door is only ever planned alongside the API
+	// When/Triggers/SelectedBy contributes no edge for it: there is no node
+	// to point at, and that is correct — a Lambda::Permission gated to the
+	// API Gateway front door is only ever planned alongside the API
 	// Gateway registration it names, so the dependency always resolves
 	// when the dependent registration itself applies.
 	//
-	// # Why not on the Resource interface
+	// Plain registration data rather than a Resource interface method:
+	// internal/resource/otel.go's decorator wraps every Resource at
+	// registration time and has already silently dropped three optional
+	// interfaces this way (see otel.go's HAZARD comment) — DependsOn can't
+	// fall into that trap because the decorator never wraps it.
 	//
-	// Same reasoning as Scope below, and the same precedent Triggers and
-	// SelectedBy already set: internal/resource/otel.go's decorator wraps
-	// every Resource at registration time and has already silently dropped
-	// an optional *interface* three separate times (SecretProducer,
-	// ImmutableDiffer, SpecValidator) because the wrapper type did not
-	// itself implement it. DependsOn is plain registration data the
-	// decorator never wraps or re-implements, so it cannot fall into that
-	// trap.
-	//
-	// # Why not a manifest-level concept
-	//
-	// A type edge is what the code can already see: the aws package knows
-	// its own function needs its own role and bucket without asking a
-	// manifest author to say so. depends_on (manifest.Service) is the
-	// separate, narrower escape hatch for ordering that is real but that no
-	// registration can see — a service-to-service relationship the
-	// registry has no way to infer from types alone.
+	// Distinct from manifest.Service's own `depends_on`, the narrower
+	// escape hatch for a real service-to-service ordering need no
+	// registration can see, since the registry has no way to infer it from
+	// types alone.
 	DependsOn []string
-	// Lookup is how instances are found (D26).
+	// Lookup is how instances are found.
 	Lookup LookupStrategy
 	// When, if set, reports whether this registration applies to a given
 	// manifest. Nil means it always does, which is the common case.
@@ -128,87 +82,33 @@ type Registration struct {
 	// SelectedBy, if set, additionally restricts this registration to a
 	// service whose merged compute settings satisfy it — for a case
 	// Triggers cannot express: two registrations that both apply to the
-	// same trigger, where a manifest must choose exactly one of them. An
-	// AWS Lambda function URL and an API Gateway HTTP API are both valid
-	// front doors for an HTTP-triggered service; without an additional
-	// gate, a service planned both, a wrong-output bug in exactly the
-	// shape Triggers itself was built to eliminate (see AppliesToTrigger's
-	// own doc comment) — trigger alone cannot express "pick one," because
-	// both registrations share the identical trigger value.
-	//
-	// nil means no additional gate, which is the common case: every
-	// registration that predates this field, and most that will follow
-	// it, has nothing to choose between. See AppliesToSettings for the
-	// exact matching rule.
-	//
-	// Keyed on a service's merged compute settings (the same map
-	// Spec.Config["settings"] carries, per internal/plan's expandCompute)
-	// rather than a new Condition parameter, for the same reason Triggers
-	// itself is a separate field and not folded into Condition: Condition
-	// is a pure function of one thing that is the same for every service
-	// in a manifest (which vendor fulfils each capability), while a
-	// service's own settings vary service to service and have nothing to
-	// do with vendor selection.
+	// same trigger, where a manifest must choose exactly one (an AWS
+	// Lambda function URL and an API Gateway HTTP API are both valid front
+	// doors for an HTTP-triggered service). nil means no additional gate,
+	// the common case. See AppliesToSettings for the exact matching rule,
+	// and AppliesToTrigger's doc comment for why this is a separate field
+	// rather than folded into Condition.
 	SelectedBy func(settings map[string]any) bool
 	// Scope, if set, names the serialization domain this registration's
 	// mutating calls (Create, Update, Delete) must not overlap within.
 	// Derived from a Spec rather than fixed per registration, so two
 	// instances of the same type that scope to different values — a Neon
-	// branch in one project versus a Neon branch in another — still run
-	// concurrently; only two operations that resolve to the same string
-	// are serialized against each other. Nil means unscoped, which is the
-	// behaviour every registration predating this field keeps unchanged,
-	// and remains the common case: most provider APIs rate-limit by
-	// request count, which D13's global concurrency bound already handles.
+	// branch in one project versus another — still run concurrently; only
+	// two operations resolving to the same string are serialized against
+	// each other, by ScopeLocker. Nil means unscoped, the common case:
+	// most provider APIs rate-limit by request count rather than
+	// serializing by scope. See docs/ARCHITECTURE.md, "Ordering is a
+	// dependency graph", for why this exists (Neon returns 423 on
+	// concurrent branch creates in one project, which no amount of
+	// concurrency-limit tuning fixes because the constraint isn't scoped
+	// per-count at all).
 	//
-	// # Why this exists
-	//
-	// A real `kraai apply` against two services bound to the same Neon
-	// project failed like this:
-	//
-	//	!  failed  "kraaiapi-pull-request-00001-api-db"  neon/branch  api.DB
-	//	   create neon/branch: neon API returned 423 for
-	//	   /projects/dark-sky-69860828/branches: project already has running
-	//	   conflicting operations, scheduling of new ones is prohibited
-	//	+  created "kraaiapi-pull-request-00001-tick-db"  neon/branch  tick.DB
-	//
-	// D13 bounds concurrency by count, sized to provider rate limits.
-	// Neon does not rate-limit branch creation — it serializes by scope:
-	// at most one in-flight mutation per project, regardless of how far
-	// under any request-rate ceiling the caller stays. Two resources that
-	// happen to share a Neon project race every time, and the failure
-	// worsens with scale: twenty services on one project means twenty
-	// concurrent creates and nineteen 423s. No amount of tuning D13's
-	// SetLimit fixes this, because the constraint it is not scoped
-	// per-count at all — it is scoped per-project.
-	//
-	// # Why a Spec-derived function, not a fixed field
-	//
-	// A Neon project is a value from the manifest (BranchSettings.Project
-	// in internal/provider/neonresource), known only once a Spec exists —
-	// the registration itself is built once at process start, before any
-	// manifest is read, so nothing static on it could name a project.
-	// Shaped like Condition for the same reason Condition is a pure
-	// function over a small input rather than a wider one (see its own
-	// doc comment): a function keeps this package independent of
-	// internal/manifest and of any vendor package, since Spec is already
-	// this package's own vocabulary and a provider-specific string key
-	// ("project") is read out of Spec.Config by the registration's own
-	// closure, not by anything here.
-	//
-	// # Why registration data, not a Resource interface method
-	//
-	// internal/resource/otel.go's decorator wraps every resource.Resource
-	// at registration time and has already silently dropped an optional
-	// *interface* three separate times — SecretProducer, ImmutableDiffer,
-	// SpecValidator — each time because the decorator's wrapper type did
-	// not itself implement the interface, so a type assertion against the
-	// wrapped value failed even though the underlying resource satisfied
-	// it. A Scope() method on Resource would be the fourth trap of the
-	// same shape. Registration is plain data the decorator never wraps or
-	// re-implements, which is exactly why Triggers and SelectedBy already
-	// live here rather than on the interface — Scope follows the same
-	// precedent for the same reason.
+	// A Spec-derived function rather than a fixed field because the scoped
+	// value (a Neon project, say) comes from the manifest, known only once
+	// a Spec exists — the registration itself is built before any manifest
+	// is read. Registration data rather than a Resource interface method
+	// for the same decorator-dropping-interfaces reason DependsOn's own
+	// doc comment gives.
 	Scope func(spec Spec) string
 	// Resource implements the verbs.
 	Resource Resource
@@ -248,40 +148,19 @@ func (r Registration) applies(vendors map[string]string) bool {
 // AppliesToTrigger reports whether this registration is wanted for a
 // service declaring trigger.
 //
-// trigger == "" (a service with no compute: block at all, or one this
-// caller never resolved a trigger for) always matches, regardless of
-// Triggers — this is what keeps a manifest with no per-service compute
-// behaving exactly as it did before Triggers existed: every registration
-// for the capability still applies. Once a service does declare a trigger,
-// a registration with Triggers == nil still always matches (it does not
-// care what triggers the service), and one with a non-nil Triggers matches
-// only when trigger is in the list.
+// trigger == "" (no compute: block, or a caller that never resolved one)
+// always matches regardless of Triggers, which is what keeps a manifest
+// with no per-service compute behaving exactly as before Triggers existed.
+// Once a service declares a trigger, Triggers == nil still always matches
+// (this registration does not care what triggers the service), and a
+// non-nil Triggers matches only when trigger is in the list.
 //
-// # Why this is not a second Condition
-//
-// Condition is deliberately a pure function of one thing that is the same
-// for every service in a manifest: which vendor fulfils each capability.
-// A service's trigger is not that — it varies service to service within a
-// single manifest, so answering "does this registration apply" for it
-// cannot be folded into Resolve, which resolves once per capability and
-// returns the same registrations regardless of which service asked.
-// Growing Condition's signature to also take a trigger would force every
-// existing Condition (RequiresCapabilityVendor included) to ignore a
-// parameter that only compute registrations ever use, and would move the
-// resolution decision into Registry, which then has to be called once per
-// service instead of once per capability for no benefit. Keeping Triggers
-// a separate, optional field lets Resolve stay exactly what it is — a
-// function of capability and vendor choice — and lets the one caller that
-// actually knows a service's trigger (expandCompute) apply this filter
-// itself, after Resolve, the same way it already reads Registration.Type
-// to build a plan item.
-//
-// A second closure-typed field shaped like Condition (e.g. "func(trigger
-// string) bool") was also considered and rejected: Triggers only ever
-// needs "is this value in a small fixed set", which a []string answers
-// directly and lets a caller inspect (list the triggers a registration
-// applies to) without invoking it — a plain value is simpler than a
-// function for a question this narrow.
+// Not folded into Condition: a service's trigger varies service to
+// service within one manifest, while Condition is a pure function of
+// vendor choice, the same for every service. Triggers stays a separate
+// []string, checked by the one caller that knows a service's trigger
+// (expandCompute) after Resolve, rather than growing Condition's
+// signature for a parameter only compute registrations use.
 func (r Registration) AppliesToTrigger(trigger string) bool {
 	if trigger == "" || r.Triggers == nil {
 		return true
@@ -327,7 +206,8 @@ type Registry struct {
 	// order. Keyed by vendor rather than provider so one manifest choice
 	// reaches every resource that choice implies — see Registration.Vendor.
 	byCapability map[string]map[string][]Registration
-	// decorate wraps every Resource at registration time (D17).
+	// decorate wraps every Resource at registration time, so no type can
+	// be added without instrumentation by forgetting a wrapper.
 	decorate func(Registration) Resource
 }
 
@@ -434,8 +314,8 @@ func (r *Registry) Lookup(key string) (Registration, bool) {
 	return reg, ok
 }
 
-// Resolve returns every registration a vendor choice implies for a capability
-// (D30).
+// Resolve returns every registration a vendor choice implies for a
+// capability.
 //
 // A manifest entry names a capability and kraai.yaml names the vendor that
 // fulfils it. One such pair can expand to more than one resource, and those
