@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -26,6 +27,9 @@ type call struct {
 func fakeAPI(t *testing.T, handler func(call) (int, string)) (*httptest.Server, *[]call) {
 	t.Helper()
 	var seen []call
+	// httptest serves each request on its own goroutine, and several tests
+	// here drive concurrent calls, so recording one is a concurrent append.
+	var seenMu sync.Mutex
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c := call{method: r.Method, path: r.URL.Path, query: r.URL.RawQuery}
 		if r.Body != nil {
@@ -33,7 +37,9 @@ func fakeAPI(t *testing.T, handler func(call) (int, string)) (*httptest.Server, 
 			_ = json.NewDecoder(r.Body).Decode(&decoded)
 			c.body = decoded
 		}
+		seenMu.Lock()
 		seen = append(seen, c)
+		seenMu.Unlock()
 		status, payload := handler(c)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
