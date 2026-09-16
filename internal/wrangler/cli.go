@@ -258,12 +258,12 @@ var versionPattern = regexp.MustCompile(`\d+\.\d+\.\d+`)
 // ParseVersion extracts a version from wrangler's --version output, which is
 // a banner rather than a bare version string. Returns "" when there is no
 // version-shaped substring, since this is diagnostic metadata for the
-// lockfile rather than something that should fail a deploy.
+// recorded detail rather than something that should fail a deploy.
 func ParseVersion(stdout string) string {
 	return versionPattern.FindString(stdout)
 }
 
-// Version reports the local wrangler's version for the lockfile, or "" if it
+// Version reports the local wrangler's version, or "" if it
 // cannot be determined.
 //
 // Never returns an error: a missing wrangler or an unexpected --version
