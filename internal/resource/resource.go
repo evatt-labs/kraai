@@ -67,6 +67,21 @@ type Spec struct {
 	// credential exists only inside the call that uses it — see Secret in
 	// outputs.go.
 	Secrets map[string]Secret
+	// Attributes are the non-secret values resources in earlier waves
+	// published in their State.Attributes, keyed by the producing
+	// resource's Ref.Key() — the same "provider/type" spelling
+	// Registration.DependsOn uses to name it.
+	//
+	// The channel exists because a provider-assigned identifier cannot be
+	// derived the way a name can: a subnet needs its VPC's VpcId, and
+	// nothing in the manifest knows what AWS will call it. A resource that
+	// needs one declares the dependency, then reads the value back under
+	// the same key it declared.
+	//
+	// Keys from the spec's own binding are bare; anything from another
+	// binding this action may read is prefixed "<binding>.", matching how
+	// Secrets are namespaced.
+	Attributes map[string]map[string]any
 }
 
 // Secret resolves a named credential the applier supplied, or fails naming
@@ -78,6 +93,40 @@ func (s Spec) Secret(ctx context.Context, name string) (string, error) {
 			"no %q credential was supplied for binding %q", name, s.Binding)
 	}
 	return producer(ctx)
+}
+
+// Attribute returns a string value another resource published, where key is
+// that resource's Ref.Key() and name the attribute within it.
+//
+// Both halves fail loudly and separately: a missing key means the dependency
+// did not run, a missing name means it ran but published something else, and
+// the two call for different fixes. A non-string value is also an error —
+// every consumer of this so far wants an identifier, and silently formatting
+// a map or a number into one would produce a request AWS rejects far from
+// here.
+func (s Spec) Attribute(key, name string) (string, error) {
+	attrs, ok := s.Attributes[key]
+	if !ok {
+		return "", kerrors.Validation(
+			"binding %q: no resource %q has published attributes, so %q cannot be resolved — "+
+				"check that this type declares %q in its DependsOn", s.Binding, key, name, key)
+	}
+	value, ok := attrs[name]
+	if !ok {
+		return "", kerrors.Validation(
+			"binding %q: resource %q published no %q attribute", s.Binding, key, name)
+	}
+	text, ok := value.(string)
+	if !ok {
+		return "", kerrors.Validation(
+			"binding %q: resource %q published %q as %T, want a string identifier",
+			s.Binding, key, name, value)
+	}
+	if text == "" {
+		return "", kerrors.Validation(
+			"binding %q: resource %q published an empty %q", s.Binding, key, name)
+	}
+	return text, nil
 }
 
 // State is what the provider actually holds for a resource.
