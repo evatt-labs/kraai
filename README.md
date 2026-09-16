@@ -248,6 +248,57 @@ An environment marked `protected: true` requires confirming its name before
 apply or destroy — interactively, or `--confirm-name` in CI. There is no
 bypass flag.
 
+## In GitHub Actions
+
+kraai ships a composite action. It downloads the released binary, verifies it
+against the release's `checksums.txt`, and runs one command.
+
+```yaml
+name: preview
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write   # only needed for the sticky comment
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: evatt-labs/kraai@v0.7.0
+        with:
+          command: apply
+        env:
+          AWS_REGION: us-east-1
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+```
+
+With no `environment` input, the action asks the binary which ephemeral
+environment this pull request maps to, so every run targets the same one
+rather than orphaning the last. Tearing it down again is the same action with
+`command: destroy` on `pull_request: [closed]`.
+
+The result is posted as one comment per (command, environment), edited in
+place rather than appended, so a branch pushed to twenty times carries one
+current result instead of twenty stale ones.
+
+**The action refuses to run on `pull_request_target`.** That trigger exposes
+the base repository's secrets to code from the pull request's own branch, and
+kraai executes manifests, templates and hooks from that branch. There is no
+input that turns the refusal off.
+
+| input | |
+|---|---|
+| `command` | `plan`, `apply` or `destroy` (required) |
+| `environment` | explicit name; defaults to this pull request's |
+| `dir` | manifest root, default `.` |
+| `version` | kraai version; defaults to the action's own ref |
+| `replace` | allow `apply` to replace resources it cannot update |
+| `confirm-name` | passed to `destroy`; safe to set unconditionally |
+| `comment` | post the sticky comment, default `true` |
+
+
 ## Providers
 
 | provider | capabilities |

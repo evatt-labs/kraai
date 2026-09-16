@@ -1,0 +1,248 @@
+name: kraai
+description: Plan, apply or destroy a kraai environment from a workflow.
+author: Evatt Labs
+
+# A composite action, deliberately. The alternatives both add a dependency
+# kraai does not otherwise have: a Docker action needs an image built and
+# published somewhere, and a JavaScript action needs a bundled Node runtime
+# and the npm toolchain this project removed. This downloads one signed
+# release archive and runs it.
+#
+# Nothing here uses a third-party action, so this file adds no supply-chain
+# surface of its own beyond the release it fetches, whose checksum it
+# verifies before running anything.
+
+inputs:
+  command:
+    description: "plan, apply, or destroy."
+    required: true
+  environment:
+    description: >-
+      Environment name. Defaults to the ephemeral name this pull request maps
+      to, derived by `kraai env-name`.
+    required: false
+    default: ""
+  dir:
+    description: "Manifest root directory."
+    required: false
+    default: "."
+  version:
+    description: >-
+      kraai version to run, e.g. "v0.6.0". Defaults to the ref this action
+      was resolved at, falling back to the latest release.
+    required: false
+    default: ""
+  replace:
+    description: "Allow apply to replace resources that cannot be updated in place."
+    required: false
+    default: "false"
+  confirm-name:
+    description: >-
+      Repeat the environment name to confirm destroying a protected
+      environment. Safe to pass unconditionally; it is ignored for
+      unprotected environments.
+    required: false
+    default: ""
+  comment:
+    description: "Post a sticky comment on the pull request with the result."
+    required: false
+    default: "true"
+  github-token:
+    description: "Token used to post the sticky comment. Needs pull-requests: write."
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  environment:
+    description: "The environment name the command ran against."
+    value: ${{ steps.resolve.outputs.environment }}
+  result:
+    description: "The command's output."
+    value: ${{ steps.run.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    # pull_request_target runs with the base repository's secrets while
+    # checking out a fork's branch, so a pull request could execute its own
+    # manifest, hooks and templates against this account's credentials. There
+    # is no configuration that makes that safe, so it is refused rather than
+    # documented as a caveat.
+    - name: Refuse pull_request_target
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+          echo "::error::kraai refuses to run on pull_request_target." >&2
+          echo "That trigger exposes this repository's secrets to code from the pull request's own branch." >&2
+          echo "Use pull_request instead, and grant the job the credentials it needs explicitly." >&2
+          exit 1
+        fi
+
+    - name: Install kraai
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        INPUT_VERSION: ${{ inputs.version }}
+        ACTION_REF: ${{ github.action_ref }}
+      run: |
+        set -euo pipefail
+
+        version="$INPUT_VERSION"
+        if [ -z "$version" ]; then
+          # The ref this action was resolved at is the matching release when
+          # it is a version tag. A branch or SHA is not, so fall back.
+          case "$ACTION_REF" in
+            v[0-9]*) version="$ACTION_REF" ;;
+            *)       version="$(gh release view --repo evatt-labs/kraai --json tagName --jq .tagName)" ;;
+          esac
+        fi
+
+        case "$(uname -s)" in
+          Linux)  os=linux ;;
+          Darwin) os=darwin ;;
+          *) echo "::error::kraai has no release build for $(uname -s)." >&2; exit 1 ;;
+        esac
+        case "$(uname -m)" in
+          x86_64)        arch=amd64 ;;
+          aarch64|arm64) arch=arm64 ;;
+          *) echo "::error::kraai has no release build for $(uname -m)." >&2; exit 1 ;;
+        esac
+
+        dest="$RUNNER_TEMP/kraai"
+        mkdir -p "$dest"
+        archive="kraai_${version#v}_${os}_${arch}.tar.gz"
+
+        # checksums.txt comes from the same release and is what the release's
+        # cosign bundle signs, so verifying against it is the one check that
+        # makes a tampered archive fail here rather than at apply time.
+        gh release download "$version" --repo evatt-labs/kraai \
+          --pattern "$archive" --pattern checksums.txt --dir "$dest"
+
+        # An archive absent from checksums.txt must fail here. Piping a
+        # non-matching grep straight into sha256sum would hand it empty input,
+        # which is not the same thing as a verified file.
+        line="$(grep " ${archive}\$" "$dest/checksums.txt" || true)"
+        if [ -z "$line" ]; then
+          echo "::error::$archive is not listed in the release's checksums.txt." >&2
+          exit 1
+        fi
+        ( cd "$dest" && printf '%s\n' "$line" | sha256sum -c - )
+
+        tar -xzf "$dest/$archive" -C "$dest" kraai
+        chmod +x "$dest/kraai"
+        echo "$dest" >> "$GITHUB_PATH"
+
+    - name: Resolve environment
+      id: resolve
+      shell: bash
+      env:
+        INPUT_ENVIRONMENT: ${{ inputs.environment }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        REPO_NAME: ${{ github.event.repository.name }}
+      run: |
+        set -euo pipefail
+        environment="$INPUT_ENVIRONMENT"
+        if [ -z "$environment" ]; then
+          if [ -z "${PR_NUMBER:-}" ]; then
+            echo "::error::No environment given and this is not a pull request, so none can be derived." >&2
+            echo "Pass the environment input explicitly." >&2
+            exit 1
+          fi
+          # Derived by kraai itself rather than reconstructed here: the name
+          # is a frozen grammar with golden tests behind it, and a second
+          # implementation would drift silently into the wrong environment.
+          if ! environment="$(kraai env-name --pull-request "$PR_NUMBER" --repo "$REPO_NAME" 2>&1)"; then
+            case "$environment" in
+              *"unknown command"*)
+                echo "::error::This kraai release has no env-name command, so the environment cannot be derived." >&2
+                echo "Pin a newer version, or pass the environment input explicitly." >&2
+                ;;
+              *) echo "::error::$environment" >&2 ;;
+            esac
+            exit 1
+          fi
+        fi
+        echo "environment=$environment" >> "$GITHUB_OUTPUT"
+        echo "kraai environment: $environment"
+
+    - name: Run kraai
+      id: run
+      shell: bash
+      env:
+        COMMAND: ${{ inputs.command }}
+        ENVIRONMENT: ${{ steps.resolve.outputs.environment }}
+        DIR: ${{ inputs.dir }}
+        REPLACE: ${{ inputs.replace }}
+        CONFIRM_NAME: ${{ inputs.confirm-name }}
+      run: |
+        # Deliberately no -e: the argument builders below are `[ ... ] && ...`
+        # chains that return non-zero whenever the condition is simply false,
+        # and the command's own exit code is captured explicitly instead.
+        set -uo pipefail
+
+        case "$COMMAND" in
+          plan|apply|destroy) ;;
+          *) echo "::error::command must be plan, apply or destroy (got '$COMMAND')." >&2; exit 1 ;;
+        esac
+
+        args=("$COMMAND" "$ENVIRONMENT" --dir "$DIR")
+        [ "$COMMAND" = "apply" ] && [ "$REPLACE" = "true" ] && args+=(--replace)
+        [ "$COMMAND" = "destroy" ] && [ -n "$CONFIRM_NAME" ] && args+=(--confirm-name "$CONFIRM_NAME")
+
+        # The exit code is captured rather than allowed to end the step, so
+        # the sticky comment still reports a failed plan. The step fails
+        # afterwards, on the real code.
+        output_file="$RUNNER_TEMP/kraai-output.txt"
+        set +e
+        kraai "${args[@]}" 2>&1 | tee "$output_file"
+        status=${PIPESTATUS[0]}
+        set -e
+
+        {
+          echo "result<<KRAAI_EOF"
+          cat "$output_file"
+          echo "KRAAI_EOF"
+          echo "status=$status"
+        } >> "$GITHUB_OUTPUT"
+        echo "status=$status" >> "$GITHUB_ENV"
+        exit 0
+
+    # One comment per (environment, command), edited in place rather than
+    # appended, so a pull request pushed to twenty times carries one current
+    # result instead of twenty stale ones.
+    - name: Comment on the pull request
+      if: ${{ inputs.comment == 'true' && github.event.pull_request.number }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        COMMAND: ${{ inputs.command }}
+        ENVIRONMENT: ${{ steps.resolve.outputs.environment }}
+        RESULT: ${{ steps.run.outputs.result }}
+      run: |
+        set -euo pipefail
+        marker="<!-- kraai:$COMMAND:$ENVIRONMENT -->"
+        if [ "${status:-0}" = "0" ]; then heading="kraai $COMMAND succeeded"; else heading="kraai $COMMAND failed"; fi
+
+        body="$(printf '%s\n### %s\n\n`%s`\n\n```\n%s\n```\n' \
+          "$marker" "$heading" "$ENVIRONMENT" "$RESULT")"
+
+        existing="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
+          --jq "[.[] | select(.body | contains(\"$marker\"))] | .[0].id // empty")"
+
+        if [ -n "$existing" ]; then
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing}" -f body="$body" --silent
+        else
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" -f body="$body" --silent
+        fi
+
+    # Deliberately last: the comment above reports a failure before this
+    # ends the job, which is the whole reason the run step swallowed its
+    # exit code.
+    - name: Fail on a failed command
+      shell: bash
+      run: |
+        if [ "${status:-0}" != "0" ]; then
+          echo "::error::kraai ${{ inputs.command }} exited ${status}." >&2
+          exit "${status}"
+        fi
