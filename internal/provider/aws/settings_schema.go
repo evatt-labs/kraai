@@ -122,3 +122,23 @@ var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]
 	"required":             []any{"binding"},
 	"additionalProperties": false,
 })
+
+// networkBindingSchema validates one entry of a service's `network:` list —
+// manifest.Network's shape, `{binding, cidr, subnet}`.
+//
+// The CIDRs are checked for being strings and for being present, not for
+// being well-formed or for nesting correctly. EC2 rejects an unusable block
+// with a precise message naming the real constraint (a /16-to-/28 range, a
+// subnet inside its VPC, no overlap with an existing association), and
+// reproducing those rules here would mean maintaining a second, worse copy
+// of them.
+var networkBindingSchema = resource.NewSchema("aws network binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding": map[string]any{"type": "string"},
+		"cidr":    map[string]any{"type": "string"},
+		"subnet":  map[string]any{"type": "string"},
+	},
+	"required":             []any{"binding", "cidr", "subnet"},
+	"additionalProperties": false,
+})

@@ -100,7 +100,7 @@ func Register(reg *resource.Registry, client *Client) error {
 // fix (e.g. DNS-validated certificates needing their own explicit ordering
 // hint, or a second RecordSet registration) to resolve.
 func Registrations(client *Client) []resource.Registration {
-	return []resource.Registration{
+	return append(registerNetwork(client), []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
 			Capability: manifest.CapabilityObjects,
@@ -419,5 +419,5 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newLambdaPermissionResource(
 				client, "apigateway.amazonaws.com", apiGatewaySourceARN),
 		},
-	}
+	}...)
 }
