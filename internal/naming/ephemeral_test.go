@@ -11,7 +11,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// TestIsValidEnvironmentName_Golden pins legacy-node/test/names.test.mjs's
+// TestIsValidEnvironmentName_Golden pins the JavaScript CLI's names.test.mjs
 // own isValidEnvironmentName fixtures: 2 accepted, 7 rejected.
 func TestIsValidEnvironmentName_Golden(t *testing.T) {
 	accept := []string{
@@ -41,7 +41,7 @@ func TestIsValidEnvironmentName_Golden(t *testing.T) {
 }
 
 // TestGenerateEnvironmentName_MatchesOwnValidator mirrors
-// legacy-node/test/names.test.mjs's "produces a name matching its own
+// the JavaScript CLI's names.test.mjs "produces a name matching its own
 // validator" — every draw from a CSPRNG-backed generator must satisfy the
 // frozen NamePattern.
 func TestGenerateEnvironmentName_MatchesOwnValidator(t *testing.T) {
@@ -56,7 +56,7 @@ func TestGenerateEnvironmentName_MatchesOwnValidator(t *testing.T) {
 	}
 }
 
-// TestGenerateEnvironmentName_Varies mirrors legacy-node's "produces
+// TestGenerateEnvironmentName_Varies mirrors the JavaScript CLI's "produces
 // different names across calls": a collapse to a single distinct value
 // across many draws would mean the RNG isn't varying.
 func TestGenerateEnvironmentName_Varies(t *testing.T) {
@@ -74,7 +74,7 @@ func TestGenerateEnvironmentName_Varies(t *testing.T) {
 }
 
 // TestEnvironmentNameForPullRequest_Golden pins
-// legacy-node/test/names.test.mjs's environmentNameForPullRequest
+// the JavaScript CLI's names.test.mjs environmentNameForPullRequest
 // fixtures.
 func TestEnvironmentNameForPullRequest_Golden(t *testing.T) {
 	cases := []struct {
