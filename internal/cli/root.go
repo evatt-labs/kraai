@@ -43,6 +43,7 @@ func NewRootCommand() *cobra.Command {
 		"print full error stack traces (also settable via KRAAI_DEBUG=1)")
 
 	root.AddCommand(newVersionCommand())
+	root.AddCommand(newEnvNameCommand())
 	root.AddCommand(newCapabilitiesCommand(assemble.Capabilities))
 	root.AddCommand(newPlanCommand(assemble.Registry))
 	root.AddCommand(newApplyCommand(assemble.Registry))
