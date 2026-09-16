@@ -266,8 +266,8 @@ one hand-written implementation per service.
 go install github.com/evatt-labs/kraai/cmd/kraai@latest
 ```
 
-Released builds are cross-platform single binaries via GoReleaser. A thin npm
-wrapper keeps `npx kraai` working.
+Released builds are cross-platform single binaries via GoReleaser. kraai is
+not distributed through npm.
 
 ## Status
 
@@ -301,7 +301,8 @@ being worked on in what order.
 ## The legacy JavaScript line
 
 kraai began as a JavaScript CLI, published to npm as `kraai` 0.4.3 and 0.5.0.
-That code has been removed; `git log -- legacy-node` still has it.
+That code has been removed and the npm package unpublished; `git log --
+legacy-node` still has the source.
 
 The Go rewrite reproduces its naming behaviour byte for byte, so an
 environment the JavaScript line created resolves to the same resource names
