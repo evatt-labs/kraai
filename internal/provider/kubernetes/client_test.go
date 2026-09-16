@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 )
@@ -28,6 +29,10 @@ func newTestClient(t *testing.T, handler func(*recorded) (int, string)) (*Client
 	t.Helper()
 	var seen []recorded
 	var discoveryCalls int32
+	// Each request is served on its own goroutine. These tests are
+	// sequential today, but a fake that only works sequentially is a race
+	// waiting for the first concurrent test.
+	var seenMu sync.Mutex
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := recorded{
@@ -40,7 +45,9 @@ func newTestClient(t *testing.T, handler func(*recorded) (int, string)) (*Client
 			_ = json.NewDecoder(r.Body).Decode(&decoded)
 			rec.body = decoded
 		}
+		seenMu.Lock()
 		seen = append(seen, rec)
+		seenMu.Unlock()
 
 		switch r.URL.Path {
 		case "/apis/apps/v1":
