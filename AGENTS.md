@@ -117,9 +117,18 @@ gofmt -l .                     # must be empty
 Only `cmd/kraai` may call `os.Exit`, print with `fmt.Print*`, or read
 environment variables. `internal/env` is the single exception.
 
-Doc comments explain **why**, and name the alternative that was rejected.
-This is the most common review comment. Calibrate against
-`internal/resource/registry.go`.
+Comments follow Go's convention. A **doc comment** says what the thing does
+and what a caller must know — it renders on pkg.go.dev, so keep it to a few
+lines. An **inline `//`** explains why, at the line that is genuinely
+non-obvious. **Architectural rationale** goes in `docs/ARCHITECTURE.md` or a
+package `doc.go`, never in a function's doc comment.
+
+**Never cite decision numbers** (`D26`, `D13`) in source — they couple code
+to a document that moves. State the reason instead.
+
+Much of the existing tree violates this: 43% of non-test lines are comments
+and some doc blocks exceed 70 lines. It is being unwound. Do not imitate it,
+and do not treat its verbosity as the house style.
 
 Commits: conventional prefix, imperative, no filler, breaking changes use
 `feat!:`. **No AI attribution anywhere** — no generated-with lines, no

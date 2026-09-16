@@ -33,10 +33,27 @@ real account while you are finding your way around.
 
 Most of these exist because something went wrong once.
 
-**Write down the reasoning, not just the code.** Doc comments here explain
-*why* a thing is the way it is, and name the alternative that was rejected.
-Calibrate against `internal/resource/registry.go` or `internal/plan/doc.go`.
-This is the single most common review comment.
+**Comments follow Go's own convention, not an in-house one.**
+
+A doc comment documents the API: what the thing does, what a caller needs to
+know, what the invariants are. It renders on pkg.go.dev for someone deciding
+whether to call it. Keep it to that — usually a few lines.
+
+Explain *why* with an inline `//` at the line that needs it, where the logic
+is genuinely non-obvious or looks wrong until you know something. That is
+where a reader is actually confused, and it stays next to the code it
+explains.
+
+Architectural rationale — why the whole design is shaped this way, what was
+rejected — belongs in `docs/ARCHITECTURE.md` or a package's `doc.go`, not in
+the doc comment of a function.
+
+**Do not cite decision numbers in source.** `D26`, `D13` and friends couple
+code to an external document and rot when it changes. Say the thing instead.
+
+Existing code does not all follow this yet — 43% of non-test lines are
+comments, with doc blocks running to 70+ lines. That is being unwound; do not
+use it as the model.
 
 **A test that has never been seen to fail is not evidence.** For anything
 load-bearing, break the behaviour deliberately, watch the test fail, restore
