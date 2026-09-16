@@ -7,6 +7,14 @@ migration target, and was removed once this one replaced it
 (`git log -- docs/archive/node-cli` still has it). When a decision here
 changes, change it here first.
 
+> **Read `ARCHITECTURE.md` first if you want to know how kraai works today.**
+>
+> This file is the decision record: why each choice was made, what was
+> rejected, and what superseded what. It is deliberately a history, and parts
+> of it describe things that were decided and never built. `ARCHITECTURE.md`
+> is the flattened current state, audited against the code, and separates
+> what exists from what does not.
+
 ## Thesis
 
 kraai is a multi-cloud devops control plane: environments (ephemeral and
