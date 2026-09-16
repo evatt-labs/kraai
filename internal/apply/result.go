@@ -7,12 +7,12 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// Outcome is what actually happened to one resource during an Apply run —
-// the mutating analogue of plan.ActionKind. Kept as a distinct type rather
-// than reusing plan.ActionKind: a plan proposes create/no-change/replace/
-// (Get) failed, but an apply run additionally needs to say a mutation
-// itself failed (as opposed to the read that preceded it) and that an
-// action never ran at all because an earlier phase failed.
+// Outcome is what actually happened to one resource during an Apply run:
+// the mutating analogue of plan.ActionKind.
+//
+// A distinct type rather than a reuse of plan.ActionKind, because an apply
+// additionally needs to say that a mutation failed — as opposed to the read
+// before it — and that an action never ran because an earlier wave failed.
 type Outcome int
 
 const (
@@ -28,7 +28,7 @@ const (
 	// could not be resolved to a registered resource. See Err.
 	OutcomeFailed
 	// OutcomeSkipped means this action was never attempted, because an
-	// earlier phase had a failure and apply refuses to start a phase that
+	// earlier wave had a failure and apply refuses to start a wave that
 	// depends on one that did not fully succeed.
 	OutcomeSkipped
 )
@@ -69,10 +69,11 @@ type Result struct {
 	Results []ActionResult
 }
 
-// HasFailures reports whether any action failed. It does not consider
-// OutcomeSkipped a failure in its own right — a skipped action recorded no
-// error of its own, it simply never ran because an earlier phase did fail,
-// and that earlier failure is what HasFailures already reports.
+// HasFailures reports whether any action failed.
+//
+// OutcomeSkipped is not a failure in its own right: a skipped action
+// recorded no error, it never ran because an earlier wave failed, and that
+// earlier failure is what this already reports.
 func (r *Result) HasFailures() bool {
 	if r == nil {
 		return false
