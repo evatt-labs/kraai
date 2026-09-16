@@ -38,18 +38,25 @@ waves, each wave running concurrently under a bounded limit.
 
 ## A manifest
 
-A manifest is a directory, not a file.
+A manifest is a directory, not a file. Every example below is real syntax,
+checked by planning it.
 
 ```
-kraai.yaml                              # providers, plugins
-services/api.yaml                       # services and their bindings
-environments/production.yaml            # per-environment overlay
-environments/production.values.yaml     # free-form template values
+kraai.yaml                                   # providers (or kraai.yaml.j2 to template it)
+services/api.yaml                            # services and their bindings
+environments/production.yaml                 # per-environment overlay
+environments/production.values.yaml          # free-form values for templating
 ```
+
+### Providers
+
+`kraai.yaml` says which vendor fulfils each capability, and carries that
+vendor's own settings. Settings are validated against a schema the provider
+publishes, so a typo is a named error rather than a silent no-op.
 
 ```yaml
-# kraai.yaml
 version: 1
+
 providers:
   compute:
     vendor: aws
@@ -57,34 +64,127 @@ providers:
       region: us-east-1
       runtime: python3.14
       architecture: arm64
+      package: zip
+      reservedConcurrency: 20
+
   database:
     vendor: neon
     settings:
-      project: my-project
+      project: acme-shop
       region: aws-us-east-2
-      database: appdb
+      database: shopdb
       role: app_user
 ```
 
+### Services
+
+A service declares what it needs in vendor-neutral terms. `compute.trigger`
+says what shape it is, which decides what gets built for it: an HTTP service
+gets a front door, a scheduled one gets a schedule and no HTTP surface at all.
+
 ```yaml
-# services/api.yaml
 services:
+  # HTTP-facing: FastAPI behind an API Gateway HTTP API, run by the Lambda
+  # Web Adapter so the application contains no Lambda-specific code.
   api:
     dir: .
     compute:
       trigger: http
       handler: run.sh
-      include: [build/]
+      include: [build/]            # re-adds a gitignored path to the artifact
       settings:
         layerArn: arn:aws:lambda:us-east-1:753240598075:layer:LambdaAdapterLayerArm64:28
+        memorySize: 512
+        timeout: 30
+        env:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
+          AWS_LWA_READINESS_CHECK_PATH: /healthz
         envSecrets:
-          DATABASE_URL: DB.connection_uri     # resolved at apply time, never stored
+          DATABASE_URL: DB.connection_uri     # resolved at apply, never stored
+    databases:
+      - { binding: DB, driver: postgres }
+
+  # Invoked on a schedule. No HTTP surface, no adapter layer.
+  reaper:
+    dir: .
+    depends_on: [api]              # ordering no registration can infer
+    compute:
+      trigger: schedule
+      handler: app.tasks.reap.handler
+      schedule: "rate(15 minutes)"
+      include: [build/]
+      settings:
+        memorySize: 256
+        envSecrets:
+          DATABASE_URL: DB.connection_uri
     databases:
       - { binding: DB, driver: postgres }
 ```
 
-Files ending `.j2` are rendered with Jinja-style templating before parsing,
-then validated by the same strict schema.
+`envSecrets` maps an environment variable to a credential another binding
+produces — here, the Neon branch's connection URI. The value is fetched at the
+moment it is used and is never written to the manifest, the artifact, a log or
+an error.
+
+The packaging step honours `.gitignore`, so build output and virtualenvs stay
+out of the artifact. `include:` re-adds what the artifact genuinely needs.
+`.env` and `.git` are excluded unconditionally and cannot be re-added.
+
+### Environments
+
+The overlay is what makes the same manifest a throwaway preview or production.
+
+```yaml
+# environments/production.yaml
+kind: persistent
+protected: true                    # apply and destroy require confirming the name
+naming:
+  prefix: "acme-shop-"             # avoids collisions in a shared account
+routes:
+  api:
+    - pattern: api.acme.example
+      custom_domain: true
+```
+
+```yaml
+# environments/acmeshop-pull-request-00042.yaml
+kind: ephemeral
+```
+
+### Templating
+
+Name the root `kraai.yaml.j2` and it is rendered before parsing, then
+validated by the same strict schema. Values come from
+`environments/<name>.values.yaml`, overridden by `--set`.
+
+```yaml
+# kraai.yaml.j2
+providers:
+  compute:
+    vendor: aws
+    settings:
+      region: {{ region }}
+      # Sized against the database's compute, not Lambda's account limit,
+      # so a preview environment cannot exhaust a shared Postgres.
+      reservedConcurrency: {{ reservedConcurrency|default:5 }}
+```
+
+```yaml
+# environments/production.values.yaml
+region: us-east-1
+reservedConcurrency: 20
+
+# environments/acmeshop-pull-request-00042.values.yaml
+region: us-east-1
+reservedConcurrency: 2
+```
+
+```
+kraai plan production --set reservedConcurrency=50
+```
+
+Values files are deliberately free-form and not schema-validated — unlike
+every other part of a manifest.
 
 ## Using it
 
@@ -96,21 +196,50 @@ kraai capabilities             # what each provider offers (no credentials neede
 ```
 
 `plan` against a real account is safe and is the best way to see what kraai
-would do:
+would do. This is verbatim output from the manifest above:
 
 ```
 $ kraai plan production
 plan for "production": 12 to create, 0 to replace, 0 unchanged, 0 failed (12 total)
 
 wave 0:
-  +  create  "kraai-api-production-api"      aws/AWS::S3::Bucket::ArtifactBucket
-  +  create  "kraai-api-production-api"      aws/AWS::IAM::Role
-  +  create  "kraai-api-production-api-db"   neon/branch
+  +  create  "acme-shop-production-api"     aws/AWS::S3::Bucket::ArtifactBucket
+  +  create  "acme-shop-production-api"     aws/AWS::IAM::Role
+  +  create  "acme-shop-production-api"     aws/AWS::ApiGatewayV2::Api
+  +  create  "acme-shop-production-api-db"  neon/branch
+
 wave 1:
-  +  create  "kraai-api-production-api"      aws/AWS::Lambda::Function
+  +  create  "acme-shop-production-api"     aws/AWS::Lambda::Function
+
 wave 2:
-  +  create  "kraai-api-production-api"      aws/AWS::Lambda::Permission::APIGateway
+  +  create  "acme-shop-production-api"     aws/AWS::Lambda::Permission::APIGateway
+
+wave 3:
+  +  create  "acme-shop-production-reaper"     aws/AWS::S3::Bucket::ArtifactBucket
+  +  create  "acme-shop-production-reaper"     aws/AWS::IAM::Role
+  +  create  "acme-shop-production-reaper"     aws/AWS::Events::Rule
+  +  create  "acme-shop-production-reaper-db"  neon/branch
+
+wave 4:
+  +  create  "acme-shop-production-reaper"     aws/AWS::Lambda::Function
+
+wave 5:
+  +  create  "acme-shop-production-reaper"     aws/AWS::Lambda::Permission::EventsRule
 ```
+
+Two things to read out of that. The **waves** are derived, not configured: a
+Lambda needs its artifact bucket and execution role, and a permission needs
+both the function and the thing being authorised — so they land in 0, 1 and 2
+without anyone saying so. And `reaper` sits entirely in waves 3 to 5 rather
+than running alongside `api`, because it declared `depends_on: [api]` — the
+one ordering no registration could have inferred.
+
+The derived names carry the environment and the `naming.prefix` from the
+overlay, so the same manifest in a preview environment produces
+`acmeshop-pull-request-00042-api` instead and cannot collide.
+
+(The real command also prints a `service.binding` column, trimmed here for
+width. Add `--json` for a machine-readable projection.)
 
 Exit codes are small and CI-branchable: `0` success, `1` unexpected, `2`
 validation, `4` confirmation required.
