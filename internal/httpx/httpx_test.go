@@ -110,40 +110,73 @@ func TestSharedTransportReusesConnections(t *testing.T) {
 		totalRequests, workers, got, maxIdleConnsPerHost)
 }
 
+// roundBarrier holds every request of one round until all of them have
+// arrived, so the server is forced to have that many connections open at the
+// same instant.
+type roundBarrier struct {
+	mu      sync.Mutex
+	arrived int
+	target  int
+	release chan struct{}
+}
+
+func (b *roundBarrier) reset(target int) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.arrived, b.target, b.release = 0, target, make(chan struct{})
+}
+
+func (b *roundBarrier) arrive() {
+	b.mu.Lock()
+	b.arrived++
+	if b.arrived == b.target {
+		close(b.release)
+	}
+	release := b.release
+	b.mu.Unlock()
+	<-release
+}
+
 // TestUntunedTransportChurnsMoreThanTuned is the contrast: the identical
-// harness driven through both transports, asserting the untuned one opens
-// meaningfully more connections than the tuned one.
+// harness driven through both transports, asserting the untuned one reopens
+// connections the tuned one keeps.
 //
-// Deliberately a RELATIVE comparison rather than an absolute threshold.
-// Churn is a consequence of how much requests actually overlap, which
-// depends on machine speed — an earlier version asserted the untuned
-// transport exceeded a fixed count and failed on CI, because a fast runner
-// served the requests nearly serially and two idle connections sufficed.
-// That was not the untuned transport behaving well; it was the test failing
-// to create the condition it claimed to measure, then reporting the absence
-// of that condition as a defect.
+// # Why this drives synchronised bursts rather than a steady load
 //
-// Measuring both in one run cancels machine speed out: whatever overlap the
-// host produces applies equally to both halves, so the only variable left is
-// the pool size, which is the thing under test.
+// MaxIdleConnsPerHost bounds how many *idle* connections a host keeps. A
+// connection in continuous use is never idle, so it is never subject to that
+// bound at all. Two earlier versions of this test missed that and were flaky
+// on CI for the same underlying reason: workers looping without pause keep
+// every connection busy end to end, nothing is returned to the idle pool, and
+// both transports open exactly one connection per worker. The relative
+// comparison then read 10 against 10 and failed, reporting the absence of a
+// condition the harness never created.
+//
+// Rounds fix it deterministically. A barrier holds all of a round's requests
+// until every one has arrived, forcing `workers` connections open at once;
+// when the round drains they all go idle together. The untuned transport may
+// keep only DefaultMaxIdleConnsPerHost of them and must reopen the rest next
+// round, while the tuned pool is large enough to keep all of them. The gap is
+// then a property of the pool sizes, not of how fast the machine is.
 func TestUntunedTransportChurnsMoreThanTuned(t *testing.T) {
 	const workers = 10
-	const perWorker = 20
-	const totalRequests = workers * perWorker
+	const rounds = 3
 
-	// The handler holds each request briefly so workers are genuinely in
-	// flight together. Without overlap there is nothing for a connection
-	// pool to do, and both transports would look identical.
-	const handlerDelay = 3 * time.Millisecond
+	var barrier roundBarrier
 	handler := func(w http.ResponseWriter, _ *http.Request) {
-		time.Sleep(handlerDelay)
+		barrier.arrive()
 		w.WriteHeader(http.StatusOK)
 	}
 
 	measure := func(client *http.Client) int64 {
 		srv := newCountingServer(handler)
 		defer srv.Close()
-		fire(t, client, srv.URL, workers, perWorker)
+		for round := 0; round < rounds; round++ {
+			barrier.reset(workers)
+			// One request per worker per round, so a round completes only
+			// once every connection it opened has gone idle.
+			fire(t, client, srv.URL, workers, 1)
+		}
 		return srv.connections()
 	}
 
@@ -155,17 +188,19 @@ func TestUntunedTransportChurnsMoreThanTuned(t *testing.T) {
 	// so this measures what callers actually get.
 	tuned := measure(NewClient(5*time.Second, nil, nil))
 
-	t.Logf("%d requests across %d workers -> untuned %d connections, tuned %d (MaxIdleConnsPerHost=%d)",
-		totalRequests, workers, untuned, tuned, maxIdleConnsPerHost)
+	t.Logf("%d rounds of %d simultaneous requests -> untuned %d connections, tuned %d (MaxIdleConnsPerHost=%d)",
+		rounds, workers, untuned, tuned, maxIdleConnsPerHost)
 
-	if tuned > maxIdleConnsPerHost {
-		t.Errorf("tuned transport opened %d connections, want at most the pool size %d",
-			tuned, maxIdleConnsPerHost)
+	// The tuned pool holds every connection a round opens, so later rounds
+	// reuse them all and the total never exceeds one round's worth.
+	if tuned != workers {
+		t.Errorf("tuned transport opened %d connections across %d rounds, want exactly %d — "+
+			"a pool of %d should hold every connection between rounds",
+			tuned, rounds, workers, maxIdleConnsPerHost)
 	}
 	if untuned <= tuned {
 		t.Errorf("untuned transport opened %d connections and tuned opened %d: "+
-			"want the untuned default to churn strictly more, or this harness is not "+
-			"creating enough overlap to measure pooling at all", untuned, tuned)
+			"want the untuned default to reopen what it cannot keep idle", untuned, tuned)
 	}
 }
 func TestTwoCallersShareOnePool(t *testing.T) {
