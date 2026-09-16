@@ -117,5 +117,8 @@ Other labels worth knowing:
   `docs/proposals/`. Read the proposal before starting; the sequencing is
   usually load-bearing.
 
+The [public roadmap](https://github.com/orgs/evatt-labs/projects/1) shows what
+is being worked on and in what order.
+
 If you are unsure whether something is wanted, open an issue before writing
 code.
