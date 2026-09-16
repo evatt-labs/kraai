@@ -180,7 +180,7 @@ func (a *artifactBucketResource) Get(ctx context.Context, ref resource.Ref) (*re
 
 	// Report the state under the caller's own Ref (the service-derived
 	// name), not the transformed bucket name: everything above this type
-	// (plan, the lockfile) identifies this resource by the Ref the
+	// (plan, the applier) identifies this resource by the Ref the
 	// registry handed it, and substituting a different Ref.Name here would
 	// make this resource's identity inconsistent with every other Tier 2
 	// registration for the same service.
@@ -304,7 +304,8 @@ func (a *artifactBucketResource) Update(context.Context, resource.Ref, resource.
 // This method re-derives that answer itself with Client.OwnsBucket rather
 // than trusting that whatever called Delete already called Get first and
 // would have refused to proceed on a foreign bucket: internal/destroy is
-// manifest-driven, not lockfile-driven (see internal/resource/resource.go's
+// manifest-driven: nothing kraai stores records what was created (see
+// internal/resource/resource.go's
 // own package doc comment — "the authoritative answer to 'does this exist'
 // is always a fresh lookup"), and nothing in this type's contract
 // guarantees Get ran immediately before Delete in the same process, on the

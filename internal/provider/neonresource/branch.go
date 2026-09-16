@@ -306,7 +306,7 @@ func (b *branchResource) Delete(ctx context.Context, ref resource.Ref) error {
 
 // Secrets implements resource.SecretProducer: the branch's connection string
 // is a live credential, so it is produced on demand rather than carried in
-// the state that reaches the lockfile.
+// the state that leaves this package.
 //
 // Fetched fresh each call, which is also the only correct behaviour — Neon
 // issues the URI against the branch's current compute endpoint, and a value
@@ -337,7 +337,7 @@ func (b *branchResource) Secrets(state *resource.State) map[string]resource.Secr
 // Attributes carry what a later phase needs and nothing sensitive: the
 // project and branch ids, the branch name, the database and role. The
 // connection string is deliberately absent — it reaches Hyperdrive through
-// Secrets, so nothing written to the lockfile has ever held it.
+// Secrets, so nothing serialised out of this package has ever held it.
 func (b *branchResource) state(project *neon.Project, branch *neon.Branch) *resource.State {
 	return &resource.State{
 		Ref: resource.Ref{Provider: Provider, Type: TypeBranch, Name: branch.Name},
