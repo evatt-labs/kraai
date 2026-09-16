@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose something kraai should do
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that you cannot do today? Describe the situation, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+      description: Optional. A rough shape is fine.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What else you considered
+      description: |
+        Including "do nothing". This project records rejected alternatives
+        alongside decisions, so knowing what you ruled out is genuinely useful.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I read docs/ARCHITECTURE.md and this is not something that already exists
+          required: true
+        - label: I checked the `unbuilt` label, in case this is already designed but not built
+          required: true

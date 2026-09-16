@@ -1,0 +1,55 @@
+name: Bug report
+description: Something behaves differently from what it claims
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: this project has a recurring class of bug where a
+        manifest field is parsed and read by no code. If a setting seems to do
+        nothing, grep the field name outside its struct definition — if the
+        only hit is the definition, that is the bug, and it is worth saying so.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Include the command you ran and its real output.
+      placeholder: |
+        $ kraai plan my-env --dir .
+        ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: kraai version
+      description: "`kraai version`, or the commit you built from."
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Which provider
+      multiple: true
+      options: [AWS, Cloudflare, Neon, "Not provider-specific"]
+    validations:
+      required: true
+  - type: textarea
+    id: manifest
+    attributes:
+      label: Relevant manifest
+      description: "Redact anything sensitive. Note that kraai never reads credentials from a manifest."
+      render: yaml
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked whether this is already tracked, including the `unbuilt` and `dead-field` labels
+          required: true

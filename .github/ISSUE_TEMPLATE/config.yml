@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Code of Conduct
+    url: https://github.com/evatt-labs/kraai/blob/main/CODE_OF_CONDUCT.md
+    about: How this community behaves, and how to report a violation privately.
+  - name: Architecture
+    url: https://github.com/evatt-labs/kraai/blob/main/docs/ARCHITECTURE.md
+    about: What kraai actually is today, separated from what is only designed.
