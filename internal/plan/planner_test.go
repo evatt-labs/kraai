@@ -805,3 +805,67 @@ func TestPlan_ManifestDependsOn_OrdersOtherwiseIndependentServices(t *testing.T)
 			"relationship to it at all — only the manifest's own depends_on orders them", frontend.Wave)
 	}
 }
+
+// TestPlan_NamingPrefixReachesResourceAndServiceNames is the end-to-end
+// counterpart of internal/naming's Namer unit tests: an environment's
+// naming.prefix (manifest.Environment.Naming.Prefix) must reach every
+// derived name a real Plan call produces, both for a binding's backing
+// resource (expandBinding, via naming.ResourceName's replacement) and for
+// a service's own compute (expandCompute, via naming.ServiceName's
+// replacement) — not just the internal/naming package in isolation.
+func TestPlan_NamingPrefixReachesResourceAndServiceNames(t *testing.T) {
+	f := newRegistryFixture(t)
+	compute := newFakeResource()
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::Lambda::Function", Capability: manifest.CapabilityCompute,
+		Lookup: resource.LookupByName, Resource: compute,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	m := f.oneServiceManifest()
+	m.Root.Providers.Compute = &manifest.Provider{Vendor: "aws"}
+	m.Environment.Naming = &manifest.Naming{Prefix: "acme-"}
+
+	got, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	for _, a := range got.Actions {
+		if !strings.HasPrefix(a.Ref.Name, "acme-") {
+			t.Errorf("%s/%s: Ref.Name = %q, want it prefixed with the environment's naming.prefix",
+				a.Provider, a.Type, a.Ref.Name)
+		}
+	}
+
+	kv := findAction(t, got, "cloudflare", "kv_namespace")
+	if want := "acme-" + naming.ResourceName(envName, "api", "CACHE"); kv.Ref.Name != want {
+		t.Errorf("kv Ref.Name = %q, want %q (prefix ahead of the unprefixed derivation)", kv.Ref.Name, want)
+	}
+
+	svc := findAction(t, got, "aws", "AWS::Lambda::Function")
+	if want := "acme-" + naming.ServiceName(envName, "api"); svc.Ref.Name != want {
+		t.Errorf("compute Ref.Name = %q, want %q", svc.Ref.Name, want)
+	}
+}
+
+// TestPlan_NoNamingOverlayMatchesUnprefixedDerivation is Plan's own D22
+// identity check: a manifest with no Environment.Naming at all (the zero
+// value, matching every planner_test.go fixture above this one) must
+// plan every resource under exactly the name naming.ResourceName/
+// ServiceName would have produced before Namer existed.
+func TestPlan_NoNamingOverlayMatchesUnprefixedDerivation(t *testing.T) {
+	f := newRegistryFixture(t)
+	m := f.oneServiceManifest() // m.Environment is the zero value: Naming == nil
+
+	got, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	kv := findAction(t, got, "cloudflare", "kv_namespace")
+	if want := naming.ResourceName(envName, "api", "CACHE"); kv.Ref.Name != want {
+		t.Errorf("kv Ref.Name = %q, want %q", kv.Ref.Name, want)
+	}
+}

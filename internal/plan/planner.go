@@ -105,7 +105,18 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 		return nil, kerrors.Validation("plan: environment name must not be empty")
 	}
 
-	items, err := p.expand(m, environmentName)
+	// Naming.Prefix (persistent environments only) is optional; an
+	// environment with no naming overlay at all, or one with an empty
+	// prefix, gets the zero-value Namer — see Namer's own doc comment for
+	// why that is byte-identical to naming.ResourceName/ServiceName's
+	// pre-prefix behavior (D22), not merely close to it.
+	var prefix string
+	if m.Environment.Naming != nil {
+		prefix = m.Environment.Naming.Prefix
+	}
+	namer := naming.NewNamer(prefix)
+
+	items, err := p.expand(m, environmentName, namer)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +182,9 @@ func serviceDependsOn(m *manifest.Manifest) map[string][]string {
 
 // expand walks every service's declared bindings in a deterministic order
 // and returns one plannedItem per resource type each binding expands to.
-func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]plannedItem, error) {
+// namer carries this environment's naming.prefix (Plan builds it once, from
+// m.Environment.Naming) so every name derived below applies it consistently.
+func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer naming.Namer) ([]plannedItem, error) {
 	var out []plannedItem
 
 	for _, svcKey := range sortedKeys(m.Services) {
@@ -189,7 +202,7 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]planne
 		// deploys, and synthesising a compute resource there would invent a
 		// binding its author never asked for.
 		if _, ok := m.Root.Providers.For(manifest.CapabilityCompute); ok {
-			items, err := p.expandCompute(m, environmentName, svcKey, svc)
+			items, err := p.expandCompute(m, environmentName, svcKey, svc, namer)
 			if err != nil {
 				return nil, kerrors.Wrap(err, kerrors.CodeValidation, "services.%s", svcKey)
 			}
@@ -201,21 +214,21 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]planne
 			if d.Caching != nil {
 				config["caching"] = *d.Caching
 			}
-			items, err := p.expandBinding(m, environmentName, svcKey, d.Binding, manifest.CapabilityDatabase, config)
+			items, err := p.expandBinding(m, environmentName, svcKey, d.Binding, manifest.CapabilityDatabase, config, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "databases", d.Binding)
 			}
 			out = append(out, items...)
 		}
 		for _, kv := range svc.KeyValue {
-			items, err := p.expandBinding(m, environmentName, svcKey, kv.Binding, manifest.CapabilityKeyValue, nil)
+			items, err := p.expandBinding(m, environmentName, svcKey, kv.Binding, manifest.CapabilityKeyValue, nil, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "keyvalue", kv.Binding)
 			}
 			out = append(out, items...)
 		}
 		for _, o := range svc.Objects {
-			items, err := p.expandBinding(m, environmentName, svcKey, o.Binding, manifest.CapabilityObjects, nil)
+			items, err := p.expandBinding(m, environmentName, svcKey, o.Binding, manifest.CapabilityObjects, nil, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "objects", o.Binding)
 			}
@@ -223,7 +236,7 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]planne
 		}
 		for _, q := range svc.Queues {
 			items, err := p.expandBinding(m, environmentName, svcKey, q.Binding, manifest.CapabilityQueues,
-				map[string]any{"consumer": q.Consumer})
+				map[string]any{"consumer": q.Consumer}, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "queues", q.Binding)
 			}
@@ -263,7 +276,7 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]planne
 // a registration's selector sees exactly what the provider's own Create
 // call will.
 func (p *Planner) expandCompute(
-	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service,
+	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service, namer naming.Namer,
 ) ([]plannedItem, error) {
 	regs, err := p.registry.Resolve(manifest.CapabilityCompute, m.Root.Providers.Vendors())
 	if err != nil {
@@ -293,7 +306,7 @@ func (p *Planner) expandCompute(
 	}
 	mergedSettings := manifest.MergeSettings(provider.Settings, svcSettings)
 
-	name := naming.ServiceName(environmentName, svcKey)
+	name := namer.Service(environmentName, svcKey)
 	config := map[string]any{"dir": svc.Dir, "settings": mergedSettings}
 	if trigger != "" {
 		config["trigger"] = trigger
@@ -376,6 +389,7 @@ func annotate(err error, svcKey, kind, binding string) error {
 // one's Ref and Spec.
 func (p *Planner) expandBinding(
 	m *manifest.Manifest, environmentName, svcKey, binding, capability string, config map[string]any,
+	namer naming.Namer,
 ) ([]plannedItem, error) {
 	if _, ok := m.Root.Providers.For(capability); !ok {
 		return nil, kerrors.Validation("no provider is configured for capability %q", capability)
@@ -390,7 +404,7 @@ func (p *Planner) expandBinding(
 		return nil, err
 	}
 
-	name := naming.ResourceName(environmentName, svcKey, binding)
+	name := namer.Resource(environmentName, svcKey, binding)
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {

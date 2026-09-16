@@ -275,6 +275,38 @@ func TestLoad_BadKindIsValidationError(t *testing.T) {
 	}
 }
 
+// TestLoad_InvalidNamingPrefixIsValidationError is the "validate the
+// prefix... enforce it at manifest load with a clear error" requirement:
+// a naming.prefix missing its mandatory trailing hyphen is rejected at
+// Load, with manifest.ErrInvalidPrefix identifiable in the error chain
+// via errors.Is — not just a message a caller has to substring-match.
+func TestLoad_InvalidNamingPrefixIsValidationError(t *testing.T) {
+	loader := newRealLoader(t, "testdata/bad-naming-prefix")
+	_, err := loader.Load("dev", nil)
+	kerr := requireCode(t, err, kerrors.CodeValidation)
+	if !errors.Is(kerr, manifest.ErrInvalidPrefix) {
+		t.Errorf("error %v does not wrap manifest.ErrInvalidPrefix", kerr)
+	}
+	if !strings.Contains(kerr.Error(), "naming.prefix") {
+		t.Errorf("error %q does not mention naming.prefix", kerr.Error())
+	}
+}
+
+// TestLoad_NamingPrefixTooLongIsValidationError is the "a prefix so long
+// it leaves no room for the derived name is a manifest error, not a
+// silent truncation to nothing" requirement: a naming.prefix over
+// internal/manifest's length ceiling is rejected at Load, with
+// manifest.ErrPrefixTooLong identifiable via errors.Is, rather than
+// silently accepted and truncated away later inside internal/naming.
+func TestLoad_NamingPrefixTooLongIsValidationError(t *testing.T) {
+	loader := newRealLoader(t, "testdata/naming-prefix-too-long")
+	_, err := loader.Load("dev", nil)
+	kerr := requireCode(t, err, kerrors.CodeValidation)
+	if !errors.Is(kerr, manifest.ErrPrefixTooLong) {
+		t.Errorf("error %v does not wrap manifest.ErrPrefixTooLong", kerr)
+	}
+}
+
 func TestLoad_WrongVersionIsValidationError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)

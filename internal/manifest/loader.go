@@ -235,11 +235,26 @@ func validateServices(services map[string]Service) error {
 func validateEnvironment(path string, env *Environment) error {
 	switch env.Kind {
 	case EnvironmentKindEphemeral, EnvironmentKindPersistent:
-		return nil
 	default:
 		return kerrors.Validation("%s: kind: must be %q or %q, got %q",
 			path, EnvironmentKindEphemeral, EnvironmentKindPersistent, env.Kind)
 	}
+
+	// naming.prefix becomes a leading segment of every DNS-safe resource
+	// name this environment derives (internal/naming.Namer), so it gets
+	// the same known-field-wrong-value treatment every other field in
+	// this function does — see validatePrefix (naming.go) for the
+	// grammar and why it lives in this package rather than
+	// internal/naming. env.Naming is nil for the overwhelming majority of
+	// environments (no naming overlay configured at all), so this only
+	// runs the check when there is a prefix to check.
+	if env.Naming != nil {
+		if err := validatePrefix(env.Naming.Prefix); err != nil {
+			return kerrors.Wrap(err, kerrors.CodeValidation,
+				"%s: naming.prefix: %q", path, env.Naming.Prefix)
+		}
+	}
+	return nil
 }
 
 // readOptional reads name, returning (nil, nil) if it doesn't exist rather
