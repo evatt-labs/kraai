@@ -87,4 +87,18 @@
 // pair, so registrationsFor in planner.go supplements it with whatever
 // else shares the capability. See that function's comment for the specific
 // tension this works around and its limits.
+//
+// # naming.prefix and the orphaned-resource hazard
+//
+// Plan builds one internal/naming.Namer per call, from
+// m.Environment.Naming, and every name expand/expandCompute/expandBinding
+// derive goes through it. If a Plan against a persistent environment
+// suddenly reports a wave of nothing but ActionCreate for resources you
+// believed already existed, check whether naming.prefix was just added or
+// changed on that environment: kraai has no state document (D6), so a
+// changed prefix does not rename anything, it just makes every later Plan
+// stop deriving the old names and start deriving new ones — the
+// previously-created resources are still out there, just no longer
+// findable through kraai's own naming. See internal/naming.NewNamer's doc
+// comment for the full reasoning and what to do about it.
 package plan
