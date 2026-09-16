@@ -42,15 +42,25 @@ checksum:
 # runs when GoReleaser executes; the release workflow installs cosign and
 # grants `id-token: write` for it. Outside Actions there is no OIDC identity,
 # so a local run needs `--skip=sign`.
+#
+# One bundle, not a separate .sig and .pem. cosign v3 defaults to the new
+# bundle format, which carries the signature, the certificate and the
+# transparency-log entry in one file and ignores --output-signature and
+# --output-certificate entirely. Passing those alone leaves --bundle empty
+# and cosign fails trying to write to "".
+#
+# Verify a release with:
+#   cosign verify-blob checksums.txt \
+#     --bundle checksums.txt.bundle \
+#     --certificate-identity-regexp '^https://github.com/evatt-labs/kraai/' \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com
 signs:
   - id: checksums
     cmd: cosign
-    signature: "${artifact}.sig"
-    certificate: "${artifact}.pem"
+    signature: "${artifact}.bundle"
     args:
       - sign-blob
-      - "--output-signature=${signature}"
-      - "--output-certificate=${certificate}"
+      - "--bundle=${signature}"
       - "${artifact}"
       - --yes
     artifacts: checksum
