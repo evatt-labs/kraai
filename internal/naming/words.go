@@ -1,6 +1,6 @@
 package naming
 
-// colors, adjectives, and animals are legacy-node/src/names.mjs's exact
+// colors, adjectives, and animals are the JavaScript CLI's exact
 // word lists, in the exact same order. GenerateEnvironmentName's output
 // space must match 0.5.0 byte-for-byte per D22: the index a word sits at
 // has no meaning of its own, but keeping the lists identical means kraai

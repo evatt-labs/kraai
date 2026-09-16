@@ -18,7 +18,7 @@ var randReader = cryptorand.Reader
 
 // randomIntn returns a uniformly-distributed integer in [0, n), backed by
 // crypto/rand rather than math/rand. This mirrors Node's
-// crypto.randomInt, which legacy-node/src/names.mjs uses for the same
+// crypto.randomInt, which the JavaScript CLI used for the same
 // reason (see its own comment on pick()): a generated environment name
 // reaches a workers.dev hostname and, per D27, a path on disk. Neither is
 // a secret and predictability isn't a security property here, but a

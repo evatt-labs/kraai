@@ -300,9 +300,12 @@ being worked on in what order.
 
 ## The legacy JavaScript line
 
-The published npm package `kraai` 0.5.x is JavaScript and lives in
-[`legacy-node/`](legacy-node/), frozen during the Go rewrite. Environments it
-created can still be torn down by it.
+kraai began as a JavaScript CLI, published to npm as `kraai` 0.4.3 and 0.5.0.
+That code has been removed; `git log -- legacy-node` still has it.
+
+The Go rewrite reproduces its naming behaviour byte for byte, so an
+environment the JavaScript line created resolves to the same resource names
+here and can be torn down by this binary.
 
 ## Licence
 

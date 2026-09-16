@@ -8,7 +8,7 @@ import (
 	"pgregory.net/rapid"
 )
 
-// TestResourceName_Golden pins legacy-node/test/names.test.mjs's
+// TestResourceName_Golden pins the JavaScript CLI's names.test.mjs
 // resourceName fixtures.
 func TestResourceName_Golden(t *testing.T) {
 	cases := []struct {
@@ -183,7 +183,7 @@ func TestServiceName(t *testing.T) {
 // itself defined as Namer{}.Resource (resource.go): comparing the two
 // would only ever prove they agree with themselves, even if the shared
 // underlying computation broke. These are TestResourceName_Golden's own
-// fixtures (legacy-node/test/names.test.mjs), asserted a second time
+// fixtures (the JavaScript CLI's test suite), asserted a second time
 // through the Namer path with an explicit empty prefix, so a future
 // change to Namer.Resource that silently altered the no-prefix case would
 // fail here even if it also broke ResourceName in lockstep.

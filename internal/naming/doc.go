@@ -1,5 +1,5 @@
 // Package naming ports kraai 0.5.0's JS naming derivation
-// (legacy-node/src/names.mjs) to Go, byte-for-byte in behavior per
+// (src/names.mjs in the removed JavaScript CLI) to Go, byte-for-byte per
 // docs/BLUEPRINT.md D22 — changing any of these orphans every environment
 // already deployed by 0.4.x/0.5.x, independent of the language rewrite.
 //

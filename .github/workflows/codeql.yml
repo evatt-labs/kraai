@@ -39,10 +39,9 @@ jobs:
       # forever on a check that no longer exists. Splitting this later means
       # updating branch protection in the same change.
       #
-      # go covers cmd/ and internal/ - the actual product. javascript-typescript
-      # covers legacy-node/ (still the published npm package until the
-      # release-handover workstream lands) and npm/ (the Go binary's installer
-      # wrapper). Drop the JS half only when legacy-node/ is deleted.
+      # go covers cmd/ and internal/ - the actual product.
+      # javascript-typescript covers npm/, the wrapper that downloads the Go
+      # binary on install. Drop the JS half if npm/ ever goes too.
       - uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           languages: go,javascript-typescript
