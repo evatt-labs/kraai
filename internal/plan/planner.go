@@ -88,8 +88,7 @@ type plannedItem struct {
 // type every declared binding expands to, without changing anything.
 //
 // environmentName is threaded through separately from m because
-// manifest.Environment carries no name of its own — the same pattern
-// internal/lockfile's MergeResources already uses for the same reason.
+// manifest.Environment carries no name of its own.
 //
 // The returned error is non-nil only when the walk itself could not be
 // built at all (a binding's capability has no configured provider, or the
