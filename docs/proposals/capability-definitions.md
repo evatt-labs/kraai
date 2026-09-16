@@ -249,6 +249,97 @@ Per the repo's standing practice, the load-bearing tests get the
 revert-and-fail treatment: break the behaviour, capture the real failure,
 restore.
 
+## Findings from the generation spike (2026-09-16)
+
+A spike tested whether kraai's AWS provider could become a generated
+snapshot of AWS's own CloudFormation resource schemas — the model AWS CDK
+calls L1 constructs — leaving only a small hand-written overlay for what no
+schema can state. Branch `spike/aws-cfn-schema-generation`, not merged.
+
+**The result falsified the premise, and changes what these workstreams
+should expect.** Measured against the 1,285 lines of hand-written
+Lambda-related provider code (539 non-comment):
+
+| | lines |
+|---|---:|
+| L1 generated, all 15 `AWS::Lambda::*` types | 1,117 |
+| L2 overlay (capability + topology) for the 4 registrations kraai uses | 40 non-comment |
+| Baseline lines L1+L2 genuinely **replace** | **0** |
+| Baseline lines L1 informs or backstops | ~40 of 539 |
+
+The overlay is small, as predicted. That turned out not to matter: the
+overlay was never what made the baseline large. The baseline is almost
+entirely a third category neither L1 nor L2 covers — **translation between
+two type systems.** `translate`, settings decoding and validation, ARN
+construction and match functions survive at 90-100%, and no vendor schema,
+however complete, touches them.
+
+`settings_validate.go` survives 100% and *structurally cannot* be
+generated from a CloudFormation schema: it validates kraai's **own**
+invented settings keys, which is a different schema entirely.
+
+### What this means for these workstreams
+
+**The irreducible cost is not describing vendor resources. It is the
+abstraction layer between kraai's vocabulary and the vendor's** — and that
+layer exists precisely because kraai chose vendor-neutral capabilities. A
+manifest addressing vendor properties directly would need no translation,
+and would also have no capability abstraction, which is the product.
+
+So workstream 2's schemas are **hand-written, not derived**. They describe
+kraai's own settings vocabulary, which no vendor publishes. That was always
+the plan; the spike removes the temptation to try to generate them and
+discover the same wall later.
+
+### Where generation does earn its place
+
+As a backstop rather than a replacement, and worth revisiting once the
+capability work lands:
+
+- **Immutability derived rather than discovered.** `AWS::Lambda::Permission`
+  declares handlers `[create, read, delete, list]` — no `update`. That is
+  machine-readable, and kraai currently learns it by other means.
+- **Property names and constraints** as a validation backstop against
+  hand-written translate logic drifting from the real type.
+- **Per-verb IAM permissions**, published per handler — enough to generate
+  the minimal policy a manifest needs. Nothing asked for this; it is free.
+- **`handlers.list.handlerSchema.required`** is real, generalizable signal.
+  It explains exactly why `AWS::Lambda::Permission`'s list handler needs a
+  parent-scoped `ResourceModel` — something kraai discovered from a 400 at
+  runtime, which blocked apply entirely until fixed.
+
+### Surprises worth recording
+
+- `Runtime` and `Architecture` are **not** in `AWS::Lambda::Function`'s
+  top-level `required`, and `Runtime` carries no enum.
+- **No property carries a machine-readable `default`.** Defaulting is
+  kraai's problem in every case.
+- ARN shape information is absent (`Arn` has no pattern) or too generic to
+  use (`SourceArn`'s pattern matches any AWS ARN).
+- `relationshipRef` is absent throughout, confirming topology is not
+  machine-readable — the one thing this proposal already assumed.
+
+### Engine shape, deferred deliberately
+
+The spike also settles how far a shared engine should go. What varies
+between providers is narrow and predictable: transport, async completion,
+update payload shape, and error-to-absence mapping. What is shared is the
+conceptual kernel that already exists — identity strategies (D26),
+create-only-driven diffing, the `Resource` contract, retry, scope locking,
+telemetry.
+
+Both composition styles are already in the tree: `internal/provider/aws`
+injects a `ccAPI` interface; `internal/provider/cfresource`'s `simple`
+injects `create`/`find`/`remove` function values.
+
+**Do not extract a base engine yet.** There is one uniform-control-plane
+implementation, and extracting a shared kernel from a single example
+abstracts the wrong axis — this codebase invented the synthetic-type-key
+convention three separate times before it was worth naming. Extract when a
+second uniform-plane provider (Azure/ARM) lands and there are two real
+implementations to generalize from. GCP and Cloudflare have no uniform
+plane at all and stay per-provider regardless.
+
 ## Workstreams
 
 1. **`capability-definitions`** — `CapabilityDef`, the `Provider`
