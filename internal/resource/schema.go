@@ -26,9 +26,7 @@ var messagePrinter = message.NewPrinter(language.English)
 // JSON Schema rather than OpenAPI: OpenAPI 3.1 schemas are JSON Schema
 // 2020-12, so nothing is lost expressively, and kraai already consumes JSON
 // Schema elsewhere (the CloudFormation resource provider schemas fetched
-// for primaryIdentifier and createOnlyProperties). See
-// docs/proposals/capability-definitions.md for the full comparison against
-// OpenAPI's own tooling.
+// for primaryIdentifier and createOnlyProperties).
 //
 // A provider package builds a Schema as Go data (map[string]any), not an
 // embedded .json file, so it lives next to the code whose settings it
@@ -342,8 +340,7 @@ func levenshtein(a, b string) int {
 // validateStructural enforces kraai's structural-schema constraint — every
 // schema node states its own "type", and the root schema declares neither
 // "oneOf" nor "anyOf" — a narrower subset of Kubernetes' own
-// structural-schema rule; see docs/proposals/capability-definitions.md,
-// "Schemas are structural JSON Schema", for the full comparison.
+// structural-schema rule.
 //
 // Every node typed means a schema can never validate a value whose shape
 // is ambiguous. No root oneOf/anyOf means the root document has exactly

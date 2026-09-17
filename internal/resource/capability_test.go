@@ -159,9 +159,10 @@ func TestNewCatalogRejectsAnEmptyCapabilityName(t *testing.T) {
 	}
 }
 
-// nonStructuralSchema builds a schema NewCatalog must reject: a top-level
-// oneOf, which docs/proposals/capability-definitions.md's structural-schema
-// constraint forbids.
+// nonStructuralSchema builds a schema NewCatalog must reject: kraai requires
+// structural JSON Schema (every node typed, no top-level oneOf/anyOf) so
+// validation and the unrecognized-key suggestion stay deterministic, and a
+// top-level oneOf violates that.
 func nonStructuralSchema() *Schema {
 	return NewSchema("bad", map[string]any{
 		"type": "object",

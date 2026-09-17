@@ -7,9 +7,11 @@
 // above this package reasons about resources; everything below reasons
 // about one cloud's API.
 //
-// See docs/ARCHITECTURE.md ("The resource contract", "Ordering is a
-// dependency graph") for why resources are per-verb, why identity is never
-// stored, and how lookup strategies and scope locking work.
+// Resources implement per-verb methods (Get/Create/Update/Delete) rather
+// than a single Ensure, so a plan can call Get without any mutating method
+// in scope, and each verb is timed separately. Identity is never stored:
+// every Ref is recomputed from the manifest, and how a type is found
+// (LookupStrategy) is declared per type rather than assumed globally.
 package resource
 
 import (
@@ -133,8 +135,9 @@ func (s Spec) Attribute(key, name string) (string, error) {
 type State struct {
 	Ref Ref
 	// ID is the provider-assigned identifier, read fresh on every command.
-	// It is never persisted or treated as a source of truth — see
-	// docs/ARCHITECTURE.md, "The manifest is the only source of truth".
+	// It is never persisted or treated as a source of truth: kraai keeps no
+	// state document, so a resource's existence and identity are always
+	// answered by a live lookup, never by trusting a prior run's value.
 	ID string
 	// Attributes are the type-specific fields a later phase may need — a
 	// connection host, a bucket name, a namespace id.

@@ -157,8 +157,8 @@ func TestMissingSecretErrorNamesWhatWasAskedFor(t *testing.T) {
 	}
 }
 
-// Within a phase, resources run in parallel under the global limit (D13) and
-// all write here.
+// Resources within a wave run concurrently under a bounded errgroup, so
+// concurrent writes here must be safe.
 func TestOutputsAreConcurrencySafe(t *testing.T) {
 	out := NewOutputs()
 	var wg sync.WaitGroup

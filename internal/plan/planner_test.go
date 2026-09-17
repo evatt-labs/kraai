@@ -27,7 +27,7 @@ func findAction(t *testing.T, p *Plan, provider, typ string) Action {
 	return Action{}
 }
 
-// TestPlan_CapabilityExpandsToMultipleTypes pins D30: one Postgres binding,
+// TestPlan_CapabilityExpandsToMultipleTypes pins that one Postgres binding,
 // with only "neon" configured as its vendor, must still produce both the
 // Neon branch and the Cloudflare Hyperdrive configuration fronting it —
 // the exact cross-provider case registrationsFor exists for.
@@ -333,7 +333,9 @@ func TestPlan_GetFailureReportsWithoutAbortingTheRun(t *testing.T) {
 
 // TestPlan_ConcurrencyLimitBoundsParallelism proves Get calls within a
 // phase actually run concurrently (not serially) and never exceed the
-// configured limit — the two failure modes D13 exists to rule out.
+// configured limit — unbounded parallelism would blow through a
+// provider's rate limits, and accidental serialization would defeat the
+// point of bounding it.
 func TestPlan_ConcurrencyLimitBoundsParallelism(t *testing.T) {
 	f := newRegistryFixture(t)
 	f.kv.delay = 20 * time.Millisecond
@@ -850,11 +852,12 @@ func TestPlan_NamingPrefixReachesResourceAndServiceNames(t *testing.T) {
 	}
 }
 
-// TestPlan_NoNamingOverlayMatchesUnprefixedDerivation is Plan's own D22
-// identity check: a manifest with no Environment.Naming at all (the zero
-// value, matching every planner_test.go fixture above this one) must
-// plan every resource under exactly the name naming.ResourceName/
-// ServiceName would have produced before Namer existed.
+// TestPlan_NoNamingOverlayMatchesUnprefixedDerivation checks that naming
+// stays byte-identical to the pre-Namer derivation: a manifest with no
+// Environment.Naming at all (the zero value, matching every
+// planner_test.go fixture above this one) must plan every resource under
+// exactly the name naming.ResourceName/ServiceName would have produced
+// before Namer existed.
 func TestPlan_NoNamingOverlayMatchesUnprefixedDerivation(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := f.oneServiceManifest() // m.Environment is the zero value: Naming == nil

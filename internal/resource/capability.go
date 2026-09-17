@@ -14,9 +14,11 @@ import (
 // Modelled on a Kubernetes CustomResourceDefinition: a provider is the
 // operator that supplies semantics, and internal/manifest stays as
 // ignorant of what "compute" or "objects" means as the Kubernetes API
-// server is of what a CRD's kind actually does. See
-// docs/proposals/capability-definitions.md for the full design and why
-// the schema is structural JSON Schema rather than OpenAPI.
+// server is of what a CRD's kind actually does. Schemas here are
+// structural JSON Schema, not OpenAPI: OpenAPI 3.1 schemas are already
+// JSON Schema 2020-12, so nothing is gained by round-tripping through
+// OpenAPI's own tooling, and kraai already consumes JSON Schema for the
+// CloudFormation resource schemas it fetches.
 //
 // A nil ProviderSettings or Binding means "nothing to validate for this
 // capability," never a placeholder for validation a future change will
@@ -57,8 +59,7 @@ type CapabilityDef struct {
 // Registrations(client, ...) shape: neither method here takes a client or
 // context, because a capability must be knowable — and a manifest
 // validated against it — before a single credential is read or client
-// constructed. See docs/proposals/capability-definitions.md, "Declarations
-// are static data".
+// constructed.
 type Provider interface {
 	// Name identifies which vendor declared these capabilities — the same
 	// string as that vendor package's own Provider constant (aws.Provider,

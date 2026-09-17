@@ -14,8 +14,8 @@ import (
 // Triggers restriction (applies regardless of trigger) and an HTTP-gated
 // type restricted to manifest.TriggerHTTP — the minimal shape that
 // reproduces the bug this workstream fixes without importing the aws
-// package itself (D21: providers are exercised through fakes, not real
-// clients).
+// package itself: this package's tests exercise providers through fakes,
+// never real clients, to stay offline and credential-free.
 type computeRegistryFixture struct {
 	reg      *resource.Registry
 	function *fakeResource
@@ -170,8 +170,8 @@ func TestPlan_ComputeSettingsMergeIntoSpecConfig(t *testing.T) {
 
 // TestPlan_ComputeNameIsPerServiceNotPerBinding pins that the trigger
 // filter operates on the compute resource's own name (naming.ServiceName)
-// and does not disturb the deployable-unit-per-service identity D36
-// established.
+// and does not disturb compute being synthesized one per service rather
+// than one per binding.
 func TestPlan_ComputeNameIsPerServiceNotPerBinding(t *testing.T) {
 	f := newComputeRegistryFixture(t)
 	m := &manifest.Manifest{
