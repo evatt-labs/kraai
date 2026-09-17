@@ -50,8 +50,8 @@ func Register(reg *resource.Registry, client *Client) error {
 // and so do Lambda+ApiGatewayV2
 //
 // Registry.Resolve returns every registration for a capability/provider pair
-// together — the mechanism neonresource already uses (D30) to expand one
-// Postgres binding into a branch plus the Hyperdrive configuration fronting
+// together — the mechanism neonresource already uses to expand one Postgres
+// binding into a branch plus the Hyperdrive configuration fronting
 // it. The same shape fits here: an "objects" binding on aws is the
 // static-site stack in full — a DNS zone, a TLS certificate, a bucket, the
 // CDN in front of it, and the DNS record pointing at that CDN — and a
@@ -110,7 +110,7 @@ func Registrations(client *Client) []resource.Registration {
 			// inside it, in principle (see this function's own doc comment
 			// on the validation-record gap this does not solve).
 			//
-			// See hostedZoneMatch's doc comment: D26 calls this "byApi"
+			// See hostedZoneMatch's doc comment: this is named "byApi"
 			// after Route53's native ListHostedZonesByName, but this
 			// package's Cloud-Control-only engine resolves it via the same
 			// list-and-match mechanism as LookupByAttr.
@@ -128,7 +128,7 @@ func Registrations(client *Client) []resource.Registration {
 			// CloudFront's own DependsOn below), but nothing in this stack
 			// needs to exist before a certificate request can be made.
 			//
-			// DomainName is explicitly not unique (D26) — the same domain
+			// DomainName is explicitly not unique — the same domain
 			// can have multiple certificates outstanding during rotation —
 			// so identity is a kraai-owned tag, stamped into the
 			// CreateResource desired state itself (certificateStampTag).
@@ -147,8 +147,9 @@ func Registrations(client *Client) []resource.Registration {
 			//
 			// BucketName is settable at create, globally unique, and is the
 			// resource's own Ref/primary identifier (CloudFormation
-			// TemplateReference, aws-resource-s3-bucket.html) — D7's
-			// derivable-name assumption holds.
+			// TemplateReference, aws-resource-s3-bucket.html) — so this
+			// type's identity can be derived from the manifest name without
+			// a separate lookup.
 			//
 			// Bare resourceType, no per-type translate — this is the
 			// registration that motivated resourceType.Create's
@@ -170,7 +171,8 @@ func Registrations(client *Client) []resource.Registration {
 			// phase co-location (both PhaseStorage, CloudFront
 			// PhaseCompute) with no ordering guarantee against either.
 			DependsOn: []string{key(TypeS3Bucket), key(TypeCertificateManagerCertificate)},
-			// AWS enforces alias uniqueness globally (D26). See
+			// AWS enforces alias uniqueness globally, so Aliases is a safe
+			// attribute to search on for this type's identity. See
 			// cloudfrontMatch's doc comment for the gap this leaves open —
 			// a distribution with no alias cannot be found this way.
 			Lookup: resource.LookupByAttr,
@@ -221,8 +223,9 @@ func Registrations(client *Client) []resource.Registration {
 			//
 			// FunctionName is settable at create; CloudFormation marks it
 			// "Update requires: Replacement", i.e. a createOnlyProperty and
-			// this type's Ref (aws-resource-lambda-function.html) — D7's
-			// derivable-name assumption holds.
+			// this type's Ref (aws-resource-lambda-function.html) — so this
+			// type's identity can likewise be derived from the manifest
+			// name without a separate lookup.
 			//
 			// Resource is newLambdaFunctionResource, not a plain
 			// resourceType: this is where a deployment package actually
@@ -248,9 +251,10 @@ func Registrations(client *Client) []resource.Registration {
 			//
 			// FunctionName-equivalent for a bucket is BucketName, settable
 			// and unique at create (see TypeS3Bucket's own registration
-			// above) — D7's derivable-name assumption holds here too; this
-			// is byName against artifactBucketName's derived name, not
-			// against ref.Name directly (see artifactBucketResource.Get).
+			// above) — so this type's identity can likewise be derived from
+			// the manifest name; this is byName against artifactBucketName's
+			// derived name, not against ref.Name directly (see
+			// artifactBucketResource.Get).
 			Lookup:   resource.LookupByName,
 			Resource: newArtifactBucketResource(client),
 		},
@@ -266,7 +270,9 @@ func Registrations(client *Client) []resource.Registration {
 			// above.
 			//
 			// RoleName is settable at create; IAM's own reference marks
-			// renaming a role "Update requires: Replacement" — D7 holds.
+			// renaming a role "Update requires: Replacement" — so this
+			// type's identity can likewise be derived from the manifest
+			// name without a separate lookup.
 			Lookup:   resource.LookupByName,
 			Resource: newIAMRoleResource(client),
 		},
@@ -320,9 +326,10 @@ func Registrations(client *Client) []resource.Registration {
 			// HTTP surface.
 			Triggers: []string{manifest.TriggerSchedule},
 			// Name is settable at create; EventBridge's own reference marks
-			// it "Update requires: Replacement" — D7 holds. See
-			// eventsrule.go's own doc comment for why Events::Rule was
-			// chosen over EventBridge Scheduler.
+			// it "Update requires: Replacement" — so this type's identity is
+			// likewise derivable from the manifest name. See eventsrule.go's
+			// own doc comment for why Events::Rule was chosen over
+			// EventBridge Scheduler.
 			Lookup:   resource.LookupByName,
 			Resource: newEventsRuleResource(client),
 		},
@@ -383,7 +390,9 @@ func Registrations(client *Client) []resource.Registration {
 			// interruption" — not even createOnly) and AWS documents no
 			// uniqueness constraint on it. See apigatewayv2Match's doc
 			// comment for the full reasoning; this is a byTag type for the
-			// same reason ACM::Certificate is under D26.
+			// same reason ACM::Certificate is: no provider attribute
+			// guarantees uniqueness, so identity comes from a kraai-owned
+			// tag instead.
 			//
 			// Resource is newAPIGatewayResource, not a plain resourceType:
 			// this is where the API's real properties (Name, ProtocolType,

@@ -14,8 +14,9 @@
 //
 // Create, Update and Delete are real. Create submits spec.Config as Cloud
 // Control's desired state (stamping the identity tag into it first for a
-// byTag type, per D26) and polls the resulting ProgressEvent to a terminal
-// state. Update fetches the current schema; a type with no update handler
+// byTag type, whose identity comes from a kraai-owned tag rather than a
+// provider-assigned attribute) and polls the resulting ProgressEvent to a
+// terminal state. Update fetches the current schema; a type with no update handler
 // (IMMUTABLE provisioning: create/read/delete only) refuses with
 // resource.ErrImmutable rather than attempting a call Cloud Control would
 // reject, and everything else diffs current properties against spec.Config

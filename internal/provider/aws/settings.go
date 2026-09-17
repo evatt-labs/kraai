@@ -3,7 +3,7 @@ package aws
 import "github.com/evatt-labs/kraai/internal/kerrors"
 
 // Settings are the AWS-specific values a manifest's providers.compute (or
-// providers.objects) settings block carries for this provider (D34).
+// providers.objects) settings block carries for this provider.
 //
 // Free-form in the manifest — internal/manifest's Provider.Settings is
 // uninterpreted map[string]any — and decoded here, in one place, rather

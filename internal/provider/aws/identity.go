@@ -1,7 +1,7 @@
 package aws
 
 // cloudfrontMatch implements AWS::CloudFront::Distribution's LookupByAttr
-// strategy (D26): AWS enforces alias (CNAME) uniqueness globally, so a
+// strategy: AWS enforces alias (CNAME) uniqueness globally, so a
 // distribution's Aliases is a safe attribute to search on.
 //
 // # Known gap: a distribution with no configured alias
@@ -9,8 +9,9 @@ package aws
 // DistributionConfig.Aliases is optional — a distribution serving only its
 // default *.cloudfront.net domain carries none. Such a distribution cannot
 // be found by this strategy at all, since there is no alias for name to
-// match against. D26 does not address this case for CloudFront specifically;
-// it is surfaced here rather than silently accepted, and the write-path
+// match against. No lookup strategy here covers this case for CloudFront
+// specifically; it is surfaced here rather than silently accepted, and the
+// write-path
 // workstream needs an answer before it can create a distribution with no
 // alias and expect a later Get to find it (a kraai-owned tag, the same
 // mechanism ApiGatewayV2::Api uses below, is the likely fix).
@@ -31,7 +32,7 @@ func cloudfrontMatch(properties map[string]any, name string) bool {
 	return false
 }
 
-// identityTagKey is the kraai-owned tag byTag types are found by (D26).
+// identityTagKey is the kraai-owned tag byTag types are found by.
 //
 // A byTag type's Create sets this tag in the create call itself (see
 // resourceType.Create's stampTag call), never as a follow-up write — a
@@ -94,7 +95,7 @@ func arrayTagsStampTag(desired map[string]any, name string) {
 }
 
 // certificateMatch implements AWS::CertificateManager::Certificate's
-// LookupByTag strategy (D26): DomainName is explicitly not unique — the
+// LookupByTag strategy: DomainName is explicitly not unique — the
 // same domain can have multiple certificates outstanding at once, e.g.
 // during rotation — so identity comes from the kraai-owned tag instead.
 // ACM::Certificate's Tags property uses CloudFormation's standard
@@ -104,10 +105,10 @@ func certificateMatch(properties map[string]any, name string) bool {
 }
 
 // certificateStampTag sets AWS::CertificateManager::Certificate's identity
-// tag in the CreateResource desired state itself (D26's non-negotiable
-// rule for byTag types): a crash between create and a follow-up tag write
-// would orphan the certificate unfindably, which is the one failure no
-// later run can clean up.
+// tag in the CreateResource desired state itself, never as a follow-up
+// write: a crash between create and a follow-up tag write would orphan the
+// certificate unfindably, which is the one failure no later run can clean
+// up.
 func certificateStampTag(desired map[string]any, name string) {
 	arrayTagsStampTag(desired, name)
 }
@@ -117,7 +118,7 @@ func certificateStampTag(desired map[string]any, name string) {
 //
 // # Why this is a list-and-match walk, not a real API lookup
 //
-// D26 names this "byApi" after Route53's native ListHostedZonesByName call,
+// This is named "byApi" after Route53's native ListHostedZonesByName call,
 // but this package's engine speaks only Cloud Control and CloudFormation
 // (doc.go: "one engine, not one client per service") — it holds no Route53
 // client, and adding one would mean a second, type-specific API surface
@@ -151,9 +152,9 @@ func hostedZoneMatch(properties map[string]any, name string) bool {
 // RecordSet through it would mean fabricating a compound-identifier string
 // kraai has no reliable format for, rather than the reasonably safe
 // list-and-match this package's engine already has a mechanism for. Not
-// mentioned in D26's own worked list (it enumerates S3, CloudFront, ACM and
-// HostedZone, not RecordSet) — this workstream extends the same reasoning
-// to a fifth type by the same test D26 itself applies: is the identifier
+// mentioned among the first types this reasoning was applied to (S3,
+// CloudFront, ACM and HostedZone, not RecordSet) — this workstream extends
+// the same reasoning to a fifth type by the same test: is the identifier
 // derivable and settable at create time without a lookup, or not.
 //
 // # Known gap: Name alone does not disambiguate record type or zone
@@ -180,18 +181,18 @@ func recordSetMatch(properties map[string]any, name string) bool {
 //
 // # Why byTag rather than byName or byAttr
 //
-// D7's derivable-name assumption does not hold here the way it does for
-// AWS::Lambda::Function or AWS::S3::Bucket: ApiGatewayV2::Api's Name is a
+// The name-is-the-identifier assumption that holds for AWS::Lambda::Function
+// or AWS::S3::Bucket does not hold here: ApiGatewayV2::Api's Name is a
 // plain, mutable string (CloudFormation's own reference marks it "Update
 // requires: No interruption", i.e. not even a createOnlyProperty), and
 // neither the CreateApi nor the CloudFormation resource documentation
 // declares it unique — the API reference's own worked examples return
 // multiple Api objects distinguished only by apiId, and CreateApi's 409
 // ConflictException is documented as "the resource already exists" with no
-// stated connection to Name. D26 requires "an attribute the provider
-// guarantees unique" for byAttr; Name here gives no such guarantee, which is
-// exactly the ACM::Certificate case D26 already names — a kraai-owned tag,
-// not a provider attribute, is the safe strategy.
+// stated connection to Name. byAttr requires an attribute the provider
+// guarantees unique; Name here gives no such guarantee, which is exactly the
+// ACM::Certificate case above — a kraai-owned tag, not a provider attribute,
+// is the safe strategy.
 //
 // Tags for this type is CloudFormation's "Object of String" shape — a flat
 // map, unlike S3 or CloudFront's Tags: [{Key, Value}, ...] array shape — so
@@ -206,8 +207,8 @@ func apigatewayv2Match(properties map[string]any, name string) bool {
 }
 
 // apigatewayv2StampTag sets AWS::ApiGatewayV2::Api's identity tag in the
-// CreateResource desired state itself (D26's non-negotiable rule for byTag
-// types), in the flat "Object of String" shape this type's Tags property
+// CreateResource desired state itself, never as a follow-up write, in the
+// flat "Object of String" shape this type's Tags property
 // uses — the counterpart to apigatewayv2Match above, which reads the same
 // shape back out.
 func apigatewayv2StampTag(desired map[string]any, name string) {

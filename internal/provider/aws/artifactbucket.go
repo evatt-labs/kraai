@@ -14,8 +14,8 @@ import (
 // TypeArtifactBucket is this registry's key for the per-service Lambda
 // artifact bucket — deliberately not "AWS::S3::Bucket" itself.
 //
-// Registry.Register keys uniqueness on Provider+Type alone (D15's registry,
-// internal/resource/registry.go), with no notion of "the same AWS type
+// Registry.Register keys uniqueness on Provider+Type alone
+// (internal/resource/registry.go), with no notion of "the same AWS type
 // registered twice for two different capabilities." "AWS::S3::Bucket" is
 // already registered under CapabilityObjects for a manifest's own
 // `objects:` bindings (see TypeS3Bucket above); a manifest that configures
@@ -65,13 +65,13 @@ func artifactBucketName(serviceName string) string {
 // The brief calls for one artifact bucket shared by every service in an
 // environment. Structurally, that shape is not reachable from this
 // workstream alone: internal/plan's expandCompute (out of scope for this
-// workstream, D36) expands every CapabilityCompute registration once per
+// workstream) expands every CapabilityCompute registration once per
 // service, deriving each Ref from that service's own name, with no
 // environment-only expansion point this package's registration can hook
 // into. But even setting that aside, a genuinely shared bucket is actively
 // wrong under this design's own concurrency model, not merely
 // unreachable: `kraai plan` calls Get for every planned item in a wave
-// concurrently (D13), before anything is created. If every service's
+// concurrently, before anything is created. If every service's
 // artifact-bucket item resolved to the identical AWS-side bucket name, a
 // fresh environment's first `kraai plan` would have every service's Get
 // independently observe "does not exist yet" and plan ActionCreate — none
@@ -197,14 +197,14 @@ func (a *artifactBucketResource) Get(ctx context.Context, ref resource.Ref) (*re
 // Recorded as a span event on ctx's active span (a no-op when tracing
 // isn't active, e.g. every test in this package) rather than a log line:
 // this package has no logger of its own — internal/resource's own
-// Instrument decorator (D17) is the only structured-output mechanism
+// Instrument decorator is the only structured-output mechanism
 // anything above this package already wires up, and every Get/Delete call
 // this method can be reached from is already running inside the span that
 // decorator starts (resource/otel.go's instrumented.observe wraps ctx
 // before calling into the inner Resource). Riding that existing span
 // keeps this diagnostic attached to the exact call it explains, with no
 // new package dependency and no forbidigo violation (fmt.Print* is
-// forbidden outside cmd/kraai per D18).
+// forbidden outside cmd/kraai, which owns all process-level output).
 func recordForeignBucket(ctx context.Context, bucketName, message string) {
 	trace.SpanFromContext(ctx).AddEvent(message, trace.WithAttributes(
 		attribute.String("kraai.bucket_name", bucketName),
@@ -219,7 +219,7 @@ func (a *artifactBucketResource) Create(ctx context.Context, spec resource.Spec)
 	// Config must be replaced, not merely carried through: spec.Config on
 	// entry is expandCompute's generic compute shape (dir, settings,
 	// trigger, handler, schedule), none of which is BucketName — the
-	// property this bare byName type's own primary identifier (D26) is
+	// property this bare byName type's own primary identifier is
 	// actually built from. Submitting the generic shape unchanged would
 	// hand Cloud Control a desired state with no BucketName at all; S3
 	// treats an absent bucket name as "generate one," so every apply would

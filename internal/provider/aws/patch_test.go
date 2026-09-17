@@ -57,7 +57,8 @@ func TestBuildPatch(t *testing.T) {
 	})
 
 	t.Run("a property only in current never produces a remove", func(t *testing.T) {
-		// D6: a property the manifest never declares is never touched.
+		// A property the manifest never declares is never touched — the
+		// manifest is kraai's only source of truth.
 		body, err := buildPatch(
 			map[string]any{"Comment": "current", "LegacyField": "leftover"},
 			map[string]any{"Comment": "current"},

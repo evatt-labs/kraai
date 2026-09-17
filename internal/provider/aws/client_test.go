@@ -29,7 +29,7 @@ func testPollTimings() Option {
 	return WithPollTimings(time.Microsecond, time.Microsecond, 200*time.Millisecond)
 }
 
-// fakeCC is a hand-rolled cloudControlAPI: no AWS account, no network (D21).
+// fakeCC is a hand-rolled cloudControlAPI: no AWS account, no network needed.
 type fakeCC struct {
 	getOut  *cloudcontrol.GetResourceOutput
 	getErr  error
@@ -824,7 +824,7 @@ func TestClientDeleteResource(t *testing.T) {
 	})
 }
 
-// fakeS3 is a hand-rolled s3API: no AWS account, no network (D21).
+// fakeS3 is a hand-rolled s3API: no AWS account, no network needed.
 type fakeS3 struct {
 	err  error
 	reqs []*s3.PutObjectInput
@@ -920,7 +920,7 @@ func (f *fakeS3) ListBuckets(_ context.Context, params *s3.ListBucketsInput, _ .
 	return out, nil
 }
 
-// fakeSTS is a hand-rolled stsAPI: no AWS account, no network (D21).
+// fakeSTS is a hand-rolled stsAPI: no AWS account, no network needed.
 type fakeSTS struct {
 	account string
 	err     error

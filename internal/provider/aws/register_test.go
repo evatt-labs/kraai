@@ -201,7 +201,8 @@ func TestRegisterPropagatesADuplicateRegistrationError(t *testing.T) {
 // its own dedicated wave-assignment tests against this exact topology
 // (internal/plan/aws_topology_test.go).
 func TestRegisterExpandsCapabilitiesToEveryType(t *testing.T) {
-	// Mirrors neonresource's D30 pairing: one capability, several AWS types.
+	// Mirrors neonresource's own capability-to-multiple-types pairing: one
+	// capability, several AWS types.
 	reg := resource.NewRegistry()
 	if err := Register(reg, &Client{}); err != nil {
 		t.Fatalf("Register: %v", err)
