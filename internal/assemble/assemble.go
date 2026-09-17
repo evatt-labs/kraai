@@ -40,9 +40,9 @@ const (
 var supportedVendors = []string{vendorAWS, vendorCloudflare, vendorNeon}
 
 // Credential environment variables, read only through internal/env —
-// .golangci.yml's forbidigo rule (D18/D19) forbids os.Getenv anywhere but
-// cmd/kraai and internal/env itself, and names these two exact Cloudflare
-// keys as the reason internal/env exists.
+// .golangci.yml's forbidigo rule forbids os.Getenv anywhere but cmd/kraai
+// and internal/env itself, and names these two exact Cloudflare keys as
+// the reason internal/env exists.
 //
 // AWS needs no entry here: internal/provider/aws authenticates through the
 // AWS SDK's own default credential chain (environment, shared config, IMDS)
@@ -71,9 +71,9 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 	// cloudflare vendor.
 	//
 	// Choosing Neon does not imply one. Neon's registrations include a
-	// Cloudflare Hyperdrive companion (D30), but that companion applies only
-	// when the compute side is Cloudflare too (D36) — a Neon database serving
-	// an AWS Lambda connects directly over the Postgres wire and never routes
+	// Cloudflare Hyperdrive companion, but that companion is conditioned on
+	// the compute side also being Cloudflare — a Neon database serving an
+	// AWS Lambda connects directly over the Postgres wire and never routes
 	// through it. Requiring a Cloudflare token here regardless would refuse
 	// to plan an AWS application over credentials it has no reason to hold,
 	// for a resource that would never be created.

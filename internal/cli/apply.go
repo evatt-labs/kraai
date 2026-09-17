@@ -23,8 +23,8 @@ import (
 )
 
 // isInteractive reports whether r is a real terminal a human is typing
-// into, so newApplyCommand knows whether it may prompt for D14's
-// protected-environment confirmation instead of requiring --confirm-name.
+// into, so newApplyCommand knows whether it may prompt for the protected-
+// environment confirmation instead of requiring --confirm-name.
 //
 // A function type rather than a direct term.IsTerminal call at the call
 // site, for the same reason RegistryAssembler above is a function type: a
@@ -80,7 +80,7 @@ func newApplyCommand(assembler RegistryAssembler) *cobra.Command {
 	cmd.Flags().BoolVar(&replaceFlag, "replace", false,
 		"permit replacing (delete then create) resources the plan cannot reconcile in place")
 	cmd.Flags().StringVar(&confirmName, "confirm-name", "",
-		"confirm a protected environment by repeating its name (D14); ignored on a non-protected environment")
+		"confirm a protected environment by repeating its name; ignored on a non-protected environment")
 
 	return cmd
 }
@@ -94,17 +94,21 @@ func newApplyCommand(assembler RegistryAssembler) *cobra.Command {
 // # Exit codes
 //
 // Every early return here is a *kerrors.KError and flows through
-// cmd/kraai's existing centralized handler unmodified (D18/D19): CodeValidation
-// (2) for a bad environment name or manifest, CodeConfirmationRequired (4)
-// for a missing or mismatched protected-environment confirmation, and
-// whatever apply.Apply itself returns (CodeValidation for the pre-flight
-// gate, CodeUnexpected for a cancelled run or a resolve/mutation failure)
+// cmd/kraai's single centralized handler unmodified — every other package
+// returns wrapped errors and leaves stdout/stderr formatting and the
+// process exit code to that one place: CodeValidation (2) for a bad
+// environment name or manifest, CodeConfirmationRequired (4) for a missing
+// or mismatched protected-environment confirmation, and whatever
+// apply.Apply itself returns (CodeValidation for the pre-flight gate,
+// CodeUnexpected for a cancelled run or a resolve/mutation failure)
 // otherwise. Unlike `kraai plan` (internal/cli/plan.go's own documented
-// exception, D19), apply does not get a bespoke non-error "still report
-// something" exit-code channel — a plan.Action that failed to read is a
-// report plan can hand back inside a successful call, but an apply.Result
-// with a failed mutation is not a report of something benign, it is this
-// command not having fully done what it was asked: that already fits the
+// exception — plan keeps its own separate 0/1/2 no-changes/error/changes
+// convention instead of this command's codes), apply does not get a
+// bespoke non-error "still report something" exit-code channel — a
+// plan.Action that failed to read is a report plan can hand back inside a
+// successful call, but an apply.Result with a failed mutation is not a
+// report of something benign, it is this command not having fully done
+// what it was asked: that already fits the
 // existing "return a non-nil error" channel, so the achievable, narrowly-
 // scoped shape here is to render the result (successes and failures alike)
 // and then return an error if anything in it failed, rather than inventing
@@ -139,10 +143,11 @@ func runApply(
 		return err
 	}
 
-	// D14's gate runs before the registry is even assembled: a protected
-	// environment that fails confirmation should never cause kraai to
-	// authenticate against a live provider, let alone plan or apply
-	// against one, for a run that was going to be refused anyway.
+	// The protected-environment gate runs before the registry is even
+	// assembled: a protected environment that fails confirmation should
+	// never cause kraai to authenticate against a live provider, let alone
+	// plan or apply against one, for a run that was going to be refused
+	// anyway.
 	if err := confirmProtected(cmd, envName, confirmName, m.Environment.Protected, interactive); err != nil {
 		return err
 	}
@@ -181,12 +186,13 @@ func runApply(
 	return nil
 }
 
-// confirmProtected implements D14: a protected environment must be
-// confirmed by repeating its name before apply runs, non-interactively via
-// --confirm-name (exact match, no bypass) or interactively by typing it at
-// a prompt. A non-protected environment accepts and ignores confirmName
-// entirely, so a CI workflow can pass --confirm-name unconditionally on
-// every environment without knowing which ones are protected.
+// confirmProtected enforces kraai's one built-in safety gate: a protected
+// environment must be confirmed by repeating its name before apply runs,
+// non-interactively via --confirm-name (exact match, no bypass) or
+// interactively by typing it at a prompt. A non-protected environment
+// accepts and ignores confirmName entirely, so a CI workflow can pass
+// --confirm-name unconditionally on every environment without knowing
+// which ones are protected.
 func confirmProtected(cmd *cobra.Command, envName, confirmName string, protected bool, interactive isInteractive) error {
 	if !protected {
 		return nil
@@ -206,8 +212,9 @@ func confirmProtected(cmd *cobra.Command, envName, confirmName string, protected
 	return promptForConfirmation(cmd, envName)
 }
 
-// promptForConfirmation writes D14's interactive prompt and reads back
-// what was typed, refusing on anything but an exact match — split out from
+// promptForConfirmation writes the protected-environment interactive
+// prompt and reads back what was typed, refusing on anything but an exact
+// match — split out from
 // confirmProtected so a test exercises the prompt/read/compare logic
 // directly against a fake stdin/stdout, without needing a real terminal to
 // reach it (interactive's whole reason for existing, see its doc comment).

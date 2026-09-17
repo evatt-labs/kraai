@@ -554,9 +554,11 @@ func TestPlanLoadsDotEnvFromTheManifestDirectory(t *testing.T) {
 
 	var seen string
 	assembler := func(context.Context, *manifest.Manifest) (*resource.Registry, error) {
-		// Read through env.Require rather than os.Getenv: that is the
-		// sanctioned reader (D18), and it is the exact call the assembler
-		// makes for a real credential.
+		// Read through env.Require rather than os.Getenv: .golangci.yml's
+		// forbidigo rule forbids os.Getenv everywhere except env.Require's
+		// own implementation, so this is the one sanctioned way to read an
+		// env var, and it is the exact call the assembler makes for a real
+		// credential.
 		got, err := env.Require("KRAAI_TEST_FROM_DOTENV")
 		if err == nil {
 			seen = got["KRAAI_TEST_FROM_DOTENV"]

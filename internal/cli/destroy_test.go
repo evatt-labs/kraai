@@ -202,11 +202,11 @@ func TestRunDestroy_JSONOutput_Parses(t *testing.T) {
 	}
 }
 
-// --- D14 protected-environment gate, end to end through the CLI ---
+// --- protected-environment gate, end to end through the CLI ---
 //
-// Mirrors apply_test.go's own D14 tests exactly, reusing protectedFixture
-// and confirmProtected/promptForConfirmation, since destroy shares the
-// same gate function and CLI flag.
+// Mirrors apply_test.go's own protected-environment tests exactly, reusing
+// protectedFixture and confirmProtected/promptForConfirmation, since
+// destroy shares the same gate function and CLI flag.
 
 func TestRunDestroy_ProtectedEnvironment_NoConfirmName_Refused(t *testing.T) {
 	dir := protectedFixture(t)

@@ -1,5 +1,7 @@
 // Package cli wires kraai's command-line surface. cmd/kraai stays a thin
-// entrypoint; every Cobra command lives here per docs/BLUEPRINT.md D20.
+// entrypoint that wires Cobra commands to internal/ packages; every Cobra
+// command itself lives here, not in cmd/kraai, mirroring Terraform's own
+// internal/-heavy structure.
 package cli
 
 import (
@@ -53,11 +55,11 @@ func NewRootCommand() *cobra.Command {
 }
 
 // DebugRequested reports whether --debug was set on the most recent
-// Execute call. cmd/kraai's centralized handler (docs/BLUEPRINT.md D18)
-// calls this, after Execute returns, to decide whether to print the full
-// error stack; it independently also honors KRAAI_DEBUG, which this
-// package never reads (D18's package-boundary rule confines that to
-// cmd/kraai).
+// Execute call. cmd/kraai's single centralized error handler calls this,
+// after Execute returns, to decide whether to print the full error stack;
+// it independently also honors KRAAI_DEBUG, which this package never
+// reads — only cmd/kraai may read environment variables or touch process
+// exit/stdio directly.
 func DebugRequested() bool {
 	return debugFlag
 }

@@ -46,7 +46,8 @@ type Command struct {
 }
 
 // Executor runs external commands. Injecting one is how the tests exercise
-// every path here without a wrangler install (D21).
+// every path here without a wrangler install actually present on the
+// machine running them.
 type Executor interface {
 	Run(ctx context.Context, cmd Command) error
 	// Output runs the command and returns its stdout.

@@ -89,7 +89,8 @@ func countingAssembler(t *testing.T, r *countingResource) RegistryAssembler {
 }
 
 // protectedFixture is oneKeyValueBindingFixture's manifest with
-// `protected: true` set on the environment overlay, for exercising D14.
+// `protected: true` set on the environment overlay, for exercising the
+// protected-environment confirmation gate.
 func protectedFixture(t *testing.T) string {
 	t.Helper()
 	return writeFixture(t, map[string]string{
@@ -305,7 +306,7 @@ func TestRunApply_MutationFailure_RendersThenReturnsError(t *testing.T) {
 	}
 }
 
-// --- D14 protected-environment gate, end to end through the CLI ---
+// --- protected-environment gate, end to end through the CLI ---
 
 func TestRunApply_ProtectedEnvironment_NoConfirmName_Refused(t *testing.T) {
 	dir := protectedFixture(t)

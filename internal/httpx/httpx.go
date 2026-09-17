@@ -1,5 +1,5 @@
 // Package httpx is the one place in kraai that owns HTTP connection pooling
-// (D13) and per-request tracing (D17), so every outbound call this process
+// and per-request tracing, so every outbound call this process
 // makes — to Cloudflare, to Neon, to a freshly deployed Worker, and, via the
 // AWS SDK's own HTTP hook, to Cloud Control — reuses the same warm
 // connections instead of paying a fresh TCP and TLS handshake per call.
@@ -32,7 +32,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Pool tuning (D13).
+// Pool tuning.
 //
 // # MaxIdleConnsPerHost
 //
@@ -46,9 +46,10 @@ import (
 // concurrent requests, 8 of every 10 pay a fresh handshake. Set to 20 — 2x
 // the concurrency bound, not 1x — so a pool that has just been drawn down to
 // its bound by one phase still has headroom for the next phase's burst
-// (D31's phases run in sequence, but a new phase's first wave of requests
-// arrives before the previous phase's connections have necessarily gone
-// idle) without immediately evicting entries under IdleConnTimeout pressure.
+// (phases run in sequence back-to-back, so a new phase's first burst of
+// requests arrives before the previous phase's connections have
+// necessarily gone idle) without immediately evicting entries under
+// IdleConnTimeout pressure.
 //
 // # MaxIdleConns
 //
@@ -108,15 +109,16 @@ func newTransport() *http.Transport {
 }
 
 // NewClient returns an *http.Client bounded by timeout, sharing Transport's
-// connection pool, and instrumented with otelhttp (D17) so every request it
+// connection pool, and instrumented with otelhttp so every request it
 // issues produces a span and duration metric without the caller doing
 // anything further.
 //
 // tp and mp select the TracerProvider/MeterProvider otelhttp records to; nil
 // for either means "use the globals," mirroring resource.Instrument's own
 // contract in internal/resource/otel.go exactly, for the same reason: a real
-// run passes nil, nil and gets whatever OTEL_EXPORTER_OTLP_ENDPOINT wires up
-// (D17's "no custom config surface"), while a test injects an in-memory
+// run passes nil, nil and gets whatever OTEL_EXPORTER_OTLP_ENDPOINT wires
+// up — OTel's own standard export convention, with no config surface of
+// kraai's own to build or maintain — while a test injects an in-memory
 // provider to assert on spans without a collector running anywhere.
 //
 // Each call returns a distinct *http.Client (and a distinct otelhttp.Transport
