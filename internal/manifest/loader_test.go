@@ -18,9 +18,9 @@ func newRealLoader(t *testing.T, root string) *manifest.Loader {
 	return manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
 }
 
-// TestLoad_BlueprintExamplesParse is acceptance criterion 1: every example
-// in docs/BLUEPRINT.md's "Manifest schema" section, copied verbatim into
-// testdata/blueprint/, must parse into a fully resolved Manifest.
+// TestLoad_BlueprintExamplesParse pins that the canonical kraai.yaml /
+// services / environments manifest examples, copied verbatim into
+// testdata/blueprint/, parse into a fully resolved Manifest.
 func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	loader := newRealLoader(t, "testdata/blueprint")
 

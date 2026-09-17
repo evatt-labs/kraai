@@ -30,8 +30,8 @@ import (
 // that detection's replacement, not an incidental extra.
 //
 // DecodeStrict does not itself decide what's templated — callers render
-// .j2 sources before calling this, per docs/BLUEPRINT.md D5's ordering
-// (render, then parse, then validate).
+// .j2 sources before calling this, so the fixed order is always render,
+// then parse, then validate.
 func DecodeStrict(data []byte, source string, target any) error {
 	rv := reflect.ValueOf(target)
 	if rv.Kind() != reflect.Pointer || rv.IsNil() {

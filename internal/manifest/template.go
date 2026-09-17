@@ -14,8 +14,12 @@ import (
 
 //go:generate go run go.uber.org/mock/mockgen -source=template.go -destination=mock_template_test.go -package=manifest
 
-// TemplateEngine renders a Jinja2-style (D5) template. Kraai's chosen
-// engine is pongo2 (D25); this interface exists so the loader's own tests
+// TemplateEngine renders a Jinja2-style template. Kraai's chosen engine is
+// pongo2, an actively-maintained Django-syntax engine — Jinja2 was itself
+// modeled on Django templates, so `{{ var }}`/`{% if %}`/`{% for %}`/
+// `{% extends %}`/`|filters` all carry over, and the alternative
+// (`noirbizarre/gonja`) has had no commits since 2020; this interface
+// exists so the loader's own tests
 // never depend on pongo2's real syntax or behavior, and so a render
 // failure can be simulated without constructing a template that's
 // actually invalid pongo2.
@@ -30,7 +34,7 @@ type TemplateEngine interface {
 }
 
 // pongoEngine is TemplateEngine's real implementation, backed by pongo2
-// v6.1.0 (D25 — decided, not re-litigated here). It owns its own
+// v6.1.0. It owns its own
 // pongo2.TemplateSet, rooted at fs via pongoLoader, rather than using
 // pongo2's package-level FromBytes — see pongoLoader's doc comment for why
 // that distinction is a security boundary, not a style choice.
@@ -70,16 +74,16 @@ const invalidTemplatePath = "\x00kraai:rejected-template-path"
 // errTemplatePathRejected is returned by pongoLoader.Get for
 // invalidTemplatePath. pongo2 wraps it in its own *pongo2.Error, and
 // pongoEngine.Render wraps the result in kerrors.Validation, so this never
-// itself needs to satisfy D18's "return a kerrors error" rule — it's an
-// internal detail of an interface pongo2 defines, not this package's own
-// public boundary.
+// itself needs to return a kerrors error — it's an internal detail of an
+// interface pongo2 defines, not this package's own public boundary.
 var errTemplatePathRejected = errors.New("template path is absolute or escapes the manifest directory")
 
 // pongoLoader implements pongo2.TemplateLoader on top of the manifest's own
 // FS, so {% include %}, {% extends %}, and {% ssi %} resolve relative to
-// the manifest directory FS is rooted at. D5 explicitly wants real
-// templating including include/extends — this is what makes that safe
-// rather than banning it outright.
+// the manifest directory FS is rooted at. Composing/extending manifests
+// needs real templating — variables, includes, conditionals — not just
+// structural merge, so include/extends have to work; this is what makes
+// that safe rather than banning it outright.
 //
 // SECURITY: pongo2's package-level FromBytes (and its DefaultSet) uses
 // LocalFilesystemLoader, which is rooted at the process's current working

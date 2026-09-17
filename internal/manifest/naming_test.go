@@ -9,8 +9,7 @@ import (
 )
 
 // TestValidatePrefix_EmptyIsValid pins "no naming.prefix configured" (the
-// overwhelming majority of environments today, including every example in
-// docs/BLUEPRINT.md's "Manifest schema" section) as always valid.
+// overwhelming majority of environments today) as always valid.
 func TestValidatePrefix_EmptyIsValid(t *testing.T) {
 	if err := validatePrefix(""); err != nil {
 		t.Fatalf("validatePrefix(\"\") = %v, want nil", err)

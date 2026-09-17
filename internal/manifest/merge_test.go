@@ -48,8 +48,9 @@ func TestMergeServiceFiles_EmptyInput(t *testing.T) {
 	}
 }
 
-// TestRapid_MergeServiceFiles_DisjointKeysAlwaysUnion is D21's named rapid
-// target for this package: manifest merge rules. For any set of files with
+// TestRapid_MergeServiceFiles_DisjointKeysAlwaysUnion is a property-based
+// test for this package's merge rules, the pure, logic-dense code where
+// exhaustive case enumeration isn't practical. For any set of files with
 // pairwise-disjoint service-name sets, the merge must always succeed and
 // produce exactly the union, with every service's Dir unchanged.
 func TestRapid_MergeServiceFiles_DisjointKeysAlwaysUnion(t *testing.T) {

@@ -224,8 +224,8 @@ func rapidSegment(t *rapid.T) string {
 	return rapid.StringMatching(`[a-zA-Z][a-zA-Z0-9_]{0,8}`).Draw(t, "segment")
 }
 
-// TestRapid_ParseSetPath_RoundTripsSimpleDottedKeys is D21's named rapid
-// target for this package: --set path parsing. For any sequence of plain
+// TestRapid_ParseSetPath_RoundTripsSimpleDottedKeys is a property-based
+// test for this package's --set path parsing. For any sequence of plain
 // (non-indexed, escape-free) identifiers joined with dots, parseSetPath
 // must recover exactly that sequence of key steps, in order.
 func TestRapid_ParseSetPath_RoundTripsSimpleDottedKeys(t *testing.T) {
@@ -256,11 +256,11 @@ func TestRapid_ParseSetPath_RoundTripsSimpleDottedKeys(t *testing.T) {
 	})
 }
 
-// TestRapid_SetPathValue_LastWriteAtAPathWins is D21's named rapid target
-// for merge precedence: applying two --set assignments at the same path,
-// in order, must leave the second value at that path — matching --set's
-// documented "later wins" precedence (docs/BLUEPRINT.md D5) regardless of
-// path shape or value type.
+// TestRapid_SetPathValue_LastWriteAtAPathWins is a property-based test for
+// merge precedence: applying two --set assignments at the same path, in
+// order, must leave the second value at that path — matching --set's
+// documented "later wins" precedence (the same override order as Helm's
+// --set) regardless of path shape or value type.
 func TestRapid_SetPathValue_LastWriteAtAPathWins(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		n := rapid.IntRange(1, 4).Draw(t, "n")

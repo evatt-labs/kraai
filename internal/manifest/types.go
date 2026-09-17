@@ -2,20 +2,19 @@ package manifest
 
 // Manifest is the fully-resolved, validated manifest for one environment:
 // kraai.yaml's root config, every services/*.yaml file merged into one
-// service set (D4), the environment overlay, and the merged values map
-// (values file + --set, D5) that was used as template context.
+// service set, the environment overlay, and the merged values map (values
+// file + --set) that was used as template context.
 type Manifest struct {
 	Root        Root
 	Services    map[string]Service
 	Environment Environment
 	// Values is the merged environments/<name>.values.yaml + --set map.
 	// Deliberately map[string]any: values files are free-form and exempt
-	// from schema validation (D5), unlike every other field here.
+	// from schema validation, unlike every other field here.
 	Values map[string]any
 }
 
-// Root is kraai.yaml at the manifest root (D4): providers, hooks, plugins.
-// See docs/BLUEPRINT.md "Manifest schema" for the canonical example.
+// Root is kraai.yaml at the manifest root: providers, hooks, plugins.
 type Root struct {
 	Version   int       `yaml:"version"`
 	Providers Providers `yaml:"providers"`
@@ -74,7 +73,7 @@ const (
 // purpose is not having them. Settings is passed to the provider, which
 // decodes and validates its own shape and reports its own errors.
 //
-// The same exemption Values carries (D5), for the same reason and with the
+// The same exemption Values carries, for the same reason and with the
 // same cost: this is the one part of a manifest not checked at load.
 type Provider struct {
 	// Vendor is the implementation fulfilling the capability, e.g. "neon".
@@ -145,7 +144,7 @@ func (p Providers) Capabilities() []string {
 }
 
 // ServicesFile is the shape of one services/*.yaml (or .yaml.j2) file
-// before merging (D4). Multiple files are globbed and merged into a single
+// before merging. Multiple files are globbed and merged into a single
 // map[string]Service by the loader; see mergeServiceFiles.
 type ServicesFile struct {
 	Services map[string]Service `yaml:"services"`
@@ -191,7 +190,7 @@ type Service struct {
 }
 
 // Compute is a service's own compute shape: how it is invoked, and its own
-// settings layered over providers.compute.settings (D34).
+// settings layered over providers.compute.settings.
 //
 // The whole block is optional. A Service with a nil Compute behaves exactly
 // as one always has: every resource type the configured compute vendor
@@ -227,8 +226,8 @@ type Compute struct {
 	Schedule string `yaml:"schedule,omitempty"`
 	// Settings is this service's own compute settings, layered over
 	// providers.compute.settings per top-level key rather than replacing it
-	// — see MergeSettings. Carries the same free-form exemption Provider.
-	// Settings does (D34, D5): uninterpreted here, decoded and validated by
+	// — see MergeSettings. Carries the same free-form exemption
+	// Provider.Settings does: uninterpreted here, decoded and validated by
 	// the compute provider.
 	Settings map[string]any `yaml:"settings,omitempty"`
 	// Include re-adds paths dir's own .gitignore excludes to this service's
@@ -267,7 +266,7 @@ const (
 // base's value.
 //
 // Shallow, not deep, by design. Settings is free-form and
-// provider-interpreted (D34) — this package has no schema for what lives
+// provider-interpreted — this package has no schema for what lives
 // inside a vendor's settings map, so it has no principled way to decide
 // whether two nested maps sharing a key describe the same concept and
 // should be merged field-by-field, or are unrelated shapes where the
@@ -349,9 +348,10 @@ type Queue struct {
 }
 
 // Environment is environments/<name>.yaml: the overlay describing one
-// environment's kind, protection, naming, routes, and imported resources
-// (D7). Never templated (D5 names only kraai.yaml.j2 and
-// services/*.yaml.j2 as opt-in-templated); always schema-validated.
+// environment's kind, protection, naming, routes, and imported resources.
+// Never templated — templating is opt-in by file extension, and only
+// kraai.yaml.j2 and services/*.yaml.j2 are eligible; always
+// schema-validated.
 type Environment struct {
 	// Kind is "ephemeral" or "persistent" — validated in Validate.
 	Kind      string                     `yaml:"kind"`
@@ -380,9 +380,11 @@ type Route struct {
 	CustomDomain bool   `yaml:"custom_domain,omitempty"`
 }
 
-// ResourceImports is one service's imported/adopted resources (D7, D8):
-// the reference written directly into the manifest is the resource's
-// identity, keyed by binding name within each resource kind.
+// ResourceImports is one service's imported/adopted resources: the
+// reference written directly into the manifest is the resource's identity,
+// keyed by binding name within each resource kind. Once referenced, an
+// imported resource is owned exactly like one kraai created itself — there
+// is no separate never-delete flag, so `destroy` can remove it too.
 type ResourceImports struct {
 	Databases map[string]ImportRef `yaml:"databases,omitempty"`
 	KeyValue  map[string]ImportRef `yaml:"keyvalue,omitempty"`
@@ -390,8 +392,8 @@ type ResourceImports struct {
 	Queues    map[string]ImportRef `yaml:"queues,omitempty"`
 }
 
-// ImportRef identifies a pre-existing, adopted resource (D7): either an id
-// or a name, whichever the provider's own lookup needs.
+// ImportRef identifies a pre-existing, adopted resource: either an id or a
+// name, whichever the provider's own lookup needs.
 type ImportRef struct {
 	ID   string `yaml:"id,omitempty"`
 	Name string `yaml:"name,omitempty"`
