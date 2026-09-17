@@ -266,7 +266,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: evatt-labs/kraai@v0.7.0
+      - uses: evatt-labs/kraai@v0.6.1
         with:
           command: apply
         env:
