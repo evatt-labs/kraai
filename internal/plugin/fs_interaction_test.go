@@ -8,7 +8,7 @@ import (
 )
 
 // TestLoadReadsExactPathAndSurfacesFSError uses the generated MockFS
-// (D21) rather than mapFS specifically to assert the interaction itself —
+// rather than mapFS specifically to assert the interaction itself —
 // that Host.Load reads exactly spec.Path, once, and propagates whatever
 // error the FS returns — the kind of call-shape assertion a hand-rolled
 // fake like mapFS (used by this package's other tests, for readability)

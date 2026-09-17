@@ -165,7 +165,7 @@ func (p *Plugin) newInstance(ctx context.Context) (api.Module, error) {
 // a WASI-dependent guest runtime (Go's included) initializes at all, but
 // with no preopens or config granted, every filesystem/env syscall a
 // guest attempts through it fails closed rather than reaching the host's
-// real filesystem or environment (D16: sandboxed by default).
+// real filesystem or environment.
 func (p *Plugin) instantiate(ctx context.Context, suffix string) (api.Module, error) {
 	cfg := wazero.NewModuleConfig().
 		WithName(p.name + "#" + suffix).
@@ -182,10 +182,9 @@ func (p *Plugin) instantiate(ctx context.Context, suffix string) (api.Module, er
 // reused across many calls does not accumulate guest-side memory
 // unboundedly.
 //
-// Invoke blocks if every pooled instance is already in use, providing the
-// backpressure docs/BLUEPRINT.md D13 asks for: a plugin's concurrency is
-// bounded by its own pool size, never unbounded goroutine-per-call
-// fan-out.
+// Invoke blocks if every pooled instance is already in use — that is the
+// backpressure that keeps a plugin's concurrency bounded by its own pool
+// size, never unbounded goroutine-per-call fan-out.
 //
 // ctx bounds the whole call, not just the wait for a free instance: the
 // runtime is built with WithCloseOnContextDone (Host.Load), so a guest

@@ -210,7 +210,7 @@ func TestInvokeUnknownKey(t *testing.T) {
 }
 
 // assertValidation asserts err wraps a *kerrors.KError with CodeValidation,
-// per D18/D19's requirement that every failure return a kerrors error and
+// per this package's convention that every failure returns a kerrors error and
 // ABI-contract violations specifically use CodeValidation.
 func assertValidation(t *testing.T, err error) {
 	t.Helper()

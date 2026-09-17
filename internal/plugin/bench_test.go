@@ -3,7 +3,7 @@ package plugin
 import "testing"
 
 // BenchmarkNoopCall reports raw wazero per-call dispatch overhead for
-// humans comparing against docs/BLUEPRINT.md's measured 56ns figure —
+// humans comparing against the measured ~56ns per-call figure —
 // informational, not an assertion (see TestWarmCallOverheadBudget for
 // the hard regression guard).
 func BenchmarkNoopCall(b *testing.B) {
@@ -38,8 +38,8 @@ func BenchmarkNoopCall(b *testing.B) {
 
 // BenchmarkInvokeRoundTrip reports Plugin.Invoke's full per-call cost —
 // alloc, write, call, read, dealloc, plus this package's own bounds
-// checking — against a 16KB payload, the size docs/BLUEPRINT.md's
-// measurement appendix pools instances against (19.2us at pool size 1
+// checking — against a 16KB payload, the size this package's own
+// concurrency benchmarks pool instances against (19.2us at pool size 1
 // down to 4.3us at pool size 16). Informational, alongside
 // TestWarmCallOverheadBudget's hard assertion on the narrower,
 // argument-free call path.

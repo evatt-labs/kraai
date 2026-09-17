@@ -17,8 +17,7 @@ const (
 	fixtureAllocBase = 8192
 	fixtureOutBase   = 32768
 	// fixtureMemPages leaves headroom for the 16KB payload
-	// docs/BLUEPRINT.md's benchmark appendix measures pooling against,
-	// on both sides of fixtureOutBase.
+	// BenchmarkInvokeRoundTrip exercises, on both sides of fixtureOutBase.
 	fixtureMemPages = 2
 
 	// fixtureEchoExport/fixtureHostCallExport are the provision export
