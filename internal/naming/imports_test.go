@@ -129,11 +129,11 @@ func TestResolveImports_Empty(t *testing.T) {
 	}
 }
 
-// TestRapid_ResolveImportRef_ExactlyOneFieldIsTheOnlyAcceptedShape is
-// D21's named rapid target for import-reference resolution: for any pair
-// of (id, name) strings, ResolveImportRef succeeds if and only if
+// TestRapid_ResolveImportRef_ExactlyOneFieldIsTheOnlyAcceptedShape is a
+// property-based rapid target for import-reference resolution: for any
+// pair of (id, name) strings, ResolveImportRef succeeds if and only if
 // exactly one of them is non-empty, and on success returns that field
-// unchanged (D7: the manifest's declared value already is the identity,
+// unchanged (the manifest's declared value already is the identity;
 // nothing is derived from it).
 func TestRapid_ResolveImportRef_ExactlyOneFieldIsTheOnlyAcceptedShape(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {

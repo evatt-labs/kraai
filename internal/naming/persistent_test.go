@@ -85,7 +85,7 @@ func TestIsValidEnvironmentReference(t *testing.T) {
 	}
 }
 
-// TestRapid_PersistentAndEphemeralGrammarsAreDisjoint is D21's named
+// TestRapid_PersistentAndEphemeralGrammarsAreDisjoint is a property-based
 // rapid target confirming the two frozen grammars this workstream owns
 // never both match the same string — a manifest-loading caller should
 // never be able to construct a name that's ambiguously "both kinds."

@@ -62,9 +62,9 @@ func TestResourceName_TruncatesTo63WithoutTrailingHyphen(t *testing.T) {
 // (`name.slice(0, 63).replace(/-+$/, "")`), so a binding that slugs to
 // the empty string (all separator characters) produces a name ending in
 // a bare hyphen whenever the untruncated name is <= 63 bytes. This is
-// not a bug introduced by the Go port — D22 freezes the behavior byte
-// for byte — but it's worth having pinned down rather than accidentally
-// "fixed" by a future edit.
+// not a bug introduced by the Go port — this package's job is matching
+// 0.5.0's behavior byte for byte, not improving on it — but it's worth
+// having pinned down rather than accidentally "fixed" by a future edit.
 func TestResourceName_EmptySlugCanLeaveTrailingHyphenWhenUntruncated(t *testing.T) {
 	got := ResourceName("blue-honey-badger-12345", "api", "___")
 	want := "blue-honey-badger-12345-api-"
@@ -74,7 +74,7 @@ func TestResourceName_EmptySlugCanLeaveTrailingHyphenWhenUntruncated(t *testing.
 }
 
 // TestResourceName_NonASCIIEnvironmentNameTruncatesByBytesNotRunes locks
-// in the D22 UTF-16-vs-bytes divergence documented on ResourceName: a
+// in the UTF-16-vs-bytes divergence documented on ResourceName: a
 // non-ASCII environmentName or serviceKey (never produced by either
 // grammar this package owns, but not rejected by ResourceName itself
 // either, since it doesn't re-validate its own arguments) is truncated
@@ -97,9 +97,9 @@ func TestResourceName_NonASCIIEnvironmentNameTruncatesByBytesNotRunes(t *testing
 // nonsense the input binding contains.
 var slugPattern = regexp.MustCompile(`^([a-z0-9]+(-[a-z0-9]+)*)?$`)
 
-// TestRapid_Slugify_AlwaysMatchesFrozenPatternAndIsStable is D21's named
-// rapid target for the binding-slugging half of naming derivation: for
-// any input string whatsoever (empty, unicode, all separators, mixed
+// TestRapid_Slugify_AlwaysMatchesFrozenPatternAndIsStable is a
+// property-based rapid target for the binding-slugging half of naming
+// derivation: for any input string whatsoever (empty, unicode, all separators, mixed
 // case, arbitrarily long), slugify's output always matches slugPattern,
 // and calling it twice on the same input always yields the same output.
 func TestRapid_Slugify_AlwaysMatchesFrozenPatternAndIsStable(t *testing.T) {
@@ -120,17 +120,17 @@ func TestRapid_Slugify_AlwaysMatchesFrozenPatternAndIsStable(t *testing.T) {
 // environmentNamePattern generates strings for the rapid tests below
 // that actually satisfy NamePattern, so ResourceName is exercised with
 // realistic environmentName inputs rather than arbitrary garbage that
-// could never reach it in practice (D22's grammars are the only real
-// source of environmentName values).
+// could never reach it in practice (this package's own environment-name
+// grammars are the only real source of environmentName values).
 var environmentNamePattern = `[a-z]{2,15}-[a-z]{2,15}-[a-z]{2,15}-[0-9]{5}`
 
 // serviceKeyPattern generates realistic manifest service keys: a
-// services/*.yaml map key, which in every example in docs/BLUEPRINT.md
-// is a short lowercase identifier.
+// services/*.yaml map key, which in practice is a short lowercase
+// identifier.
 var serviceKeyPattern = `[a-z][a-z0-9]{0,20}`
 
-// TestRapid_ResourceName_BoundedAndStable is D21's named rapid target
-// for resourceName's 63-byte bound and determinism guarantees,
+// TestRapid_ResourceName_BoundedAndStable is a property-based rapid
+// target for resourceName's 63-byte bound and determinism guarantees,
 // exercised over realistic environmentName/serviceKey values and fully
 // arbitrary binding strings (to stress slugify).
 func TestRapid_ResourceName_BoundedAndStable(t *testing.T) {
@@ -177,8 +177,9 @@ func TestServiceName(t *testing.T) {
 	}
 }
 
-// TestNamer_EmptyPrefixMatchesResourceName_Golden is the D22 identity
-// guarantee for Namer.Resource, pinned against literal expected strings —
+// TestNamer_EmptyPrefixMatchesResourceName_Golden is the
+// byte-identical-with-0.5.0 guarantee for Namer.Resource, pinned against
+// literal expected strings —
 // deliberately not against a call to ResourceName, since ResourceName is
 // itself defined as Namer{}.Resource (resource.go): comparing the two
 // would only ever prove they agree with themselves, even if the shared
@@ -287,7 +288,7 @@ func TestNamer_TruncatesTo63WithPrefixWithoutTrailingHyphen(t *testing.T) {
 }
 
 // TestNamer_TruncationBoundaryStripsHyphenExactlyAtCut is a deterministic,
-// engineered case of the D22 trailing-hyphen-strip quirk (see truncate's
+// engineered case of the inherited trailing-hyphen-strip quirk (see truncate's
 // doc comment and TestResourceName_EmptySlugCanLeaveTrailingHyphenWhenUntruncated):
 // prefix, environmentName and serviceKey are sized so the untruncated
 // name's 63rd byte (index 62) is itself the hyphen separating serviceKey

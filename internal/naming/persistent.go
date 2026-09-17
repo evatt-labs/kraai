@@ -2,13 +2,14 @@ package naming
 
 import "regexp"
 
-// PersistentNamePattern is kraai's persistent environment-name grammar
-// (D22), distinct from NamePattern: a lowercase letter, then 0-30
-// lowercase letters/digits/hyphens, then a lowercase letter or digit —
-// 2-32 characters total, never starting or ending with a hyphen. Unlike
+// PersistentNamePattern is kraai's persistent environment-name grammar,
+// distinct from NamePattern: a lowercase letter, then 0-30 lowercase
+// letters/digits/hyphens, then a lowercase letter or digit — 2-32
+// characters total, never starting or ending with a hyphen. Unlike
 // NamePattern this is new in the Go rewrite (0.5.0 never had persistent
-// environments), so there's no prior byte-compat obligation — only the
-// grammar the blueprint itself fixes.
+// environments), so there's no prior byte-compat obligation to preserve —
+// the bound is fixed here, once, so validation and derivation can never
+// drift apart from each other.
 var PersistentNamePattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,30}[a-z0-9]$`)
 
 // IsValidPersistentEnvironmentName reports whether name matches
