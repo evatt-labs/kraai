@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.1](https://github.com/evatt-labs/kraai/compare/v0.6.0...v0.6.1) (2026-09-17)
+
+
+### Features
+
+* **cli:** derive a pull request's environment name ([#161](https://github.com/evatt-labs/kraai/issues/161)) ([50856cd](https://github.com/evatt-labs/kraai/commit/50856cdd240409ee3aa20fc0e636eebe35cb43b6))
+* publish a GitHub Action that runs the Go binary ([#162](https://github.com/evatt-labs/kraai/issues/162)) ([70af1a6](https://github.com/evatt-labs/kraai/commit/70af1a6480d41d255c1553455cf5d46b29342dc7))
+* **release:** publish a Homebrew cask ([#164](https://github.com/evatt-labs/kraai/issues/164)) ([c3958cf](https://github.com/evatt-labs/kraai/commit/c3958cfe624bf293eba1b246dde55d55a59aed9e))
+
 ## [0.6.0](https://github.com/evatt-labs/kraai/compare/v0.5.0...v0.6.0) (2026-09-16)
 
 
