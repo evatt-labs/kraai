@@ -103,6 +103,12 @@ homebrew_casks:
         # a dialog rather than an error. Stripping the attribute is what
         # makes `brew install` produce a runnable binary; proper notarization
         # would remove the need for it.
+        #
+        # This emits Homebrew's `postflight` stanza, which Homebrew 7
+        # deprecated in favour of the declarative `postflight_steps`, so every
+        # brew command touching this cask prints a deprecation warning. The
+        # template is GoReleaser's, not this file's: goreleaser/goreleaser#6870.
+        # Installing works regardless — verified against Homebrew 7.0.3.
         install: |
           if OS.mac?
             system_command "/usr/bin/xattr",
