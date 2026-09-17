@@ -303,7 +303,7 @@ input that turns the refusal off.
 
 | provider | capabilities |
 |---|---|
-| **AWS** | `compute` (Lambda, API Gateway, EventBridge, IAM), `objects` (partial — see #117) |
+| **AWS** | `compute` (Lambda, API Gateway, EventBridge, IAM), `network` (VPC, subnet, routing), `objects` (partial — see #117) |
 | **Cloudflare** | `database` (D1), `keyvalue`, `objects` (R2), `queues` |
 | **Neon** | `database` (Postgres branches, with Hyperdrive when compute is Cloudflare) |
 
@@ -323,7 +323,7 @@ go install github.com/evatt-labs/kraai/cmd/kraai@latest
 
 Or download an archive from a [release](https://github.com/evatt-labs/kraai/releases).
 Releases are cross-platform single binaries for macOS and Linux on amd64 and
-arm64. kraai is not distributed through npm.
+arm64.
 
 Each release ships a `checksums.txt` signed with cosign, keylessly, against
 the release workflow's own identity — no key material exists anywhere to be
@@ -340,8 +340,9 @@ cosign verify-blob checksums.txt \
 
 Working and exercised against real infrastructure: `plan`, `apply`,
 `destroy`, dependency-ordered execution, per-service compute configuration,
-credential handoff between waves, protected-environment gating, schema-validated
-provider settings, and the AWS, Cloudflare and Neon providers above.
+credential handoff between waves, VPC provisioning, protected-environment
+gating, schema-validated provider settings, and the AWS, Cloudflare and Neon
+providers above.
 
 Designed and **not** built — each has a tracking issue:
 
@@ -364,16 +365,6 @@ being worked on in what order.
 - [`docs/proposals/`](docs/proposals/) — designs under review.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — standards, some stricter than usual.
 - [`AGENTS.md`](AGENTS.md) — if you are an AI agent working in this repo.
-
-## The legacy JavaScript line
-
-kraai began as a JavaScript CLI, published to npm as `kraai` 0.4.3 and 0.5.0.
-That code has been removed and the npm package unpublished; `git log --
-legacy-node` still has the source.
-
-The Go rewrite reproduces its naming behaviour byte for byte, so an
-environment the JavaScript line created resolves to the same resource names
-here and can be torn down by this binary.
 
 ## Licence
 
