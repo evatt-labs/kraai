@@ -17,6 +17,31 @@ tools that deploy do not provision.
 > and not built — see [Status](#status) below, which names the gaps rather
 > than hiding them.
 
+## Install
+
+```
+brew install evatt-labs/tap/kraai
+```
+
+```
+go install github.com/evatt-labs/kraai/cmd/kraai@latest
+```
+
+Or download an archive from a [release](https://github.com/evatt-labs/kraai/releases).
+Releases are cross-platform single binaries for macOS and Linux on amd64 and
+arm64.
+
+Each release ships a `checksums.txt` signed with cosign, keylessly, against
+the release workflow's own identity — no key material exists anywhere to be
+stolen. Verify one with:
+
+```
+cosign verify-blob checksums.txt \
+  --bundle checksums.txt.bundle \
+  --certificate-identity-regexp '^https://github.com/evatt-labs/kraai/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
 ## How it works
 
 There is **no state file**. The manifest is the sole source of truth.
@@ -310,31 +335,6 @@ input that turns the refusal off.
 AWS is built on the **Cloud Control API** — one uniform CRUD plane across
 1,600+ resource types, driven by fetched CloudFormation schemas rather than
 one hand-written implementation per service.
-
-## Install
-
-```
-brew install evatt-labs/tap/kraai
-```
-
-```
-go install github.com/evatt-labs/kraai/cmd/kraai@latest
-```
-
-Or download an archive from a [release](https://github.com/evatt-labs/kraai/releases).
-Releases are cross-platform single binaries for macOS and Linux on amd64 and
-arm64.
-
-Each release ships a `checksums.txt` signed with cosign, keylessly, against
-the release workflow's own identity — no key material exists anywhere to be
-stolen. Verify one with:
-
-```
-cosign verify-blob checksums.txt \
-  --bundle checksums.txt.bundle \
-  --certificate-identity-regexp '^https://github.com/evatt-labs/kraai/' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-```
 
 ## Status
 
