@@ -83,7 +83,7 @@ func WithBaseURL(u string) Option {
 // New builds a client for accountID authenticating with token.
 func New(token, accountID string, opts ...Option) *Client {
 	c := &Client{
-		// httpx.NewClient (D13): shares the process-wide pooled Transport
+		// httpx.NewClient shares the process-wide pooled Transport
 		// rather than constructing its own, so a phase's concurrent calls
 		// into this client reuse warm connections instead of each paying a
 		// fresh handshake. WithHTTPClient overrides this for tests and for

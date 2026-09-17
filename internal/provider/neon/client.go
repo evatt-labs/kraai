@@ -42,12 +42,14 @@ const (
 //
 // # Why hand-rolled, not projectdiscovery/retryablehttp-go
 //
-// docs/BLUEPRINT.md D13 names projectdiscovery/retryablehttp-go as the
-// intended retry library, explicitly because it carries no
-// github.com/hashicorp/* import (D2 is a hard, unconditional policy
-// against those). Checked directly against this workstream's actual need
-// rather than taken on D13's word alone, and rejected for two independent
-// reasons, either of which would be sufficient on its own:
+// retryablehttp-go was considered first because it carries no
+// github.com/hashicorp/* import — this repo has a hard, unconditional
+// policy against those, since kraai competes directly with
+// Terraform/Vault/Packer/Nomad and depending on a direct competitor's own
+// library is a real supply-chain and optics risk independent of license
+// terms. Checked directly against this workstream's actual need rather
+// than assumed acceptable, and rejected for two independent reasons,
+// either of which would be sufficient on its own:
 //
 //  1. Its transitive dependency tree (go.mod at the version current as of
 //     this writing, v1.0.133) pulls in a DNS resolver
@@ -58,11 +60,11 @@ const (
 //     and roughly two dozen more indirect packages — because this is a
 //     general-purpose HTTP client built for ProjectDiscovery's own
 //     security-scanning tools (nuclei, httpx), not a narrowly-scoped retry
-//     wrapper. D3 explicitly weighs a dependency against "count as its own
-//     security surface for a CLI holding cloud credentials"; taking on
-//     that entire tree to retry one call is the opposite of earning its
-//     place, and is a materially larger supply-chain footprint than the
-//     ~90 lines this file hand-rolls below.
+//     wrapper. A dependency's size is its own security surface for a CLI
+//     holding cloud credentials; taking on that entire tree to retry one
+//     call is the opposite of earning its place, and is a materially
+//     larger supply-chain footprint than the ~90 lines this file
+//     hand-rolls below.
 //  2. Its retry-decision logic buys nothing this specific need requires
 //     anyway. Client.CheckRetry defaults to DefaultRetryPolicy, which (at
 //     the same pinned version) is CheckRecoverableErrors — it inspects
@@ -78,13 +80,12 @@ const (
 //     proves is a pattern this codebase is comfortable hand-rolling and
 //     reviewing.
 //
-// D13's own row is not wrong in general — it is a reasonable default for
-// a workload that genuinely wants broad status/transport retry coverage
-// across many providers. It is the wrong choice for this one, narrow,
-// already-scoped need, and Rule 19 (follow existing conventions) points at
-// aws/client.go's own hand-rolled bounded-backoff loop as the convention
-// actually in force in this codebase for exactly this shape of problem —
-// a convention D13 predates and this workstream follows instead.
+// A ready-made retry library is a reasonable default for a workload that
+// genuinely wants broad status/transport retry coverage across many
+// providers. It is the wrong choice for this one, narrow, already-scoped
+// need — aws/client.go's own hand-rolled bounded-backoff loop is the
+// existing convention in this codebase for exactly this shape of problem,
+// and this workstream follows it instead of introducing a second pattern.
 const (
 	defaultRetryInitialDelay = 500 * time.Millisecond
 	defaultRetryMaxDelay     = 10 * time.Second
@@ -136,7 +137,7 @@ func WithRetryTimings(initialDelay, maxDelay, timeout time.Duration) Option {
 // New builds a client authenticating with apiKey.
 func New(apiKey string, opts ...Option) *Client {
 	c := &Client{
-		// httpx.NewClient (D13): shares the process-wide pooled Transport
+		// httpx.NewClient shares the process-wide pooled Transport
 		// rather than constructing its own, so a phase's concurrent calls
 		// into this client reuse warm connections instead of each paying a
 		// fresh handshake. WithHTTPClient overrides this for tests and for
@@ -303,10 +304,10 @@ func do[T any](ctx context.Context, c *Client, req request) (T, error) {
 // idempotent by any mechanism this client can observe. Two POSTs that both
 // reach Neon would create two branches — Neon's branch-name uniqueness
 // within a project was not verified against a live account for this
-// workstream (D3's "no credentials" test constraint applies equally to
-// this manual check), so this client does not get to assume a retried
-// create is safe just because a first one might be rejected as a
-// duplicate. A 5xx gives no proof the create did not already succeed
+// workstream, since this repo's tests run offline with no live
+// credentials and this check would need a real Neon account to confirm,
+// so this client does not get to assume a retried create is safe just
+// because a first one might be rejected as a duplicate. A 5xx gives no proof the create did not already succeed
 // server-side before the response failed to come back cleanly, so retrying
 // it here would risk exactly the silent double-provisioning bug
 // LookupByAttr's name-based Get could not reliably catch afterward (two

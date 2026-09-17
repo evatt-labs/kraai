@@ -10,9 +10,9 @@ import (
 // Register adds the Postgres capability's two resource types.
 //
 // Registered together because they are one capability: a Postgres binding on
-// Cloudflare is a branch and the configuration fronting it (D30), and
-// registering the branch without Hyperdrive would produce an environment with
-// a database no Worker can reach.
+// Cloudflare is a branch and the configuration fronting it, and registering
+// the branch without Hyperdrive would produce an environment with a database
+// no Worker can reach.
 func Register(reg *resource.Registry, neonClient *neon.Client, cfClient *cloudflare.Client, settings BranchSettings) error {
 	for _, r := range Registrations(neonClient, cfClient, settings) {
 		if err := reg.Register(r); err != nil {

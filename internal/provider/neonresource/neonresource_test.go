@@ -115,8 +115,8 @@ func TestRegistrationsCoverTheCapability(t *testing.T) {
 		t.Fatalf("hyperdrive registration = %+v", hyper)
 	}
 
-	// One capability expanding to two types, in registration order (D30) —
-	// but only when the compute side is Cloudflare. Hyperdrive is a Workers
+	// One capability expanding to two types, in registration order — but
+	// only when the compute side is Cloudflare. Hyperdrive is a Workers
 	// connection pooler: a Lambda connects to the branch directly over the
 	// Postgres wire and would never route through it, so planning one for an
 	// AWS application demands a Cloudflare account that deployment has no
@@ -792,10 +792,9 @@ func TestDecodeSettingsNamesEveryMissingField(t *testing.T) {
 }
 
 // TestDecodeSettingsRejectsUnknownKeyWithSuggestion is this workstream's
-// proof that the schema mechanism is generic rather than AWS-specific
-// (docs/proposals/capability-definitions.md's own test strategy names
-// this explicitly): a Neon provider settings map gets the identical
-// "unrecognized key(s) ... did you mean ... — recognized keys" treatment
+// proof that the schema mechanism is generic rather than AWS-specific: a
+// Neon provider settings map gets the identical "unrecognized key(s) ...
+// did you mean ... — recognized keys" treatment
 // internal/provider/aws's compute settings get, from the same
 // resource.Schema type, with no Neon-specific allowlist code anywhere in
 // this package.

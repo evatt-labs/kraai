@@ -5,11 +5,10 @@ import "github.com/evatt-labs/kraai/internal/resource"
 // databaseSettingsSchema validates providers.database.settings for this
 // provider — decodeSettings' own four keys (branch.go).
 //
-// This is the non-AWS proof docs/proposals/capability-definitions.md's
-// test strategy asks for: the exact same resource.Schema mechanism
-// internal/provider/aws's compute capability uses, generating the
-// unrecognized-key-with-suggestion error for a provider that has never
-// had a hand-written allowlist of its own. Wired into decodeSettings
+// This proves the resource.Schema mechanism generalizes beyond the AWS
+// provider it was first built for: the same unrecognized-key-with-
+// suggestion validation, applied here to a provider that never had a
+// hand-written settings allowlist of its own. Wired into decodeSettings
 // below, which internal/assemble.Registry calls before a client is ever
 // built (Registry's own "wantsNeon" branch) — unconditional in an even
 // stronger sense than AWS's ValidateSpec: it runs at registry assembly,
