@@ -277,7 +277,7 @@ func (p *Planner) expandCompute(
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: svcKey, Capability: manifest.CapabilityCompute,
-				Provider: r.Provider, Type: r.Type,
+				Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
 				ReadsBindings: reads,
 			},
 			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
@@ -359,7 +359,7 @@ func (p *Planner) expandBinding(
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: binding, Capability: capability,
-				Provider: r.Provider, Type: r.Type,
+				Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
 				// A non-compute item reads only the binding it was expanded
 				// from. Set explicitly rather than left nil so it never
 				// falls through to a default inside apply: what an item may

@@ -176,6 +176,22 @@ func runPlan(
 // fmt.Fprintf/Fprintln below is unchecked on purpose (mirroring
 // render.go), leaving exactly one real, testable failure path: the single
 // write to w at the end.
+// qualifiedType renders an action's type as "provider/type", naming the
+// vendor's own type in parentheses when the two differ.
+//
+// Only when they differ, which is rarely: a role key like
+// "AWS::Lambda::Permission::APIGateway" names nothing an operator can find
+// in an AWS console, and the type they can find is the parenthesized one.
+// Printing it on every row instead would repeat the type verbatim for almost
+// every resource kraai plans, which teaches a reader to skip the column that
+// occasionally carries the answer.
+func qualifiedType(a plan.Action) string {
+	if a.VendorType == "" || a.VendorType == a.Type {
+		return a.Provider + "/" + a.Type
+	}
+	return a.Provider + "/" + a.Type + " (" + a.VendorType + ")"
+}
+
 func writePlanText(w io.Writer, envName string, p *plan.Plan) error {
 	var b strings.Builder
 
@@ -193,8 +209,8 @@ func writePlanText(w io.Writer, envName string, p *plan.Plan) error {
 				wave = a.Wave
 				_, _ = fmt.Fprintf(tw, "\nwave %d:\n", wave)
 			}
-			_, _ = fmt.Fprintf(tw, "  %s\t%-9s\t%s\t%s/%s\t%s.%s", actionSymbol(a.Kind), a.Kind,
-				strconv.Quote(a.Ref.Name), a.Provider, a.Type, a.ServiceKey, a.Binding)
+			_, _ = fmt.Fprintf(tw, "  %s\t%-9s\t%s\t%s\t%s.%s", actionSymbol(a.Kind), a.Kind,
+				strconv.Quote(a.Ref.Name), qualifiedType(a), a.ServiceKey, a.Binding)
 			if a.Kind == plan.ActionFailed {
 				_, _ = fmt.Fprintf(tw, "\t%v", a.Err)
 			}
@@ -322,6 +338,11 @@ type planActionJSON struct {
 	Capability string `json:"capability"`
 	Provider   string `json:"provider"`
 	Type       string `json:"type"`
+	// VendorType is what the vendor calls what Type drives. Always present,
+	// equal to Type in the common case, so a consumer reads one field rather
+	// than branching on whether the two diverge — additive, so nothing keyed
+	// on "type" changes.
+	VendorType string `json:"vendor_type"`
 	Wave       int    `json:"wave"`
 	Name       string `json:"name"`
 	Kind       string `json:"kind"`
@@ -355,6 +376,7 @@ func toPlanDocument(envName string, p *plan.Plan) planDocument {
 			Capability: a.Capability,
 			Provider:   a.Provider,
 			Type:       a.Type,
+			VendorType: a.VendorType,
 			Wave:       a.Wave,
 			Name:       a.Ref.Name,
 			Kind:       a.Kind.String(),

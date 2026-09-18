@@ -2,6 +2,7 @@ package resource
 
 import (
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -21,6 +22,26 @@ type Registration struct {
 	// "cloudflare" (that is whose API creates it) but whose Vendor is
 	// "neon" (choosing Neon is what asks for it).
 	Vendor string
+	// VendorType is the vendor's own name for what Type drives, when the two
+	// differ. Empty means they are the same, which is the common case.
+	//
+	// They differ when one vendor type plays more than one role. A provider
+	// may register a type only once under a given key, so a second role needs
+	// a second key — and the role is kraai's distinction, not the vendor's:
+	// AWS has one AWS::Lambda::Permission, while kraai has one per thing
+	// being authorized, each with its own dependencies and its own
+	// conditions. Type carries the role, VendorType carries what the vendor
+	// will actually be asked for.
+	//
+	// Declared rather than inferred. This divergence was expressed three
+	// separate times, in three files, by inventing a "::Role" suffix and
+	// explaining the convention from scratch each time, with the real type
+	// reachable only from inside the provider's own resource implementation —
+	// so nothing could check the two agreed, and a plan could not tell an
+	// operator which object to look for in a vendor console. RoleType builds
+	// the key, validate checks it, and internal/plan carries both through to
+	// its output.
+	VendorType string
 	// Capability is what this type fulfils in a manifest — "postgres",
 	// "keyvalue", "objects", "queues", "compute". It is how a manifest entry
 	// that names no vendor reaches a vendor's implementation.
@@ -263,6 +284,36 @@ func (r Registration) Matches(ctx ApplicabilityContext) bool {
 // Key is the registry key, "provider/type".
 func (r Registration) Key() string { return r.Provider + "/" + r.Type }
 
+// roleSeparator joins a vendor type to the role a registration gives it.
+// "::" because every type this convention has been used for so far is a
+// CloudFormation type name, which already reads in "::"-separated segments,
+// so a role reads as one more segment rather than as a foreign marker.
+const roleSeparator = "::"
+
+// RoleType builds a registry key for one role a vendor type plays:
+// "AWS::Lambda::Permission" plus role "APIGateway" is
+// "AWS::Lambda::Permission::APIGateway".
+//
+// A function rather than each provider concatenating its own, so the shape
+// validate checks is the shape this produces, and a reader who finds one of
+// these keys has somewhere to look up what it means.
+func RoleType(vendorType, role string) string {
+	return vendorType + roleSeparator + role
+}
+
+// VendorTypeName is the vendor's own name for what this registration drives:
+// VendorType when it declares one, Type otherwise.
+//
+// Every caller that wants to name the vendor's type should use this rather
+// than reading VendorType, so the empty-means-same rule is applied in one
+// place instead of at each use.
+func (r Registration) VendorTypeName() string {
+	if r.VendorType == "" {
+		return r.Type
+	}
+	return r.VendorType
+}
+
 // vendor is the manifest value that selects this registration.
 func (r Registration) vendor() string {
 	if r.Vendor != "" {
@@ -367,6 +418,21 @@ func validate(reg Registration) error {
 	case dependsOnSelf(reg):
 		return kerrors.Validation(
 			"resource registration %q declares itself in DependsOn", reg.Provider+"/"+reg.Type)
+	case reg.VendorType == reg.Type && reg.VendorType != "":
+		return kerrors.Validation(
+			"resource registration %q declares VendorType equal to Type — leave it empty, "+
+				"which already means the two are the same", reg.Provider+"/"+reg.Type)
+	case reg.VendorType != "" && !strings.HasPrefix(reg.Type, reg.VendorType+roleSeparator):
+		// The convention the three hand-written "::Role" keys already
+		// followed, now checked. A key that does not extend its vendor type
+		// tells a reader of plan output nothing about how the two relate, and
+		// this is the check that was missing when the convention lived in
+		// three comments instead of one place — see RoleType, which builds
+		// exactly the shape this accepts.
+		return kerrors.Validation(
+			"resource registration %q declares VendorType %q, which its Type does not extend — "+
+				"a role key must be %q plus %q and a role (see resource.RoleType)",
+			reg.Provider+"/"+reg.Type, reg.VendorType, reg.VendorType, roleSeparator)
 	}
 	return nil
 }

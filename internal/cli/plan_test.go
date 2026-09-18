@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -646,5 +647,67 @@ func TestPlanUnreadableDotEnvIsAnError(t *testing.T) {
 	}
 	if _, err := execPlan(t, assembler, []string{testEnvName, "--dir", dir}); err == nil {
 		t.Fatal("an unreadable .env was silently skipped")
+	}
+}
+
+// rolePlan has one action whose registry key diverges from the vendor's own
+// type name and one where they agree — the two cases the output has to tell
+// apart.
+func rolePlan() *plan.Plan {
+	return &plan.Plan{Actions: []plan.Action{
+		{
+			Item: plan.Item{
+				ServiceKey: "api", Binding: "api", Capability: "compute",
+				Provider: "aws", Type: "AWS::S3::Bucket::ArtifactBucket",
+				VendorType: "AWS::S3::Bucket", Wave: 0,
+			},
+			Ref:  resource.Ref{Provider: "aws", Type: "AWS::S3::Bucket", Name: "env-api-artifacts"},
+			Kind: plan.ActionCreate,
+		},
+		{
+			Item: plan.Item{
+				ServiceKey: "api", Binding: "api", Capability: "compute",
+				Provider: "aws", Type: "AWS::Lambda::Function",
+				VendorType: "AWS::Lambda::Function", Wave: 0,
+			},
+			Ref:  resource.Ref{Provider: "aws", Type: "AWS::Lambda::Function", Name: "env-api"},
+			Kind: plan.ActionCreate,
+		},
+	}}
+}
+
+// A role key names nothing an operator can find in a vendor console, so the
+// text output names the type they can — and only then, because printing it on
+// every row would repeat the type verbatim for nearly every resource.
+func TestWritePlanText_NamesTheVendorTypeOnlyWhenItDiffers(t *testing.T) {
+	var buf bytes.Buffer
+	if err := writePlanText(&buf, "env", rolePlan()); err != nil {
+		t.Fatalf("writePlanText: %v", err)
+	}
+	out := buf.String()
+
+	if !strings.Contains(out, "aws/AWS::S3::Bucket::ArtifactBucket (AWS::S3::Bucket)") {
+		t.Errorf("a diverging type did not name its vendor type:\n%s", out)
+	}
+	if strings.Contains(out, "AWS::Lambda::Function (AWS::Lambda::Function)") {
+		t.Errorf("a type equal to its vendor type was printed twice:\n%s", out)
+	}
+}
+
+// vendor_type is always present, equal to type in the common case, so a
+// consumer reads one field rather than branching on whether it diverges.
+func TestPlanJSON_CarriesVendorTypeOnEveryAction(t *testing.T) {
+	doc := toPlanDocument("env", rolePlan())
+
+	got := map[string]string{}
+	for _, a := range doc.Actions {
+		got[a.Type] = a.VendorType
+	}
+	want := map[string]string{
+		"AWS::S3::Bucket::ArtifactBucket": "AWS::S3::Bucket",
+		"AWS::Lambda::Function":           "AWS::Lambda::Function",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("vendor_type by type = %v, want %v", got, want)
 	}
 }
