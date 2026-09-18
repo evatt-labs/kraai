@@ -223,3 +223,106 @@ func TestPlan_AWSAPITopology_Deterministic(t *testing.T) {
 		}
 	}
 }
+
+// TestPlan_StaticSiteOrdersAcrossCapabilities is the decomposition's own
+// acceptance criterion: the five types that used to share the `objects`
+// capability now sit under four, and must still order correctly.
+//
+// They do because groupKey is (service, binding) and carries no capability,
+// so four entries sharing one binding name are one expansion group and their
+// DependsOn edges resolve across capabilities exactly as they did when all
+// five were one binding. That is load-bearing and invisible — hence this
+// test, and its companion below for what happens when the names differ.
+func TestPlan_StaticSiteOrdersAcrossCapabilities(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{
+			manifest.CapabilityObjects: {Vendor: "aws"},
+			manifest.CapabilityDNS:     {Vendor: "aws"},
+			manifest.CapabilityTLS:     {Vendor: "aws"},
+			manifest.CapabilityCDN:     {Vendor: "aws"},
+		}},
+		Services: map[string]manifest.Service{
+			"site": {Dir: ".", Bindings: manifest.Bindings{
+				manifest.CapabilityObjects: {{"binding": "SITE"}},
+				manifest.CapabilityTLS:     {{"binding": "SITE", "domain": "acme.example"}},
+				manifest.CapabilityCDN:     {{"binding": "SITE"}},
+				manifest.CapabilityDNS:     {{"binding": "SITE", "zone": "acme.example"}},
+			}},
+		},
+	}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	waves := map[string]int{}
+	for _, a := range p.Actions {
+		waves[a.Type] = a.Wave
+	}
+
+	// The distribution needs its origin bucket and its certificate; the
+	// record needs its zone and the distribution it aliases.
+	for _, c := range []struct{ earlier, later string }{
+		{"AWS::S3::Bucket", "AWS::CloudFront::Distribution"},
+		{"AWS::CertificateManager::Certificate", "AWS::CloudFront::Distribution"},
+		{"AWS::Route53::HostedZone", "AWS::Route53::RecordSet"},
+		{"AWS::CloudFront::Distribution", "AWS::Route53::RecordSet"},
+	} {
+		e, ok := waves[c.earlier]
+		if !ok {
+			t.Fatalf("%s was not planned (waves: %v)", c.earlier, waves)
+		}
+		l, ok := waves[c.later]
+		if !ok {
+			t.Fatalf("%s was not planned (waves: %v)", c.later, waves)
+		}
+		if e >= l {
+			t.Errorf("%s (wave %d) must come before %s (wave %d)", c.earlier, e, c.later, l)
+		}
+	}
+}
+
+// The companion to the test above, pinning the hazard rather than the
+// guarantee: the same four entries under different binding names are four
+// groups, no DependsOn resolves across them, and the distribution lands in
+// the same wave as the bucket it is supposed to front.
+//
+// Asserted rather than left undiscovered, because this is what the
+// decomposition made reachable — one capability meant one binding meant one
+// group, and there was nothing to get wrong. Not currently a live bug: none
+// of these four types can be created at all yet (evatt-labs/kraai#117). When
+// evatt-labs/kraai#197 decides what a cross-capability edge should mean, this
+// test is what has to change, and it should fail loudly when it does rather
+// than quietly keep passing.
+func TestPlan_StaticSiteLosesOrderingWhenBindingNamesDiffer(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{
+			manifest.CapabilityObjects: {Vendor: "aws"},
+			manifest.CapabilityCDN:     {Vendor: "aws"},
+		}},
+		Services: map[string]manifest.Service{
+			"site": {Dir: ".", Bindings: manifest.Bindings{
+				manifest.CapabilityObjects: {{"binding": "ASSETS"}},
+				manifest.CapabilityCDN:     {{"binding": "EDGE"}},
+			}},
+		},
+	}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	waves := map[string]int{}
+	for _, a := range p.Actions {
+		waves[a.Type] = a.Wave
+	}
+	if waves["AWS::CloudFront::Distribution"] != waves["AWS::S3::Bucket"] {
+		t.Fatalf("expected the documented hazard — distribution and bucket in one wave — got %v. "+
+			"If this now orders correctly, evatt-labs/kraai#197 has been fixed and both this test "+
+			"and groupKey's doc comment need updating.", waves)
+	}
+}

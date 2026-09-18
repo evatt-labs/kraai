@@ -20,14 +20,28 @@ import (
 func Capabilities() []resource.CapabilityDef {
 	return []resource.CapabilityDef{
 		{
-			Name: manifest.CapabilityObjects,
-			Summary: "S3-backed static site stack: bucket, CloudFront distribution, " +
-				"ACM certificate, and the Route 53 zone and records fronting it.",
+			Name:    manifest.CapabilityObjects,
+			Summary: "S3 bucket.",
 			// No ProviderSettings: no registration under this capability
 			// reads a provider-level settings map at all. Binding is what
 			// says everything a service's `objects:` entry may carry
 			// (settings_schema.go).
 			Binding: objectsBindingSchema,
+		},
+		{
+			Name:    manifest.CapabilityDNS,
+			Summary: "Route 53 hosted zone and the record sets inside it.",
+			Binding: dnsBindingSchema,
+		},
+		{
+			Name:    manifest.CapabilityTLS,
+			Summary: "ACM certificate, validated through Route 53.",
+			Binding: tlsBindingSchema,
+		},
+		{
+			Name:    manifest.CapabilityCDN,
+			Summary: "CloudFront distribution in front of an S3 origin.",
+			Binding: cdnBindingSchema,
 		},
 		{
 			Name: manifest.CapabilityCompute,

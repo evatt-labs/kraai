@@ -112,16 +112,82 @@ var computeSettingsSchema = resource.NewSchema("aws compute settings", map[strin
 // struct for a binding entry to mirror, so what a manifest may write here is
 // exactly what this map says.
 //
-// The AWS "objects" capability itself reads no free-form settings map at
-// all (expandBinding passes a nil config for it — internal/plan/planner.go)
-// beyond the shared, provider-level "region" DecodeSettings already
-// type-checks, so this capability declares no ProviderSettings schema; see
-// Capabilities' own doc comment in capabilities.go for why Binding is what
-// this capability populates instead.
+// The AWS "objects" capability reads no provider-level settings map beyond
+// the shared "region" DecodeSettings already type-checks, so it declares no
+// ProviderSettings schema; Binding is what it populates instead.
 var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
 		"binding": map[string]any{"type": "string"},
+	},
+	"required":             []any{"binding"},
+	"additionalProperties": false,
+})
+
+// dnsBindingSchema validates one entry of a service's `dns:` list: the zone
+// to create and the name a record in it answers for.
+//
+// A name of its own rather than reusing the binding name, because a binding
+// name is kraai's handle for the resource and a zone name is a real, external
+// thing an operator already owns — "acme.com" is not a legal binding name in
+// kraai's grammar, and a binding named SITE says nothing about which zone it
+// is. That the two are separate is exactly what sharing one capability with
+// `objects` made impossible to express.
+//
+// Nothing reads these keys yet: routing them into each type's desired state
+// is evatt-labs/kraai#117, which this decomposition unblocks rather than
+// closes. They are declared now because declaring them is what makes the
+// split mean anything — a `dns:` entry that accepts only a binding name is
+// the same undifferentiated shape under a new spelling.
+var dnsBindingSchema = resource.NewSchema("aws dns binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding": map[string]any{"type": "string"},
+		"zone":    map[string]any{"type": "string"},
+		"name":    map[string]any{"type": "string"},
+	},
+	"required":             []any{"binding", "zone"},
+	"additionalProperties": false,
+})
+
+// tlsBindingSchema validates one entry of a service's `tls:` list: the
+// domain a certificate is requested for, and any additional names it covers.
+//
+// See dnsBindingSchema for why these keys are declared before anything reads
+// them (evatt-labs/kraai#117).
+var tlsBindingSchema = resource.NewSchema("aws tls binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding": map[string]any{"type": "string"},
+		"domain":  map[string]any{"type": "string"},
+		"alternateNames": map[string]any{
+			"type":  "array",
+			"items": map[string]any{"type": "string"},
+		},
+	},
+	"required":             []any{"binding", "domain"},
+	"additionalProperties": false,
+})
+
+// cdnBindingSchema validates one entry of a service's `cdn:` list: the
+// aliases the distribution answers on.
+//
+// Aliases rather than a single name because a distribution genuinely
+// serves several, and because this package's own identity strategy for
+// CloudFront searches on them (cloudfrontMatch) — a distribution with no
+// alias cannot be found again, so this is the one key here that is already
+// load-bearing for more than configuration.
+//
+// See dnsBindingSchema for why these keys are declared before anything reads
+// them (evatt-labs/kraai#117).
+var cdnBindingSchema = resource.NewSchema("aws cdn binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding": map[string]any{"type": "string"},
+		"aliases": map[string]any{
+			"type":  "array",
+			"items": map[string]any{"type": "string"},
+		},
 	},
 	"required":             []any{"binding"},
 	"additionalProperties": false,

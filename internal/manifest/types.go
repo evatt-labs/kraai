@@ -59,8 +59,25 @@ const (
 	// database capability the manifest offered was "postgres".
 	CapabilityDatabase = "database"
 	CapabilityKeyValue = "keyvalue"
-	CapabilityObjects  = "objects"
-	CapabilityQueues   = "queues"
+	// CapabilityObjects is object storage and nothing else. It briefly
+	// carried four other things — a CDN distribution, a TLS certificate, a
+	// DNS zone and a DNS record — because there was no capability for any of
+	// them to register under, and sharing one capability means sharing one
+	// binding shape, so none of the four could receive configuration of its
+	// own. Each now has its own.
+	CapabilityObjects = "objects"
+	CapabilityQueues  = "queues"
+	// CapabilityDNS is a zone and the records inside it. One capability
+	// rather than two: a record without a zone to live in is not a thing a
+	// manifest can ask for, and the two are provisioned, ordered and torn
+	// down together.
+	CapabilityDNS = "dns"
+	// CapabilityTLS is a certificate for a name a service serves.
+	CapabilityTLS = "tls"
+	// CapabilityCDN is an edge cache in front of an origin. Distinct from
+	// objects even though its usual origin is a bucket: which is cached, by
+	// whom, under what name, is not a property of the storage.
+	CapabilityCDN = "cdn"
 	// CapabilityNetwork covers the private network a service's other
 	// resources sit inside. Unlike the capabilities above it fulfils no
 	// request the service's code makes at runtime — nothing connects to a
