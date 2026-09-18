@@ -9,9 +9,9 @@ import "github.com/evatt-labs/kraai/internal/resource"
 // Only "database" is declared, even though Registrations can return a
 // second registration (the Hyperdrive companion, provider "cloudflare") —
 // both registrations Registrations ever returns share this one Capability
-// value (see Registrations' own doc comment on D30 pairing), so there is
-// only ever one capability name to declare here regardless of how many
-// resource types fulfilling it exist.
+// value (see Registrations' own doc comment), so there is only ever one
+// capability name to declare here regardless of how many resource types
+// fulfilling it exist.
 func Capabilities() []resource.CapabilityDef {
 	return []resource.CapabilityDef{
 		{

@@ -57,8 +57,7 @@ type BranchSettings struct {
 	// before this field existed, and nothing anywhere read it — a real,
 	// silent instance of the reservedConcurrency/naming.prefix class,
 	// found by this workstream's own schema rejecting the manifest that
-	// carried it (see docs/proposals/capability-definitions.md and this
-	// package's settings_schema.go).
+	// carried it (see this package's settings_schema.go).
 	//
 	// The client has no CreateProject at all — FindProjectByName is the
 	// only way this package ever reaches a project, and a branch inherits
@@ -194,7 +193,7 @@ type branchResource struct {
 // real region against b.settings.Region when the manifest declared one.
 //
 // Looked up on every verb rather than cached. It is one request, identity is
-// never read from storage (D7), and a cache would have to be invalidated on
+// never read from storage, and a cache would have to be invalidated on
 // exactly the event kraai cannot observe — someone renaming the project in
 // Neon's console between two commands.
 //
