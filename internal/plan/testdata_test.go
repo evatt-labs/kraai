@@ -9,7 +9,7 @@ import (
 
 // registryFixture is a stand-in registry shaped like the real one: a
 // Postgres capability that expands across two providers the way
-// internal/provider/neonresource actually registers it (D30), plus one
+// internal/provider/neonresource actually registers it, plus one
 // single-type capability per other manifest resource kind.
 type registryFixture struct {
 	reg *resource.Registry
@@ -41,8 +41,8 @@ func newRegistryFixture(t *testing.T) *registryFixture {
 		{
 			// A different literal Provider than the branch above, on
 			// purpose: this is the exact shape
-			// internal/provider/neonresource.Register uses for Hyperdrive
-			// (D30). Cloudflare's API creates it, but choosing Neon for
+			// internal/provider/neonresource.Register uses for Hyperdrive.
+			// Cloudflare's API creates it, but choosing Neon for
 			// Postgres is what asks for it, so Vendor says neon — without
 			// which one vendor choice reaches only half the capability.
 			// DependsOn names the branch by its own registry key, exactly

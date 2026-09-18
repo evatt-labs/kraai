@@ -7,8 +7,9 @@ import "sync"
 // scope never overlap, while operations in different scopes — or with no
 // scope at all — are unaffected. This is mutual exclusion, not ordering:
 // which of two same-scope operations runs first is unspecified, only that
-// they never run at once (see docs/ARCHITECTURE.md, "Ordering is a
-// dependency graph", for the Neon 423 this exists to prevent).
+// they never run at once. This exists because some providers serialize by
+// scope rather than rate-limit by count: Neon returns 423 Locked when two
+// branch-create calls land concurrently in the same project.
 //
 // internal/apply and internal/destroy both use it: a phase's errgroup runs
 // many actions concurrently, and either package can issue a mutating call

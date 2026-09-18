@@ -243,9 +243,9 @@ func TestResolveErrorsListSeveralOptions(t *testing.T) {
 	}
 }
 
-// TestVendorSelectsAcrossProviders is D30's real shape: fulfilling one
-// capability can take resources from more than one API, and the manifest names
-// only the vendor. Keying resolution by provider instead made the second half
+// TestVendorSelectsAcrossProviders proves fulfilling one capability can take
+// resources from more than one API, while the manifest names only the
+// vendor. Keying resolution by provider instead made the second half
 // unreachable — a database provisioned with nothing in front of it.
 func TestVendorSelectsAcrossProviders(t *testing.T) {
 	r := NewRegistry()

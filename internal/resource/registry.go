@@ -19,8 +19,7 @@ type Registration struct {
 	// than one API: choosing Neon for Postgres also requires a Cloudflare
 	// Hyperdrive configuration in front of it, whose Provider is
 	// "cloudflare" (that is whose API creates it) but whose Vendor is
-	// "neon" (choosing Neon is what asks for it). See docs/ARCHITECTURE.md,
-	// "Capabilities, vendors, and resources".
+	// "neon" (choosing Neon is what asks for it).
 	Vendor string
 	// Capability is what this type fulfils in a manifest — "postgres",
 	// "keyvalue", "objects", "queues", "compute". It is how a manifest entry
@@ -30,8 +29,8 @@ type Registration struct {
 	// an instance of this type needs to exist before it can be created.
 	// Resolved by internal/plan to a concrete instance within the same
 	// (service, binding) expansion group, never a whole-manifest type
-	// match — see docs/ARCHITECTURE.md, "Ordering is a dependency graph".
-	// Replaces an earlier fixed-phase ordering model that ran out against
+	// match. Replaces an earlier fixed-phase ordering model that ran out
+	// against
 	// a real deployment: two registrations sharing one phase had no
 	// ordering guarantee between them, which took a fresh `kraai apply`
 	// three runs to converge.
@@ -97,11 +96,9 @@ type Registration struct {
 	// two operations resolving to the same string are serialized against
 	// each other, by ScopeLocker. Nil means unscoped, the common case:
 	// most provider APIs rate-limit by request count rather than
-	// serializing by scope. See docs/ARCHITECTURE.md, "Ordering is a
-	// dependency graph", for why this exists (Neon returns 423 on
-	// concurrent branch creates in one project, which no amount of
-	// concurrency-limit tuning fixes because the constraint isn't scoped
-	// per-count at all).
+	// serializing by scope: Neon returns 423 on concurrent branch creates in
+	// one project, which no amount of concurrency-limit tuning fixes because
+	// the constraint isn't scoped per-count at all.
 	//
 	// A Spec-derived function rather than a fixed field because the scoped
 	// value (a Neon project, say) comes from the manifest, known only once

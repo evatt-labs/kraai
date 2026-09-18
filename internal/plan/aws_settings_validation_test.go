@@ -54,8 +54,10 @@ func (s specValidatorOnly) Get(context.Context, resource.Ref) (*resource.State, 
 // registration, exactly as internal/assemble.Registry wires a live run. A
 // fake resource, or a direct unit test against decodeLambdaSettings alone,
 // would not prove that wiring; the bug this whole mechanism exists to
-// close (docs/proposals/capability-definitions.md, "Findings from the
-// generation spike" / SpecValidator's own doc comment in validate.go)
+// close — settings validation used to run only inside DiffersFromState,
+// which never executes on a fresh environment's first plan because
+// DiffersFromState only runs once Get has already found an existing
+// resource, so a typo'd or invalid setting reached nothing at all —
 // passed every unit test the pre-fix code had.
 //
 // Every other compute registration keeps a fakeResource, exactly as
