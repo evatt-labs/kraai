@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.2](https://github.com/evatt-labs/kraai/compare/v0.6.1...v0.6.2) (2026-09-18)
+
+
+### Features
+
+* **manifest:** key providers by declared capability instead of a fixed struct ([#188](https://github.com/evatt-labs/kraai/issues/188)) ([8090845](https://github.com/evatt-labs/kraai/commit/8090845f0bed62e0dca5f2c4ff9b0dbdb71ca315)), closes [#122](https://github.com/evatt-labs/kraai/issues/122)
+* **manifest:** key service bindings by declared capability ([#191](https://github.com/evatt-labs/kraai/issues/191)) ([398e85c](https://github.com/evatt-labs/kraai/commit/398e85cef0f84126376855570e1842e96131a2da)), closes [#122](https://github.com/evatt-labs/kraai/issues/122)
+
 ## [0.6.1](https://github.com/evatt-labs/kraai/compare/v0.6.0...v0.6.1) (2026-09-17)
 
 
