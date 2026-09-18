@@ -35,9 +35,10 @@ const defaultFunctionURLAuthType = "AWS_IAM"
 // choice between them (or a rule for when each applies — a Function URL is
 // what routes/custom_domain has nothing to front, while ApiGatewayV2 is
 // what a persistent environment's routes overlay needs a stage/domain
-// mapping onto) is exactly the kind of AWS-primitive decision D24 already
-// defers to kraai-api's own blueprint, not this document. Flagged here and
-// in this workstream's PR description rather than picking one silently.
+// mapping onto) is exactly the kind of AWS-primitive decision kraai-api's
+// own infrastructure design is left to make for itself, not this document.
+// Flagged here and in this workstream's PR description rather than picking
+// one silently.
 type lambdaURLResource struct {
 	inner *resourceType
 }
@@ -63,9 +64,11 @@ func (u *lambdaURLResource) translate(spec resource.Spec) resource.Spec {
 		// Bare function name, not a constructed ARN: AWS::Lambda::Url's own
 		// TargetFunctionArn property documents accepting either form ("my-
 		// function" or a full ARN). Using the bare name — identical to the
-		// function's own derived name (Lambda::Function is byName, D26) —
-		// means this registration needs no cross-resource lookup of any
-		// kind, live or ARN-constructed, to reach the function it targets.
+		// function's own derived name (AWS::Lambda::Function's identity is
+		// that name itself, looked up directly, not via a separate
+		// identifier) — means this registration needs no cross-resource
+		// lookup of any kind, live or ARN-constructed, to reach the function
+		// it targets.
 		"TargetFunctionArn": spec.Name,
 		"AuthType":          authType,
 	}

@@ -205,9 +205,9 @@ func (l *lambdaFunctionResource) Delete(ctx context.Context, ref resource.Ref) e
 }
 
 // DiffersFromState checks only FunctionName, this type's sole
-// createOnlyProperty per D26 (docs/BLUEPRINT.md and this package's own
-// register.go: "FunctionName is settable at create; CloudFormation marks
-// it 'Update requires: Replacement'"). See this type's own doc comment for
+// createOnlyProperty (this package's own register.go: "FunctionName is
+// settable at create; CloudFormation marks it 'Update requires:
+// Replacement'"). See this type's own doc comment for
 // why the real translate — packaging, upload, secret resolution — never
 // runs here.
 //

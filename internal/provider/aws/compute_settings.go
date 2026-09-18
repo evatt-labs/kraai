@@ -105,9 +105,9 @@ const (
 	// register.go's ApiGatewayV2::Api and Lambda::Url registrations
 	// select between via SelectedBy.
 	//
-	// API Gateway is the default: kraai-api's own documented topology
-	// (docs/BLUEPRINT.md) is "FastAPI app behind API Gateway HTTP API,
-	// deployed via AWS Lambda Web Adapter" — an unconfigured service
+	// API Gateway is the default: kraai-api's own documented topology is
+	// "FastAPI app behind API Gateway HTTP API, deployed via AWS Lambda Web
+	// Adapter" — an unconfigured service
 	// should get the shape kraai's own first real consumer actually uses,
 	// not the newer/simpler alternative this package happens to register
 	// second.

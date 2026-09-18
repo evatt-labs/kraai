@@ -57,8 +57,9 @@ const (
 )
 
 // cloudControlAPI is the subset of *cloudcontrol.Client this package's
-// *Client calls: the five verbs Cloud Control exposes uniformly (D17's
-// finding) plus the status poll the async ones require.
+// *Client calls: the five verbs Cloud Control exposes uniformly across every
+// resource type (see this package's own doc comment) plus the status poll
+// the async ones require.
 //
 // Shaped like the SDK's own method signatures rather than this package's
 // vocabulary, unlike ccAPI in resource.go: this is the seam being
@@ -173,7 +174,7 @@ type Client struct {
 type Option func(*Client)
 
 // WithCloudControlAPI substitutes the Cloud Control caller, which is how
-// tests exercise Client without an AWS account or network (D21).
+// tests exercise Client without an AWS account or network.
 func WithCloudControlAPI(api cloudControlAPI) Option {
 	return func(c *Client) { c.cc = api }
 }
@@ -184,7 +185,7 @@ func WithCloudFormationAPI(api cloudFormationAPI) Option {
 }
 
 // WithS3API substitutes the S3 caller, which is how tests exercise artifact
-// upload without an AWS account or network (D21).
+// upload without an AWS account or network.
 func WithS3API(api s3API) Option {
 	return func(c *Client) { c.s3 = api }
 }
@@ -208,15 +209,16 @@ func WithPollTimings(initialDelay, maxDelay, timeout time.Duration) Option {
 }
 
 // New builds a Client for settings.Region, authenticating via the AWS SDK's
-// own default credential chain (environment, shared config, IMDS — kraai
-// reads no AWS credential itself, per D18's "external touchpoints own their
-// own auth").
+// own default credential chain (environment, shared config, IMDS) — kraai
+// never reads or handles an AWS credential itself, delegating entirely to
+// the SDK's own auth resolution.
 func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error) {
-	// awsconfig.WithHTTPClient (D13): the SDK builds its own HTTP client per
-	// service (cloudcontrol, cloudformation, s3, sts) unless told otherwise,
-	// which is a fifth independently-pooled client alongside
-	// internal/reachability, internal/provider/neon and
-	// internal/provider/cloudflare. httpx.NewClient's *http.Client satisfies
+	// awsconfig.WithHTTPClient: kraai shares one tuned HTTP client across
+	// every provider for connection reuse rather than letting each SDK build
+	// its own. The SDK builds its own HTTP client per service (cloudcontrol,
+	// cloudformation, s3, sts) unless told otherwise, which is a fifth
+	// independently-pooled client alongside internal/reachability,
+	// internal/provider/neon and internal/provider/cloudflare. httpx.NewClient's *http.Client satisfies
 	// the SDK's minimal HTTPClient interface (a Do(*http.Request) method),
 	// so this puts every AWS call through the same shared pool and the same
 	// otelhttp instrumentation as everything else, without replacing any of
@@ -661,8 +663,9 @@ func (s Schema) HasUpdateHandler() bool {
 // provider schema.
 //
 // Fetched at runtime on first use per type and cached for the process's
-// lifetime (resourceType.getSchema), never vendored: D17's own finding
-// measured schema sizes up to 116KB, and a resource type's schema does not
+// lifetime (resourceType.getSchema), never vendored: this package's own
+// measurement found schema sizes up to 116KB (see the Schema type's own doc
+// comment), and a resource type's schema does not
 // change within a single kraai invocation, so one DescribeType call per type
 // per process is the right amount of caching — enough to avoid repeating an
 // expensive call on every Get/Create/Update/DiffersFromState, not so much
@@ -981,7 +984,7 @@ func (c *Client) OwnsBucket(ctx context.Context, bucket string) (bool, error) {
 // dependency graph has already made safe and which it has not.
 //
 // Assumes the "aws" partition. kraai's stated first deployment target is
-// commercial AWS for kraai.dev's own infrastructure (D24); GovCloud/China
+// commercial AWS, used to run kraai.dev's own infrastructure; GovCloud/China
 // partitions, whose ARNs use "aws-us-gov"/"aws-cn", are not something this
 // workstream verified against and are out of scope here.
 func (c *Client) AccountID(ctx context.Context) (string, error) {

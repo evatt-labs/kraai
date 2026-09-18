@@ -41,7 +41,7 @@ type sourceARNFunc func(ctx context.Context, client *Client, spec resource.Spec)
 
 // eventBridgeRuleSourceARN builds the invoking rule's ARN locally from the
 // account id, region and the rule's own derived name (spec.Name — the
-// EventBridge Rule registration is byName, D26, so this is exactly the
+// EventBridge Rule registration is looked up byName, so this is exactly the
 // same name eventsrule.go's own Create submits as its Name property). No
 // live lookup: this is the same account-id-plus-region construction
 // eventsrule.go and lambda.go already use for the reverse direction
