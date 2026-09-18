@@ -1,7 +1,6 @@
 name: Go CI
 
-# No path filter, deliberately (see docs/BLUEPRINT.md's go-module-scaffold
-# workstream notes on required-status-check gotchas): this workflow's own
+# No path filter, deliberately: this workflow's own
 # jobs (go-build-test, go-lint) aren't in branch protection's required-check
 # list today, so a path filter wouldn't collide with the existing
 # JS-era `test`/`analyze`/`dependency-review` checks. But `go build`/`go vet`

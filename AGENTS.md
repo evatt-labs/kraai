@@ -9,17 +9,24 @@ real money or shipped a silent bug.
 
 ## Orient yourself first
 
-**Read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).** It is the current
-state, audited against the code, with decided-but-unbuilt work in a separate
-section.
+**Start with GitHub Issues, before reading anything else.** Project state
+lives there, not in markdown and not in any agent's memory:
 
-**Do not treat [`docs/BLUEPRINT.md`](docs/BLUEPRINT.md) as truth.** It is a
-decision record — why choices were made, what was rejected, what superseded
-what. It is deliberately a history, and parts of it describe things that were
+```
+gh issue list --state open
+gh project item-list 1 --owner evatt-labs   # status per issue: Todo/Done
+```
+
+Check existing issues and the project board before proposing work or
+picking up work.
+
+**Read the [Architecture wiki page](https://github.com/evatt-labs/kraai/wiki/Architecture)
+next.** It is the current state, audited against the code.
+
+**Do not treat the [Decision Log](https://github.com/evatt-labs/kraai/wiki/Decision-Log)
+as truth.** It is why choices were made, what was rejected, what superseded
+what — deliberately a history, and parts of it describe things that were
 never built. It has been wrong about the code more than once.
-
-**Project state lives in GitHub Issues**, not in markdown and not in any
-agent's memory. Check existing issues before proposing work.
 
 ## The rule that matters most
 
@@ -120,8 +127,9 @@ environment variables. `internal/env` is the single exception.
 Comments follow Go's convention. A **doc comment** says what the thing does
 and what a caller must know — it renders on pkg.go.dev, so keep it to a few
 lines. An **inline `//`** explains why, at the line that is genuinely
-non-obvious. **Architectural rationale** goes in `docs/ARCHITECTURE.md` or a
-package `doc.go`, never in a function's doc comment.
+non-obvious. **Architectural rationale** goes in the
+[Architecture wiki page](https://github.com/evatt-labs/kraai/wiki/Architecture)
+or a package `doc.go`, never in a function's doc comment.
 
 **Never cite decision numbers** (`D26`, `D13`) in source — they couple code
 to a document that moves. State the reason instead.

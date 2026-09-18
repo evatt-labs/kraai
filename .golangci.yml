@@ -1,9 +1,8 @@
-# golangci-lint v2 config for the Go rewrite (docs/BLUEPRINT.md D20/D21).
 # `standard` is golangci-lint's own default set (govet, errcheck, staticcheck,
 # unused, ineffassign, and a handful more) — a deliberately small addition on
-# top of it for now; revisit as internal/ fills in and real patterns emerge
-# (see docs/BLUEPRINT.md D21: coverage-as-a-number isn't the goal, meaningful
-# checks are — same principle applies to lint scope creep).
+# top of it for now; revisit as internal/ fills in and real patterns emerge.
+# Coverage-as-a-number isn't the goal, meaningful checks are — the same
+# principle applies to lint scope creep.
 version: "2"
 
 run:
@@ -19,9 +18,9 @@ linters:
     - revive
   settings:
     forbidigo:
-      # docs/BLUEPRINT.md D18: only cmd/kraai's centralized handler may
-      # call os.Exit, print error output straight to stdout/stderr, or
-      # read env vars. Every other package returns errors instead.
+      # Only cmd/kraai's centralized handler may call os.Exit, print error
+      # output straight to stdout/stderr, or read env vars. Every other
+      # package returns errors instead.
       #
       # forbidigo matches a call's selector expression only (e.g.
       # "os.Getenv"), not its argument literals, so it can't target
@@ -33,17 +32,16 @@ linters:
       #
       # internal/env is the revisit this note invited. Provider credentials
       # (CLOUDFLARE_API_TOKEN, NEON_API_KEY) genuinely come from the
-      # environment, and D18's point is that env access is centralized rather
-      # than scattered — which one package owning it satisfies better than
-      # spreading os.Getenv across every provider. It is excluded below for
-      # that reason, not waived.
+      # environment, and centralizing env access in one package satisfies
+      # that better than spreading os.Getenv across every provider. It is
+      # excluded below for that reason, not waived.
       forbid:
         - pattern: '^os\.Exit$'
-          msg: "os.Exit is only allowed in cmd/kraai's centralized handler (D18)."
+          msg: "os.Exit is only allowed in cmd/kraai's centralized handler."
         - pattern: '^fmt\.Print(f|ln)?$'
-          msg: "fmt.Print/Printf/Println write straight to stdout; only cmd/kraai presents output this way (D18)."
+          msg: "fmt.Print/Printf/Println write straight to stdout; only cmd/kraai presents output this way."
         - pattern: '^os\.Getenv$'
-          msg: "env vars (KRAAI_DEBUG included) are read only by cmd/kraai's centralized handler (D18/D19)."
+          msg: "env vars (KRAAI_DEBUG included) are read only by cmd/kraai's centralized handler."
   exclusions:
     rules:
       - path: ^cmd/kraai/
