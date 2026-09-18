@@ -196,6 +196,24 @@ func (c *Catalog) Providers(capability string) []CatalogEntry {
 	return c.byCapability[capability]
 }
 
+// VendorsFor returns every provider declaring capability, sorted — the
+// answer to "who can fulfil this", which a manifest loader needs both to
+// check the vendor it was given and to say what it could have been.
+//
+// Data rather than a verdict, unlike ValidateBinding: there is no schema here
+// whose own wording has to survive, so the caller that knows the manifest key
+// and the file it came from is better placed to write the error than this
+// package is.
+func (c *Catalog) VendorsFor(capability string) []string {
+	entries := c.byCapability[capability]
+	out := make([]string, 0, len(entries))
+	for _, e := range entries {
+		out = append(out, e.Provider)
+	}
+	sort.Strings(out)
+	return out
+}
+
 // ValidateBinding checks one entry of a service's binding list for
 // capability against the Binding schema the vendor fulfilling that
 // capability declared.

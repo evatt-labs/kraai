@@ -34,6 +34,8 @@ const (
 type Vocabulary interface {
 	// Names returns every declared capability name, sorted.
 	Names() []string
+	// VendorsFor returns every vendor declaring capability, sorted.
+	VendorsFor(capability string) []string
 	// ValidateBinding checks one binding entry against the schema the
 	// vendor fulfilling capability declared for it, returning nil when
 	// there is no such schema to check against.
@@ -191,8 +193,40 @@ func (l *Loader) validateRoot(root *Root) error {
 			return kerrors.Validation(
 				"%s: providers.%s: vendor is required", rootFile, capability)
 		}
+		// Both halves of the pairing, not just each half on its own. The
+		// capability is declared and the vendor may well be a real one, and
+		// this is still unresolvable if that vendor does not fulfil this
+		// capability. Caught here, naming the file and the key, rather than
+		// surfacing at plan time as a registry lookup with nothing pointing
+		// back at the line that caused it.
+		vendors := l.vocabulary.VendorsFor(capability)
+		if !contains(vendors, provider.Vendor) {
+			return kerrors.Validation(
+				"%s: providers.%s.vendor: %q does not provide capability %q — %s",
+				rootFile, capability, provider.Vendor, capability, vendorsSuffix(vendors))
+		}
 	}
 	return nil
+}
+
+// vendorsSuffix names who could have gone there, or says plainly that nobody
+// could — an empty list means the capability is declared by some provider for
+// something other than this, and "providers for it: " followed by nothing
+// reads as a truncated message rather than an answer.
+func vendorsSuffix(vendors []string) string {
+	if len(vendors) == 0 {
+		return "no provider declares it"
+	}
+	return "providers for it: " + strings.Join(vendors, ", ")
+}
+
+func contains(haystack []string, needle string) bool {
+	for _, s := range haystack {
+		if s == needle {
+			return true
+		}
+	}
+	return false
 }
 
 // loadServices globs services/*.yaml and services/*.yaml.j2, renders the

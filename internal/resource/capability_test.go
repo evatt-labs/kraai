@@ -332,3 +332,37 @@ func TestValidateBindingIsSilentWhenThereIsNothingToCheck(t *testing.T) {
 		}
 	})
 }
+
+// VendorsFor answers "who can fulfil this", which is what a manifest loader
+// needs both to check the vendor it was handed and to say what it could have
+// been. Sorted, because that list goes into an error message.
+func TestVendorsFor(t *testing.T) {
+	c, err := NewCatalog(
+		fakeProvider{name: "neon", defs: []CapabilityDef{{Name: "database", Summary: "branch"}}},
+		fakeProvider{name: "aws", defs: []CapabilityDef{
+			{Name: "compute", Summary: "lambda"},
+			{Name: "objects", Summary: "bucket"},
+		}},
+		fakeProvider{name: "cloudflare", defs: []CapabilityDef{
+			{Name: "database", Summary: "d1"},
+			{Name: "objects", Summary: "r2"},
+		}},
+	)
+	if err != nil {
+		t.Fatalf("NewCatalog: %v", err)
+	}
+
+	// Registration order is neon, aws, cloudflare; these come back sorted.
+	if got := c.VendorsFor("database"); !reflect.DeepEqual(got, []string{"cloudflare", "neon"}) {
+		t.Errorf("VendorsFor(database) = %v", got)
+	}
+	if got := c.VendorsFor("compute"); !reflect.DeepEqual(got, []string{"aws"}) {
+		t.Errorf("VendorsFor(compute) = %v", got)
+	}
+
+	// Empty, not nil-and-surprising, for a capability nothing declares —
+	// the caller formats that case rather than being handed a nil to guess at.
+	if got := c.VendorsFor("frobnicate"); len(got) != 0 {
+		t.Errorf("VendorsFor(frobnicate) = %v, want empty", got)
+	}
+}

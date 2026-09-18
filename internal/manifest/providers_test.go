@@ -44,6 +44,10 @@ func TestProvidersFor(t *testing.T) {
 // dependency direction Vocabulary exists to protect.
 type vocabulary struct {
 	names []string
+	// vendors is who declares each capability. Nil means "every vendor
+	// declares everything", which keeps the tests that are about something
+	// else from having to enumerate it.
+	vendors map[string][]string
 	// bindingErr, when set, is what ValidateBinding returns for every
 	// entry — enough to prove the loader consults the vendor's schema and
 	// reports what it says, without this package owning a schema.
@@ -51,6 +55,18 @@ type vocabulary struct {
 }
 
 func (v vocabulary) Names() []string { return v.names }
+
+func (v vocabulary) VendorsFor(capability string) []string {
+	if v.vendors == nil {
+		return []string{anyVendor}
+	}
+	return v.vendors[capability]
+}
+
+// anyVendor is what a vocabulary with no vendor table declares every
+// capability under, so a test about capability names alone names this as its
+// vendor and says nothing about pairing.
+const anyVendor = "anyvendor"
 
 func (v vocabulary) ValidateBinding(string, string, map[string]any) error { return v.bindingErr }
 
@@ -76,7 +92,7 @@ func TestValidateRootRequiresAVendor(t *testing.T) {
 		}
 	}
 
-	if err := l.validateRoot(&Root{Version: 1, Providers: Providers{CapabilityDatabase: {Vendor: "neon"}}}); err != nil {
+	if err := l.validateRoot(&Root{Version: 1, Providers: Providers{CapabilityDatabase: {Vendor: anyVendor}}}); err != nil {
 		t.Fatalf("a configured vendor was rejected: %v", err)
 	}
 }
@@ -128,7 +144,7 @@ func TestValidateRootAcceptsACapabilityOnlyAProviderDeclares(t *testing.T) {
 
 	if err := l.validateRoot(&Root{
 		Version:   1,
-		Providers: Providers{"search": {Vendor: "elastic"}},
+		Providers: Providers{"search": {Vendor: anyVendor}},
 	}); err != nil {
 		t.Fatalf("a declared capability was rejected: %v", err)
 	}
@@ -266,5 +282,78 @@ func TestProvidersVendors(t *testing.T) {
 	}
 	if got := (Providers{}).Vendors(); len(got) != 0 {
 		t.Fatalf("an empty Providers produced %v", got)
+	}
+}
+
+// A capability that is declared and a vendor that exists are still not a
+// pairing: neon fulfils database, not compute, so naming it for compute can
+// only ever fail to resolve. Caught at load with the file and key, rather
+// than at plan time as a registry lookup pointing at nothing.
+func TestValidateRootRejectsAVendorThatDoesNotProvideTheCapability(t *testing.T) {
+	l := &Loader{vocabulary: vocabulary{
+		names: []string{CapabilityCompute, CapabilityDatabase},
+		vendors: map[string][]string{
+			CapabilityCompute:  {"aws"},
+			CapabilityDatabase: {"cloudflare", "neon"},
+		},
+	}}
+
+	err := l.validateRoot(&Root{
+		Version:   1,
+		Providers: Providers{CapabilityCompute: {Vendor: "neon"}},
+	})
+	if err == nil {
+		t.Fatal("a vendor that does not provide the capability was accepted")
+	}
+	// The key, the vendor, the capability, and who could have gone there —
+	// an author who guessed wrong cannot see the declarations from a manifest.
+	for _, want := range []string{"providers.compute.vendor", "neon", "compute", "aws"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error should mention %q: %v", want, err)
+		}
+	}
+	// And not the vendors for some other capability.
+	if strings.Contains(err.Error(), "cloudflare") {
+		t.Errorf("error named a vendor for a different capability: %v", err)
+	}
+}
+
+// The right pairing loads, which is what stops the check above from being
+// satisfied by rejecting everything.
+func TestValidateRootAcceptsAVendorThatProvidesTheCapability(t *testing.T) {
+	l := &Loader{vocabulary: vocabulary{
+		names:   []string{CapabilityCompute},
+		vendors: map[string][]string{CapabilityCompute: {"aws", "cloudflare"}},
+	}}
+
+	for _, vendor := range []string{"aws", "cloudflare"} {
+		err := l.validateRoot(&Root{
+			Version:   1,
+			Providers: Providers{CapabilityCompute: {Vendor: vendor}},
+		})
+		if err != nil {
+			t.Errorf("vendor %q was rejected for a capability it provides: %v", vendor, err)
+		}
+	}
+}
+
+// A capability every provider declares for something else leaves the vendor
+// list empty, and "providers for it: " followed by nothing reads as a
+// truncated message rather than an answer.
+func TestValidateRootSaysSoWhenNoProviderDeclaresTheCapability(t *testing.T) {
+	l := &Loader{vocabulary: vocabulary{
+		names:   []string{"search"},
+		vendors: map[string][]string{},
+	}}
+
+	err := l.validateRoot(&Root{
+		Version:   1,
+		Providers: Providers{"search": {Vendor: "elastic"}},
+	})
+	if err == nil {
+		t.Fatal("a capability no provider fulfils was accepted")
+	}
+	if !strings.Contains(err.Error(), "no provider declares it") {
+		t.Errorf("error should say plainly that nobody provides it: %v", err)
 	}
 }
