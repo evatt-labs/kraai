@@ -78,7 +78,7 @@ func countingAssembler(t *testing.T, r *countingResource) RegistryAssembler {
 		reg := resource.NewRegistry()
 		err := reg.Register(resource.Registration{
 			Provider: "fake", Type: "kv", Capability: manifest.CapabilityKeyValue,
-			Vendor: "fake", Phase: resource.PhaseStorage, Lookup: resource.LookupByName,
+			Vendor: "fake", Lookup: resource.LookupByName,
 			Resource: r,
 		})
 		if err != nil {
@@ -89,7 +89,8 @@ func countingAssembler(t *testing.T, r *countingResource) RegistryAssembler {
 }
 
 // protectedFixture is oneKeyValueBindingFixture's manifest with
-// `protected: true` set on the environment overlay, for exercising D14.
+// `protected: true` set on the environment overlay, for exercising the
+// protected-environment confirmation gate.
 func protectedFixture(t *testing.T) string {
 	t.Helper()
 	return writeFixture(t, map[string]string{
@@ -247,7 +248,7 @@ func TestRunApply_CreateAction_TextOutput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("execApply: %v", err)
 	}
-	for _, want := range []string{"1 created", "storage:", "+", "created", "api.CACHE", "fake/kv"} {
+	for _, want := range []string{"1 created", "wave 0:", "+", "created", "api.CACHE", "fake/kv"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output = %q, want it to contain %q", out, want)
 		}
@@ -305,7 +306,7 @@ func TestRunApply_MutationFailure_RendersThenReturnsError(t *testing.T) {
 	}
 }
 
-// --- D14 protected-environment gate, end to end through the CLI ---
+// --- protected-environment gate, end to end through the CLI ---
 
 func TestRunApply_ProtectedEnvironment_NoConfirmName_Refused(t *testing.T) {
 	dir := protectedFixture(t)
@@ -482,47 +483,47 @@ func TestOutcomeSymbol(t *testing.T) {
 	}
 }
 
-// applyResultsFixture builds a *apply.Result spanning three phases with
-// every Outcome, mirroring plan_test.go's twoPhasePlan() so writeApplyText
-// and toApplyDocument are exercised over the "phase changes mid-list"
+// applyResultsFixture builds a *apply.Result spanning three waves with
+// every Outcome, mirroring plan_test.go's twoWavePlan() so writeApplyText
+// and toApplyDocument are exercised over the "wave changes mid-list"
 // branch and every outcome branch without a real manifest/registry.
 func applyResultsFixture() *apply.Result {
 	return &apply.Result{Results: []apply.ActionResult{
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "DB", Capability: manifest.CapabilityDatabase,
-				Provider: "neon", Type: "branch", Phase: resource.PhaseDatabase},
+				Provider: "neon", Type: "branch", Wave: 0},
 			Ref:     resource.Ref{Provider: "neon", Type: "branch", Name: "env-api-db"},
 			Outcome: apply.OutcomeCreated,
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "DB2", Capability: manifest.CapabilityDatabase,
-				Provider: "neon", Type: "branch", Phase: resource.PhaseDatabase},
+				Provider: "neon", Type: "branch", Wave: 0},
 			Ref:     resource.Ref{Provider: "neon", Type: "branch", Name: "env-api-db2"},
 			Outcome: apply.OutcomeReplaced,
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "CACHE", Capability: manifest.CapabilityKeyValue,
-				Provider: "fake", Type: "kv", Phase: resource.PhaseStorage},
+				Provider: "fake", Type: "kv", Wave: 1},
 			Ref:     resource.Ref{Provider: "fake", Type: "kv", Name: "env-api-cache"},
 			Outcome: apply.OutcomeUnchanged,
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "QUEUE", Capability: manifest.CapabilityQueues,
-				Provider: "fake", Type: "queue", Phase: resource.PhaseStorage},
+				Provider: "fake", Type: "queue", Wave: 1},
 			Ref:     resource.Ref{Provider: "fake", Type: "queue", Name: "env-api-queue"},
 			Outcome: apply.OutcomeFailed,
 			Err:     errors.New("queue create boom"),
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "api", Capability: manifest.CapabilityCompute,
-				Provider: "cf", Type: "worker", Phase: resource.PhaseCompute},
+				Provider: "cf", Type: "worker", Wave: 2},
 			Ref:     resource.Ref{Provider: "cf", Type: "worker", Name: "env-api"},
 			Outcome: apply.OutcomeSkipped,
 		},
 	}}
 }
 
-func TestWriteApplyText_MultiPhaseAndEveryOutcome(t *testing.T) {
+func TestWriteApplyText_MultiWaveAndEveryOutcome(t *testing.T) {
 	var buf bytes.Buffer
 	if err := writeApplyText(&buf, "env", applyResultsFixture()); err != nil {
 		t.Fatalf("writeApplyText: %v", err)
@@ -530,7 +531,7 @@ func TestWriteApplyText_MultiPhaseAndEveryOutcome(t *testing.T) {
 	out := buf.String()
 	for _, want := range []string{
 		"1 created, 1 unchanged, 1 replaced, 1 failed, 1 skipped (5 total)",
-		"database:", "storage:", "compute:",
+		"wave 0:", "wave 1:", "wave 2:",
 		"+", "~", "=", "!", "-",
 		"queue create boom",
 	} {
@@ -540,7 +541,7 @@ func TestWriteApplyText_MultiPhaseAndEveryOutcome(t *testing.T) {
 	}
 }
 
-func TestToApplyDocument_EveryOutcomeAndPhase(t *testing.T) {
+func TestToApplyDocument_EveryOutcomeAndWave(t *testing.T) {
 	doc := toApplyDocument("env", applyResultsFixture())
 	if doc.Summary != (applySummaryJSON{
 		Created: 1, Unchanged: 1, Replaced: 1, Failed: 1, Skipped: 1, Total: 5, HasFailures: true,
@@ -550,8 +551,8 @@ func TestToApplyDocument_EveryOutcomeAndPhase(t *testing.T) {
 	if len(doc.Results) != 5 {
 		t.Fatalf("Results = %+v", doc.Results)
 	}
-	if doc.Results[0].Phase != "database" || doc.Results[2].Phase != "storage" || doc.Results[4].Phase != "compute" {
-		t.Errorf("phases = %q, %q, %q", doc.Results[0].Phase, doc.Results[2].Phase, doc.Results[4].Phase)
+	if doc.Results[0].Wave != 0 || doc.Results[2].Wave != 1 || doc.Results[4].Wave != 2 {
+		t.Errorf("waves = %d, %d, %d", doc.Results[0].Wave, doc.Results[2].Wave, doc.Results[4].Wave)
 	}
 	if doc.Results[3].Outcome != "failed" || doc.Results[3].Error != "queue create boom" {
 		t.Errorf("Results[3] = %+v, want the failed action carrying its error", doc.Results[3])

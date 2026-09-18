@@ -10,9 +10,9 @@ import (
 )
 
 // ccAPI is the Cloud Control surface this package's generic Resource needs,
-// defined at this, its actual consumer (D21) — not the SDK's Input/Output
-// shape. A fake in resource_test.go implements it and needs neither an AWS
-// account nor a network.
+// defined at this, its actual consumer — not the SDK's Input/Output shape.
+// A fake in resource_test.go implements it and needs neither an AWS account
+// nor a network.
 type ccAPI interface {
 	// GetResource returns typeName/identifier's current properties, or
 	// found=false when the resource does not exist. See Client.GetResource
@@ -43,7 +43,7 @@ type ccAPI interface {
 
 // matchFunc reports whether a resource's decoded properties are the one
 // ref.Name identifies, for the byAttr and byTag lookup strategies. name is
-// the derived resource name (D26's Ref.Name), not necessarily the value
+// the derived resource name (Ref.Name), not necessarily the value
 // stored in the matched attribute directly — see cloudfrontMatch and
 // apigatewayv2Match in identity.go for what each type actually compares.
 type matchFunc func(properties map[string]any, name string) bool
@@ -63,8 +63,8 @@ type matchFunc func(properties map[string]any, name string) bool
 // (409032463870) found first. A hardcoded "this TypeName needs that
 // property" table would need a new entry, in this generic file, every time
 // a future type turns out to share the same shape — exactly the
-// per-type-table failure mode stampTag and LookupStrategy (D26) already
-// exist to avoid for identity. Declaring the scope as a function on the
+// per-type-table failure mode stampTag and LookupStrategy already exist to
+// avoid for identity. Declaring the scope as a function on the
 // registration instead keeps this file's only knowledge of the concept
 // "some types need a scoped list," never which types or which property.
 //
@@ -77,7 +77,7 @@ type matchFunc func(properties map[string]any, name string) bool
 type listScopeFunc func(name string) (map[string]any, error)
 
 // resourceType adapts one Cloud Control-backed AWS resource type to the
-// resource contract (D15). One value of this type per registry entry in
+// resource contract. One value of this type per registry entry in
 // register.go; the CloudFormation TypeName and lookup strategy are what
 // varies between AWS::S3::Bucket, AWS::Lambda::Function and the rest — the
 // verbs themselves do not.
@@ -94,7 +94,7 @@ type resourceType struct {
 	match matchFunc
 
 	// stampTag is required exactly when lookup is LookupByTag: it writes
-	// this type's identity tag into the CreateResource desired state (D26).
+	// this type's identity tag into the CreateResource desired state.
 	// Kept separate from match, rather than deriving one from the other,
 	// because the two run against different shapes — stampTag builds
 	// desired state going out, match reads properties coming back — and
@@ -117,9 +117,9 @@ type resourceType struct {
 	// this schema; fetching it once per type rather than once per call
 	// avoids turning every write-path call into two API round trips.
 	//
-	// A mutex guarding a plain bool rather than sync.Once: a phase's
-	// resources run concurrently under errgroup.SetLimit (D13), and more
-	// than one resource of the same type can be updated in the same phase,
+	// A mutex guarding a plain bool rather than sync.Once: a wave's
+	// resources run concurrently under errgroup.SetLimit, and more
+	// than one resource of the same type can be updated in the same wave,
 	// so this is genuinely reachable from multiple goroutines. sync.Once
 	// would also cache a transient failure (a single throttled
 	// DescribeType) forever for the rest of the run; caching only on
@@ -151,7 +151,7 @@ func (r *resourceType) getSchema(ctx context.Context) (Schema, error) {
 // Get reports the resource's current state, or (nil, nil) when it does not
 // exist.
 //
-// Absence is an answer, not a failure (D15): Client.GetResource already
+// Absence is an answer, not a failure: Client.GetResource already
 // translates Cloud Control's ResourceNotFoundException this way, and every
 // path below preserves it rather than collapsing a real error into the same
 // return shape.
@@ -187,7 +187,7 @@ func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.Sta
 }
 
 // resolve finds the Cloud Control primary identifier for name, per this
-// type's lookup strategy (D26).
+// type's lookup strategy.
 //
 // For LookupByName, name already is the primary identifier — Cloud Control's
 // own resource schema makes the derived name settable and unique at create
@@ -279,7 +279,7 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 			return nil, kerrors.Validation(
 				"%s is registered LookupByTag but declares no stampTag function", r.typeName)
 		}
-		// The identity tag rides in this same CreateResource call (D26):
+		// The identity tag rides in this same CreateResource call:
 		// writing it as a follow-up call would leave a window where a crash
 		// between create and tag orphans the resource unfindably — the one
 		// failure no later run could clean up.
@@ -290,11 +290,36 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 	if err != nil {
 		return nil, err
 	}
+	properties = r.readBackIfEmpty(ctx, identifier, properties)
 	return &resource.State{
 		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: spec.Name},
 		ID:         identifier,
 		Attributes: properties,
 	}, nil
+}
+
+// readBackIfEmpty fetches a just-created resource's properties when the
+// create itself reported none.
+//
+// Cloud Control populates a create's ResourceModel for some types and leaves
+// it empty for others — every EC2 type here returns nothing, so a VPC would
+// publish no VpcId and every resource depending on it would fail with
+// nothing to point at. A read costs one call on the create path only, and
+// only for the types that need it.
+//
+// A failed read-back is not a failed create: the resource exists either way,
+// and reporting an error here would make apply try to create it again. The
+// dependent that needed the missing value fails on its own terms instead,
+// naming what it could not resolve.
+func (r *resourceType) readBackIfEmpty(ctx context.Context, identifier string, properties map[string]any) map[string]any {
+	if len(properties) > 0 || identifier == "" {
+		return properties
+	}
+	fetched, found, err := r.client.GetResource(ctx, r.typeName, identifier)
+	if err != nil || !found {
+		return properties
+	}
+	return fetched
 }
 
 // injectDerivedName ensures a LookupByName type's desired state carries
@@ -309,7 +334,7 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 // # Why this exists
 //
 // For LookupByName, the derived name *is* the provider's own primary
-// identifier (D26) — but Create otherwise submits spec.Config verbatim,
+// identifier — but Create otherwise submits spec.Config verbatim,
 // and nothing before this method ever puts the name into it.
 // AWS::S3::Bucket's own CloudFormation reference documents the resulting
 // failure mode explicitly: "If you don't specify a name, AWS
@@ -341,8 +366,8 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 // # Compound and unresolvable identifiers fail loudly, never guess
 //
 // A byName type's PrimaryIdentifier is expected to be exactly one
-// top-level property (D7's derivable-name assumption, verified per type in
-// register.go's own comments: BucketName, FunctionName, RoleName, Name).
+// top-level property (verified per type in register.go's own comments:
+// BucketName, FunctionName, RoleName, Name).
 // AWS::Route53::RecordSet is the real counterexample this package already
 // knows about — its primary identifier is the compound
 // (HostedZoneId, Name, Type), and no single property is "the name" to
@@ -511,9 +536,10 @@ func (r *resourceType) DiffersFromState(spec resource.Spec, state *resource.Stat
 
 		desiredVal, hasDesired := lookupPath(spec.Config, path)
 		if !hasDesired {
-			// Not declared in the manifest at all. D6: a property the
-			// manifest never mentions is never touched, so its absence here
-			// can never itself be the source of a disagreement.
+			// Not declared in the manifest at all — the manifest is kraai's
+			// only source of truth, so a property it never mentions is
+			// never touched, and its absence here can never itself be the
+			// source of a disagreement.
 			continue
 		}
 		desiredNorm, err := normalizeForCompare(desiredVal)

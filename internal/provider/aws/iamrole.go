@@ -36,11 +36,13 @@ const awsLambdaBasicExecutionRoleArn = "arn:aws:iam::aws:policy/service-role/AWS
 
 // iamRoleResource provisions a service's Lambda execution role.
 //
-// Registered in PhaseStorage, ahead of the function that assumes it — see
-// register.go's own doc comment on why this is phase-as-ordering, not
-// phase-as-category, and the precedent PR #75 already established for the
-// same technique (ACM validation records ahead of the certificate,
-// S3/certificate ahead of CloudFront).
+// Depended upon by TypeLambdaFunction's own registration (register.go) —
+// this type declares no DependsOn of its own, only functions as a
+// dependency for the function that assumes it. Previously ordered ahead of
+// the function by declaring PhaseStorage purely to run first, despite
+// being neither storage nor a category match; that phase-as-priority hack
+// is exactly what resource.Registration.DependsOn replaced (see its own
+// doc comment).
 type iamRoleResource struct {
 	inner *resourceType
 }

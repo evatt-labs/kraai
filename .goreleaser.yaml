@@ -1,8 +1,7 @@
-# GoReleaser config for kraai (docs/BLUEPRINT.md D1). No release-triggering
-# workflow exists yet (that's a future workstream once cosign/GH credentials
-# are in place) — this file is validated locally via `goreleaser release
-# --snapshot --clean` for now. See the go-module-scaffold PR description for
-# exactly what's stubbed pending real credentials.
+# GoReleaser config for kraai. Driven by .github/workflows/release.yml on a
+# v* tag push; validate changes locally with
+# `goreleaser release --snapshot --clean --skip=sign`, since keyless signing
+# needs an OIDC identity that only exists inside a real Actions run.
 version: 2
 
 project_name: kraai
@@ -40,20 +39,28 @@ checksum:
 
 # Keyless cosign signing (Sigstore, OIDC-based — no key material stored in
 # this repo). config.Sign has no per-run `skip` field, so this pipe always
-# runs when GoReleaser executes; there's no OIDC identity or cosign binary
-# available outside a real GitHub Actions run, so local/CI verification of
-# this scaffolding uses `goreleaser release --snapshot --clean --skip=sign`.
-# STUBBED: untested end-to-end pending a release workflow that installs
-# cosign and grants `id-token: write` for keyless signing.
+# runs when GoReleaser executes; the release workflow installs cosign and
+# grants `id-token: write` for it. Outside Actions there is no OIDC identity,
+# so a local run needs `--skip=sign`.
+#
+# One bundle, not a separate .sig and .pem. cosign v3 defaults to the new
+# bundle format, which carries the signature, the certificate and the
+# transparency-log entry in one file and ignores --output-signature and
+# --output-certificate entirely. Passing those alone leaves --bundle empty
+# and cosign fails trying to write to "".
+#
+# Verify a release with:
+#   cosign verify-blob checksums.txt \
+#     --bundle checksums.txt.bundle \
+#     --certificate-identity-regexp '^https://github.com/evatt-labs/kraai/' \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com
 signs:
   - id: checksums
     cmd: cosign
-    signature: "${artifact}.sig"
-    certificate: "${artifact}.pem"
+    signature: "${artifact}.bundle"
     args:
       - sign-blob
-      - "--output-signature=${signature}"
-      - "--output-certificate=${certificate}"
+      - "--bundle=${signature}"
       - "${artifact}"
       - --yes
     artifacts: checksum
@@ -62,17 +69,48 @@ release:
   github:
     owner: evatt-labs
     name: kraai
+  # GoReleaser defaults this to false, which marks every tag as the latest
+  # release — a v0.6.0-rc.1 would be offered as the recommended download
+  # ahead of the last stable one. "auto" reads the semver prerelease
+  # segment, so anything with a -rc, -beta or -alpha suffix is published as
+  # a prerelease and leaves the stable release alone.
+  prerelease: auto
 
-# STUBBED: evatt-labs/homebrew-tap does not exist yet. Publishing is
-# skipped for snapshot builds regardless, but a real release will fail here
-# until that tap repo is created and a token with push access to it is
-# wired into the (not-yet-existing) release workflow. `brews:` (formulas)
-# is deprecated as of GoReleaser v2.16 in favor of `homebrew_casks:`.
+# Publishing the cask needs push access to a second repository, which the
+# release workflow's GITHUB_TOKEN does not have — hence a separate secret.
+#
+# skip_upload is computed rather than fixed so a missing token skips Homebrew
+# and still ships the release. GoReleaser runs this pipe after uploading the
+# archives, so failing here would leave a release that looks complete and is
+# not; that is the failure this expression exists to prevent. Prereleases are
+# skipped for the same reason `brew install` should never resolve to an rc.
 homebrew_casks:
   - name: kraai
+    skip_upload: '{{ if or (eq .Env.HOMEBREW_TAP_TOKEN "") (ne .Prerelease "") }}true{{ else }}false{{ end }}'
     repository:
       owner: evatt-labs
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     directory: Casks
+    binaries:
+      - kraai
     homepage: https://github.com/evatt-labs/kraai
-    description: kraai is a multi-cloud devops control plane.
+    description: Declare environments as manifests and apply them with one command.
+    hooks:
+      post:
+        # The release archives are cosign-signed but not Apple-notarized, so
+        # Gatekeeper quarantines the binary and the first run is refused with
+        # a dialog rather than an error. Stripping the attribute is what
+        # makes `brew install` produce a runnable binary; proper notarization
+        # would remove the need for it.
+        #
+        # This emits Homebrew's `postflight` stanza, which Homebrew 7
+        # deprecated in favour of the declarative `postflight_steps`, so every
+        # brew command touching this cask prints a deprecation warning. The
+        # template is GoReleaser's, not this file's: goreleaser/goreleaser#6870.
+        # Installing works regardless — verified against Homebrew 7.0.3.
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr",
+                           args: ["-dr", "com.apple.quarantine", "#{staged_path}/kraai"]
+          end

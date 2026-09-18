@@ -41,8 +41,8 @@ func (k ActionKind) String() string {
 }
 
 // Item identifies what a single Action is about, independent of any live
-// provider client — safe to render, log, or hand to a serializer on its
-// own, unlike a resource.Registration, which carries a live resource.Resource.
+// provider client — safe to render, log, or serialize on its own, unlike a
+// resource.Registration, which carries a live resource.Resource.
 type Item struct {
 	// ServiceKey and Binding locate this resource in the manifest.
 	ServiceKey string
@@ -51,32 +51,26 @@ type Item struct {
 	// ("postgres", "keyvalue", "objects", "queues").
 	Capability string
 	// Provider and Type are the vendor's own vocabulary for the concrete
-	// resource type this binding (partly) expanded to (D30).
+	// resource type this binding expanded to. One binding may expand to
+	// types under more than one provider.
 	Provider string
 	Type     string
-	// Phase is when this resource type is provisioned (D31).
-	Phase resource.Phase
+	// Wave is the zero-based execution wave this resource is provisioned
+	// in: the length of the longest chain of dependencies that must
+	// complete before it can start, computed once per Plan by graph.go.
+	// Everything in one wave runs concurrently; apply executes waves in
+	// ascending order, destroy in descending order.
+	Wave int
 	// ReadsBindings names the bindings in this action's own service whose
 	// credentials it may read.
 	//
-	// A compute item's binding is the service itself (see expandCompute), so
-	// without this field apply had no way to hand a Lambda the connection
-	// string for the database its own service declares: apply's secret
-	// index is keyed by (ServiceKey, Binding), a compute action's Binding is
-	// svcKey, and a database binding's producer registers itself under
-	// (ServiceKey, "DB") — the keys never meet. expandCompute populates this
-	// with every binding the service declares across Databases, KeyValue,
-	// Objects and Queues, sorted for the same determinism the rest of this
-	// package guarantees; expandBinding populates it with the item's own
-	// binding alone, which is a no-op change in what that item can read.
-	//
-	// This lives on Item rather than being inferred inside apply from the
-	// manifest because apply must not import internal/manifest or branch on
-	// capability — the planner is the one package that already walks a
-	// service's declared bindings, so it is the one place that can express
-	// "what may this action read" as plain data instead of apply
-	// re-deriving manifest-shaped knowledge it was deliberately never given
-	// (see internal/apply's package doc).
+	// A compute item's Binding is its service key, while a database
+	// binding's producer registers under that service's binding name, so
+	// apply's (ServiceKey, Binding)-keyed secret index would never connect
+	// the two without this. It lives on Item rather than being derived
+	// inside apply because apply must not import internal/manifest or
+	// branch on capability, and the planner already walks a service's
+	// declared bindings.
 	ReadsBindings []string
 }
 
@@ -86,13 +80,9 @@ type Action struct {
 	// Ref is this resource's derived identity (internal/naming).
 	Ref resource.Ref
 	// Spec is the desired state a subsequent apply would create or replace
-	// this resource with. Its Secrets are always empty: a plan never
-	// resolves a live credential, and wiring one in would require knowing
-	// which other binding produces the value this one needs — vendor-
-	// specific knowledge this package deliberately does not have. That
-	// wiring belongs to whatever builds apply next, using the same
-	// resource.Outputs/resource.SecretProducer machinery the resource
-	// contract already defines for it.
+	// this resource with. Its Secrets are always empty — a plan never
+	// resolves a live credential; apply wires those from resource.Outputs
+	// and resource.SecretProducer.
 	Spec resource.Spec
 	// Current is what Get found, or nil when the resource does not exist
 	// (ActionCreate) or Get failed (ActionFailed).
@@ -105,7 +95,7 @@ type Action struct {
 
 // Plan is the ordered result of walking a manifest: what would happen to
 // every resource type every declared binding expands to, in provisioning
-// order (D31, stable within a phase).
+// order and stable within a wave.
 type Plan struct {
 	Actions []Action
 }
@@ -122,8 +112,7 @@ func (p *Plan) HasChanges() bool {
 }
 
 // HasFailures reports whether any resource's current state could not be
-// read, meaning this plan is incomplete — see the package doc's "Partial
-// failure" section.
+// read, meaning this plan is incomplete.
 func (p *Plan) HasFailures() bool {
 	for _, a := range p.Actions {
 		if a.Kind == ActionFailed {

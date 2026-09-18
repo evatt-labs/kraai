@@ -32,19 +32,17 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Both languages in one job, deliberately not a matrix. `analyze` is a
+      # One language, still deliberately not a matrix. `analyze` is a
       # required status check on main (branch protection); a matrix renames
-      # it to `analyze (go)` / `analyze (javascript-typescript)`, so the
-      # required context would never report again and every PR would block
-      # forever on a check that no longer exists. Splitting this later means
-      # updating branch protection in the same change.
+      # it to `analyze (go)`, so the required context would never report
+      # again and every PR would block forever on a check that no longer
+      # exists. Adding a second language later means updating branch
+      # protection in the same change.
       #
-      # go covers cmd/ and internal/ - the actual product. javascript-typescript
-      # covers legacy-node/ (still the published npm package until the
-      # release-handover workstream lands) and npm/ (the Go binary's installer
-      # wrapper). Drop the JS half only when legacy-node/ is deleted.
-      - uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+      # go covers cmd/ and internal/, which is now the whole repo: the
+      # JavaScript CLI and the npm install wrapper are both gone.
+      - uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
-          languages: go,javascript-typescript
+          languages: go
 
-      - uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+      - uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0

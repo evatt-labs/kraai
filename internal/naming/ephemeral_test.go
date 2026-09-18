@@ -11,7 +11,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// TestIsValidEnvironmentName_Golden pins legacy-node/test/names.test.mjs's
+// TestIsValidEnvironmentName_Golden pins the JavaScript CLI's names.test.mjs
 // own isValidEnvironmentName fixtures: 2 accepted, 7 rejected.
 func TestIsValidEnvironmentName_Golden(t *testing.T) {
 	accept := []string{
@@ -41,7 +41,7 @@ func TestIsValidEnvironmentName_Golden(t *testing.T) {
 }
 
 // TestGenerateEnvironmentName_MatchesOwnValidator mirrors
-// legacy-node/test/names.test.mjs's "produces a name matching its own
+// the JavaScript CLI's names.test.mjs "produces a name matching its own
 // validator" — every draw from a CSPRNG-backed generator must satisfy the
 // frozen NamePattern.
 func TestGenerateEnvironmentName_MatchesOwnValidator(t *testing.T) {
@@ -56,7 +56,7 @@ func TestGenerateEnvironmentName_MatchesOwnValidator(t *testing.T) {
 	}
 }
 
-// TestGenerateEnvironmentName_Varies mirrors legacy-node's "produces
+// TestGenerateEnvironmentName_Varies mirrors the JavaScript CLI's "produces
 // different names across calls": a collapse to a single distinct value
 // across many draws would mean the RNG isn't varying.
 func TestGenerateEnvironmentName_Varies(t *testing.T) {
@@ -74,7 +74,7 @@ func TestGenerateEnvironmentName_Varies(t *testing.T) {
 }
 
 // TestEnvironmentNameForPullRequest_Golden pins
-// legacy-node/test/names.test.mjs's environmentNameForPullRequest
+// the JavaScript CLI's names.test.mjs environmentNameForPullRequest
 // fixtures.
 func TestEnvironmentNameForPullRequest_Golden(t *testing.T) {
 	cases := []struct {
@@ -115,7 +115,7 @@ func TestEnvironmentNameForPullRequest_TruncatesOverlongRepoName(t *testing.T) {
 
 // TestEnvironmentNameForPullRequest_RangeErrors pins the JS suite's
 // "throws on a PR number above 99999" / "... 0" cases, translated to
-// Go's returned-error convention (D18/D19) instead of a thrown exception.
+// Go's own returned-error convention instead of a thrown exception.
 func TestEnvironmentNameForPullRequest_RangeErrors(t *testing.T) {
 	for _, prNumber := range []int{0, 100000, -1} {
 		_, err := EnvironmentNameForPullRequest("repo", prNumber)
@@ -159,10 +159,10 @@ func TestEnvironmentNameForPullRequest_AcceptedResultsAreValid(t *testing.T) {
 	}
 }
 
-// TestRapid_EnvironmentNameForPullRequest_AlwaysValidOrRejected is D21's
-// named rapid target for pull-request naming derivation: for any repo
-// name and any int32-range PR number, the function either returns a name
-// that passes IsValidEnvironmentName, or a CodeValidation error — never a
+// TestRapid_EnvironmentNameForPullRequest_AlwaysValidOrRejected is a
+// property-based rapid target for pull-request naming derivation: for any
+// repo name and any int32-range PR number, the function either returns a
+// name that passes IsValidEnvironmentName, or a CodeValidation error — never a
 // panic, and never a name that fails its own validator (the defensive
 // assert in EnvironmentNameForPullRequest would itself fail the test via
 // CodeUnexpected below). Also asserts determinism: calling twice with the

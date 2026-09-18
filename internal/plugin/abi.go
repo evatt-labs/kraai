@@ -41,8 +41,8 @@ const (
 // boundary. It is checked before any host-side allocation driven by a
 // guest-supplied length, so a malicious or buggy plugin cannot force an
 // unbounded make([]byte, n) merely by returning a huge len. 64MiB
-// comfortably covers any provider schema kraai ships today (D29 notes the
-// largest, CloudFront's, is 116KB) with headroom, without being large
+// comfortably covers any provider schema kraai ships today (the largest,
+// CloudFront's, is 116KB) with headroom, without being large
 // enough to be a meaningful DoS lever on its own.
 const MaxTransferBytes = 64 << 20
 

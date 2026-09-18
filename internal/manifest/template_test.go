@@ -129,8 +129,8 @@ func TestPongoEngine_ExtendsDotDotEscapeIsRejected(t *testing.T) {
 }
 
 // TestPongoEngine_RelativeIncludeWithinRootStillWorks proves the fix
-// didn't just break the feature D5 asks for: a legitimate relative
-// {% include %} to a file inside the manifest directory must still work.
+// didn't just break real templating: a legitimate relative {% include %}
+// to a file inside the manifest directory must still work.
 func TestPongoEngine_RelativeIncludeWithinRootStillWorks(t *testing.T) {
 	engine := manifest.NewTemplateEngine(mustNewFS(t, "testdata/template-security"))
 	out, err := engine.Render("main.j2", []byte(`{% include "partial.j2" %}`), nil)

@@ -65,7 +65,7 @@ func TestInstrumentProducesASpanAndAHistogram(t *testing.T) {
 	r := NewRegistry(WithDecorator(tl.decor))
 	if err := r.Register(Registration{
 		Provider: "cloudflare", Type: "d1_database", Capability: "database",
-		Phase: PhaseStorage, Lookup: LookupByAPI, Resource: inner,
+		Lookup: LookupByAPI, Resource: inner,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,6 @@ func TestInstrumentProducesASpanAndAHistogram(t *testing.T) {
 		"kraai.provider":      "cloudflare",
 		"kraai.resource_type": "d1_database",
 		"kraai.verb":          "get",
-		"kraai.phase":         "storage",
 		"kraai.resource_name": "env-a-api-db",
 	} {
 		if attrs[key] != want {
@@ -120,7 +119,7 @@ func TestInstrumentRecordsFailures(t *testing.T) {
 
 	wrapped := tl.decor(Registration{
 		Provider: "neon", Type: "branch", Capability: "postgres",
-		Phase: PhaseDatabase, Lookup: LookupByAttr, Resource: inner,
+		Lookup: LookupByAttr, Resource: inner,
 	})
 
 	if err := wrapped.Delete(t.Context(), Ref{Name: "env-a"}); err == nil {
@@ -154,7 +153,7 @@ func TestInstrumentDoesNotUseNameAsAMetricDimension(t *testing.T) {
 
 	wrapped := tl.decor(Registration{
 		Provider: "cloudflare", Type: "kv_namespace", Capability: "keyvalue",
-		Phase: PhaseStorage, Lookup: LookupByAttr, Resource: inner,
+		Lookup: LookupByAttr, Resource: inner,
 	})
 
 	// Three different environments, which is the case that would explode the
@@ -190,7 +189,7 @@ func TestEveryVerbIsInstrumented(t *testing.T) {
 
 	wrapped := tl.decor(Registration{
 		Provider: "p", Type: "t", Capability: "c",
-		Phase: PhaseStorage, Lookup: LookupByName, Resource: inner,
+		Lookup: LookupByName, Resource: inner,
 	})
 
 	ctx := t.Context()
@@ -227,7 +226,7 @@ func TestInstrumentWithGlobalProviders(t *testing.T) {
 
 	wrapped := Instrument(nil, nil)(Registration{
 		Provider: "p", Type: "t", Capability: "c",
-		Phase: PhaseStorage, Lookup: LookupByName, Resource: inner,
+		Lookup: LookupByName, Resource: inner,
 	})
 	if _, err := wrapped.Get(context.Background(), Ref{Name: "n"}); err != nil {
 		t.Fatalf("Get through the global providers: %v", err)
@@ -260,7 +259,7 @@ func TestInstrumentSurvivesAFailingMeter(t *testing.T) {
 
 	wrapped := Instrument(tp, failingMeterProvider{})(Registration{
 		Provider: "cloudflare", Type: "r2_bucket", Capability: "objects",
-		Phase: PhaseStorage, Lookup: LookupByName, Resource: inner,
+		Lookup: LookupByName, Resource: inner,
 	})
 
 	state, err := wrapped.Create(t.Context(), Spec{Binding: "BUCKET"})
@@ -305,7 +304,7 @@ func decorate(t *testing.T, r Resource) Resource {
 	reg := NewRegistry(WithDecorator(Instrument(nil, nil)))
 	if err := reg.Register(Registration{
 		Provider: "p", Type: "t", Capability: "objects",
-		Phase: PhaseStorage, Lookup: LookupByName, Resource: r,
+		Lookup: LookupByName, Resource: r,
 	}); err != nil {
 		t.Fatalf("registering: %v", err)
 	}

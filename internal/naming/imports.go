@@ -31,16 +31,16 @@ func (k ImportKind) String() string {
 	}
 }
 
-// ImportIdentity is one imported resource's resolved identity (D7): the
+// ImportIdentity is one imported resource's resolved identity: the
 // manifest.ImportRef field that was set, and which one it was.
 type ImportIdentity struct {
 	Kind  ImportKind
 	Value string
 }
 
-// ResolveImportRef validates and resolves ref. Per D7, an imported
-// resource's manifest-declared { id | name } *is* the resource's
-// identity — no further derivation happens here. This only checks that
+// ResolveImportRef validates and resolves ref. An imported resource's
+// manifest-declared { id | name } already *is* the resource's identity —
+// no further derivation happens here. This only checks that
 // the manifest author declared exactly one of the two: both or neither
 // is a validation error, since kraai would otherwise have to guess
 // which one a provider's Get call should use.
@@ -62,8 +62,8 @@ func ResolveImportRef(ref manifest.ImportRef) (ImportIdentity, error) {
 }
 
 // resourceKinds lists ResourceImports' four fields in the manifest
-// schema's own declared order (docs/BLUEPRINT.md "Manifest schema":
-// databases, keyvalue, objects, queues), alongside an accessor, so
+// schema's own declared order (databases, keyvalue, objects, queues),
+// alongside an accessor, so
 // ResolveImports can iterate them deterministically without reflection.
 var resourceKinds = []struct {
 	name string

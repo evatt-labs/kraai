@@ -19,22 +19,27 @@ func TestRegisterWiresEveryType(t *testing.T) {
 	cases := []struct {
 		key        string
 		capability string
-		phase      resource.Phase
+		dependsOn  []string
 		lookup     resource.LookupStrategy
 	}{
-		{Provider + "/" + TypeS3Bucket, manifest.CapabilityObjects, resource.PhaseStorage, resource.LookupByName},
-		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityObjects, resource.PhaseCompute, resource.LookupByAttr},
-		{Provider + "/" + TypeCertificateManagerCertificate, manifest.CapabilityObjects, resource.PhaseStorage, resource.LookupByTag},
-		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityObjects, resource.PhaseStorage, resource.LookupByAPI},
-		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityObjects, resource.PhaseCompute, resource.LookupByAttr},
-		{Provider + "/" + TypeLambdaFunction, manifest.CapabilityCompute, resource.PhaseCompute, resource.LookupByName},
-		{Provider + "/" + TypeAPIGatewayV2API, manifest.CapabilityCompute, resource.PhaseCompute, resource.LookupByTag},
-		{Provider + "/" + TypeArtifactBucket, manifest.CapabilityCompute, resource.PhaseStorage, resource.LookupByName},
-		{Provider + "/" + TypeIAMRole, manifest.CapabilityCompute, resource.PhaseStorage, resource.LookupByName},
-		{Provider + "/" + TypeLambdaURL, manifest.CapabilityCompute, resource.PhaseCompute, resource.LookupByAttr},
-		{Provider + "/" + TypeEventsRule, manifest.CapabilityCompute, resource.PhaseCompute, resource.LookupByName},
-		{Provider + "/" + TypePermissionEventsRule, manifest.CapabilityCompute, resource.PhaseCompute, resource.LookupByAttr},
-		{Provider + "/" + TypePermissionAPIGateway, manifest.CapabilityCompute, resource.PhaseCompute, resource.LookupByAttr},
+		{Provider + "/" + TypeS3Bucket, manifest.CapabilityObjects, nil, resource.LookupByName},
+		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityObjects,
+			[]string{key(TypeS3Bucket), key(TypeCertificateManagerCertificate)}, resource.LookupByAttr},
+		{Provider + "/" + TypeCertificateManagerCertificate, manifest.CapabilityObjects, nil, resource.LookupByTag},
+		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityObjects, nil, resource.LookupByAPI},
+		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityObjects,
+			[]string{key(TypeRoute53HostedZone), key(TypeCloudFrontDistribution)}, resource.LookupByAttr},
+		{Provider + "/" + TypeLambdaFunction, manifest.CapabilityCompute,
+			[]string{key(TypeArtifactBucket), key(TypeIAMRole)}, resource.LookupByName},
+		{Provider + "/" + TypeAPIGatewayV2API, manifest.CapabilityCompute, nil, resource.LookupByTag},
+		{Provider + "/" + TypeArtifactBucket, manifest.CapabilityCompute, nil, resource.LookupByName},
+		{Provider + "/" + TypeIAMRole, manifest.CapabilityCompute, nil, resource.LookupByName},
+		{Provider + "/" + TypeLambdaURL, manifest.CapabilityCompute, []string{key(TypeLambdaFunction)}, resource.LookupByAttr},
+		{Provider + "/" + TypeEventsRule, manifest.CapabilityCompute, nil, resource.LookupByName},
+		{Provider + "/" + TypePermissionEventsRule, manifest.CapabilityCompute,
+			[]string{key(TypeLambdaFunction)}, resource.LookupByAttr},
+		{Provider + "/" + TypePermissionAPIGateway, manifest.CapabilityCompute,
+			[]string{key(TypeLambdaFunction), key(TypeAPIGatewayV2API)}, resource.LookupByAttr},
 	}
 	for _, tc := range cases {
 		t.Run(tc.key, func(t *testing.T) {
@@ -42,8 +47,11 @@ func TestRegisterWiresEveryType(t *testing.T) {
 			if !ok {
 				t.Fatalf("Lookup(%q): not registered", tc.key)
 			}
-			if got.Capability != tc.capability || got.Phase != tc.phase || got.Lookup != tc.lookup {
-				t.Fatalf("registration = %+v, want capability=%s phase=%v lookup=%s", got, tc.capability, tc.phase, tc.lookup)
+			if got.Capability != tc.capability || got.Lookup != tc.lookup {
+				t.Fatalf("registration = %+v, want capability=%s lookup=%s", got, tc.capability, tc.lookup)
+			}
+			if !reflect.DeepEqual(got.DependsOn, tc.dependsOn) {
+				t.Fatalf("DependsOn = %v, want %v", got.DependsOn, tc.dependsOn)
 			}
 		})
 	}
@@ -185,9 +193,16 @@ func TestRegisterPropagatesADuplicateRegistrationError(t *testing.T) {
 	}
 }
 
-func TestRegisterExpandsCapabilitiesInPhaseOrder(t *testing.T) {
-	// Mirrors neonresource's D30 pairing: one capability, two AWS types, the
-	// producer resolved before its consumer.
+// TestRegisterExpandsCapabilitiesToEveryType checks that both capabilities
+// this package registers under resolve to the complete, expected set of
+// types. Execution order is no longer Resolve's concern — Resolve returns
+// registration order (see Registry.Resolve's own doc comment) and real
+// ordering is computed from DependsOn by internal/plan/graph.go, which has
+// its own dedicated wave-assignment tests against this exact topology
+// (internal/plan/aws_topology_test.go).
+func TestRegisterExpandsCapabilitiesToEveryType(t *testing.T) {
+	// Mirrors neonresource's own capability-to-multiple-types pairing: one
+	// capability, several AWS types.
 	reg := resource.NewRegistry()
 	if err := Register(reg, &Client{}); err != nil {
 		t.Fatalf("Register: %v", err)
@@ -197,50 +212,33 @@ func TestRegisterExpandsCapabilitiesInPhaseOrder(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Resolve objects: %v", err)
 	}
-	wantObjects := []string{TypeRoute53HostedZone, TypeCertificateManagerCertificate, TypeS3Bucket, TypeCloudFrontDistribution, TypeRoute53RecordSet}
+	wantObjects := map[string]bool{
+		TypeRoute53HostedZone: true, TypeCertificateManagerCertificate: true, TypeS3Bucket: true,
+		TypeCloudFrontDistribution: true, TypeRoute53RecordSet: true,
+	}
 	if len(objects) != len(wantObjects) {
 		t.Fatalf("objects = %+v, want %d entries", objects, len(wantObjects))
 	}
-	// Resolve sorts by Phase ascending (stable within a phase), so this
-	// order also proves HostedZone, Certificate and S3Bucket all land in
-	// PhaseStorage, ahead of CloudFrontDistribution and RecordSet in
-	// PhaseCompute — CloudFront can reference the certificate PhaseStorage
-	// already provisioned by the time it runs.
-	for i, want := range wantObjects {
-		if objects[i].Type != want {
-			t.Fatalf("objects[%d].Type = %q, want %q (full: %+v)", i, objects[i].Type, want, objects)
+	for _, r := range objects {
+		if !wantObjects[r.Type] {
+			t.Fatalf("objects contains unexpected type %q (full: %+v)", r.Type, objects)
 		}
-	}
-	if objects[0].Phase != resource.PhaseStorage || objects[2].Phase != resource.PhaseStorage {
-		t.Fatalf("objects = %+v, want the first three in PhaseStorage", objects)
-	}
-	if objects[3].Phase != resource.PhaseCompute || objects[4].Phase != resource.PhaseCompute {
-		t.Fatalf("objects = %+v, want the last two in PhaseCompute", objects)
 	}
 
 	compute, err := reg.Resolve(manifest.CapabilityCompute, map[string]string{manifest.CapabilityCompute: Provider})
 	if err != nil {
 		t.Fatalf("Resolve compute: %v", err)
 	}
-	wantCompute := []string{
-		TypeArtifactBucket, TypeIAMRole, // PhaseStorage, registration order
-		TypeLambdaFunction, TypeLambdaURL, TypeEventsRule, TypePermissionEventsRule,
-		TypeAPIGatewayV2API, TypePermissionAPIGateway, // PhaseCompute, registration order
+	wantCompute := map[string]bool{
+		TypeArtifactBucket: true, TypeIAMRole: true, TypeLambdaFunction: true, TypeLambdaURL: true,
+		TypeEventsRule: true, TypePermissionEventsRule: true, TypeAPIGatewayV2API: true, TypePermissionAPIGateway: true,
 	}
 	if len(compute) != len(wantCompute) {
 		t.Fatalf("compute = %+v, want %d entries", compute, len(wantCompute))
 	}
-	for i, want := range wantCompute {
-		if compute[i].Type != want {
-			t.Fatalf("compute[%d].Type = %q, want %q (full: %+v)", i, compute[i].Type, want, compute)
-		}
-	}
-	if compute[0].Phase != resource.PhaseStorage || compute[1].Phase != resource.PhaseStorage {
-		t.Fatalf("compute = %+v, want the artifact bucket and role in PhaseStorage, ahead of the function that needs both", compute)
-	}
-	for _, r := range compute[2:] {
-		if r.Phase != resource.PhaseCompute {
-			t.Fatalf("compute = %+v, want everything after the bucket/role in PhaseCompute", compute)
+	for _, r := range compute {
+		if !wantCompute[r.Type] {
+			t.Fatalf("compute contains unexpected type %q (full: %+v)", r.Type, compute)
 		}
 	}
 }

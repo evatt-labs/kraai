@@ -18,9 +18,9 @@ func newRealLoader(t *testing.T, root string) *manifest.Loader {
 	return manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
 }
 
-// TestLoad_BlueprintExamplesParse is acceptance criterion 1: every example
-// in docs/BLUEPRINT.md's "Manifest schema" section, copied verbatim into
-// testdata/blueprint/, must parse into a fully resolved Manifest.
+// TestLoad_BlueprintExamplesParse pins that the canonical kraai.yaml /
+// services / environments manifest examples, copied verbatim into
+// testdata/blueprint/, parse into a fully resolved Manifest.
 func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	loader := newRealLoader(t, "testdata/blueprint")
 
@@ -272,6 +272,38 @@ func TestLoad_BadKindIsValidationError(t *testing.T) {
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "kind") {
 		t.Errorf("error %q does not mention kind", kerr.Error())
+	}
+}
+
+// TestLoad_InvalidNamingPrefixIsValidationError is the "validate the
+// prefix... enforce it at manifest load with a clear error" requirement:
+// a naming.prefix missing its mandatory trailing hyphen is rejected at
+// Load, with manifest.ErrInvalidPrefix identifiable in the error chain
+// via errors.Is — not just a message a caller has to substring-match.
+func TestLoad_InvalidNamingPrefixIsValidationError(t *testing.T) {
+	loader := newRealLoader(t, "testdata/bad-naming-prefix")
+	_, err := loader.Load("dev", nil)
+	kerr := requireCode(t, err, kerrors.CodeValidation)
+	if !errors.Is(kerr, manifest.ErrInvalidPrefix) {
+		t.Errorf("error %v does not wrap manifest.ErrInvalidPrefix", kerr)
+	}
+	if !strings.Contains(kerr.Error(), "naming.prefix") {
+		t.Errorf("error %q does not mention naming.prefix", kerr.Error())
+	}
+}
+
+// TestLoad_NamingPrefixTooLongIsValidationError is the "a prefix so long
+// it leaves no room for the derived name is a manifest error, not a
+// silent truncation to nothing" requirement: a naming.prefix over
+// internal/manifest's length ceiling is rejected at Load, with
+// manifest.ErrPrefixTooLong identifiable via errors.Is, rather than
+// silently accepted and truncated away later inside internal/naming.
+func TestLoad_NamingPrefixTooLongIsValidationError(t *testing.T) {
+	loader := newRealLoader(t, "testdata/naming-prefix-too-long")
+	_, err := loader.Load("dev", nil)
+	kerr := requireCode(t, err, kerrors.CodeValidation)
+	if !errors.Is(kerr, manifest.ErrPrefixTooLong) {
+		t.Errorf("error %v does not wrap manifest.ErrPrefixTooLong", kerr)
 	}
 }
 

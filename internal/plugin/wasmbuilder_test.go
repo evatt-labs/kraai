@@ -5,8 +5,7 @@ package plugin
 // on an external toolchain (Go/TinyGo/Rust, or GOOS=wasip1 cross-compiles)
 // at test time. A hand-built module with one exported function is ~40
 // bytes and compiles in well under a millisecond; a real Go-compiled
-// wasip1 c-shared reactor module is ~1.86MB and takes ~390ms to compile
-// (see docs/BLUEPRINT.md's plugin runtime measurement appendix) —
+// wasip1 c-shared reactor module is ~1.86MB and takes ~390ms to compile —
 // generating fixtures here keeps the test suite fast and, more
 // importantly, lets a test construct exactly the malformed/hostile shapes
 // this package's bounds-checking exists to reject (an out-of-range

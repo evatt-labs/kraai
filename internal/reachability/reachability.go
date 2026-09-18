@@ -17,6 +17,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/evatt-labs/kraai/internal/httpx"
 )
 
 // edgeErrorPage matches Cloudflare's own edge fallback body for a request
@@ -69,7 +71,14 @@ func (o Options) withDefaults() Options {
 		o.ProbeTimeout = DefaultProbeTimeout
 	}
 	if o.Client == nil {
-		o.Client = &http.Client{Timeout: o.ProbeTimeout}
+		// httpx.NewClient shares the process-wide pooled Transport
+		// with every other HTTP-based provider client, so probing several
+		// freshly deployed environments in the same run does not each pay a
+		// fresh handshake in isolation. Its own timeout stays
+		// ProbeTimeout — a probe is not a 60s management-API call — which is
+		// exactly why the pool is shared but the client is not; see
+		// internal/httpx's package doc for the full reasoning.
+		o.Client = httpx.NewClient(o.ProbeTimeout, nil, nil)
 	}
 	return o
 }

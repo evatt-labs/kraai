@@ -15,12 +15,10 @@ import (
 const instrumentationName = "github.com/evatt-labs/kraai/internal/resource"
 
 // Instrument returns a decorator suitable for WithDecorator, wrapping every
-// verb in a span and a duration histogram (D17).
+// verb in a span and a duration histogram.
 //
 // Applied at registration rather than at each call site, so a resource type
-// cannot be added without instrumentation by forgetting a wrapper — the
-// explicit ask behind D17 was to time calls across the whole stack and find
-// hot spots, which only holds if coverage is automatic.
+// cannot be added without instrumentation by forgetting a wrapper.
 //
 // Passing nil for either provider uses the globals, which is what a real run
 // does; tests pass an SDK provider with an in-memory exporter.
@@ -58,7 +56,6 @@ func Instrument(tp trace.TracerProvider, mp metric.MeterProvider) func(Registrat
 				attribute.String("kraai.provider", reg.Provider),
 				attribute.String("kraai.resource_type", reg.Type),
 				attribute.String("kraai.capability", reg.Capability),
-				attribute.String("kraai.phase", reg.Phase.String()),
 			},
 		}
 	}
@@ -144,36 +141,29 @@ func (i *instrumented) Delete(ctx context.Context, ref Ref) error {
 //
 // This is not cosmetic. Instrument is applied to every registration by
 // internal/assemble, so in a real run nothing downstream ever holds an
-// undecorated Resource — it holds an *instrumented. A caller asking "does
-// this resource also implement SecretProducer" is therefore asking about
-// *instrumented, not about the type that actually implements it, and
-// before these methods existed the answer was always no. Two shipped
-// behaviours were silently dead as a result: plan could never emit
-// ActionReplace (internal/plan's decide type-asserts ImmutableDiffer), and
-// apply's credential handoff resolved nothing (internal/apply type-asserts
-// SecretProducer), in both cases only under the decorator that production
-// always applies and no test used.
+// undecorated Resource — it holds an *instrumented. Before these forwarding
+// methods existed, a caller asking "does this resource also implement
+// SecretProducer" was really asking *instrumented, which always answered
+// no even when the wrapped type implemented it. Two behaviours shipped
+// silently dead as a result: plan could never emit ActionReplace
+// (internal/plan's decide type-asserts ImmutableDiffer), and apply's
+// credential handoff resolved nothing (internal/apply type-asserts
+// SecretProducer). A third, plan.SpecValidator, was forwarded from the
+// start to avoid becoming a fourth instance of the same bug.
 //
-// Forwarding unconditionally rather than building a struct variant per
-// combination of implemented interfaces is safe here because each method's
-// not-implemented answer is indistinguishable from the type not
-// implementing the interface at all: no secrets, and no immutable
-// difference. The cost is that a type assertion against *instrumented no
-// longer carries information — which is precisely why the guard test in
+// Forwarding unconditionally, rather than a struct variant per combination
+// of implemented interfaces, is safe here because "not implemented" and
+// "implemented but answered false/nil" look identical to every caller: no
+// secrets, no immutable difference, no validation error. The cost is that
+// a type assertion against *instrumented no longer proves anything on its
+// own, which is why TestInstrumentedForwardsOptionalInterfaces in
 // otel_test.go exists.
 //
-// HAZARD: an optional interface added to this package in future MUST get a
-// forwarder here and an entry in TestInstrumentedForwardsOptionalInterfaces,
-// or it will be silently dropped in production exactly as these two were.
-// That test can prove the interfaces it knows about are forwarded; nothing
-// mechanical can notice an interface nobody told it about.
-//
-// A third optional interface, plan.SpecValidator, joined these two for
-// exactly the reason this HAZARD note warns about: it is declared in
-// internal/plan, spelled out structurally below for the same import-cycle
-// reason DiffersFromState already is, and forwarded here so a validator a
-// provider implements is not silently dropped the moment internal/assemble
-// wraps it in Instrument, which every real run does.
+// HAZARD: any optional interface added to this package in future MUST get
+// a forwarder here and a case in that test, or it will be silently dropped
+// in production exactly as the first two were. The test proves the
+// interfaces it knows about are forwarded; nothing mechanical can notice
+// one nobody told it about.
 
 // Secrets forwards to the inner resource when it is a SecretProducer, and
 // otherwise reports that this resource produces no credentials — the same

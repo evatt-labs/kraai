@@ -7,14 +7,14 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// Outcome is what actually happened to one resource during a Destroy run —
-// the deleting analogue of apply.Outcome. A narrower set than apply's:
-// destroy has no replace/no-change distinction (every attempted action is
-// simply "deleted" or "failed to delete"), and no cross-phase
-// OutcomeSkipped, since a phase failure never stops a later phase here
-// (see the package doc). The one OutcomeSkipped this package does report
-// means something apply's never does: the resource never existed, so
-// nothing was attempted for it.
+// Outcome is what actually happened to one resource during a Destroy run:
+// the deleting analogue of apply.Outcome.
+//
+// A narrower set than apply's. Destroy has no replace/no-change
+// distinction — every attempted action is deleted or failed to delete —
+// and no cross-wave skip, since a wave failure never stops a later wave
+// here. The one OutcomeSkipped it does report means what apply's never
+// does: the resource never existed, so nothing was attempted.
 type Outcome int
 
 const (
@@ -57,16 +57,16 @@ type ActionResult struct {
 	Err error
 }
 
-// Result is the ordered outcome of destroying every action in a
-// plan.Plan, one ActionResult per plan.Action, in the same order the plan
-// carried them in (not the reverse execution order destroy actually ran
-// them in — see the package doc's "Reverse phase order" section).
+// Result is the ordered outcome of destroying every action in a plan.Plan,
+// one ActionResult per plan.Action, in the order the plan carried them —
+// not the reverse order destroy actually ran them in.
 type Result struct {
 	Results []ActionResult
 }
 
-// HasFailures reports whether any action failed to delete. It does not
-// consider OutcomeSkipped a failure: a skipped action was never attempted
+// HasFailures reports whether any action failed to delete.
+//
+// OutcomeSkipped is not a failure: a skipped action was never attempted
 // because the resource never existed, which is success, not a gap.
 func (r *Result) HasFailures() bool {
 	if r == nil {

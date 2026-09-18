@@ -18,7 +18,8 @@ import (
 )
 
 // Opener opens a URL. Its only production implementation shells out to the
-// platform handler; tests substitute their own (D21).
+// platform handler; tests substitute their own so opening a browser is
+// never a side effect of running the test suite.
 type Opener interface {
 	Open(ctx context.Context, target string) error
 }

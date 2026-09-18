@@ -1,4 +1,4 @@
-// Package kerrors defines kraai's error types (docs/BLUEPRINT.md D18/D19).
+// Package kerrors defines kraai's error types.
 //
 // KError is the base error type: it wraps a cause built with
 // github.com/cockroachdb/errors (so stack capture is never hand-rolled) and
@@ -16,13 +16,13 @@ import (
 )
 
 // Code identifies a kraai error's failure category. Each Code has a fixed
-// ExitCode() per docs/BLUEPRINT.md D19 — the table is small and
-// CI-branchable on purpose, not one code per Go error type.
+// ExitCode() — the table is small and CI-branchable on purpose, not one
+// code per Go error type.
 type Code int
 
-// Values are explicit, not iota-derived: docs/BLUEPRINT.md D19's exit-code
-// table is a documented public CI contract, so inserting a new Code
-// between existing ones must never silently shift a downstream exit code.
+// Values are explicit, not iota-derived: the exit-code table is a
+// documented public CI contract, so inserting a new Code between existing
+// ones must never silently shift a downstream exit code.
 const (
 	// CodeUnexpected is the fallback bucket for generic/unrecognized
 	// errors, including any error that isn't a *KError at all.
@@ -37,7 +37,7 @@ const (
 	CodeConfirmationRequired Code = 4
 )
 
-// ExitCode returns the process exit code for c, per docs/BLUEPRINT.md D19.
+// ExitCode returns the process exit code for c.
 // The numeric value of Code and its ExitCode are deliberately the same
 // today; ExitCode exists as the named, documented conversion so the two
 // don't need to be assumed identical at every call site.
@@ -97,7 +97,7 @@ func (e *KError) Code() Code {
 	return e.code
 }
 
-// ExitCode returns the process exit code for e, per docs/BLUEPRINT.md D19.
+// ExitCode returns the process exit code for e.
 func (e *KError) ExitCode() int {
 	return e.code.ExitCode()
 }
@@ -108,15 +108,15 @@ const depth = 1
 
 // New creates a *KError in the generic/unexpected bucket (CodeUnexpected)
 // with a formatted message. Use a typed constructor below instead when the
-// failure fits one of D19's specific buckets.
+// failure fits one of the specific buckets below.
 func New(format string, args ...any) *KError {
 	return &KError{code: CodeUnexpected, cause: cockroachdb.NewWithDepthf(depth, format, args...)}
 }
 
 // Wrap wraps cause as a *KError, adding a formatted message and assigning
-// it code. Use this to attach a D19 bucket to a failure that originated
-// outside kraai (a cloud SDK error, an os error, etc). If cause is nil,
-// Wrap returns nil, matching the fmt.Errorf/errors.Wrap convention of
+// it code. Use this to attach one of the buckets above to a failure that
+// originated outside kraai (a cloud SDK error, an os error, etc). If cause
+// is nil, Wrap returns nil, matching the fmt.Errorf/errors.Wrap convention of
 // being a no-op wrapper around a non-error.
 //
 // Wrap returns the error interface, not *KError, deliberately: a *KError
@@ -156,9 +156,9 @@ func ConfirmationRequired(format string, args ...any) *KError {
 }
 
 // ExitCode maps err to the process exit code cmd/kraai's centralized
-// handler should use, per docs/BLUEPRINT.md D19: a nil err is success (0),
-// a *KError anywhere in err's chain yields its own ExitCode(), and
-// anything else falls back to CodeUnexpected's exit code (1).
+// handler should use: a nil err is success (0), a *KError anywhere in
+// err's chain yields its own ExitCode(), and anything else falls back to
+// CodeUnexpected's exit code (1).
 func ExitCode(err error) int {
 	if err == nil {
 		return 0

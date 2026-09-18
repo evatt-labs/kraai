@@ -46,8 +46,8 @@ const CapabilityHTTPFetch = "http_fetch"
 
 // HTTPDoer is the minimal HTTP interface HTTPCapability wraps — satisfied
 // by *http.Client as-is, so a real caller wires in its own shared,
-// D13-tuned client, while tests inject a mock without touching the
-// network (D21).
+// rate-limit-tuned client, while tests inject a mock without touching the
+// network.
 type HTTPDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }

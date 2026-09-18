@@ -23,7 +23,7 @@ const maxListPages = 100
 // every lookup here feeds teardown, which reads "not found" as "already
 // deleted" and moves on. On an account with more than a page of namespaces,
 // that silently orphans the one it did not see — the same class of leak the
-// lockfile exists to prevent, reintroduced on the lookup side.
+// teardown exists to prevent, reintroduced on the lookup side.
 //
 // Termination is by short page rather than by result_info. A page smaller
 // than the one requested is the last one by definition, which holds whether

@@ -46,7 +46,8 @@ type Command struct {
 }
 
 // Executor runs external commands. Injecting one is how the tests exercise
-// every path here without a wrangler install (D21).
+// every path here without a wrangler install actually present on the
+// machine running them.
 type Executor interface {
 	Run(ctx context.Context, cmd Command) error
 	// Output runs the command and returns its stdout.
@@ -258,12 +259,12 @@ var versionPattern = regexp.MustCompile(`\d+\.\d+\.\d+`)
 // ParseVersion extracts a version from wrangler's --version output, which is
 // a banner rather than a bare version string. Returns "" when there is no
 // version-shaped substring, since this is diagnostic metadata for the
-// lockfile rather than something that should fail a deploy.
+// recorded detail rather than something that should fail a deploy.
 func ParseVersion(stdout string) string {
 	return versionPattern.FindString(stdout)
 }
 
-// Version reports the local wrangler's version for the lockfile, or "" if it
+// Version reports the local wrangler's version, or "" if it
 // cannot be determined.
 //
 // Never returns an error: a missing wrangler or an unexpected --version

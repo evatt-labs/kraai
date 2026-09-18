@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/provider/cloudflare"
@@ -25,6 +27,9 @@ type call struct {
 func fakeAPI(t *testing.T, handler func(call) (int, string)) (*httptest.Server, *[]call) {
 	t.Helper()
 	var seen []call
+	// httptest serves each request on its own goroutine, and several tests
+	// here drive concurrent calls, so recording one is a concurrent append.
+	var seenMu sync.Mutex
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c := call{method: r.Method, path: r.URL.Path, query: r.URL.RawQuery}
 		if r.Body != nil {
@@ -32,7 +37,9 @@ func fakeAPI(t *testing.T, handler func(call) (int, string)) (*httptest.Server, 
 			_ = json.NewDecoder(r.Body).Decode(&decoded)
 			c.body = decoded
 		}
+		seenMu.Lock()
 		seen = append(seen, c)
+		seenMu.Unlock()
 		status, payload := handler(c)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -47,10 +54,24 @@ func settings() BranchSettings {
 }
 
 // neonClient serves the project and branch endpoints a branch adapter walks.
+//
+// WithRetryTimings is set to millisecond bounds rather than
+// neon.Client's production defaults (up to a 2-minute retry ceiling per
+// call — see internal/provider/neon/client.go). Several tests in this
+// file deliberately return error statuses to exercise this package's
+// error-propagation paths; several of those statuses (423, 429, and 5xx
+// for idempotent calls) are exactly what neon.Client now retries. Without
+// this, a single such test would spend up to two real minutes retrying a
+// failure it wants to observe immediately — this package's own suite took
+// over 480s under -race before this override was added, almost entirely
+// spent in that retry loop.
 func neonClient(t *testing.T, handler func(call) (int, string)) (*neon.Client, *[]call) {
 	t.Helper()
 	srv, seen := fakeAPI(t, handler)
-	return neon.New("key", neon.WithBaseURL(srv.URL), neon.WithHTTPClient(srv.Client())), seen
+	return neon.New("key",
+		neon.WithBaseURL(srv.URL), neon.WithHTTPClient(srv.Client()),
+		neon.WithRetryTimings(time.Millisecond, 2*time.Millisecond, 20*time.Millisecond),
+	), seen
 }
 
 func cfClient(t *testing.T, handler func(call) (int, string)) (*cloudflare.Client, *[]call) {
@@ -86,15 +107,15 @@ func TestRegistrationsCoverTheCapability(t *testing.T) {
 	}
 
 	branch, ok := reg.Lookup("neon/branch")
-	if !ok || branch.Phase != resource.PhaseDatabase || branch.Capability != Capability {
+	if !ok || branch.Capability != Capability {
 		t.Fatalf("branch registration = %+v", branch)
 	}
 	hyper, ok := reg.Lookup("cloudflare/hyperdrive")
-	if !ok || hyper.Phase != resource.PhaseStorage || hyper.Capability != Capability {
+	if !ok || hyper.Capability != Capability || len(hyper.DependsOn) != 1 || hyper.DependsOn[0] != "neon/branch" {
 		t.Fatalf("hyperdrive registration = %+v", hyper)
 	}
 
-	// One capability expanding to two types, in phase order (D30, D31) — but
+	// One capability expanding to two types, in registration order — but
 	// only when the compute side is Cloudflare. Hyperdrive is a Workers
 	// connection pooler: a Lambda connects to the branch directly over the
 	// Postgres wire and would never route through it, so planning one for an
@@ -113,7 +134,7 @@ func TestRegistrationsCoverTheCapability(t *testing.T) {
 			"hyperdrive config fronting it", len(resolved))
 	}
 	if resolved[0].Type != TypeBranch || resolved[1].Type != TypeHyperdrive {
-		t.Fatalf("resolved out of phase order: %s then %s", resolved[0].Type, resolved[1].Type)
+		t.Fatalf("resolved out of registration order: %s then %s", resolved[0].Type, resolved[1].Type)
 	}
 
 	// The same database on AWS is the branch alone.
@@ -133,6 +154,57 @@ func TestRegistrationsCoverTheCapability(t *testing.T) {
 	// Hyperdrive is not independently selectable by its own provider name.
 	if _, err := reg.Resolve(Capability, map[string]string{Capability: "cloudflare"}); err == nil {
 		t.Fatal("naming cloudflare as the database vendor resolved to something")
+	}
+}
+
+// TestBranchScope pins newBranchScope's contract: every branch this
+// registration produces resolves to the same scope, keyed on the
+// registration's own settings.Project/OrgID rather than anything in the
+// per-call Spec — see newBranchScope's doc comment for why. This is the
+// mechanism internal/resource/registry.go's Registration.Scope exists for:
+// two branches sharing a project must serialize, which this test checks
+// at the level that actually matters — the string two different Specs
+// produce is identical, and a different project's settings produce a
+// different string.
+func TestBranchScope(t *testing.T) {
+	nc, _ := neonClient(t, standardNeon(`[]`))
+	reg := resource.NewRegistry()
+	if err := Register(reg, nc, nil, settings()); err != nil {
+		t.Fatalf("Register: %v", err)
+	}
+
+	branch, ok := reg.Lookup("neon/branch")
+	if !ok {
+		t.Fatalf("neon/branch was not registered")
+	}
+	if branch.Scope == nil {
+		t.Fatalf("branch registration has no Scope — two branches on one Neon project would race unserialized")
+	}
+
+	// Two different Specs — different binding, different config, one with
+	// no config at all — all resolve to the same scope, because the
+	// project this branch registration acts against is fixed by
+	// settings(), not by anything in Spec.
+	s1 := branch.ScopeFor(resource.Spec{Binding: "DB"})
+	s2 := branch.ScopeFor(resource.Spec{Binding: "OTHER", Config: map[string]any{"driver": "postgres"}})
+	if s1 == "" {
+		t.Fatal("scope is empty — every branch would be treated as unscoped")
+	}
+	if s1 != s2 {
+		t.Fatalf("scope varied across Specs for the same registration: %q vs %q", s1, s2)
+	}
+
+	// A different project's settings produce a different scope, so two
+	// registrations for two different projects (a future multi-project
+	// manifest) would not serialize against each other.
+	otherSettings := BranchSettings{Project: "other-project", Database: "appdb", Role: "app", OrgID: "org-1"}
+	otherReg := resource.NewRegistry()
+	if err := Register(otherReg, nc, nil, otherSettings); err != nil {
+		t.Fatalf("Register (other project): %v", err)
+	}
+	otherBranch, _ := otherReg.Lookup("neon/branch")
+	if got := otherBranch.ScopeFor(resource.Spec{}); got == s1 {
+		t.Fatalf("scope for a different project matched the first project's scope: %q", got)
 	}
 }
 
@@ -202,6 +274,90 @@ func TestBranchMissingProjectIsAnError(t *testing.T) {
 	}
 	if _, err := b.Create(t.Context(), resource.Spec{Binding: "DB", Name: "env-a"}); err == nil {
 		t.Fatal("create against a missing project succeeded")
+	}
+}
+
+// neonWithRegion is standardNeon's shape with an explicit project
+// region_id, for the region-verification tests below.
+func neonWithRegion(regionID, branches string) func(call) (int, string) {
+	return func(c call) (int, string) {
+		switch {
+		case strings.HasSuffix(c.path, "/projects"):
+			return 200, `{"projects":[{"id":"p-1","name":"my-project","org_id":"org-1","region_id":"` +
+				regionID + `"}],"pagination":{"cursor":""}}`
+		case strings.HasSuffix(c.path, "/branches") && c.method == "GET":
+			return 200, `{"branches":` + branches + `,"pagination":{"cursor":""}}`
+		}
+		return 200, `{}`
+	}
+}
+
+// TestBranchRegionMatchesPasses is the positive control: a manifest that
+// declares the project's real region must not be rejected.
+func TestBranchRegionMatchesPasses(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-east-2", `[]`))
+	s := settings()
+	s.Region = "aws-us-east-2"
+	b := &branchResource{client: nc, settings: s}
+
+	if _, err := b.Get(t.Context(), resource.Ref{Name: "env-a"}); err != nil {
+		t.Fatalf("a matching region was rejected: %v", err)
+	}
+}
+
+// TestBranchRegionMismatchFails is this round's motivating bug, closed
+// rather than merely no longer silently accepted:
+// providers.database.settings.region declared a region kraai never
+// verified against the project it actually resolved, so a manifest could
+// assert one region and get another with no error at all.
+func TestBranchRegionMismatchFails(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-west-2", `[]`))
+	s := settings()
+	s.Region = "aws-us-east-2"
+	b := &branchResource{client: nc, settings: s}
+
+	_, err := b.Get(t.Context(), resource.Ref{Name: "env-a"})
+	if err == nil {
+		t.Fatal("expected an error for a region mismatch")
+	}
+	for _, want := range []string{"aws-us-east-2", "aws-us-west-2"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error %q does not name %q", err.Error(), want)
+		}
+	}
+}
+
+// TestBranchRegionMismatchFailsEveryVerb proves the check is not a Get-only
+// side effect: resolveProject is the one function every verb funnels
+// through, so Create and Delete must refuse a region mismatch too, exactly
+// as they already refuse a missing project (TestBranchMissingProjectIsAnError).
+func TestBranchRegionMismatchFailsEveryVerb(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-west-2", `[]`))
+	s := settings()
+	s.Region = "aws-us-east-2"
+	b := &branchResource{client: nc, settings: s}
+
+	if _, err := b.Get(t.Context(), resource.Ref{Name: "env-a"}); err == nil {
+		t.Error("Get accepted a region mismatch")
+	}
+	if _, err := b.Create(t.Context(), resource.Spec{Binding: "DB", Name: "env-a"}); err == nil {
+		t.Error("Create accepted a region mismatch")
+	}
+	if err := b.Delete(t.Context(), resource.Ref{Name: "env-a"}); err == nil {
+		t.Error("Delete accepted a region mismatch")
+	}
+}
+
+// TestBranchRegionAbsentIsValid pins "no opinion" for the common case: a
+// manifest that never declares providers.database.settings.region — every
+// manifest before this round's bug was found — must plan exactly as it
+// always did, regardless of which region the project actually lives in.
+func TestBranchRegionAbsentIsValid(t *testing.T) {
+	nc, _ := neonClient(t, neonWithRegion("aws-us-west-2", `[]`))
+	b := &branchResource{client: nc, settings: settings()} // settings() sets no Region
+
+	if _, err := b.Get(t.Context(), resource.Ref{Name: "env-a"}); err != nil {
+		t.Fatalf("an absent region declaration was rejected: %v", err)
 	}
 }
 
@@ -632,6 +788,66 @@ func TestDecodeSettingsNamesEveryMissingField(t *testing.T) {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("error should name %q: %v", want, err)
 		}
+	}
+}
+
+// TestDecodeSettingsRejectsUnknownKeyWithSuggestion is this workstream's
+// proof that the schema mechanism is generic rather than AWS-specific: a
+// Neon provider settings map gets the identical "unrecognized key(s) ...
+// did you mean ... — recognized keys" treatment
+// internal/provider/aws's compute settings get, from the same
+// resource.Schema type, with no Neon-specific allowlist code anywhere in
+// this package.
+func TestDecodeSettingsRejectsUnknownKeyWithSuggestion(t *testing.T) {
+	_, err := DecodeSettings(map[string]any{
+		"project": "p", "database": "d", "role": "r",
+		"orgid": "o", // wrong case: the real key is "orgId"
+	})
+	if err == nil {
+		t.Fatal("expected an error for an unrecognized key")
+	}
+	for _, want := range []string{
+		"unrecognized key(s)", "orgid", "did you mean orgId?", "recognized keys",
+	} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error %q missing %q", err.Error(), want)
+		}
+	}
+}
+
+// TestDecodeSettingsRejectsWrongTypedValue pins "a valid key with a
+// wrong-typed value rejected rather than coerced" against this provider
+// too — decodeSettings' own str() helper would otherwise silently read a
+// non-string project as "", surfacing as a confusing "missing" error
+// instead of naming the real problem.
+func TestDecodeSettingsRejectsWrongTypedValue(t *testing.T) {
+	_, err := DecodeSettings(map[string]any{
+		"project": 12345, "database": "d", "role": "r",
+	})
+	if err == nil {
+		t.Fatal("expected an error for a wrong-typed project")
+	}
+	if strings.Contains(err.Error(), "missing") {
+		t.Fatalf("wrong-typed project was reported as missing rather than rejected: %q", err.Error())
+	}
+}
+
+// TestDecodeSettingsAcceptsRegion is the regression fixture for this
+// round's own bug: kraai-api's real kraai.yaml.j2 declares
+// providers.database.settings.region, and databaseSettingsSchema's first
+// version rejected it as unrecognized. region must decode without error
+// (and BranchSettings.Region must actually carry it — resolveProject in
+// branch.go is what does something with it, tested in
+// TestBranchRegionMatchesPasses/TestBranchRegionMismatchFails).
+func TestDecodeSettingsAcceptsRegion(t *testing.T) {
+	got, err := DecodeSettings(map[string]any{
+		"project": "p", "database": "d", "role": "r", "region": "aws-us-east-2",
+	})
+	if err != nil {
+		t.Fatalf("DecodeSettings rejected a declared region: %v", err)
+	}
+	if got.Region != "aws-us-east-2" {
+		t.Fatalf("Region = %q, want %q", got.Region, "aws-us-east-2")
 	}
 }
 

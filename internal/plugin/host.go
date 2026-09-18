@@ -17,8 +17,8 @@ const DefaultPoolSize = 4
 // instance at 1024 WASM pages (64MiB). Without it wazero applies the
 // wasm32 architectural ceiling of 65536 pages — 4GiB per instance, times
 // PoolSize — and a plugin needs no exploit to reach it, only a
-// memory.grow loop. D16 calls the plugin boundary sandboxed by default,
-// and a sandbox with no resource ceiling is not one: the host's own
+// memory.grow loop. The plugin boundary is sandboxed by default, and a
+// sandbox with no resource ceiling is not one: the host's own
 // address space is the resource the guest would otherwise be spending.
 //
 // This is a ceiling, not a reservation. wazero's WithMemoryCapacityFromMax
@@ -81,7 +81,7 @@ type Provision struct {
 
 // Spec describes one plugin to load. Grants and Provides are both
 // explicit and exhaustive: a plugin gets exactly the host capabilities
-// named in Grants and nothing else (D16), and only the exports named in
+// named in Grants and nothing else, and only the exports named in
 // Provides are ever considered for registration, regardless of what else
 // the module happens to export.
 type Spec struct {
@@ -100,14 +100,14 @@ type Spec struct {
 	// exported function implementing each.
 	Provides []Provision
 	// PoolSize is how many goroutine-safe module instances to keep ready
-	// for concurrent Invoke calls (D29: instances are not goroutine-safe,
-	// pool them). Size it against docs/BLUEPRINT.md D13's global
+	// for concurrent Invoke calls (instances are not goroutine-safe,
+	// pool them). Size it against the process's overall bounded
 	// concurrency limit. Defaults to DefaultPoolSize when <= 0.
 	PoolSize int
 }
 
 // Host is the shared, process-lifetime state behind every loaded plugin:
-// the on-disk compilation cache (D29) and the universe of host
+// the on-disk compilation cache and the universe of host
 // capabilities available to grant. Each Plugin loaded from a Host still
 // gets its own private wazero.Runtime — see doc.go's "Compilation and
 // pooling" section for why that's the isolation boundary, not Host
@@ -128,9 +128,10 @@ type Host struct {
 // NewHost builds a Host backed by an on-disk compilation cache rooted at
 // cacheDir (created if absent) and the given host capabilities, available
 // to be granted to a plugin via Spec.Grants. cacheDir must be
-// durable across process runs — an ephemeral temp directory defeats D29's
-// entire point, since the in-memory alternative (wazero.NewCompilationCache)
-// already covers the case where persistence doesn't matter, and is
+// durable across process runs — an ephemeral temp directory defeats the
+// entire point of an on-disk cache, since the in-memory alternative
+// (wazero.NewCompilationCache) already covers the case where persistence
+// doesn't matter, and is
 // deliberately not what this constructor uses.
 func NewHost(cacheDir string, capabilities ...Capability) (*Host, error) {
 	cache, err := wazero.NewCompilationCacheWithDir(cacheDir)
@@ -154,7 +155,7 @@ func (h *Host) Close(ctx context.Context) error {
 // Load compiles and instantiates the plugin described by spec, reading
 // its bytes from fsys.
 //
-// Resolving a manifest plugins: entry (docs/BLUEPRINT.md D4) to a
+// Resolving a manifest's plugins: entry to a
 // filesystem path is deliberately kept out of this package: fsys already
 // encapsulates that. A bare filename ("kraai-plugin-example.wasm") and a
 // relative path ("./plugins/cost-guard.wasm") are both just strings
@@ -162,9 +163,10 @@ func (h *Host) Close(ctx context.Context) error {
 // never fetches a plugin from a registry or the network itself. That's a
 // deliberate scope decision: a package-reference resolver (fetch-by-
 // name-and-version, checksum pinning, a cache directory, a registry API)
-// is real design surface of its own, and D3's dependency-weighing logic
-// applies just as much to a home-grown fetch mechanism as to a third-party
-// one — building it hastily in a binary that holds cloud credentials is a
+// is real design surface of its own, and the same dependency-surface
+// caution that governs adding a third-party package applies just as much
+// to a home-grown fetch mechanism as to one pulled off the shelf —
+// building it hastily in a binary that holds cloud credentials is a
 // worse trade than not building it yet. Every plugins: entry today names
 // a local .wasm file; a real registry resolver, if one is ever built,
 // slots in as its own FS implementation without this package changing.
@@ -184,7 +186,7 @@ func (h *Host) Load(ctx context.Context, fsys FS, spec Spec) (*Plugin, error) {
 	if err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "reading plugin %q at %s", spec.Name, spec.Path)
 	}
-	// Re-checked rather than delegated: FS is an extension point (D20) and
+	// Re-checked rather than delegated: FS is an extension point and
 	// a caller's implementation may not bound itself. This cannot undo an
 	// allocation such an implementation already made, but it does stop an
 	// oversized module reaching the compiler, which is where the cost
@@ -207,8 +209,8 @@ func (h *Host) Load(ctx context.Context, fsys FS, spec Spec) (*Plugin, error) {
 	// whole exploit — pins its goroutine, and the OS thread under it,
 	// forever; no deadline, cancellation, or shutdown reaches it. The cost
 	// is periodic checks inserted into compiled code, which the measured
-	// 56ns warm per-call overhead (docs/BLUEPRINT.md) can absorb many times
-	// over. See Plugin.Invoke for why this option obliges the pool to
+	// 56ns warm per-call overhead can absorb many times over. See
+	// Plugin.Invoke for why this option obliges the pool to
 	// recycle instances: cancellation closes the module it interrupted.
 	rt := wazero.NewRuntimeWithConfig(ctx, wazero.NewRuntimeConfig().
 		WithCompilationCache(h.cache).

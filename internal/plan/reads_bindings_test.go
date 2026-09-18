@@ -19,7 +19,7 @@ func TestPlan_ComputeReadsBindingsIncludesEveryDeclaredBinding(t *testing.T) {
 	compute := newFakeResource()
 	if err := f.reg.Register(resource.Registration{
 		Provider: "aws", Type: "AWS::Lambda::Function", Capability: manifest.CapabilityCompute,
-		Phase: resource.PhaseCompute, Lookup: resource.LookupByName, Resource: compute,
+		Lookup: resource.LookupByName, Resource: compute,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestPlan_ComputeReadsBindingsOrderIsDeterministic(t *testing.T) {
 	compute := newFakeResource()
 	if err := f.reg.Register(resource.Registration{
 		Provider: "aws", Type: "AWS::Lambda::Function", Capability: manifest.CapabilityCompute,
-		Phase: resource.PhaseCompute, Lookup: resource.LookupByName, Resource: compute,
+		Lookup: resource.LookupByName, Resource: compute,
 	}); err != nil {
 		t.Fatal(err)
 	}

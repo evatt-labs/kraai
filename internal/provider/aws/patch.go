@@ -41,11 +41,12 @@ type patchOp struct {
 // # Why only "add" and "replace", never "remove"
 //
 // Only keys present in desired participate. A property the manifest never
-// declares in Spec.Config is, per D6, never touched — not inspected, not
-// diffed, not warned about — so its absence from desired must never turn
-// into a "remove" op for a property Cloud Control is currently holding a
-// value for. The set of properties kraai manages is exactly the set the
-// manifest declares.
+// declares in Spec.Config is never touched — not inspected, not diffed, not
+// warned about, because the manifest is kraai's only source of truth for
+// desired configuration — so its absence from desired must never turn into a
+// "remove" op for a property Cloud Control is currently holding a value for.
+// The set of properties kraai manages is exactly the set the manifest
+// declares.
 //
 // Values are normalized through normalizeForCompare before comparison so a
 // manifest-sourced int and a JSON-decoded float64 for the same number don't

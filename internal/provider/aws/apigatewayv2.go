@@ -68,8 +68,10 @@ func newAPIGatewayResource(client *Client) *apiGatewayResource {
 // integration ARN — which needs the account id (Client.AccountID, cached
 // after first use) the same way lambda.go's own Role property and
 // eventsrule.go's Target Arn already do, and for the identical reason: no
-// live lookup of the function itself, so no same-phase ordering risk
-// against it (both are registered in PhaseCompute).
+// live lookup of the function itself, so this registration declares no
+// DependsOn on it (register.go) — Target's own construction never needed
+// the function to exist first, and the dependency graph records that
+// directly instead of leaving it implicit in same-wave co-location.
 func (a *apiGatewayResource) translate(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
 	account, err := a.client.AccountID(ctx)
 	if err != nil {

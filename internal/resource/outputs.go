@@ -7,24 +7,19 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// Outputs carries what one phase produced into the next (Q3, approved
-// 2026-09-14).
-//
-// A Hyperdrive configuration needs the connection details of the database
-// branch provisioned before it; a Worker deploy needs the identifier of every
-// resource it binds to. Something has to carry values across phases, and one
-// of those values is a live credential.
-//
-// # Credentials are fetched, not stored
+// Outputs carries what one phase produced into the next — a Hyperdrive
+// configuration needs the connection details of the database branch
+// provisioned before it; a Worker deploy needs the identifier of every
+// resource it binds to.
 //
 // Attributes hold what is safe to keep: identifiers, names, hosts. A
-// credential is registered as a Secret — a function the consumer calls at the
-// moment it needs the value — so the credential exists only inside the call
-// that uses it. Nothing that is logged, serialised, written to the lockfile,
-// or included in an error has ever held one, because the struct never did.
+// credential is registered as a Secret instead — a function the consumer
+// calls at the moment it needs the value — so the credential exists only
+// inside the call that uses it. Nothing that is logged, serialised, or
+// included in an error has ever held one, because the struct never did.
 //
-// Safe for concurrent use: within a phase, resources run in parallel under
-// the global limit (D13) and all write here.
+// Safe for concurrent use: within a phase, resources run in parallel and
+// all write here.
 type Outputs struct {
 	mu      sync.RWMutex
 	states  map[string]*State

@@ -27,6 +27,12 @@ const (
 // a real Cloud Control TypeName — see its own doc comment in
 // artifactbucket.go for why.
 
+// key builds a DependsOn entry naming one of this package's own
+// registrations by its registry key ("aws/<TypeName>") — the same format
+// Registration.Key() produces, so a dependency here always matches the key
+// the depended-upon registration actually registers under.
+func key(typeName string) string { return Provider + "/" + typeName }
+
 // Register adds every type in this package to reg.
 func Register(reg *resource.Registry, client *Client) error {
 	for _, r := range Registrations(client) {
@@ -44,14 +50,14 @@ func Register(reg *resource.Registry, client *Client) error {
 // and so do Lambda+ApiGatewayV2
 //
 // Registry.Resolve returns every registration for a capability/provider pair
-// together, in phase order — the mechanism neonresource already uses (D30)
-// to expand one Postgres binding into a branch plus the Hyperdrive
-// configuration fronting it. The same shape fits here: an "objects" binding
-// on aws is the static-site stack in full — a DNS zone, a TLS certificate, a
-// bucket, the CDN in front of it, and the DNS record pointing at that CDN —
-// and a "compute" binding on aws is a function plus the HTTP API in front of
-// it. Capability names come from internal/manifest's exported constants,
-// never a new string — the vocabulary is exactly what the registry has
+// together — the mechanism neonresource already uses to expand one Postgres
+// binding into a branch plus the Hyperdrive configuration fronting
+// it. The same shape fits here: an "objects" binding on aws is the
+// static-site stack in full — a DNS zone, a TLS certificate, a bucket, the
+// CDN in front of it, and the DNS record pointing at that CDN — and a
+// "compute" binding on aws is a function plus the HTTP API in front of it.
+// Capability names come from internal/manifest's exported constants, never a
+// new string — the vocabulary is exactly what the registry has
 // implementations for.
 //
 // There is no DNS- or certificate-shaped capability in internal/manifest
@@ -65,29 +71,46 @@ func Register(reg *resource.Registry, client *Client) error {
 // capability a manifest author chooses independently. Called out here
 // rather than left implicit, and again in this workstream's PR description.
 //
-// This phase ordering does not fully solve the real cross-resource
-// dependency a Route53-fronted, ACM-certified CloudFront site has: an ACM
-// certificate normally needs a validation RecordSet in its hosted zone
-// before Cloud Control will report it ISSUED, while the RecordSet aliasing
-// the zone's apex to the CloudFront distribution needs the distribution to
-// exist first — two different purposes for the same resource type at two
-// different points in the sequence. The three-phase model (database,
-// storage, compute) has no way to express "RecordSet before Certificate for
-// validation, and also RecordSet after CloudFront for the alias" as two
-// separate steps. This workstream registers RecordSet once, in PhaseCompute,
-// for the common alias-to-CloudFront case, and surfaces the validation-order
-// gap here for the applier or a manifest-level fix (e.g. DNS-validated
-// certificates needing their own explicit ordering hint) to resolve.
+// # Ordering: real edges, not phase-as-priority
+//
+// Every registration below that used to carry a Phase purely to sequence it
+// ahead of or behind another type — the IAM role and artifact bucket ahead
+// of the function that needs them, RecordSet after CloudFront, CloudFront
+// after its bucket and certificate — now declares that relationship as a
+// DependsOn edge instead. internal/plan resolves each edge to the concrete
+// instance within the same service (see resource.Registration.DependsOn's
+// own doc comment), so "the function" always means this service's own
+// function, never another service's.
+//
+// This still does not fully solve the real cross-resource dependency a
+// Route53-fronted, ACM-certified CloudFront site has: an ACM certificate
+// normally needs a validation RecordSet in its hosted zone before Cloud
+// Control will report it ISSUED, while the RecordSet aliasing the zone's
+// apex to the CloudFront distribution needs the distribution to exist
+// first — two different purposes for the same resource type at two
+// different points in the sequence, which this package still registers
+// only once. A real dependency graph does not change that: RecordSet has
+// exactly one DependsOn list, so "before Certificate for validation, and
+// also after CloudFront for the alias" is still not expressible as two
+// separate steps for a single registration. What the graph does fix is the
+// two ordering gaps that were previously same-phase races with no ordering
+// guarantee at all: CloudFront now genuinely waits for its bucket and
+// certificate, and RecordSet now genuinely waits for CloudFront. The
+// validation-record gap is surfaced here, unchanged, for a manifest-level
+// fix (e.g. DNS-validated certificates needing their own explicit ordering
+// hint, or a second RecordSet registration) to resolve.
 func Registrations(client *Client) []resource.Registration {
-	return []resource.Registration{
+	return append(registerNetwork(client), []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
 			Capability: manifest.CapabilityObjects,
-			// First: everything else in this stack — the certificate's
-			// validation record, the CDN's alias record — is scoped inside
-			// this zone.
-			Phase: resource.PhaseStorage,
-			// See hostedZoneMatch's doc comment: D26 calls this "byApi"
+			// No DependsOn: nothing else in this stack needs to exist
+			// before a zone can be created, only after — the certificate's
+			// validation record and the CDN's alias record are both scoped
+			// inside it, in principle (see this function's own doc comment
+			// on the validation-record gap this does not solve).
+			//
+			// See hostedZoneMatch's doc comment: this is named "byApi"
 			// after Route53's native ListHostedZonesByName, but this
 			// package's Cloud-Control-only engine resolves it via the same
 			// list-and-match mechanism as LookupByAttr.
@@ -100,10 +123,12 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeCertificateManagerCertificate,
 			Capability: manifest.CapabilityObjects,
-			// Alongside storage: CloudFront (PhaseCompute) needs an issued
-			// certificate to reference as its viewer certificate.
-			Phase: resource.PhaseStorage,
-			// DomainName is explicitly not unique (D26) — the same domain
+			// No DependsOn: CloudFront needs an issued certificate to
+			// reference as its viewer certificate (expressed as
+			// CloudFront's own DependsOn below), but nothing in this stack
+			// needs to exist before a certificate request can be made.
+			//
+			// DomainName is explicitly not unique — the same domain
 			// can have multiple certificates outstanding during rotation —
 			// so identity is a kraai-owned tag, stamped into the
 			// CreateResource desired state itself (certificateStampTag).
@@ -116,13 +141,15 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeS3Bucket,
 			Capability: manifest.CapabilityObjects,
-			// Alongside storage: CloudFront's origin must exist before the
-			// distribution fronting it does.
-			Phase: resource.PhaseStorage,
+			// No DependsOn: CloudFront's origin must exist before the
+			// distribution fronting it does (expressed as CloudFront's own
+			// DependsOn below), but a bucket itself needs nothing first.
+			//
 			// BucketName is settable at create, globally unique, and is the
 			// resource's own Ref/primary identifier (CloudFormation
-			// TemplateReference, aws-resource-s3-bucket.html) — D7's
-			// derivable-name assumption holds.
+			// TemplateReference, aws-resource-s3-bucket.html) — so this
+			// type's identity can be derived from the manifest name without
+			// a separate lookup.
 			//
 			// Bare resourceType, no per-type translate — this is the
 			// registration that motivated resourceType.Create's
@@ -132,18 +159,20 @@ func Registrations(client *Client) []resource.Registration {
 			// state, and S3 silently generates a bucket name of its own for
 			// an absent BucketName rather than rejecting the request. See
 			// injectDerivedName's own doc comment for the full failure mode
-			// this closed, and docs/workstreams.yaml's aws-provider-core
-			// entry for the finding.
+			// this closed.
 			Lookup:   resource.LookupByName,
 			Resource: &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: client},
 		},
 		{
 			Provider: Provider, Type: TypeCloudFrontDistribution,
 			Capability: manifest.CapabilityObjects,
-			// After storage: needs the bucket as its origin and the
-			// certificate as its viewer certificate.
-			Phase: resource.PhaseCompute,
-			// AWS enforces alias uniqueness globally (D26). See
+			// Needs the bucket as its origin and the certificate as its
+			// viewer certificate — a real edge, replacing what used to be
+			// phase co-location (both PhaseStorage, CloudFront
+			// PhaseCompute) with no ordering guarantee against either.
+			DependsOn: []string{key(TypeS3Bucket), key(TypeCertificateManagerCertificate)},
+			// AWS enforces alias uniqueness globally, so Aliases is a safe
+			// attribute to search on for this type's identity. See
 			// cloudfrontMatch's doc comment for the gap this leaves open —
 			// a distribution with no alias cannot be found this way.
 			Lookup: resource.LookupByAttr,
@@ -155,11 +184,12 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeRoute53RecordSet,
 			Capability: manifest.CapabilityObjects,
-			// After CloudFront, for the common case this registers: an
-			// alias record pointing the zone's name at the distribution.
-			// See this function's own doc comment for the validation-record
-			// ordering this does not solve.
-			Phase: resource.PhaseCompute,
+			// Needs the zone to create a record inside (HostedZoneId is
+			// this type's own parent-container property) and the
+			// distribution as its alias target — the common case this
+			// registers. See this function's own doc comment for the
+			// validation-record ordering this does not solve.
+			DependsOn: []string{key(TypeRoute53HostedZone), key(TypeCloudFrontDistribution)},
 			// See recordSetMatch's doc comment: not byName, because
 			// RecordSet's primary identifier is a compound
 			// (HostedZoneId|Name|Type) this package's byName fast path has
@@ -173,7 +203,17 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeLambdaFunction,
 			Capability: manifest.CapabilityCompute,
-			Phase:      resource.PhaseCompute,
+			// Needs its artifact bucket to upload the deployment package
+			// into and its execution role to assume — real edges, and the
+			// case this workstream's own motivating evidence names: a
+			// fresh `kraai apply` against a live AWS account took three
+			// runs to converge in part because these three types all sat
+			// in PhaseCompute together with no ordering between them, and
+			// Lambda::Function's own Create genuinely calls PutObject
+			// against the bucket (lambda.go) before Cloud Control ever
+			// sees a Code property — this is not aspirational ordering,
+			// the bucket must already exist.
+			DependsOn: []string{key(TypeArtifactBucket), key(TypeIAMRole)},
 			// No Triggers restriction: every service with AWS compute gets
 			// a Lambda function regardless of how it's invoked — an HTTP
 			// handler and a scheduled handler are both, in the end, a
@@ -183,8 +223,9 @@ func Registrations(client *Client) []resource.Registration {
 			//
 			// FunctionName is settable at create; CloudFormation marks it
 			// "Update requires: Replacement", i.e. a createOnlyProperty and
-			// this type's Ref (aws-resource-lambda-function.html) — D7's
-			// derivable-name assumption holds.
+			// this type's Ref (aws-resource-lambda-function.html) — so this
+			// type's identity can likewise be derived from the manifest
+			// name without a separate lookup.
 			//
 			// Resource is newLambdaFunctionResource, not a plain
 			// resourceType: this is where a deployment package actually
@@ -196,43 +237,54 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeArtifactBucket,
 			Capability: manifest.CapabilityCompute,
-			// Ahead of the function in PhaseCompute that uploads its
-			// artifact there — phase-as-ordering, not phase-as-category,
-			// the same technique and the same caveat PR #75 already
-			// documented for ACM validation records and the
-			// S3/CloudFront pair above: D12's two-level phase model has no
-			// finer-grained dependency expression than "which phase," so
-			// "before the function" is expressed by placing this in the
-			// phase before PhaseCompute rather than by a real dependency
-			// edge. See artifactbucket.go's own doc comment for the
+			// No DependsOn: this is one of the two registrations the
+			// workstream that replaced Phase with a real dependency graph
+			// exists to fix. It used to be declared PhaseStorage purely to
+			// run before the function that uploads its artifact here —
+			// phase-as-priority, not phase-as-category, and its own
+			// comment admitted it. It depends on nothing and is now
+			// depended upon directly, by TypeLambdaFunction above, instead
+			// of being filed under a storage category it was never a
+			// member of. See artifactbucket.go's own doc comment for the
 			// further deviation this registration carries: one bucket per
 			// service, not the brief's one bucket per environment.
-			Phase: resource.PhaseStorage,
+			//
 			// FunctionName-equivalent for a bucket is BucketName, settable
 			// and unique at create (see TypeS3Bucket's own registration
-			// above) — D7's derivable-name assumption holds here too; this
-			// is byName against artifactBucketName's derived name, not
-			// against ref.Name directly (see artifactBucketResource.Get).
+			// above) — so this type's identity can likewise be derived from
+			// the manifest name; this is byName against artifactBucketName's
+			// derived name, not against ref.Name directly (see
+			// artifactBucketResource.Get).
 			Lookup:   resource.LookupByName,
 			Resource: newArtifactBucketResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeIAMRole,
 			Capability: manifest.CapabilityCompute,
-			// Ahead of the function that assumes it — see
-			// TypeArtifactBucket's registration above for the identical
-			// phase-as-ordering reasoning; this is the case the brief
-			// itself names.
-			Phase: resource.PhaseStorage,
+			// No DependsOn: the other registration this workstream exists
+			// to fix — see TypeArtifactBucket's comment above for the
+			// identical reasoning; this is the exact case the brief itself
+			// names (the IAM execution role, declared PhaseStorage purely
+			// to precede the function that assumes it). It depends on
+			// nothing and is depended upon directly, by TypeLambdaFunction
+			// above.
+			//
 			// RoleName is settable at create; IAM's own reference marks
-			// renaming a role "Update requires: Replacement" — D7 holds.
+			// renaming a role "Update requires: Replacement" — so this
+			// type's identity can likewise be derived from the manifest
+			// name without a separate lookup.
 			Lookup:   resource.LookupByName,
 			Resource: newIAMRoleResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeLambdaURL,
 			Capability: manifest.CapabilityCompute,
-			Phase:      resource.PhaseCompute,
+			// Needs its function to exist: lambdaurl.go's translate writes
+			// TargetFunctionArn as the function's bare derived name (no
+			// live lookup, no locally-built ARN — AWS::Lambda::Url
+			// documents bare-name acceptance), but CreateFunctionUrlConfig
+			// itself still requires that named function to already exist.
+			DependsOn: []string{key(TypeLambdaFunction)},
 			// HTTP-triggered services only, and only when settings.
 			// httpFrontDoor selects "url" — see this registration's
 			// SelectedBy and ApiGatewayV2::Api's own below: a service gets
@@ -259,7 +311,14 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeEventsRule,
 			Capability: manifest.CapabilityCompute,
-			Phase:      resource.PhaseCompute,
+			// No DependsOn on the function: eventsrule.go's translate
+			// builds the target Arn locally from the account id, region
+			// and the function's own derived name (functionARN) — no live
+			// lookup, and PutTargets does not itself validate that the
+			// named function exists. Genuinely independent of
+			// TypeLambdaFunction, so it is free to run in an earlier wave
+			// alongside it rather than being forced to wait.
+			//
 			// Schedule-triggered services only — the direct fix for the bug
 			// that originally motivated Triggers: a schedule rule belongs
 			// only to a service with a schedule expression to run, exactly
@@ -267,16 +326,25 @@ func Registrations(client *Client) []resource.Registration {
 			// HTTP surface.
 			Triggers: []string{manifest.TriggerSchedule},
 			// Name is settable at create; EventBridge's own reference marks
-			// it "Update requires: Replacement" — D7 holds. See
-			// eventsrule.go's own doc comment for why Events::Rule was
-			// chosen over EventBridge Scheduler.
+			// it "Update requires: Replacement" — so this type's identity is
+			// likewise derivable from the manifest name. See eventsrule.go's
+			// own doc comment for why Events::Rule was chosen over
+			// EventBridge Scheduler.
 			Lookup:   resource.LookupByName,
 			Resource: newEventsRuleResource(client),
 		},
 		{
 			Provider: Provider, Type: TypePermissionEventsRule,
 			Capability: manifest.CapabilityCompute,
-			Phase:      resource.PhaseCompute,
+			// Needs its function: AddPermission's FunctionName must already
+			// exist. Not the rule: eventBridgeRuleSourceARN builds the
+			// authorizing rule's own SourceArn locally (ruleARN, no live
+			// lookup), so AddPermission has no live dependency on the rule
+			// itself — this matches the workstream's own live-account
+			// evidence exactly, where both Lambda::Permission registrations
+			// failed on a second run for lacking their function, never for
+			// lacking the trigger resource they authorize.
+			DependsOn: []string{key(TypeLambdaFunction)},
 			// Same gate as the rule it authorizes: a schedule-triggered
 			// service only.
 			Triggers: []string{manifest.TriggerSchedule},
@@ -290,7 +358,15 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeAPIGatewayV2API,
 			Capability: manifest.CapabilityCompute,
-			Phase:      resource.PhaseCompute,
+			// No DependsOn on the function: apigatewayv2.go's translate
+			// builds Target the same way eventsrule.go builds its Arn — a
+			// locally-constructed function ARN, no live lookup, chosen
+			// specifically to avoid a same-phase ordering risk (see its own
+			// doc comment). That design already assumed no live coupling to
+			// the function's existence; a dependency graph does not change
+			// that assumption, it just makes the same lack of coupling
+			// explicit instead of implicit.
+			//
 			// Triggers: only a service that declares itself HTTP-facing
 			// gets an API Gateway. This is the per-service-compute
 			// workstream's fix for the bug that motivated it: before
@@ -314,7 +390,9 @@ func Registrations(client *Client) []resource.Registration {
 			// interruption" — not even createOnly) and AWS documents no
 			// uniqueness constraint on it. See apigatewayv2Match's doc
 			// comment for the full reasoning; this is a byTag type for the
-			// same reason ACM::Certificate is under D26.
+			// same reason ACM::Certificate is: no provider attribute
+			// guarantees uniqueness, so identity comes from a kraai-owned
+			// tag instead.
 			//
 			// Resource is newAPIGatewayResource, not a plain resourceType:
 			// this is where the API's real properties (Name, ProtocolType,
@@ -327,7 +405,17 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypePermissionAPIGateway,
 			Capability: manifest.CapabilityCompute,
-			Phase:      resource.PhaseCompute,
+			// Needs both its function (AddPermission's FunctionName) and
+			// the API Gateway it authorizes: unlike
+			// TypePermissionEventsRule's sourceARNFunc, apiGatewaySourceARN
+			// performs a real live Cloud Control lookup of the gateway to
+			// resolve its execute-api ARN (see apiGatewaySourceARN's own
+			// doc comment) — this is the one Lambda::Permission registration
+			// with a genuine, not merely organizational, dependency on the
+			// resource it authorizes, and exactly the second failure this
+			// workstream's own live-account evidence names ("for the API
+			// Gateway one, the gateway").
+			DependsOn: []string{key(TypeLambdaFunction), key(TypeAPIGatewayV2API)},
 			// Same double gate as the API Gateway it authorizes: an
 			// HTTP-triggered service with "apigateway" selected as its
 			// front door only — creating this permission for a service
@@ -339,5 +427,5 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newLambdaPermissionResource(
 				client, "apigateway.amazonaws.com", apiGatewaySourceARN),
 		},
-	}
+	}...)
 }

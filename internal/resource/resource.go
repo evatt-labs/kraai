@@ -1,29 +1,17 @@
 // Package resource is the contract every provisioned thing implements, and
 // the registry that maps a manifest entry to the code that fulfils it.
 //
-// It is the seam between a deliberately vendor-neutral manifest — a service
-// declares databases, keyvalue, objects and queues, never "a D1 database" —
+// It sits between a vendor-neutral manifest — a service declares
+// capabilities like "database" or "objects", never a specific product —
 // and the provider clients that know what those actually are. Everything
-// above this package reasons about resources; everything below reasons about
-// one cloud's API.
+// above this package reasons about resources; everything below reasons
+// about one cloud's API.
 //
-// # Shape
-//
-// Per-verb methods rather than one Ensure (D15). Plan calls Get and diffs
-// without touching the mutating verbs, and each verb gets its own span and
-// its own timing (D17) — a single Ensure blurs all of that into one
-// measurement with no way to see which sub-step is slow.
-//
-// # Identity is never stored
-//
-// A Ref is derived from the manifest on every command (D7). kraai persists no
-// resource ids: teardown (internal/destroy) is manifest-driven, not
-// lockfile-driven — it reuses the same *plan.Plan apply would, resolving
-// each planned action's resource straight from this registry by Ref.Key(),
-// the same way apply does (D6). The authoritative answer to "does this
-// exist" is always a fresh lookup. How that lookup is performed varies per
-// type, which is why a registration declares its Lookup strategy (D26)
-// rather than the package assuming one rule holds everywhere.
+// Resources implement per-verb methods (Get/Create/Update/Delete) rather
+// than a single Ensure, so a plan can call Get without any mutating method
+// in scope, and each verb is timed separately. Identity is never stored:
+// every Ref is recomputed from the manifest, and how a type is found
+// (LookupStrategy) is declared per type rather than assumed globally.
 package resource
 
 import (
@@ -45,7 +33,7 @@ type Ref struct {
 	// Name is the derived resource name.
 	Name string
 	// Import is non-nil for an adopted resource the manifest points at by id
-	// or name rather than one kraai created (D7). Its identity cannot be
+	// or name rather than one kraai created. Its identity cannot be
 	// derived, so it is carried explicitly.
 	Import *Import
 }
@@ -76,16 +64,26 @@ type Spec struct {
 	Name string
 	// Config is the type-specific desired state.
 	Config map[string]any
-	// Secrets are credentials an earlier phase produced that this resource
-	// needs, as producers rather than values (D32).
-	//
-	// A Hyperdrive configuration needs its database's password; putting that
-	// in Config would place a live credential in a plain map that something
-	// downstream may log or serialise. Keeping it a function means the value
-	// exists only inside the call that uses it, which is the same guarantee
-	// Outputs makes — carried through to the resource that consumes it rather
-	// than stopping at the applier.
+	// Secrets are credential producers an earlier phase registered for this
+	// resource, keyed by name. A function rather than a value, so the
+	// credential exists only inside the call that uses it — see Secret in
+	// outputs.go.
 	Secrets map[string]Secret
+	// Attributes are the non-secret values resources in earlier waves
+	// published in their State.Attributes, keyed by the producing
+	// resource's Ref.Key() — the same "provider/type" spelling
+	// Registration.DependsOn uses to name it.
+	//
+	// The channel exists because a provider-assigned identifier cannot be
+	// derived the way a name can: a subnet needs its VPC's VpcId, and
+	// nothing in the manifest knows what AWS will call it. A resource that
+	// needs one declares the dependency, then reads the value back under
+	// the same key it declared.
+	//
+	// Keys from the spec's own binding are bare; anything from another
+	// binding this action may read is prefixed "<binding>.", matching how
+	// Secrets are namespaced.
+	Attributes map[string]map[string]any
 }
 
 // Secret resolves a named credential the applier supplied, or fails naming
@@ -99,31 +97,61 @@ func (s Spec) Secret(ctx context.Context, name string) (string, error) {
 	return producer(ctx)
 }
 
+// Attribute returns a string value another resource published, where key is
+// that resource's Ref.Key() and name the attribute within it.
+//
+// Both halves fail loudly and separately: a missing key means the dependency
+// did not run, a missing name means it ran but published something else, and
+// the two call for different fixes. A non-string value is also an error —
+// every consumer of this so far wants an identifier, and silently formatting
+// a map or a number into one would produce a request AWS rejects far from
+// here.
+func (s Spec) Attribute(key, name string) (string, error) {
+	attrs, ok := s.Attributes[key]
+	if !ok {
+		return "", kerrors.Validation(
+			"binding %q: no resource %q has published attributes, so %q cannot be resolved — "+
+				"check that this type declares %q in its DependsOn", s.Binding, key, name, key)
+	}
+	value, ok := attrs[name]
+	if !ok {
+		return "", kerrors.Validation(
+			"binding %q: resource %q published no %q attribute", s.Binding, key, name)
+	}
+	text, ok := value.(string)
+	if !ok {
+		return "", kerrors.Validation(
+			"binding %q: resource %q published %q as %T, want a string identifier",
+			s.Binding, key, name, value)
+	}
+	if text == "" {
+		return "", kerrors.Validation(
+			"binding %q: resource %q published an empty %q", s.Binding, key, name)
+	}
+	return text, nil
+}
+
 // State is what the provider actually holds for a resource.
 type State struct {
 	Ref Ref
-	// ID is the provider-assigned identifier. Read fresh on every command and
-	// recorded in the lockfile for teardown, never treated as the source of
-	// truth for identity (D7).
+	// ID is the provider-assigned identifier, read fresh on every command.
+	// It is never persisted or treated as a source of truth: kraai keeps no
+	// state document, so a resource's existence and identity are always
+	// answered by a live lookup, never by trusting a prior run's value.
 	ID string
 	// Attributes are the type-specific fields a later phase may need — a
 	// connection host, a bucket name, a namespace id.
 	Attributes map[string]any
 }
 
-// Resource is the contract every provisioned type implements (D15).
+// Resource is the contract every provisioned type implements.
 //
 //go:generate go tool mockgen -source=resource.go -destination=mock_resource_test.go -package=resource
 type Resource interface {
 	// Get returns the resource's current state, or (nil, nil) when it does
-	// not exist.
-	//
-	// Absence is an answer, not a failure. Teardown reads "not there" as
-	// "already deleted, keep going" — a partial run must be retryable, and
-	// every provider client in this repo already behaves this way. Returning
-	// an error for absence would turn a clean retry into a failure and, worse,
-	// would make a retried teardown look like it had failed when it had
-	// succeeded.
+	// not exist. Absence is an answer, not a failure: a retried teardown
+	// must see "not there" as "already deleted, keep going," not as an
+	// error.
 	Get(ctx context.Context, ref Ref) (*State, error)
 
 	// Create provisions the resource described by spec.
@@ -133,15 +161,14 @@ type Resource interface {
 	Update(ctx context.Context, ref Ref, spec Spec) (*State, error)
 
 	// Delete removes the resource. Deleting something already gone is
-	// success, for the same reason Get reports absence rather than failing.
+	// success, for the same reason Get reports absence rather than an
+	// error.
 	Delete(ctx context.Context, ref Ref) error
 }
 
-// LookupStrategy is how instances of a type are found (D26).
-//
-// Declared per type rather than assumed globally: when this was measured
-// against a real provider, the derivable-name assumption held for only four
-// of nine types. A single global rule cannot cover a real API surface.
+// LookupStrategy is how instances of a type are found, declared per type
+// rather than assumed globally: when measured against a real provider, the
+// derivable-name assumption held for only four of nine types.
 type LookupStrategy string
 
 const (
@@ -156,9 +183,9 @@ const (
 	// LookupByTag means identity comes from a kraai-owned tag, for types with
 	// no unique derivable attribute at all.
 	//
-	// A type using this must set its tag in the create call itself, never as
-	// a follow-up write: a crash between the two orphans the resource
-	// unfindably, which is the one failure no later run can clean up.
+	// A type using this must write its tag in the create call itself, never
+	// as a follow-up write: a crash between the two orphans the resource
+	// unfindably, the one failure no later run can clean up.
 	LookupByTag LookupStrategy = "byTag"
 )
 

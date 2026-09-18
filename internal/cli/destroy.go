@@ -33,8 +33,8 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 			"`kraai plan` would, and deletes what it finds: every resource the plan\n" +
 			"reports as existing (created, unchanged, replaced, or unreadable) is\n" +
 			"deleted; anything the plan already knows does not exist is skipped. It\n" +
-			"tears phases down in reverse of apply's order (compute, then storage,\n" +
-			"then database), and unlike apply, one failure never stops the rest of\n" +
+			"tears waves down in reverse of apply's order (highest wave first),\n" +
+			"and unlike apply, one failure never stops the rest of\n" +
 			"the run — destroy always makes as much progress as it can and reports\n" +
 			"exactly what it could not remove.",
 		Args:          cobra.ExactArgs(1),
@@ -51,7 +51,7 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 	cmd.Flags().BoolVar(&jsonOut, "json", false,
 		"print the result as JSON instead of human-readable text")
 	cmd.Flags().StringVar(&confirmName, "confirm-name", "",
-		"confirm a protected environment by repeating its name (D14); ignored on a non-protected environment")
+		"confirm a protected environment by repeating its name; ignored on a non-protected environment")
 
 	return cmd
 }
@@ -63,8 +63,9 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 // test drives every branch without a terminal, credentials, or a network.
 //
 // Deliberately mirrors runApply's shape almost line for line: same
-// environment-name validation, same manifest/.env load order, same D14
-// gate ahead of registry assembly, same plan.New(reg).Plan call so
+// environment-name validation, same manifest/.env load order, same
+// protected-environment confirmation gate ahead of registry assembly,
+// same plan.New(reg).Plan call so
 // `kraai destroy` tears down exactly what `kraai plan`/`kraai apply` would
 // describe (see internal/destroy's package doc, "Plan-then-execute, never
 // re-expand"). It has no --replace flag: destroy has no analogue of
@@ -74,8 +75,8 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 // # Exit codes
 //
 // Every early return here is a *kerrors.KError and flows through
-// cmd/kraai's existing centralized handler unmodified (D18/D19), the same
-// table runApply documents: CodeValidation (2) for a bad environment name
+// cmd/kraai's single centralized handler unmodified, the same table
+// runApply documents: CodeValidation (2) for a bad environment name
 // or manifest, CodeConfirmationRequired (4) for a missing or mismatched
 // protected-environment confirmation, and whatever destroy.Destroy itself
 // returns (CodeUnexpected for a cancelled run or a resolve/delete
@@ -114,11 +115,11 @@ func runDestroy(
 		return err
 	}
 
-	// D14's gate runs before the registry is even assembled: a protected
-	// environment that fails confirmation should never cause kraai to
-	// authenticate against a live provider, let alone plan or tear down
-	// against one, for a run that was going to be refused anyway. Same
-	// gate, same function, as apply.
+	// The protected-environment gate runs before the registry is even
+	// assembled: a protected environment that fails confirmation should
+	// never cause kraai to authenticate against a live provider, let alone
+	// plan or tear down against one, for a run that was going to be
+	// refused anyway. Same gate, same function, as apply.
 	if err := confirmProtected(cmd, envName, confirmName, m.Environment.Protected, interactive); err != nil {
 		return err
 	}
@@ -229,12 +230,12 @@ func writeDestroyText(w io.Writer, envName string, result *destroy.Result) error
 	} else {
 		tw := tabwriter.NewWriter(&b, 0, 2, 2, ' ', 0)
 
-		phase := result.Results[0].Phase
-		_, _ = fmt.Fprintf(tw, "%s:\n", phase)
+		wave := result.Results[0].Wave
+		_, _ = fmt.Fprintf(tw, "wave %d:\n", wave)
 		for _, r := range result.Results {
-			if r.Phase != phase {
-				phase = r.Phase
-				_, _ = fmt.Fprintf(tw, "\n%s:\n", phase)
+			if r.Wave != wave {
+				wave = r.Wave
+				_, _ = fmt.Fprintf(tw, "\nwave %d:\n", wave)
 			}
 			_, _ = fmt.Fprintf(tw, "  %s\t%-9s\t%s\t%s/%s\t%s.%s", outcomeSymbolDestroy(r.Outcome), r.Outcome,
 				strconv.Quote(r.Ref.Name), r.Provider, r.Type, r.ServiceKey, r.Binding)
@@ -254,9 +255,10 @@ func writeDestroyText(w io.Writer, envName string, result *destroy.Result) error
 // deliberately separate, stable projection of *destroy.Result, for the
 // same reasons internal/cli/apply.go's applyDocument is not a direct
 // json.Marshal of *destroy.Result: ActionResult.Err is an error
-// interface, and Outcome/resource.Phase are integer enums whose numeric
-// values are an implementation detail. Every field here is a plain
-// string, int, or bool.
+// interface, and Outcome is an integer enum whose numeric value is an
+// implementation detail. Every field here is a plain string, int, or
+// bool. "phase" -> "wave" for the same breaking-change reason
+// internal/cli/plan.go's planActionJSON doc comment records.
 type destroyDocument struct {
 	Environment string              `json:"environment"`
 	Summary     destroySummaryJSON  `json:"summary"`
@@ -280,7 +282,7 @@ type destroyResultJSON struct {
 	Capability string `json:"capability"`
 	Provider   string `json:"provider"`
 	Type       string `json:"type"`
-	Phase      string `json:"phase"`
+	Wave       int    `json:"wave"`
 	Name       string `json:"name"`
 	Outcome    string `json:"outcome"`
 	Error      string `json:"error,omitempty"`
@@ -311,7 +313,7 @@ func toDestroyDocument(envName string, result *destroy.Result) destroyDocument {
 			Capability: r.Capability,
 			Provider:   r.Provider,
 			Type:       r.Type,
-			Phase:      r.Phase.String(),
+			Wave:       r.Wave,
 			Name:       r.Ref.Name,
 			Outcome:    r.Outcome.String(),
 		}

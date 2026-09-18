@@ -317,8 +317,14 @@ func TestDecodeLambdaSettingsFunctionURLAuthTypeDoesNotTripTheUnknownKeyCheck(t 
 	}
 }
 
+// TestValidateKnownSettingsListsEveryOffendingKey is converted from
+// settings_validate_test.go's coverage of the retired hand-written
+// allowlist (validateKnownSettings) onto its structural-schema replacement
+// — computeSettingsSchema, the same schema decodeLambdaSettings now calls
+// directly. The behavior it pins (every unrecognized key is named in one
+// pass, not just the first one found) is unchanged.
 func TestValidateKnownSettingsListsEveryOffendingKey(t *testing.T) {
-	err := validateKnownSettings(map[string]any{
+	err := computeSettingsSchema.Validate(map[string]any{
 		"runtime": "python3.13", "bogusOne": 1, "bogusTwo": 2,
 	})
 	if err == nil {

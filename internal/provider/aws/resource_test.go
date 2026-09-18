@@ -12,7 +12,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// fakeClient is ccAPI, hand-rolled — no AWS account, no network (D21).
+// fakeClient is ccAPI, hand-rolled — no AWS account, no network needed.
 type fakeClient struct {
 	// byIdentifier answers GetResource. A missing key means "not found",
 	// distinct from an entry mapping to an error.
@@ -347,9 +347,9 @@ func TestResourceTypeCreate(t *testing.T) {
 	})
 
 	t.Run("a byTag type stamps its identity tag into the create call itself", func(t *testing.T) {
-		// D26's non-negotiable rule: the tag must ride in CreateResource's
-		// own desired state, never a follow-up write, since a crash between
-		// the two would orphan the resource unfindably.
+		// The tag must ride in CreateResource's own desired state, never a
+		// follow-up write, since a crash between the two would orphan the
+		// resource unfindably.
 		fc := &fakeClient{createID: "arn:aws:acm:...", createProps: map[string]any{}}
 		r := &resourceType{
 			provider: Provider, typeName: TypeCertificateManagerCertificate, lookup: resource.LookupByTag,
@@ -788,8 +788,9 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 	})
 
 	t.Run("a createOnlyProperty not declared in the manifest is never a source of difference", func(t *testing.T) {
-		// D6: a property the manifest never mentions is never touched, so
-		// its absence from Spec.Config must not itself trigger a replacement.
+		// A property the manifest never mentions is never touched — the
+		// manifest is kraai's only source of truth — so its absence from
+		// Spec.Config must not itself trigger a replacement.
 		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 

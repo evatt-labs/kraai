@@ -18,6 +18,7 @@ import (
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
+	"github.com/evatt-labs/kraai/internal/httpx"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
@@ -30,6 +31,16 @@ const maxListPages = 100
 // same defensive backstop maxListPages applies to ListResources, against a
 // NextContinuationToken that never stops advancing.
 const maxEmptyBucketPages = 100
+
+// maxOwnsBucketPages bounds OwnsBucket's page walk over ListBuckets, the
+// same defensive backstop maxListPages and maxEmptyBucketPages apply to
+// their own list loops, against a ContinuationToken that never stops
+// advancing. In practice OwnsBucket's own Prefix filter (see its doc
+// comment) narrows a real account's response to at most a handful of
+// buckets, so this bound is never expected to matter — it exists for the
+// same reason the other two do: an API that stops honouring its own
+// pagination contract must not spin this loop forever.
+const maxOwnsBucketPages = 100
 
 // Default polling bounds for asynchronous Cloud Control operations
 // (CreateResource, UpdateResource, DeleteResource). These are generous on
@@ -46,8 +57,9 @@ const (
 )
 
 // cloudControlAPI is the subset of *cloudcontrol.Client this package's
-// *Client calls: the five verbs Cloud Control exposes uniformly (D17's
-// finding) plus the status poll the async ones require.
+// *Client calls: the five verbs Cloud Control exposes uniformly across every
+// resource type (see this package's own doc comment) plus the status poll
+// the async ones require.
 //
 // Shaped like the SDK's own method signatures rather than this package's
 // vocabulary, unlike ccAPI in resource.go: this is the seam being
@@ -71,17 +83,21 @@ type cloudFormationAPI interface {
 
 // s3API is the subset of *s3.Client this package calls: PutObject, to
 // upload a Lambda deployment artifact to the per-environment artifact
-// bucket (aws-provider-compute), and ListObjectsV2/DeleteObjects, to empty
-// an artifact bucket before Cloud Control deletes it (EmptyBucket below).
+// bucket (aws-provider-compute), ListObjectsV2/DeleteObjects, to empty an
+// artifact bucket before Cloud Control deletes it (EmptyBucket below), and
+// ListBuckets, to answer "do we actually own this bucket" (OwnsBucket
+// below) — see that method's own doc comment for why this package needs
+// that question answered at all.
 //
 // Deliberately not Cloud-Control-routed like every other verb in this
 // package: Cloud Control manages a bucket's own existence
 // (AWS::S3::Bucket's Get/Create/Delete), but has no notion of "put this
-// object in it," "list what's in it" or "remove these objects" — object
-// data planes are not part of the Cloud Control resource-provider surface
-// for any type. This is the one place this package reaches past Cloud
-// Control to a service-specific SDK client, for exactly the operations
-// Cloud Control cannot express.
+// object in it," "list what's in it," "remove these objects," or "which
+// buckets does this account actually own" — object data planes and
+// account-scoped listing are not part of the Cloud Control resource-
+// provider surface for any type. This is the one place this package
+// reaches past Cloud Control to a service-specific SDK client, for exactly
+// the operations Cloud Control cannot express.
 type s3API interface {
 	PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error)
 	// ListObjectsV2 lists (up to 1000) current objects in a bucket per
@@ -100,6 +116,12 @@ type s3API interface {
 	// services' page/batch ceilings are identical (see EmptyBucket's doc
 	// comment).
 	DeleteObjects(ctx context.Context, params *s3.DeleteObjectsInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectsOutput, error)
+	// ListBuckets returns the buckets this AWS account itself owns,
+	// optionally narrowed by Prefix — OwnsBucket's only primitive, and the
+	// one call in this seam that is inherently account-scoped rather than
+	// bucket-scoped (see OwnsBucket's own doc comment for why that
+	// property is exactly what makes it useful here).
+	ListBuckets(ctx context.Context, params *s3.ListBucketsInput, optFns ...func(*s3.Options)) (*s3.ListBucketsOutput, error)
 }
 
 // stsAPI is the subset of *sts.Client this package calls: GetCallerIdentity,
@@ -152,7 +174,7 @@ type Client struct {
 type Option func(*Client)
 
 // WithCloudControlAPI substitutes the Cloud Control caller, which is how
-// tests exercise Client without an AWS account or network (D21).
+// tests exercise Client without an AWS account or network.
 func WithCloudControlAPI(api cloudControlAPI) Option {
 	return func(c *Client) { c.cc = api }
 }
@@ -163,7 +185,7 @@ func WithCloudFormationAPI(api cloudFormationAPI) Option {
 }
 
 // WithS3API substitutes the S3 caller, which is how tests exercise artifact
-// upload without an AWS account or network (D21).
+// upload without an AWS account or network.
 func WithS3API(api s3API) Option {
 	return func(c *Client) { c.s3 = api }
 }
@@ -187,11 +209,25 @@ func WithPollTimings(initialDelay, maxDelay, timeout time.Duration) Option {
 }
 
 // New builds a Client for settings.Region, authenticating via the AWS SDK's
-// own default credential chain (environment, shared config, IMDS — kraai
-// reads no AWS credential itself, per D18's "external touchpoints own their
-// own auth").
+// own default credential chain (environment, shared config, IMDS) — kraai
+// never reads or handles an AWS credential itself, delegating entirely to
+// the SDK's own auth resolution.
 func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error) {
-	cfg, err := awsconfig.LoadDefaultConfig(ctx, awsconfig.WithRegion(settings.Region))
+	// awsconfig.WithHTTPClient: kraai shares one tuned HTTP client across
+	// every provider for connection reuse rather than letting each SDK build
+	// its own. The SDK builds its own HTTP client per service (cloudcontrol,
+	// cloudformation, s3, sts) unless told otherwise, which is a fifth
+	// independently-pooled client alongside internal/reachability,
+	// internal/provider/neon and internal/provider/cloudflare. httpx.NewClient's *http.Client satisfies
+	// the SDK's minimal HTTPClient interface (a Do(*http.Request) method),
+	// so this puts every AWS call through the same shared pool and the same
+	// otelhttp instrumentation as everything else, without replacing any of
+	// the SDK's own retry or credential-resolution behaviour — WithHTTPClient
+	// only substitutes the transport those layers run on top of.
+	cfg, err := awsconfig.LoadDefaultConfig(ctx,
+		awsconfig.WithRegion(settings.Region),
+		awsconfig.WithHTTPClient(httpx.NewClient(60*time.Second, nil, nil)),
+	)
 	if err != nil {
 		// LoadDefaultConfig's error can name a credential file path but never
 		// a credential value, so wrapping it is safe.
@@ -627,8 +663,9 @@ func (s Schema) HasUpdateHandler() bool {
 // provider schema.
 //
 // Fetched at runtime on first use per type and cached for the process's
-// lifetime (resourceType.getSchema), never vendored: D17's own finding
-// measured schema sizes up to 116KB, and a resource type's schema does not
+// lifetime (resourceType.getSchema), never vendored: this package's own
+// measurement found schema sizes up to 116KB (see the Schema type's own doc
+// comment), and a resource type's schema does not
 // change within a single kraai invocation, so one DescribeType call per type
 // per process is the right amount of caching — enough to avoid repeating an
 // expensive call on every Get/Create/Update/DiffersFromState, not so much
@@ -802,6 +839,127 @@ func (c *Client) EmptyBucket(ctx context.Context, bucket string) error {
 	return kerrors.Validation("emptying bucket %q did not terminate within %d pages", bucket, maxEmptyBucketPages)
 }
 
+// OwnsBucket reports whether bucket belongs to this AWS account.
+//
+// # The bug this closes
+//
+// S3 bucket names are unique globally, across every AWS account on Earth,
+// not just within this one — and Cloud Control's GetResource for
+// AWS::S3::Bucket resolves that global namespace without checking
+// ownership at all. Verified against the live Evatt Labs account
+// (409032463870, us-east-1):
+//
+//	$ aws s3api list-buckets --query "Buckets[?contains(Name,'dev-api')].Name"
+//	[]                                          # we own no such bucket
+//
+//	$ aws s3api head-bucket --bucket dev-api-artifacts
+//	An error occurred (403) when calling the HeadBucket operation: Forbidden
+//	                                            # it exists, owned by someone else
+//
+//	$ aws cloudcontrol get-resource --type-name AWS::S3::Bucket --identifier dev-api-artifacts
+//	{"BucketName":"dev-api-artifacts","Arn":"arn:aws:s3:::dev-api-artifacts", ...}
+//	                                            # full success
+//
+// Before this method existed, artifactBucketResource.Get trusted Cloud
+// Control's success unconditionally: a stranger's bucket that merely
+// happened to collide with this environment's derived name (dev,
+// dev-api-artifacts — exactly the kind of generic name every environment
+// produces) read as "exists, no change needed." destroy would then attempt
+// EmptyBucket/DeleteResource against a bucket kraai does not own, and
+// apply would skip creating the real bucket and upload the Lambda artifact
+// straight into a stranger's. See this workstream's PR description for the
+// full consequence chain.
+//
+// # Why ListBuckets, not HeadBucket + ExpectedBucketOwner
+//
+// S3 supports an expected-owner check on many operations
+// (x-amz-expected-bucket-owner, the Go SDK's ExpectedBucketOwner field),
+// and HeadBucket is the obvious first candidate for an ownership-aware
+// existence check. Verified against the live account that it does not
+// work for this: HeadBucket on the foreign bucket above returns an
+// identical 403 Forbidden whether or not ExpectedBucketOwner is set to
+// this account's own id, and a HeadBucket on a bucket name that does not
+// exist at all returns 404 either way — the ExpectedBucketOwner mismatch
+// produces no distinguishable signal from a bare access-denied. This is
+// not a gap in this package's probing; AWS's own HeadBucket reference
+// documents it as intentional: "If the bucket doesn't exist or you don't
+// have permission to access it, the HEAD request returns a generic 400 Bad
+// Request, 403 Forbidden, or 404 Not Found HTTP status code. A message
+// body isn't included, so you can't determine the exception beyond these
+// HTTP response codes." A 403 from HeadBucket therefore always carries the
+// same ambiguity this workstream's brief named explicitly: it cannot be
+// told apart from "this bucket is ours, but the caller's own IAM policy is
+// too narrow to list it" — and silently reading that ambiguous case as
+// "someone else owns this" would misreport a misconfigured policy as a
+// foreign bucket, which is exactly the failure mode this method must not
+// introduce.
+//
+// ListBuckets sidesteps the ambiguity rather than resolving it: per AWS's
+// own reference, it "[r]eturns a list of all buckets owned by the
+// authenticated sender of the request" — an account-scoped listing, not a
+// per-bucket permission check, so it can never be fooled by a bucket-level
+// policy (this account's own artifact bucket denying HeadBucket to an
+// over-narrow caller would still appear in this account's own
+// ListBuckets) and never needs to guess at a foreign account's ownership
+// (a bucket this account does not own can never appear in this account's
+// own bucket list, full stop — there is no cross-account visibility to be
+// ambiguous about). The two questions this workstream's brief asks Get to
+// keep separate — "does this bucket exist at all" and "do we own it" —
+// are answered by two different AWS APIs precisely so that a bucket-level
+// permission problem on our own bucket can never be misread as a
+// foreign-ownership one: Cloud Control's GetResource (existence, globally,
+// no ownership check) stays the existence check exactly as before, and
+// this method alone decides ownership. If ListBuckets itself fails — most
+// plausibly because the caller's IAM lacks the account-wide
+// s3:ListAllMyBuckets action this operation requires — that is a real,
+// account-level authorization problem unrelated to any specific bucket's
+// ownership, and is returned as an error here rather than folded into
+// either a true or false ownership answer; see this method's callers in
+// artifactbucket.go for why an error here must never be read as "not
+// owned."
+//
+// Filtered by Prefix rather than paged through the account's entire bucket
+// list: AWS's own documentation now warns that an unpaginated ListBuckets
+// call is rejected outright once an account's bucket quota exceeds 10,000,
+// so narrowing server-side to candidates that could possibly match bucket's
+// exact name is both cheaper and the only form of this call safe to rely
+// on regardless of account size. Prefix is a "begins with" filter, not an
+// exact match, so the loop below still checks each candidate's Name for
+// equality rather than trusting a single result.
+//
+// # AccountID is not needed here
+//
+// Every other ARN-constructing method in this package (see AccountID's own
+// doc comment) needs this account's id as a literal value to embed in a
+// constructed ARN. This method needs no such value: ListBuckets is
+// inherently scoped to "whatever account these credentials authenticate
+// as," so the question "is this ours" never has to compare an id at all —
+// another way the account-scoped API sidesteps the ambiguity a bare id
+// comparison via ExpectedBucketOwner could not.
+func (c *Client) OwnsBucket(ctx context.Context, bucket string) (bool, error) {
+	var token *string
+	for page := 0; page < maxOwnsBucketPages; page++ {
+		out, err := c.s3.ListBuckets(ctx, &s3.ListBucketsInput{
+			Prefix:            aws.String(bucket),
+			ContinuationToken: token,
+		})
+		if err != nil {
+			return false, kerrors.Wrap(err, kerrors.CodeUnexpected,
+				"listing this account's own S3 buckets to check ownership of %q", bucket)
+		}
+		for _, b := range out.Buckets {
+			if b.Name != nil && *b.Name == bucket {
+				return true, nil
+			}
+		}
+		if out.ContinuationToken == nil || *out.ContinuationToken == "" {
+			return false, nil
+		}
+		token = out.ContinuationToken
+	}
+	return false, kerrors.Validation("checking ownership of bucket %q did not terminate within %d pages", bucket, maxOwnsBucketPages)
+}
+
 // AccountID returns the AWS account id the configured credentials
 // authenticate as, fetched once via STS GetCallerIdentity and cached for
 // the process's lifetime (see the Client.accountID field doc for why
@@ -812,20 +970,21 @@ func (c *Client) EmptyBucket(ctx context.Context, bucket string) error {
 // A Lambda's execution Role property and an EventBridge Rule's Target Arn
 // both require a full ARN, not a bare name — unlike AWS::Lambda::Url's
 // TargetFunctionArn, which documents bare-name acceptance. The role and the
-// function it assumes into are ordered by phase (PhaseStorage before
-// PhaseCompute, see register.go), so a live GetResource lookup of the
-// role's Arn attribute would be safe. The function and its own triggers
-// (EventBridge Rule, Lambda Url) are not: both are registered in
-// PhaseCompute, which runs concurrently and gives no guarantee the function
-// exists yet when its rule's Create runs (the same class of same-phase
-// ordering gap register.go's own doc comment already flags for
-// RecordSet/CloudFront/Certificate). Constructing every ARN this package
+// function it assumes into are now a real DependsOn edge (register.go:
+// TypeLambdaFunction depends on TypeIAMRole), so a live GetResource lookup
+// of the role's Arn attribute would be safe today. The function and
+// EventBridge Rule are not ordered against each other at all — Rule
+// declares no DependsOn on the function (see eventsrule.go's own doc
+// comment) because PutTargets never validates the target's existence, so a
+// live lookup here would still race. Constructing every ARN this package
 // needs locally, from the account id plus the region plus the resource's
 // own derived name, removes the dependency entirely rather than papering
-// over a race with a retry.
+// over a race with a retry — and does so uniformly, rather than requiring
+// every call site to know which of its cross-resource references the
+// dependency graph has already made safe and which it has not.
 //
 // Assumes the "aws" partition. kraai's stated first deployment target is
-// commercial AWS for kraai.dev's own infrastructure (D24); GovCloud/China
+// commercial AWS, used to run kraai.dev's own infrastructure; GovCloud/China
 // partitions, whose ARNs use "aws-us-gov"/"aws-cn", are not something this
 // workstream verified against and are out of scope here.
 func (c *Client) AccountID(ctx context.Context) (string, error) {

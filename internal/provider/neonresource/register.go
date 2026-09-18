@@ -10,9 +10,9 @@ import (
 // Register adds the Postgres capability's two resource types.
 //
 // Registered together because they are one capability: a Postgres binding on
-// Cloudflare is a branch and the configuration fronting it (D30), and
-// registering the branch without Hyperdrive would produce an environment with
-// a database no Worker can reach.
+// Cloudflare is a branch and the configuration fronting it, and registering
+// the branch without Hyperdrive would produce an environment with a database
+// no Worker can reach.
 func Register(reg *resource.Registry, neonClient *neon.Client, cfClient *cloudflare.Client, settings BranchSettings) error {
 	for _, r := range Registrations(neonClient, cfClient, settings) {
 		if err := reg.Register(r); err != nil {
@@ -22,8 +22,10 @@ func Register(reg *resource.Registry, neonClient *neon.Client, cfClient *cloudfl
 	return nil
 }
 
-// Registrations returns the database capability's registrations, in the phase
-// order they are applied.
+// Registrations returns the database capability's registrations. The
+// Hyperdrive companion below declares the branch as its DependsOn, so
+// internal/plan orders them correctly regardless of the order returned
+// here.
 //
 // A nil cfClient omits the Hyperdrive companion entirely. That is the same
 // rule its When condition expresses, answered one step earlier: a caller with
@@ -37,10 +39,18 @@ func Registrations(neonClient *neon.Client, cfClient *cloudflare.Client, setting
 		{
 			Provider: Provider, Type: TypeBranch,
 			Capability: Capability,
-			// First: everything that binds to a database needs it to exist.
-			Phase: resource.PhaseDatabase,
+			// No DependsOn: a branch is the root of this capability's own
+			// dependency chain — everything that binds to a database needs
+			// it to exist, nothing it needs to exist first.
+			//
 			// Listed and matched on branch name within the project.
-			Lookup:   resource.LookupByAttr,
+			Lookup: resource.LookupByAttr,
+			// Neon serializes mutations per project, not by request rate
+			// — see resource.Registration.Scope's doc comment for the
+			// live 423 two branches on one project produced. See
+			// newBranchScope's own doc comment for why this closes over
+			// settings.Project/OrgID rather than reading Spec.Config.
+			Scope:    newBranchScope(settings),
 			Resource: &branchResource{client: neonClient, settings: settings},
 		},
 	}
@@ -63,9 +73,9 @@ func Registrations(neonClient *neon.Client, cfClient *cloudflare.Client, setting
 		// nothing will ever connect through.
 		When: resource.RequiresCapabilityVendor(manifest.CapabilityCompute, HyperdriveProvider),
 		// After the branch, whose connection string it consumes.
-		Phase:    resource.PhaseStorage,
-		Lookup:   resource.LookupByAttr,
-		Resource: &hyperdriveResource{client: cfClient},
+		DependsOn: []string{Provider + "/" + TypeBranch},
+		Lookup:    resource.LookupByAttr,
+		Resource:  &hyperdriveResource{client: cfClient},
 	})
 }
 

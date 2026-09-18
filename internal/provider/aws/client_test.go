@@ -29,7 +29,7 @@ func testPollTimings() Option {
 	return WithPollTimings(time.Microsecond, time.Microsecond, 200*time.Millisecond)
 }
 
-// fakeCC is a hand-rolled cloudControlAPI: no AWS account, no network (D21).
+// fakeCC is a hand-rolled cloudControlAPI: no AWS account, no network needed.
 type fakeCC struct {
 	getOut  *cloudcontrol.GetResourceOutput
 	getErr  error
@@ -824,7 +824,7 @@ func TestClientDeleteResource(t *testing.T) {
 	})
 }
 
-// fakeS3 is a hand-rolled s3API: no AWS account, no network (D21).
+// fakeS3 is a hand-rolled s3API: no AWS account, no network needed.
 type fakeS3 struct {
 	err  error
 	reqs []*s3.PutObjectInput
@@ -845,6 +845,15 @@ type fakeS3 struct {
 	deleteObjectsOut *s3.DeleteObjectsOutput
 	deleteObjectsErr error
 	deleteObjectsReq []*s3.DeleteObjectsInput
+
+	// listBucketsOut/listBucketsErr script ListBuckets, one entry per call
+	// in order (mirroring listOut/listAt's sequential-page pattern above)
+	// when listBucketsOut has more than one element; a single element (or
+	// none, see ListBuckets's own doc comment) repeats for every call.
+	listBucketsOut []*s3.ListBucketsOutput
+	listBucketsErr error
+	listBucketsAt  int
+	listBucketsReq []*s3.ListBucketsInput
 }
 
 func (f *fakeS3) PutObject(_ context.Context, params *s3.PutObjectInput, _ ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
@@ -881,7 +890,37 @@ func (f *fakeS3) DeleteObjects(_ context.Context, params *s3.DeleteObjectsInput,
 	return &s3.DeleteObjectsOutput{}, nil
 }
 
-// fakeSTS is a hand-rolled stsAPI: no AWS account, no network (D21).
+// ListBuckets defaults to "yes, this account owns whatever bucket name was
+// queried" when a test configures neither listBucketsOut nor
+// listBucketsErr — the opposite default from ListObjectsV2/DeleteObjects
+// above, deliberately: every artifactBucketResource test in
+// artifactbucket_test.go that predates the ownership check (name
+// rewriting, emptying, Create) exercises none of it, and defaulting to
+// "owned" here means none of them needed to be rewritten just to satisfy a
+// gate they were never testing. Tests that actually exercise ownership
+// (TestClientOwnsBucket, and the foreign-bucket cases in
+// artifactbucket_test.go) configure listBucketsOut/listBucketsErr
+// explicitly to override this default.
+func (f *fakeS3) ListBuckets(_ context.Context, params *s3.ListBucketsInput, _ ...func(*s3.Options)) (*s3.ListBucketsOutput, error) {
+	f.listBucketsReq = append(f.listBucketsReq, params)
+	if f.listBucketsErr != nil {
+		return nil, f.listBucketsErr
+	}
+	if len(f.listBucketsOut) == 0 {
+		var name string
+		if params.Prefix != nil {
+			name = *params.Prefix
+		}
+		return &s3.ListBucketsOutput{Buckets: []s3types.Bucket{{Name: aws.String(name)}}}, nil
+	}
+	out := f.listBucketsOut[f.listBucketsAt]
+	if f.listBucketsAt < len(f.listBucketsOut)-1 {
+		f.listBucketsAt++
+	}
+	return out, nil
+}
+
+// fakeSTS is a hand-rolled stsAPI: no AWS account, no network needed.
 type fakeSTS struct {
 	account string
 	err     error
@@ -1054,6 +1093,107 @@ func TestClientEmptyBucket(t *testing.T) {
 
 		if err := c.EmptyBucket(context.Background(), "my-bucket"); err == nil {
 			t.Fatal("expected a per-object DeleteObjects failure reported in the response body to be surfaced")
+		}
+	})
+}
+
+// TestClientOwnsBucket is the direct regression test for the live bug this
+// workstream fixes: S3 bucket names are unique globally, not per account,
+// and Cloud Control's GetResource resolves that global namespace with no
+// ownership check at all — verified against the live Evatt Labs account
+// (409032463870, us-east-1), see OwnsBucket's own doc comment for the full
+// evidence. OwnsBucket is the one place this package can still tell "exists
+// somewhere" apart from "exists in this account."
+func TestClientOwnsBucket(t *testing.T) {
+	t.Run("the bucket is in this account's own list", func(t *testing.T) {
+		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{
+			Buckets: []s3types.Bucket{{Name: aws.String("dev-api-artifacts")}},
+		}}}
+		c := &Client{s3: fs3}
+
+		owned, err := c.OwnsBucket(context.Background(), "dev-api-artifacts")
+		if err != nil {
+			t.Fatalf("OwnsBucket: %v", err)
+		}
+		if !owned {
+			t.Fatal("OwnsBucket = false, want true: the bucket is in this account's own ListBuckets response")
+		}
+		if len(fs3.listBucketsReq) != 1 || fs3.listBucketsReq[0].Prefix == nil || *fs3.listBucketsReq[0].Prefix != "dev-api-artifacts" {
+			t.Fatalf("ListBuckets called with %v, want a request Prefix-filtered to the bucket being checked", fs3.listBucketsReq)
+		}
+	})
+
+	t.Run("a foreign bucket this account does not own reads as not owned, not as an error", func(t *testing.T) {
+		// The live repro this guards against: this account's own
+		// ListBuckets genuinely returns no such bucket, because the real
+		// "dev-api-artifacts" belongs to a different AWS account entirely
+		// — Prefix narrows the request, but an empty Buckets slice (or one
+		// containing only unrelated names) is a normal, successful
+		// response, not a failure.
+		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}}
+		c := &Client{s3: fs3}
+
+		owned, err := c.OwnsBucket(context.Background(), "dev-api-artifacts")
+		if err != nil {
+			t.Fatalf("OwnsBucket: %v", err)
+		}
+		if owned {
+			t.Fatal("OwnsBucket = true, want false: this account's own ListBuckets does not include this bucket")
+		}
+	})
+
+	t.Run("Prefix is begins-with, not exact: a same-prefix decoy does not count as owned", func(t *testing.T) {
+		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{
+			Buckets: []s3types.Bucket{{Name: aws.String("dev-api-artifacts-decoy")}},
+		}}}
+		c := &Client{s3: fs3}
+
+		owned, err := c.OwnsBucket(context.Background(), "dev-api-artifacts")
+		if err != nil {
+			t.Fatalf("OwnsBucket: %v", err)
+		}
+		if owned {
+			t.Fatal("OwnsBucket = true, want false: the only candidate returned is a different bucket name that merely shares the prefix")
+		}
+	})
+
+	t.Run("pages through more than one page before finding the match", func(t *testing.T) {
+		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{
+			{Buckets: []s3types.Bucket{{Name: aws.String("dev-api-artifacts-old")}}, ContinuationToken: aws.String("page-2")},
+			{Buckets: []s3types.Bucket{{Name: aws.String("dev-api-artifacts")}}},
+		}}
+		c := &Client{s3: fs3}
+
+		owned, err := c.OwnsBucket(context.Background(), "dev-api-artifacts")
+		if err != nil {
+			t.Fatalf("OwnsBucket: %v", err)
+		}
+		if !owned {
+			t.Fatal("OwnsBucket = false, want true: the match is on the second page")
+		}
+		if len(fs3.listBucketsReq) != 2 {
+			t.Fatalf("got %d ListBuckets calls, want 2", len(fs3.listBucketsReq))
+		}
+		if fs3.listBucketsReq[1].ContinuationToken == nil || *fs3.listBucketsReq[1].ContinuationToken != "page-2" {
+			t.Fatalf("second ListBuckets call's ContinuationToken = %v, want %q", fs3.listBucketsReq[1].ContinuationToken, "page-2")
+		}
+	})
+
+	t.Run("a permissions or infra failure on ListBuckets itself is a real error, never read as not-owned", func(t *testing.T) {
+		// This is the disambiguation this workstream's brief asks for
+		// explicitly: an account-wide failure to even list this account's
+		// own buckets (e.g. missing s3:ListAllMyBuckets) says nothing
+		// about whether this specific bucket belongs to a stranger, and
+		// must not be silently reported as "someone else owns this."
+		fs3 := &fakeS3{listBucketsErr: errors.New("access denied")}
+		c := &Client{s3: fs3}
+
+		owned, err := c.OwnsBucket(context.Background(), "dev-api-artifacts")
+		if err == nil {
+			t.Fatal("expected a ListBuckets failure to be reported as an error")
+		}
+		if owned {
+			t.Fatal("OwnsBucket = true alongside a non-nil error; a failed check must never assert ownership")
 		}
 	})
 }

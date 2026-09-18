@@ -9,14 +9,14 @@ import (
 
 //go:generate go run go.uber.org/mock/mockgen -source=fs.go -destination=mock_fs_test.go -package=plugin
 
-// FS abstracts reading a plugin's compiled WASM bytes off disk (D21: every
-// external-system touchpoint sits behind an interface). Its ReadFile
+// FS abstracts reading a plugin's compiled WASM bytes off disk, so tests
+// can inject a fake without touching the real filesystem. Its ReadFile
 // signature intentionally matches internal/manifest.FS's method of the
 // same name: a caller already holding a manifest.FS (rooted and
 // symlink-contained via os.Root — see internal/manifest/fs.go) can pass it
 // here directly, by Go's structural typing, without adapting it or this
 // package importing internal/manifest at all. That keeps plugin-runtime's
-// own extension surface (D20) free of a dependency on the manifest
+// own extension surface free of a dependency on the manifest
 // package's shape, while still reusing its symlink-safety property when a
 // caller wires the two together.
 type FS interface {
@@ -24,14 +24,14 @@ type FS interface {
 	//
 	// An implementation should bound what it will read into memory;
 	// NewOSFS's does, at MaxPluginBytes. Host.Load re-checks the length it
-	// gets back regardless, since FS is an extension point (D20) and a
+	// gets back regardless, since FS is an extension point and a
 	// caller's own implementation is not this package's to trust.
 	ReadFile(name string) ([]byte, error)
 }
 
 // MaxPluginBytes bounds a single plugin's compiled WASM binary. A
 // .wasm file is read wholly into memory and then compiled, and wazero's
-// compile cost is linear in module size (~440ns/byte, docs/BLUEPRINT.md),
+// compile cost is linear in module size (~440ns/byte, measured),
 // so an oversized file costs host memory and CPU before a single guest
 // instruction runs — the one part of loading a plugin that happens
 // entirely outside any sandbox. 64MiB is ~34x the largest real module

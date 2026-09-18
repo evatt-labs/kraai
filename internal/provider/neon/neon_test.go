@@ -26,6 +26,16 @@ type recorded struct {
 
 func newTestClient(t *testing.T, handler func(*recorded) (int, string)) (*Client, *[]recorded) {
 	t.Helper()
+	return newTestClientWithOptions(t, handler)
+}
+
+// newTestClientWithOptions is newTestClient plus any extra Options — the
+// retry tests use it to install WithRetryTimings, so they exercise real
+// backoff/timeout/cancellation logic in milliseconds instead of the
+// production defaults (which are sized for a real Neon project lock to
+// actually clear, not for a test to wait out).
+func newTestClientWithOptions(t *testing.T, handler func(*recorded) (int, string), opts ...Option) (*Client, *[]recorded) {
+	t.Helper()
 	var seen []recorded
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +57,8 @@ func newTestClient(t *testing.T, handler func(*recorded) (int, string)) (*Client
 	}))
 	t.Cleanup(srv.Close)
 
-	return New("test-key", WithBaseURL(srv.URL), WithHTTPClient(srv.Client())), &seen
+	all := append([]Option{WithBaseURL(srv.URL), WithHTTPClient(srv.Client())}, opts...)
+	return New("test-key", all...), &seen
 }
 
 func TestAuthorizationHeaderIsSent(t *testing.T) {

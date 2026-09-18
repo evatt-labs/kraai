@@ -51,8 +51,8 @@ func registryFor(t *testing.T, client *cloudflare.Client) *resource.Registry {
 	return reg
 }
 
-// TestEveryTypeRegisters pins the registry keys, capabilities and phases —
-// the mapping a manifest entry actually travels through.
+// TestEveryTypeRegisters pins the registry keys and capabilities — the
+// mapping a manifest entry actually travels through.
 func TestEveryTypeRegisters(t *testing.T) {
 	client, _ := newClient(t, func(call) (int, string) { return ok(`{}`) })
 	reg := registryFor(t, client)
@@ -70,9 +70,6 @@ func TestEveryTypeRegisters(t *testing.T) {
 		}
 		if entry.Capability != capability {
 			t.Errorf("%s capability = %q, want %q", key, entry.Capability, capability)
-		}
-		if entry.Phase != resource.PhaseStorage {
-			t.Errorf("%s phase = %v, want storage", key, entry.Phase)
 		}
 		if !entry.Lookup.Valid() {
 			t.Errorf("%s declares an invalid lookup strategy", key)

@@ -64,20 +64,20 @@ func newPlanCommand(assembler RegistryAssembler) *cobra.Command {
 // flag variables implicitly — the same reason internal/cli/root.go's
 // Execute/handle split exists in cmd/kraai/main.go.
 //
-// # Exit code (D19)
+// # Exit code
 //
-// docs/BLUEPRINT.md D19 documents that `kraai plan` keeps its own,
-// separate, Terraform-style exit-code convention (0 no changes / 1 error /
-// 2 changes present) rather than the generic kerrors table the rest of the
-// CLI uses. That convention needs a channel for "the command succeeded but
-// should still report a distinguished non-zero exit code" — main.go's
-// centralized handler (docs/BLUEPRINT.md D18) currently derives the exit
+// `kraai plan` is meant to keep its own, separate, Terraform-style
+// exit-code convention (0 no changes / 1 error / 2 changes present,
+// matching `-detailed-exitcode`) rather than the generic kerrors table the
+// rest of the CLI uses. That convention needs a channel for "the command
+// succeeded but should still report a distinguished non-zero exit code" —
+// main.go's single centralized error handler currently derives the exit
 // code purely from whether Execute returned an error, via
 // kerrors.ExitCode. Reusing kerrors' "2" for that would collide with its
-// existing meaning (CodeValidation), so D19's "2" cannot simply piggyback
-// on the generic table — it needs its own signal, e.g. a package-level
-// var+accessor mirroring root.go's debugFlag/DebugRequested, read by
-// main.go after Execute returns nil.
+// existing meaning (CodeValidation), so the "changes present" signal can't
+// simply piggyback on the generic table — it needs its own channel, e.g. a
+// package-level var+accessor mirroring root.go's debugFlag/DebugRequested,
+// read by main.go after Execute returns nil.
 //
 // That plumbing is a change to cmd/kraai's shared, tested error-handling
 // contract, not something specific to plan — apply and destroy will
@@ -91,7 +91,7 @@ func newPlanCommand(assembler RegistryAssembler) *cobra.Command {
 // "Partial failure") — returns nil and exits 0. A plan that could not be
 // computed at all (bad environment name, missing/invalid manifest,
 // registry assembly failure, or the planner itself failing) returns a
-// *kerrors.KError and exits non-zero through the normal D18/D19 table.
+// *kerrors.KError and exits non-zero through the normal exit-code table.
 // The distinct "2 means changes are present" signal is a named gap, not a
 // silent one — worth building when apply/destroy make the shared plumbing
 // pay for itself.
@@ -175,12 +175,12 @@ func writePlanText(w io.Writer, envName string, p *plan.Plan) error {
 	} else {
 		tw := tabwriter.NewWriter(&b, 0, 2, 2, ' ', 0)
 
-		phase := p.Actions[0].Phase
-		_, _ = fmt.Fprintf(tw, "%s:\n", phase)
+		wave := p.Actions[0].Wave
+		_, _ = fmt.Fprintf(tw, "wave %d:\n", wave)
 		for _, a := range p.Actions {
-			if a.Phase != phase {
-				phase = a.Phase
-				_, _ = fmt.Fprintf(tw, "\n%s:\n", phase)
+			if a.Wave != wave {
+				wave = a.Wave
+				_, _ = fmt.Fprintf(tw, "\nwave %d:\n", wave)
 			}
 			_, _ = fmt.Fprintf(tw, "  %s\t%-9s\t%s\t%s/%s\t%s.%s", actionSymbol(a.Kind), a.Kind,
 				strconv.Quote(a.Ref.Name), a.Provider, a.Type, a.ServiceKey, a.Binding)
@@ -265,9 +265,25 @@ func summaryLine(envName string, c actionCounts) string {
 // json.Marshal of internal/plan's own types — for two reasons: Action.Err
 // is an error interface (a *kerrors.KError's fields are unexported, so it
 // would marshal to "{}" and silently lose the failure reason), and
-// resource.Phase/plan.ActionKind are integer enums whose numeric values
-// are an implementation detail a machine-readable contract should not
-// leak. Every field here is a plain string, int, or bool.
+// plan.ActionKind is an integer enum whose numeric value is an
+// implementation detail a machine-readable contract should not leak. Every
+// field here is a plain string, int, or bool.
+//
+// # Breaking change: "phase" is now "wave"
+//
+// This contract used to carry a "phase" string — one of "database",
+// "storage", "compute", the three fixed stages resource.Phase declared.
+// resource.Phase is gone (see resource.Registration.DependsOn's doc
+// comment for why), replaced by plan.Item.Wave: a zero-based integer,
+// derived per plan from the real dependency graph, with no fixed upper
+// bound and no name beyond its number. "wave" (int) is the direct
+// replacement — the obvious candidate once ordering is a computed integer
+// depth rather than one of three named stages, and the only field this
+// projection changes. A consumer of the old contract keyed on the literal
+// strings "database"/"storage"/"compute" breaks; one that only grouped or
+// sorted by the phase field's value keeps working against "wave" with the
+// same grouping/sorting logic, since both are still "the field that says
+// what runs together and in what order."
 type planDocument struct {
 	Environment string           `json:"environment"`
 	Summary     planSummaryJSON  `json:"summary"`
@@ -295,7 +311,7 @@ type planActionJSON struct {
 	Capability string `json:"capability"`
 	Provider   string `json:"provider"`
 	Type       string `json:"type"`
-	Phase      string `json:"phase"`
+	Wave       int    `json:"wave"`
 	Name       string `json:"name"`
 	Kind       string `json:"kind"`
 	Error      string `json:"error,omitempty"`
@@ -328,7 +344,7 @@ func toPlanDocument(envName string, p *plan.Plan) planDocument {
 			Capability: a.Capability,
 			Provider:   a.Provider,
 			Type:       a.Type,
-			Phase:      a.Phase.String(),
+			Wave:       a.Wave,
 			Name:       a.Ref.Name,
 			Kind:       a.Kind.String(),
 		}

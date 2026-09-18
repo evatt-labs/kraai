@@ -12,23 +12,17 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// defaultConcurrency bounds Get calls within one phase when the caller
-// does not set one explicitly (D13: never one goroutine per resource
-// unbounded, but also no reason to hardcode one number for every
-// provider's rate limits). Modest on purpose — plan runs against live
-// provider APIs, and a first-time caller should not have to discover a
-// sane limit by getting rate-limited.
+// defaultConcurrency bounds Get calls within one wave when the caller sets
+// no limit of its own. Modest on purpose: plan runs against live provider
+// APIs, and a first-time caller should not discover a sane limit by being
+// rate-limited.
 const defaultConcurrency = 10
 
 // getter is the only capability Plan needs from a resource.Resource.
 //
-// Every resource.Resource satisfies getter, so assigning one into a
-// getter-typed field is ordinary Go interface narrowing — but once stored
-// that way, nothing in this package can call Create, Update, or Delete on
-// it without first writing an explicit type assertion back to
-// resource.Resource. That is the structural guarantee the package doc
-// promises: not a rule this code happens to follow, but one the type
-// checker enforces.
+// Narrowing to it makes the package's read-only promise a compile-time
+// guarantee: reaching Create, Update or Delete from here would require an
+// explicit type assertion back to resource.Resource.
 type getter interface {
 	Get(ctx context.Context, ref resource.Ref) (*resource.State, error)
 }
@@ -43,13 +37,12 @@ type Planner struct {
 type Option func(*Planner)
 
 // WithConcurrency sets the maximum number of Get calls in flight at once
-// within a single phase. Non-positive values are ignored, leaving the
-// default in place, since zero or negative would either deadlock
-// (errgroup.SetLimit(0) permits no goroutines at all) or mean "unlimited"
-// (a negative value), both of which contradict D13's "never unbounded"
-// and "sized" intent for the exact same reason — so this treats either as
-// caller error to ignore rather than something to reject noisily on
-// construction, matching the option pattern's no-error-return contract.
+// within a single wave.
+//
+// Non-positive values are ignored rather than rejected, since an Option
+// cannot return an error: errgroup.SetLimit(0) permits no goroutines at
+// all and a negative limit means unbounded, so neither is a limit a caller
+// can have meant.
 func WithConcurrency(n int) Option {
 	return func(p *Planner) {
 		if n > 0 {
@@ -68,29 +61,28 @@ func New(reg *resource.Registry, opts ...Option) *Planner {
 }
 
 // plannedItem is one resource type a binding expanded to, before Get has
-// run — everything decide needs, with the resource narrowed to getter (see
-// the type's own doc).
+// run: everything decide needs, with the resource narrowed to getter.
 type plannedItem struct {
 	Item
 	ref  resource.Ref
 	spec resource.Spec
 	res  getter
+	// dependsOn carries the originating Registration.DependsOn through to
+	// computeWaves. Kept off Item because nothing downstream needs the raw
+	// keys once Wave has been computed from them.
+	dependsOn []string
 }
 
 // Plan walks m's services and reports what would happen to every resource
 // type every declared binding expands to, without changing anything.
 //
 // environmentName is threaded through separately from m because
-// manifest.Environment carries no name of its own — the same pattern
-// internal/lockfile's MergeResources already uses for the same reason.
+// manifest.Environment carries no name of its own.
 //
-// The returned error is non-nil only when the walk itself could not be
-// built at all (a binding's capability has no configured provider, or the
-// registry has nothing for that capability/vendor pair) — a configuration
-// problem, not a live one. A live failure reading one resource's current
-// state never fails this call; it is reported as an ActionFailed entry in
-// the returned Plan instead. See the package doc's "Partial failure"
-// section.
+// The returned error is non-nil only when the walk could not be built at
+// all — a configuration problem, such as a binding whose capability has no
+// configured provider. A live failure reading one resource's state is
+// reported as an ActionFailed entry in the returned Plan instead.
 func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentName string) (*Plan, error) {
 	if m == nil {
 		return nil, kerrors.Validation("plan: manifest is nil")
@@ -99,61 +91,93 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 		return nil, kerrors.Validation("plan: environment name must not be empty")
 	}
 
-	items, err := p.expand(m, environmentName)
+	// An environment with no naming overlay, or an empty prefix, gets the
+	// zero-value Namer, whose output is byte-identical to the unprefixed
+	// naming helpers.
+	var prefix string
+	if m.Environment.Naming != nil {
+		prefix = m.Environment.Naming.Prefix
+	}
+	namer := naming.NewNamer(prefix)
+
+	items, err := p.expand(m, environmentName, namer)
 	if err != nil {
 		return nil, err
 	}
 
-	byPhase := make(map[resource.Phase][]plannedItem, len(resource.Phases()))
-	for _, it := range items {
-		byPhase[it.Phase] = append(byPhase[it.Phase], it)
+	waves, err := computeWaves(items, serviceDependsOn(m))
+	if err != nil {
+		return nil, err
+	}
+	waveCount := 0
+	for i := range items {
+		items[i].Wave = waves[i]
+		if waves[i]+1 > waveCount {
+			waveCount = waves[i] + 1
+		}
 	}
 
-	// Phases run in sequence (D31); every phase runs regardless of whether
-	// an earlier one had failures, so one unreachable resource never hides
-	// the answers for every other one (see the package doc).
+	byWave := make([][]plannedItem, waveCount)
+	for _, it := range items {
+		byWave[it.Wave] = append(byWave[it.Wave], it)
+	}
+
+	// Every wave runs regardless of whether an earlier one had failures, so
+	// one unreachable resource never hides the answer for every other one.
 	var actions []Action
-	for _, phase := range resource.Phases() {
-		group := byPhase[phase]
+	for _, group := range byWave {
 		if len(group) == 0 {
 			continue
 		}
-		actions = append(actions, p.getPhase(ctx, group)...)
+		actions = append(actions, p.getWave(ctx, group)...)
 	}
 
 	// A cancelled run is not a plan. Every Get honours ctx, so cancelling
-	// mid-walk leaves an Action per resource saying it could not be read —
-	// which renders as a wall of failures and reads as "your infrastructure
-	// is unreachable" rather than "you pressed Ctrl-C". Report the
-	// cancellation instead; there is no partial plan worth showing, because
-	// the reader cannot tell which entries are real.
+	// mid-walk would otherwise render as a wall of failures reading as
+	// "your infrastructure is unreachable" rather than "you pressed
+	// Ctrl-C", with no way to tell which entries are real.
 	if err := ctx.Err(); err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "planning was cancelled")
 	}
 	return &Plan{Actions: actions}, nil
 }
 
+// serviceDependsOn projects m.Services down to the one field computeWaves
+// needs: each service's DependsOn, keyed by service name.
+//
+// A plain map rather than the manifest types themselves, so graph.go stays
+// free of manifest vocabulary.
+func serviceDependsOn(m *manifest.Manifest) map[string][]string {
+	out := make(map[string][]string, len(m.Services))
+	for name, svc := range m.Services {
+		if len(svc.DependsOn) > 0 {
+			out[name] = svc.DependsOn
+		}
+	}
+	return out
+}
+
 // expand walks every service's declared bindings in a deterministic order
 // and returns one plannedItem per resource type each binding expands to.
-func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]plannedItem, error) {
+// namer carries this environment's naming.prefix (Plan builds it once, from
+// m.Environment.Naming) so every name derived below applies it consistently.
+func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer naming.Namer) ([]plannedItem, error) {
 	var out []plannedItem
 
 	for _, svcKey := range sortedKeys(m.Services) {
 		svc := m.Services[svcKey]
 
-		// A service is itself a deployable unit, not only a set of bindings.
-		// Its `dir` already says where its code lives, so nothing in the
-		// manifest declares "deploy this" — planning it from the service's
-		// existence is what makes the thing being deployed appear in a plan
-		// at all. Without it, planning an application with two services and a
-		// database reported the database and said nothing about the code.
+		// A service is itself a deployable unit, not only a set of bindings:
+		// nothing in the manifest declares "deploy this", so planning it
+		// from the service's own existence is what puts the deployed code
+		// in the plan at all.
 		//
-		// Only when a compute vendor is configured: a manifest with no
-		// compute capability describes resources that something else
-		// deploys, and synthesising a compute resource there would invent a
-		// binding its author never asked for.
+		// Only when a compute vendor is configured — a manifest with no
+		// compute capability describes resources something else deploys, and
+		// synthesising compute there would invent a binding its author never
+		// asked for.
 		if _, ok := m.Root.Providers.For(manifest.CapabilityCompute); ok {
-			items, err := p.expandCompute(m, environmentName, svcKey, svc)
+			items, err := p.expandCompute(m, environmentName, svcKey, svc, namer)
 			if err != nil {
 				return nil, kerrors.Wrap(err, kerrors.CodeValidation, "services.%s", svcKey)
 			}
@@ -165,21 +189,21 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]planne
 			if d.Caching != nil {
 				config["caching"] = *d.Caching
 			}
-			items, err := p.expandBinding(m, environmentName, svcKey, d.Binding, manifest.CapabilityDatabase, config)
+			items, err := p.expandBinding(m, environmentName, svcKey, d.Binding, manifest.CapabilityDatabase, config, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "databases", d.Binding)
 			}
 			out = append(out, items...)
 		}
 		for _, kv := range svc.KeyValue {
-			items, err := p.expandBinding(m, environmentName, svcKey, kv.Binding, manifest.CapabilityKeyValue, nil)
+			items, err := p.expandBinding(m, environmentName, svcKey, kv.Binding, manifest.CapabilityKeyValue, nil, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "keyvalue", kv.Binding)
 			}
 			out = append(out, items...)
 		}
 		for _, o := range svc.Objects {
-			items, err := p.expandBinding(m, environmentName, svcKey, o.Binding, manifest.CapabilityObjects, nil)
+			items, err := p.expandBinding(m, environmentName, svcKey, o.Binding, manifest.CapabilityObjects, nil, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "objects", o.Binding)
 			}
@@ -187,9 +211,17 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]planne
 		}
 		for _, q := range svc.Queues {
 			items, err := p.expandBinding(m, environmentName, svcKey, q.Binding, manifest.CapabilityQueues,
-				map[string]any{"consumer": q.Consumer})
+				map[string]any{"consumer": q.Consumer}, namer)
 			if err != nil {
 				return nil, annotate(err, svcKey, "queues", q.Binding)
+			}
+			out = append(out, items...)
+		}
+		for _, n := range svc.Networks {
+			items, err := p.expandBinding(m, environmentName, svcKey, n.Binding, manifest.CapabilityNetwork,
+				map[string]any{"cidr": n.Cidr, "subnet": n.Subnet}, namer)
+			if err != nil {
+				return nil, annotate(err, svcKey, "network", n.Binding)
 			}
 			out = append(out, items...)
 		}
@@ -199,51 +231,34 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string) ([]planne
 
 // expandCompute plans the service's own deployable unit.
 //
-// It carries the service directory in its config because that is the one
-// thing a compute provider cannot derive: everything else about how to build
-// and deploy comes from providers.compute.settings (merged with the
-// service's own, per svc.Compute.Settings), but where the code lives is per
-// service. svc.Compute.Include rides alongside dir for the same reason: it
-// is this service's own escape hatch back into a directory its own
-// .gitignore excludes (see manifest.Compute.Include's own doc comment), so
-// it can only ever come from this service's manifest entry, never from
-// providers.compute.settings.
+// dir and Include travel in the config because they are the only things a
+// compute provider cannot derive from providers.compute.settings: where
+// this service's code lives, and its own escape hatch back into paths its
+// .gitignore excludes.
 //
-// A service's Compute block, when present, also decides which of the
-// vendor's registered resource types actually apply: see
-// resource.Registration.Triggers and AppliesToTrigger. This is the fix for
-// the bug that motivated this workstream — every service used to plan one
-// resource per type the compute vendor registers, regardless of whether
-// that type made sense for what the service actually does.
-//
-// A registration's merged settings can further narrow that set via
-// resource.Registration.SelectedBy/AppliesToSettings, for a case Triggers
-// alone cannot express: more than one registration valid for the identical
-// trigger, where a manifest must choose exactly one (aws-provider-compute's
-// own case — a Lambda function URL and an API Gateway HTTP API are both
-// valid front doors for TriggerHTTP, and a service must get exactly one).
-// Checked after AppliesToTrigger, against the same mergedSettings this
-// function already builds for Spec.Config — no separate settings source, so
-// a registration's selector sees exactly what the provider's own Create
+// The service's Compute block also decides which of the vendor's registered
+// types apply, in two stages. Registration.Triggers narrows by what the
+// service does; Registration.SelectedBy then narrows by merged settings,
+// for the case Triggers alone cannot express — more than one registration
+// valid for the identical trigger where exactly one must win, as with a
+// Lambda function URL and an API Gateway HTTP API both being valid HTTP
+// front doors. SelectedBy is checked against the same mergedSettings built
+// for Spec.Config, so a selector sees exactly what the provider's Create
 // call will.
 func (p *Planner) expandCompute(
-	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service,
+	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service, namer naming.Namer,
 ) ([]plannedItem, error) {
 	regs, err := p.registry.Resolve(manifest.CapabilityCompute, m.Root.Providers.Vendors())
 	if err != nil {
 		return nil, err
 	}
 
-	// providerSettings is present because the caller (expand) only reaches
-	// expandCompute when Providers.For(CapabilityCompute) already
-	// succeeded.
+	// Present because expand only reaches here once Providers.For succeeded.
 	provider, _ := m.Root.Providers.For(manifest.CapabilityCompute)
 
 	// A service with no Compute block carries no trigger and no settings
-	// override of its own. trigger == "" is what makes
-	// AppliesToTrigger keep every registered type for it, matching
-	// behavior from before this field existed; mergedSettings then reduces
-	// to the provider's settings unchanged.
+	// override: an empty trigger makes AppliesToTrigger keep every
+	// registered type, and mergedSettings reduces to the provider's own.
 	var trigger string
 	var svcSettings map[string]any
 	var handler, schedule string
@@ -257,7 +272,7 @@ func (p *Planner) expandCompute(
 	}
 	mergedSettings := manifest.MergeSettings(provider.Settings, svcSettings)
 
-	name := naming.ServiceName(environmentName, svcKey)
+	name := namer.Service(environmentName, svcKey)
 	config := map[string]any{"dir": svc.Dir, "settings": mergedSettings}
 	if trigger != "" {
 		config["trigger"] = trigger
@@ -285,12 +300,13 @@ func (p *Planner) expandCompute(
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: svcKey, Capability: manifest.CapabilityCompute,
-				Provider: r.Provider, Type: r.Type, Phase: r.Phase,
+				Provider: r.Provider, Type: r.Type,
 				ReadsBindings: reads,
 			},
-			ref:  resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
-			spec: resource.Spec{Binding: svcKey, Name: name, Config: config},
-			res:  r.Resource,
+			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
+			spec:      resource.Spec{Binding: svcKey, Name: name, Config: config},
+			res:       r.Resource,
+			dependsOn: r.DependsOn,
 		})
 	}
 	return out, nil
@@ -299,16 +315,10 @@ func (p *Planner) expandCompute(
 // declaredBindings returns every binding svc declares across Databases,
 // KeyValue, Objects and Queues, sorted ascending.
 //
-// This is the set a compute item's ReadsBindings gets: a service's own
-// compute resource is the natural — and only sensible default — reader of
-// every credential its own bindings produce, since nothing else in the
-// manifest can name a narrower "this Lambda gets the DB secret but not the
-// cache secret" scope today. Sorted for the same reason expand walks
-// m.Services in sorted order: Go gives no ordering guarantee over the
-// slices' construction order here either (each is appended in manifest
-// declaration order, which is stable, but sorting removes any doubt and
-// keeps a repeated Plan call byte-for-byte identical regardless of
-// manifest authoring order).
+// This is the set a compute item's ReadsBindings gets: the service's own
+// compute resource reads every credential its own bindings produce, there
+// being no way today to declare a narrower scope. Sorted so a repeated
+// Plan call is byte-for-byte identical regardless of authoring order.
 func declaredBindings(svc manifest.Service) []string {
 	var bindings []string
 	for _, d := range svc.Databases {
@@ -323,6 +333,9 @@ func declaredBindings(svc manifest.Service) []string {
 	for _, q := range svc.Queues {
 		bindings = append(bindings, q.Binding)
 	}
+	for _, n := range svc.Networks {
+		bindings = append(bindings, n.Binding)
+	}
 	sort.Strings(bindings)
 	return bindings
 }
@@ -334,11 +347,12 @@ func annotate(err error, svcKey, kind, binding string) error {
 	return kerrors.Wrap(err, kerrors.CodeValidation, "services.%s.%s.%s", svcKey, kind, binding)
 }
 
-// expandBinding resolves one binding's capability to a vendor, expands
-// that pair into every resource type it produces (D30), and derives each
-// one's Ref and Spec.
+// expandBinding resolves one binding's capability to a vendor, expands that
+// pair into every resource type it produces, and derives each one's Ref and
+// Spec.
 func (p *Planner) expandBinding(
 	m *manifest.Manifest, environmentName, svcKey, binding, capability string, config map[string]any,
+	namer naming.Namer,
 ) ([]plannedItem, error) {
 	if _, ok := m.Root.Providers.For(capability); !ok {
 		return nil, kerrors.Validation("no provider is configured for capability %q", capability)
@@ -353,34 +367,32 @@ func (p *Planner) expandBinding(
 		return nil, err
 	}
 
-	name := naming.ResourceName(environmentName, svcKey, binding)
+	name := namer.Resource(environmentName, svcKey, binding)
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: binding, Capability: capability,
-				Provider: r.Provider, Type: r.Type, Phase: r.Phase,
-				// A non-compute item reads only the binding it was itself
-				// expanded from — identical to Binding above, so this is a
-				// no-op change to what today's behaviour already was. Set
-				// explicitly rather than left nil so this item's
-				// ReadsBindings never emerges from apply's nil-fallback by
-				// accident; it is this package's decision to make, not
-				// apply's to infer.
+				Provider: r.Provider, Type: r.Type,
+				// A non-compute item reads only the binding it was expanded
+				// from. Set explicitly rather than left nil so it never
+				// falls through to a default inside apply: what an item may
+				// read is this package's decision.
 				ReadsBindings: []string{binding},
 			},
-			ref:  resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
-			spec: resource.Spec{Binding: binding, Name: name, Config: config},
-			res:  r.Resource,
+			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
+			spec:      resource.Spec{Binding: binding, Name: name, Config: config},
+			res:       r.Resource,
+			dependsOn: r.DependsOn,
 		})
 	}
 	return out, nil
 }
 
-// getPhase runs Get for every item in one phase, bounded by p.concurrency,
+// getWave runs Get for every item in one wave, bounded by p.concurrency,
 // and returns one Action per item in the same order items was given in.
-func (p *Planner) getPhase(ctx context.Context, items []plannedItem) []Action {
+func (p *Planner) getWave(ctx context.Context, items []plannedItem) []Action {
 	actions := make([]Action, len(items))
 
 	g := &errgroup.Group{}

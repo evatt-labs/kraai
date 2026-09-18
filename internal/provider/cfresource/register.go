@@ -45,7 +45,7 @@ func Registrations(client *cloudflare.Client) []resource.Registration {
 	return []resource.Registration{
 		{
 			Provider: Provider, Type: TypeD1Database,
-			Capability: manifest.CapabilityDatabase, Phase: resource.PhaseStorage,
+			Capability: manifest.CapabilityDatabase,
 			// The list endpoint takes a name filter, so the lookup is
 			// server-side rather than a paged scan.
 			Lookup: resource.LookupByAPI,
@@ -67,7 +67,7 @@ func Registrations(client *cloudflare.Client) []resource.Registration {
 		},
 		{
 			Provider: Provider, Type: TypeKVNamespace,
-			Capability: manifest.CapabilityKeyValue, Phase: resource.PhaseStorage,
+			Capability: manifest.CapabilityKeyValue,
 			// Listed and filtered on title, which the endpoint guarantees
 			// unique. Paged: its default is twenty per page.
 			Lookup: resource.LookupByAttr,
@@ -86,7 +86,7 @@ func Registrations(client *cloudflare.Client) []resource.Registration {
 		},
 		{
 			Provider: Provider, Type: TypeR2Bucket,
-			Capability: manifest.CapabilityObjects, Phase: resource.PhaseStorage,
+			Capability: manifest.CapabilityObjects,
 			// The name is the identifier: no separate id, so no lookup step
 			// before a delete.
 			Lookup: resource.LookupByName,
@@ -110,8 +110,8 @@ func Registrations(client *cloudflare.Client) []resource.Registration {
 		},
 		{
 			Provider: Provider, Type: TypeQueue,
-			Capability: manifest.CapabilityQueues, Phase: resource.PhaseStorage,
-			Lookup: resource.LookupByAttr,
+			Capability: manifest.CapabilityQueues,
+			Lookup:     resource.LookupByAttr,
 			Resource: &simple{
 				provider: Provider, typ: TypeQueue,
 				create: client.Queues.Create,

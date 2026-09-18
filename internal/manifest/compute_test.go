@@ -33,8 +33,8 @@ func TestMergeSettings_ServiceOverridesProviderPerKey(t *testing.T) {
 // TestMergeSettings_ShallowNotDeep documents the shallow-merge decision: a
 // nested value under a key present in both maps is replaced whole by
 // override's value, never merged field-by-field, because Settings is
-// free-form and vendor-interpreted (D34) and this package has no schema to
-// merge by.
+// free-form data validated by the provider rather than by this package,
+// so there is no schema here to merge nested fields by.
 func TestMergeSettings_ShallowNotDeep(t *testing.T) {
 	base := map[string]any{"layers": map[string]any{"web-adapter": "1.8", "extra": "keep-me"}}
 	override := map[string]any{"layers": map[string]any{"web-adapter": "2.0"}}
@@ -114,6 +114,43 @@ func TestValidateServices_TriggerVocabulary(t *testing.T) {
 		}
 		if got := err.Error(); !strings.Contains(got, "services.tick.compute.trigger") || !strings.Contains(got, `"cron"`) {
 			t.Fatalf("error = %q, want it to name services.tick.compute.trigger and the bad value", got)
+		}
+	})
+}
+
+// TestValidateServices_DependsOn covers Service.DependsOn's structural
+// sanity checks: a valid reference to another declared service, a
+// self-reference, and a reference to a service that does not exist.
+func TestValidateServices_DependsOn(t *testing.T) {
+	t.Run("depending on another declared service is valid", func(t *testing.T) {
+		services := map[string]Service{
+			"frontend": {DependsOn: []string{"backend"}},
+			"backend":  {},
+		}
+		if err := validateServices(services); err != nil {
+			t.Fatalf("validateServices: %v", err)
+		}
+	})
+
+	t.Run("a service cannot depend on itself", func(t *testing.T) {
+		services := map[string]Service{"api": {DependsOn: []string{"api"}}}
+		err := validateServices(services)
+		if err == nil {
+			t.Fatal("expected an error")
+		}
+		if got := err.Error(); !strings.Contains(got, "services.api.depends_on") || !strings.Contains(got, "itself") {
+			t.Fatalf("error = %q, want it to name services.api.depends_on and mention self-dependency", got)
+		}
+	})
+
+	t.Run("depending on an undeclared service is a validation error naming it", func(t *testing.T) {
+		services := map[string]Service{"api": {DependsOn: []string{"ghost"}}}
+		err := validateServices(services)
+		if err == nil {
+			t.Fatal("expected an error")
+		}
+		if got := err.Error(); !strings.Contains(got, "services.api.depends_on") || !strings.Contains(got, `"ghost"`) {
+			t.Fatalf("error = %q, want it to name services.api.depends_on and the missing service", got)
 		}
 	})
 }

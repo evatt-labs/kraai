@@ -119,7 +119,7 @@ func keyValueAssembler(t *testing.T, getter *fakeGetter) RegistryAssembler {
 		reg := resource.NewRegistry()
 		err := reg.Register(resource.Registration{
 			Provider: "fake", Type: "kv", Capability: manifest.CapabilityKeyValue,
-			Vendor: "fake", Phase: resource.PhaseStorage, Lookup: resource.LookupByName,
+			Vendor: "fake", Lookup: resource.LookupByName,
 			Resource: getter,
 		})
 		if err != nil {
@@ -255,7 +255,7 @@ func TestRunPlan_CreateAction_TextOutput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("execPlan: %v", err)
 	}
-	for _, want := range []string{"1 to create", "storage:", "+", "create", "api.CACHE", "fake/kv"} {
+	for _, want := range []string{"1 to create", "wave 0:", "+", "create", "api.CACHE", "fake/kv"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output = %q, want it to contain %q", out, want)
 		}
@@ -410,34 +410,34 @@ func TestActionSymbol(t *testing.T) {
 	}
 }
 
-// twoPhasePlan builds a *plan.Plan directly (bypassing Planner) spanning
-// two phases with every ActionKind, so writePlanText/toPlanDocument are
-// exercised over the "phase changes mid-list" branch and every action-kind
+// twoWavePlan builds a *plan.Plan directly (bypassing Planner) spanning
+// two waves with every ActionKind, so writePlanText/toPlanDocument are
+// exercised over the "wave changes mid-list" branch and every action-kind
 // branch without needing a real manifest/registry for each case.
-func twoPhasePlan() *plan.Plan {
+func twoWavePlan() *plan.Plan {
 	return &plan.Plan{
 		Actions: []plan.Action{
 			{
 				Item: plan.Item{ServiceKey: "api", Binding: "DB", Capability: manifest.CapabilityDatabase,
-					Provider: "neon", Type: "branch", Phase: resource.PhaseDatabase},
+					Provider: "neon", Type: "branch", Wave: 0},
 				Ref:  resource.Ref{Provider: "neon", Type: "branch", Name: "env-api-db"},
 				Kind: plan.ActionCreate,
 			},
 			{
 				Item: plan.Item{ServiceKey: "api", Binding: "DB", Capability: manifest.CapabilityDatabase,
-					Provider: "neon", Type: "branch", Phase: resource.PhaseDatabase},
+					Provider: "neon", Type: "branch", Wave: 0},
 				Ref:  resource.Ref{Provider: "neon", Type: "branch", Name: "env-api-db2"},
 				Kind: plan.ActionReplace,
 			},
 			{
 				Item: plan.Item{ServiceKey: "api", Binding: "CACHE", Capability: manifest.CapabilityKeyValue,
-					Provider: "fake", Type: "kv", Phase: resource.PhaseStorage},
+					Provider: "fake", Type: "kv", Wave: 1},
 				Ref:  resource.Ref{Provider: "fake", Type: "kv", Name: "env-api-cache"},
 				Kind: plan.ActionNoChange,
 			},
 			{
 				Item: plan.Item{ServiceKey: "api", Binding: "QUEUE", Capability: manifest.CapabilityQueues,
-					Provider: "fake", Type: "queue", Phase: resource.PhaseStorage},
+					Provider: "fake", Type: "queue", Wave: 1},
 				Ref:  resource.Ref{Provider: "fake", Type: "queue", Name: "env-api-queue"},
 				Kind: plan.ActionFailed,
 				Err:  errors.New("queue api down"),
@@ -446,15 +446,15 @@ func twoPhasePlan() *plan.Plan {
 	}
 }
 
-func TestWritePlanText_MultiPhaseAndEveryKind(t *testing.T) {
+func TestWritePlanText_MultiWaveAndEveryKind(t *testing.T) {
 	var buf bytes.Buffer
-	if err := writePlanText(&buf, "env", twoPhasePlan()); err != nil {
+	if err := writePlanText(&buf, "env", twoWavePlan()); err != nil {
 		t.Fatalf("writePlanText: %v", err)
 	}
 	out := buf.String()
 	for _, want := range []string{
 		"1 to create, 1 to replace, 1 unchanged, 1 failed (4 total)",
-		"database:", "storage:",
+		"wave 0:", "wave 1:",
 		"+", "~", "=", "!",
 		"queue api down",
 	} {
@@ -464,8 +464,8 @@ func TestWritePlanText_MultiPhaseAndEveryKind(t *testing.T) {
 	}
 }
 
-func TestToPlanDocument_EveryKindAndPhase(t *testing.T) {
-	doc := toPlanDocument("env", twoPhasePlan())
+func TestToPlanDocument_EveryKindAndWave(t *testing.T) {
+	doc := toPlanDocument("env", twoWavePlan())
 
 	if doc.Summary != (planSummaryJSON{Create: 1, Replace: 1, NoChange: 1, Failed: 1, Total: 4, HasChanges: true, HasFailures: true}) {
 		t.Errorf("Summary = %+v", doc.Summary)
@@ -473,8 +473,8 @@ func TestToPlanDocument_EveryKindAndPhase(t *testing.T) {
 	if len(doc.Actions) != 4 {
 		t.Fatalf("Actions = %+v", doc.Actions)
 	}
-	if doc.Actions[0].Phase != "database" || doc.Actions[2].Phase != "storage" {
-		t.Errorf("Actions phases = %q, %q", doc.Actions[0].Phase, doc.Actions[2].Phase)
+	if doc.Actions[0].Wave != 0 || doc.Actions[2].Wave != 1 {
+		t.Errorf("Actions waves = %d, %d", doc.Actions[0].Wave, doc.Actions[2].Wave)
 	}
 	if doc.Actions[3].Kind != "failed" || doc.Actions[3].Error != "queue api down" {
 		t.Errorf("Actions[3] = %+v, want the failed action with its error", doc.Actions[3])
@@ -554,9 +554,11 @@ func TestPlanLoadsDotEnvFromTheManifestDirectory(t *testing.T) {
 
 	var seen string
 	assembler := func(context.Context, *manifest.Manifest) (*resource.Registry, error) {
-		// Read through env.Require rather than os.Getenv: that is the
-		// sanctioned reader (D18), and it is the exact call the assembler
-		// makes for a real credential.
+		// Read through env.Require rather than os.Getenv: .golangci.yml's
+		// forbidigo rule forbids os.Getenv everywhere except env.Require's
+		// own implementation, so this is the one sanctioned way to read an
+		// env var, and it is the exact call the assembler makes for a real
+		// credential.
 		got, err := env.Require("KRAAI_TEST_FROM_DOTENV")
 		if err == nil {
 			seen = got["KRAAI_TEST_FROM_DOTENV"]

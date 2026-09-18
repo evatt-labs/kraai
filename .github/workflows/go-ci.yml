@@ -1,7 +1,6 @@
 name: Go CI
 
-# No path filter, deliberately (see docs/BLUEPRINT.md's go-module-scaffold
-# workstream notes on required-status-check gotchas): this workflow's own
+# No path filter, deliberately: this workflow's own
 # jobs (go-build-test, go-lint) aren't in branch protection's required-check
 # list today, so a path filter wouldn't collide with the existing
 # JS-era `test`/`analyze`/`dependency-review` checks. But `go build`/`go vet`
@@ -35,10 +34,12 @@ jobs:
       - run: go build ./...
       - run: go vet ./...
 
-      # No tests exist yet (see go-module-scaffold's PR description) — this
-      # still produces a (currently empty) coverage.out so the codecov
-      # upload step and integration are proven working now, per
-      # docs/BLUEPRINT.md D21, rather than bolted on once tests exist.
+      # Coverage runs WITHOUT -race, deliberately. The race detector costs
+      # roughly 10x here (measured: 3.9s -> 37.7s for this suite), and this
+      # job is the fast signal — build, vet, tests, coverage. Races are
+      # covered by the go-race job below, which runs in parallel, so wall
+      # clock is unchanged and a data race is reported as its own distinct
+      # failure rather than as "the test job went red".
       - run: go test ./... -coverprofile=coverage.out
 
       # Same codecov project as the JS line (see ci.yml) — tokenless,
@@ -49,6 +50,36 @@ jobs:
           files: coverage.out
           flags: go
           fail_ci_if_error: false
+
+  go-race:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      # The race detector, as its own job.
+      #
+      # This codebase is concurrency-heavy by design: apply and destroy run
+      # each phase concurrently under a bounded errgroup (D13), registrations
+      # can declare a mutual-exclusion scope guarded by a shared keyed-mutex,
+      # outputs and credential producers are written from parallel goroutines,
+      # and every provider client shares one HTTP transport. None of that is
+      # exercised meaningfully by a serial test run.
+      #
+      # It is separate from go-build-test rather than folded into it because
+      # the two answer different questions. "A test failed" and "two
+      # goroutines touched the same memory" want different first reactions,
+      # and keeping them apart means the fast job still returns build, vet
+      # and coverage in seconds while this one takes its time.
+      #
+      # No -coverprofile here: coverage is already produced by the fast job,
+      # and collecting it twice would only slow this one further.
+      - run: go test ./... -race
 
   go-lint:
     runs-on: ubuntu-latest

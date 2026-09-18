@@ -26,19 +26,19 @@ func newRegistry(t *testing.T, regs ...resource.Registration) *resource.Registry
 	return reg
 }
 
-// action builds one plan.Action with the given identity, phase, and kind,
+// action builds one plan.Action with the given identity, wave, and kind,
 // filling in the fields apply actually reads. ReadsBindings is left nil —
 // every existing test in this file exercises apply's fallback-to-own-
 // binding path (effectiveReadsBindings in apply.go), which is also exactly
 // what internal/plan/planner.go's expandBinding sets explicitly for every
 // non-compute item today. See actionReading for tests that need a
 // different ReadsBindings, e.g. a compute item reading a sibling binding.
-func action(serviceKey, binding, provider, typ string, phase resource.Phase, kind plan.ActionKind) plan.Action {
+func action(serviceKey, binding, provider, typ string, wave int, kind plan.ActionKind) plan.Action {
 	name := serviceKey + "-" + binding
 	return plan.Action{
 		Item: plan.Item{
 			ServiceKey: serviceKey, Binding: binding, Capability: "database",
-			Provider: provider, Type: typ, Phase: phase,
+			Provider: provider, Type: typ, Wave: wave,
 		},
 		Ref:  resource.Ref{Provider: provider, Type: typ, Name: name},
 		Spec: resource.Spec{Binding: binding, Name: name},
@@ -51,8 +51,8 @@ func action(serviceKey, binding, provider, typ string, phase resource.Phase, kin
 // produces for a compute item, whose own Binding is the service key and
 // whose ReadsBindings names the (possibly many) bindings the service
 // declares.
-func actionReading(serviceKey, binding, provider, typ string, phase resource.Phase, kind plan.ActionKind, reads []string) plan.Action {
-	a := action(serviceKey, binding, provider, typ, phase, kind)
+func actionReading(serviceKey, binding, provider, typ string, wave int, kind plan.ActionKind, reads []string) plan.Action {
+	a := action(serviceKey, binding, provider, typ, wave, kind)
 	a.ReadsBindings = reads
 	return a
 }
@@ -88,12 +88,12 @@ func TestApply_PreflightRefusesOnActionFailed_ZeroCalls(t *testing.T) {
 	db := newFakeResource()
 	reg := newRegistry(t, resource.Registration{
 		Provider: "neon", Type: "branch", Capability: "database",
-		Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db,
+		Lookup: resource.LookupByName, Resource: db,
 	})
 
-	failed := action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionFailed)
+	failed := action("api", "DB", "neon", "branch", 0, plan.ActionFailed)
 	failed.Err = errors.New("get failed")
-	ok := action("api", "OTHER", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate)
+	ok := action("api", "OTHER", "neon", "branch", 0, plan.ActionCreate)
 
 	p := &plan.Plan{Actions: []plan.Action{failed, ok}}
 
@@ -115,10 +115,10 @@ func TestApply_PreflightRefusesOnActionReplaceWithoutFlag_ZeroCalls(t *testing.T
 	db := newFakeResource()
 	reg := newRegistry(t, resource.Registration{
 		Provider: "neon", Type: "branch", Capability: "database",
-		Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db,
+		Lookup: resource.LookupByName, Resource: db,
 	})
 
-	replace := action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionReplace)
+	replace := action("api", "DB", "neon", "branch", 0, plan.ActionReplace)
 	p := &plan.Plan{Actions: []plan.Action{replace}}
 
 	result, err := New(reg).Apply(context.Background(), p) // allowReplace defaults to false
@@ -139,10 +139,10 @@ func TestApply_AllowReplace_DeletesThenCreates(t *testing.T) {
 	db.createState = &resource.State{Ref: resource.Ref{Provider: "neon", Type: "branch", Name: "api-DB"}, ID: "new"}
 	reg := newRegistry(t, resource.Registration{
 		Provider: "neon", Type: "branch", Capability: "database",
-		Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db,
+		Lookup: resource.LookupByName, Resource: db,
 	})
 
-	replace := action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionReplace)
+	replace := action("api", "DB", "neon", "branch", 0, plan.ActionReplace)
 	p := &plan.Plan{Actions: []plan.Action{replace}}
 
 	result, err := New(reg, WithAllowReplace(true)).Apply(context.Background(), p)
@@ -166,10 +166,10 @@ func TestApply_Replace_DeleteFailureNeverCallsCreate(t *testing.T) {
 	db.deleteErr = errors.New("delete boom")
 	reg := newRegistry(t, resource.Registration{
 		Provider: "neon", Type: "branch", Capability: "database",
-		Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db,
+		Lookup: resource.LookupByName, Resource: db,
 	})
 
-	replace := action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionReplace)
+	replace := action("api", "DB", "neon", "branch", 0, plan.ActionReplace)
 	p := &plan.Plan{Actions: []plan.Action{replace}}
 
 	result, err := New(reg, WithAllowReplace(true)).Apply(context.Background(), p)
@@ -185,9 +185,9 @@ func TestApply_Replace_DeleteFailureNeverCallsCreate(t *testing.T) {
 	}
 }
 
-// --- phase sequencing and failure semantics ---
+// --- wave sequencing and failure semantics ---
 
-func TestApply_PhaseFailureSkipsLaterPhases(t *testing.T) {
+func TestApply_WaveFailureSkipsLaterWaves(t *testing.T) {
 	db := newFakeResource()
 	db.createErr = errors.New("db create boom")
 	storage := newFakeResource()
@@ -195,17 +195,17 @@ func TestApply_PhaseFailureSkipsLaterPhases(t *testing.T) {
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db},
+			Lookup: resource.LookupByName, Resource: db},
 		resource.Registration{Provider: "cf", Type: "kv", Capability: "keyvalue",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: storage},
+			Lookup: resource.LookupByName, Resource: storage},
 		resource.Registration{Provider: "cf", Type: "worker", Capability: "compute",
-			Phase: resource.PhaseCompute, Lookup: resource.LookupByName, Resource: compute},
+			Lookup: resource.LookupByName, Resource: compute},
 	)
 
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
-		action("api", "CACHE", "cf", "kv", resource.PhaseStorage, plan.ActionCreate),
-		action("api", "api", "cf", "worker", resource.PhaseCompute, plan.ActionCreate),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
+		action("api", "CACHE", "cf", "kv", 1, plan.ActionCreate),
+		action("api", "api", "cf", "worker", 2, plan.ActionCreate),
 	}}
 
 	result, err := New(reg).Apply(context.Background(), p)
@@ -223,7 +223,7 @@ func TestApply_PhaseFailureSkipsLaterPhases(t *testing.T) {
 		t.Errorf("compute outcome = %v, want OutcomeSkipped", r.Outcome)
 	}
 	if storage.createCalls != 0 || compute.createCalls != 0 {
-		t.Errorf("storage.createCalls=%d compute.createCalls=%d, want 0: a failed phase must not start the next one",
+		t.Errorf("storage.createCalls=%d compute.createCalls=%d, want 0: a failed wave must not start the next one",
 			storage.createCalls, compute.createCalls)
 	}
 	if !result.HasFailures() {
@@ -239,14 +239,14 @@ func TestApply_SiblingsSurviveOneFailure(t *testing.T) {
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "cf", Type: "kv", Capability: "keyvalue",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: ok},
+			Lookup: resource.LookupByName, Resource: ok},
 		resource.Registration{Provider: "cf", Type: "queue", Capability: "queues",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: bad},
+			Lookup: resource.LookupByName, Resource: bad},
 	)
 
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "OK", "cf", "kv", resource.PhaseStorage, plan.ActionCreate),
-		action("api", "BAD", "cf", "queue", resource.PhaseStorage, plan.ActionCreate),
+		action("api", "OK", "cf", "kv", 1, plan.ActionCreate),
+		action("api", "BAD", "cf", "queue", 1, plan.ActionCreate),
 	}}
 
 	result, err := New(reg).Apply(context.Background(), p)
@@ -264,7 +264,7 @@ func TestApply_SiblingsSurviveOneFailure(t *testing.T) {
 	}
 }
 
-func TestApply_PhaseSequencing_DatabaseCompletesBeforeStorageStarts(t *testing.T) {
+func TestApply_WaveSequencing_Wave0CompletesBeforeWave1Starts(t *testing.T) {
 	db := newFakeResource()
 	db.createState = &resource.State{Ref: resource.Ref{Provider: "neon", Type: "branch", Name: "api-DB"}}
 	db.delay = 40 * time.Millisecond
@@ -273,14 +273,14 @@ func TestApply_PhaseSequencing_DatabaseCompletesBeforeStorageStarts(t *testing.T
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db},
+			Lookup: resource.LookupByName, Resource: db},
 		resource.Registration{Provider: "cf", Type: "kv", Capability: "keyvalue",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: storage},
+			Lookup: resource.LookupByName, Resource: storage},
 	)
 
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
-		action("api", "CACHE", "cf", "kv", resource.PhaseStorage, plan.ActionCreate),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
+		action("api", "CACHE", "cf", "kv", 1, plan.ActionCreate),
 	}}
 
 	start := time.Now()
@@ -290,7 +290,7 @@ func TestApply_PhaseSequencing_DatabaseCompletesBeforeStorageStarts(t *testing.T
 	}
 	elapsed := time.Since(start)
 	if elapsed < db.delay {
-		t.Fatalf("elapsed = %v, want >= %v: storage must not start until the database phase finished", elapsed, db.delay)
+		t.Fatalf("elapsed = %v, want >= %v: wave 1 must not start until wave 0 finished", elapsed, db.delay)
 	}
 	if storage.createCalls != 1 {
 		t.Errorf("storage.createCalls = %d, want 1", storage.createCalls)
@@ -312,12 +312,12 @@ func TestApply_ConcurrencyBounded(t *testing.T) {
 	f.delay = 20 * time.Millisecond
 	reg := newRegistry(t, resource.Registration{
 		Provider: "cf", Type: "kv", Capability: "keyvalue",
-		Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: f,
+		Lookup: resource.LookupByName, Resource: f,
 	})
 
 	var actions []plan.Action
 	for i := 0; i < n; i++ {
-		actions = append(actions, action("api", bindingName(i), "cf", "kv", resource.PhaseStorage, plan.ActionCreate))
+		actions = append(actions, action("api", bindingName(i), "cf", "kv", 1, plan.ActionCreate))
 	}
 	p := &plan.Plan{Actions: actions}
 
@@ -358,9 +358,123 @@ func TestWithConcurrency_IgnoresNonPositive(t *testing.T) {
 	}
 }
 
+// --- scope locking ---
+
+// TestApply_ScopedRegistration_SerializesSameScope is the regression test
+// for the live failure Registration.Scope exists to fix: a real `kraai
+// apply` against two services bound to the same Neon project raced two
+// concurrent branch creates and got one 423. Every action below shares one
+// registration whose Scope always resolves to the same value, mirroring
+// several services all binding to one Neon project — the actual manifest
+// shape the incident reproduced. Asserts observed concurrency for that
+// scope never exceeds 1, even though WithConcurrency(n) permits n to run
+// at once.
+func TestApply_ScopedRegistration_SerializesSameScope(t *testing.T) {
+	const n = 6
+
+	f := newFakeResource()
+	f.delay = 20 * time.Millisecond
+	reg := newRegistry(t, resource.Registration{
+		Provider: "neon", Type: "branch", Capability: "database",
+		Lookup:   resource.LookupByAttr,
+		Scope:    func(resource.Spec) string { return "neon:project:shared" },
+		Resource: f,
+	})
+
+	var actions []plan.Action
+	for i := 0; i < n; i++ {
+		actions = append(actions, action(fmt.Sprintf("svc%d", i), "DB", "neon", "branch", 0, plan.ActionCreate))
+	}
+	p := &plan.Plan{Actions: actions}
+
+	result, err := New(reg, WithConcurrency(n)).Apply(context.Background(), p)
+	if err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	for _, r := range result.Results {
+		if r.Outcome == OutcomeFailed {
+			t.Fatalf("action failed: %+v", r)
+		}
+	}
+
+	if f.maxInFlight != 1 {
+		t.Fatalf("maxInFlight = %d, want 1: actions sharing a scope overlapped", f.maxInFlight)
+	}
+}
+
+// TestApply_ScopedRegistration_DifferentScopesRunConcurrently asserts the
+// other half of Registration.Scope's contract: two resources whose Spec
+// resolves to different scopes (two different Neon projects) are not
+// serialized against each other, only against themselves.
+func TestApply_ScopedRegistration_DifferentScopesRunConcurrently(t *testing.T) {
+	f := newFakeResource()
+	f.delay = 40 * time.Millisecond
+	reg := newRegistry(t, resource.Registration{
+		Provider: "neon", Type: "branch", Capability: "database",
+		Lookup: resource.LookupByAttr,
+		Scope: func(spec resource.Spec) string {
+			project, _ := spec.Config["project"].(string)
+			return "neon:project:" + project
+		},
+		Resource: f,
+	})
+
+	a1 := action("svc1", "DB", "neon", "branch", 0, plan.ActionCreate)
+	a1.Spec.Config = map[string]any{"project": "p1"}
+	a2 := action("svc2", "DB", "neon", "branch", 0, plan.ActionCreate)
+	a2.Spec.Config = map[string]any{"project": "p2"}
+	p := &plan.Plan{Actions: []plan.Action{a1, a2}}
+
+	result, err := New(reg, WithConcurrency(2)).Apply(context.Background(), p)
+	if err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	for _, r := range result.Results {
+		if r.Outcome == OutcomeFailed {
+			t.Fatalf("action failed: %+v", r)
+		}
+	}
+
+	if f.maxInFlight < 2 {
+		t.Fatalf("maxInFlight = %d, want >= 2: different-scope actions ran serially", f.maxInFlight)
+	}
+}
+
+// TestApply_UnscopedRegistration_Unaffected pins the "nil means unscoped"
+// contract Registration.Scope's own doc comment states: a registration
+// that sets no Scope at all still runs its actions concurrently up to
+// WithConcurrency's limit, exactly as it did before this field existed —
+// this is the same assertion TestApply_ConcurrencyBounded already made,
+// named here explicitly as the scope-locking regression it also guards.
+func TestApply_UnscopedRegistration_Unaffected(t *testing.T) {
+	const n = 8
+	const limit = 4
+
+	f := newFakeResource()
+	f.delay = 20 * time.Millisecond
+	reg := newRegistry(t, resource.Registration{
+		Provider: "cf", Type: "kv", Capability: "keyvalue",
+		Lookup: resource.LookupByName, Resource: f,
+		// Scope deliberately left nil.
+	})
+
+	var actions []plan.Action
+	for i := 0; i < n; i++ {
+		actions = append(actions, action("api", bindingName(i), "cf", "kv", 1, plan.ActionCreate))
+	}
+	p := &plan.Plan{Actions: actions}
+
+	if _, err := New(reg, WithConcurrency(limit)).Apply(context.Background(), p); err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	if f.maxInFlight < 2 {
+		t.Fatalf("maxInFlight = %d, want >= 2: an unscoped registration was unexpectedly serialized", f.maxInFlight)
+	}
+}
+
 // --- secret handoff ---
 
-func TestApply_SecretHandoffAcrossPhases_SameBinding(t *testing.T) {
+func TestApply_SecretHandoffAcrossWaves_SameBinding(t *testing.T) {
 	branch := newFakeResource()
 	branch.createState = &resource.State{Ref: resource.Ref{Provider: "neon", Type: "branch", Name: "api-DB"}, ID: "b1"}
 	branchWithSecrets := &fakeSecretResource{
@@ -377,17 +491,17 @@ func TestApply_SecretHandoffAcrossPhases_SameBinding(t *testing.T) {
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: branchWithSecrets},
+			Lookup: resource.LookupByName, Resource: branchWithSecrets},
 		resource.Registration{Provider: "cf", Type: "hyperdrive", Capability: "database",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: hyperdrive},
+			Lookup: resource.LookupByName, Resource: hyperdrive},
 	)
 
 	// Both actions share ServiceKey "api" and Binding "DB" — the same
 	// manifest binding expanding to two provider types, exactly the shape
 	// planner.expandBinding produces for Neon+Hyperdrive.
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
-		action("api", "DB", "cf", "hyperdrive", resource.PhaseStorage, plan.ActionCreate),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
+		action("api", "DB", "cf", "hyperdrive", 1, plan.ActionCreate),
 	}}
 
 	if _, err := New(reg).Apply(context.Background(), p); err != nil {
@@ -423,14 +537,14 @@ func TestApply_SecretsDoNotLeakAcrossBindings(t *testing.T) {
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: branchWithSecrets},
+			Lookup: resource.LookupByName, Resource: branchWithSecrets},
 		resource.Registration{Provider: "cf", Type: "hyperdrive", Capability: "database",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: otherHyperdrive},
+			Lookup: resource.LookupByName, Resource: otherHyperdrive},
 	)
 
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
-		action("api", "OTHER", "cf", "hyperdrive", resource.PhaseStorage, plan.ActionCreate),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
+		action("api", "OTHER", "cf", "hyperdrive", 1, plan.ActionCreate),
 	}}
 
 	if _, err := New(reg).Apply(context.Background(), p); err != nil {
@@ -463,17 +577,17 @@ func TestApply_NoChangeStillPopulatesOutputsAndSecrets(t *testing.T) {
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: branchWithSecrets},
+			Lookup: resource.LookupByName, Resource: branchWithSecrets},
 		resource.Registration{Provider: "cf", Type: "hyperdrive", Capability: "database",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: hyperdrive},
+			Lookup: resource.LookupByName, Resource: hyperdrive},
 	)
 
-	noChange := action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionNoChange)
+	noChange := action("api", "DB", "neon", "branch", 0, plan.ActionNoChange)
 	noChange.Current = current
 
 	p := &plan.Plan{Actions: []plan.Action{
 		noChange,
-		action("api", "DB", "cf", "hyperdrive", resource.PhaseStorage, plan.ActionCreate),
+		action("api", "DB", "cf", "hyperdrive", 1, plan.ActionCreate),
 	}}
 
 	result, err := New(reg).Apply(context.Background(), p)
@@ -497,9 +611,9 @@ func TestApply_NoChangeWithNilCurrentIsInvalidPlan(t *testing.T) {
 	db := newFakeResource()
 	reg := newRegistry(t, resource.Registration{
 		Provider: "neon", Type: "branch", Capability: "database",
-		Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db,
+		Lookup: resource.LookupByName, Resource: db,
 	})
-	noChange := action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionNoChange)
+	noChange := action("api", "DB", "neon", "branch", 0, plan.ActionNoChange)
 	// Current left nil deliberately: an invalid plan this package defends
 	// against per Rule 5 (avoid silent assumptions across a package
 	// boundary) rather than trusting internal/plan's own invariant blindly.
@@ -541,14 +655,14 @@ func TestApply_ComputeReadsSiblingBindingSecret_Namespaced(t *testing.T) {
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: branchWithSecrets},
+			Lookup: resource.LookupByName, Resource: branchWithSecrets},
 		resource.Registration{Provider: "aws", Type: "function", Capability: "compute",
-			Phase: resource.PhaseCompute, Lookup: resource.LookupByName, Resource: lambda},
+			Lookup: resource.LookupByName, Resource: lambda},
 	)
 
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
-		actionReading("api", "api", "aws", "function", resource.PhaseCompute, plan.ActionCreate, []string{"DB"}),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
+		actionReading("api", "api", "aws", "function", 2, plan.ActionCreate, []string{"DB"}),
 	}}
 
 	if _, err := New(reg).Apply(context.Background(), p); err != nil {
@@ -595,17 +709,17 @@ func TestApply_TwoReadableBindingsSameSecretName_NoCollision(t *testing.T) {
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: primary},
+			Lookup: resource.LookupByName, Resource: primary},
 		resource.Registration{Provider: "neon", Type: "branch2", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: replica},
+			Lookup: resource.LookupByName, Resource: replica},
 		resource.Registration{Provider: "aws", Type: "function", Capability: "compute",
-			Phase: resource.PhaseCompute, Lookup: resource.LookupByName, Resource: lambda},
+			Lookup: resource.LookupByName, Resource: lambda},
 	)
 
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "PRIMARY", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
-		action("api", "REPLICA", "neon", "branch2", resource.PhaseDatabase, plan.ActionCreate),
-		actionReading("api", "api", "aws", "function", resource.PhaseCompute, plan.ActionCreate,
+		action("api", "PRIMARY", "neon", "branch", 0, plan.ActionCreate),
+		action("api", "REPLICA", "neon", "branch2", 0, plan.ActionCreate),
+		actionReading("api", "api", "aws", "function", 2, plan.ActionCreate,
 			[]string{"PRIMARY", "REPLICA"}),
 	}}
 
@@ -650,14 +764,14 @@ func TestApply_NonComputeActionExplicitReadsBindings_OwnBindingOnly(t *testing.T
 
 	reg := newRegistry(t,
 		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: branchWithSecrets},
+			Lookup: resource.LookupByName, Resource: branchWithSecrets},
 		resource.Registration{Provider: "cf", Type: "hyperdrive", Capability: "database",
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: otherHyperdrive},
+			Lookup: resource.LookupByName, Resource: otherHyperdrive},
 	)
 
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
-		actionReading("api", "OTHER", "cf", "hyperdrive", resource.PhaseStorage, plan.ActionCreate, []string{"OTHER"}),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
+		actionReading("api", "OTHER", "cf", "hyperdrive", 1, plan.ActionCreate, []string{"OTHER"}),
 	}}
 
 	if _, err := New(reg).Apply(context.Background(), p); err != nil {
@@ -676,17 +790,17 @@ func TestApply_NonComputeActionExplicitReadsBindings_OwnBindingOnly(t *testing.T
 // Binding, matching what every action saw before this field existed,
 // rather than emerging as "reads nothing" by accident.
 func TestEffectiveReadsBindings_FallsBackToOwnBinding(t *testing.T) {
-	nilCase := action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate)
+	nilCase := action("api", "DB", "neon", "branch", 0, plan.ActionCreate)
 	if got := effectiveReadsBindings(nilCase); len(got) != 1 || got[0] != "DB" {
 		t.Errorf("nil ReadsBindings: effectiveReadsBindings = %v, want [DB]", got)
 	}
 
-	emptyCase := actionReading("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate, []string{})
+	emptyCase := actionReading("api", "DB", "neon", "branch", 0, plan.ActionCreate, []string{})
 	if got := effectiveReadsBindings(emptyCase); len(got) != 1 || got[0] != "DB" {
 		t.Errorf("empty ReadsBindings: effectiveReadsBindings = %v, want [DB]", got)
 	}
 
-	explicitCase := actionReading("api", "api", "aws", "function", resource.PhaseCompute, plan.ActionCreate,
+	explicitCase := actionReading("api", "api", "aws", "function", 2, plan.ActionCreate,
 		[]string{"CACHE", "DB"})
 	got := effectiveReadsBindings(explicitCase)
 	if len(got) != 2 || got[0] != "CACHE" || got[1] != "DB" {
@@ -699,7 +813,7 @@ func TestEffectiveReadsBindings_FallsBackToOwnBinding(t *testing.T) {
 func TestApply_UnregisteredResourceType_ReportsFailed(t *testing.T) {
 	reg := resource.NewRegistry() // nothing registered
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
 	}}
 	result, err := New(reg).Apply(context.Background(), p)
 	if err != nil {
@@ -718,10 +832,10 @@ func TestApply_ContextCancellation(t *testing.T) {
 	db.delay = 200 * time.Millisecond
 	reg := newRegistry(t, resource.Registration{
 		Provider: "neon", Type: "branch", Capability: "database",
-		Phase: resource.PhaseDatabase, Lookup: resource.LookupByName, Resource: db,
+		Lookup: resource.LookupByName, Resource: db,
 	})
 	p := &plan.Plan{Actions: []plan.Action{
-		action("api", "DB", "neon", "branch", resource.PhaseDatabase, plan.ActionCreate),
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
 	}}
 
 	ctx, cancel := context.WithCancel(context.Background())

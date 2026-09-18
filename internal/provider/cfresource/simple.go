@@ -123,7 +123,7 @@ func (s *simple) Delete(ctx context.Context, ref resource.Ref) error {
 	}
 	if !ok {
 		// Already gone is the goal, not a failure. Teardown counts a warning
-		// here against clearing the lockfile, so reporting one for a resource
+		// here against forgetting a resource, so reporting absence for one
 		// a previous partial run already deleted would mean the lock could
 		// never be cleared on a retry.
 		return nil

@@ -7,25 +7,21 @@ import (
 
 // Render turns a Plan into plain, human-readable text.
 //
-// Deliberately not a method on Plan and not called anywhere else in this
-// package: computing a plan and presenting it are different jobs with
-// different audiences: apply needs the structured Actions, a human at a
-// terminal needs a formatted summary, and a future command layer may want
-// JSON or a TUI instead of either. Keeping this a free function operating
-// on the finished Plan means none of those callers has to recompute
-// anything, and adding a second renderer never touches Planner or Plan.
+// A free function rather than a method so a second renderer — JSON, a TUI —
+// can be added without touching Planner or Plan, and so no caller has to
+// recompute the walk to present it differently.
 func Render(p *Plan) string {
 	if p == nil || len(p.Actions) == 0 {
 		return "no resources declared\n"
 	}
 
 	var b strings.Builder
-	phase := p.Actions[0].Phase
-	fmt.Fprintf(&b, "%s:\n", phase)
+	wave := p.Actions[0].Wave
+	fmt.Fprintf(&b, "wave %d:\n", wave)
 	for _, a := range p.Actions {
-		if a.Phase != phase {
-			phase = a.Phase
-			fmt.Fprintf(&b, "\n%s:\n", phase)
+		if a.Wave != wave {
+			wave = a.Wave
+			fmt.Fprintf(&b, "\nwave %d:\n", wave)
 		}
 		fmt.Fprintf(&b, "  %s %s (%s/%s, %s.%s)\n", symbol(a.Kind), describe(a), a.Provider, a.Type, a.ServiceKey, a.Binding)
 	}

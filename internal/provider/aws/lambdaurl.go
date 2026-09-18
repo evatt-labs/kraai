@@ -10,19 +10,6 @@ import (
 // TypeLambdaURL is AWS::Lambda::Url's Cloud Control TypeName.
 const TypeLambdaURL = "AWS::Lambda::Url"
 
-// lambdaURLSettingKeys are the keys this file's translate reads out of a
-// compute Spec's merged settings map. Declared for the same reason
-// lambdaSettingKeys (compute_settings.go) and providerSettingKeys
-// (settings.go) are: providers.compute.settings is one free-form map with
-// three readers in this package now, not two, and validateKnownSettings
-// (settings_validate.go) unions all three so none of them has to know the
-// others' vocabulary. Found the hard way: functionUrlAuthType was a real,
-// working setting this file already read that the unknown-key check would
-// otherwise have rejected as unrecognized the first time a manifest author
-// used it, the same silent-then-loud bug this package exists to fix, one
-// key over.
-var lambdaURLSettingKeys = []string{"functionUrlAuthType"}
-
 // defaultFunctionURLAuthType is used when a manifest's compute settings
 // name no functionUrlAuthType.
 //
@@ -48,9 +35,10 @@ const defaultFunctionURLAuthType = "AWS_IAM"
 // choice between them (or a rule for when each applies — a Function URL is
 // what routes/custom_domain has nothing to front, while ApiGatewayV2 is
 // what a persistent environment's routes overlay needs a stage/domain
-// mapping onto) is exactly the kind of AWS-primitive decision D24 already
-// defers to kraai-api's own blueprint, not this document. Flagged here and
-// in this workstream's PR description rather than picking one silently.
+// mapping onto) is exactly the kind of AWS-primitive decision kraai-api's
+// own infrastructure design is left to make for itself, not this document.
+// Flagged here and in this workstream's PR description rather than picking
+// one silently.
 type lambdaURLResource struct {
 	inner *resourceType
 }
@@ -76,9 +64,11 @@ func (u *lambdaURLResource) translate(spec resource.Spec) resource.Spec {
 		// Bare function name, not a constructed ARN: AWS::Lambda::Url's own
 		// TargetFunctionArn property documents accepting either form ("my-
 		// function" or a full ARN). Using the bare name — identical to the
-		// function's own derived name (Lambda::Function is byName, D26) —
-		// means this registration needs no cross-resource lookup of any
-		// kind, live or ARN-constructed, to reach the function it targets.
+		// function's own derived name (AWS::Lambda::Function's identity is
+		// that name itself, looked up directly, not via a separate
+		// identifier) — means this registration needs no cross-resource
+		// lookup of any kind, live or ARN-constructed, to reach the function
+		// it targets.
 		"TargetFunctionArn": spec.Name,
 		"AuthType":          authType,
 	}

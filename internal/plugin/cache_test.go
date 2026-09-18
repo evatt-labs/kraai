@@ -58,8 +58,8 @@ func main() {}
 }
 
 // TestCompilationCacheIsHitAcrossRuntimes is the second half of
-// acceptance criterion 4 and the direct regression guard for D29: the
-// on-disk compilation cache must actually be hit on a second run, not
+// acceptance criterion 4 and the direct regression guard ensuring the
+// on-disk compilation cache is actually hit on a second run, not
 // silently recompiled every time. wazero.NewCompilationCache() (the
 // in-memory variant) is the documented trap — it does not survive across
 // separate wazero.Runtime instances, which is exactly what simulating two
@@ -72,9 +72,9 @@ func main() {}
 // dominated by decoding/validating the instruction stream, not codegen —
 // so caching (which only skips codegen) barely moved its timing at all,
 // even at sizes far larger than any real plugin. A real Go binary's
-// cold-vs-cached ratio is what docs/BLUEPRINT.md's measurement appendix
-// actually reports (391ms -> 15.4ms, ~25x); reproducing that ratio
-// reliably needs the real thing, not an approximation of "large."
+// cold-vs-cached ratio is what was actually measured (391ms -> 15.4ms,
+// ~25x); reproducing that ratio reliably needs the real thing, not an
+// approximation of "large."
 func TestCompilationCacheIsHitAcrossRuntimes(t *testing.T) {
 	ctx := t.Context()
 	wasmBytes := buildRealGuestModule(t)
@@ -104,8 +104,9 @@ func TestCompilationCacheIsHitAcrossRuntimes(t *testing.T) {
 	// Second "process run": a brand new wazero.Runtime AND a brand new
 	// wazero.CompilationCache object, so nothing in-process survives from
 	// the first run — the only thing that can make this fast is the
-	// cache directory's on-disk contents, which is precisely what D29
-	// requires and NewCompilationCache() (in-memory) could never provide.
+	// cache directory's on-disk contents, which is precisely what an
+	// on-disk cache is for and NewCompilationCache() (in-memory) could
+	// never provide.
 	cache2, err := wazero.NewCompilationCacheWithDir(cacheDir)
 	if err != nil {
 		t.Fatalf("NewCompilationCacheWithDir (second run): %v", err)
@@ -122,11 +123,11 @@ func TestCompilationCacheIsHitAcrossRuntimes(t *testing.T) {
 
 	t.Logf("cold compile: %s, warm (cache-hit) compile: %s", coldElapsed, warmElapsed)
 
-	// D29 measured a ~25x improvement (391ms -> 15.4ms). This asserts a
-	// much more conservative 3x margin, wide enough to absorb CI
-	// scheduling noise while still failing hard if the cache silently
-	// stopped being hit (in which case warmElapsed would be roughly
-	// equal to coldElapsed, not smaller at all).
+	// A ~25x improvement (391ms -> 15.4ms) was measured separately. This
+	// test asserts a much more conservative 3x margin, wide enough to
+	// absorb CI scheduling noise while still failing hard if the cache
+	// silently stopped being hit (in which case warmElapsed would be
+	// roughly equal to coldElapsed, not smaller at all).
 	if warmElapsed*3 >= coldElapsed {
 		t.Fatalf(
 			"expected the second compile to be at least 3x faster via the on-disk cache; cold=%s warm=%s — the cache may not be getting hit",

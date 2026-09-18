@@ -8,7 +8,7 @@ import (
 
 // TestConcurrentInvoke exercises Plugin.Invoke from many goroutines at
 // once against a small pool, intended to run under `go test -race`: a
-// wazero module instance is not goroutine-safe (D29), so this proves the
+// wazero module instance is not goroutine-safe, so this proves the
 // pool actually serializes access per instance rather than merely
 // happening to work. Each goroutine sends a distinct payload and checks
 // it gets exactly that payload back — any instance sharing bug would show
@@ -61,7 +61,7 @@ func TestConcurrentInvoke(t *testing.T) {
 }
 
 // TestPoolGetBlocksThenUnblocks proves get() actually blocks when the
-// pool is exhausted (the D13 backpressure this pool exists to provide),
+// pool is exhausted (the backpressure this pool exists to provide),
 // rather than silently returning something unsafe.
 func TestPoolGetBlocksThenUnblocks(t *testing.T) {
 	ctx := t.Context()

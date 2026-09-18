@@ -9,7 +9,7 @@ import (
 
 // registryFixture is a stand-in registry shaped like the real one: a
 // Postgres capability that expands across two providers the way
-// internal/provider/neonresource actually registers it (D30), plus one
+// internal/provider/neonresource actually registers it, plus one
 // single-type capability per other manifest resource kind.
 type registryFixture struct {
 	reg *resource.Registry
@@ -36,30 +36,34 @@ func newRegistryFixture(t *testing.T) *registryFixture {
 	regs := []resource.Registration{
 		{
 			Provider: "neon", Type: "branch", Capability: manifest.CapabilityDatabase,
-			Phase: resource.PhaseDatabase, Lookup: resource.LookupByAttr, Resource: f.branch,
+			Lookup: resource.LookupByAttr, Resource: f.branch,
 		},
 		{
 			// A different literal Provider than the branch above, on
 			// purpose: this is the exact shape
-			// internal/provider/neonresource.Register uses for Hyperdrive
-			// (D30). Cloudflare's API creates it, but choosing Neon for
+			// internal/provider/neonresource.Register uses for Hyperdrive.
+			// Cloudflare's API creates it, but choosing Neon for
 			// Postgres is what asks for it, so Vendor says neon — without
 			// which one vendor choice reaches only half the capability.
+			// DependsOn names the branch by its own registry key, exactly
+			// as neonresource.Registrations does, so a test walking this
+			// fixture's wave assignment exercises the same edge the real
+			// registration declares.
 			Provider: "cloudflare", Type: "hyperdrive", Vendor: "neon",
-			Capability: manifest.CapabilityDatabase,
-			Phase:      resource.PhaseStorage, Lookup: resource.LookupByAttr, Resource: f.hyperdrive,
+			Capability: manifest.CapabilityDatabase, DependsOn: []string{"neon/branch"},
+			Lookup: resource.LookupByAttr, Resource: f.hyperdrive,
 		},
 		{
 			Provider: "cloudflare", Type: "kv_namespace", Capability: manifest.CapabilityKeyValue,
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByAttr, Resource: f.kv,
+			Lookup: resource.LookupByAttr, Resource: f.kv,
 		},
 		{
 			Provider: "cloudflare", Type: "r2_bucket", Capability: manifest.CapabilityObjects,
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByName, Resource: f.r2,
+			Lookup: resource.LookupByName, Resource: f.r2,
 		},
 		{
 			Provider: "cloudflare", Type: "queue", Capability: manifest.CapabilityQueues,
-			Phase: resource.PhaseStorage, Lookup: resource.LookupByAttr, Resource: f.queue,
+			Lookup: resource.LookupByAttr, Resource: f.queue,
 		},
 	}
 	for _, r := range regs {

@@ -20,19 +20,19 @@ func TestRender_EmptyPlan(t *testing.T) {
 func TestRender_EveryActionKind(t *testing.T) {
 	p := &Plan{Actions: []Action{
 		{
-			Item: Item{ServiceKey: "api", Binding: "DB", Provider: "neon", Type: "branch", Phase: resource.PhaseDatabase},
+			Item: Item{ServiceKey: "api", Binding: "DB", Provider: "neon", Type: "branch", Wave: 0},
 			Ref:  resource.Ref{Name: "env-api-db"}, Kind: ActionCreate,
 		},
 		{
-			Item: Item{ServiceKey: "api", Binding: "CACHE", Provider: "cloudflare", Type: "kv_namespace", Phase: resource.PhaseStorage},
+			Item: Item{ServiceKey: "api", Binding: "CACHE", Provider: "cloudflare", Type: "kv_namespace", Wave: 1},
 			Ref:  resource.Ref{Name: "env-api-cache"}, Kind: ActionNoChange,
 		},
 		{
-			Item: Item{ServiceKey: "api", Binding: "UPLOADS", Provider: "cloudflare", Type: "r2_bucket", Phase: resource.PhaseStorage},
+			Item: Item{ServiceKey: "api", Binding: "UPLOADS", Provider: "cloudflare", Type: "r2_bucket", Wave: 1},
 			Ref:  resource.Ref{Name: "env-api-uploads"}, Kind: ActionReplace,
 		},
 		{
-			Item: Item{ServiceKey: "api", Binding: "JOBS", Provider: "cloudflare", Type: "queue", Phase: resource.PhaseStorage},
+			Item: Item{ServiceKey: "api", Binding: "JOBS", Provider: "cloudflare", Type: "queue", Wave: 1},
 			Ref:  resource.Ref{Name: "env-api-jobs"}, Kind: ActionFailed, Err: errors.New("timeout"),
 		},
 	}}
@@ -40,7 +40,7 @@ func TestRender_EveryActionKind(t *testing.T) {
 	got := Render(p)
 
 	for _, want := range []string{
-		"database:", "storage:",
+		"wave 0:", "wave 1:",
 		"+ create \"env-api-db\"",
 		"= \"env-api-cache\" unchanged",
 		"~ replace \"env-api-uploads\" (immutable field differs)",
@@ -51,9 +51,9 @@ func TestRender_EveryActionKind(t *testing.T) {
 		}
 	}
 
-	// One phase header per phase, not per action.
-	if strings.Count(got, "storage:") != 1 {
-		t.Errorf("Render printed the storage header more than once:\n%s", got)
+	// One wave header per wave, not per action.
+	if strings.Count(got, "wave 1:") != 1 {
+		t.Errorf("Render printed the wave 1 header more than once:\n%s", got)
 	}
 }
 

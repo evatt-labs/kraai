@@ -35,19 +35,20 @@ const permissionAction = "lambda:InvokeFunction"
 // given the client (for AccountID/Region, or a live lookup) and the
 // action's own Spec. Two implementations exist: eventBridgeRuleSourceARN
 // (pure, no live lookup) and apiGatewaySourceARN (a live lookup — see its
-// own doc comment for the same-phase ordering gap this cannot avoid).
+// own doc comment for why it needs one, and how register.go's DependsOn
+// now makes that lookup safely ordered).
 type sourceARNFunc func(ctx context.Context, client *Client, spec resource.Spec) (string, error)
 
 // eventBridgeRuleSourceARN builds the invoking rule's ARN locally from the
 // account id, region and the rule's own derived name (spec.Name — the
-// EventBridge Rule registration is byName, D26, so this is exactly the
+// EventBridge Rule registration is looked up byName, so this is exactly the
 // same name eventsrule.go's own Create submits as its Name property). No
 // live lookup: this is the same account-id-plus-region construction
 // eventsrule.go and lambda.go already use for the reverse direction
-// (function ARN, role ARN), for the identical reason — avoiding a
-// same-phase race with the resource it references, since Events::Rule and
-// this permission both run in PhaseCompute with no ordering guarantee
-// between them.
+// (function ARN, role ARN). This permission's own registration declares no
+// DependsOn on TypeEventsRule (register.go) precisely because this
+// function never needs the rule to exist — a live lookup would have to be
+// ordered against it, this local construction does not.
 func eventBridgeRuleSourceARN(ctx context.Context, client *Client, spec resource.Spec) (string, error) {
 	account, err := client.AccountID(ctx)
 	if err != nil {
@@ -58,7 +59,7 @@ func eventBridgeRuleSourceARN(ctx context.Context, client *Client, spec resource
 
 // apiGatewaySourceARN resolves the fronting API Gateway's execute-api ARN.
 //
-// # Known gap: this is a live lookup with a real same-phase race
+// # A live lookup, safely ordered by DependsOn
 //
 // Unlike an EventBridge rule or an IAM role, an ApiGatewayV2::Api's id is
 // not something kraai derives — it is assigned by AWS at creation and
@@ -67,27 +68,32 @@ func eventBridgeRuleSourceARN(ctx context.Context, client *Client, spec resource
 // it is to ask Cloud Control, via the identical byTag lookup
 // register.go's own ApiGatewayV2::Api registration uses.
 //
-// That lookup is not safely ordered: this permission and the API Gateway
-// it authorizes are both registered in PhaseCompute, which runs
-// concurrently under D12's two-level phase model with no guarantee the
-// gateway's own Create has completed by the time this one starts. This is
-// the same class of unsolved same-phase dependency register.go's own doc
-// comment already names for RecordSet/Certificate/CloudFront — surfaced
-// here rather than hidden behind a wildcarded SourceArn, which was
-// considered and rejected: AWS::Lambda::Permission's SourceArn is matched
+// That lookup used to race the gateway's own creation: this permission and
+// the API Gateway it authorizes were both registered in the same
+// PhaseCompute, which ran concurrently with no guarantee the gateway's own
+// Create had completed by the time this one started — the exact live-
+// account failure that motivated replacing phases with a real dependency
+// graph (see resource.Registration.DependsOn's own doc comment). This
+// registration now declares DependsOn: [TypeLambdaFunction,
+// TypeAPIGatewayV2API] (register.go), so internal/plan orders this
+// permission strictly after the gateway it looks up — the call below
+// always finds a state, on a first `kraai apply` as much as any later one.
+//
+// A wildcarded SourceArn was considered and rejected as an alternative fix,
+// before the graph existed: AWS::Lambda::Permission's SourceArn is matched
 // with StringLike, so wildcarding the api-id segment (rather than only the
 // stage/method/path segments every example already wildcards) would grant
 // every API Gateway HTTP API in the account permission to invoke this
 // function, not only the one fronting it — a real, avoidable broadening of
-// what can invoke a given service's code for the sake of dodging a race
-// that resolves itself on retry.
+// what can invoke a given service's code, rejected in favor of ordering the
+// lookup correctly instead of loosening what it matches.
 //
-// A first-ever `kraai apply` on a fresh environment can therefore fail
-// this one action with a clear, named error (never silently: the failure
-// is reported, not swallowed) if the gateway has not yet been created when
-// this permission's Create runs; a second `kraai apply` succeeds once it
-// has. This is a real usability cost, not a hidden one, and is flagged as
-// such in this workstream's PR description rather than deferred again.
+// The error below is retained rather than removed: DependsOn guarantees
+// this permission's own Create does not start until the gateway's wave has
+// finished, but Get itself can still observe nothing found if the
+// registry and a hand-run plan somehow drift apart, or a future change
+// weakens the edge above — a clear, named error stays cheaper than a nil
+// dereference two lines later.
 func apiGatewaySourceARN(ctx context.Context, client *Client, spec resource.Spec) (string, error) {
 	lookup := &resourceType{
 		provider: Provider, typeName: TypeAPIGatewayV2API, lookup: resource.LookupByTag,
@@ -99,10 +105,10 @@ func apiGatewaySourceARN(ctx context.Context, client *Client, spec resource.Spec
 	}
 	if state == nil {
 		return "", kerrors.Validation(
-			"no AWS::ApiGatewayV2::Api was found for %q yet — this Lambda::Permission depends on it "+
-				"existing first, and both are registered in the same phase with no ordering guarantee "+
-				"between them (see apiGatewaySourceARN's own doc comment); retry once the API Gateway "+
-				"has been created", spec.Name)
+			"no AWS::ApiGatewayV2::Api was found for %q — this Lambda::Permission depends on it "+
+				"existing first (see register.go's DependsOn for TypePermissionAPIGateway); if the plan "+
+				"and the live account have not drifted apart, retry once the API Gateway has been created",
+			spec.Name)
 	}
 
 	account, err := client.AccountID(ctx)

@@ -12,17 +12,17 @@ func newStub(t *testing.T) *MockResource {
 	return NewMockResource(gomock.NewController(t))
 }
 
-func reg(t *testing.T, provider, typ, capability string, phase Phase) Registration {
+func reg(t *testing.T, provider, typ, capability string) Registration {
 	t.Helper()
 	return Registration{
 		Provider: provider, Type: typ, Capability: capability,
-		Phase: phase, Lookup: LookupByName, Resource: newStub(t),
+		Lookup: LookupByName, Resource: newStub(t),
 	}
 }
 
 func TestRegisterAndLookup(t *testing.T) {
 	r := NewRegistry()
-	if err := r.Register(reg(t, "cloudflare", "d1_database", "database", PhaseStorage)); err != nil {
+	if err := r.Register(reg(t, "cloudflare", "d1_database", "database")); err != nil {
 		t.Fatalf("Register: %v", err)
 	}
 
@@ -30,7 +30,7 @@ func TestRegisterAndLookup(t *testing.T) {
 	if !ok {
 		t.Fatal("registered type was not found")
 	}
-	if got.Capability != "database" || got.Phase != PhaseStorage {
+	if got.Capability != "database" {
 		t.Fatalf("registration = %+v", got)
 	}
 }
@@ -40,10 +40,10 @@ func TestRegisterAndLookup(t *testing.T) {
 // listed first.
 func TestRegisterRejectsDuplicates(t *testing.T) {
 	r := NewRegistry()
-	if err := r.Register(reg(t, "cloudflare", "d1_database", "database", PhaseStorage)); err != nil {
+	if err := r.Register(reg(t, "cloudflare", "d1_database", "database")); err != nil {
 		t.Fatal(err)
 	}
-	err := r.Register(reg(t, "cloudflare", "d1_database", "database", PhaseStorage))
+	err := r.Register(reg(t, "cloudflare", "d1_database", "database"))
 	if err == nil {
 		t.Fatal("a second registration silently replaced the first")
 	}
@@ -55,7 +55,7 @@ func TestRegisterRejectsDuplicates(t *testing.T) {
 // Validation happens at registration, not at first use, so a malformed entry
 // fails while the stack trace still points at whoever wrote it.
 func TestRegisterValidates(t *testing.T) {
-	valid := reg(t, "cloudflare", "d1_database", "database", PhaseStorage)
+	valid := reg(t, "cloudflare", "d1_database", "database")
 
 	tests := []struct {
 		name   string
@@ -67,7 +67,7 @@ func TestRegisterValidates(t *testing.T) {
 		{"no capability", func(r *Registration) { r.Capability = "" }, "no Capability"},
 		{"no resource", func(r *Registration) { r.Resource = nil }, "no Resource"},
 		{"bad lookup", func(r *Registration) { r.Lookup = "byVibes" }, "lookup strategy"},
-		{"bad phase", func(r *Registration) { r.Phase = Phase(99) }, "phase"},
+		{"self-dependency", func(r *Registration) { r.DependsOn = []string{"cloudflare/d1_database"} }, "DependsOn"},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -90,16 +90,20 @@ func TestRegisterValidates(t *testing.T) {
 // it — what the JavaScript did by hand, in a fixed order.
 func TestResolveExpandsOneCapabilityToSeveralTypes(t *testing.T) {
 	r := NewRegistry()
-	// Registered out of phase order on purpose.
+	// Registered in the order a caller expects to get them back: Resolve no
+	// longer reorders by phase, so registration order is what determines
+	// the returned order (ordering an execution graph builds on top is
+	// DependsOn's job, not Resolve's).
 	if err := r.Register(Registration{
-		Provider: "neon", Type: "hyperdrive", Capability: "postgres",
-		Phase: PhaseStorage, Lookup: LookupByAttr, Resource: newStub(t),
+		Provider: "neon", Type: "branch", Capability: "postgres",
+		Lookup: LookupByAttr, Resource: newStub(t),
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := r.Register(Registration{
-		Provider: "neon", Type: "branch", Capability: "postgres",
-		Phase: PhaseDatabase, Lookup: LookupByAttr, Resource: newStub(t),
+		Provider: "neon", Type: "hyperdrive", Capability: "postgres",
+		DependsOn: []string{"neon/branch"},
+		Lookup:    LookupByAttr, Resource: newStub(t),
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -111,16 +115,17 @@ func TestResolveExpandsOneCapabilityToSeveralTypes(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("got %d registrations, want the capability to expand to both", len(got))
 	}
-	// Phase order, not registration order: the branch must exist before
-	// anything fronts it.
 	if got[0].Type != "branch" || got[1].Type != "hyperdrive" {
-		t.Fatalf("resolved out of phase order: %s then %s", got[0].Type, got[1].Type)
+		t.Fatalf("resolved out of registration order: %s then %s", got[0].Type, got[1].Type)
+	}
+	if len(got[1].DependsOn) != 1 || got[1].DependsOn[0] != "neon/branch" {
+		t.Fatalf("hyperdrive's DependsOn = %v, want [neon/branch]", got[1].DependsOn)
 	}
 }
 
 func TestResolveErrorsNameWhatIsAvailable(t *testing.T) {
 	r := NewRegistry()
-	if err := r.Register(reg(t, "neon", "branch", "postgres", PhaseDatabase)); err != nil {
+	if err := r.Register(reg(t, "neon", "branch", "postgres")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -138,10 +143,10 @@ func TestResolveErrorsNameWhatIsAvailable(t *testing.T) {
 func TestAllIsStablyOrdered(t *testing.T) {
 	r := NewRegistry()
 	for _, entry := range []Registration{
-		reg(t, "cloudflare", "queue", "queues", PhaseStorage),
-		reg(t, "wrangler", "worker", "compute", PhaseCompute),
-		reg(t, "neon", "branch", "postgres", PhaseDatabase),
-		reg(t, "cloudflare", "kv_namespace", "keyvalue", PhaseStorage),
+		reg(t, "cloudflare", "queue", "queues"),
+		reg(t, "wrangler", "worker", "compute"),
+		reg(t, "neon", "branch", "postgres"),
+		reg(t, "cloudflare", "kv_namespace", "keyvalue"),
 	} {
 		if err := r.Register(entry); err != nil {
 			t.Fatal(err)
@@ -152,7 +157,8 @@ func TestAllIsStablyOrdered(t *testing.T) {
 	for _, entry := range r.All() {
 		keys = append(keys, entry.Key())
 	}
-	want := []string{"neon/branch", "cloudflare/kv_namespace", "cloudflare/queue", "wrangler/worker"}
+	// Key order now, not phase-then-key: resource.Phase is gone.
+	want := []string{"cloudflare/kv_namespace", "cloudflare/queue", "neon/branch", "wrangler/worker"}
 	if strings.Join(keys, ",") != strings.Join(want, ",") {
 		t.Fatalf("got %v\nwant %v", keys, want)
 	}
@@ -167,26 +173,11 @@ func TestDecoratorWrapsAtRegistration(t *testing.T) {
 		return reg.Resource
 	}))
 
-	if err := r.Register(reg(t, "cloudflare", "r2_bucket", "objects", PhaseStorage)); err != nil {
+	if err := r.Register(reg(t, "cloudflare", "r2_bucket", "objects")); err != nil {
 		t.Fatal(err)
 	}
 	if wrapped != 1 {
 		t.Fatalf("decorator ran %d times, want once at registration", wrapped)
-	}
-}
-
-func TestPhasesAreOrdered(t *testing.T) {
-	got := Phases()
-	if len(got) != 3 || got[0] != PhaseDatabase || got[2] != PhaseCompute {
-		t.Fatalf("phases = %v", got)
-	}
-	for _, p := range got {
-		if !p.Valid() || p.String() == "unknown" {
-			t.Fatalf("phase %d is not fully declared", p)
-		}
-	}
-	if Phase(99).Valid() || Phase(99).String() != "unknown" {
-		t.Fatal("an undeclared phase reported itself as valid")
 	}
 }
 
@@ -226,9 +217,9 @@ func TestResolveOnAnEmptyRegistry(t *testing.T) {
 func TestResolveErrorsListSeveralOptions(t *testing.T) {
 	r := NewRegistry()
 	for _, entry := range []Registration{
-		reg(t, "neon", "branch", "postgres", PhaseDatabase),
-		reg(t, "supabase", "branch", "postgres", PhaseDatabase),
-		reg(t, "cloudflare", "kv_namespace", "keyvalue", PhaseStorage),
+		reg(t, "neon", "branch", "postgres"),
+		reg(t, "supabase", "branch", "postgres"),
+		reg(t, "cloudflare", "kv_namespace", "keyvalue"),
 	} {
 		if err := r.Register(entry); err != nil {
 			t.Fatal(err)
@@ -252,22 +243,22 @@ func TestResolveErrorsListSeveralOptions(t *testing.T) {
 	}
 }
 
-// TestVendorSelectsAcrossProviders is D30's real shape: fulfilling one
-// capability can take resources from more than one API, and the manifest names
-// only the vendor. Keying resolution by provider instead made the second half
+// TestVendorSelectsAcrossProviders proves fulfilling one capability can take
+// resources from more than one API, while the manifest names only the
+// vendor. Keying resolution by provider instead made the second half
 // unreachable — a database provisioned with nothing in front of it.
 func TestVendorSelectsAcrossProviders(t *testing.T) {
 	r := NewRegistry()
 	if err := r.Register(Registration{
 		Provider: "neon", Type: "branch", Capability: "postgres",
-		Phase: PhaseDatabase, Lookup: LookupByAttr, Resource: newStub(t),
+		Lookup: LookupByAttr, Resource: newStub(t),
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := r.Register(Registration{
 		// Cloudflare's API, Neon's choice.
 		Provider: "cloudflare", Type: "hyperdrive", Vendor: "neon",
-		Capability: "postgres", Phase: PhaseStorage,
+		Capability: "postgres", DependsOn: []string{"neon/branch"},
 		Lookup: LookupByAttr, Resource: newStub(t),
 	}); err != nil {
 		t.Fatal(err)
@@ -281,7 +272,7 @@ func TestVendorSelectsAcrossProviders(t *testing.T) {
 		t.Fatalf("vendor=neon resolved to %d type(s), want both halves of the choice", len(got))
 	}
 	if got[0].Type != "branch" || got[1].Type != "hyperdrive" {
-		t.Fatalf("resolved out of phase order: %v", got)
+		t.Fatalf("resolved out of registration order: %v", got)
 	}
 
 	// The companion is not independently selectable by its own provider name.
@@ -294,7 +285,7 @@ func TestVendorSelectsAcrossProviders(t *testing.T) {
 // stating.
 func TestVendorDefaultsToProvider(t *testing.T) {
 	r := NewRegistry()
-	if err := r.Register(reg(t, "cloudflare", "kv_namespace", "keyvalue", PhaseStorage)); err != nil {
+	if err := r.Register(reg(t, "cloudflare", "kv_namespace", "keyvalue")); err != nil {
 		t.Fatal(err)
 	}
 	got, err := r.Resolve("keyvalue", map[string]string{"keyvalue": "cloudflare"})
@@ -309,9 +300,9 @@ func TestCompetingVendorsStaySeparate(t *testing.T) {
 	r := NewRegistry()
 	for _, entry := range []Registration{
 		{Provider: "neon", Type: "branch", Capability: "postgres",
-			Phase: PhaseDatabase, Lookup: LookupByAttr, Resource: newStub(t)},
+			Lookup: LookupByAttr, Resource: newStub(t)},
 		{Provider: "supabase", Type: "branch", Capability: "postgres",
-			Phase: PhaseDatabase, Lookup: LookupByAttr, Resource: newStub(t)},
+			Lookup: LookupByAttr, Resource: newStub(t)},
 	} {
 		if err := r.Register(entry); err != nil {
 			t.Fatal(err)
@@ -337,13 +328,13 @@ func TestConditionalRegistrationTracksAnotherCapability(t *testing.T) {
 	r := NewRegistry()
 	if err := r.Register(Registration{
 		Provider: "neon", Type: "branch", Capability: "database",
-		Phase: PhaseDatabase, Lookup: LookupByAttr, Resource: newStub(t),
+		Lookup: LookupByAttr, Resource: newStub(t),
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := r.Register(Registration{
 		Provider: "cloudflare", Type: "hyperdrive", Vendor: "neon", Capability: "database",
-		Phase: PhaseStorage, Lookup: LookupByAttr, Resource: newStub(t),
+		Lookup: LookupByAttr, Resource: newStub(t),
 		When: RequiresCapabilityVendor("compute", "cloudflare"),
 	}); err != nil {
 		t.Fatal(err)
@@ -382,7 +373,7 @@ func TestResolveFailsWhenEveryRegistrationIsConditionedOut(t *testing.T) {
 	r := NewRegistry()
 	if err := r.Register(Registration{
 		Provider: "cloudflare", Type: "hyperdrive", Capability: "database",
-		Phase: PhaseStorage, Lookup: LookupByAttr, Resource: newStub(t),
+		Lookup: LookupByAttr, Resource: newStub(t),
 		When: RequiresCapabilityVendor("compute", "cloudflare"),
 	}); err != nil {
 		t.Fatal(err)
@@ -400,7 +391,7 @@ func TestResolveFailsWhenEveryRegistrationIsConditionedOut(t *testing.T) {
 // Resolve needs a vendor for the capability it is asked about.
 func TestResolveRequiresAVendorForTheCapability(t *testing.T) {
 	r := NewRegistry()
-	if err := r.Register(reg(t, "neon", "branch", "database", PhaseDatabase)); err != nil {
+	if err := r.Register(reg(t, "neon", "branch", "database")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := r.Resolve("database", map[string]string{"compute": "aws"}); err == nil {
@@ -468,4 +459,22 @@ func TestAppliesToSettings(t *testing.T) {
 			t.Error("expected no match for a nil settings map")
 		}
 	})
+}
+
+// TestDependsOnSelfIsRejected pins the trivial-cycle guard: a registration
+// naming its own key in DependsOn fails at registration time rather than
+// surfacing as a graph cycle on every later plan.
+func TestDependsOnSelfIsRejected(t *testing.T) {
+	r := NewRegistry()
+	err := r.Register(Registration{
+		Provider: "aws", Type: "AWS::Lambda::Function", Capability: "compute",
+		DependsOn: []string{"aws/AWS::Lambda::Function"},
+		Lookup:    LookupByName, Resource: newStub(t),
+	})
+	if err == nil {
+		t.Fatal("a self-dependent registration was accepted")
+	}
+	if !strings.Contains(err.Error(), "DependsOn") {
+		t.Fatalf("got %v, want an error mentioning DependsOn", err)
+	}
 }

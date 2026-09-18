@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 
@@ -209,5 +210,204 @@ func TestArtifactBucketDeleteOnAbsentBucket(t *testing.T) {
 	}
 	if len(fc.deleteCalls) == 0 || fc.deleteCalls[len(fc.deleteCalls)-1] != realBucket {
 		t.Fatalf("DeleteResource called with %v, want %q", fc.deleteCalls, realBucket)
+	}
+}
+
+// TestArtifactBucketGetAbsentBucket proves the first of the three outcomes
+// this workstream's brief asks Get to distinguish: a bucket Cloud Control
+// never found at all reads as absent, exactly as before this workstream —
+// and never even reaches the ownership check, since there is nothing to
+// check ownership of.
+func TestArtifactBucketGetAbsentBucket(t *testing.T) {
+	const serviceName = "myenv-api"
+
+	fc := &fakeClient{} // byIdentifier empty: Cloud Control finds nothing.
+	fs3 := &fakeS3{}
+	bucket := &artifactBucketResource{
+		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
+		client: &Client{s3: fs3},
+	}
+
+	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if state != nil {
+		t.Fatalf("Get = %+v, want nil: Cloud Control reported no such bucket", state)
+	}
+	if len(fs3.listBucketsReq) != 0 {
+		t.Fatalf("OwnsBucket was checked (%d ListBuckets call(s)) for a bucket Cloud Control never found", len(fs3.listBucketsReq))
+	}
+}
+
+// TestArtifactBucketGetForeignBucketReadsAsAbsent is the direct regression
+// test for the live bug this workstream fixes — see artifactbucket.go's
+// Get doc comment for the full live evidence this reproduces: S3 bucket
+// names are unique globally, not per account, so Cloud Control's
+// GetResource happily resolves a bucket a completely different AWS account
+// owns. Before the ownership check existed, that success alone was read as
+// "this environment's own bucket, no change needed."
+//
+// # Revert-and-fail
+//
+// Commenting out the `if !owned { ... return nil, nil }` branch in
+// artifactbucket.go's Get (falling through to `state.Ref = ref; return
+// state, nil` unconditionally, exactly as the code read before this
+// workstream) turns this test red with the real output:
+//
+//	artifactbucket_test.go:284: Get = &{Ref:{Provider: Type: Name:myenv-api Import:<nil>} ID:myenv-api-artifacts Attributes:map[BucketName:myenv-api-artifacts]}, want nil: this bucket belongs to a different AWS account
+//	--- FAIL: TestArtifactBucketGetForeignBucketReadsAsAbsent (0.00s)
+//
+// confirming the test actually exercises the ownership gate rather than
+// passing regardless. Restoring the branch turns it green again.
+func TestArtifactBucketGetForeignBucketReadsAsAbsent(t *testing.T) {
+	const serviceName = "myenv-api"
+	const realBucket = "myenv-api-artifacts"
+
+	// Cloud Control resolves the bucket globally (it exists, just not in
+	// this account) — the live "dev-api-artifacts" repro's GetResource
+	// success.
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	// This account's own ListBuckets does not include it — the live repro's
+	// `aws s3api list-buckets` returning [].
+	fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}}
+	bucket := &artifactBucketResource{
+		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
+		client: &Client{s3: fs3},
+	}
+
+	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if state != nil {
+		t.Fatalf("Get = %+v, want nil: this bucket belongs to a different AWS account", state)
+	}
+	if len(fs3.listBucketsReq) != 1 || fs3.listBucketsReq[0].Prefix == nil || *fs3.listBucketsReq[0].Prefix != realBucket {
+		t.Fatalf("ListBuckets called with %v, want one call Prefix-filtered to %q", fs3.listBucketsReq, realBucket)
+	}
+}
+
+// TestArtifactBucketGetOwnedBucketIsGenuineNoChange is the third of the
+// three outcomes: Cloud Control finds the bucket and this account's own
+// ListBuckets confirms it — the real "no change needed" case, reported
+// with the caller's own Ref, not the real bucket name (see this method's
+// own comment on why).
+func TestArtifactBucketGetOwnedBucketIsGenuineNoChange(t *testing.T) {
+	const serviceName = "myenv-api"
+	const realBucket = "myenv-api-artifacts"
+
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{
+		Buckets: []s3types.Bucket{{Name: aws.String(realBucket)}},
+	}}}
+	bucket := &artifactBucketResource{
+		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
+		client: &Client{s3: fs3},
+	}
+
+	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if state == nil {
+		t.Fatal("Get = nil, want the genuine current state: this account owns the bucket Cloud Control found")
+	}
+	if state.Ref.Name != serviceName {
+		t.Fatalf("state.Ref.Name = %q, want the caller's own Ref.Name %q", state.Ref.Name, serviceName)
+	}
+}
+
+// TestArtifactBucketGetOwnershipCheckFailureIsNeverSilentlyAbsent covers
+// this workstream's brief explicitly: a permissions or infra failure while
+// checking ownership (this account's own ListBuckets call itself failing,
+// e.g. missing s3:ListAllMyBuckets) is a real error, distinguished from the
+// foreign-owner case above — it must never collapse into the same (nil,
+// nil) "absent" answer a confirmed-foreign bucket gets, which would
+// misreport a misconfigured policy as "someone else owns this."
+func TestArtifactBucketGetOwnershipCheckFailureIsNeverSilentlyAbsent(t *testing.T) {
+	const serviceName = "myenv-api"
+	const realBucket = "myenv-api-artifacts"
+
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fs3 := &fakeS3{listBucketsErr: errors.New("access denied")}
+	bucket := &artifactBucketResource{
+		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
+		client: &Client{s3: fs3},
+	}
+
+	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
+	if err == nil {
+		t.Fatal("expected a ListBuckets failure while checking ownership to be reported, not swallowed")
+	}
+	if state != nil {
+		t.Fatalf("Get = %+v alongside a non-nil error, want nil state", state)
+	}
+}
+
+// TestArtifactBucketDeleteRefusesForeignBucket is the destroy-path half of
+// this workstream's fix: consequence #1 of the live bug this closes was
+// that `kraai destroy` would call EmptyBucket (ListObjectsV2 then
+// DeleteObjects) against a bucket kraai does not own. This proves Delete
+// itself refuses before either the emptying or the deletion step runs —
+// see Delete's own doc comment for why the guard lives inside Delete
+// rather than relying on Get having run first.
+//
+// # Revert-and-fail
+//
+// Commenting out the `if !owned { ... return nil }` branch in
+// artifactbucket.go's Delete turns this test red with the real output:
+//
+//	artifactbucket_test.go:380: ListObjectsV2 was called (1 time(s)) against a bucket this account does not own
+//	--- FAIL: TestArtifactBucketDeleteRefusesForeignBucket (0.00s)
+//
+// confirming the guard, not incidental behavior, is what this test
+// exercises. Restoring the branch turns it green again.
+func TestArtifactBucketDeleteRefusesForeignBucket(t *testing.T) {
+	const serviceName = "myenv-api"
+	const realBucket = "myenv-api-artifacts"
+
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}} // not in this account's own list
+	bucket := &artifactBucketResource{
+		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
+		client: &Client{s3: fs3},
+	}
+
+	if err := bucket.Delete(context.Background(), resource.Ref{Name: serviceName}); err != nil {
+		t.Fatalf("Delete on a foreign-owned bucket: %v, want nil (nothing this account owns to delete)", err)
+	}
+	if len(fs3.listReq) != 0 {
+		t.Fatalf("ListObjectsV2 was called (%d time(s)) against a bucket this account does not own", len(fs3.listReq))
+	}
+	if len(fc.deleteCalls) != 0 {
+		t.Fatalf("DeleteResource was called (%v) against a bucket this account does not own", fc.deleteCalls)
+	}
+}
+
+// TestArtifactBucketDeleteOwnershipCheckFailureIsNeverSilentlyPermitted
+// mirrors TestArtifactBucketGetOwnershipCheckFailureIsNeverSilentlyAbsent
+// for the destroy path: a failure to even determine ownership must stop
+// Delete before it touches the bucket, never be read as "not ours, skip
+// harmlessly" or "ours, proceed."
+func TestArtifactBucketDeleteOwnershipCheckFailureIsNeverSilentlyPermitted(t *testing.T) {
+	const serviceName = "myenv-api"
+	const realBucket = "myenv-api-artifacts"
+
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fs3 := &fakeS3{listBucketsErr: errors.New("access denied")}
+	bucket := &artifactBucketResource{
+		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
+		client: &Client{s3: fs3},
+	}
+
+	if err := bucket.Delete(context.Background(), resource.Ref{Name: serviceName}); err == nil {
+		t.Fatal("expected a ListBuckets failure while checking ownership to be reported, not swallowed")
+	}
+	if len(fs3.listReq) != 0 {
+		t.Fatalf("ListObjectsV2 was called (%d time(s)) despite ownership being undetermined", len(fs3.listReq))
+	}
+	if len(fc.deleteCalls) != 0 {
+		t.Fatalf("DeleteResource was called (%v) despite ownership being undetermined", fc.deleteCalls)
 	}
 }

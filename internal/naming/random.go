@@ -18,10 +18,11 @@ var randReader = cryptorand.Reader
 
 // randomIntn returns a uniformly-distributed integer in [0, n), backed by
 // crypto/rand rather than math/rand. This mirrors Node's
-// crypto.randomInt, which legacy-node/src/names.mjs uses for the same
+// crypto.randomInt, which the JavaScript CLI used for the same
 // reason (see its own comment on pick()): a generated environment name
-// reaches a workers.dev hostname and, per D27, a path on disk. Neither is
-// a secret and predictability isn't a security property here, but a
+// reaches a workers.dev hostname and a manifest path kraai's on-disk
+// identity cache keys entries by. Neither is a secret and
+// predictability isn't a security property here, but a
 // CSPRNG costs nothing and keeps gosec's insecure-randomness rule from
 // flagging every sink the name flows into.
 func randomIntn(n int) (int64, error) {

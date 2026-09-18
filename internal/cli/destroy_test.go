@@ -202,11 +202,11 @@ func TestRunDestroy_JSONOutput_Parses(t *testing.T) {
 	}
 }
 
-// --- D14 protected-environment gate, end to end through the CLI ---
+// --- protected-environment gate, end to end through the CLI ---
 //
-// Mirrors apply_test.go's own D14 tests exactly, reusing protectedFixture
-// and confirmProtected/promptForConfirmation, since destroy shares the
-// same gate function and CLI flag.
+// Mirrors apply_test.go's own protected-environment tests exactly, reusing
+// protectedFixture and confirmProtected/promptForConfirmation, since
+// destroy shares the same gate function and CLI flag.
 
 func TestRunDestroy_ProtectedEnvironment_NoConfirmName_Refused(t *testing.T) {
 	dir := protectedFixture(t)
@@ -272,42 +272,43 @@ func TestOutcomeSymbolDestroy(t *testing.T) {
 	}
 }
 
-// destroyResultsFixture builds a *destroy.Result spanning three phases
+// destroyResultsFixture builds a *destroy.Result spanning three waves
 // with every Outcome, mirroring apply_test.go's applyResultsFixture so
 // writeDestroyText and toDestroyDocument are exercised over the
-// "phase changes mid-list" branch and every outcome branch without a real
-// manifest/registry.
+// "wave changes mid-list" branch and every outcome branch without a real
+// manifest/registry. Waves descend (2, 1, 1, 0): destroy walks waves in
+// reverse, so its own Result preserves that reversed order.
 func destroyResultsFixture() *destroy.Result {
 	return &destroy.Result{Results: []destroy.ActionResult{
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "api", Capability: manifest.CapabilityCompute,
-				Provider: "cf", Type: "worker", Phase: resource.PhaseCompute},
+				Provider: "cf", Type: "worker", Wave: 2},
 			Ref:     resource.Ref{Provider: "cf", Type: "worker", Name: "env-api"},
 			Outcome: destroy.OutcomeDeleted,
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "CACHE", Capability: manifest.CapabilityKeyValue,
-				Provider: "fake", Type: "kv", Phase: resource.PhaseStorage},
+				Provider: "fake", Type: "kv", Wave: 1},
 			Ref:     resource.Ref{Provider: "fake", Type: "kv", Name: "env-api-cache"},
 			Outcome: destroy.OutcomeSkipped,
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "QUEUE", Capability: manifest.CapabilityQueues,
-				Provider: "fake", Type: "queue", Phase: resource.PhaseStorage},
+				Provider: "fake", Type: "queue", Wave: 1},
 			Ref:     resource.Ref{Provider: "fake", Type: "queue", Name: "env-api-queue"},
 			Outcome: destroy.OutcomeFailed,
 			Err:     errors.New("queue delete boom"),
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "DB", Capability: manifest.CapabilityDatabase,
-				Provider: "neon", Type: "branch", Phase: resource.PhaseDatabase},
+				Provider: "neon", Type: "branch", Wave: 0},
 			Ref:     resource.Ref{Provider: "neon", Type: "branch", Name: "env-api-db"},
 			Outcome: destroy.OutcomeDeleted,
 		},
 	}}
 }
 
-func TestWriteDestroyText_MultiPhaseAndEveryOutcome(t *testing.T) {
+func TestWriteDestroyText_MultiWaveAndEveryOutcome(t *testing.T) {
 	var buf bytes.Buffer
 	if err := writeDestroyText(&buf, "env", destroyResultsFixture()); err != nil {
 		t.Fatalf("writeDestroyText: %v", err)
@@ -315,7 +316,7 @@ func TestWriteDestroyText_MultiPhaseAndEveryOutcome(t *testing.T) {
 	out := buf.String()
 	for _, want := range []string{
 		"2 deleted, 1 skipped, 1 failed (4 total)",
-		"compute:", "storage:", "database:",
+		"wave 2:", "wave 1:", "wave 0:",
 		"-", "=", "!",
 		"queue delete boom",
 	} {
@@ -325,7 +326,7 @@ func TestWriteDestroyText_MultiPhaseAndEveryOutcome(t *testing.T) {
 	}
 }
 
-func TestToDestroyDocument_EveryOutcomeAndPhase(t *testing.T) {
+func TestToDestroyDocument_EveryOutcomeAndWave(t *testing.T) {
 	doc := toDestroyDocument("env", destroyResultsFixture())
 	if doc.Summary != (destroySummaryJSON{
 		Deleted: 2, Skipped: 1, Failed: 1, Total: 4, HasFailures: true,
@@ -335,8 +336,8 @@ func TestToDestroyDocument_EveryOutcomeAndPhase(t *testing.T) {
 	if len(doc.Results) != 4 {
 		t.Fatalf("Results = %+v", doc.Results)
 	}
-	if doc.Results[0].Phase != "compute" || doc.Results[1].Phase != "storage" || doc.Results[3].Phase != "database" {
-		t.Errorf("phases = %q, %q, %q", doc.Results[0].Phase, doc.Results[1].Phase, doc.Results[3].Phase)
+	if doc.Results[0].Wave != 2 || doc.Results[1].Wave != 1 || doc.Results[3].Wave != 0 {
+		t.Errorf("waves = %d, %d, %d", doc.Results[0].Wave, doc.Results[1].Wave, doc.Results[3].Wave)
 	}
 	if doc.Results[2].Outcome != "failed" || doc.Results[2].Error != "queue delete boom" {
 		t.Errorf("Results[2] = %+v, want the failed action carrying its error", doc.Results[2])

@@ -22,8 +22,8 @@ type Handle interface {
 }
 
 // HandleFunc adapts a plain function to Handle, for registering a
-// built-in that's just Go code — never loaded as a plugin (D16: built-ins
-// are compiled into the binary directly).
+// built-in that's just Go code — never loaded as a plugin, since built-ins
+// are compiled into the binary directly.
 type HandleFunc func(ctx context.Context, input []byte) ([]byte, error)
 
 // Invoke implements Handle.
@@ -52,10 +52,10 @@ func (h pluginHandle) Invoke(ctx context.Context, input []byte) ([]byte, error) 
 // Warning records that registering Winner under Key overrode an existing
 // registration from Loser. It is returned/collected as structured data
 // (see Registry.Register, Registry.Warnings) rather than logged directly:
-// docs/BLUEPRINT.md D18 confines stdout/stderr presentation to
-// cmd/kraai's centralized handler, and this package has no logger of its
-// own to introduce — every other package here is pure-function-testable
-// by returning values, not by capturing what it printed, and a registry
+// only cmd/kraai's centralized handler ever prints to stdout/stderr or
+// exits, and this package has no logger of its own to introduce — every
+// other package here is pure-function-testable by returning values, not
+// by capturing what it printed, and a registry
 // override is exactly the kind of thing a caller (eventually cmd/kraai)
 // needs to decide how to present, not something this package should
 // assume gets written to a terminal. Introducing log/slog behind an
@@ -81,8 +81,8 @@ type registryEntry struct {
 }
 
 // Registry resolves a set of string keys to Handles, assembled from
-// built-ins plus a project's plugins:, in declared order (docs/
-// workstreams.yaml). Each key holds a stack of registrations in
+// built-ins plus a project's plugins:, in declared order. Each key holds
+// a stack of registrations in
 // registration order; the active one is always the top of the stack, so
 // removing the top registration (Deregister) uncovers whatever was
 // registered before it — a plugin overriding a built-in, then removed,
@@ -166,8 +166,8 @@ func (r *Registry) Lookup(key string) (Handle, bool) {
 }
 
 // Warnings returns every override warning recorded so far, oldest first,
-// for a caller (eventually cmd/kraai, per D18) to present however it
-// chooses.
+// for a caller (eventually cmd/kraai's centralized handler) to present
+// however it chooses.
 func (r *Registry) Warnings() []Warning {
 	r.mu.Lock()
 	defer r.mu.Unlock()

@@ -1,6 +1,8 @@
 // Package plugin loads and runs kraai's third-party extension surface: WASM
-// modules executed in-process via tetratelabs/wazero (docs/BLUEPRINT.md D16,
-// D28, D29). It owns three things: the guest ABI (the compatibility
+// modules executed in-process via tetratelabs/wazero, capability-sandboxed,
+// over a raw ptr/len ABI rather than a plugin framework, with compiled
+// modules cached on disk since compilation cost is linear in module size.
+// It owns three things: the guest ABI (the compatibility
 // contract a plugin author builds against), a Host that compiles and
 // instantiates plugins with an on-disk compilation cache and a per-plugin
 // capability sandbox, and a Registry that resolves built-in-versus-plugin
@@ -10,7 +12,7 @@
 //
 // This is versioned from the first commit (CurrentABIVersion) and
 // documented here in full because it is the third-party compatibility
-// surface (D20), not an implementation detail: changing the shape below is
+// surface, not an implementation detail: changing the shape below is
 // a breaking change to every plugin already built against it.
 //
 // Every plugin module MUST export:
@@ -22,11 +24,11 @@
 //     own linear memory and returns a pointer to the region's start. The
 //     host calls this before every capability call to obtain a region to
 //     write that call's input into; the module owns its own memory layout
-//     entirely (D28), the host never assumes an allocator strategy.
+//     entirely, the host never assumes an allocator strategy.
 //   - kraai_dealloc(ptr: i32, size: i32) — releases a region previously
 //     returned by kraai_alloc or produced as a call's output, once the
 //     host has copied the result out. A plugin instance is reused across
-//     many pooled calls (D29), so this keeps memory from growing
+//     many pooled calls, so this keeps memory from growing
 //     unboundedly over the instance's lifetime. A plugin with nothing to
 //     free may implement this as a no-op, but must still export it — the
 //     contract is the signature, not the behavior.
@@ -66,13 +68,13 @@
 // memory the host obtains by calling the plugin's own kraai_alloc — the
 // host never assumes it can write into plugin memory it didn't first ask
 // the plugin to allocate. A capability is reachable by a plugin only if
-// that plugin's Spec names it in Grants — nothing is ambient (D16).
+// that plugin's Spec names it in Grants — nothing is ambient.
 // An import the host does not provide — unwired entirely, or granted to a
 // different plugin only — fails module instantiation outright, before any
 // guest code runs; this is enforced by construction (see Host.Load),
 // never by a runtime permission check a buggy plugin could race past.
 //
-// # Compilation and pooling (D29)
+// # Compilation and pooling
 //
 // Host holds one on-disk wazero.CompilationCache shared by every plugin it
 // loads (wazero.NewCompilationCacheWithDir — never the in-memory
@@ -81,19 +83,19 @@
 // runs). Each Plugin gets its own private wazero.Runtime so its granted
 // capability set is a real instantiation-time boundary rather than a
 // shared, globally-visible host module — creating a wazero.Runtime is
-// cheap (tens of microseconds; see docs/BLUEPRINT.md's plugin runtime
-// measurement appendix) precisely so this per-plugin isolation costs
-// nothing that matters, while the compilation cache — the actually
-// expensive part — stays shared and on disk.
+// cheap (tens of microseconds, measured) precisely so this per-plugin
+// isolation costs nothing that matters, while the compilation cache — the
+// actually expensive part — stays shared and on disk.
 //
 // A compiled module is instantiated once per pool slot at load time and
 // never recompiled; module instances are not goroutine-safe (wazero's own
 // contract), so Plugin.Invoke borrows one from a bounded pool for the
 // duration of a call and returns it afterward. Pool size is set by
-// Spec.PoolSize and should be sized against docs/BLUEPRINT.md D13's
-// global concurrency limit, not chosen independently.
+// Spec.PoolSize and should be sized against the process's overall bounded
+// concurrency limit (the errgroup every apply/destroy run shares), not
+// chosen independently.
 //
-// # Egress (D16)
+// # Egress
 //
 // A granted host capability runs with the *host's* network identity — its
 // VPC placement, its instance role, its side of any private link — while
@@ -111,7 +113,7 @@
 // Which public hosts a given plugin may reach is manifest policy and is
 // deliberately unanswered here.
 //
-// # Resource bounds (D16)
+// # Resource bounds
 //
 // Every plugin runtime is built with two ceilings, because "sandboxed by
 // default" has to mean the host's own resources too, not only its
@@ -169,7 +171,7 @@
 //     credentials, no internal hostnames, no wrapped transport detail
 //     that would not be safe to hand the plugin author directly.
 //
-// # Middleware (blueprint open question 3)
+// # Middleware
 //
 // The archived JS-era blueprint treated "middleware" (wrapping
 // resource.ensure / state.read / state.write) as distinct from a plugin

@@ -16,7 +16,7 @@ const (
 	environmentsDir = "environments"
 )
 
-// Loader resolves a manifest directory (D4) into one validated Manifest.
+// Loader resolves a manifest directory into one validated Manifest.
 // Both external systems it touches — the filesystem and the template
 // engine — are injected interfaces (FS, TemplateEngine), so Loader itself
 // never imports os or pongo2 directly.
@@ -32,8 +32,8 @@ func NewLoader(fsys FS, engine TemplateEngine) *Loader {
 }
 
 // Load resolves the manifest for envName: kraai.yaml (+ services/*.yaml,
-// merged per D4) rendered opt-in-by-extension (D5) against the merged
-// values (environments/<envName>.values.yaml + setArgs, Helm precedence),
+// merged) rendered opt-in-by-extension against the merged values
+// (environments/<envName>.values.yaml + setArgs, Helm precedence),
 // then the environment overlay itself — every schema-validated file
 // strictly rejecting unknown keys along the way.
 func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
@@ -123,7 +123,7 @@ func validateRoot(root *Root) error {
 }
 
 // loadServices globs services/*.yaml and services/*.yaml.j2, renders the
-// latter against values, strictly decodes both, and merges them (D4).
+// latter against values, strictly decodes both, and merges them.
 func (l *Loader) loadServices(values map[string]any) (map[string]Service, error) {
 	plainMatches, err := l.fs.Glob(servicesGlob)
 	if err != nil {
@@ -171,8 +171,8 @@ func (l *Loader) loadServices(values map[string]any) (map[string]Service, error)
 }
 
 // loadEnvironment loads environments/<envName>.yaml, the schema-validated,
-// never-templated overlay (D5 names only kraai.yaml.j2 and
-// services/*.yaml.j2 as opt-in-templated).
+// never-templated overlay — templating is opt-in by file extension, and
+// only kraai.yaml.j2 and services/*.yaml.j2 are eligible.
 func (l *Loader) loadEnvironment(envName string) (*Environment, error) {
 	path := environmentsDir + "/" + envName + ".yaml"
 	data, err := l.fs.ReadFile(path)
@@ -195,11 +195,13 @@ func (l *Loader) loadEnvironment(envName string) (*Environment, error) {
 
 // validateServices checks every field DecodeStrict cannot: not an unknown
 // key (that is strict-decoding's job), but a known field whose value falls
-// outside its declared vocabulary. Today that is exactly Compute.Trigger.
+// outside its declared vocabulary — Compute.Trigger, and DependsOn's own
+// structural sanity (every named service exists, and a service does not
+// name itself).
 //
 // Iterates services in sorted key order so a manifest with more than one
-// bad trigger reports the same one first on every run, rather than
-// whichever Go's map iteration happened to visit first.
+// bad trigger or depends_on entry reports the same one first on every run,
+// rather than whichever Go's map iteration happened to visit first.
 func validateServices(services map[string]Service) error {
 	names := make([]string, 0, len(services))
 	for name := range services {
@@ -209,14 +211,22 @@ func validateServices(services map[string]Service) error {
 
 	for _, name := range names {
 		svc := services[name]
-		if svc.Compute == nil {
-			continue
+		if svc.Compute != nil {
+			switch svc.Compute.Trigger {
+			case TriggerHTTP, TriggerSchedule:
+			default:
+				return kerrors.Validation("services.%s.compute.trigger: must be %q or %q, got %q",
+					name, TriggerHTTP, TriggerSchedule, svc.Compute.Trigger)
+			}
 		}
-		switch svc.Compute.Trigger {
-		case TriggerHTTP, TriggerSchedule:
-		default:
-			return kerrors.Validation("services.%s.compute.trigger: must be %q or %q, got %q",
-				name, TriggerHTTP, TriggerSchedule, svc.Compute.Trigger)
+		for _, dep := range svc.DependsOn {
+			if dep == name {
+				return kerrors.Validation("services.%s.depends_on: a service cannot depend on itself", name)
+			}
+			if _, ok := services[dep]; !ok {
+				return kerrors.Validation(
+					"services.%s.depends_on: %q is not a declared service", name, dep)
+			}
 		}
 	}
 	return nil
@@ -225,11 +235,26 @@ func validateServices(services map[string]Service) error {
 func validateEnvironment(path string, env *Environment) error {
 	switch env.Kind {
 	case EnvironmentKindEphemeral, EnvironmentKindPersistent:
-		return nil
 	default:
 		return kerrors.Validation("%s: kind: must be %q or %q, got %q",
 			path, EnvironmentKindEphemeral, EnvironmentKindPersistent, env.Kind)
 	}
+
+	// naming.prefix becomes a leading segment of every DNS-safe resource
+	// name this environment derives (internal/naming.Namer), so it gets
+	// the same known-field-wrong-value treatment every other field in
+	// this function does — see validatePrefix (naming.go) for the
+	// grammar and why it lives in this package rather than
+	// internal/naming. env.Naming is nil for the overwhelming majority of
+	// environments (no naming overlay configured at all), so this only
+	// runs the check when there is a prefix to check.
+	if env.Naming != nil {
+		if err := validatePrefix(env.Naming.Prefix); err != nil {
+			return kerrors.Wrap(err, kerrors.CodeValidation,
+				"%s: naming.prefix: %q", path, env.Naming.Prefix)
+		}
+	}
+	return nil
 }
 
 // readOptional reads name, returning (nil, nil) if it doesn't exist rather
