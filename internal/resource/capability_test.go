@@ -248,3 +248,87 @@ func TestNewCatalogCompilesValidSchemas(t *testing.T) {
 		t.Fatalf("the catalog-resolved Binding schema rejected a valid entry: %v", err)
 	}
 }
+
+// bindingCatalog is two providers declaring the same capability with
+// different binding shapes — the case that makes "which vendor" the question
+// ValidateBinding has to answer.
+func bindingCatalog(t *testing.T) *Catalog {
+	t.Helper()
+	strict := NewSchema("strict binding", map[string]any{
+		"type":                 "object",
+		"properties":           map[string]any{"binding": map[string]any{"type": "string"}},
+		"required":             []any{"binding"},
+		"additionalProperties": false,
+	})
+	permissive := NewSchema("permissive binding", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"binding": map[string]any{"type": "string"},
+			"driver":  map[string]any{"type": "string"},
+		},
+		"required":             []any{"binding"},
+		"additionalProperties": false,
+	})
+
+	c, err := NewCatalog(
+		fakeProvider{name: "strictvendor", defs: []CapabilityDef{
+			{Name: "database", Summary: "strict", Binding: strict},
+		}},
+		fakeProvider{name: "permissivevendor", defs: []CapabilityDef{
+			{Name: "database", Summary: "permissive", Binding: permissive},
+		}},
+		fakeProvider{name: "noschema", defs: []CapabilityDef{
+			{Name: "database", Summary: "declares no binding shape"},
+		}},
+	)
+	if err != nil {
+		t.Fatalf("NewCatalog: %v", err)
+	}
+	return c
+}
+
+// An entry is held to the schema of the vendor the manifest chose, not to
+// whichever vendor happens to be registered first for that capability.
+func TestValidateBindingUsesTheNamedVendorsSchema(t *testing.T) {
+	c := bindingCatalog(t)
+	entry := map[string]any{"binding": "DB", "driver": "postgres"}
+
+	if err := c.ValidateBinding("database", "permissivevendor", entry); err != nil {
+		t.Errorf("the vendor that declares driver rejected it: %v", err)
+	}
+
+	err := c.ValidateBinding("database", "strictvendor", entry)
+	if err == nil {
+		t.Fatal("the vendor that does not declare driver accepted it")
+	}
+	if !strings.Contains(err.Error(), "driver") {
+		t.Errorf("error should name the offending key: %v", err)
+	}
+}
+
+// Nothing to check is not the same as checking and passing, but both return
+// nil here, so each case is pinned rather than left to read as the other.
+func TestValidateBindingIsSilentWhenThereIsNothingToCheck(t *testing.T) {
+	c := bindingCatalog(t)
+	anything := map[string]any{"binding": "DB", "whatever": true}
+
+	t.Run("a declared capability whose provider declares no Binding", func(t *testing.T) {
+		if err := c.ValidateBinding("database", "noschema", anything); err != nil {
+			t.Errorf("a provider declaring no binding shape rejected an entry: %v", err)
+		}
+	})
+
+	// The vendor/capability pairing being wrong is a manifest error, but it
+	// is not this entry's error — see evatt-labs/kraai#189.
+	t.Run("a vendor that does not declare the capability", func(t *testing.T) {
+		if err := c.ValidateBinding("database", "notavendor", anything); err != nil {
+			t.Errorf("an unknown vendor produced an entry-shaped error: %v", err)
+		}
+	})
+
+	t.Run("a capability nothing declares", func(t *testing.T) {
+		if err := c.ValidateBinding("frobnicate", "strictvendor", anything); err != nil {
+			t.Errorf("an unknown capability produced an entry-shaped error: %v", err)
+		}
+	})
+}

@@ -106,7 +106,11 @@ var computeSettingsSchema = resource.NewSchema("aws compute settings", map[strin
 })
 
 // objectsBindingSchema validates one entry of a service's `objects:` list
-// for this provider — manifest.ObjectStore's current shape, `{binding}`.
+// for this provider: a bare binding name.
+//
+// This is the shape, not a copy of one — internal/manifest carries no Go
+// struct for a binding entry to mirror, so what a manifest may write here is
+// exactly what this map says.
 //
 // The AWS "objects" capability itself reads no free-form settings map at
 // all (expandBinding passes a nil config for it — internal/plan/planner.go)
@@ -123,8 +127,8 @@ var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]
 	"additionalProperties": false,
 })
 
-// networkBindingSchema validates one entry of a service's `network:` list —
-// manifest.Network's shape, `{binding, cidr, subnet}`.
+// networkBindingSchema validates one entry of a service's `network:` list:
+// a binding name and the two address ranges, all required.
 //
 // The CIDRs are checked for being strings and for being present, not for
 // being well-formed or for nesting correctly. EC2 rejects an unusable block

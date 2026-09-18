@@ -47,18 +47,17 @@ var databaseSettingsSchema = resource.NewSchema("neon database settings", map[st
 })
 
 // databaseBindingSchema validates one entry of a service's `databases:`
-// list — manifest.Database's current shape: a required binding name, an
-// optional driver, and an optional nested caching block.
+// list: a required binding name, an optional driver, and an optional nested
+// caching block.
 //
 // Declared independently of internal/provider/cfresource's own
-// databaseBindingSchema (cfresource declares the identical shape for the
-// same manifest struct) rather than shared between the two packages:
-// CapabilityDef is a per-provider declaration by design (see
-// resource.Provider's own doc comment), and the manifest shape a
-// "databases:" entry carries is not this package's vocabulary to own —
-// internal/manifest is. Duplicated here and in cfresource rather than
-// factored into a shared helper both would import, which would start
-// blurring that boundary for a few dozen lines of map literal.
+// databaseBindingSchema, which happens to declare the same shape today,
+// rather than shared between the two packages: CapabilityDef is a
+// per-provider declaration by design (see resource.Provider's own doc
+// comment), and the two are free to diverge the moment one vendor accepts
+// something the other cannot. Duplicated here and in cfresource rather than
+// factored into a shared helper both would import, which would make a
+// coincidence look like a contract for a few dozen lines of map literal.
 var databaseBindingSchema = resource.NewSchema("database binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{

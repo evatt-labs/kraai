@@ -63,14 +63,14 @@ func kraaiAPIManifest() *manifest.Manifest {
 		}},
 		Services: map[string]manifest.Service{
 			"api": {
-				Dir:       ".",
-				Compute:   &manifest.Compute{Trigger: manifest.TriggerHTTP, Handler: "run.sh"},
-				Databases: []manifest.Database{{Binding: "DB", Driver: "postgres"}},
+				Dir:      ".",
+				Compute:  &manifest.Compute{Trigger: manifest.TriggerHTTP, Handler: "run.sh"},
+				Bindings: manifest.Bindings{manifest.CapabilityDatabase: {{"binding": "DB", "driver": "postgres"}}},
 			},
 			"tick": {
-				Dir:       ".",
-				Compute:   &manifest.Compute{Trigger: manifest.TriggerSchedule, Handler: "app.tasks.tick.handler", Schedule: "rate(5 minutes)"},
-				Databases: []manifest.Database{{Binding: "DB", Driver: "postgres"}},
+				Dir:      ".",
+				Compute:  &manifest.Compute{Trigger: manifest.TriggerSchedule, Handler: "app.tasks.tick.handler", Schedule: "rate(5 minutes)"},
+				Bindings: manifest.Bindings{manifest.CapabilityDatabase: {{"binding": "DB", "driver": "postgres"}}},
 			},
 		},
 	}

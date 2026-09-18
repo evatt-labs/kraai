@@ -102,7 +102,7 @@ func TestPlan_ExistingResourcesPlanAsNoChange(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
 		Root:     manifest.Root{Providers: manifest.Providers{manifest.CapabilityKeyValue: {Vendor: "cloudflare"}}},
-		Services: map[string]manifest.Service{"api": {KeyValue: []manifest.KeyValue{{Binding: "CACHE"}}}},
+		Services: map[string]manifest.Service{"api": {Bindings: manifest.Bindings{manifest.CapabilityKeyValue: {{"binding": "CACHE"}}}}},
 	}
 
 	name := naming.ResourceName(envName, "api", "CACHE")
@@ -140,7 +140,7 @@ func TestPlan_ImmutableDiffPlansAsReplace(t *testing.T) {
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
-			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
 		},
 	}
 	name := naming.ResourceName(envName, "api", "UPLOADS")
@@ -174,7 +174,7 @@ func TestPlan_ImmutableDiffErrorPlansAsFailed(t *testing.T) {
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
-			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
 		},
 	}
 	name := naming.ResourceName(envName, "api", "UPLOADS")
@@ -213,7 +213,7 @@ func TestPlan_SpecValidatorRunsOnActionCreate(t *testing.T) {
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
-			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
 		},
 	}
 	// Deliberately no state seeded for this resource's derived name: Get
@@ -251,7 +251,7 @@ func TestPlan_SpecValidatorAlsoRunsWhenResourceExists(t *testing.T) {
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
-			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
 		},
 	}
 	name := naming.ResourceName(envName, "api", "UPLOADS")
@@ -341,12 +341,14 @@ func TestPlan_ConcurrencyLimitBoundsParallelism(t *testing.T) {
 	f.kv.delay = 20 * time.Millisecond
 
 	services := map[string]manifest.Service{}
-	var kvBindings []manifest.KeyValue
+	var kvBindings []manifest.Binding
 	const n = 12
 	for i := 0; i < n; i++ {
-		kvBindings = append(kvBindings, manifest.KeyValue{Binding: bindingName(i)})
+		kvBindings = append(kvBindings, manifest.Binding{"binding": bindingName(i)})
 	}
-	services["api"] = manifest.Service{KeyValue: kvBindings}
+	services["api"] = manifest.Service{
+		Bindings: manifest.Bindings{manifest.CapabilityKeyValue: kvBindings},
+	}
 
 	m := &manifest.Manifest{
 		Root:     manifest.Root{Providers: manifest.Providers{manifest.CapabilityKeyValue: {Vendor: "cloudflare"}}},
@@ -422,10 +424,10 @@ func TestPlan_EmptyEnvironmentNameIsValidationError(t *testing.T) {
 func TestPlan_UnconfiguredCapabilityIsValidationError(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
-		Services: map[string]manifest.Service{"api": {Databases: []manifest.Database{{Binding: "DB", Driver: "postgres"}}}},
+		Services: map[string]manifest.Service{"api": {Bindings: manifest.Bindings{manifest.CapabilityDatabase: {{"binding": "DB", "driver": "postgres"}}}}},
 	}
 	_, err := New(f.reg).Plan(context.Background(), m, envName)
-	assertValidationError(t, err, "services.api.databases.DB")
+	assertValidationError(t, err, "services.api.database.DB")
 }
 
 func TestPlan_UnknownVendorIsValidationError(t *testing.T) {
@@ -433,11 +435,11 @@ func TestPlan_UnknownVendorIsValidationError(t *testing.T) {
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityDatabase: {Vendor: "aws"}}},
 		Services: map[string]manifest.Service{
-			"api": {Databases: []manifest.Database{{Binding: "DB", Driver: "postgres"}}},
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityDatabase: {{"binding": "DB", "driver": "postgres"}}}},
 		},
 	}
 	_, err := New(f.reg).Plan(context.Background(), m, envName)
-	assertValidationError(t, err, "services.api.databases.DB")
+	assertValidationError(t, err, "services.api.database.DB")
 }
 
 func TestPlan_UnconfiguredCapability_EveryBindingKind(t *testing.T) {
@@ -447,9 +449,9 @@ func TestPlan_UnconfiguredCapability_EveryBindingKind(t *testing.T) {
 		service manifest.Service
 		wantErr string
 	}{
-		{"keyvalue", manifest.Service{KeyValue: []manifest.KeyValue{{Binding: "CACHE"}}}, "services.api.keyvalue.CACHE"},
-		{"objects", manifest.Service{Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}}, "services.api.objects.UPLOADS"},
-		{"queues", manifest.Service{Queues: []manifest.Queue{{Binding: "JOBS"}}}, "services.api.queues.JOBS"},
+		{"keyvalue", manifest.Service{Bindings: manifest.Bindings{manifest.CapabilityKeyValue: {{"binding": "CACHE"}}}}, "services.api.keyvalue.CACHE"},
+		{"objects", manifest.Service{Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}}, "services.api.objects.UPLOADS"},
+		{"queues", manifest.Service{Bindings: manifest.Bindings{manifest.CapabilityQueues: {{"binding": "JOBS"}}}}, "services.api.queues.JOBS"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -460,17 +462,23 @@ func TestPlan_UnconfiguredCapability_EveryBindingKind(t *testing.T) {
 	}
 }
 
-// TestPlan_DatabaseCachingIsCarriedIntoConfig covers a Database binding
-// that declares caching, whose config a future resource type could read
+// TestPlan_DatabaseCachingIsCarriedIntoConfig covers a database binding that
+// declares caching, whose config a future resource type could read
 // (Spec.Config is intentionally opaque to this package; see resource.Spec).
+//
+// It arrives as whatever the manifest wrote, not as a manifest.Caching: a
+// binding entry's shape past its name belongs to the vendor, and this
+// package converting it into a Go type of its own would be the vocabulary
+// ownership the capability model exists to move.
 func TestPlan_DatabaseCachingIsCarriedIntoConfig(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityDatabase: {Vendor: "neon"}}},
 		Services: map[string]manifest.Service{
-			"api": {Databases: []manifest.Database{{
-				Binding: "DB", Driver: "postgres", Caching: &manifest.Caching{Disabled: true, MaxAge: 30},
-			}}},
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityDatabase: {{
+				"binding": "DB", "driver": "postgres",
+				"caching": map[string]any{"disabled": true, "maxAge": 30},
+			}}}},
 		},
 	}
 	p, err := New(f.reg).Plan(context.Background(), m, envName)
@@ -478,9 +486,9 @@ func TestPlan_DatabaseCachingIsCarriedIntoConfig(t *testing.T) {
 		t.Fatalf("Plan: %v", err)
 	}
 	branch := findAction(t, p, "neon", "branch")
-	caching, ok := branch.Spec.Config["caching"].(manifest.Caching)
-	if !ok || caching.MaxAge != 30 || !caching.Disabled {
-		t.Fatalf("Spec.Config[caching] = %#v, want the declared Caching value", branch.Spec.Config["caching"])
+	caching, ok := branch.Spec.Config["caching"].(map[string]any)
+	if !ok || caching["maxAge"] != 30 || caching["disabled"] != true {
+		t.Fatalf("Spec.Config[caching] = %#v, want the declared caching value", branch.Spec.Config["caching"])
 	}
 }
 
@@ -552,8 +560,8 @@ func TestPlan_MultipleServicesAreOrderedDeterministically(t *testing.T) {
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: f.providers()},
 		Services: map[string]manifest.Service{
-			"zeta":  {KeyValue: []manifest.KeyValue{{Binding: "CACHE"}}},
-			"alpha": {KeyValue: []manifest.KeyValue{{Binding: "CACHE"}}},
+			"zeta":  {Bindings: manifest.Bindings{manifest.CapabilityKeyValue: {{"binding": "CACHE"}}}},
+			"alpha": {Bindings: manifest.Bindings{manifest.CapabilityKeyValue: {{"binding": "CACHE"}}}},
 		},
 	}
 	p, err := New(f.reg).Plan(context.Background(), m, envName)
@@ -786,8 +794,8 @@ func TestPlan_ManifestDependsOn_OrdersOtherwiseIndependentServices(t *testing.T)
 			manifest.CapabilityObjects:  {Vendor: "cloudflare"},
 		}},
 		Services: map[string]manifest.Service{
-			"backend":  {KeyValue: []manifest.KeyValue{{Binding: "CACHE"}}},
-			"frontend": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}, DependsOn: []string{"backend"}},
+			"backend":  {Bindings: manifest.Bindings{manifest.CapabilityKeyValue: {{"binding": "CACHE"}}}},
+			"frontend": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}, DependsOn: []string{"backend"}},
 		},
 	}
 

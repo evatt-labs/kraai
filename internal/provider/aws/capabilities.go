@@ -24,10 +24,9 @@ func Capabilities() []resource.CapabilityDef {
 			Summary: "S3-backed static site stack: bucket, CloudFront distribution, " +
 				"ACM certificate, and the Route 53 zone and records fronting it.",
 			// No ProviderSettings: no registration under this capability
-			// reads a settings map at all (expandBinding passes a nil
-			// config for "objects" — internal/plan/planner.go). Binding
-			// validates the one thing a service's `objects:` entry
-			// actually carries today (settings_schema.go).
+			// reads a provider-level settings map at all. Binding is what
+			// says everything a service's `objects:` entry may carry
+			// (settings_schema.go).
 			Binding: objectsBindingSchema,
 		},
 		{

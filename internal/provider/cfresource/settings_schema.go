@@ -11,18 +11,15 @@ import "github.com/evatt-labs/kraai/internal/resource"
 // site would be exactly the "field nothing reads" failure this whole
 // mechanism exists to close; see resource.CapabilityDef's own doc comment.
 //
-// Binding schemas below have the same live-caller caveat every provider's
-// Binding schema does in this workstream: internal/manifest still parses
-// `services.<svc>.<name>[]` into fixed Go structs, so nothing calls these
-// yet — see CapabilityDef.Binding's own doc comment for why that is
-// scaffolding for workstream 3, not a recurrence of the gap this
-// mechanism closes.
+// The Binding schemas below are live: internal/manifest validates every
+// entry of a service's binding list against the one declared by the vendor
+// the manifest chose for that capability. A key absent from a schema below
+// cannot be written in a manifest that selects this provider.
 
 // databaseBindingSchema validates one entry of a service's `databases:`
-// list — manifest.Database's shape. Declared independently of
-// internal/provider/neonresource's identical schema; see that package's
-// own databaseBindingSchema doc comment for why the duplication is
-// deliberate.
+// list. Declared independently of internal/provider/neonresource's schema,
+// which happens to match today; see that package's own databaseBindingSchema
+// doc comment for why the duplication is deliberate.
 var databaseBindingSchema = resource.NewSchema("database binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -42,7 +39,7 @@ var databaseBindingSchema = resource.NewSchema("database binding", map[string]an
 })
 
 // keyvalueBindingSchema validates one entry of a service's `keyvalue:`
-// list — manifest.KeyValue's shape, a bare binding name.
+// list: a bare binding name.
 var keyvalueBindingSchema = resource.NewSchema("keyvalue binding", map[string]any{
 	"type":                 "object",
 	"properties":           map[string]any{"binding": map[string]any{"type": "string"}},
@@ -50,11 +47,11 @@ var keyvalueBindingSchema = resource.NewSchema("keyvalue binding", map[string]an
 	"additionalProperties": false,
 })
 
-// objectsBindingSchema validates one entry of a service's `objects:` list
-// — manifest.ObjectStore's shape, a bare binding name. Declared
-// independently of internal/provider/aws's identical schema for the same
-// reason databaseBindingSchema is: per-capability declaration is each
-// provider's own, not shared manifest vocabulary this package imports.
+// objectsBindingSchema validates one entry of a service's `objects:` list:
+// a bare binding name. Declared independently of internal/provider/aws's
+// matching schema for the same reason databaseBindingSchema is:
+// per-capability declaration is each provider's own, not shared vocabulary
+// this package imports.
 var objectsBindingSchema = resource.NewSchema("objects binding", map[string]any{
 	"type":                 "object",
 	"properties":           map[string]any{"binding": map[string]any{"type": "string"}},
@@ -62,10 +59,9 @@ var objectsBindingSchema = resource.NewSchema("objects binding", map[string]any{
 	"additionalProperties": false,
 })
 
-// queuesBindingSchema validates one entry of a service's `queues:` list —
-// manifest.Queue's shape: a binding name plus the optional "consumer" flag
-// that says whether this service processes the queue rather than only
-// producing to it.
+// queuesBindingSchema validates one entry of a service's `queues:` list: a
+// binding name plus the optional "consumer" flag that says whether this
+// service processes the queue rather than only producing to it.
 var queuesBindingSchema = resource.NewSchema("queues binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
