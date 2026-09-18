@@ -384,11 +384,13 @@ being worked on in what order.
 
 ## Documentation
 
-- **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — what kraai is today,
-  audited against the code, with unbuilt work kept separate.
-- [`docs/BLUEPRINT.md`](docs/BLUEPRINT.md) — the decision record: why each
-  choice was made and what it replaced. A history, not a description.
-- [`docs/proposals/`](docs/proposals/) — designs under review.
+- **[Architecture](https://github.com/evatt-labs/kraai/wiki/Architecture)**
+  — what kraai is today, audited against the code.
+- [Decision Log](https://github.com/evatt-labs/kraai/wiki/Decision-Log) —
+  why each choice was made and what it replaced. A history, not a
+  description of what's currently true.
+- Designs under review are tracking issues labeled `workstream`, not
+  standalone documents.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — standards, some stricter than usual.
 - [`AGENTS.md`](AGENTS.md) — if you are an AI agent working in this repo.
 

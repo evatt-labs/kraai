@@ -26,7 +26,7 @@ body:
     attributes:
       label: Before submitting
       options:
-        - label: I read docs/ARCHITECTURE.md and this is not something that already exists
+        - label: I read the Architecture wiki page and this is not something that already exists
           required: true
         - label: I checked the `unbuilt` label, in case this is already designed but not built
           required: true

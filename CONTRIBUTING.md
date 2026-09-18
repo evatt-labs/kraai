@@ -8,15 +8,14 @@ By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Start here
 
-**Read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) first.** It describes
-what kraai actually is today, audited against the code, and keeps
-decided-but-unbuilt work in a separate section so you can trust every line of
-the main body.
+**Read the [Architecture wiki page](https://github.com/evatt-labs/kraai/wiki/Architecture)
+first.** It describes what kraai actually is today, audited against the
+code.
 
-[`docs/BLUEPRINT.md`](docs/BLUEPRINT.md) is the decision record — why each
-choice was made and what it replaced. It is deliberately a history, and parts
-of it describe things that were never built. Read it for *why*, not for *what
-is true*.
+The [Decision Log](https://github.com/evatt-labs/kraai/wiki/Decision-Log)
+is why each choice was made and what it replaced. It is deliberately a
+history, and parts of it describe things that were never built. Read it for
+*why*, not for *what is true*.
 
 ## Getting set up
 
@@ -45,8 +44,9 @@ where a reader is actually confused, and it stays next to the code it
 explains.
 
 Architectural rationale — why the whole design is shaped this way, what was
-rejected — belongs in `docs/ARCHITECTURE.md` or a package's `doc.go`, not in
-the doc comment of a function.
+rejected — belongs in the [Architecture wiki
+page](https://github.com/evatt-labs/kraai/wiki/Architecture) or a package's
+`doc.go`, not in the doc comment of a function.
 
 **Do not cite decision numbers in source.** `D26`, `D13` and friends couple
 code to an external document and rot when it changes. Say the thing instead.
@@ -130,8 +130,8 @@ Other labels worth knowing:
 - **`unbuilt`** — decided and reasoned about, no implementation exists.
 - **`dead-field`** — a field the manifest parses that no code reads. There
   have been six. They are each small, well-defined, and genuinely useful.
-- **`workstream`** — part of a sequenced plan from a document in
-  `docs/proposals/`. Read the proposal before starting; the sequencing is
+- **`workstream`** — part of a sequenced plan, tracked by a parent issue
+  linking its sub-issues. Read the parent before starting; the sequencing is
   usually load-bearing.
 
 The [public roadmap](https://github.com/orgs/evatt-labs/projects/1) shows what
