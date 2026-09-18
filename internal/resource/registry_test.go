@@ -584,3 +584,101 @@ func TestDependsOnSelfIsRejected(t *testing.T) {
 		t.Fatalf("got %v, want an error mentioning DependsOn", err)
 	}
 }
+
+// RoleType builds the key shape validate accepts, so the two agree by
+// construction rather than by a comment asking providers to match them.
+func TestRoleTypeBuildsAValidatedKey(t *testing.T) {
+	const vendorType = "AWS::Lambda::Permission"
+	key := RoleType(vendorType, "APIGateway")
+
+	if key != "AWS::Lambda::Permission::APIGateway" {
+		t.Fatalf("RoleType = %q", key)
+	}
+
+	r := NewRegistry()
+	err := r.Register(Registration{
+		Provider: "aws", Type: key, VendorType: vendorType,
+		Capability: "compute", Lookup: LookupByName, Resource: newStub(t),
+	})
+	if err != nil {
+		t.Fatalf("a key built by RoleType was rejected: %v", err)
+	}
+}
+
+// VendorTypeName applies the empty-means-same rule in one place, so no caller
+// has to know which of the two cases it is looking at.
+func TestVendorTypeName(t *testing.T) {
+	same := Registration{Type: "AWS::S3::Bucket"}
+	if got := same.VendorTypeName(); got != "AWS::S3::Bucket" {
+		t.Errorf("VendorTypeName with no VendorType = %q, want Type", got)
+	}
+
+	split := Registration{Type: "AWS::S3::Bucket::ArtifactBucket", VendorType: "AWS::S3::Bucket"}
+	if got := split.VendorTypeName(); got != "AWS::S3::Bucket" {
+		t.Errorf("VendorTypeName = %q, want the declared VendorType", got)
+	}
+}
+
+// The convention the three hand-written role keys already followed, now
+// actually checked — it previously lived in three comments and nothing could
+// tell whether a registration honoured it.
+func TestVendorTypeIsValidatedAgainstType(t *testing.T) {
+	cases := []struct {
+		name       string
+		regType    string
+		vendorType string
+		wantErr    string
+	}{
+		{
+			name:    "no VendorType is the common case and always valid",
+			regType: "AWS::S3::Bucket",
+		},
+		{
+			name:       "a role key extending its vendor type is valid",
+			regType:    "AWS::S3::Bucket::ArtifactBucket",
+			vendorType: "AWS::S3::Bucket",
+		},
+		{
+			// Redundant rather than wrong, but a field that says nothing is a
+			// field a reader has to check anyway — see the error's own text.
+			name:       "VendorType equal to Type is rejected as redundant",
+			regType:    "AWS::S3::Bucket",
+			vendorType: "AWS::S3::Bucket",
+			wantErr:    "leave it empty",
+		},
+		{
+			name:       "a Type that does not extend its VendorType is rejected",
+			regType:    "MyOwnBucketName",
+			vendorType: "AWS::S3::Bucket",
+			wantErr:    "does not extend",
+		},
+		{
+			// The near miss the separator exists to catch: a key that starts
+			// with the vendor type but does not extend it as a role.
+			name:       "a Type that merely starts with its VendorType is rejected",
+			regType:    "AWS::S3::BucketPolicy",
+			vendorType: "AWS::S3::Bucket",
+			wantErr:    "does not extend",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := NewRegistry().Register(Registration{
+				Provider: "aws", Type: c.regType, VendorType: c.vendorType,
+				Capability: "compute", Lookup: LookupByName, Resource: newStub(t),
+			})
+			if c.wantErr == "" {
+				if err != nil {
+					t.Fatalf("Register: %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("Register accepted Type=%q VendorType=%q", c.regType, c.vendorType)
+			}
+			if !strings.Contains(err.Error(), c.wantErr) {
+				t.Errorf("error should mention %q: %v", c.wantErr, err)
+			}
+		})
+	}
+}

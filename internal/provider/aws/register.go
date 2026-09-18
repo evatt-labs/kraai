@@ -23,9 +23,9 @@ const (
 
 // Tier 2 compute types (aws-provider-compute): what it takes to actually run
 // a deployed Lambda, beyond the function and its HTTP front door registered
-// above. TypeArtifactBucket is this package's own registry vocabulary, not
-// a real Cloud Control TypeName — see its own doc comment in
-// artifactbucket.go for why.
+// above. TypeArtifactBucket is this package's own registry vocabulary rather
+// than a real Cloud Control TypeName, and declares its VendorType
+// accordingly — see its own doc comment in artifactbucket.go for why.
 
 // key builds a DependsOn entry naming one of this package's own
 // registrations by its registry key ("aws/<TypeName>") — the same format
@@ -235,7 +235,7 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newLambdaFunctionResource(client),
 		},
 		{
-			Provider: Provider, Type: TypeArtifactBucket,
+			Provider: Provider, Type: TypeArtifactBucket, VendorType: TypeS3Bucket,
 			Capability: manifest.CapabilityCompute,
 			// No DependsOn: this is one of the two registrations the
 			// workstream that replaced Phase with a real dependency graph
@@ -336,7 +336,7 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newEventsRuleResource(client),
 		},
 		{
-			Provider: Provider, Type: TypePermissionEventsRule,
+			Provider: Provider, Type: TypePermissionEventsRule, VendorType: realTypeLambdaPermission,
 			Capability: manifest.CapabilityCompute,
 			// Needs its function: AddPermission's FunctionName must already
 			// exist. Not the rule: eventBridgeRuleSourceARN builds the
@@ -408,7 +408,7 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newAPIGatewayResource(client),
 		},
 		{
-			Provider: Provider, Type: TypePermissionAPIGateway,
+			Provider: Provider, Type: TypePermissionAPIGateway, VendorType: realTypeLambdaPermission,
 			Capability: manifest.CapabilityCompute,
 			// Needs both its function (AddPermission's FunctionName) and
 			// the API Gateway it authorizes: unlike

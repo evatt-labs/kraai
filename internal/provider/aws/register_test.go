@@ -358,3 +358,93 @@ func TestPermissionRegistrationsDeclareAListScope(t *testing.T) {
 		})
 	}
 }
+
+// drivenTypeName reports the Cloud Control TypeName a registration's Resource
+// actually submits, by reaching the resourceType it is or wraps.
+//
+// Reflection, and reading an unexported field, because that is what makes the
+// invariant checkable at all: every resource here either is a *resourceType or
+// holds one as `inner`, and typeName is what every Cloud Control call is made
+// against. Nothing exports it, and exporting it purely to be asserted on would
+// widen the package's surface for a test's convenience.
+func drivenTypeName(t *testing.T, res resource.Resource) string {
+	t.Helper()
+
+	v := reflect.ValueOf(res)
+	for range 2 { // at most one wrapper level: the resource, then its inner
+		if v.Kind() == reflect.Pointer {
+			v = v.Elem()
+		}
+		if v.Kind() != reflect.Struct {
+			break
+		}
+		if f := v.FieldByName("typeName"); f.IsValid() && f.Kind() == reflect.String {
+			return f.String()
+		}
+		inner := v.FieldByName("inner")
+		if !inner.IsValid() {
+			break
+		}
+		v = inner
+	}
+	t.Fatalf("could not find the driven typeName on %T", res)
+	return ""
+}
+
+// TestVendorTypeMatchesTheTypeEachRegistrationDrives is the check the "::Role"
+// convention never had: a registration's declared VendorType must be the type
+// its Resource actually calls Cloud Control with.
+//
+// Before VendorType existed the two could only be compared by reading two
+// files and trusting a comment, and the one value an operator needs in order
+// to find the object in a console was reachable from nowhere outside this
+// package. A registration that renames its role key, or repoints its inner
+// resourceType, now fails here instead of silently printing a type name that
+// maps to nothing.
+func TestVendorTypeMatchesTheTypeEachRegistrationDrives(t *testing.T) {
+	for _, r := range Registrations(&Client{}) {
+		t.Run(r.Type, func(t *testing.T) {
+			driven := drivenTypeName(t, r.Resource)
+			if got := r.VendorTypeName(); got != driven {
+				t.Errorf("VendorTypeName = %q, but the resource drives %q", got, driven)
+			}
+		})
+	}
+}
+
+// The three registrations whose key diverges from their vendor type, named
+// explicitly so the split is not merely self-consistent but is the split this
+// package intends — a test that only compared the two to each other would
+// pass if both were wrong together.
+func TestRoleKeysDeclareTheirVendorType(t *testing.T) {
+	byType := map[string]resource.Registration{}
+	for _, r := range Registrations(&Client{}) {
+		byType[r.Type] = r
+	}
+
+	want := map[string]string{
+		TypeArtifactBucket:       TypeS3Bucket,
+		TypePermissionAPIGateway: realTypeLambdaPermission,
+		TypePermissionEventsRule: realTypeLambdaPermission,
+	}
+	for key, vendorType := range want {
+		reg, ok := byType[key]
+		if !ok {
+			t.Fatalf("%s is not registered", key)
+		}
+		if reg.VendorType != vendorType {
+			t.Errorf("%s declares VendorType %q, want %q", key, reg.VendorType, vendorType)
+		}
+	}
+
+	// Every other registration keeps the two equal, which is what makes a
+	// diverging key worth noticing when one appears.
+	for _, r := range Registrations(&Client{}) {
+		if _, diverges := want[r.Type]; diverges {
+			continue
+		}
+		if r.VendorType != "" {
+			t.Errorf("%s declares VendorType %q, want none: its key is its vendor type", r.Type, r.VendorType)
+		}
+	}
+}

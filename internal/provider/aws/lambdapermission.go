@@ -9,20 +9,27 @@ import (
 )
 
 // TypePermissionAPIGateway and TypePermissionEventsRule are this package's
-// own registry vocabulary, not real Cloud Control TypeNames — both drive
-// the identical real type, AWS::Lambda::Permission, via
-// resourceType.typeName, exactly as TypeArtifactBucket reuses
-// AWS::S3::Bucket under a different registry key (see that constant's own
-// doc comment for why: a provider/type pair can only be registered once,
-// and these are two functionally distinct grants on the same function,
-// each with its own identity and its own trigger gate).
+// own registry vocabulary, not real Cloud Control TypeNames: both drive the
+// identical real type, AWS::Lambda::Permission, which each registration
+// declares as its VendorType.
+//
+// Two keys because a provider/type pair can only be registered once, and
+// these are two functionally distinct grants on the same function, each with
+// its own identity and its own applicability conditions — the same reason
+// TypeArtifactBucket reuses AWS::S3::Bucket under a different key.
 const (
-	TypePermissionAPIGateway = "AWS::Lambda::Permission::APIGateway"
-	TypePermissionEventsRule = "AWS::Lambda::Permission::EventsRule"
-
-	// realTypeLambdaPermission is the actual Cloud Control TypeName both
-	// registrations above drive.
+	// realTypeLambdaPermission is the Cloud Control TypeName both
+	// registrations below drive, and what each declares as its VendorType.
 	realTypeLambdaPermission = "AWS::Lambda::Permission"
+)
+
+// Role keys for the two grants, built by resource.RoleType rather than
+// written out, so the relationship between each key and the type it drives
+// is the one the registry validates rather than a convention held in a
+// comment.
+var (
+	TypePermissionAPIGateway = resource.RoleType(realTypeLambdaPermission, "APIGateway")
+	TypePermissionEventsRule = resource.RoleType(realTypeLambdaPermission, "EventsRule")
 )
 
 // permissionAction is the action every permission this package grants

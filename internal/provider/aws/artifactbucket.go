@@ -21,14 +21,12 @@ import (
 // `objects:` bindings (see TypeS3Bucket above); a manifest that configures
 // both objects and compute on aws — kraai's own kraai-api is exactly this
 // shape — would fail Register outright on a duplicate key if this
-// registration reused that same string. Registration.Type is this
-// package's own registry vocabulary, not required to equal the Cloud
-// Control TypeName it drives (that's resourceType.typeName, a separate
-// field) — every other registration in this package keeps the two equal
-// out of clarity, per register.go's own "AWS's own vocabulary, not
-// kraai's" comment, but nothing enforces that, and this is the one type
-// here that genuinely needs to diverge from it rather than collide.
-const TypeArtifactBucket = "AWS::S3::Bucket::ArtifactBucket"
+// registration reused that same string.
+//
+// The registration declares VendorType: TypeS3Bucket, which is what says
+// out loud that this key drives an ordinary S3 bucket. The registry checks
+// the two agree, and a plan names both.
+var TypeArtifactBucket = resource.RoleType(TypeS3Bucket, "ArtifactBucket")
 
 // maxBucketNameLen is S3's own bucket name length ceiling.
 const maxBucketNameLen = 63

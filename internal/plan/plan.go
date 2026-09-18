@@ -55,6 +55,17 @@ type Item struct {
 	// types under more than one provider.
 	Provider string
 	Type     string
+	// VendorType is what the vendor itself calls what Type drives, which
+	// differs from Type only when one vendor type plays several roles — one
+	// AWS::Lambda::Permission is two registrations here, one per thing it
+	// authorizes. Always populated, equal to Type in the common case, so a
+	// reader never has to know which case they are looking at.
+	//
+	// Carried through to output because Type alone cannot be looked up: an
+	// operator reading "AWS::Lambda::Permission::APIGateway" finds nothing
+	// under that name in any AWS console, and the type they can find was
+	// previously reachable only from inside the provider package.
+	VendorType string
 	// Wave is the zero-based execution wave this resource is provisioned
 	// in: the length of the longest chain of dependencies that must
 	// complete before it can start, computed once per Plan by graph.go.
