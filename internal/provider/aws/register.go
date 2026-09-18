@@ -103,7 +103,7 @@ func Registrations(client *Client) []resource.Registration {
 	return append(registerNetwork(client), []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
-			Capability: manifest.CapabilityObjects,
+			Capability: manifest.CapabilityDNS,
 			// No DependsOn: nothing else in this stack needs to exist
 			// before a zone can be created, only after — the certificate's
 			// validation record and the CDN's alias record are both scoped
@@ -122,7 +122,7 @@ func Registrations(client *Client) []resource.Registration {
 		},
 		{
 			Provider: Provider, Type: TypeCertificateManagerCertificate,
-			Capability: manifest.CapabilityObjects,
+			Capability: manifest.CapabilityTLS,
 			// No DependsOn: CloudFront needs an issued certificate to
 			// reference as its viewer certificate (expressed as
 			// CloudFront's own DependsOn below), but nothing in this stack
@@ -165,7 +165,7 @@ func Registrations(client *Client) []resource.Registration {
 		},
 		{
 			Provider: Provider, Type: TypeCloudFrontDistribution,
-			Capability: manifest.CapabilityObjects,
+			Capability: manifest.CapabilityCDN,
 			// Needs the bucket as its origin and the certificate as its
 			// viewer certificate — a real edge, replacing what used to be
 			// phase co-location (both PhaseStorage, CloudFront
@@ -183,7 +183,7 @@ func Registrations(client *Client) []resource.Registration {
 		},
 		{
 			Provider: Provider, Type: TypeRoute53RecordSet,
-			Capability: manifest.CapabilityObjects,
+			Capability: manifest.CapabilityDNS,
 			// Needs the zone to create a record inside (HostedZoneId is
 			// this type's own parent-container property) and the
 			// distribution as its alias target — the common case this

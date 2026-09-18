@@ -326,20 +326,26 @@ input that turns the refusal off.
 
 ## Providers
 
-kraai defines six capabilities. Coverage below is how many of them **kraai
+kraai defines nine capabilities. Coverage below is how many of them **kraai
 implements** for each provider. It says nothing about what the provider itself
 offers — every one of these clouds offers far more than kraai reaches, and an
 empty cell is work kraai has not done rather than a capability the provider
 lacks.
 
-| provider | compute | database | keyvalue | objects | queues | network | coverage |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|---|
-| **AWS** | ✅ | — | — | ◐ | — | ✅ | ~40% |
-| **Cloudflare** | — | ✅ | ✅ | ✅ | ✅ | — | 67% |
-| **Azure** | — | — | — | — | — | — | 0% |
-| **GCP** | — | — | — | — | — | — | 0% |
+| provider | compute | database | keyvalue | objects | queues | network | dns | tls | cdn | coverage |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|---|
+| **AWS** | ✅ | — | — | ✅ | — | ✅ | ◐ | ◐ | ◐ | ~50% |
+| **Cloudflare** | — | ✅ | ✅ | ✅ | ✅ | — | — | — | — | 44% |
+| **Azure** | — | — | — | — | — | — | — | — | — | 0% |
+| **GCP** | — | — | — | — | — | — | — | — | — | 0% |
 
 ✅ implemented by kraai · ◐ partial · — not implemented by kraai
+
+`dns`, `tls` and `cdn` used to be folded into `objects`, which meant they
+shared one binding shape and so could not be configured at all. Splitting them
+out is what makes their configuration expressible; it also moved the
+denominator, so Cloudflare's percentage fell without Cloudflare losing
+anything.
 
 **Read the count alongside the depth, not instead of it.** Cloudflare covers
 more capabilities; AWS is the more developed provider. AWS is the only one
@@ -349,8 +355,9 @@ infrastructure, and the only one built on a uniform CRUD plane — the
 CloudFormation schemas rather than one hand-written implementation per
 service. Adding an AWS resource type is a registry entry.
 
-Known gaps, each with a tracking issue. AWS `objects` has four types that
-cannot be created ([#117](https://github.com/evatt-labs/kraai/issues/117)).
+Known gaps, each with a tracking issue. AWS `dns`, `tls` and `cdn` are
+registered but cannot yet be created — they reach the generic engine with no
+configuration of their own ([#117](https://github.com/evatt-labs/kraai/issues/117)).
 Cloudflare offers two compute products and kraai implements neither — Workers
 ([#135](https://github.com/evatt-labs/kraai/issues/135)) and Containers
 ([#138](https://github.com/evatt-labs/kraai/issues/138)). Azure and GCP have

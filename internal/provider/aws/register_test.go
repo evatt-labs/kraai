@@ -23,11 +23,11 @@ func TestRegisterWiresEveryType(t *testing.T) {
 		lookup     resource.LookupStrategy
 	}{
 		{Provider + "/" + TypeS3Bucket, manifest.CapabilityObjects, nil, resource.LookupByName},
-		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityObjects,
+		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityCDN,
 			[]string{key(TypeS3Bucket), key(TypeCertificateManagerCertificate)}, resource.LookupByAttr},
-		{Provider + "/" + TypeCertificateManagerCertificate, manifest.CapabilityObjects, nil, resource.LookupByTag},
-		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityObjects, nil, resource.LookupByAPI},
-		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityObjects,
+		{Provider + "/" + TypeCertificateManagerCertificate, manifest.CapabilityTLS, nil, resource.LookupByTag},
+		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityDNS, nil, resource.LookupByAPI},
+		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityDNS,
 			[]string{key(TypeRoute53HostedZone), key(TypeCloudFrontDistribution)}, resource.LookupByAttr},
 		{Provider + "/" + TypeLambdaFunction, manifest.CapabilityCompute,
 			[]string{key(TypeArtifactBucket), key(TypeIAMRole)}, resource.LookupByName},
@@ -234,20 +234,28 @@ func TestRegisterExpandsCapabilitiesToEveryType(t *testing.T) {
 		t.Fatalf("Register: %v", err)
 	}
 
-	objects, err := reg.Resolve(manifest.CapabilityObjects, resource.ApplicabilityContext{Vendors: map[string]string{manifest.CapabilityObjects: Provider}})
-	if err != nil {
-		t.Fatalf("Resolve objects: %v", err)
+	// One capability per thing, since the decomposition: `objects` is an
+	// object store and nothing else, and the four types it used to carry
+	// each resolve under the capability that actually describes them.
+	byCapability := map[string]map[string]bool{
+		manifest.CapabilityObjects: {TypeS3Bucket: true},
+		manifest.CapabilityDNS:     {TypeRoute53HostedZone: true, TypeRoute53RecordSet: true},
+		manifest.CapabilityTLS:     {TypeCertificateManagerCertificate: true},
+		manifest.CapabilityCDN:     {TypeCloudFrontDistribution: true},
 	}
-	wantObjects := map[string]bool{
-		TypeRoute53HostedZone: true, TypeCertificateManagerCertificate: true, TypeS3Bucket: true,
-		TypeCloudFrontDistribution: true, TypeRoute53RecordSet: true,
-	}
-	if len(objects) != len(wantObjects) {
-		t.Fatalf("objects = %+v, want %d entries", objects, len(wantObjects))
-	}
-	for _, r := range objects {
-		if !wantObjects[r.Type] {
-			t.Fatalf("objects contains unexpected type %q (full: %+v)", r.Type, objects)
+	for capability, want := range byCapability {
+		resolved, err := reg.Resolve(capability, resource.ApplicabilityContext{
+			Vendors: map[string]string{capability: Provider},
+		})
+		if err != nil {
+			t.Fatalf("Resolve %s: %v", capability, err)
+		}
+		got := map[string]bool{}
+		for _, r := range resolved {
+			got[r.Type] = true
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s resolved to %v, want %v", capability, got, want)
 		}
 	}
 
