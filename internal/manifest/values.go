@@ -10,11 +10,12 @@ import (
 )
 
 // LoadValues loads environments/<envName>.values.yaml — free-form data,
-// deliberately never schema-validated (D5) — and applies setArgs (--set
-// flags, Helm's dotted-path syntax) on top of it, later overrides winning.
-// A missing values file is not an error: it's simply an empty base, since
-// D5 never says the file is required, only that when present it's the
-// lowest-precedence tier above a template's own default.
+// deliberately never schema-validated, since its keys are whatever a
+// template references and this package has no way to know that vocabulary
+// in advance — and applies setArgs (--set flags, Helm's dotted-path syntax)
+// on top of it, later overrides winning. A missing values file is not an
+// error: it's simply an empty base, the lowest-precedence tier above a
+// template's own default.
 //
 // The returned map is also the template context for rendering any
 // kraai.yaml.j2 / services/*.yaml.j2 file (see loader.go), so its
@@ -23,9 +24,10 @@ import (
 // filter supplies the third, lowest tier whenever a key this map doesn't
 // have is referenced in a template.
 func LoadValues(fsys FS, envName string, setArgs []string) (map[string]any, error) {
-	// envName is assumed already validated against D22's persistent-name
-	// grammar (or the frozen ephemeral grammar) by the naming-policy
-	// workstream, not yet implemented — this package only ever joins it
+	// envName is assumed already validated against the persistent-name
+	// grammar (/^[a-z][a-z0-9-]{0,30}[a-z0-9]$/, or the frozen ephemeral
+	// grammar) by the naming-policy workstream, not yet implemented — this
+	// package only ever joins it
 	// into a path. os.DirFS + io/fs path validation already reject a
 	// traversal attempt outright (fs.ErrNotExist, not a filesystem escape),
 	// but an unvalidated name can still surface a raw io/fs error instead
@@ -64,9 +66,9 @@ func LoadValues(fsys FS, envName string, setArgs []string) (map[string]any, erro
 
 	result, ok := merged.(map[string]any)
 	if !ok {
-		// Unreachable given parseSetPath rejects an empty path (D5's
-		// --set always starts with a map key), but kept as a defensive
-		// guard rather than a silent type assertion panic (Rule 20).
+		// Unreachable given parseSetPath rejects an empty path — a --set
+		// assignment always starts with a map key — but kept as a
+		// defensive guard rather than a silent type assertion panic.
 		return nil, kerrors.New("manifest: resolved values is not an object (got %T)", merged)
 	}
 	return result, nil

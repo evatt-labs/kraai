@@ -29,8 +29,8 @@ import (
 //
 // Owned here, in internal/manifest, rather than in internal/naming
 // alongside NamePattern/PersistentNamePattern: internal/naming already
-// imports internal/manifest (ResolveImportRef takes a manifest.ImportRef,
-// D7), so internal/manifest importing internal/naming back would be an
+// imports internal/manifest (ResolveImportRef takes a manifest.ImportRef),
+// so internal/manifest importing internal/naming back would be an
 // import cycle. internal/naming.Namer never validates the prefix it is
 // given — it trusts NewNamer's caller, exactly as ResourceName/
 // ServiceName already trust environmentName/serviceKey/binding — so the
@@ -41,12 +41,12 @@ import (
 var prefixPattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*-$`)
 
 // maxPrefixLength bounds Naming.Prefix at 32 bytes — the same length
-// ceiling docs/BLUEPRINT.md D22 already puts on a persistent environment
-// name (internal/naming.PersistentNamePattern: 2-32 characters). A prefix
+// ceiling already placed on a persistent environment name
+// (internal/naming.PersistentNamePattern: 2-32 characters). A prefix
 // is a short, fixed namespace tag ("kraai-api-", "kraai-web-"); there is
 // no legitimate reason for it to consume more of the 63-byte name budget
-// than an entire environment name is itself allowed to. Reusing D22's own
-// number, rather than inventing a new one, keeps "how long can a naming
+// than an entire environment name is itself allowed to. Reusing that same
+// ceiling, rather than inventing a new one, keeps "how long can a naming
 // input be" answerable with one figure instead of two that happen to
 // almost agree.
 //

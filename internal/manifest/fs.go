@@ -10,8 +10,9 @@ import (
 
 //go:generate go run go.uber.org/mock/mockgen -source=fs.go -destination=mock_fs_test.go -package=manifest
 
-// FS abstracts the filesystem operations the loader needs (D21: every
-// external-system touchpoint sits behind an interface). It reads relative
+// FS abstracts the filesystem operations the loader needs, so no external
+// system touchpoint bypasses an interface with a direct os call. It reads
+// relative
 // to a fixed manifest root, mirroring io/fs.FS's rooted semantics, so
 // tests can inject an in-memory or failing implementation without ever
 // touching disk. Glob results are always returned sorted, so callers get

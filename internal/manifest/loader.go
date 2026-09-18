@@ -16,7 +16,7 @@ const (
 	environmentsDir = "environments"
 )
 
-// Loader resolves a manifest directory (D4) into one validated Manifest.
+// Loader resolves a manifest directory into one validated Manifest.
 // Both external systems it touches — the filesystem and the template
 // engine — are injected interfaces (FS, TemplateEngine), so Loader itself
 // never imports os or pongo2 directly.
@@ -32,8 +32,8 @@ func NewLoader(fsys FS, engine TemplateEngine) *Loader {
 }
 
 // Load resolves the manifest for envName: kraai.yaml (+ services/*.yaml,
-// merged per D4) rendered opt-in-by-extension (D5) against the merged
-// values (environments/<envName>.values.yaml + setArgs, Helm precedence),
+// merged) rendered opt-in-by-extension against the merged values
+// (environments/<envName>.values.yaml + setArgs, Helm precedence),
 // then the environment overlay itself — every schema-validated file
 // strictly rejecting unknown keys along the way.
 func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
@@ -123,7 +123,7 @@ func validateRoot(root *Root) error {
 }
 
 // loadServices globs services/*.yaml and services/*.yaml.j2, renders the
-// latter against values, strictly decodes both, and merges them (D4).
+// latter against values, strictly decodes both, and merges them.
 func (l *Loader) loadServices(values map[string]any) (map[string]Service, error) {
 	plainMatches, err := l.fs.Glob(servicesGlob)
 	if err != nil {
@@ -171,8 +171,8 @@ func (l *Loader) loadServices(values map[string]any) (map[string]Service, error)
 }
 
 // loadEnvironment loads environments/<envName>.yaml, the schema-validated,
-// never-templated overlay (D5 names only kraai.yaml.j2 and
-// services/*.yaml.j2 as opt-in-templated).
+// never-templated overlay — templating is opt-in by file extension, and
+// only kraai.yaml.j2 and services/*.yaml.j2 are eligible.
 func (l *Loader) loadEnvironment(envName string) (*Environment, error) {
 	path := environmentsDir + "/" + envName + ".yaml"
 	data, err := l.fs.ReadFile(path)

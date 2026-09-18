@@ -1,9 +1,10 @@
-// Package manifest loads kraai's directory-based manifest (docs/BLUEPRINT.md
-// D4): kraai.yaml at the manifest root plus every services/*.yaml file,
-// merged into one resolved, validated, strongly-typed Manifest for a given
+// Package manifest loads kraai's manifest, a directory rather than a single
+// file so a large service set stays reviewable and diffable in a PR:
+// kraai.yaml at the manifest root plus every services/*.yaml file, merged
+// into one resolved, validated, strongly-typed Manifest for a given
 // environment name.
 //
-// Load order matters and is fixed (docs/BLUEPRINT.md D5):
+// Load order matters and is fixed:
 //
 //  1. environments/<name>.values.yaml is loaded as free-form data (never
 //     schema-validated) and merged with CLI --set overrides, Helm's exact

@@ -33,8 +33,8 @@ func TestMergeSettings_ServiceOverridesProviderPerKey(t *testing.T) {
 // TestMergeSettings_ShallowNotDeep documents the shallow-merge decision: a
 // nested value under a key present in both maps is replaced whole by
 // override's value, never merged field-by-field, because Settings is
-// free-form and vendor-interpreted (D34) and this package has no schema to
-// merge by.
+// free-form data validated by the provider rather than by this package,
+// so there is no schema here to merge nested fields by.
 func TestMergeSettings_ShallowNotDeep(t *testing.T) {
 	base := map[string]any{"layers": map[string]any{"web-adapter": "1.8", "extra": "keep-me"}}
 	override := map[string]any{"layers": map[string]any{"web-adapter": "2.0"}}
