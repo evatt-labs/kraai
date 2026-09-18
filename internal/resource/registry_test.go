@@ -108,7 +108,7 @@ func TestResolveExpandsOneCapabilityToSeveralTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := r.Resolve("postgres", map[string]string{"postgres": "neon"})
+	got, err := r.Resolve("postgres", ApplicabilityContext{Vendors: map[string]string{"postgres": "neon"}})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
 	}
@@ -129,12 +129,12 @@ func TestResolveErrorsNameWhatIsAvailable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := r.Resolve("mysql", map[string]string{"mysql": "neon"})
+	_, err := r.Resolve("mysql", ApplicabilityContext{Vendors: map[string]string{"mysql": "neon"}})
 	if err == nil || !strings.Contains(err.Error(), "postgres") {
 		t.Fatalf("got %v, want an error listing the known capabilities", err)
 	}
 
-	_, err = r.Resolve("postgres", map[string]string{"postgres": "planetscale"})
+	_, err = r.Resolve("postgres", ApplicabilityContext{Vendors: map[string]string{"postgres": "planetscale"}})
 	if err == nil || !strings.Contains(err.Error(), "neon") {
 		t.Fatalf("got %v, want an error listing the providers for that capability", err)
 	}
@@ -202,7 +202,7 @@ func TestLookupStrategyValid(t *testing.T) {
 // An empty registry must still produce a usable message rather than naming
 // nothing at all.
 func TestResolveOnAnEmptyRegistry(t *testing.T) {
-	_, err := NewRegistry().Resolve("postgres", map[string]string{"postgres": "neon"})
+	_, err := NewRegistry().Resolve("postgres", ApplicabilityContext{Vendors: map[string]string{"postgres": "neon"}})
 	if err == nil {
 		t.Fatal("resolving against an empty registry succeeded")
 	}
@@ -226,7 +226,7 @@ func TestResolveErrorsListSeveralOptions(t *testing.T) {
 		}
 	}
 
-	_, err := r.Resolve("mysql", map[string]string{"mysql": "planetscale"})
+	_, err := r.Resolve("mysql", ApplicabilityContext{Vendors: map[string]string{"mysql": "planetscale"}})
 	if err == nil {
 		t.Fatal("an unknown capability resolved")
 	}
@@ -234,7 +234,7 @@ func TestResolveErrorsListSeveralOptions(t *testing.T) {
 		t.Fatalf("got %v, want both known capabilities listed", err)
 	}
 
-	_, err = r.Resolve("postgres", map[string]string{"postgres": "planetscale"})
+	_, err = r.Resolve("postgres", ApplicabilityContext{Vendors: map[string]string{"postgres": "planetscale"}})
 	if err == nil {
 		t.Fatal("an unknown provider resolved")
 	}
@@ -264,7 +264,7 @@ func TestVendorSelectsAcrossProviders(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := r.Resolve("postgres", map[string]string{"postgres": "neon"})
+	got, err := r.Resolve("postgres", ApplicabilityContext{Vendors: map[string]string{"postgres": "neon"}})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
 	}
@@ -276,7 +276,7 @@ func TestVendorSelectsAcrossProviders(t *testing.T) {
 	}
 
 	// The companion is not independently selectable by its own provider name.
-	if _, err := r.Resolve("postgres", map[string]string{"postgres": "cloudflare"}); err == nil {
+	if _, err := r.Resolve("postgres", ApplicabilityContext{Vendors: map[string]string{"postgres": "cloudflare"}}); err == nil {
 		t.Fatal("the companion resolved under its provider rather than its vendor")
 	}
 }
@@ -288,7 +288,7 @@ func TestVendorDefaultsToProvider(t *testing.T) {
 	if err := r.Register(reg(t, "cloudflare", "kv_namespace", "keyvalue")); err != nil {
 		t.Fatal(err)
 	}
-	got, err := r.Resolve("keyvalue", map[string]string{"keyvalue": "cloudflare"})
+	got, err := r.Resolve("keyvalue", ApplicabilityContext{Vendors: map[string]string{"keyvalue": "cloudflare"}})
 	if err != nil || len(got) != 1 {
 		t.Fatalf("Resolve = %v, %v", got, err)
 	}
@@ -309,7 +309,7 @@ func TestCompetingVendorsStaySeparate(t *testing.T) {
 		}
 	}
 
-	got, err := r.Resolve("postgres", map[string]string{"postgres": "neon"})
+	got, err := r.Resolve("postgres", ApplicabilityContext{Vendors: map[string]string{"postgres": "neon"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -318,7 +318,8 @@ func TestCompetingVendorsStaySeparate(t *testing.T) {
 	}
 }
 
-// TestConditionalRegistrationTracksAnotherCapability is why Condition exists.
+// TestConditionalRegistrationTracksAnotherCapability is why
+// RequiresCapabilityVendor exists.
 // A Cloudflare Hyperdrive config is asked for by choosing Neon for a
 // database, but it is a Workers connection pooler — it belongs only when the
 // compute side is Workers too. Planning one for a Lambda demands a Cloudflare
@@ -335,12 +336,12 @@ func TestConditionalRegistrationTracksAnotherCapability(t *testing.T) {
 	if err := r.Register(Registration{
 		Provider: "cloudflare", Type: "hyperdrive", Vendor: "neon", Capability: "database",
 		Lookup: LookupByAttr, Resource: newStub(t),
-		When: RequiresCapabilityVendor("compute", "cloudflare"),
+		Applies: []Applicability{RequiresCapabilityVendor("compute", "cloudflare")},
 	}); err != nil {
 		t.Fatal(err)
 	}
 
-	onWorkers, err := r.Resolve("database", map[string]string{"database": "neon", "compute": "cloudflare"})
+	onWorkers, err := r.Resolve("database", ApplicabilityContext{Vendors: map[string]string{"database": "neon", "compute": "cloudflare"}})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
 	}
@@ -348,7 +349,7 @@ func TestConditionalRegistrationTracksAnotherCapability(t *testing.T) {
 		t.Fatalf("on Workers: %d type(s), want branch and hyperdrive", len(onWorkers))
 	}
 
-	onLambda, err := r.Resolve("database", map[string]string{"database": "neon", "compute": "aws"})
+	onLambda, err := r.Resolve("database", ApplicabilityContext{Vendors: map[string]string{"database": "neon", "compute": "aws"}})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
 	}
@@ -357,7 +358,7 @@ func TestConditionalRegistrationTracksAnotherCapability(t *testing.T) {
 	}
 
 	// Compute unconfigured is not Cloudflare either.
-	noCompute, err := r.Resolve("database", map[string]string{"database": "neon"})
+	noCompute, err := r.Resolve("database", ApplicabilityContext{Vendors: map[string]string{"database": "neon"}})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
 	}
@@ -374,12 +375,12 @@ func TestResolveFailsWhenEveryRegistrationIsConditionedOut(t *testing.T) {
 	if err := r.Register(Registration{
 		Provider: "cloudflare", Type: "hyperdrive", Capability: "database",
 		Lookup: LookupByAttr, Resource: newStub(t),
-		When: RequiresCapabilityVendor("compute", "cloudflare"),
+		Applies: []Applicability{RequiresCapabilityVendor("compute", "cloudflare")},
 	}); err != nil {
 		t.Fatal(err)
 	}
 
-	_, err := r.Resolve("database", map[string]string{"database": "cloudflare", "compute": "aws"})
+	_, err := r.Resolve("database", ApplicabilityContext{Vendors: map[string]string{"database": "cloudflare", "compute": "aws"}})
 	if err == nil {
 		t.Fatal("a capability with no applicable type resolved successfully")
 	}
@@ -394,69 +395,174 @@ func TestResolveRequiresAVendorForTheCapability(t *testing.T) {
 	if err := r.Register(reg(t, "neon", "branch", "database")); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := r.Resolve("database", map[string]string{"compute": "aws"}); err == nil {
+	if _, err := r.Resolve("database", ApplicabilityContext{Vendors: map[string]string{"compute": "aws"}}); err == nil {
 		t.Fatal("resolved a capability with no vendor configured")
 	}
 }
 
-// TestAppliesToTrigger pins the per-service-compute trigger-filtering
-// contract: a registration with no Triggers never cares what a service
-// declares, a registration with Triggers matches only a listed value, and
-// a service declaring no trigger at all (trigger == "") always matches —
-// the exact rule that keeps a manifest with no compute: block behaving as
-// it did before this field existed.
-func TestAppliesToTrigger(t *testing.T) {
+// TestRequiresTrigger pins the per-service-compute trigger-filtering
+// contract, unchanged from when it lived in a Triggers field: a
+// registration with no trigger condition never cares what a service
+// declares, one with a trigger condition matches only a listed value, and a
+// service declaring no trigger at all always matches — the exact rule that
+// keeps a manifest with no compute: block behaving as it did before triggers
+// existed, and the rule that lets a binding, which has no trigger to speak
+// of, be resolved at the same evaluation point.
+func TestRequiresTrigger(t *testing.T) {
 	cases := []struct {
 		name     string
 		triggers []string
 		trigger  string
 		want     bool
 	}{
-		{"untriggered registration matches an http service", nil, "http", true},
-		{"untriggered registration matches a schedule service", nil, "schedule", true},
-		{"untriggered registration matches a service with no trigger", nil, "", true},
+		{"unconditioned registration matches an http service", nil, "http", true},
+		{"unconditioned registration matches a schedule service", nil, "schedule", true},
+		{"unconditioned registration matches a service with no trigger", nil, "", true},
 		{"http-gated registration matches an http service", []string{"http"}, "http", true},
 		{"http-gated registration rejects a schedule service", []string{"http"}, "schedule", false},
 		{"http-gated registration matches a service with no trigger", []string{"http"}, "", true},
-		{"multi-value Triggers matches any listed value", []string{"http", "schedule"}, "schedule", true},
+		{"a multi-value condition matches any listed value", []string{"http", "schedule"}, "schedule", true},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			reg := Registration{Triggers: c.triggers}
-			if got := reg.AppliesToTrigger(c.trigger); got != c.want {
-				t.Fatalf("AppliesToTrigger(%q) with Triggers=%v = %v, want %v",
+			var reg Registration
+			if c.triggers != nil {
+				reg.Applies = []Applicability{RequiresTrigger(c.triggers...)}
+			}
+			got := reg.Matches(ApplicabilityContext{Trigger: c.trigger})
+			if got != c.want {
+				t.Fatalf("Matches(trigger=%q) with triggers=%v = %v, want %v",
 					c.trigger, c.triggers, got, c.want)
 			}
 		})
 	}
 }
 
-// TestAppliesToSettings pins the mutual-exclusivity gate SelectedBy exists
-// for: nil always matches (a registration with no opinion on settings),
-// and a non-nil closure decides per the settings map it is handed.
-func TestAppliesToSettings(t *testing.T) {
-	t.Run("nil SelectedBy always applies", func(t *testing.T) {
-		reg := Registration{}
-		if !reg.AppliesToSettings(map[string]any{"anything": "at all"}) {
-			t.Fatal("AppliesToSettings with nil SelectedBy = false, want true")
+// TestRequiresSettings pins the mutual-exclusivity gate this condition
+// exists for: a registration with no settings condition always applies, and
+// one with a condition decides per the settings map it is handed.
+func TestRequiresSettings(t *testing.T) {
+	t.Run("no settings condition always applies", func(t *testing.T) {
+		var reg Registration
+		if !reg.Matches(ApplicabilityContext{Settings: map[string]any{"anything": "at all"}}) {
+			t.Fatal("a registration with no conditions did not match")
 		}
-		if !reg.AppliesToSettings(nil) {
-			t.Fatal("AppliesToSettings(nil) with nil SelectedBy = false, want true")
+		if !reg.Matches(ApplicabilityContext{}) {
+			t.Fatal("a registration with no conditions did not match an empty context")
 		}
 	})
 
-	t.Run("a non-nil SelectedBy decides", func(t *testing.T) {
-		reg := Registration{
-			SelectedBy: func(settings map[string]any) bool { return settings["frontDoor"] == "url" },
-		}
-		if !reg.AppliesToSettings(map[string]any{"frontDoor": "url"}) {
+	t.Run("a settings condition decides", func(t *testing.T) {
+		reg := Registration{Applies: []Applicability{
+			RequiresSettings(func(settings map[string]any) bool { return settings["frontDoor"] == "url" }),
+		}}
+		if !reg.Matches(ApplicabilityContext{Settings: map[string]any{"frontDoor": "url"}}) {
 			t.Error("expected a match for frontDoor=url")
 		}
-		if reg.AppliesToSettings(map[string]any{"frontDoor": "apigateway"}) {
+		if reg.Matches(ApplicabilityContext{Settings: map[string]any{"frontDoor": "apigateway"}}) {
 			t.Error("expected no match for frontDoor=apigateway")
 		}
-		if reg.AppliesToSettings(nil) {
-			t.Error("expected no match for a nil settings map")
+	})
+
+	// A settings condition is consulted even when the context carries no
+	// settings, unlike a trigger condition, which an absent trigger
+	// satisfies. Pinned because the asymmetry looks like an oversight and is
+	// not: waving settings conditions through on a nil map would make both
+	// halves of a mutually exclusive pair apply at once, which is the bug
+	// they exist to prevent. See RequiresSettings' own doc comment.
+	t.Run("nil settings are still handed to the condition", func(t *testing.T) {
+		reg := Registration{Applies: []Applicability{
+			RequiresSettings(func(settings map[string]any) bool { return settings["frontDoor"] == "url" }),
+		}}
+		if reg.Matches(ApplicabilityContext{}) {
+			t.Error("a settings condition was skipped for a context with no settings")
+		}
+	})
+}
+
+// Several conditions on one registration are ANDed, which is what the three
+// separate fields this replaced did implicitly. Worth pinning explicitly now
+// that it is a property of the slice rather than of the struct's shape.
+func TestApplicabilityConditionsAreANDed(t *testing.T) {
+	reg := Registration{Applies: []Applicability{
+		RequiresCapabilityVendor("compute", "aws"),
+		RequiresTrigger("http"),
+	}}
+
+	if !reg.Matches(ApplicabilityContext{
+		Vendors: map[string]string{"compute": "aws"}, Trigger: "http",
+	}) {
+		t.Error("both conditions held and the registration did not match")
+	}
+	if reg.Matches(ApplicabilityContext{
+		Vendors: map[string]string{"compute": "cloudflare"}, Trigger: "http",
+	}) {
+		t.Error("the vendor condition failed and the registration still matched")
+	}
+	if reg.Matches(ApplicabilityContext{
+		Vendors: map[string]string{"compute": "aws"}, Trigger: "schedule",
+	}) {
+		t.Error("the trigger condition failed and the registration still matched")
+	}
+}
+
+// And/Or/Not are what the three-field shape could not express at all: the
+// old fields were only ever ANDed, across unrelated types, with no way to
+// say "either of these" or "anything but this".
+func TestApplicabilityCombinators(t *testing.T) {
+	onAWS := RequiresCapabilityVendor("compute", "aws")
+	onCloudflare := RequiresCapabilityVendor("compute", "cloudflare")
+	aws := ApplicabilityContext{Vendors: map[string]string{"compute": "aws"}}
+	neon := ApplicabilityContext{Vendors: map[string]string{"compute": "neon"}}
+
+	t.Run("Or", func(t *testing.T) {
+		either := Or(onAWS, onCloudflare)
+		if !either(aws) {
+			t.Error("Or did not match its first satisfied condition")
+		}
+		if either(neon) {
+			t.Error("Or matched with no condition satisfied")
+		}
+		// Or's identity, and the opposite of And's — stated because getting
+		// it backwards silently makes every registration apply.
+		if Or()(aws) {
+			t.Error("Or with no conditions matched")
+		}
+	})
+
+	t.Run("Not", func(t *testing.T) {
+		if Not(onAWS)(aws) {
+			t.Error("Not did not invert a satisfied condition")
+		}
+		if !Not(onAWS)(neon) {
+			t.Error("Not did not invert an unsatisfied condition")
+		}
+	})
+
+	t.Run("And nests inside Or", func(t *testing.T) {
+		// The case the implicit AND in Applies cannot reach: an AND as one
+		// arm of an OR.
+		httpOnAWS := And(onAWS, RequiresTrigger("http"))
+		reg := Registration{Applies: []Applicability{Or(httpOnAWS, onCloudflare)}}
+
+		if !reg.Matches(ApplicabilityContext{
+			Vendors: map[string]string{"compute": "aws"}, Trigger: "http",
+		}) {
+			t.Error("the AND arm held and the registration did not match")
+		}
+		if reg.Matches(ApplicabilityContext{
+			Vendors: map[string]string{"compute": "aws"}, Trigger: "schedule",
+		}) {
+			t.Error("neither arm held and the registration still matched")
+		}
+		if !reg.Matches(ApplicabilityContext{
+			Vendors: map[string]string{"compute": "cloudflare"}, Trigger: "schedule",
+		}) {
+			t.Error("the other arm held and the registration did not match")
+		}
+		// And's identity, stated for the same reason Or's is.
+		if !And()(neon) {
+			t.Error("And with no conditions did not match")
 		}
 	})
 }

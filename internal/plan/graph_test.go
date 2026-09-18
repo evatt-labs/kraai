@@ -110,8 +110,8 @@ func TestComputeWaves_TypeEdgeScopedToGroup(t *testing.T) {
 
 // TestComputeWaves_FilteredOutRegistrationContributesNoEdge pins the hard
 // constraint: a dependency naming a type that was never planned for this
-// group (because a registration filtered itself out via When/Triggers/
-// SelectedBy before reaching expand) resolves to no edge at all, not an
+// group (because a registration's own conditions filtered it out before
+// reaching expand) resolves to no edge at all, not an
 // error and not a phantom wait. "b" depends on "missing", which no item in
 // its group provides — it must still land in wave 0.
 func TestComputeWaves_FilteredOutRegistrationContributesNoEdge(t *testing.T) {

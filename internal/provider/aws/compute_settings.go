@@ -64,8 +64,8 @@ type LambdaSettings struct {
 	// default) or httpFrontDoorURL. Always normalized to one of those two
 	// values by decodeLambdaSettings — never empty, and never anything
 	// else, because register.go's registrations for both paths are gated
-	// on this exact value via resource.Registration.SelectedBy and a
-	// service must get exactly one. See httpFrontDoorIs's own doc comment
+	// on this exact value via resource.RequiresSettings and a service must
+	// get exactly one. See httpFrontDoorIs's own doc comment
 	// for why the planner-facing selector reads the raw setting directly
 	// rather than going through this validated decode.
 	HTTPFrontDoor string
@@ -103,7 +103,7 @@ const (
 	// httpFrontDoorAPIGateway and httpFrontDoorURL are LambdaSettings.
 	// HTTPFrontDoor's only two valid values, and the two front doors
 	// register.go's ApiGatewayV2::Api and Lambda::Url registrations
-	// select between via SelectedBy.
+	// select between via their settings conditions.
 	//
 	// API Gateway is the default: kraai-api's own documented topology is
 	// "FastAPI app behind API Gateway HTTP API, deployed via AWS Lambda Web
@@ -131,9 +131,9 @@ const (
 // normalizeHTTPFrontDoor maps an unset value to the documented default,
 // leaving anything else (valid or not) unchanged for the caller to
 // validate. Shared by decodeLambdaSettings (which validates and errors on
-// anything else) and httpFrontDoorIs (register.go's SelectedBy closures,
-// which only need to compare — see that function's own doc comment for why
-// it does not itself validate).
+// anything else) and httpFrontDoorIs (the closures register.go hands to
+// resource.RequiresSettings, which only need to compare — see that
+// function's own doc comment for why it does not itself validate).
 func normalizeHTTPFrontDoor(raw string) string {
 	if raw == "" {
 		return httpFrontDoorAPIGateway
@@ -228,14 +228,14 @@ func decodeLambdaSettings(settings map[string]any) (LambdaSettings, error) {
 	}
 
 	// httpFrontDoor is validated here, not just left to select nothing:
-	// register.go's ApiGatewayV2::Api and Lambda::Url registrations are
-	// both gated by SelectedBy on this value, and SelectedBy has no error
-	// channel of its own — an unrecognized value would make both
-	// registrations return false and the service would silently plan no
-	// HTTP front door at all, rather than the loud failure an invalid
-	// manifest value deserves (Rule 20). Checked in decodeLambdaSettings,
-	// not inside httpFrontDoorIs itself, so it is caught once, centrally,
-	// rather than by every caller of that selector remembering to.
+	// register.go's ApiGatewayV2::Api and Lambda::Url registrations are both
+	// conditioned on this value, and an applicability condition has no error
+	// channel of its own — an unrecognized value would make both conditions
+	// return false and the service would silently plan no HTTP front door at
+	// all, rather than the loud failure an invalid manifest value deserves
+	// (Rule 20). Checked in decodeLambdaSettings, not inside httpFrontDoorIs
+	// itself, so it is caught once, centrally, rather than by every caller of
+	// that selector remembering to.
 	s.HTTPFrontDoor = normalizeHTTPFrontDoor(settingStr(settings, "httpFrontDoor"))
 	if s.HTTPFrontDoor != httpFrontDoorAPIGateway && s.HTTPFrontDoor != httpFrontDoorURL {
 		return LambdaSettings{}, kerrors.Validation(
@@ -245,16 +245,17 @@ func decodeLambdaSettings(settings map[string]any) (LambdaSettings, error) {
 	return s, nil
 }
 
-// httpFrontDoorIs builds a resource.Registration.SelectedBy closure that
-// matches when a service's merged compute settings select want.
+// httpFrontDoorIs builds the closure register.go hands to
+// resource.RequiresSettings, matching when a service's merged compute
+// settings select want.
 //
 // Reads the raw setting directly via settingStr/normalizeHTTPFrontDoor
-// rather than calling the validating decodeLambdaSettings: SelectedBy runs
-// during internal/plan's expandCompute for every compute registration,
-// including AWS::IAM::Role and AWS::SSM::Parameter, which carry no opinion
-// on httpFrontDoor at all and whose own registrations pass nil settings
-// maps in some call paths — decodeLambdaSettings would refuse those on
-// missing runtime/architecture/layerArn, coupling front-door selection to
+// rather than calling the validating decodeLambdaSettings: this runs while
+// resolving every compute registration, including AWS::IAM::Role and
+// AWS::SSM::Parameter, which carry no opinion on httpFrontDoor at all and
+// whose own registrations see nil settings maps in some call paths —
+// decodeLambdaSettings would refuse those on missing
+// runtime/architecture/layerArn, coupling front-door selection to
 // requirements that have nothing to do with it.
 //
 // An actually-invalid value still cannot select nothing silently:
@@ -271,18 +272,18 @@ func decodeLambdaSettings(settings map[string]any) (LambdaSettings, error) {
 // and Create/Update only run under `kraai apply`, never `kraai plan`. A
 // service planned into a brand-new environment with an invalid
 // httpFrontDoor got ActionCreate for AWS::Lambda::Function (DiffersFromState
-// never reached) while SelectedBy silently matched neither
+// never reached) while the settings condition silently matched neither
 // AWS::ApiGatewayV2::Api nor AWS::Lambda::Url for the exact same reason
 // this comment describes below — the plan came out two resources short
 // with nothing in the output saying why. ValidateSpec closes that gap:
 // see plan.SpecValidator's own doc comment for the general fix and the
 // real `kraai plan` evidence this bug produced.
 //
-// SelectedBy itself still has no error channel (Registration.SelectedBy's
-// own doc comment) and still cannot report "you asked for a front door
-// that does not exist" on its own — an invalid value still makes both
-// AWS::ApiGatewayV2::Api and AWS::Lambda::Url's SelectedBy return false,
-// so neither is ever planned as its own Action, with or without this fix.
+// An applicability condition still has no error channel and still cannot
+// report "you asked for a front door that does not exist" on its own — an
+// invalid value still makes both AWS::ApiGatewayV2::Api's and
+// AWS::Lambda::Url's condition return false, so neither is ever planned as
+// its own Action, with or without this fix.
 // What changed is that this is no longer silent: AWS::Lambda::Function's
 // own ActionFailed, reachable on every path now, is the loud signal this
 // selector was always designed to depend on instead of reporting the

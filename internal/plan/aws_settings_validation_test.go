@@ -63,7 +63,7 @@ func (s specValidatorOnly) Get(context.Context, resource.Ref) (*resource.State, 
 // Every other compute registration keeps a fakeResource, exactly as
 // awsAPITopologyFixture's own doc comment explains: this keeps the test
 // offline and credential-free while still exercising real registration
-// data (Capability, DependsOn, Triggers, SelectedBy) for the one
+// data (Capability, DependsOn, Applies) for the one
 // registration under test.
 func awsComputeRegistryWithRealLambda(t *testing.T) *resource.Registry {
 	t.Helper()

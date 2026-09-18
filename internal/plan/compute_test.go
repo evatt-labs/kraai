@@ -11,7 +11,7 @@ import (
 
 // computeRegistryFixture registers two compute types shaped exactly like
 // internal/provider/aws's real registrations: a function type with no
-// Triggers restriction (applies regardless of trigger) and an HTTP-gated
+// trigger condition (applies regardless of trigger) and an HTTP-gated
 // type restricted to manifest.TriggerHTTP — the minimal shape that
 // reproduces the bug this workstream fixes without importing the aws
 // package itself: this package's tests exercise providers through fakes,
@@ -35,13 +35,13 @@ func newComputeRegistryFixture(t *testing.T) *computeRegistryFixture {
 		{
 			Provider: "fakecloud", Type: "function", Capability: manifest.CapabilityCompute,
 			Lookup: resource.LookupByName, Resource: f.function,
-			// No Triggers: applies to every service using this compute
+			// No conditions: applies to every service using this compute
 			// vendor, whatever it declares (or doesn't declare).
 		},
 		{
 			Provider: "fakecloud", Type: "http_api", Capability: manifest.CapabilityCompute,
 			Lookup: resource.LookupByName, Resource: f.httpAPI,
-			Triggers: []string{manifest.TriggerHTTP},
+			Applies: []resource.Applicability{resource.RequiresTrigger(manifest.TriggerHTTP)},
 		},
 	}
 	for _, r := range regs {
@@ -119,7 +119,7 @@ func TestPlan_NoComputeBlockAppliesEveryRegisteredType(t *testing.T) {
 
 	types := actionTypesFor(p, "legacy")
 	if len(types) != 2 || !types["function"] || !types["http_api"] {
-		t.Fatalf("legacy's planned types = %v, want both {function, http_api} unchanged from before Triggers existed", types)
+		t.Fatalf("legacy's planned types = %v, want both {function, http_api} unchanged from before triggers existed", types)
 	}
 }
 
@@ -195,9 +195,9 @@ func TestPlan_ComputeNameIsPerServiceNotPerBinding(t *testing.T) {
 // internal/provider/aws's real Tier 2 set after the front-door mutual-
 // exclusivity fix: a function type with no gating at all, and two
 // HTTP-gated types — "http_api" and "function_url" — that share the
-// identical Triggers value and are told apart only by SelectedBy, exactly
-// the shape Triggers alone cannot express (see expandCompute's own doc
-// comment on SelectedBy).
+// identical trigger condition and are told apart only by a settings
+// condition, exactly the shape a trigger alone cannot express (see
+// resource.RequiresSettings' own doc comment).
 type frontDoorRegistryFixture struct {
 	reg *resource.Registry
 }
@@ -224,12 +224,18 @@ func newFrontDoorRegistryFixture(t *testing.T) *frontDoorRegistryFixture {
 		{
 			Provider: "fakecloud", Type: "http_api", Capability: manifest.CapabilityCompute,
 			Lookup: resource.LookupByName, Resource: newFakeResource(),
-			Triggers: []string{manifest.TriggerHTTP}, SelectedBy: frontDoorIs("apigateway"),
+			Applies: []resource.Applicability{
+				resource.RequiresTrigger(manifest.TriggerHTTP),
+				resource.RequiresSettings(frontDoorIs("apigateway")),
+			},
 		},
 		{
 			Provider: "fakecloud", Type: "function_url", Capability: manifest.CapabilityCompute,
 			Lookup: resource.LookupByName, Resource: newFakeResource(),
-			Triggers: []string{manifest.TriggerHTTP}, SelectedBy: frontDoorIs("url"),
+			Applies: []resource.Applicability{
+				resource.RequiresTrigger(manifest.TriggerHTTP),
+				resource.RequiresSettings(frontDoorIs("url")),
+			},
 		},
 	}
 	for _, r := range regs {

@@ -125,7 +125,7 @@ func TestRegistrationsCoverTheCapability(t *testing.T) {
 		manifest.CapabilityDatabase: "neon",
 		manifest.CapabilityCompute:  "cloudflare",
 	}
-	resolved, err := reg.Resolve(Capability, onWorkers)
+	resolved, err := reg.Resolve(Capability, resource.ApplicabilityContext{Vendors: onWorkers})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestRegistrationsCoverTheCapability(t *testing.T) {
 		manifest.CapabilityDatabase: "neon",
 		manifest.CapabilityCompute:  "aws",
 	}
-	elsewhere, err := reg.Resolve(Capability, onLambda)
+	elsewhere, err := reg.Resolve(Capability, resource.ApplicabilityContext{Vendors: onLambda})
 	if err != nil {
 		t.Fatalf("Resolve: %v", err)
 	}
@@ -152,7 +152,7 @@ func TestRegistrationsCoverTheCapability(t *testing.T) {
 	}
 
 	// Hyperdrive is not independently selectable by its own provider name.
-	if _, err := reg.Resolve(Capability, map[string]string{Capability: "cloudflare"}); err == nil {
+	if _, err := reg.Resolve(Capability, resource.ApplicabilityContext{Vendors: map[string]string{Capability: "cloudflare"}}); err == nil {
 		t.Fatal("naming cloudflare as the database vendor resolved to something")
 	}
 }

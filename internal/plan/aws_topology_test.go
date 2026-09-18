@@ -15,7 +15,7 @@ import (
 // registrations — internal/provider/aws.Registrations and
 // internal/provider/neonresource.Registrations, unmodified — swapping only
 // each Registration.Resource for a fakeResource so Get never reaches a real
-// cloud API. Capability, DependsOn, Triggers, SelectedBy, Lookup and every
+// cloud API. Capability, DependsOn, Applies, Lookup and every
 // other field come straight from production: this is what "design it
 // against the real registrations" (the task's own instruction) means in a
 // test that must run offline, with no credentials, in CI.
@@ -152,7 +152,7 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 
 	// "tick": schedule-triggered, no HTTP surface at all — must plan an
 	// EventBridge rule and its permission, never an API Gateway or a
-	// Lambda::Permission::APIGateway (Triggers/SelectedBy gating, unrelated
+	// Lambda::Permission::APIGateway (applicability gating, unrelated
 	// to this workstream but still load-bearing for the topology).
 	tickBucket := findServiceAction(t, p, "tick", awsprovider.TypeArtifactBucket)
 	tickRole := findServiceAction(t, p, "tick", awsprovider.TypeIAMRole)

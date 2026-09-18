@@ -74,72 +74,89 @@ func TestComputeRegistrationsTriggerGating(t *testing.T) {
 	bucket, role := byType[TypeArtifactBucket], byType[TypeIAMRole]
 	url, rule := byType[TypeLambdaURL], byType[TypeEventsRule]
 
-	if function.Triggers != nil {
-		t.Fatalf("TypeLambdaFunction.Triggers = %v, want nil: every service gets a function regardless of trigger", function.Triggers)
+	// Registrations are now selected at one point, against one context, so
+	// these assertions name both dimensions rather than calling a
+	// trigger-only check the planner no longer has. Where a registration has
+	// no settings condition, the settings passed here are irrelevant and left
+	// nil; where it has one, the settings that select it are supplied, so
+	// this test measures the trigger dimension rather than tripping over the
+	// other one.
+	appliesTo := func(reg resource.Registration, trigger string, settings map[string]any) bool {
+		return reg.Matches(resource.ApplicabilityContext{Trigger: trigger, Settings: settings})
 	}
-	if !function.AppliesToTrigger(manifest.TriggerHTTP) || !function.AppliesToTrigger(manifest.TriggerSchedule) || !function.AppliesToTrigger("") {
+	frontDoor := func(v string) map[string]any { return map[string]any{"httpFrontDoor": v} }
+
+	if len(function.Applies) != 0 {
+		t.Fatalf("TypeLambdaFunction has %d condition(s), want none: every service gets a function regardless of trigger",
+			len(function.Applies))
+	}
+	if !appliesTo(function, manifest.TriggerHTTP, nil) ||
+		!appliesTo(function, manifest.TriggerSchedule, nil) ||
+		!appliesTo(function, "", nil) {
 		t.Fatal("TypeLambdaFunction must apply to every trigger, including none declared")
 	}
 
-	if !httpAPI.AppliesToTrigger(manifest.TriggerHTTP) {
+	if !appliesTo(httpAPI, manifest.TriggerHTTP, frontDoor(httpFrontDoorAPIGateway)) {
 		t.Error("TypeAPIGatewayV2API must apply to an HTTP-triggered service")
 	}
-	if httpAPI.AppliesToTrigger(manifest.TriggerSchedule) {
+	if appliesTo(httpAPI, manifest.TriggerSchedule, frontDoor(httpFrontDoorAPIGateway)) {
 		t.Error("TypeAPIGatewayV2API must not apply to a schedule-triggered service — this is the bug this workstream fixes")
 	}
-	if !httpAPI.AppliesToTrigger("") {
-		t.Error("TypeAPIGatewayV2API must still apply to a service declaring no compute: block, unchanged from before Triggers existed")
+	if !appliesTo(httpAPI, "", nil) {
+		t.Error("TypeAPIGatewayV2API must still apply to a service declaring no compute: block, unchanged from before triggers existed")
 	}
 
 	// The artifact bucket and execution role apply to every compute
 	// service unconditionally — every Lambda needs a package and a role
 	// regardless of how it's invoked.
 	for name, reg := range map[string]resource.Registration{"bucket": bucket, "role": role} {
-		if reg.Triggers != nil {
-			t.Errorf("%s.Triggers = %v, want nil", name, reg.Triggers)
+		if len(reg.Applies) != 0 {
+			t.Errorf("%s has %d condition(s), want none", name, len(reg.Applies))
 		}
-		if !reg.AppliesToTrigger(manifest.TriggerHTTP) || !reg.AppliesToTrigger(manifest.TriggerSchedule) || !reg.AppliesToTrigger("") {
+		if !appliesTo(reg, manifest.TriggerHTTP, nil) ||
+			!appliesTo(reg, manifest.TriggerSchedule, nil) ||
+			!appliesTo(reg, "", nil) {
 			t.Errorf("%s must apply to every trigger", name)
 		}
 	}
 
-	if !url.AppliesToTrigger(manifest.TriggerHTTP) {
+	if !appliesTo(url, manifest.TriggerHTTP, frontDoor(httpFrontDoorURL)) {
 		t.Error("TypeLambdaURL must apply to an HTTP-triggered service")
 	}
-	if url.AppliesToTrigger(manifest.TriggerSchedule) {
+	if appliesTo(url, manifest.TriggerSchedule, frontDoor(httpFrontDoorURL)) {
 		t.Error("TypeLambdaURL must not apply to a schedule-triggered service")
 	}
 
-	if !rule.AppliesToTrigger(manifest.TriggerSchedule) {
+	if !appliesTo(rule, manifest.TriggerSchedule, nil) {
 		t.Error("TypeEventsRule must apply to a schedule-triggered service")
 	}
-	if rule.AppliesToTrigger(manifest.TriggerHTTP) {
+	if appliesTo(rule, manifest.TriggerHTTP, nil) {
 		t.Error("TypeEventsRule must not apply to an HTTP-triggered service")
 	}
 
 	rulePermission, apiPermission := byType[TypePermissionEventsRule], byType[TypePermissionAPIGateway]
-	if !rulePermission.AppliesToTrigger(manifest.TriggerSchedule) {
+	if !appliesTo(rulePermission, manifest.TriggerSchedule, nil) {
 		t.Error("TypePermissionEventsRule must apply to a schedule-triggered service")
 	}
-	if rulePermission.AppliesToTrigger(manifest.TriggerHTTP) {
+	if appliesTo(rulePermission, manifest.TriggerHTTP, nil) {
 		t.Error("TypePermissionEventsRule must not apply to an HTTP-triggered service")
 	}
-	if !apiPermission.AppliesToTrigger(manifest.TriggerHTTP) {
+	if !appliesTo(apiPermission, manifest.TriggerHTTP, frontDoor(httpFrontDoorAPIGateway)) {
 		t.Error("TypePermissionAPIGateway must apply to an HTTP-triggered service")
 	}
-	if apiPermission.AppliesToTrigger(manifest.TriggerSchedule) {
+	if appliesTo(apiPermission, manifest.TriggerSchedule, frontDoor(httpFrontDoorAPIGateway)) {
 		t.Error("TypePermissionAPIGateway must not apply to a schedule-triggered service")
 	}
 }
 
 // TestHTTPFrontDoorRegistrationsAreMutuallyExclusive is PR #80's review
 // fix at this package's own boundary: AWS::Lambda::Url and
-// AWS::ApiGatewayV2::Api both apply to TriggerHTTP, so Triggers alone
-// cannot stop a service planning both. SelectedBy must select exactly one,
-// and its own accompanying permission (TypePermissionAPIGateway) must
-// track ApiGatewayV2::Api's choice exactly — creating that permission for
-// a service that has no API Gateway would name a SourceArn Cloud Control
-// could never resolve.
+// AWS::ApiGatewayV2::Api both apply to TriggerHTTP, so a trigger condition
+// alone cannot stop a service planning both. A settings condition must
+// select exactly one, and its own accompanying permission
+// (TypePermissionAPIGateway) must track ApiGatewayV2::Api's choice exactly —
+// creating that permission for a service that has no API Gateway would name
+// a SourceArn Cloud Control could never resolve.
 func TestHTTPFrontDoorRegistrationsAreMutuallyExclusive(t *testing.T) {
 	regs := Registrations(&Client{})
 	byType := map[string]resource.Registration{}
@@ -160,18 +177,27 @@ func TestHTTPFrontDoorRegistrationsAreMutuallyExclusive(t *testing.T) {
 		{"explicit apigateway", map[string]any{"httpFrontDoor": "apigateway"}, false, true, true},
 		{"explicit url", map[string]any{"httpFrontDoor": "url"}, true, false, false},
 	}
+	// Every case fixes the trigger at HTTP, so what varies is the settings
+	// alone — the dimension this test is about. The nil case is what proves
+	// a settings condition is consulted rather than waved through when the
+	// map is nil: waving it through would make both front doors apply at
+	// once, which is precisely what this test exists to forbid.
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if got := url.AppliesToSettings(c.settings); got != c.wantURL {
-				t.Errorf("TypeLambdaURL.AppliesToSettings(%v) = %v, want %v", c.settings, got, c.wantURL)
+			ctx := resource.ApplicabilityContext{
+				Trigger:  manifest.TriggerHTTP,
+				Settings: c.settings,
 			}
-			if got := httpAPI.AppliesToSettings(c.settings); got != c.wantAPI {
-				t.Errorf("TypeAPIGatewayV2API.AppliesToSettings(%v) = %v, want %v", c.settings, got, c.wantAPI)
+			if got := url.Matches(ctx); got != c.wantURL {
+				t.Errorf("TypeLambdaURL.Matches(settings=%v) = %v, want %v", c.settings, got, c.wantURL)
 			}
-			if got := apiPermission.AppliesToSettings(c.settings); got != c.wantAPIPerms {
-				t.Errorf("TypePermissionAPIGateway.AppliesToSettings(%v) = %v, want %v", c.settings, got, c.wantAPIPerms)
+			if got := httpAPI.Matches(ctx); got != c.wantAPI {
+				t.Errorf("TypeAPIGatewayV2API.Matches(settings=%v) = %v, want %v", c.settings, got, c.wantAPI)
 			}
-			if url.AppliesToSettings(c.settings) && httpAPI.AppliesToSettings(c.settings) {
+			if got := apiPermission.Matches(ctx); got != c.wantAPIPerms {
+				t.Errorf("TypePermissionAPIGateway.Matches(settings=%v) = %v, want %v", c.settings, got, c.wantAPIPerms)
+			}
+			if url.Matches(ctx) && httpAPI.Matches(ctx) {
 				t.Fatalf("both TypeLambdaURL and TypeAPIGatewayV2API select for settings=%v — a service would get two HTTP front doors", c.settings)
 			}
 		})
@@ -208,7 +234,7 @@ func TestRegisterExpandsCapabilitiesToEveryType(t *testing.T) {
 		t.Fatalf("Register: %v", err)
 	}
 
-	objects, err := reg.Resolve(manifest.CapabilityObjects, map[string]string{manifest.CapabilityObjects: Provider})
+	objects, err := reg.Resolve(manifest.CapabilityObjects, resource.ApplicabilityContext{Vendors: map[string]string{manifest.CapabilityObjects: Provider}})
 	if err != nil {
 		t.Fatalf("Resolve objects: %v", err)
 	}
@@ -225,21 +251,37 @@ func TestRegisterExpandsCapabilitiesToEveryType(t *testing.T) {
 		}
 	}
 
-	compute, err := reg.Resolve(manifest.CapabilityCompute, map[string]string{manifest.CapabilityCompute: Provider})
-	if err != nil {
-		t.Fatalf("Resolve compute: %v", err)
+	// Compute takes two resolves, not one, because Resolve answers "what
+	// applies to this service" rather than "what is registered": the two HTTP
+	// front doors are mutually exclusive, so no single service ever sees both
+	// and no single context can return all eight. The union across the only
+	// two front-door choices there are is what "every type is reachable"
+	// means — every registered type is reachable from some real manifest,
+	// which is the property this test is actually for.
+	//
+	// The trigger is left unset, which satisfies every trigger condition, so
+	// what varies here is the front door alone.
+	computeVendors := map[string]string{manifest.CapabilityCompute: Provider}
+	got := map[string]bool{}
+	for _, frontDoor := range []string{httpFrontDoorAPIGateway, httpFrontDoorURL} {
+		compute, err := reg.Resolve(manifest.CapabilityCompute, resource.ApplicabilityContext{
+			Vendors:  computeVendors,
+			Settings: map[string]any{"httpFrontDoor": frontDoor},
+		})
+		if err != nil {
+			t.Fatalf("Resolve compute (httpFrontDoor=%s): %v", frontDoor, err)
+		}
+		for _, r := range compute {
+			got[r.Type] = true
+		}
 	}
+
 	wantCompute := map[string]bool{
 		TypeArtifactBucket: true, TypeIAMRole: true, TypeLambdaFunction: true, TypeLambdaURL: true,
 		TypeEventsRule: true, TypePermissionEventsRule: true, TypeAPIGatewayV2API: true, TypePermissionAPIGateway: true,
 	}
-	if len(compute) != len(wantCompute) {
-		t.Fatalf("compute = %+v, want %d entries", compute, len(wantCompute))
-	}
-	for _, r := range compute {
-		if !wantCompute[r.Type] {
-			t.Fatalf("compute contains unexpected type %q (full: %+v)", r.Type, compute)
-		}
+	if !reflect.DeepEqual(got, wantCompute) {
+		t.Fatalf("compute types reachable across both front doors = %v, want %v", got, wantCompute)
 	}
 }
 
