@@ -9,11 +9,11 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// exitCodeCases enumerates docs/BLUEPRINT.md D19's exit-code table for the
-// error-producing buckets (0/success has no *KError and is covered
-// separately in TestExitCode_NilIsSuccess). Both the constructor->Code
-// mapping and the package-level ExitCode helper are asserted from this one
-// table so the D19 table has exactly one source of truth in the test.
+// exitCodeCases enumerates kraai's exit-code table for the error-producing
+// buckets (0/success has no *KError and is covered separately in
+// TestExitCode_NilIsSuccess). Both the constructor->Code mapping and the
+// package-level ExitCode helper are asserted from this one table so the
+// exit-code table has exactly one source of truth in the test.
 var exitCodeCases = []struct {
 	name    string
 	build   func() error

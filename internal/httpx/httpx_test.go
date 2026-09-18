@@ -262,7 +262,7 @@ func TestPerCallerTimeoutHonoured(t *testing.T) {
 	_ = resp.Body.Close()
 }
 
-// TestNewClientTracesRequests confirms the D17 half of this package: a
+// TestNewClientTracesRequests confirms the tracing half of this package: a
 // request issued through a NewClient-built client produces a span, using an
 // in-memory exporter the same way internal/resource/otel_test.go's own tests
 // avoid needing a real collector.

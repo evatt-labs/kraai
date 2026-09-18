@@ -111,8 +111,10 @@ func TestRegistry_CloudflareSuccess(t *testing.T) {
 	// Four capabilities all choosing cloudflare: exercises the vendor-dedup
 	// path (cfresource.Register must be called exactly once, or the second
 	// call fails with "already registered") as well as the successful wiring
-	// of each type — database included, now that D35 gives Cloudflare's own
-	// database engine (D1) a capability a manifest can actually name.
+	// of each type — database included, now that the database capability's
+	// `driver` field gives Cloudflare's own D1 database engine a capability
+	// a manifest can actually name (it used to be unreachable, since the
+	// only database capability the manifest offered was postgres).
 	m := manifestWith(manifest.Providers{
 		Database: &manifest.Provider{Vendor: vendorCloudflare},
 		KeyValue: &manifest.Provider{Vendor: vendorCloudflare},
@@ -156,7 +158,7 @@ func TestRegistry_NeonMissingNeonCredentials(t *testing.T) {
 // case kraai-api actually is: a Neon database serving AWS Lambda.
 //
 // Neon's registrations include a Cloudflare Hyperdrive companion, but that
-// companion applies only when the compute side is Cloudflare too (D36) — a
+// companion is conditioned on the compute side also being Cloudflare — a
 // Lambda connects to the branch directly over the Postgres wire. Demanding a
 // Cloudflare token here would refuse to plan the application over credentials
 // it has no reason to hold, for a resource that would never be created.
@@ -223,7 +225,7 @@ func TestRegistry_NeonAlongsideCloudflareRegistersBothHalves(t *testing.T) {
 		t.Fatalf("Registry: %v", err)
 	}
 	// Both halves of choosing Neon when the compute side is Workers: the
-	// branch, and the configuration fronting it (D30).
+	// branch, and the Hyperdrive configuration fronting it.
 	if _, ok := reg.Lookup("neon/branch"); !ok {
 		t.Error("expected neon/branch to be registered")
 	}

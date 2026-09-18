@@ -1,10 +1,11 @@
-// Command kraai is the CLI entrypoint. It stays thin by design (see
-// docs/BLUEPRINT.md D20): all command wiring lives in internal/cli, and all
-// business logic lives deeper under internal/. This file is also, per D18,
-// the ONLY place in the codebase allowed to call os.Exit, print directly to
-// stdout/stderr for error presentation, or read the KRAAI_DEBUG env var —
-// every other package returns errors and lets this centralized handler
-// decide how to present them and what exit code to use.
+// Command kraai is the CLI entrypoint. It stays thin by design, mirroring
+// Terraform's own internal/-heavy structure: all command wiring lives in
+// internal/cli, and all business logic lives deeper under internal/. This
+// file is also the ONLY place in the codebase allowed to call os.Exit,
+// print directly to stdout/stderr for error presentation, or read the
+// KRAAI_DEBUG env var — every other package returns errors and lets this
+// centralized handler decide how to present them and what exit code to
+// use.
 package main
 
 import (
@@ -23,8 +24,8 @@ func main() {
 
 // handle is main's pure, testable core: given the error Execute produced,
 // whether --debug was set, an env lookup function, and where to print,
-// it prints kraai's error presentation (docs/BLUEPRINT.md D18/D19) and
-// returns the process exit code to use. Splitting this out of main keeps
+// it prints kraai's error presentation and returns the process exit code
+// to use. Splitting this out of main keeps
 // the debug-mode decision and the exit-code mapping unit-testable without
 // capturing os.Stdout/os.Stderr or forking a subprocess.
 func handle(err error, debugFlag bool, getenv func(string) string, stderr io.Writer) int {
@@ -45,7 +46,7 @@ func handle(err error, debugFlag bool, getenv func(string) string, stderr io.Wri
 
 // debugRequested reports whether full error stacks should print: either
 // --debug was passed, or KRAAI_DEBUG=1 is set in the environment. Each
-// triggers it independently (docs/BLUEPRINT.md D19).
+// triggers it independently.
 func debugRequested(debugFlag bool, getenv func(string) string) bool {
 	return debugFlag || getenv("KRAAI_DEBUG") == "1"
 }

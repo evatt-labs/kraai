@@ -71,7 +71,7 @@ func (o Options) withDefaults() Options {
 		o.ProbeTimeout = DefaultProbeTimeout
 	}
 	if o.Client == nil {
-		// httpx.NewClient (D13): shares the process-wide pooled Transport
+		// httpx.NewClient shares the process-wide pooled Transport
 		// with every other HTTP-based provider client, so probing several
 		// freshly deployed environments in the same run does not each pay a
 		// fresh handshake in isolation. Its own timeout stays

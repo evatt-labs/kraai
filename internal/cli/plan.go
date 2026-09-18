@@ -64,20 +64,20 @@ func newPlanCommand(assembler RegistryAssembler) *cobra.Command {
 // flag variables implicitly — the same reason internal/cli/root.go's
 // Execute/handle split exists in cmd/kraai/main.go.
 //
-// # Exit code (D19)
+// # Exit code
 //
-// docs/BLUEPRINT.md D19 documents that `kraai plan` keeps its own,
-// separate, Terraform-style exit-code convention (0 no changes / 1 error /
-// 2 changes present) rather than the generic kerrors table the rest of the
-// CLI uses. That convention needs a channel for "the command succeeded but
-// should still report a distinguished non-zero exit code" — main.go's
-// centralized handler (docs/BLUEPRINT.md D18) currently derives the exit
+// `kraai plan` is meant to keep its own, separate, Terraform-style
+// exit-code convention (0 no changes / 1 error / 2 changes present,
+// matching `-detailed-exitcode`) rather than the generic kerrors table the
+// rest of the CLI uses. That convention needs a channel for "the command
+// succeeded but should still report a distinguished non-zero exit code" —
+// main.go's single centralized error handler currently derives the exit
 // code purely from whether Execute returned an error, via
 // kerrors.ExitCode. Reusing kerrors' "2" for that would collide with its
-// existing meaning (CodeValidation), so D19's "2" cannot simply piggyback
-// on the generic table — it needs its own signal, e.g. a package-level
-// var+accessor mirroring root.go's debugFlag/DebugRequested, read by
-// main.go after Execute returns nil.
+// existing meaning (CodeValidation), so the "changes present" signal can't
+// simply piggyback on the generic table — it needs its own channel, e.g. a
+// package-level var+accessor mirroring root.go's debugFlag/DebugRequested,
+// read by main.go after Execute returns nil.
 //
 // That plumbing is a change to cmd/kraai's shared, tested error-handling
 // contract, not something specific to plan — apply and destroy will
@@ -91,7 +91,7 @@ func newPlanCommand(assembler RegistryAssembler) *cobra.Command {
 // "Partial failure") — returns nil and exits 0. A plan that could not be
 // computed at all (bad environment name, missing/invalid manifest,
 // registry assembly failure, or the planner itself failing) returns a
-// *kerrors.KError and exits non-zero through the normal D18/D19 table.
+// *kerrors.KError and exits non-zero through the normal exit-code table.
 // The distinct "2 means changes are present" signal is a named gap, not a
 // silent one — worth building when apply/destroy make the shared plumbing
 // pay for itself.

@@ -51,7 +51,7 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 	cmd.Flags().BoolVar(&jsonOut, "json", false,
 		"print the result as JSON instead of human-readable text")
 	cmd.Flags().StringVar(&confirmName, "confirm-name", "",
-		"confirm a protected environment by repeating its name (D14); ignored on a non-protected environment")
+		"confirm a protected environment by repeating its name; ignored on a non-protected environment")
 
 	return cmd
 }
@@ -63,8 +63,9 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 // test drives every branch without a terminal, credentials, or a network.
 //
 // Deliberately mirrors runApply's shape almost line for line: same
-// environment-name validation, same manifest/.env load order, same D14
-// gate ahead of registry assembly, same plan.New(reg).Plan call so
+// environment-name validation, same manifest/.env load order, same
+// protected-environment confirmation gate ahead of registry assembly,
+// same plan.New(reg).Plan call so
 // `kraai destroy` tears down exactly what `kraai plan`/`kraai apply` would
 // describe (see internal/destroy's package doc, "Plan-then-execute, never
 // re-expand"). It has no --replace flag: destroy has no analogue of
@@ -74,8 +75,8 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 // # Exit codes
 //
 // Every early return here is a *kerrors.KError and flows through
-// cmd/kraai's existing centralized handler unmodified (D18/D19), the same
-// table runApply documents: CodeValidation (2) for a bad environment name
+// cmd/kraai's single centralized handler unmodified, the same table
+// runApply documents: CodeValidation (2) for a bad environment name
 // or manifest, CodeConfirmationRequired (4) for a missing or mismatched
 // protected-environment confirmation, and whatever destroy.Destroy itself
 // returns (CodeUnexpected for a cancelled run or a resolve/delete
@@ -114,11 +115,11 @@ func runDestroy(
 		return err
 	}
 
-	// D14's gate runs before the registry is even assembled: a protected
-	// environment that fails confirmation should never cause kraai to
-	// authenticate against a live provider, let alone plan or tear down
-	// against one, for a run that was going to be refused anyway. Same
-	// gate, same function, as apply.
+	// The protected-environment gate runs before the registry is even
+	// assembled: a protected environment that fails confirmation should
+	// never cause kraai to authenticate against a live provider, let alone
+	// plan or tear down against one, for a run that was going to be
+	// refused anyway. Same gate, same function, as apply.
 	if err := confirmProtected(cmd, envName, confirmName, m.Environment.Protected, interactive); err != nil {
 		return err
 	}
