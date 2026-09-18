@@ -71,7 +71,9 @@ func Registrations(neonClient *neon.Client, cfClient *cloudflare.Client, setting
 		// through it. Planning one anyway demands a Cloudflare account
 		// that deployment has no reason to hold, to create something
 		// nothing will ever connect through.
-		When: resource.RequiresCapabilityVendor(manifest.CapabilityCompute, HyperdriveProvider),
+		Applies: []resource.Applicability{
+			resource.RequiresCapabilityVendor(manifest.CapabilityCompute, HyperdriveProvider),
+		},
 		// After the branch, whose connection string it consumes.
 		DependsOn: []string{Provider + "/" + TypeBranch},
 		Lookup:    resource.LookupByAttr,

@@ -35,7 +35,7 @@ type groupKey struct {
 //     every item of each service it depends on.
 //
 // A dependency naming a type the group never planned contributes no edge:
-// a registration filtered out by When/Triggers/SelectedBy, or supplied by
+// a registration its own conditions filtered out, or supplied by
 // another provider, has no node to point at.
 //
 // It runs Kahn's algorithm in layers rather than one node at a time, so

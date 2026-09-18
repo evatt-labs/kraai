@@ -36,7 +36,7 @@ type Registration struct {
 	// three runs to converge.
 	//
 	// A registration whose named dependency was itself filtered out by
-	// When/Triggers/SelectedBy contributes no edge for it: there is no node
+	// its own conditions contributes no edge for it: there is no node
 	// to point at, and that is correct — a Lambda::Permission gated to the
 	// API Gateway front door is only ever planned alongside the API
 	// Gateway registration it names, so the dependency always resolves
@@ -55,39 +55,23 @@ type Registration struct {
 	DependsOn []string
 	// Lookup is how instances are found.
 	Lookup LookupStrategy
-	// When, if set, reports whether this registration applies to a given
-	// manifest. Nil means it always does, which is the common case.
+	// Applies restricts this registration to the manifests and services it
+	// is meaningful for. Empty means it always applies, which is the common
+	// case; several entries are ANDed.
 	//
-	// A companion resource can depend on a capability other than its own.
-	// Cloudflare Hyperdrive is asked for by choosing Neon for a database,
-	// but it is a Workers connection pooler — it belongs only when the
-	// compute side is Workers too. Planning one for a Neon database served
-	// by an AWS Lambda is not merely redundant: it demands a Cloudflare
-	// account that deployment has no reason to hold, to create something
-	// nothing will ever connect through.
-	When Condition
-	// Triggers, if non-nil, restricts this registration to services that
-	// declare one of these trigger values (a manifest concept — "http",
-	// "schedule" — this package never imports manifest to name them, so a
-	// caller building a registration passes the same string constants
-	// internal/manifest exports). Nil means every trigger, including a
-	// service that declares none at all: the common case, and the only
-	// behavior a registration predating the trigger vocabulary needs.
+	// One field rather than the three predicates this replaced
+	// (When/Triggers/SelectedBy), because they were three shapes answering
+	// one question, implicitly ANDed across unrelated fields, each checked
+	// somewhere different. A fourth condition is now a constructor rather
+	// than a fourth field on the struct every provider sees, and conditions
+	// compose with And/Or/Not instead of only ever ANDing.
 	//
-	// See AppliesToTrigger for the exact matching rule, and its doc comment
-	// for why this is a plain field checked by the caller (internal/plan's
-	// expandCompute) rather than folded into When/Condition.
-	Triggers []string
-	// SelectedBy, if set, additionally restricts this registration to a
-	// service whose merged compute settings satisfy it — for a case
-	// Triggers cannot express: two registrations that both apply to the
-	// same trigger, where a manifest must choose exactly one (an AWS
-	// Lambda function URL and an API Gateway HTTP API are both valid front
-	// doors for an HTTP-triggered service). nil means no additional gate,
-	// the common case. See AppliesToSettings for the exact matching rule,
-	// and AppliesToTrigger's doc comment for why this is a separate field
-	// rather than folded into Condition.
-	SelectedBy func(settings map[string]any) bool
+	// Every entry is evaluated at one point, in Resolve, against a context
+	// carrying everything any condition can ask about. See
+	// ApplicabilityContext for why a per-service field is answerable there
+	// at all, and why a condition on one is satisfied rather than skipped
+	// when the caller has nothing to say.
+	Applies []Applicability
 	// Scope, if set, names the serialization domain this registration's
 	// mutating calls (Create, Update, Delete) must not overlap within.
 	// Derived from a Spec rather than fixed per registration, so two
@@ -123,59 +107,157 @@ func (r Registration) ScopeFor(spec Spec) string {
 	return r.Scope(spec)
 }
 
-// Condition reports whether a registration applies, given which vendor
-// fulfils each configured capability.
+// ApplicabilityContext is everything a condition may ask about: the
+// manifest's vendor choices, and the one service the registrations are being
+// resolved for.
 //
-// Keyed by capability rather than taking the whole manifest so the registry
-// stays independent of the manifest package, and so a condition is a pure
-// function of a small map that a test can write by hand.
-type Condition func(vendors map[string]string) bool
-
-// RequiresCapabilityVendor builds a Condition satisfied only when capability
-// is fulfilled by vendor.
-func RequiresCapabilityVendor(capability, vendor string) Condition {
-	return func(vendors map[string]string) bool { return vendors[capability] == vendor }
+// A struct rather than a parameter list because the three conditions this
+// replaced each took a different argument, which is what forced them to be
+// checked in three places. One context means one evaluation point.
+//
+// Trigger and Settings describe a service's compute block, which not every
+// caller has: a `queues:` binding is resolved for a service whose trigger is
+// nobody's business, and a service may declare no compute block at all. Both
+// are zero-valued rather than absent in those cases.
+//
+// What a condition makes of a zero value is the condition's own business,
+// and the two that read these do not agree — deliberately. RequiresTrigger
+// treats an absent trigger as satisfied, which is what lets a binding be
+// resolved at the same evaluation point as compute without a trigger
+// condition ever narrowing it. RequiresSettings does not, because two
+// registrations conditioned on the same setting are how a manifest picks
+// exactly one of them, and waving that through would let both apply at once.
+// See each one's own doc comment.
+type ApplicabilityContext struct {
+	// Vendors maps each configured capability to the vendor fulfilling it.
+	//
+	// Keyed by capability rather than carrying the whole manifest so this
+	// package stays independent of internal/manifest, and so a condition is
+	// a pure function of a small map a test can write by hand.
+	Vendors map[string]string
+	// Trigger is what invokes the service being resolved for, "" when it
+	// declares no compute block or when the caller is resolving a binding
+	// rather than compute.
+	Trigger string
+	// Settings is the service's merged compute settings, nil for a caller
+	// with none.
+	Settings map[string]any
 }
 
-// applies reports whether this registration is wanted for vendors.
-func (r Registration) applies(vendors map[string]string) bool {
-	return r.When == nil || r.When(vendors)
+// Applicability reports whether a registration applies in a context.
+type Applicability func(ApplicabilityContext) bool
+
+// RequiresCapabilityVendor is satisfied only when capability is fulfilled by
+// vendor.
+//
+// A companion resource can depend on a capability other than its own.
+// Cloudflare Hyperdrive is asked for by choosing Neon for a database, but it
+// is a Workers connection pooler — it belongs only when the compute side is
+// Workers too. Planning one for a Neon database served by an AWS Lambda is
+// not merely redundant: it demands a Cloudflare account that deployment has
+// no reason to hold, to create something nothing will ever connect through.
+func RequiresCapabilityVendor(capability, vendor string) Applicability {
+	return func(ctx ApplicabilityContext) bool { return ctx.Vendors[capability] == vendor }
 }
 
-// AppliesToTrigger reports whether this registration is wanted for a
-// service declaring trigger.
+// RequiresTrigger is satisfied when the service declares one of triggers (a
+// manifest concept — "http", "schedule" — which this package never imports
+// manifest to name, so a caller passes the same string constants
+// internal/manifest exports).
 //
-// trigger == "" (no compute: block, or a caller that never resolved one)
-// always matches regardless of Triggers, which is what keeps a manifest
-// with no per-service compute behaving exactly as before Triggers existed.
-// Once a service declares a trigger, Triggers == nil still always matches
-// (this registration does not care what triggers the service), and a
-// non-nil Triggers matches only when trigger is in the list.
+// A service that declares no trigger satisfies this, rather than failing it.
+// That is what keeps a manifest with no per-service compute block planning
+// every registered type, exactly as it did before triggers existed, and what
+// keeps a non-compute binding — resolved with no trigger to speak of —
+// unaffected by a condition that was never about it.
 //
-// Not folded into Condition: a service's trigger varies service to
-// service within one manifest, while Condition is a pure function of
-// vendor choice, the same for every service. Triggers stays a separate
-// []string, checked by the one caller that knows a service's trigger
-// (expandCompute) after Resolve, rather than growing Condition's
-// signature for a parameter only compute registrations use.
-func (r Registration) AppliesToTrigger(trigger string) bool {
-	if trigger == "" || r.Triggers == nil {
-		return true
-	}
-	for _, t := range r.Triggers {
-		if t == trigger {
+// Calling it with no triggers narrows to services that declare none, which
+// is what the rule above says and almost certainly not what the caller meant.
+// It is not rejected: this constructor has no error channel, and the registry
+// cannot see inside the closure it returns to find out. A provider's own
+// "capabilities cover registrations" test is where that would be caught.
+func RequiresTrigger(triggers ...string) Applicability {
+	return func(ctx ApplicabilityContext) bool {
+		if ctx.Trigger == "" {
 			return true
 		}
+		for _, t := range triggers {
+			if t == ctx.Trigger {
+				return true
+			}
+		}
+		return false
 	}
-	return false
 }
 
-// AppliesToSettings reports whether this registration is wanted given a
-// service's merged compute settings. nil SelectedBy always matches — the
-// same "no additional opinion" contract Triggers == nil gives
-// AppliesToTrigger.
-func (r Registration) AppliesToSettings(settings map[string]any) bool {
-	return r.SelectedBy == nil || r.SelectedBy(settings)
+// RequiresSettings is satisfied when the service's merged compute settings
+// satisfy want — for the case a trigger cannot express: two registrations
+// that both apply to the same trigger, where a manifest must choose exactly
+// one (an AWS Lambda function URL and an API Gateway HTTP API are both valid
+// front doors for an HTTP-triggered service).
+//
+// want is consulted for every context, including one with nil settings —
+// deliberately unlike RequiresTrigger, which treats an absent trigger as
+// satisfied.
+//
+// The asymmetry is not an oversight. Two registrations conditioned on the
+// same setting are how a manifest picks exactly one of them, so a rule that
+// waved settings conditions through whenever the map was nil would make both
+// of a mutually exclusive pair apply at once — a service with two HTTP front
+// doors, which is the bug this condition exists to prevent, reintroduced by
+// the guard meant to make it safe. Satisfying a *trigger* condition by
+// default cannot do that: it widens what applies without ever making two
+// exclusive registrations apply together.
+//
+// So a settings condition is the one thing a caller with no settings must not
+// write. Nothing does: every registration conditioned on settings is a
+// compute registration, and internal/plan resolves compute with
+// manifest.MergeSettings' output, which is never nil.
+func RequiresSettings(want func(settings map[string]any) bool) Applicability {
+	return func(ctx ApplicabilityContext) bool { return want(ctx.Settings) }
+}
+
+// And is satisfied when every one of conditions is. Listing conditions in
+// Registration.Applies already ANDs them; this is for nesting one inside Or
+// or Not, where the implicit AND is out of reach.
+func And(conditions ...Applicability) Applicability {
+	return func(ctx ApplicabilityContext) bool {
+		for _, c := range conditions {
+			if !c(ctx) {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+// Or is satisfied when any one of conditions is. No conditions is not
+// satisfied, which is Or's identity and the opposite of And's.
+func Or(conditions ...Applicability) Applicability {
+	return func(ctx ApplicabilityContext) bool {
+		for _, c := range conditions {
+			if c(ctx) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+// Not inverts condition.
+func Not(condition Applicability) Applicability {
+	return func(ctx ApplicabilityContext) bool { return !condition(ctx) }
+}
+
+// Matches reports whether every one of this registration's conditions holds
+// in ctx. No conditions always matches, the common case.
+func (r Registration) Matches(ctx ApplicabilityContext) bool {
+	for _, c := range r.Applies {
+		if !c(ctx) {
+			return false
+		}
+	}
+	return true
 }
 
 // Key is the registry key, "provider/type".
@@ -320,17 +402,20 @@ func (r *Registry) Lookup(key string) (Registration, bool) {
 // a Neon branch and the Cloudflare Hyperdrive configuration fronting it. Both
 // are returned, because both are what that one choice asked for.
 //
-// vendors maps each configured capability to the vendor fulfilling it, so a
-// registration can declare a condition on a capability other than its own —
-// see Registration.When.
+// ctx carries the manifest's vendor choices and, when the caller has one, the
+// service being resolved for. It is the single point every Applicability is
+// evaluated at: a registration can therefore condition on a capability other
+// than its own, on the service's trigger, or on its compute settings, and all
+// three are answered here rather than in three places. See
+// ApplicabilityContext for what a caller with no service fills in.
 //
 // Returned in registration order, which is what makes expansion
 // deterministic; ordering between registrations is no longer this
 // function's concern (see Registration.DependsOn) — a caller that needs an
 // execution order builds a dependency graph from the returned set instead
 // of relying on the order Resolve happens to hand them back in.
-func (r *Registry) Resolve(capability string, vendors map[string]string) ([]Registration, error) {
-	vendor := vendors[capability]
+func (r *Registry) Resolve(capability string, ctx ApplicabilityContext) ([]Registration, error) {
+	vendor := ctx.Vendors[capability]
 	if vendor == "" {
 		return nil, kerrors.Validation("no vendor is configured for capability %q", capability)
 	}
@@ -353,11 +438,12 @@ func (r *Registry) Resolve(capability string, vendors map[string]string) ([]Regi
 
 	out := make([]Registration, 0, len(regs))
 	for _, reg := range regs {
-		// A registration whose condition is unmet is not an error: the
-		// capability is still fulfilled, by fewer resources. Dropping it
-		// silently is correct precisely because the condition describes when
-		// the resource is meaningful at all.
-		if reg.applies(vendors) {
+		// A registration whose conditions are unmet is not an error on its
+		// own: the capability is still fulfilled, by fewer resources.
+		// Dropping it silently is correct precisely because the conditions
+		// describe when the resource is meaningful at all. Dropping *every*
+		// one of them is different, and is the error below.
+		if reg.Matches(ctx) {
 			out = append(out, reg)
 		}
 	}

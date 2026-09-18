@@ -204,7 +204,7 @@ type Service struct {
 // as one always has: every resource type the configured compute vendor
 // registers is planned for it, unconditioned on trigger. Only a service
 // that opts in by declaring Compute gets trigger-gated resources — see
-// resource.Registration.Triggers and internal/plan's expandCompute.
+// resource.RequiresTrigger and internal/plan's expandCompute.
 type Compute struct {
 	// Trigger is what invokes this service: TriggerHTTP for a service
 	// fronted by an HTTP API/gateway, TriggerSchedule for one invoked on a

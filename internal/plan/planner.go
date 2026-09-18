@@ -216,28 +216,23 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer nam
 // .gitignore excludes.
 //
 // The service's Compute block also decides which of the vendor's registered
-// types apply, in two stages. Registration.Triggers narrows by what the
-// service does; Registration.SelectedBy then narrows by merged settings,
-// for the case Triggers alone cannot express — more than one registration
-// valid for the identical trigger where exactly one must win, as with a
-// Lambda function URL and an API Gateway HTTP API both being valid HTTP
-// front doors. SelectedBy is checked against the same mergedSettings built
-// for Spec.Config, so a selector sees exactly what the provider's Create
-// call will.
+// types apply, which is why Resolve is called after the settings merge rather
+// than before it: a registration's conditions are evaluated against the
+// service's trigger and its merged settings, and handing Resolve a context
+// missing either would narrow on a value this function had not computed yet.
+// The settings in that context are the same mergedSettings built for
+// Spec.Config, so a condition sees exactly what the provider's Create call
+// will.
 func (p *Planner) expandCompute(
 	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service, namer naming.Namer,
 ) ([]plannedItem, error) {
-	regs, err := p.registry.Resolve(manifest.CapabilityCompute, m.Root.Providers.Vendors())
-	if err != nil {
-		return nil, err
-	}
-
 	// Present because expand only reaches here once Providers.For succeeded.
 	provider, _ := m.Root.Providers.For(manifest.CapabilityCompute)
 
 	// A service with no Compute block carries no trigger and no settings
-	// override: an empty trigger makes AppliesToTrigger keep every
-	// registered type, and mergedSettings reduces to the provider's own.
+	// override: an empty trigger keeps every registered type
+	// (resource.RequiresTrigger), and mergedSettings reduces to the
+	// provider's own.
 	var trigger string
 	var svcSettings map[string]any
 	var handler, schedule string
@@ -250,6 +245,15 @@ func (p *Planner) expandCompute(
 		include = svc.Compute.Include
 	}
 	mergedSettings := manifest.MergeSettings(provider.Settings, svcSettings)
+
+	regs, err := p.registry.Resolve(manifest.CapabilityCompute, resource.ApplicabilityContext{
+		Vendors:  m.Root.Providers.Vendors(),
+		Trigger:  trigger,
+		Settings: mergedSettings,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	name := namer.Service(environmentName, svcKey)
 	config := map[string]any{"dir": svc.Dir, "settings": mergedSettings}
@@ -270,12 +274,6 @@ func (p *Planner) expandCompute(
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
-		if !r.AppliesToTrigger(trigger) {
-			continue
-		}
-		if !r.AppliesToSettings(mergedSettings) {
-			continue
-		}
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: svcKey, Capability: manifest.CapabilityCompute,
@@ -342,7 +340,14 @@ func (p *Planner) expandBinding(
 	// a registration may depend on another: the Cloudflare Hyperdrive config
 	// a Neon database asks for applies only when compute is Cloudflare too,
 	// and answering that needs more than one entry.
-	regs, err := p.registry.Resolve(capability, m.Root.Providers.Vendors())
+	//
+	// No Trigger and no Settings: a binding is not a compute block, and what
+	// invokes the service it belongs to is nobody's business here. Both are
+	// zero-valued rather than invented, which the conditions that read them
+	// treat as "this caller has no opinion" — see resource.RequiresTrigger.
+	regs, err := p.registry.Resolve(capability, resource.ApplicabilityContext{
+		Vendors: m.Root.Providers.Vendors(),
+	})
 	if err != nil {
 		return nil, err
 	}

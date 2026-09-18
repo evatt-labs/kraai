@@ -286,16 +286,18 @@ func Registrations(client *Client) []resource.Registration {
 			// itself still requires that named function to already exist.
 			DependsOn: []string{key(TypeLambdaFunction)},
 			// HTTP-triggered services only, and only when settings.
-			// httpFrontDoor selects "url" — see this registration's
-			// SelectedBy and ApiGatewayV2::Api's own below: a service gets
-			// exactly one of the two, never both. Before this gate existed,
-			// both applied to every HTTP-triggered service (and, since
-			// AppliesToTrigger("") always matches, to every service with no
-			// compute: block at all too) — the same wrong-output bug class
-			// AppliesToTrigger itself was built to eliminate, caught in PR
-			// #80's review and fixed here rather than left in place.
-			Triggers:   []string{manifest.TriggerHTTP},
-			SelectedBy: httpFrontDoorIs(httpFrontDoorURL),
+			// httpFrontDoor selects "url" — see ApiGatewayV2::Api's own
+			// conditions below: a service gets exactly one of the two, never
+			// both. Before this gate existed, both applied to every
+			// HTTP-triggered service (and, since a service with no trigger
+			// satisfies RequiresTrigger, to every service with no compute:
+			// block at all too) — the same wrong-output bug class the trigger
+			// condition itself was built to eliminate, caught in PR #80's
+			// review and fixed here rather than left in place.
+			Applies: []resource.Applicability{
+				resource.RequiresTrigger(manifest.TriggerHTTP),
+				resource.RequiresSettings(httpFrontDoorIs(httpFrontDoorURL)),
+			},
 			// Lambda::Url has no Tags property at all (verified against
 			// its CloudFormation resource reference: AuthType, Cors,
 			// InvokeMode, Qualifier, TargetFunctionArn only) — byTag is
@@ -320,11 +322,11 @@ func Registrations(client *Client) []resource.Registration {
 			// alongside it rather than being forced to wait.
 			//
 			// Schedule-triggered services only — the direct fix for the bug
-			// that originally motivated Triggers: a schedule rule belongs
+			// that originally motivated the trigger condition: a rule belongs
 			// only to a service with a schedule expression to run, exactly
 			// as ApiGatewayV2::Api/Lambda::Url belong only to one with an
 			// HTTP surface.
-			Triggers: []string{manifest.TriggerSchedule},
+			Applies: []resource.Applicability{resource.RequiresTrigger(manifest.TriggerSchedule)},
 			// Name is settable at create; EventBridge's own reference marks
 			// it "Update requires: Replacement" — so this type's identity is
 			// likewise derivable from the manifest name. See eventsrule.go's
@@ -345,9 +347,9 @@ func Registrations(client *Client) []resource.Registration {
 			// failed on a second run for lacking their function, never for
 			// lacking the trigger resource they authorize.
 			DependsOn: []string{key(TypeLambdaFunction)},
-			// Same gate as the rule it authorizes: a schedule-triggered
+			// Same condition as the rule it authorizes: a schedule-triggered
 			// service only.
-			Triggers: []string{manifest.TriggerSchedule},
+			Applies: []resource.Applicability{resource.RequiresTrigger(manifest.TriggerSchedule)},
 			// See lambdapermission.go's own doc comment for identity
 			// strategy and the one part of it not independently verified
 			// against a live account.
@@ -367,25 +369,28 @@ func Registrations(client *Client) []resource.Registration {
 			// that assumption, it just makes the same lack of coupling
 			// explicit instead of implicit.
 			//
-			// Triggers: only a service that declares itself HTTP-facing
-			// gets an API Gateway. This is the per-service-compute
-			// workstream's fix for the bug that motivated it: before
-			// Triggers existed, every service using the compute capability
-			// got both types this package registers under it, so a
+			// RequiresTrigger: only a service that declares itself
+			// HTTP-facing gets an API Gateway. This is the
+			// per-service-compute workstream's fix for the bug that motivated
+			// it: before the trigger condition existed, every service using
+			// the compute capability got both types this package registers
+			// under it, so a
 			// schedule-invoked worker with no HTTP surface (kraai-api's
 			// `tick`) planned an API Gateway nothing would ever call — not
 			// merely redundant output, but a real, wrong resource once
 			// `kraai apply` executes the plan.
 			//
-			// SelectedBy: also only when settings.httpFrontDoor selects
-			// "apigateway" (the default) — see TypeLambdaURL's own comment
-			// above. A service declaring no compute: block at all still
-			// gets this one (trigger=="" always satisfies Triggers, and an
-			// absent httpFrontDoor setting defaults to "apigateway"), which
-			// is what "unchanged from before Triggers existed" actually
+			// RequiresSettings: also only when settings.httpFrontDoor
+			// selects "apigateway" (the default) — see TypeLambdaURL's own
+			// comment above. A service declaring no compute: block at all
+			// still gets this one (no trigger satisfies RequiresTrigger, and
+			// an absent httpFrontDoor setting defaults to "apigateway"),
+			// which is what "unchanged from before triggers existed" actually
 			// meant before this workstream: one HTTP front door, not two.
-			Triggers:   []string{manifest.TriggerHTTP},
-			SelectedBy: httpFrontDoorIs(httpFrontDoorAPIGateway),
+			Applies: []resource.Applicability{
+				resource.RequiresTrigger(manifest.TriggerHTTP),
+				resource.RequiresSettings(httpFrontDoorIs(httpFrontDoorAPIGateway)),
+			},
 			// Not byName: Name is mutable ("Update requires: No
 			// interruption" — not even createOnly) and AWS documents no
 			// uniqueness constraint on it. See apigatewayv2Match's doc
@@ -421,9 +426,11 @@ func Registrations(client *Client) []resource.Registration {
 			// front door only — creating this permission for a service
 			// that has no API Gateway (httpFrontDoor: "url") would name a
 			// SourceArn Cloud Control could never resolve.
-			Triggers:   []string{manifest.TriggerHTTP},
-			SelectedBy: httpFrontDoorIs(httpFrontDoorAPIGateway),
-			Lookup:     resource.LookupByAttr,
+			Applies: []resource.Applicability{
+				resource.RequiresTrigger(manifest.TriggerHTTP),
+				resource.RequiresSettings(httpFrontDoorIs(httpFrontDoorAPIGateway)),
+			},
+			Lookup: resource.LookupByAttr,
 			Resource: newLambdaPermissionResource(
 				client, "apigateway.amazonaws.com", apiGatewaySourceARN),
 		},
