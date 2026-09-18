@@ -148,7 +148,7 @@ func guardedDialContext(base *net.Dialer) func(ctx context.Context, network, add
 // caller does not supply its own: an ordinary client whose transport
 // cannot open a connection to internal infrastructure.
 //
-// A caller wiring in its own D13-tuned client keeps full control of
+// A caller wiring in its own rate-limit-tuned client keeps full control of
 // pooling, timeouts, and proxying, but MUST build its transport's
 // DialContext from GuardedDialContext — otherwise it hands every granted
 // plugin the host's whole internal network. HTTPCapability cannot enforce

@@ -10,12 +10,12 @@ import (
 )
 
 // pool is a bounded, blocking free-list of goroutine-safe module
-// instances (D29: wazero module instances are not themselves
-// goroutine-safe, so concurrent Invoke calls must never share one). A
+// instances (wazero module instances are not themselves goroutine-safe,
+// so concurrent Invoke calls must never share one). A
 // buffered channel gives both the free-list and the concurrency bound in
 // one primitive: get blocks when every instance is checked out, which is
-// exactly the backpressure docs/BLUEPRINT.md D13 asks a plugin's own
-// concurrency to respect.
+// exactly the backpressure that keeps a plugin's own concurrency bounded
+// by its pool size rather than fanning out one goroutine per call.
 //
 // The pool also owns instance replacement, which the runtime's
 // WithCloseOnContextDone (Host.Load) forces on it: when that option
@@ -48,8 +48,8 @@ func newPool(instances []api.Module, newInst func(ctx context.Context) (api.Modu
 // get borrows a live instance, blocking until one is free or ctx is done.
 // An instance found closed — because a previous call on it was terminated
 // by ctx cancellation — is replaced before being handed out, so a
-// cancelled Invoke costs one re-instantiation (measured ~2.5ms,
-// docs/BLUEPRINT.md) and never a permanently poisoned slot.
+// cancelled Invoke costs one re-instantiation (~2.5ms, measured)
+// and never a permanently poisoned slot.
 func (p *pool) get(ctx context.Context) (api.Module, error) {
 	var m api.Module
 	select {
