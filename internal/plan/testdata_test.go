@@ -92,10 +92,12 @@ func (f *registryFixture) oneServiceManifest() *manifest.Manifest {
 		Root: manifest.Root{Providers: f.providers()},
 		Services: map[string]manifest.Service{
 			"api": {
-				Databases: []manifest.Database{{Binding: "DB", Driver: "postgres"}},
-				KeyValue:  []manifest.KeyValue{{Binding: "CACHE"}},
-				Objects:   []manifest.ObjectStore{{Binding: "UPLOADS"}},
-				Queues:    []manifest.Queue{{Binding: "JOBS", Consumer: true}},
+				Bindings: manifest.Bindings{
+					manifest.CapabilityDatabase: {{"binding": "DB", "driver": "postgres"}},
+					manifest.CapabilityKeyValue: {{"binding": "CACHE"}},
+					manifest.CapabilityObjects:  {{"binding": "UPLOADS"}},
+					manifest.CapabilityQueues:   {{"binding": "JOBS", "consumer": true}},
+				},
 			},
 		},
 	}

@@ -40,12 +40,11 @@ type CapabilityDef struct {
 	// capability takes no per-service bindings at all (aws's compute is a
 	// single block per service, not a list).
 	//
-	// No call site reads Binding yet: internal/manifest still parses
-	// `services.<svc>.<name>[]` into fixed Go structs, not the free-form
-	// maps a schema validates against. It is compiled and unit-tested the
-	// same as ProviderSettings so a future caller wires an already-proven
-	// validator, but until that caller exists a Binding schema here
-	// validates nothing in practice.
+	// Consulted at load, through Catalog.ValidateBinding, for every entry of
+	// every service binding this capability to this provider. What a binding
+	// entry may carry is therefore this declaration and nothing else: adding
+	// a key here is what makes that key writable in a manifest, and an entry
+	// key absent from here is rejected by name.
 	Binding *Schema
 	// Summary is one line describing what this provider's implementation of
 	// Name actually provisions — shown by `kraai capabilities`.
@@ -195,6 +194,33 @@ func (c *Catalog) Names() []string {
 // not-yet-implemented capability looks like.
 func (c *Catalog) Providers(capability string) []CatalogEntry {
 	return c.byCapability[capability]
+}
+
+// ValidateBinding checks one entry of a service's binding list for
+// capability against the Binding schema the vendor fulfilling that
+// capability declared.
+//
+// Returns nil when there is nothing to check: when vendor declares no such
+// capability, and when it declares one with no Binding schema. Neither is a
+// silent pass over something checkable. A vendor named for a capability it
+// does not declare is a manifest error, but it is the *pairing* that is
+// wrong, not this entry, and reporting it here would give the entry's error
+// message for the manifest's — see evatt-labs/kraai#189, which is where that
+// check belongs. A declared capability with a nil Binding is a provider
+// saying this capability takes no per-entry shape it can check, which
+// CapabilityDef's own doc comment makes explicit is a statement, never a
+// placeholder.
+func (c *Catalog) ValidateBinding(capability, vendor string, entry map[string]any) error {
+	for _, e := range c.byCapability[capability] {
+		if e.Provider != vendor {
+			continue
+		}
+		if e.Capability.Binding == nil {
+			return nil
+		}
+		return e.Capability.Binding.Validate(entry)
+	}
+	return nil
 }
 
 // All returns every entry in the catalog, sorted by capability name and

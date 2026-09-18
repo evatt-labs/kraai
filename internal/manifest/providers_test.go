@@ -42,14 +42,22 @@ func TestProvidersFor(t *testing.T) {
 // internal/assemble builds from the real provider declarations, so this
 // package's tests get one without importing a provider package — the
 // dependency direction Vocabulary exists to protect.
-type vocabulary []string
+type vocabulary struct {
+	names []string
+	// bindingErr, when set, is what ValidateBinding returns for every
+	// entry — enough to prove the loader consults the vendor's schema and
+	// reports what it says, without this package owning a schema.
+	bindingErr error
+}
 
-func (v vocabulary) Names() []string { return v }
+func (v vocabulary) Names() []string { return v.names }
+
+func (v vocabulary) ValidateBinding(string, string, map[string]any) error { return v.bindingErr }
 
 // loaderWith builds a Loader carrying only what validateRoot reads, so a
 // test of root validation needs no filesystem and no template engine.
 func loaderWith(known ...string) *Loader {
-	return &Loader{vocabulary: vocabulary(known)}
+	return &Loader{vocabulary: vocabulary{names: known}}
 }
 
 // A capability naming no vendor cannot resolve to anything, and the error

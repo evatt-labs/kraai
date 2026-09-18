@@ -17,18 +17,27 @@ const (
 	environmentsDir = "environments"
 )
 
-// Vocabulary is the set of capability names a manifest may name under
-// `providers:` — every capability some registered provider declares it can
-// fulfil. resource.Catalog satisfies it as written.
+// Vocabulary is what the registered providers declare, as much of it as
+// loading a manifest needs: which capabilities exist, and what shape each
+// vendor's binding entries take. resource.Catalog satisfies it as written.
 //
-// An interface, and the narrowest one that answers the question, because
-// the vocabulary is assembled from the provider packages
+// An interface, and the narrowest one that answers those two questions,
+// because the vocabulary is assembled from the provider packages
 // (internal/assemble.Capabilities) and this package must never import one.
-// Handing the vocabulary to the Loader keeps that dependency pointing one
-// way, which is the whole reason the catalog lives in internal/assemble.
+// Handing it to the Loader keeps that dependency pointing one way, which is
+// the whole reason the catalog lives in internal/assemble.
+//
+// Note what does not appear here: no schema type, no CapabilityDef, no
+// provider type. ValidateBinding takes and returns only what this package
+// already has vocabulary for, so widening the catalog's own declarations
+// never widens this package's.
 type Vocabulary interface {
 	// Names returns every declared capability name, sorted.
 	Names() []string
+	// ValidateBinding checks one binding entry against the schema the
+	// vendor fulfilling capability declared for it, returning nil when
+	// there is no such schema to check against.
+	ValidateBinding(capability, vendor string, entry map[string]any) error
 }
 
 // Loader resolves a manifest directory into one validated Manifest.
@@ -78,7 +87,10 @@ func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := validateServices(services); err != nil {
+	if err := normalizeBindingKeys(services); err != nil {
+		return nil, err
+	}
+	if err := l.validateServices(root, services); err != nil {
 		return nil, err
 	}
 
@@ -254,23 +266,65 @@ func (l *Loader) loadEnvironment(envName string) (*Environment, error) {
 	return &env, nil
 }
 
-// validateServices checks every field DecodeStrict cannot: not an unknown
-// key (that is strict-decoding's job), but a known field whose value falls
-// outside its declared vocabulary — Compute.Trigger, and DependsOn's own
-// structural sanity (every named service exists, and a service does not
-// name itself).
+// bindingKeyAliases maps a manifest key to the capability it names, for the
+// keys where the two differ.
 //
-// Iterates services in sorted key order so a manifest with more than one
-// bad trigger or depends_on entry reports the same one first on every run,
-// rather than whichever Go's map iteration happened to visit first.
-func validateServices(services map[string]Service) error {
-	names := make([]string, 0, len(services))
-	for name := range services {
-		names = append(names, name)
-	}
-	sort.Strings(names)
+// Only `databases:` does. Every other binding key — keyvalue, objects,
+// queues, network — is spelled exactly like its capability, so the map has
+// one entry rather than a full translation table, and a capability a
+// provider adds needs no entry here at all.
+//
+// A compatibility shim with a known end: workstream 6 (evatt-labs/kraai#125)
+// is where binding keys break anyway, splitting `objects` into
+// objects/dns/tls/cdn, and `databases:` can be retired in the same change
+// that asks manifests to be edited for that.
+var bindingKeyAliases = map[string]string{"databases": CapabilityDatabase}
 
-	for _, name := range names {
+// normalizeBindingKeys rewrites each service's binding keys to the
+// capability each names, so everything downstream — validation, planning —
+// sees capability names only and no second spelling.
+//
+// Rejects a service declaring both spellings of one capability rather than
+// silently merging or dropping one: two keys meaning the same thing is
+// always a mistake, and which one won would depend on nothing the author
+// could see.
+func normalizeBindingKeys(services map[string]Service) error {
+	for _, name := range sortedServiceNames(services) {
+		svc := services[name]
+		for written, capability := range bindingKeyAliases {
+			entries, ok := svc.Bindings[written]
+			if !ok {
+				continue
+			}
+			if _, clash := svc.Bindings[capability]; clash {
+				return kerrors.Validation(
+					"services.%s: %q and %q both name the %s capability; use one",
+					name, written, capability, capability)
+			}
+			delete(svc.Bindings, written)
+			svc.Bindings[capability] = entries
+		}
+	}
+	return nil
+}
+
+// validateServices checks every field DecodeStrict cannot: not an unknown
+// key (that is strict-decoding's job, except for the binding keys it is
+// handed an inline map for), but a known field whose value falls outside its
+// declared vocabulary — Compute.Trigger, the binding keys and their entries,
+// and DependsOn's own structural sanity (every named service exists, and a
+// service does not name itself).
+//
+// Iterates services, and each service's binding keys, in sorted order so a
+// manifest with more than one problem reports the same one first on every
+// run, rather than whichever Go's map iteration happened to visit first.
+func (l *Loader) validateServices(root *Root, services map[string]Service) error {
+	known := make(map[string]bool, len(l.vocabulary.Names()))
+	for _, name := range l.vocabulary.Names() {
+		known[name] = true
+	}
+
+	for _, name := range sortedServiceNames(services) {
 		svc := services[name]
 		if svc.Compute != nil {
 			switch svc.Compute.Trigger {
@@ -279,6 +333,9 @@ func validateServices(services map[string]Service) error {
 				return kerrors.Validation("services.%s.compute.trigger: must be %q or %q, got %q",
 					name, TriggerHTTP, TriggerSchedule, svc.Compute.Trigger)
 			}
+		}
+		if err := l.validateBindings(root, name, svc.Bindings, known); err != nil {
+			return err
 		}
 		for _, dep := range svc.DependsOn {
 			if dep == name {
@@ -291,6 +348,63 @@ func validateServices(services map[string]Service) error {
 		}
 	}
 	return nil
+}
+
+// validateBindings checks one service's binding keys and entries.
+//
+// Entry shape is checked against the vendor configured for the capability,
+// not against every vendor that could fulfil it: a manifest binds one vendor
+// per capability, and validating against a vendor it did not choose would
+// report a shape it will never be held to. A capability with no vendor
+// configured is left alone here — internal/plan reports that, once, with the
+// binding it failed to expand.
+func (l *Loader) validateBindings(root *Root, svc string, bindings Bindings, known map[string]bool) error {
+	capabilities := make([]string, 0, len(bindings))
+	for capability := range bindings {
+		capabilities = append(capabilities, capability)
+	}
+	sort.Strings(capabilities)
+
+	for _, capability := range capabilities {
+		if !known[capability] {
+			return kerrors.Validation(
+				"services.%s.%s: no registered provider declares capability %q — declared: %s",
+				svc, capability, capability, strings.Join(l.vocabulary.Names(), ", "))
+		}
+
+		configured, hasVendor := root.Providers.For(capability)
+		for i, entry := range bindings[capability] {
+			// The one key this package requires of every entry, checked
+			// here rather than left to the vendor's schema: internal/plan
+			// derives a resource's name from it, so an entry without one
+			// cannot be planned no matter what vendor fulfils it, and a
+			// capability whose vendor declares no Binding schema would
+			// otherwise reach the planner unnamed.
+			if entry.Name() == "" {
+				return kerrors.Validation(
+					"services.%s.%s[%d]: %s is required and must be a non-empty string",
+					svc, capability, i, BindingKey)
+			}
+			if !hasVendor {
+				continue
+			}
+			if err := l.vocabulary.ValidateBinding(capability, configured.Vendor, entry); err != nil {
+				return kerrors.Wrap(err, kerrors.CodeValidation,
+					"services.%s.%s[%d]", svc, capability, i)
+			}
+		}
+	}
+	return nil
+}
+
+// sortedServiceNames returns services' keys in ascending order.
+func sortedServiceNames(services map[string]Service) []string {
+	names := make([]string, 0, len(services))
+	for name := range services {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 func validateEnvironment(path string, env *Environment) error {

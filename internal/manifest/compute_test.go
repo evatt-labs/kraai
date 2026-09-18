@@ -88,7 +88,7 @@ func TestMergeSettings_NilBaseIsJustOverride(t *testing.T) {
 // nil check.
 func TestValidateServices_ComputeBlockIsOptional(t *testing.T) {
 	services := map[string]Service{"api": {Dir: "."}}
-	if err := validateServices(services); err != nil {
+	if err := loaderWith().validateServices(&Root{}, services); err != nil {
 		t.Fatalf("validateServices with no compute block: %v", err)
 	}
 }
@@ -101,14 +101,14 @@ func TestValidateServices_TriggerVocabulary(t *testing.T) {
 			"api":  {Compute: &Compute{Trigger: TriggerHTTP}},
 			"tick": {Compute: &Compute{Trigger: TriggerSchedule}},
 		}
-		if err := validateServices(services); err != nil {
+		if err := loaderWith().validateServices(&Root{}, services); err != nil {
 			t.Fatalf("validateServices: %v", err)
 		}
 	})
 
 	t.Run("an unrecognized trigger is a validation error naming the service", func(t *testing.T) {
 		services := map[string]Service{"tick": {Compute: &Compute{Trigger: "cron"}}}
-		err := validateServices(services)
+		err := loaderWith().validateServices(&Root{}, services)
 		if err == nil {
 			t.Fatal("expected an error")
 		}
@@ -127,14 +127,14 @@ func TestValidateServices_DependsOn(t *testing.T) {
 			"frontend": {DependsOn: []string{"backend"}},
 			"backend":  {},
 		}
-		if err := validateServices(services); err != nil {
+		if err := loaderWith().validateServices(&Root{}, services); err != nil {
 			t.Fatalf("validateServices: %v", err)
 		}
 	})
 
 	t.Run("a service cannot depend on itself", func(t *testing.T) {
 		services := map[string]Service{"api": {DependsOn: []string{"api"}}}
-		err := validateServices(services)
+		err := loaderWith().validateServices(&Root{}, services)
 		if err == nil {
 			t.Fatal("expected an error")
 		}
@@ -145,7 +145,7 @@ func TestValidateServices_DependsOn(t *testing.T) {
 
 	t.Run("depending on an undeclared service is a validation error naming it", func(t *testing.T) {
 		services := map[string]Service{"api": {DependsOn: []string{"ghost"}}}
-		err := validateServices(services)
+		err := loaderWith().validateServices(&Root{}, services)
 		if err == nil {
 			t.Fatal("expected an error")
 		}

@@ -150,11 +150,25 @@ type Service struct {
 	Dir     string   `yaml:"dir"`
 	Compute *Compute `yaml:"compute,omitempty"`
 
-	Databases []Database    `yaml:"databases,omitempty"`
-	KeyValue  []KeyValue    `yaml:"keyvalue,omitempty"`
-	Objects   []ObjectStore `yaml:"objects,omitempty"`
-	Queues    []Queue       `yaml:"queues,omitempty"`
-	Networks  []Network     `yaml:"network,omitempty"`
+	// Bindings holds every capability binding list this service declares —
+	// every key under the service that is not one this struct names.
+	//
+	// Inline rather than five typed slices, for the reason Providers is a
+	// map: the set of capabilities a service can bind is whatever the
+	// registered providers declare, and a fixed field per capability meant a
+	// provider could declare one no manifest could ever use. An unknown key
+	// is still rejected at load — see Loader.validateServices, which checks
+	// these against the same Vocabulary providers are checked against — so
+	// this is not the free-form escape hatch DecodeStrict otherwise refuses.
+	//
+	// The entries themselves are free-form because their shape belongs to
+	// the vendor, not to this package: each is validated against the Binding
+	// schema the vendor fulfilling that capability declared
+	// (resource.CapabilityDef.Binding). The one thing this package does
+	// require of every entry is a non-empty `binding` name, because that is
+	// kraai's own vocabulary — internal/plan derives the resource name from
+	// it — not any vendor's.
+	Bindings Bindings `yaml:",inline"`
 
 	// DependsOn names other services in this manifest that must be fully
 	// provisioned before this one. The escape hatch for ordering that is
@@ -286,59 +300,49 @@ func MergeSettings(base, override map[string]any) map[string]any {
 	return merged
 }
 
-// Database is one entry of a service's `databases:` list.
+// Bindings maps a capability name to the binding entries a service declares
+// for it — `databases:`, `keyvalue:`, `objects:` and the rest, keyed by the
+// capability each names rather than by the key as written.
+type Bindings map[string][]Binding
+
+// Binding is one entry of a service's binding list for one capability.
 //
-// Driver is what the application connects with — the wire protocol and
-// client library — not which product implements it. That is the distinction
-// the field exists to carry: Neon is Postgres-wire and Cloudflare D1 is
-// SQLite-wire, and an application cares which of those it is speaking, not
-// whose storage is underneath. `driver: postgres` is therefore a claim about
-// the connection the service expects, which a provider can honour or refuse.
-//
-// Free-form rather than an enum: per-resource schemas are generated from each
-// provider's own machine-readable source in a later workstream, never
-// hand-transcribed, so this package does not own that vocabulary.
-type Database struct {
-	Binding string   `yaml:"binding"`
-	Driver  string   `yaml:"driver"`
-	Caching *Caching `yaml:"caching,omitempty"`
+// Free-form, and the one place in a resolved Manifest besides Settings and
+// Values that is. What a binding entry may carry is the vendor's vocabulary,
+// not this package's: Neon is Postgres-wire and Cloudflare D1 is
+// SQLite-wire, and `driver: postgres` is a claim about the connection a
+// service expects that only the provider can honour or refuse. Each entry is
+// validated against that vendor's declared Binding schema at load
+// (Loader.validateServices), so free-form here does not mean unchecked — it
+// means checked by whoever owns the vocabulary.
+type Binding map[string]any
+
+// BindingKey is the one key this package requires of every binding entry: a
+// service-local name for the resource, which internal/plan derives the
+// resource's real name from.
+const BindingKey = "binding"
+
+// Name returns the binding's name, empty if it carries none or carries a
+// non-string. validateServices rejects both at load, so a Binding reaching
+// internal/plan always has one.
+func (b Binding) Name() string {
+	name, _ := b[BindingKey].(string)
+	return name
 }
 
-// Caching configures a Database binding's cache behavior.
-type Caching struct {
-	Disabled bool `yaml:"disabled"`
-	MaxAge   int  `yaml:"maxAge"`
-}
-
-// KeyValue is one entry of a service's `keyvalue:` list.
-type KeyValue struct {
-	Binding string `yaml:"binding"`
-}
-
-// ObjectStore is one entry of a service's `objects:` list.
-type ObjectStore struct {
-	Binding string `yaml:"binding"`
-}
-
-// Network is a service's own private network: one VPC and the subnet its
-// other resources are placed in.
-//
-// CIDRs are the manifest author's to choose and kraai's to pass through
-// unread — an address plan has to be reconcilable with whatever else the
-// account already routes, which is knowledge no tool holds. The provider
-// rejects a block it cannot use.
-type Network struct {
-	Binding string `yaml:"binding"`
-	// Cidr is the VPC's address range, e.g. "10.20.0.0/16".
-	Cidr string `yaml:"cidr"`
-	// Subnet is the public subnet's range, which must sit inside Cidr.
-	Subnet string `yaml:"subnet"`
-}
-
-// Queue is one entry of a service's `queues:` list.
-type Queue struct {
-	Binding  string `yaml:"binding"`
-	Consumer bool   `yaml:"consumer,omitempty"`
+// Config returns everything the entry declares except its name — what
+// internal/plan puts in a resource's Spec.Config for the provider to
+// interpret. A fresh map each call, so a caller mutating what it gets back
+// cannot reach into the manifest.
+func (b Binding) Config() map[string]any {
+	config := make(map[string]any, len(b))
+	for k, v := range b {
+		if k == BindingKey {
+			continue
+		}
+		config[k] = v
+	}
+	return config
 }
 
 // Environment is environments/<name>.yaml: the overlay describing one

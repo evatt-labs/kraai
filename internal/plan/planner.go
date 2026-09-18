@@ -184,46 +184,25 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer nam
 			out = append(out, items...)
 		}
 
-		for _, d := range svc.Databases {
-			config := map[string]any{"driver": d.Driver}
-			if d.Caching != nil {
-				config["caching"] = *d.Caching
+		// One loop over whatever capabilities the service declares, rather
+		// than one hand-written loop per capability: which capabilities exist
+		// is the providers' to declare, and a loop per capability here was
+		// the second place (after manifest.Service's fields) that a new one
+		// had to be taught about before a manifest could use it.
+		//
+		// Sorted, so a manifest's plan comes out in the same order on every
+		// run. Everything a binding carries beyond its name travels
+		// uninterpreted into Spec.Config — this package no more owns
+		// "driver" or "cidr" than internal/manifest does.
+		for _, capability := range sortedCapabilities(svc.Bindings) {
+			for _, entry := range svc.Bindings[capability] {
+				items, err := p.expandBinding(
+					m, environmentName, svcKey, entry.Name(), capability, entry.Config(), namer)
+				if err != nil {
+					return nil, annotate(err, svcKey, capability, entry.Name())
+				}
+				out = append(out, items...)
 			}
-			items, err := p.expandBinding(m, environmentName, svcKey, d.Binding, manifest.CapabilityDatabase, config, namer)
-			if err != nil {
-				return nil, annotate(err, svcKey, "databases", d.Binding)
-			}
-			out = append(out, items...)
-		}
-		for _, kv := range svc.KeyValue {
-			items, err := p.expandBinding(m, environmentName, svcKey, kv.Binding, manifest.CapabilityKeyValue, nil, namer)
-			if err != nil {
-				return nil, annotate(err, svcKey, "keyvalue", kv.Binding)
-			}
-			out = append(out, items...)
-		}
-		for _, o := range svc.Objects {
-			items, err := p.expandBinding(m, environmentName, svcKey, o.Binding, manifest.CapabilityObjects, nil, namer)
-			if err != nil {
-				return nil, annotate(err, svcKey, "objects", o.Binding)
-			}
-			out = append(out, items...)
-		}
-		for _, q := range svc.Queues {
-			items, err := p.expandBinding(m, environmentName, svcKey, q.Binding, manifest.CapabilityQueues,
-				map[string]any{"consumer": q.Consumer}, namer)
-			if err != nil {
-				return nil, annotate(err, svcKey, "queues", q.Binding)
-			}
-			out = append(out, items...)
-		}
-		for _, n := range svc.Networks {
-			items, err := p.expandBinding(m, environmentName, svcKey, n.Binding, manifest.CapabilityNetwork,
-				map[string]any{"cidr": n.Cidr, "subnet": n.Subnet}, namer)
-			if err != nil {
-				return nil, annotate(err, svcKey, "network", n.Binding)
-			}
-			out = append(out, items...)
 		}
 	}
 	return out, nil
@@ -312,8 +291,8 @@ func (p *Planner) expandCompute(
 	return out, nil
 }
 
-// declaredBindings returns every binding svc declares across Databases,
-// KeyValue, Objects and Queues, sorted ascending.
+// declaredBindings returns every binding svc declares, across every
+// capability, sorted ascending.
 //
 // This is the set a compute item's ReadsBindings gets: the service's own
 // compute resource reads every credential its own bindings produce, there
@@ -321,23 +300,24 @@ func (p *Planner) expandCompute(
 // Plan call is byte-for-byte identical regardless of authoring order.
 func declaredBindings(svc manifest.Service) []string {
 	var bindings []string
-	for _, d := range svc.Databases {
-		bindings = append(bindings, d.Binding)
-	}
-	for _, kv := range svc.KeyValue {
-		bindings = append(bindings, kv.Binding)
-	}
-	for _, o := range svc.Objects {
-		bindings = append(bindings, o.Binding)
-	}
-	for _, q := range svc.Queues {
-		bindings = append(bindings, q.Binding)
-	}
-	for _, n := range svc.Networks {
-		bindings = append(bindings, n.Binding)
+	for _, entries := range svc.Bindings {
+		for _, entry := range entries {
+			bindings = append(bindings, entry.Name())
+		}
 	}
 	sort.Strings(bindings)
 	return bindings
+}
+
+// sortedCapabilities returns bindings' capability names in ascending order,
+// so a manifest expands to the same plan order on every run.
+func sortedCapabilities(bindings manifest.Bindings) []string {
+	out := make([]string, 0, len(bindings))
+	for capability := range bindings {
+		out = append(out, capability)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // annotate names the manifest path a binding-expansion failure came from,

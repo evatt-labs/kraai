@@ -10,24 +10,89 @@ import (
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// testVocabulary is the capability vocabulary these tests validate against,
-// standing in for the catalog internal/assemble builds from the real
-// provider declarations — every capability testdata/ names, and nothing
-// else, so a manifest naming something undeclared still fails here.
-type testVocabulary struct{}
+// testVocabulary is a real resource.Catalog built from hand-written
+// declarations, standing in for the one internal/assemble builds from the
+// provider packages. Real rather than a fake that accepts everything,
+// because what these tests have to prove is that a manifest is held to the
+// vendor's declared shape — a stub returning nil would let every binding
+// entry through and still pass.
+//
+// It declares every capability testdata/ names and nothing else, and carries
+// a binding schema for the vendors testdata/ configures, so a manifest
+// naming an undeclared capability or writing a mis-shaped entry fails here
+// the way it would in production. No provider package is imported.
+func testVocabulary(t *testing.T) manifest.Vocabulary {
+	t.Helper()
 
-func (testVocabulary) Names() []string {
-	return []string{
-		manifest.CapabilityCompute, manifest.CapabilityDatabase,
-		manifest.CapabilityKeyValue, manifest.CapabilityNetwork,
-		manifest.CapabilityObjects, manifest.CapabilityQueues,
+	// Mirrors internal/provider/cfresource's and neonresource's own
+	// databaseBindingSchema: a driver, and a caching block closed to
+	// anything it does not name.
+	databaseBinding := resource.NewSchema("database binding", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"binding": map[string]any{"type": "string"},
+			"driver":  map[string]any{"type": "string"},
+			"caching": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"disabled": map[string]any{"type": "boolean"},
+					"maxAge":   map[string]any{"type": "integer"},
+				},
+				"additionalProperties": false,
+			},
+		},
+		"required":             []any{"binding"},
+		"additionalProperties": false,
+	})
+	nameOnly := resource.NewSchema("binding", map[string]any{
+		"type":                 "object",
+		"properties":           map[string]any{"binding": map[string]any{"type": "string"}},
+		"required":             []any{"binding"},
+		"additionalProperties": false,
+	})
+
+	queuesBinding := resource.NewSchema("queues binding", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"binding":  map[string]any{"type": "string"},
+			"consumer": map[string]any{"type": "boolean"},
+		},
+		"required":             []any{"binding"},
+		"additionalProperties": false,
+	})
+
+	defs := []resource.CapabilityDef{
+		{Name: manifest.CapabilityCompute, Summary: "a service's own deployable unit"},
+		{Name: manifest.CapabilityDatabase, Summary: "a database", Binding: databaseBinding},
+		{Name: manifest.CapabilityKeyValue, Summary: "a key-value store", Binding: nameOnly},
+		{Name: manifest.CapabilityNetwork, Summary: "a private network"},
+		{Name: manifest.CapabilityObjects, Summary: "an object store", Binding: nameOnly},
+		{Name: manifest.CapabilityQueues, Summary: "a queue", Binding: queuesBinding},
 	}
+
+	// Every vendor testdata/ names declares the same set, so a fixture can
+	// configure any of them without this table growing a per-vendor case.
+	var providers []resource.Provider
+	for _, vendor := range []string{"aws", "cloudflare", "neon", "default-compute", "from-values", "from-cli"} {
+		providers = append(providers, resource.FuncProvider{
+			ProviderName:     vendor,
+			CapabilitiesFunc: func() []resource.CapabilityDef { return defs },
+		})
+	}
+
+	catalog, err := resource.NewCatalog(providers...)
+	if err != nil {
+		t.Fatalf("building the test catalog: %v", err)
+	}
+	return catalog
 }
 
-func newLoader(fsys manifest.FS, engine manifest.TemplateEngine) *manifest.Loader {
-	return manifest.NewLoader(fsys, engine, testVocabulary{})
+func newLoader(t *testing.T, fsys manifest.FS, engine manifest.TemplateEngine) *manifest.Loader {
+	t.Helper()
+	return manifest.NewLoader(fsys, engine, testVocabulary(t))
 }
 
 // configuredProvider returns the provider a manifest configured for a
@@ -49,7 +114,7 @@ func vendorOf(t *testing.T, p manifest.Providers, capability string) string {
 func newRealLoader(t *testing.T, root string) *manifest.Loader {
 	t.Helper()
 	fsys := mustNewFS(t, root)
-	return newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	return newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 }
 
 // TestLoad_BlueprintExamplesParse pins that the canonical kraai.yaml /
@@ -91,27 +156,36 @@ func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	if api.Dir != "packages/api" {
 		t.Errorf("api.Dir = %q", api.Dir)
 	}
-	if len(api.Databases) != 2 {
-		t.Fatalf("api.Databases = %+v", api.Databases)
+	// The blueprint writes `databases:`, which names the `database`
+	// capability — the one manifest key whose spelling differs from the
+	// capability it selects. Everything downstream sees the capability name.
+	databases := api.Bindings[manifest.CapabilityDatabase]
+	if len(databases) != 2 {
+		t.Fatalf("api database bindings = %+v", databases)
 	}
-	if api.Databases[0].Binding != "DB" || api.Databases[0].Driver != "sqlite" {
-		t.Errorf("Databases[0] = %+v", api.Databases[0])
+	if databases[0].Name() != "DB" || databases[0]["driver"] != "sqlite" {
+		t.Errorf("database[0] = %+v", databases[0])
 	}
-	pg := api.Databases[1]
-	if pg.Binding != "PG" || pg.Driver != "postgres" {
-		t.Errorf("Databases[1] = %+v", pg)
+	pg := databases[1]
+	if pg.Name() != "PG" || pg["driver"] != "postgres" {
+		t.Errorf("database[1] = %+v", pg)
 	}
-	if pg.Caching == nil || pg.Caching.Disabled != false || pg.Caching.MaxAge != 60 {
-		t.Errorf("Databases[1].Caching = %+v", pg.Caching)
+	// Entry shape past the binding name is the vendor's vocabulary, so it
+	// arrives as what the YAML said rather than as a type this package owns.
+	caching, ok := pg["caching"].(map[string]any)
+	if !ok || caching["disabled"] != false || caching["maxAge"] != 60 {
+		t.Errorf("database[1].caching = %+v", pg["caching"])
 	}
-	if len(api.KeyValue) != 1 || api.KeyValue[0].Binding != "CACHE" {
-		t.Errorf("api.KeyValue = %+v", api.KeyValue)
+	if kv := api.Bindings[manifest.CapabilityKeyValue]; len(kv) != 1 || kv[0].Name() != "CACHE" {
+		t.Errorf("api keyvalue bindings = %+v", kv)
 	}
-	if len(api.Objects) != 1 || api.Objects[0].Binding != "ASSETS" {
-		t.Errorf("api.Objects = %+v", api.Objects)
+	if objects := api.Bindings[manifest.CapabilityObjects]; len(objects) != 1 ||
+		objects[0].Name() != "ASSETS" {
+		t.Errorf("api objects bindings = %+v", api.Bindings[manifest.CapabilityObjects])
 	}
-	if len(api.Queues) != 1 || api.Queues[0].Binding != "JOBS" || !api.Queues[0].Consumer {
-		t.Errorf("api.Queues = %+v", api.Queues)
+	queues := api.Bindings[manifest.CapabilityQueues]
+	if len(queues) != 1 || queues[0].Name() != "JOBS" || queues[0]["consumer"] != true {
+		t.Errorf("api queues bindings = %+v", queues)
 	}
 
 	env := got.Environment
@@ -274,12 +348,20 @@ func TestLoad_UnknownTopLevelKeyRejected(t *testing.T) {
 	}
 }
 
+// A typo nested inside a binding entry is still rejected, but by the
+// vendor's declared schema rather than by strict decoding: what a binding
+// entry may carry is the vendor's vocabulary, and this package no longer has
+// a Go struct to check `maxage` against. The error still names the entry by
+// its manifest path, which is what made the strict-decode version worth
+// having.
 func TestLoad_UnknownNestedKeyRejectedWithPath(t *testing.T) {
 	loader := newRealLoader(t, "testdata/unknown-nested-key")
 	_, err := loader.Load("dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
-	if !strings.Contains(kerr.Error(), "services.api.databases[1].caching: unknown field \"maxage\"") {
-		t.Errorf("error %q does not contain the expected dotted/bracketed path", kerr.Error())
+	for _, want := range []string{"services.api.database[1]", "maxage"} {
+		if !strings.Contains(kerr.Error(), want) {
+			t.Errorf("error %q does not mention %q", kerr.Error(), want)
+		}
 	}
 }
 
@@ -349,7 +431,7 @@ func TestLoad_WrongVersionIsValidationError(t *testing.T) {
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 2\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "version") {
@@ -364,7 +446,7 @@ func TestLoad_TemplateRootReadErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("kraai.yaml").Return(nil, fsNotExistErr("kraai.yaml"))
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, errors.New("disk on fire"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -378,7 +460,7 @@ func TestLoad_ServicesTemplateGlobErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, nil)
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, errors.New("glob exploded"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -401,7 +483,7 @@ func TestLoad_ServicesGlobErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, errors.New("glob exploded"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -416,7 +498,7 @@ func TestLoad_ServicesReadFileErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, nil)
 	fsys.EXPECT().ReadFile("services/api.yaml").Return(nil, errors.New("disk on fire"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -431,7 +513,7 @@ func TestLoad_ServicesTemplateReadFileErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return([]string{"services/api.yaml.j2"}, nil)
 	fsys.EXPECT().ReadFile("services/api.yaml.j2").Return(nil, errors.New("disk on fire"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -450,7 +532,7 @@ func TestLoad_ServiceTemplateRenderErrorPropagates(t *testing.T) {
 	tpl.EXPECT().Render("services/api.yaml.j2", gomock.Any(), gomock.Any()).
 		Return(nil, kerrors.Validation("services/api.yaml.j2: boom"))
 
-	loader := newLoader(fsys, tpl)
+	loader := newLoader(t, fsys, tpl)
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -465,7 +547,7 @@ func TestLoad_EnvironmentReadErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, nil)
 	fsys.EXPECT().ReadFile("environments/dev.yaml").Return(nil, errors.New("disk on fire"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -476,7 +558,7 @@ func TestLoad_RootReadErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
 	fsys.EXPECT().ReadFile("kraai.yaml").Return(nil, errors.New("disk on fire"))
 
-	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }

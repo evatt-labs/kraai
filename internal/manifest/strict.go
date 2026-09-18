@@ -15,11 +15,17 @@ import (
 // built from this package's typed schema. Every mapping key is checked
 // against the destination struct's `yaml` tags; an unrecognized key is a
 // kerrors.Validation error naming source, the failing key's line, and its
-// full dotted/bracketed path (e.g. "services.api.databases[1].caching:
-// unknown field \"maxage\"") — the acceptance bar for every schema-
+// full dotted/bracketed path (e.g. "environments.prod.routes.api[1]:
+// unknown field \"patern\"") — the acceptance bar for every schema-
 // validated manifest file (kraai.yaml, services/*.yaml,
-// environments/*.yaml). It never uses map[string]any as an escape hatch:
-// every level of target must be a concrete type from this package.
+// environments/*.yaml).
+//
+// A struct may declare one `yaml:",inline"` map field, which receives the
+// keys that struct has no field for (manifest.Service.Bindings). That is not
+// an escape hatch from strictness: the keys collected there are checked
+// against a vocabulary by the caller that declared the field, which is the
+// only reason the check is not made here — the vocabulary is not this
+// package's to know.
 //
 // A duplicate key within the same mapping — a struct field or an
 // arbitrary-key map entry repeated at the same level — is also rejected,
@@ -100,7 +106,7 @@ func decodeStruct(node *yaml.Node, rv reflect.Value, path, source string) error 
 			source, node.Line, pathOrRoot(path), describeKind(node))
 	}
 
-	fields := structFields(rv.Type())
+	fields, inline := structFields(rv.Type())
 	seen := make(map[string]bool, len(node.Content)/2)
 	for i := 0; i+1 < len(node.Content); i += 2 {
 		keyNode, valNode := node.Content[i], node.Content[i+1]
@@ -112,13 +118,62 @@ func decodeStruct(node *yaml.Node, rv reflect.Value, path, source string) error 
 
 		fieldIndex, ok := fields[keyNode.Value]
 		if !ok {
-			return kerrors.Validation("%s:%d: %s: unknown field %q",
-				source, keyNode.Line, pathOrRoot(path), keyNode.Value)
+			if inline < 0 {
+				return kerrors.Validation("%s:%d: %s: unknown field %q",
+					source, keyNode.Line, pathOrRoot(path), keyNode.Value)
+			}
+			if err := decodeInline(valNode, rv.Field(inline), keyNode.Value, path, source); err != nil {
+				return err
+			}
+			continue
 		}
 		if err := decodeNode(valNode, rv.Field(fieldIndex), joinPath(path, keyNode.Value), source); err != nil {
 			return err
 		}
 	}
+	return nil
+}
+
+// decodeInline decodes one key this struct has no field for into its inline
+// map field, under that key.
+//
+// The struct's named fields still win: a key matching one never reaches
+// here, so an inline map cannot shadow or be shadowed by a declared field.
+// What lands here is not unchecked — the destination map's element type is
+// still decoded through decodeNode, and the caller that declared the inline
+// field is responsible for validating the keys it collects (see
+// Loader.validateServices, which checks them against the capability
+// vocabulary). Strict decoding rejects an unknown key; an inline field says
+// where the keys it cannot name in advance go, not that anything goes.
+//
+// parent is the path of the mapping the key was found in, so an error can
+// say where the key was written rather than only what was wrong with it.
+func decodeInline(node *yaml.Node, field reflect.Value, key, parent, source string) error {
+	if field.Kind() != reflect.Map {
+		return kerrors.New("manifest: inline field at %s must be a map, got %s",
+			pathOrRoot(parent), field.Kind())
+	}
+	if field.Type().Key().Kind() != reflect.String {
+		return kerrors.New("manifest: unsupported inline map key type %s at %s",
+			field.Type().Key(), pathOrRoot(parent))
+	}
+	if field.IsNil() {
+		field.Set(reflect.MakeMap(field.Type()))
+	}
+
+	elem := reflect.New(field.Type().Elem()).Elem()
+	if err := decodeNode(node, elem, joinPath(parent, key), source); err != nil {
+		// Both readings are reported, because at this point both are live and
+		// the decoder cannot tell them apart: the vocabulary that would say
+		// whether this key names a real capability is not known here. Saying
+		// only "expected a sequence" would send someone to fix the value of a
+		// key that should not exist; saying only "unknown field" would send
+		// them to delete a capability they spelled right and mis-shaped.
+		return kerrors.Wrap(err, kerrors.CodeValidation,
+			"%s: unknown field %q, or a capability whose value is not a list of bindings",
+			pathOrRoot(parent), key)
+	}
+	field.SetMapIndex(reflect.ValueOf(key).Convert(field.Type().Key()), elem)
 	return nil
 }
 
@@ -187,37 +242,56 @@ func decodeScalar(node *yaml.Node, rv reflect.Value, path, source string) error 
 }
 
 // structFields maps a struct type's `yaml` tag names to their field index,
-// recomputed per call: manifest loading happens a handful of times per CLI
+// and reports the index of its `,inline` field, or -1 if it has none.
+//
+// Recomputed per call: manifest loading happens a handful of times per CLI
 // invocation, never in a hot loop, so caching would be premature (Rule 2).
-func structFields(t reflect.Type) map[string]int {
-	fields := make(map[string]int, t.NumField())
+func structFields(t reflect.Type) (fields map[string]int, inline int) {
+	fields = make(map[string]int, t.NumField())
+	inline = -1
 	for i := range t.NumField() {
 		f := t.Field(i)
 		if f.PkgPath != "" { // unexported field
 			continue
 		}
-		name, skip := yamlFieldName(f)
+		name, opts, skip := yamlFieldName(f)
 		if skip {
+			continue
+		}
+		if opts["inline"] {
+			inline = i
 			continue
 		}
 		fields[name] = i
 	}
-	return fields
+	return fields, inline
 }
 
 // yamlFieldName mirrors go.yaml.in/yaml/v3's own tag semantics: the name is
 // the tag's content before the first comma, defaulting to the lowercased Go
-// field name; a "-" tag excludes the field entirely.
-func yamlFieldName(f reflect.StructField) (name string, skip bool) {
+// field name; a "-" tag excludes the field entirely; and the comma-separated
+// options after the name are returned as a set.
+//
+// "inline" is go-yaml's own option with go-yaml's own meaning — a map field
+// receiving every key the struct has no field for — rather than an option
+// invented here, so a tag reads the same whether this package's decoder or
+// the library's own handles it.
+func yamlFieldName(f reflect.StructField) (name string, opts map[string]bool, skip bool) {
 	tag := f.Tag.Get("yaml")
 	if tag == "-" {
-		return "", true
+		return "", nil, true
 	}
-	name, _, _ = strings.Cut(tag, ",")
+	name, rest, _ := strings.Cut(tag, ",")
 	if name == "" {
 		name = strings.ToLower(f.Name)
 	}
-	return name, false
+	opts = map[string]bool{}
+	for _, opt := range strings.Split(rest, ",") {
+		if opt != "" {
+			opts[opt] = true
+		}
+	}
+	return name, opts, false
 }
 
 func pathOrRoot(path string) string {
