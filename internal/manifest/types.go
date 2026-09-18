@@ -1,5 +1,7 @@
 package manifest
 
+import "sort"
+
 // Manifest is the fully-resolved, validated manifest for one environment:
 // kraai.yaml's root config, every services/*.yaml file merged into one
 // service set, the environment overlay, and the merged values map (values
@@ -25,23 +27,28 @@ type Root struct {
 // Providers names which vendor fulfils each capability kraai.yaml declares,
 // and carries that vendor's own settings.
 //
-// A fixed struct rather than a free-form map, so an unknown capability is
-// rejected at load rather than silently ignored until something fails to
-// resolve. The vocabulary here is no longer a guess: it is exactly the set of
-// capabilities the resource registry has implementations for.
-type Providers struct {
-	Compute  *Provider `yaml:"compute,omitempty"`
-	Database *Provider `yaml:"database,omitempty"`
-	KeyValue *Provider `yaml:"keyvalue,omitempty"`
-	Objects  *Provider `yaml:"objects,omitempty"`
-	Queues   *Provider `yaml:"queues,omitempty"`
-	Network  *Provider `yaml:"network,omitempty"`
-}
+// Keyed by capability name rather than being a fixed struct, so the
+// vocabulary is whatever the registered providers declare and a capability a
+// provider adds is reachable from a manifest without this package learning
+// its name. An unknown capability is still rejected at load rather than
+// silently ignored until something fails to resolve — see validateRoot,
+// which checks these keys against the Vocabulary the Loader was built with.
+// Strictness is unchanged; only its source moved, from this type's field set
+// to the declarations themselves.
+//
+// A nil entry is a key written with no value (`compute:` and nothing under
+// it). It reads as unconfigured, exactly as a nil field did.
+type Providers map[string]*Provider
 
-// Capability names, matching the keys above and the capabilities resource
-// registrations declare. Exported so a caller resolving a manifest entry to a
-// provider uses the same strings the registry does, rather than a second copy
-// that can drift.
+// Capability names kraai itself reasons about. Exported so a caller
+// resolving a manifest entry to a provider uses the same strings the
+// registry does, rather than a second copy that can drift.
+//
+// Not the vocabulary any more — that comes from the registered declarations,
+// and a manifest may name a capability absent from this list. These are the
+// ones this codebase mentions by name: internal/plan synthesises a service's
+// compute from CapabilityCompute, and every other constant here is the key a
+// binding list is expanded under.
 const (
 	CapabilityCompute = "compute"
 	// CapabilityDatabase covers every database engine, not one of them. A
@@ -84,28 +91,13 @@ type Provider struct {
 
 // For returns the provider configured for a capability.
 //
-// A method rather than each caller switching on field names: the switch
-// belongs in one place, and a capability added to the struct without a case
-// here is a compile-time-visible omission instead of a silent nil.
+// Absent, and present-but-null, both report unconfigured: a caller asking
+// what fulfils a capability gets one answer for "there is nothing here",
+// never two it has to distinguish. validateRoot is where the difference
+// between the two matters, and it reads the map directly.
 func (p Providers) For(capability string) (*Provider, bool) {
-	var configured *Provider
-	switch capability {
-	case CapabilityCompute:
-		configured = p.Compute
-	case CapabilityDatabase:
-		configured = p.Database
-	case CapabilityKeyValue:
-		configured = p.KeyValue
-	case CapabilityObjects:
-		configured = p.Objects
-	case CapabilityQueues:
-		configured = p.Queues
-	case CapabilityNetwork:
-		configured = p.Network
-	default:
-		return nil, false
-	}
-	if configured == nil {
+	configured, ok := p[capability]
+	if !ok || configured == nil {
 		return nil, false
 	}
 	return configured, true
@@ -119,7 +111,7 @@ func (p Providers) For(capability string) (*Provider, bool) {
 // compute is also Cloudflare — and answering that needs the whole set, not
 // one entry.
 func (p Providers) Vendors() map[string]string {
-	out := make(map[string]string, 5)
+	out := make(map[string]string, len(p))
 	for _, capability := range p.Capabilities() {
 		configured, _ := p.For(capability)
 		out[capability] = configured.Vendor
@@ -127,19 +119,21 @@ func (p Providers) Vendors() map[string]string {
 	return out
 }
 
-// Capabilities returns the capabilities this manifest configures, in a stable
-// order.
+// Capabilities returns the capabilities this manifest configures, sorted.
+//
+// Sorted rather than in the order kraai.yaml wrote them: a Go map has no
+// authoring order to preserve, and a caller iterating this must get the same
+// sequence on every run. The one place the order is load-bearing is
+// internal/assemble's vendorsUsed, which lets the first capability naming a
+// vendor decide that vendor's client settings.
 func (p Providers) Capabilities() []string {
-	var out []string
-	for _, capability := range []string{
-		CapabilityCompute, CapabilityDatabase,
-		CapabilityKeyValue, CapabilityObjects, CapabilityQueues,
-		CapabilityNetwork,
-	} {
+	out := make([]string, 0, len(p))
+	for capability := range p {
 		if _, ok := p.For(capability); ok {
 			out = append(out, capability)
 		}
 	}
+	sort.Strings(out)
 	return out
 }
 

@@ -39,7 +39,7 @@ func manifestWith(providers manifest.Providers) *manifest.Manifest {
 func TestRegistry_NoVendorConfigured(t *testing.T) {
 	clearCreds(t)
 	m := manifestWith(manifest.Providers{
-		KeyValue: &manifest.Provider{}, // present, but Vendor is empty
+		manifest.CapabilityKeyValue: {}, // present, but Vendor is empty
 	})
 
 	_, err := Registry(context.Background(), m)
@@ -54,7 +54,7 @@ func TestRegistry_NoVendorConfigured(t *testing.T) {
 func TestRegistry_UnknownVendor(t *testing.T) {
 	clearCreds(t)
 	m := manifestWith(manifest.Providers{
-		Compute: &manifest.Provider{Vendor: "gcp"},
+		manifest.CapabilityCompute: {Vendor: "gcp"},
 	})
 
 	_, err := Registry(context.Background(), m)
@@ -74,7 +74,7 @@ func TestRegistry_UnknownVendorNeverLeaksIntoCredentialFlow(t *testing.T) {
 	// support only after building a client.
 	clearCreds(t)
 	m := manifestWith(manifest.Providers{
-		Database: &manifest.Provider{Vendor: "supabase"},
+		manifest.CapabilityDatabase: {Vendor: "supabase"},
 	})
 
 	_, err := Registry(context.Background(), m)
@@ -89,7 +89,7 @@ func TestRegistry_UnknownVendorNeverLeaksIntoCredentialFlow(t *testing.T) {
 func TestRegistry_CloudflareMissingCredentials(t *testing.T) {
 	clearCreds(t)
 	m := manifestWith(manifest.Providers{
-		KeyValue: &manifest.Provider{Vendor: vendorCloudflare},
+		manifest.CapabilityKeyValue: {Vendor: vendorCloudflare},
 	})
 
 	_, err := Registry(context.Background(), m)
@@ -116,10 +116,10 @@ func TestRegistry_CloudflareSuccess(t *testing.T) {
 	// a manifest can actually name (it used to be unreachable, since the
 	// only database capability the manifest offered was postgres).
 	m := manifestWith(manifest.Providers{
-		Database: &manifest.Provider{Vendor: vendorCloudflare},
-		KeyValue: &manifest.Provider{Vendor: vendorCloudflare},
-		Objects:  &manifest.Provider{Vendor: vendorCloudflare},
-		Queues:   &manifest.Provider{Vendor: vendorCloudflare},
+		manifest.CapabilityDatabase: {Vendor: vendorCloudflare},
+		manifest.CapabilityKeyValue: {Vendor: vendorCloudflare},
+		manifest.CapabilityObjects:  {Vendor: vendorCloudflare},
+		manifest.CapabilityQueues:   {Vendor: vendorCloudflare},
 	})
 
 	reg, err := Registry(context.Background(), m)
@@ -140,7 +140,7 @@ func TestRegistry_NeonMissingNeonCredentials(t *testing.T) {
 	setCloudflareCreds(t) // cloudflare present; neon is what's missing
 
 	m := manifestWith(manifest.Providers{
-		Database: &manifest.Provider{Vendor: vendorNeon, Settings: map[string]any{
+		manifest.CapabilityDatabase: {Vendor: vendorNeon, Settings: map[string]any{
 			"project": "proj", "database": "db", "role": "role",
 		}},
 	})
@@ -167,7 +167,7 @@ func TestRegistry_NeonWithoutCloudflareNeedsNoCloudflareCredentials(t *testing.T
 	setNeonCreds(t)
 
 	m := manifestWith(manifest.Providers{
-		Database: &manifest.Provider{Vendor: vendorNeon, Settings: map[string]any{
+		manifest.CapabilityDatabase: {Vendor: vendorNeon, Settings: map[string]any{
 			"project": "proj", "database": "db", "role": "role",
 		}},
 	})
@@ -192,7 +192,7 @@ func TestRegistry_NeonBadSettings(t *testing.T) {
 	setNeonCreds(t)
 
 	m := manifestWith(manifest.Providers{
-		Database: &manifest.Provider{Vendor: vendorNeon, Settings: map[string]any{
+		manifest.CapabilityDatabase: {Vendor: vendorNeon, Settings: map[string]any{
 			"project": "proj",
 			// "database" and "role" are missing.
 		}},
@@ -214,8 +214,8 @@ func TestRegistry_NeonAlongsideCloudflareRegistersBothHalves(t *testing.T) {
 
 	// Compute on Cloudflare, so the Hyperdrive companion genuinely applies.
 	m := manifestWith(manifest.Providers{
-		Compute: &manifest.Provider{Vendor: vendorCloudflare},
-		Database: &manifest.Provider{Vendor: vendorNeon, Settings: map[string]any{
+		manifest.CapabilityCompute: {Vendor: vendorCloudflare},
+		manifest.CapabilityDatabase: {Vendor: vendorNeon, Settings: map[string]any{
 			"project": "proj", "database": "db", "role": "role",
 		}},
 	})
@@ -244,7 +244,7 @@ func TestRegistry_NeonAlongsideCloudflareRegistersBothHalves(t *testing.T) {
 func TestRegistry_AWSMissingRegionFallsBackToSDKDefaultChain(t *testing.T) {
 	clearCreds(t)
 	m := manifestWith(manifest.Providers{
-		Compute: &manifest.Provider{Vendor: vendorAWS},
+		manifest.CapabilityCompute: {Vendor: vendorAWS},
 	})
 
 	reg, err := Registry(context.Background(), m)
@@ -264,7 +264,7 @@ func TestRegistry_AWSMissingRegionFallsBackToSDKDefaultChain(t *testing.T) {
 func TestRegistry_AWSRegionWrongTypeIsStillAnError(t *testing.T) {
 	clearCreds(t)
 	m := manifestWith(manifest.Providers{
-		Compute: &manifest.Provider{Vendor: vendorAWS, Settings: map[string]any{"region": 12345}},
+		manifest.CapabilityCompute: {Vendor: vendorAWS, Settings: map[string]any{"region": 12345}},
 	})
 
 	_, err := Registry(context.Background(), m)
@@ -292,7 +292,7 @@ func TestRegistry_AWSClientConstructionFailure(t *testing.T) {
 	t.Setenv("AWS_PROFILE", "broken")
 
 	m := manifestWith(manifest.Providers{
-		Compute: &manifest.Provider{Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
+		manifest.CapabilityCompute: {Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
 	})
 
 	_, err := Registry(context.Background(), m)
@@ -307,8 +307,8 @@ func TestRegistry_AWSSuccess(t *testing.T) {
 	// (aws.Register bulk-wires both from one client) the same way the
 	// cloudflare test does.
 	m := manifestWith(manifest.Providers{
-		Compute: &manifest.Provider{Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
-		Objects: &manifest.Provider{Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
+		manifest.CapabilityCompute: {Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
+		manifest.CapabilityObjects: {Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
 	})
 
 	reg, err := Registry(context.Background(), m)
@@ -333,9 +333,9 @@ func TestRegistry_AllThreeVendorsTogether(t *testing.T) {
 	setNeonCreds(t)
 
 	m := manifestWith(manifest.Providers{
-		Compute:  &manifest.Provider{Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
-		Database: &manifest.Provider{Vendor: vendorNeon, Settings: map[string]any{"project": "p", "database": "d", "role": "r"}},
-		KeyValue: &manifest.Provider{Vendor: vendorCloudflare},
+		manifest.CapabilityCompute:  {Vendor: vendorAWS, Settings: map[string]any{"region": "us-east-1"}},
+		manifest.CapabilityDatabase: {Vendor: vendorNeon, Settings: map[string]any{"project": "p", "database": "d", "role": "r"}},
+		manifest.CapabilityKeyValue: {Vendor: vendorCloudflare},
 	})
 
 	reg, err := Registry(context.Background(), m)

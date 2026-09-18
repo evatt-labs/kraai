@@ -32,12 +32,12 @@ var Declarations = []resource.Provider{
 //
 // Unlike Registry, this takes no context, no manifest, and reads no
 // credential: every provider package's Capabilities() function is pure
-// data, callable before a manifest is even parsed. This is what lets a
-// caller (internal/cli's `kraai capabilities` today; internal/manifest's
-// own loader too, once it validates a manifest's capability vocabulary
-// against this same catalog instead of a hardcoded five-entry set) validate
-// or display the capability vocabulary without first knowing which vendors
-// a manifest even names.
+// data, callable before a manifest is even parsed. That is what lets its
+// callers — `kraai capabilities`, and every command that loads a manifest,
+// which hands the result to manifest.NewLoader as the vocabulary
+// kraai.yaml's `providers:` keys are checked against — validate or display
+// the capability vocabulary without first knowing which vendors a manifest
+// even names.
 //
 // Returns an error only if two providers in Declarations disagree with
 // their own Capabilities() — a provider declaring the same capability name

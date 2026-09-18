@@ -10,8 +10,8 @@ import (
 // that can drift.
 func TestProvidersFor(t *testing.T) {
 	p := Providers{
-		Compute:  &Provider{Vendor: "aws", Settings: map[string]any{"region": "us-east-1"}},
-		Database: &Provider{Vendor: "neon"},
+		CapabilityCompute:  {Vendor: "aws", Settings: map[string]any{"region": "us-east-1"}},
+		CapabilityDatabase: {Vendor: "neon"},
 	}
 
 	compute, ok := p.For(CapabilityCompute)
@@ -38,11 +38,27 @@ func TestProvidersFor(t *testing.T) {
 	}
 }
 
+// vocabulary is a fixed capability vocabulary standing in for the catalog
+// internal/assemble builds from the real provider declarations, so this
+// package's tests get one without importing a provider package — the
+// dependency direction Vocabulary exists to protect.
+type vocabulary []string
+
+func (v vocabulary) Names() []string { return v }
+
+// loaderWith builds a Loader carrying only what validateRoot reads, so a
+// test of root validation needs no filesystem and no template engine.
+func loaderWith(known ...string) *Loader {
+	return &Loader{vocabulary: vocabulary(known)}
+}
+
 // A capability naming no vendor cannot resolve to anything, and the error
 // should name the file and key rather than surfacing later as an
 // unresolvable registry lookup with no obvious source.
 func TestValidateRootRequiresAVendor(t *testing.T) {
-	err := validateRoot(&Root{Version: 1, Providers: Providers{Database: &Provider{}}})
+	l := loaderWith(CapabilityDatabase)
+
+	err := l.validateRoot(&Root{Version: 1, Providers: Providers{CapabilityDatabase: {}}})
 	if err == nil {
 		t.Fatal("a capability with no vendor was accepted")
 	}
@@ -52,8 +68,92 @@ func TestValidateRootRequiresAVendor(t *testing.T) {
 		}
 	}
 
-	if err := validateRoot(&Root{Version: 1, Providers: Providers{Database: &Provider{Vendor: "neon"}}}); err != nil {
+	if err := l.validateRoot(&Root{Version: 1, Providers: Providers{CapabilityDatabase: {Vendor: "neon"}}}); err != nil {
 		t.Fatalf("a configured vendor was rejected: %v", err)
+	}
+}
+
+// The strictness that used to come from Providers being a fixed struct now
+// comes from the declarations, and has to hold just as hard: a capability no
+// registered provider declares is a load error, not a key that resolves to
+// nothing later.
+func TestValidateRootRejectsAnUndeclaredCapability(t *testing.T) {
+	l := loaderWith(CapabilityCompute, CapabilityDatabase)
+
+	err := l.validateRoot(&Root{
+		Version:   1,
+		Providers: Providers{"frobnicate": {Vendor: "aws"}},
+	})
+	if err == nil {
+		t.Fatal("a capability no provider declares was accepted")
+	}
+	// The message has to name the offending key and say what could have gone
+	// there — an author who typo'd a capability cannot guess the vocabulary,
+	// because it is no longer written down in this package.
+	for _, want := range []string{"providers.frobnicate", "frobnicate", "compute", "database"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error should mention %q: %v", want, err)
+		}
+	}
+}
+
+// A key written with no value under it reads as unconfigured everywhere
+// else, but it is still a key this manifest declared — so an undeclared one
+// is caught whether or not its author got as far as naming a vendor.
+func TestValidateRootRejectsAnUndeclaredCapabilityWithNoValue(t *testing.T) {
+	l := loaderWith(CapabilityCompute)
+
+	err := l.validateRoot(&Root{Version: 1, Providers: Providers{"frobnicate": nil}})
+	if err == nil {
+		t.Fatal("an undeclared capability with no value was accepted")
+	}
+	if !strings.Contains(err.Error(), "frobnicate") {
+		t.Errorf("error should name the key: %v", err)
+	}
+}
+
+// A capability a provider declares but this codebase never names is
+// reachable from a manifest: that is what opening the vocabulary buys, and
+// the check must not quietly fall back to the constants above.
+func TestValidateRootAcceptsACapabilityOnlyAProviderDeclares(t *testing.T) {
+	l := loaderWith("search")
+
+	if err := l.validateRoot(&Root{
+		Version:   1,
+		Providers: Providers{"search": {Vendor: "elastic"}},
+	}); err != nil {
+		t.Fatalf("a declared capability was rejected: %v", err)
+	}
+}
+
+// Two bad keys must report the same one first on every run, or a failing
+// manifest gives a different error each time it is loaded.
+func TestValidateRootReportsTheFirstBadKeyInSortedOrder(t *testing.T) {
+	l := loaderWith(CapabilityCompute)
+
+	for range 20 {
+		err := l.validateRoot(&Root{
+			Version:   1,
+			Providers: Providers{"zeta": {Vendor: "aws"}, "alpha": {Vendor: "aws"}},
+		})
+		if err == nil {
+			t.Fatal("two undeclared capabilities were accepted")
+		}
+		if !strings.Contains(err.Error(), "alpha") {
+			t.Fatalf("error should report the first key in sorted order: %v", err)
+		}
+	}
+}
+
+// A Loader built with no vocabulary cannot check anything, so it must say so
+// rather than load a manifest with that check silently skipped.
+func TestLoadWithoutAVocabularyFails(t *testing.T) {
+	_, err := (&Loader{}).Load("prod", nil)
+	if err == nil {
+		t.Fatal("a Loader with no capability vocabulary loaded a manifest")
+	}
+	if !strings.Contains(err.Error(), "vocabulary") {
+		t.Errorf("error should name what is missing: %v", err)
 	}
 }
 
@@ -79,7 +179,11 @@ providers:
 		t.Fatalf("DecodeStrict: %v", err)
 	}
 
-	settings := root.Providers.Compute.Settings
+	compute, ok := root.Providers.For(CapabilityCompute)
+	if !ok {
+		t.Fatal("providers.compute did not decode")
+	}
+	settings := compute.Settings
 	if settings["region"] != "us-east-1" {
 		t.Fatalf("region = %v", settings["region"])
 	}
@@ -122,14 +226,14 @@ providers:
 // capability the manifest offered was "postgres".
 func TestDatabaseCapabilityIsEngineAgnostic(t *testing.T) {
 	for _, vendor := range []string{"neon", "cloudflare"} {
-		p := Providers{Database: &Provider{Vendor: vendor}}
+		p := Providers{CapabilityDatabase: {Vendor: vendor}}
 		got, ok := p.For(CapabilityDatabase)
 		if !ok || got.Vendor != vendor {
 			t.Fatalf("vendor %q did not resolve through the database capability", vendor)
 		}
 	}
 	// The engine name is not a capability.
-	if _, ok := (Providers{Database: &Provider{Vendor: "neon"}}).For("postgres"); ok {
+	if _, ok := (Providers{CapabilityDatabase: {Vendor: "neon"}}).For("postgres"); ok {
 		t.Fatal("an engine name resolved as a capability")
 	}
 }
@@ -139,8 +243,8 @@ func TestDatabaseCapabilityIsEngineAgnostic(t *testing.T) {
 // answering "does this apply" needs the whole set rather than one entry.
 func TestProvidersVendors(t *testing.T) {
 	p := Providers{
-		Compute:  &Provider{Vendor: "aws"},
-		Database: &Provider{Vendor: "neon"},
+		CapabilityCompute:  {Vendor: "aws"},
+		CapabilityDatabase: {Vendor: "neon"},
 	}
 	got := p.Vendors()
 	if len(got) != 2 || got[CapabilityCompute] != "aws" || got[CapabilityDatabase] != "neon" {

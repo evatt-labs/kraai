@@ -89,7 +89,7 @@ func awsComputeRegistryWithRealLambda(t *testing.T) *resource.Registry {
 func awsComputeManifest(settings map[string]any) *manifest.Manifest {
 	return &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{
-			Compute: &manifest.Provider{Vendor: "aws", Settings: settings},
+			manifest.CapabilityCompute: {Vendor: "aws", Settings: settings},
 		}},
 		Services: map[string]manifest.Service{
 			"api": {

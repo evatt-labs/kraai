@@ -78,10 +78,10 @@ func newRegistryFixture(t *testing.T) *registryFixture {
 // callers don't repeat the same four lines in every test.
 func (f *registryFixture) providers() manifest.Providers {
 	return manifest.Providers{
-		Database: &manifest.Provider{Vendor: "neon"},
-		KeyValue: &manifest.Provider{Vendor: "cloudflare"},
-		Objects:  &manifest.Provider{Vendor: "cloudflare"},
-		Queues:   &manifest.Provider{Vendor: "cloudflare"},
+		manifest.CapabilityDatabase: {Vendor: "neon"},
+		manifest.CapabilityKeyValue: {Vendor: "cloudflare"},
+		manifest.CapabilityObjects:  {Vendor: "cloudflare"},
+		manifest.CapabilityQueues:   {Vendor: "cloudflare"},
 	}
 }
 

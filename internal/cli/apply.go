@@ -47,7 +47,7 @@ func isRealTerminal(r io.Reader) bool {
 	return term.IsTerminal(int(f.Fd()))
 }
 
-func newApplyCommand(assembler RegistryAssembler) *cobra.Command {
+func newApplyCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cobra.Command {
 	var (
 		dir         string
 		setArgs     []string
@@ -68,7 +68,9 @@ func newApplyCommand(assembler RegistryAssembler) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runApply(cmd, args[0], dir, setArgs, jsonOut, replaceFlag, confirmName, assembler, isRealTerminal)
+			return runApply(
+				cmd, args[0], dir, setArgs, jsonOut, replaceFlag, confirmName,
+				assembler, catalog, isRealTerminal)
 		},
 	}
 
@@ -116,7 +118,8 @@ func newApplyCommand(assembler RegistryAssembler) *cobra.Command {
 // change to build.
 func runApply(
 	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut, allowReplace bool,
-	confirmName string, assembler RegistryAssembler, interactive isInteractive,
+	confirmName string, assembler RegistryAssembler, catalog CatalogAssembler,
+	interactive isInteractive,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
 		return kerrors.Validation(
@@ -137,7 +140,15 @@ func runApply(
 		return err
 	}
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	// The capability vocabulary kraai.yaml's `providers:` keys are checked
+	// against. Built from static provider declarations, so it needs no
+	// credential and no manifest — see internal/assemble.Capabilities.
+	vocabulary, err := catalog()
+	if err != nil {
+		return err
+	}
+
+	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), vocabulary)
 	m, err := loader.Load(envName, setArgs)
 	if err != nil {
 		return err

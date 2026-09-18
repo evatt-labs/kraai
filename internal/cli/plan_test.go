@@ -165,7 +165,7 @@ func requireCode(t *testing.T, err error, code kerrors.Code) *kerrors.KError {
 // and executes it with args, capturing stdout.
 func execPlan(t *testing.T, assembler RegistryAssembler, args []string) (string, error) {
 	t.Helper()
-	cmd := newPlanCommand(assembler)
+	cmd := newPlanCommand(assembler, fixtureCatalogAssembler)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -350,7 +350,7 @@ func TestRunPlan_SetFlagReachesLoader(t *testing.T) {
 }
 
 func TestNewPlanCommand_Flags(t *testing.T) {
-	cmd := newPlanCommand(unreachableAssembler)
+	cmd := newPlanCommand(unreachableAssembler, fixtureCatalogAssembler)
 
 	dirFlag := cmd.Flags().Lookup("dir")
 	if dirFlag == nil || dirFlag.DefValue != "." {
@@ -538,6 +538,19 @@ func (failingWriter) Write([]byte) (int, error) { return 0, errors.New("write bo
 // it asserts says so rather than passing quietly.
 func unreachableAssembler(context.Context, *manifest.Manifest) (*resource.Registry, error) {
 	return nil, kerrors.New("the assembler was reached; this command should have failed first")
+}
+
+// fixtureCatalogAssembler declares exactly the capabilities this package's
+// manifest fixtures name, so plan/apply/destroy validate against a real
+// resource.Catalog without importing internal/assemble or any provider
+// package — the same isolation fakeCatalogAssembler gives `kraai
+// capabilities`.
+func fixtureCatalogAssembler() (*resource.Catalog, error) {
+	return resource.NewCatalog(
+		resource.FuncProvider{ProviderName: "fake", CapabilitiesFunc: func() []resource.CapabilityDef {
+			return []resource.CapabilityDef{{Name: "keyvalue", Summary: "a fake key-value store"}}
+		}},
+	)
 }
 
 // TestPlanLoadsDotEnvFromTheManifestDirectory: env.Require's failure message

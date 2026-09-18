@@ -12,10 +12,44 @@ import (
 	"github.com/evatt-labs/kraai/internal/manifest"
 )
 
+// testVocabulary is the capability vocabulary these tests validate against,
+// standing in for the catalog internal/assemble builds from the real
+// provider declarations — every capability testdata/ names, and nothing
+// else, so a manifest naming something undeclared still fails here.
+type testVocabulary struct{}
+
+func (testVocabulary) Names() []string {
+	return []string{
+		manifest.CapabilityCompute, manifest.CapabilityDatabase,
+		manifest.CapabilityKeyValue, manifest.CapabilityNetwork,
+		manifest.CapabilityObjects, manifest.CapabilityQueues,
+	}
+}
+
+func newLoader(fsys manifest.FS, engine manifest.TemplateEngine) *manifest.Loader {
+	return manifest.NewLoader(fsys, engine, testVocabulary{})
+}
+
+// configuredProvider returns the provider a manifest configured for a
+// capability, failing the test if it configured none.
+func configuredProvider(t *testing.T, p manifest.Providers, capability string) *manifest.Provider {
+	t.Helper()
+	configured, ok := p.For(capability)
+	if !ok {
+		t.Fatalf("providers.%s is not configured", capability)
+	}
+	return configured
+}
+
+func vendorOf(t *testing.T, p manifest.Providers, capability string) string {
+	t.Helper()
+	return configuredProvider(t, p, capability).Vendor
+}
+
 func newRealLoader(t *testing.T, root string) *manifest.Loader {
 	t.Helper()
 	fsys := mustNewFS(t, root)
-	return manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	return newLoader(fsys, manifest.NewTemplateEngine(fsys))
 }
 
 // TestLoad_BlueprintExamplesParse pins that the canonical kraai.yaml /
@@ -32,14 +66,15 @@ func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	if got.Root.Version != 1 {
 		t.Errorf("Root.Version = %d, want 1", got.Root.Version)
 	}
-	if got.Root.Providers.Compute == nil || got.Root.Providers.Compute.Vendor != "cloudflare" {
-		t.Errorf("Root.Providers.Compute = %+v", got.Root.Providers.Compute)
+	if vendor := vendorOf(t, got.Root.Providers, manifest.CapabilityCompute); vendor != "cloudflare" {
+		t.Errorf("providers.compute vendor = %q", vendor)
 	}
-	if got.Root.Providers.Database == nil || got.Root.Providers.Database.Vendor != "neon" {
-		t.Errorf("Root.Providers.Database = %+v", got.Root.Providers.Database)
+	database := configuredProvider(t, got.Root.Providers, manifest.CapabilityDatabase)
+	if database.Vendor != "neon" {
+		t.Errorf("providers.database vendor = %q", database.Vendor)
 	}
 	// A vendor's own settings are carried through uninterpreted.
-	if got := got.Root.Providers.Database.Settings["project"]; got != "kraai-control-plane" {
+	if got := database.Settings["project"]; got != "kraai-control-plane" {
 		t.Errorf("Postgres.Settings[project] = %v", got)
 	}
 	if got.Root.Hooks != "./kraai.hooks.mjs" {
@@ -160,8 +195,8 @@ func TestLoad_SetOverridesValuesOverridesTemplateDefault(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if got.Root.Providers.Compute == nil || got.Root.Providers.Compute.Vendor != "default-compute" {
-			t.Errorf("Providers.Compute = %+v, want the template default", got.Root.Providers.Compute)
+		if vendor := vendorOf(t, got.Root.Providers, manifest.CapabilityCompute); vendor != "default-compute" {
+			t.Errorf("providers.compute vendor = %q, want the template default", vendor)
 		}
 	})
 
@@ -170,8 +205,8 @@ func TestLoad_SetOverridesValuesOverridesTemplateDefault(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if got.Root.Providers.Compute == nil || got.Root.Providers.Compute.Vendor != "from-values" {
-			t.Errorf("Providers.Compute = %+v, want the values-file value", got.Root.Providers.Compute)
+		if vendor := vendorOf(t, got.Root.Providers, manifest.CapabilityCompute); vendor != "from-values" {
+			t.Errorf("providers.compute vendor = %q, want the values-file value", vendor)
 		}
 	})
 
@@ -180,8 +215,8 @@ func TestLoad_SetOverridesValuesOverridesTemplateDefault(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if got.Root.Providers.Compute == nil || got.Root.Providers.Compute.Vendor != "from-cli" {
-			t.Errorf("Providers.Compute = %+v, want the --set value", got.Root.Providers.Compute)
+		if vendor := vendorOf(t, got.Root.Providers, manifest.CapabilityCompute); vendor != "from-cli" {
+			t.Errorf("providers.compute vendor = %q, want the --set value", vendor)
 		}
 	})
 }
@@ -314,7 +349,7 @@ func TestLoad_WrongVersionIsValidationError(t *testing.T) {
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 2\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "version") {
@@ -329,7 +364,7 @@ func TestLoad_TemplateRootReadErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("kraai.yaml").Return(nil, fsNotExistErr("kraai.yaml"))
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, errors.New("disk on fire"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -343,7 +378,7 @@ func TestLoad_ServicesTemplateGlobErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, nil)
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, errors.New("glob exploded"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -366,7 +401,7 @@ func TestLoad_ServicesGlobErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, errors.New("glob exploded"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -381,7 +416,7 @@ func TestLoad_ServicesReadFileErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, nil)
 	fsys.EXPECT().ReadFile("services/api.yaml").Return(nil, errors.New("disk on fire"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -396,7 +431,7 @@ func TestLoad_ServicesTemplateReadFileErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return([]string{"services/api.yaml.j2"}, nil)
 	fsys.EXPECT().ReadFile("services/api.yaml.j2").Return(nil, errors.New("disk on fire"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -415,7 +450,7 @@ func TestLoad_ServiceTemplateRenderErrorPropagates(t *testing.T) {
 	tpl.EXPECT().Render("services/api.yaml.j2", gomock.Any(), gomock.Any()).
 		Return(nil, kerrors.Validation("services/api.yaml.j2: boom"))
 
-	loader := manifest.NewLoader(fsys, tpl)
+	loader := newLoader(fsys, tpl)
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -430,7 +465,7 @@ func TestLoad_EnvironmentReadErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, nil)
 	fsys.EXPECT().ReadFile("environments/dev.yaml").Return(nil, errors.New("disk on fire"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -441,7 +476,7 @@ func TestLoad_RootReadErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
 	fsys.EXPECT().ReadFile("kraai.yaml").Return(nil, errors.New("disk on fire"))
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	loader := newLoader(fsys, manifest.NewTemplateEngine(fsys))
 	_, err := loader.Load("dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
@@ -491,8 +526,9 @@ func TestLoad_PerServiceComputeParses(t *testing.T) {
 
 	// The provider-level block is untouched by any service's override —
 	// merging (internal/plan's job) happens later, against a copy.
-	if got.Root.Providers.Compute.Settings["runtime"] != "python3.14" {
-		t.Errorf("provider settings = %+v", got.Root.Providers.Compute.Settings)
+	compute := configuredProvider(t, got.Root.Providers, manifest.CapabilityCompute)
+	if compute.Settings["runtime"] != "python3.14" {
+		t.Errorf("provider settings = %+v", compute.Settings)
 	}
 }
 
