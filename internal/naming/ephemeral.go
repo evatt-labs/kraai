@@ -9,8 +9,8 @@ import (
 )
 
 // NamePattern is kraai's frozen ephemeral environment-name grammar,
-// byte-for-byte 0.5.0's NAME_PATTERN (docs/BLUEPRINT.md D22): three
-// lowercase words of 2-15 letters each, hyphen-separated, followed by
+// byte-for-byte 0.5.0's NAME_PATTERN: three lowercase words of 2-15
+// letters each, hyphen-separated, followed by
 // exactly 5 digits. The bounded word length isn't arbitrary in the
 // original or this port: unbounded [a-z]+ would accept names that fail
 // downstream at Neon/Cloudflare anyway, so there's no reason to let
@@ -22,7 +22,7 @@ var NamePattern = regexp.MustCompile(`^[a-z]{2,15}-[a-z]{2,15}-[a-z]{2,15}-\d{5}
 var nonLetter = regexp.MustCompile(`[^a-z]`)
 
 // IsValidEnvironmentName reports whether name matches NamePattern —
-// kraai's frozen ephemeral environment-name grammar (D22). It does not
+// kraai's frozen ephemeral environment-name grammar. It does not
 // accept a persistent environment name; see
 // IsValidPersistentEnvironmentName for that distinct grammar.
 func IsValidEnvironmentName(name string) bool {
@@ -31,7 +31,7 @@ func IsValidEnvironmentName(name string) bool {
 
 // GenerateEnvironmentName draws a random ephemeral environment name —
 // {color}-{adjective}-{animal}-{5 digits} — byte-for-byte 0.5.0's
-// generateEnvironmentName (D22). The numeric suffix is drawn uniformly
+// generateEnvironmentName. The numeric suffix is drawn uniformly
 // from [10000, 99999] inclusive (Node's crypto.randomInt(10_000,
 // 100_000) is inclusive-lower/exclusive-upper), so it is always exactly
 // 5 digits and never needs zero-padding.
@@ -59,7 +59,7 @@ func GenerateEnvironmentName() (string, error) {
 
 // EnvironmentNameForPullRequest builds the deterministic per-(repo, PR
 // number) ephemeral environment name — {repoWord}-pull-request-{5
-// digits} — byte-for-byte 0.5.0's environmentNameForPullRequest (D22).
+// digits} — byte-for-byte 0.5.0's environmentNameForPullRequest.
 // One name per (repo, PR number) pair means the GitHub Action's re-run
 // strategy (down then up on every push) always targets the same
 // environment instead of generating a fresh random one every run and
@@ -74,7 +74,8 @@ func GenerateEnvironmentName() (string, error) {
 // exactly 5 digits, so an out-of-range number can't be truncated or
 // wrapped without silently colliding two different PRs' names. An
 // out-of-range prNumber returns a *kerrors.KError in the CodeValidation
-// bucket, never a panic (D18/D19) — unlike the JS original, which threw.
+// bucket, never a panic — kraai's own convention is a typed returned
+// error, not a panic, unlike the JS original, which threw.
 // Go's static typing already rules out the JS original's non-integer
 // case (prNumber is an int here, never a float).
 func EnvironmentNameForPullRequest(repoName string, prNumber int) (string, error) {

@@ -115,7 +115,7 @@ func TestEnvironmentNameForPullRequest_TruncatesOverlongRepoName(t *testing.T) {
 
 // TestEnvironmentNameForPullRequest_RangeErrors pins the JS suite's
 // "throws on a PR number above 99999" / "... 0" cases, translated to
-// Go's returned-error convention (D18/D19) instead of a thrown exception.
+// Go's own returned-error convention instead of a thrown exception.
 func TestEnvironmentNameForPullRequest_RangeErrors(t *testing.T) {
 	for _, prNumber := range []int{0, 100000, -1} {
 		_, err := EnvironmentNameForPullRequest("repo", prNumber)
@@ -159,10 +159,10 @@ func TestEnvironmentNameForPullRequest_AcceptedResultsAreValid(t *testing.T) {
 	}
 }
 
-// TestRapid_EnvironmentNameForPullRequest_AlwaysValidOrRejected is D21's
-// named rapid target for pull-request naming derivation: for any repo
-// name and any int32-range PR number, the function either returns a name
-// that passes IsValidEnvironmentName, or a CodeValidation error — never a
+// TestRapid_EnvironmentNameForPullRequest_AlwaysValidOrRejected is a
+// property-based rapid target for pull-request naming derivation: for any
+// repo name and any int32-range PR number, the function either returns a
+// name that passes IsValidEnvironmentName, or a CodeValidation error — never a
 // panic, and never a name that fails its own validator (the defensive
 // assert in EnvironmentNameForPullRequest would itself fail the test via
 // CodeUnexpected below). Also asserts determinism: calling twice with the

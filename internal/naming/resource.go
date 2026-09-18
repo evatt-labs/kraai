@@ -15,20 +15,20 @@ var nonAlnumRun = regexp.MustCompile(`[^a-z0-9]+`)
 // non-alphanumeric characters collapsed to one hyphen, then any leading
 // or trailing hyphen stripped. Byte-for-byte 0.5.0's
 // binding.toLowerCase().replaceAll(/[^a-z0-9]+/g,
-// "-").replaceAll(/^-+|-+$/g, "") (D22).
+// "-").replaceAll(/^-+|-+$/g, "").
 func slugify(s string) string {
 	return strings.Trim(nonAlnumRun.ReplaceAllString(strings.ToLower(s), "-"), "-")
 }
 
-// truncate applies kraai's frozen 63-byte name bound (D22, matching
-// R2/S3's lowercase-DNS-compliant, <=63-byte requirement): name unchanged
-// if it already fits, otherwise byte-sliced to 63 and stripped of any
-// trailing hyphen the slice introduced.
+// truncate applies kraai's frozen 63-byte name bound (matching R2/S3's
+// lowercase-DNS-compliant, <=63-byte requirement): name unchanged if it
+// already fits, otherwise byte-sliced to 63 and stripped of any trailing
+// hyphen the slice introduced.
 //
 // Every derived name goes through this one implementation —
 // Namer.Resource, Namer.Service, and the zero-prefix ResourceName/
-// ServiceName built on them alike — so the truncation rule can only ever
-// live, and only ever drift from D22, in this one place.
+// ServiceName built on them alike — so the truncation rule lives, and can
+// only ever drift, in this one place.
 //
 // Truncation is byte-length, not rune-length: 0.5.0's `name.slice(0,
 // 63)` counts UTF-16 code units, which only diverges from a Go
@@ -38,17 +38,18 @@ func slugify(s string) string {
 // 63 *bytes* is the actual DNS/R2 constraint this exists to satisfy, not
 // 63 UTF-16 code units, which was only ever an artifact of the host
 // language. A non-ASCII environmentName/serviceKey/prefix is not a live
-// input today (D22's grammars are lowercase ASCII-only, and
-// ValidatePrefix rejects a non-ASCII prefix), so the divergence is
-// theoretical, not observed in practice.
+// input today (both frozen environment-name grammars are lowercase
+// ASCII-only, and ValidatePrefix rejects a non-ASCII prefix), so the
+// divergence is theoretical, not observed in practice.
 //
 // The trailing-hyphen strip below runs only on the truncation branch,
 // matching 0.5.0's `name.slice(0, 63).replace(/-+$/, "")` exactly: an
 // untruncated name that happens to end in a hyphen — only reachable via
 // a binding that slugs to the empty string, e.g. "___" or "" — is
 // returned as-is, hyphen and all. That's an inherited quirk from the JS
-// original, not something this port introduces or should "fix" (D22
-// freezes behavior); see resource_test.go for the case pinned down.
+// original, not something this port introduces or should "fix" — this
+// package's job is matching 0.5.0's behavior byte for byte, not
+// improving on it; see resource_test.go for the case pinned down.
 func truncate(name string) string {
 	if len(name) <= 63 {
 		return name
@@ -119,10 +120,11 @@ type Namer struct {
 // values it trusts, it does not re-check its own callers' inputs. The
 // grammar and length ceiling a prefix must satisfy are owned by
 // internal/manifest (validatePrefix, internal/manifest/naming.go), not
-// here — internal/naming already imports internal/manifest for D7 import
-// resolution (imports.go), so validation has to live on the other side of
-// that dependency to avoid a cycle. internal/manifest's loader is the one
-// enforcement point (validateEnvironment in internal/manifest/loader.go),
+// here — internal/naming already imports internal/manifest for
+// import-reference resolution (imports.go), so validation has to live on
+// the other side of that dependency to avoid a cycle. internal/manifest's
+// loader is the one enforcement point (validateEnvironment in
+// internal/manifest/loader.go),
 // run once at manifest load; every later caller — the planner included —
 // trusts that a loaded Manifest's Environment.Naming.Prefix already
 // passed that check.
@@ -131,7 +133,7 @@ type Namer struct {
 //
 // Setting or changing naming.prefix on a persistent environment that has
 // already been applied changes every name that environment's resources
-// and compute derive. kraai keeps no state document (D6): "does this
+// and compute derive. kraai keeps no state document: "does this
 // resource exist" is answered by deriving its name fresh and asking the
 // provider, never by consulting a stored inventory. A changed prefix does
 // not rename the environment's existing resources — it makes kraai stop
@@ -142,9 +144,10 @@ type Namer struct {
 // find: not deleted, not tracked, just unreachable under kraai's naming
 // from that point on.
 //
-// This is inherent to deterministic naming (D7), not a bug this
-// workstream owes a fix for: a resource's identity *is* its derived name,
-// so changing the derivation changes the identity kraai looks up. Adding
+// This is inherent to deriving a resource's identity deterministically
+// from its name, not a bug this workstream owes a fix for: a resource's
+// identity *is* its derived name, so changing the derivation changes the
+// identity kraai looks up. Adding
 // or editing naming.prefix on an environment that already exists must be
 // treated like any other change to a naming input — read the plan's wave
 // of creates before applying, and reconcile or delete the orphaned
@@ -180,7 +183,7 @@ func (n Namer) Service(environmentName, serviceKey string) string {
 
 // ResourceName builds the name kraai provisions for one binding —
 // {environmentName}-{serviceKey}-{slug(binding)} — byte-for-byte 0.5.0's
-// resourceName (D22). R2 bucket names specifically must be lowercase,
+// resourceName. R2 bucket names specifically must be lowercase,
 // DNS-compliant, and 63 characters or fewer; this satisfies that for
 // every resource type rather than having per-type naming rules drift
 // apart, since a binding name like MY_QUEUE is common and would
@@ -194,8 +197,8 @@ func (n Namer) Service(environmentName, serviceKey string) string {
 // Exactly Namer{}.Resource: the zero-value Namer carries an empty
 // prefix, so this is the "no naming.prefix configured" case, not a
 // second implementation sitting next to it. That equivalence is what
-// guarantees D22's byte-identical promise holds for every environment
-// that doesn't set naming.prefix — see
+// guarantees the byte-identical-with-0.5.0 promise holds for every
+// environment that doesn't set naming.prefix — see
 // TestNamer_EmptyPrefixMatchesResourceName in resource_test.go.
 func ResourceName(environmentName, serviceKey, binding string) string {
 	return Namer{}.Resource(environmentName, serviceKey, binding)
@@ -215,7 +218,8 @@ func ResourceName(environmentName, serviceKey, binding string) string {
 // that produced it.
 //
 // Exactly Namer{}.Service — see ResourceName's own doc comment for why
-// that equivalence is what preserves D22 for the no-prefix case.
+// that equivalence is what preserves byte-compatibility with 0.5.0 for
+// the no-prefix case.
 func ServiceName(environmentName, serviceKey string) string {
 	return Namer{}.Service(environmentName, serviceKey)
 }

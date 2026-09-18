@@ -24,8 +24,8 @@ func TestRandomIntn_RejectsNonPositiveBound(t *testing.T) {
 // TestRandomIntn_ReaderErrorIsWrapped exercises the (in practice
 // unreachable — crypto/rand.Reader never fails on a supported platform)
 // read-error path via the randReader test seam, asserting it comes back
-// as a CodeUnexpected *kerrors.KError rather than a bare error or panic
-// (D18/D19).
+// as a CodeUnexpected *kerrors.KError rather than a bare error or panic,
+// matching kraai's own typed-returned-error convention.
 func TestRandomIntn_ReaderErrorIsWrapped(t *testing.T) {
 	orig := randReader
 	randReader = iotest.ErrReader(errors.New("injected read failure"))
