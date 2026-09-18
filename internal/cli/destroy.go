@@ -18,7 +18,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/plan"
 )
 
-func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
+func newDestroyCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cobra.Command {
 	var (
 		dir         string
 		setArgs     []string
@@ -41,7 +41,9 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDestroy(cmd, args[0], dir, setArgs, jsonOut, confirmName, assembler, isRealTerminal)
+			return runDestroy(
+				cmd, args[0], dir, setArgs, jsonOut, confirmName,
+				assembler, catalog, isRealTerminal)
 		},
 	}
 
@@ -88,7 +90,8 @@ func newDestroyCommand(assembler RegistryAssembler) *cobra.Command {
 // reporting channel.
 func runDestroy(
 	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
-	confirmName string, assembler RegistryAssembler, interactive isInteractive,
+	confirmName string, assembler RegistryAssembler, catalog CatalogAssembler,
+	interactive isInteractive,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
 		return kerrors.Validation(
@@ -109,7 +112,15 @@ func runDestroy(
 		return err
 	}
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	// The capability vocabulary kraai.yaml's `providers:` keys are checked
+	// against. Built from static provider declarations, so it needs no
+	// credential and no manifest — see internal/assemble.Capabilities.
+	vocabulary, err := catalog()
+	if err != nil {
+		return err
+	}
+
+	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), vocabulary)
 	m, err := loader.Load(envName, setArgs)
 	if err != nil {
 		return err

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/fs"
 	"sort"
+	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
@@ -16,19 +17,41 @@ const (
 	environmentsDir = "environments"
 )
 
+// Vocabulary is the set of capability names a manifest may name under
+// `providers:` — every capability some registered provider declares it can
+// fulfil. resource.Catalog satisfies it as written.
+//
+// An interface, and the narrowest one that answers the question, because
+// the vocabulary is assembled from the provider packages
+// (internal/assemble.Capabilities) and this package must never import one.
+// Handing the vocabulary to the Loader keeps that dependency pointing one
+// way, which is the whole reason the catalog lives in internal/assemble.
+type Vocabulary interface {
+	// Names returns every declared capability name, sorted.
+	Names() []string
+}
+
 // Loader resolves a manifest directory into one validated Manifest.
 // Both external systems it touches — the filesystem and the template
 // engine — are injected interfaces (FS, TemplateEngine), so Loader itself
 // never imports os or pongo2 directly.
 type Loader struct {
-	fs       FS
-	template TemplateEngine
+	fs         FS
+	template   TemplateEngine
+	vocabulary Vocabulary
 }
 
-// NewLoader builds a Loader reading from fsys and rendering .j2 files with
-// engine.
-func NewLoader(fsys FS, engine TemplateEngine) *Loader {
-	return &Loader{fs: fsys, template: engine}
+// NewLoader builds a Loader reading from fsys, rendering .j2 files with
+// engine, and validating the capabilities kraai.yaml names against
+// vocabulary.
+//
+// vocabulary is required. Load reports a nil one rather than skipping the
+// check: a capability vocabulary that silently does not apply is the
+// validation-that-only-runs-sometimes failure this codebase has shipped
+// before, and the whole point of taking it here is that no caller can
+// forget it.
+func NewLoader(fsys FS, engine TemplateEngine, vocabulary Vocabulary) *Loader {
+	return &Loader{fs: fsys, template: engine, vocabulary: vocabulary}
 }
 
 // Load resolves the manifest for envName: kraai.yaml (+ services/*.yaml,
@@ -37,6 +60,10 @@ func NewLoader(fsys FS, engine TemplateEngine) *Loader {
 // then the environment overlay itself — every schema-validated file
 // strictly rejecting unknown keys along the way.
 func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
+	if l.vocabulary == nil {
+		return nil, kerrors.New("manifest: Loader was built with no capability vocabulary")
+	}
+
 	values, err := LoadValues(l.fs, envName, setArgs)
 	if err != nil {
 		return nil, err
@@ -88,7 +115,7 @@ func (l *Loader) loadRoot(values map[string]any) (*Root, error) {
 		if err := DecodeStrict(plainData, rootFile, &root); err != nil {
 			return nil, err
 		}
-		return &root, validateRoot(&root)
+		return &root, l.validateRoot(&root)
 	case tplData != nil:
 		rendered, err := l.template.Render(rootTemplate, tplData, values)
 		if err != nil {
@@ -98,22 +125,56 @@ func (l *Loader) loadRoot(values map[string]any) (*Root, error) {
 		if err := DecodeStrict(rendered, rootTemplate, &root); err != nil {
 			return nil, err
 		}
-		return &root, validateRoot(&root)
+		return &root, l.validateRoot(&root)
 	default:
 		return nil, kerrors.Validation("%s is required (or %s)", rootFile, rootTemplate)
 	}
 }
 
-func validateRoot(root *Root) error {
+// validateRoot checks kraai.yaml's version and every key under `providers:`.
+//
+// Iterates the map directly, in sorted key order, rather than through
+// Providers.Capabilities: a key written with no value under it is
+// unconfigured to every other caller, but it is still a key this file
+// declared, and an unknown one has to be reported whether or not the author
+// got as far as naming a vendor. Sorted so a manifest with more than one bad
+// key reports the same one first on every run.
+func (l *Loader) validateRoot(root *Root) error {
 	if root.Version != 1 {
 		return kerrors.Validation("%s: version: must be 1, got %d", rootFile, root.Version)
 	}
-	// A configured capability naming no vendor cannot resolve to anything.
-	// Caught here rather than when the registry is consulted, so the error
-	// names the file and the key instead of surfacing later as an unresolvable
-	// lookup with no obvious source.
-	for _, capability := range root.Providers.Capabilities() {
-		provider, _ := root.Providers.For(capability)
+
+	declared := l.vocabulary.Names()
+	known := make(map[string]bool, len(declared))
+	for _, name := range declared {
+		known[name] = true
+	}
+
+	written := make([]string, 0, len(root.Providers))
+	for capability := range root.Providers {
+		written = append(written, capability)
+	}
+	sort.Strings(written)
+
+	for _, capability := range written {
+		// The strictness a fixed struct of capability fields used to give for
+		// free, now sourced from what the registered providers actually
+		// declare. An unknown capability names an implementation that does
+		// not exist, so it can only ever fail to resolve; saying so here
+		// names the file and the key, and says what could have gone there.
+		if !known[capability] {
+			return kerrors.Validation(
+				"%s: providers.%s: no registered provider declares capability %q — declared: %s",
+				rootFile, capability, capability, strings.Join(declared, ", "))
+		}
+		// A configured capability naming no vendor cannot resolve to
+		// anything. Caught here rather than when the registry is consulted,
+		// so the error names the file and the key instead of surfacing later
+		// as an unresolvable lookup with no obvious source.
+		provider, ok := root.Providers.For(capability)
+		if !ok {
+			continue
+		}
 		if provider.Vendor == "" {
 			return kerrors.Validation(
 				"%s: providers.%s: vendor is required", rootFile, capability)

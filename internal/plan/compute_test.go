@@ -54,7 +54,7 @@ func newComputeRegistryFixture(t *testing.T) *computeRegistryFixture {
 
 func (f *computeRegistryFixture) providers() manifest.Providers {
 	return manifest.Providers{
-		Compute: &manifest.Provider{
+		manifest.CapabilityCompute: {
 			Vendor:   "fakecloud",
 			Settings: map[string]any{"runtime": "python3.14", "architecture": "arm64", "reservedConcurrency": 5},
 		},
@@ -242,7 +242,7 @@ func newFrontDoorRegistryFixture(t *testing.T) *frontDoorRegistryFixture {
 
 func (f *frontDoorRegistryFixture) providers(settings map[string]any) manifest.Providers {
 	return manifest.Providers{
-		Compute: &manifest.Provider{Vendor: "fakecloud", Settings: settings},
+		manifest.CapabilityCompute: {Vendor: "fakecloud", Settings: settings},
 	}
 }
 

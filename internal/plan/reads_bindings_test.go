@@ -25,7 +25,7 @@ func TestPlan_ComputeReadsBindingsIncludesEveryDeclaredBinding(t *testing.T) {
 	}
 
 	m := f.oneServiceManifest()
-	m.Root.Providers.Compute = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
 
 	p, err := New(f.reg).Plan(context.Background(), m, envName)
 	if err != nil {
@@ -54,7 +54,7 @@ func TestPlan_ComputeReadsBindingsOrderIsDeterministic(t *testing.T) {
 	}
 
 	m := f.oneServiceManifest()
-	m.Root.Providers.Compute = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
 
 	p1, err := New(f.reg).Plan(context.Background(), m, envName)
 	if err != nil {

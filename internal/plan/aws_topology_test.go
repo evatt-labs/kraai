@@ -58,8 +58,8 @@ func awsAPITopologyFixture(t *testing.T) *resource.Registry {
 func kraaiAPIManifest() *manifest.Manifest {
 	return &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{
-			Compute:  &manifest.Provider{Vendor: "aws"},
-			Database: &manifest.Provider{Vendor: "neon"},
+			manifest.CapabilityCompute:  {Vendor: "aws"},
+			manifest.CapabilityDatabase: {Vendor: "neon"},
 		}},
 		Services: map[string]manifest.Service{
 			"api": {

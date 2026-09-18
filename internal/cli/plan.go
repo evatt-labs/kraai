@@ -29,7 +29,7 @@ import (
 // exercised without any of it. The production wiring is in NewRootCommand.
 type RegistryAssembler func(ctx context.Context, m *manifest.Manifest) (*resource.Registry, error)
 
-func newPlanCommand(assembler RegistryAssembler) *cobra.Command {
+func newPlanCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cobra.Command {
 	var (
 		dir     string
 		setArgs []string
@@ -46,7 +46,7 @@ func newPlanCommand(assembler RegistryAssembler) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPlan(cmd, args[0], dir, setArgs, jsonOut, assembler)
+			return runPlan(cmd, args[0], dir, setArgs, jsonOut, assembler, catalog)
 		},
 	}
 
@@ -95,7 +95,10 @@ func newPlanCommand(assembler RegistryAssembler) *cobra.Command {
 // The distinct "2 means changes are present" signal is a named gap, not a
 // silent one — worth building when apply/destroy make the shared plumbing
 // pay for itself.
-func runPlan(cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool, assembler RegistryAssembler) error {
+func runPlan(
+	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
+	assembler RegistryAssembler, catalog CatalogAssembler,
+) error {
 	if !naming.IsValidEnvironmentReference(envName) {
 		return kerrors.Validation(
 			"invalid environment name %q: must match kraai's ephemeral grammar (%s) "+
@@ -129,7 +132,15 @@ func runPlan(cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut 
 		return err
 	}
 
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys))
+	// The capability vocabulary kraai.yaml's `providers:` keys are checked
+	// against. Built from static provider declarations, so it needs no
+	// credential and no manifest — see internal/assemble.Capabilities.
+	vocabulary, err := catalog()
+	if err != nil {
+		return err
+	}
+
+	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), vocabulary)
 	m, err := loader.Load(envName, setArgs)
 	if err != nil {
 		return err

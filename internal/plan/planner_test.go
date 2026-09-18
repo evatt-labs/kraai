@@ -101,7 +101,7 @@ func TestPlan_AbsentResourcesPlanAsCreate(t *testing.T) {
 func TestPlan_ExistingResourcesPlanAsNoChange(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
-		Root:     manifest.Root{Providers: manifest.Providers{KeyValue: &manifest.Provider{Vendor: "cloudflare"}}},
+		Root:     manifest.Root{Providers: manifest.Providers{manifest.CapabilityKeyValue: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{"api": {KeyValue: []manifest.KeyValue{{Binding: "CACHE"}}}},
 	}
 
@@ -138,7 +138,7 @@ func TestPlan_ImmutableDiffPlansAsReplace(t *testing.T) {
 		Lookup: resource.LookupByName, Resource: differ,
 	}))
 	m := &manifest.Manifest{
-		Root: manifest.Root{Providers: manifest.Providers{Objects: &manifest.Provider{Vendor: "cloudflare"}}},
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
 			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
 		},
@@ -172,7 +172,7 @@ func TestPlan_ImmutableDiffErrorPlansAsFailed(t *testing.T) {
 		Lookup: resource.LookupByName, Resource: differ,
 	}))
 	m := &manifest.Manifest{
-		Root: manifest.Root{Providers: manifest.Providers{Objects: &manifest.Provider{Vendor: "cloudflare"}}},
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
 			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
 		},
@@ -211,7 +211,7 @@ func TestPlan_SpecValidatorRunsOnActionCreate(t *testing.T) {
 		Lookup: resource.LookupByName, Resource: validator,
 	}))
 	m := &manifest.Manifest{
-		Root: manifest.Root{Providers: manifest.Providers{Objects: &manifest.Provider{Vendor: "cloudflare"}}},
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
 			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
 		},
@@ -249,7 +249,7 @@ func TestPlan_SpecValidatorAlsoRunsWhenResourceExists(t *testing.T) {
 		Lookup: resource.LookupByName, Resource: validator,
 	}))
 	m := &manifest.Manifest{
-		Root: manifest.Root{Providers: manifest.Providers{Objects: &manifest.Provider{Vendor: "cloudflare"}}},
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
 		Services: map[string]manifest.Service{
 			"api": {Objects: []manifest.ObjectStore{{Binding: "UPLOADS"}}},
 		},
@@ -349,7 +349,7 @@ func TestPlan_ConcurrencyLimitBoundsParallelism(t *testing.T) {
 	services["api"] = manifest.Service{KeyValue: kvBindings}
 
 	m := &manifest.Manifest{
-		Root:     manifest.Root{Providers: manifest.Providers{KeyValue: &manifest.Provider{Vendor: "cloudflare"}}},
+		Root:     manifest.Root{Providers: manifest.Providers{manifest.CapabilityKeyValue: {Vendor: "cloudflare"}}},
 		Services: services,
 	}
 
@@ -431,7 +431,7 @@ func TestPlan_UnconfiguredCapabilityIsValidationError(t *testing.T) {
 func TestPlan_UnknownVendorIsValidationError(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
-		Root: manifest.Root{Providers: manifest.Providers{Database: &manifest.Provider{Vendor: "aws"}}},
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityDatabase: {Vendor: "aws"}}},
 		Services: map[string]manifest.Service{
 			"api": {Databases: []manifest.Database{{Binding: "DB", Driver: "postgres"}}},
 		},
@@ -466,7 +466,7 @@ func TestPlan_UnconfiguredCapability_EveryBindingKind(t *testing.T) {
 func TestPlan_DatabaseCachingIsCarriedIntoConfig(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
-		Root: manifest.Root{Providers: manifest.Providers{Database: &manifest.Provider{Vendor: "neon"}}},
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityDatabase: {Vendor: "neon"}}},
 		Services: map[string]manifest.Service{
 			"api": {Databases: []manifest.Database{{
 				Binding: "DB", Driver: "postgres", Caching: &manifest.Caching{Disabled: true, MaxAge: 30},
@@ -500,7 +500,7 @@ func TestPlan_ComputeIncludeIsCarriedIntoConfig(t *testing.T) {
 	}
 
 	m := f.oneServiceManifest()
-	m.Root.Providers.Compute = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
 	m.Services["api"] = manifest.Service{
 		Dir:     "services/api",
 		Compute: &manifest.Compute{Trigger: manifest.TriggerHTTP, Include: []string{"build/", "requirements.txt"}},
@@ -534,7 +534,7 @@ func TestPlan_ComputeWithNoIncludeOmitsConfigKey(t *testing.T) {
 	}
 
 	m := f.oneServiceManifest()
-	m.Root.Providers.Compute = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
 	m.Services["api"] = manifest.Service{Dir: "services/api"}
 
 	got, err := New(f.reg).Plan(t.Context(), m, "env-a")
@@ -697,7 +697,7 @@ func TestEveryServiceIsPlannedAsDeployable(t *testing.T) {
 	}
 
 	m := f.oneServiceManifest()
-	m.Root.Providers.Compute = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
 	m.Services["worker"] = manifest.Service{Dir: "services/worker"}
 
 	got, err := New(f.reg).Plan(t.Context(), m, "env-a")
@@ -760,7 +760,7 @@ func TestNoComputeVendorPlansNoCompute(t *testing.T) {
 func TestUnresolvableComputeFailsTheWalk(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := f.oneServiceManifest()
-	m.Root.Providers.Compute = &manifest.Provider{Vendor: "nobody"}
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "nobody"}
 
 	_, err := New(f.reg).Plan(t.Context(), m, "env-a")
 	if err == nil {
@@ -782,8 +782,8 @@ func TestPlan_ManifestDependsOn_OrdersOtherwiseIndependentServices(t *testing.T)
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{
-			KeyValue: &manifest.Provider{Vendor: "cloudflare"},
-			Objects:  &manifest.Provider{Vendor: "cloudflare"},
+			manifest.CapabilityKeyValue: {Vendor: "cloudflare"},
+			manifest.CapabilityObjects:  {Vendor: "cloudflare"},
 		}},
 		Services: map[string]manifest.Service{
 			"backend":  {KeyValue: []manifest.KeyValue{{Binding: "CACHE"}}},
@@ -826,7 +826,7 @@ func TestPlan_NamingPrefixReachesResourceAndServiceNames(t *testing.T) {
 	}
 
 	m := f.oneServiceManifest()
-	m.Root.Providers.Compute = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
 	m.Environment.Naming = &manifest.Naming{Prefix: "acme-"}
 
 	got, err := New(f.reg).Plan(context.Background(), m, envName)
