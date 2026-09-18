@@ -143,6 +143,12 @@ Commits: conventional prefix, imperative, no filler, breaking changes use
 co-author trailers, in commits or pull request bodies. **No emoji** in code,
 comments, commits, or output.
 
+**Monitor every PR you open until it resolves.** Queuing auto-merge
+(`gh pr merge --squash --auto --delete-branch`) is not the end of the task —
+track it until it actually merges or a required check fails, and report
+which happened. Opening a PR and moving on without confirming the outcome
+leaves work in an unknown state for whoever picks up next.
+
 ## Cloud access
 
 Read-only calls against a real account are encouraged for verification —
