@@ -218,6 +218,7 @@ kraai plan <environment>       # read-only; never mutates, never locks
 kraai apply <environment>      # create, or replace with --replace
 kraai destroy <environment>    # tear down, in reverse dependency order
 kraai capabilities             # what each provider offers (no credentials needed)
+kraai plugins --env <name>     # load the manifest's plugins and show what they provide
 ```
 
 `plan` against a real account is safe and is the best way to see what kraai
