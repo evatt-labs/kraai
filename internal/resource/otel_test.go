@@ -397,14 +397,14 @@ func TestInstrumentedOptionalsOnPlainResource(t *testing.T) {
 		t.Errorf("Secrets() on a non-producer = %v, want nil", got)
 	}
 
-	differs, err := decorated.(interface {
-		DiffersFromState(Spec, *State) (bool, error)
-	}).DiffersFromState(Spec{}, &State{})
+	difference, err := decorated.(interface {
+		Diff(Spec, *State) (Difference, error)
+	}).Diff(Spec{}, &State{})
 	if err != nil {
-		t.Errorf("DiffersFromState() on a non-differ error = %v, want nil", err)
+		t.Errorf("Diff() on a non-differ error = %v, want nil", err)
 	}
-	if differs {
-		t.Error("DiffersFromState() on a non-differ = true, want false")
+	if difference != Same {
+		t.Errorf("Diff() on a non-differ = %v, want Same", difference)
 	}
 
 	if err := decorated.(interface {
