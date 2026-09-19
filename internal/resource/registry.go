@@ -280,6 +280,10 @@ type ApplicabilityContext struct {
 	// route declaring one. False for a caller with no service, and for a
 	// service whose routes are all default-hostname.
 	CustomDomain bool
+	// Binding is the manifest entry being resolved for, without its name —
+	// what the entry said beyond which binding it is. Nil for a caller
+	// resolving compute, which has no entry.
+	Binding map[string]any
 }
 
 // Applicability reports whether a registration applies in a context.
@@ -367,6 +371,20 @@ func RequiresSettings(want func(settings map[string]any) bool) Applicability {
 // must not read as "everyone gets one".
 func RequiresCustomDomain() Applicability {
 	return func(ctx ApplicabilityContext) bool { return ctx.CustomDomain }
+}
+
+// RequiresBindingKey is satisfied when the binding entry being resolved for
+// carries key — a record set that exists only to point a zone at something
+// applies only to a dns entry that names the something.
+//
+// Like RequiresCustomDomain, an absent entry does not satisfy this: the
+// key is something a manifest writes, and a caller with no entry wrote
+// nothing.
+func RequiresBindingKey(key string) Applicability {
+	return func(ctx ApplicabilityContext) bool {
+		_, ok := ctx.Binding[key]
+		return ok
+	}
 }
 
 // And is satisfied when every one of conditions is. Listing conditions in

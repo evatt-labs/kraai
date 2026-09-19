@@ -200,15 +200,12 @@ func Registrations(client *Client) []resource.Registration {
 			// the three bindings happened to share a name. The cdn entry's
 			// origin and certificate references (Capabilities) are what
 			// order this after them now, whatever they are called.
-			// AWS enforces alias uniqueness globally, so Aliases is a safe
-			// attribute to search on for this type's identity. See
-			// cloudfrontMatch's doc comment for the gap this leaves open —
-			// a distribution with no alias cannot be found this way.
-			Lookup: resource.LookupByAttr,
-			Resource: &resourceType{
-				provider: Provider, typeName: TypeCloudFrontDistribution,
-				lookup: resource.LookupByAttr, client: client, match: cloudfrontMatch,
-			},
+			//
+			// Found by kraai's tag, not by alias: a distribution need not
+			// have one, and an alias is the manifest's to change. See
+			// cloudfront.go.
+			Lookup:   resource.LookupByTag,
+			Resource: newCloudFrontResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeRoute53RecordSet,
@@ -221,15 +218,17 @@ func Registrations(client *Client) []resource.Registration {
 			// under a shared name. See this function's own doc comment for
 			// the validation-record ordering this does not solve.
 			DependsOn: []string{key(TypeRoute53HostedZone)},
+			// The apex record of the zone its entry declares, so it shares
+			// the zone's name; planned only when the entry names an alias
+			// to point it at. See recordset.go.
+			NameFrom: resource.NameFromEntry,
+			NameKey:  "zone",
+			Applies:  []resource.Applicability{resource.RequiresBindingKey("alias")},
 			// See recordSetMatch's doc comment: not byName, because
-			// RecordSet's primary identifier is a compound
-			// (HostedZoneId|Name|Type) this package's byName fast path has
-			// no reliable way to construct without a lookup.
-			Lookup: resource.LookupByAttr,
-			Resource: &resourceType{
-				provider: Provider, typeName: TypeRoute53RecordSet,
-				lookup: resource.LookupByAttr, client: client, match: recordSetMatch,
-			},
+			// RecordSet's primary identifier is a compound this package's
+			// byName fast path has no reliable way to construct.
+			Lookup:   resource.LookupByAttr,
+			Resource: newRecordSetResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeLambdaFunction,

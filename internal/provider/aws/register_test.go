@@ -26,7 +26,7 @@ func TestRegisterWiresEveryType(t *testing.T) {
 		// No DependsOn across bindings: the bucket and certificate are
 		// reached through the cdn entry's origin and certificate references
 		// (capabilities.go), which is what orders the distribution after them.
-		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityCDN, nil, resource.LookupByAttr},
+		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityCDN, nil, resource.LookupByTag},
 		{Provider + "/" + TypeCertificateManagerCertificate, manifest.CapabilityTLS, nil, resource.LookupByTag},
 		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityDNS, nil, resource.LookupByAPI},
 		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityDNS,
@@ -246,8 +246,11 @@ func TestRegisterExpandsCapabilitiesToEveryType(t *testing.T) {
 		manifest.CapabilityCDN:     {TypeCloudFrontDistribution: true},
 	}
 	for capability, want := range byCapability {
+		// A dns entry that names an alias: the record set applies only to
+		// one that does, and the zone to every one.
 		resolved, err := reg.Resolve(capability, resource.ApplicabilityContext{
 			Vendors: map[string]string{capability: Provider},
+			Binding: map[string]any{"alias": "EDGE"},
 		})
 		if err != nil {
 			t.Fatalf("Resolve %s: %v", capability, err)
@@ -507,5 +510,30 @@ func TestOwnershipHooksAreWiredWhereTheNamespaceIsGlobal(t *testing.T) {
 		if exp.stamps && inner.stampTag == nil {
 			t.Errorf("%s: no stampTag, so nothing it creates would ever read as its own", reg.Key())
 		}
+	}
+}
+
+// The apex record is named by its zone, like the zone, and exists only for
+// an entry that names something to point it at.
+func TestRecordSetIsTheApexOfItsZoneWhenAliased(t *testing.T) {
+	reg := resource.NewRegistry()
+	if err := Register(reg, &Client{}); err != nil {
+		t.Fatalf("Register: %v", err)
+	}
+	record, ok := reg.Lookup(key(TypeRoute53RecordSet))
+	if !ok {
+		t.Fatal("no record set registration")
+	}
+	if record.NameFrom != resource.NameFromEntry || record.NameKey != "zone" {
+		t.Errorf("NameFrom=%s NameKey=%q, want entry/zone", record.NameFrom, record.NameKey)
+	}
+	if record.Matches(resource.ApplicabilityContext{Binding: map[string]any{"zone": "acme.example"}}) {
+		t.Error("a dns entry with no alias planned a record with nothing to point at")
+	}
+	if !record.Matches(resource.ApplicabilityContext{Binding: map[string]any{"zone": "acme.example", "alias": "EDGE"}}) {
+		t.Error("a dns entry with an alias planned no record")
+	}
+	if err := dnsBindingSchema.Validate(map[string]any{"binding": "ZONE", "zone": "acme.example", "name": "www"}); err == nil {
+		t.Error("the dns schema accepted a record name; the one record kraai writes is the apex")
 	}
 }

@@ -827,3 +827,18 @@ func TestRequiresCustomDomain(t *testing.T) {
 		t.Error("an empty context matched — 'nobody asked' read as 'everyone gets one'")
 	}
 }
+
+// RequiresBindingKey reads the entry being resolved for. An absent entry —
+// a compute resolve — satisfies nothing, for RequiresCustomDomain's reason.
+func TestRequiresBindingKey(t *testing.T) {
+	reg := Registration{Applies: []Applicability{RequiresBindingKey("alias")}}
+	if !reg.Matches(ApplicabilityContext{Binding: map[string]any{"zone": "z", "alias": "EDGE"}}) {
+		t.Error("an entry carrying the key did not match")
+	}
+	if reg.Matches(ApplicabilityContext{Binding: map[string]any{"zone": "z"}}) {
+		t.Error("an entry without the key matched")
+	}
+	if reg.Matches(ApplicabilityContext{}) {
+		t.Error("no entry at all matched")
+	}
+}

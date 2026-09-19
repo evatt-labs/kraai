@@ -388,9 +388,12 @@ infrastructure, and the only one built on a uniform CRUD plane — the
 CloudFormation schemas rather than one hand-written implementation per
 service. Adding an AWS resource type is a registry entry.
 
-Known gaps, each with a tracking issue. AWS `dns`, `tls` and `cdn` are
-registered but cannot yet be created — they reach the generic engine with no
-configuration of their own ([#117](https://github.com/evatt-labs/kraai/issues/117)).
+Known gaps, each with a tracking issue. AWS `dns`, `tls` and `cdn` build a
+static site's zone, certificate, distribution and apex record, but have not
+yet been exercised against a live account
+([#117](https://github.com/evatt-labs/kraai/issues/117)), and the distribution
+is not yet granted access to the private bucket it fronts
+([#219](https://github.com/evatt-labs/kraai/issues/219)).
 Cloudflare offers two compute products and kraai implements neither — Workers
 ([#135](https://github.com/evatt-labs/kraai/issues/135)) and Containers
 ([#138](https://github.com/evatt-labs/kraai/issues/138)). Azure and GCP have
