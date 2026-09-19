@@ -1,5 +1,7 @@
 package aws
 
+import "strings"
+
 // cloudfrontMatch implements AWS::CloudFront::Distribution's LookupByAttr
 // strategy: AWS enforces alias (CNAME) uniqueness globally, so a
 // distribution's Aliases is a safe attribute to search on.
@@ -135,9 +137,17 @@ func certificateStampTag(desired map[string]any, name string) {
 // client resolve properly rather than hiding; flagged here and in the PR
 // description rather than silently accepted, the same treatment
 // cloudfrontMatch already gives its own known gap.
+//
+// name is the zone name the manifest supplied (the registration is
+// NameFromEntry on "zone"). Route 53 reports a zone's Name with a trailing
+// dot, and a manifest author will not reliably write one, so both sides are
+// compared without it.
 func hostedZoneMatch(properties map[string]any, name string) bool {
-	zoneName, _ := properties["Name"].(string)
-	return zoneName == name
+	zoneName, ok := properties["Name"].(string)
+	if !ok {
+		return false
+	}
+	return strings.TrimSuffix(zoneName, ".") == strings.TrimSuffix(name, ".")
 }
 
 // recordSetMatch implements AWS::Route53::RecordSet's LookupByAttr

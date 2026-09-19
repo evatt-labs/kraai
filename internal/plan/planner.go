@@ -290,6 +290,14 @@ func (p *Planner) expandCompute(
 			Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
 		}
 		switch r.NameFrom {
+		case resource.NameFromEntry:
+			// A compute resolve has no binding entry to read a name from;
+			// this is a registration wired under the wrong capability, not
+			// a manifest problem, and it must not fall through to a derived
+			// name the registration said it does not have.
+			return nil, kerrors.Validation(
+				"%s is named from a binding entry's %q but is registered under compute, which has no entry",
+				r.Key(), r.NameKey)
 		case resource.NameFromRoute:
 			// One instance per custom-domain route, named by the hostname
 			// itself: the vendor addresses these by the domain string, and no
@@ -453,7 +461,7 @@ func (p *Planner) expandBinding(
 		return nil, err
 	}
 
-	name := namer.Resource(environmentName, svcKey, binding)
+	derived := namer.Resource(environmentName, svcKey, binding)
 
 	// An adopted resource has no identity kraai can derive, so the manifest's
 	// own reference travels on the Ref for a provider's lookup to use instead
@@ -463,6 +471,20 @@ func (p *Planner) expandBinding(
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
+		name := derived
+		if r.NameFrom == resource.NameFromEntry {
+			// The identity is the manifest's, not kraai's: a hosted zone is
+			// the zone name its entry declares. The vendor's schema decides
+			// whether the key is required; here it has to be present and a
+			// string, or the instance has no name at all.
+			value, _ := config[r.NameKey].(string)
+			if value == "" {
+				return nil, kerrors.Validation(
+					"services.%s.%s.%s: %s is named by the entry's %q, which is missing or not a string",
+					svcKey, capability, binding, r.Type, r.NameKey)
+			}
+			name = value
+		}
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: binding, Capability: capability,

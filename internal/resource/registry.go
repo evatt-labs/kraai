@@ -88,7 +88,16 @@ type Registration struct {
 	// the route's pattern. A naming strategy on the registration rather than
 	// a type name the planner knows about, so internal/plan stays ignorant of
 	// which vendor types are hostname-shaped.
+	//
+	// NameFromEntry is the same idea for a binding: the instance's identity
+	// is a value the manifest entry supplies under NameKey — a hosted zone is
+	// "acme.example", not anything derived from an environment and a binding
+	// — and the lookup that finds it again compares against that value.
 	NameFrom NameStrategy
+	// NameKey is, for NameFromEntry, the binding-entry key whose string
+	// value is the instance's name — "zone" for a hosted zone. Empty for
+	// every other strategy; validation rejects the two disagreeing.
+	NameKey string
 	// Reads is which of its service's bindings an instance reads credentials
 	// and identifiers from. The zero value, ReadsOwnBinding, is the common
 	// case: a type reaches only what its own binding's resources publish.
@@ -157,6 +166,9 @@ const (
 	// NameFromRoute names one instance per custom-domain route by the
 	// route's pattern, verbatim.
 	NameFromRoute
+	// NameFromEntry names one instance per binding by the value its manifest
+	// entry carries under Registration.NameKey, verbatim.
+	NameFromEntry
 )
 
 // String implements fmt.Stringer for readable validation errors.
@@ -166,13 +178,17 @@ func (s NameStrategy) String() string {
 		return "binding"
 	case NameFromRoute:
 		return "route"
+	case NameFromEntry:
+		return "entry"
 	default:
 		return "NameStrategy(" + strconv.Itoa(int(s)) + ")"
 	}
 }
 
 // Valid reports whether s is a declared strategy.
-func (s NameStrategy) Valid() bool { return s == NameFromBinding || s == NameFromRoute }
+func (s NameStrategy) Valid() bool {
+	return s == NameFromBinding || s == NameFromRoute || s == NameFromEntry
+}
 
 // ReadScope is which bindings a registration's instances read from. An
 // instance always reads its own binding; a scope only ever widens that.
@@ -537,6 +553,14 @@ func validate(reg Registration) error {
 		return kerrors.Validation(
 			"resource registration %q declares unknown name strategy %s",
 			reg.Provider+"/"+reg.Type, reg.NameFrom)
+	case reg.NameFrom == NameFromEntry && reg.NameKey == "":
+		return kerrors.Validation(
+			"resource registration %q is named from its entry but declares no NameKey to read the name from",
+			reg.Provider+"/"+reg.Type)
+	case reg.NameFrom != NameFromEntry && reg.NameKey != "":
+		return kerrors.Validation(
+			"resource registration %q declares NameKey %q but is named from its %s, which never reads it",
+			reg.Provider+"/"+reg.Type, reg.NameKey, reg.NameFrom)
 	case !reg.Reads.Valid():
 		return kerrors.Validation(
 			"resource registration %q declares unknown read scope %s",
