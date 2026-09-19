@@ -10,8 +10,6 @@ providers:
       database: appdb
       role: app
 
-hooks: ./kraai.hooks.mjs
-
 plugins:
   - name: example
     path: kraai-plugin-example.wasm

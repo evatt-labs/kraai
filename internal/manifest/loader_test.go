@@ -142,9 +142,6 @@ func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	if got := database.Settings["project"]; got != "kraai-control-plane" {
 		t.Errorf("Postgres.Settings[project] = %v", got)
 	}
-	if got.Root.Hooks != "./kraai.hooks.mjs" {
-		t.Errorf("Root.Hooks = %q", got.Root.Hooks)
-	}
 	if len(got.Root.Plugins) != 2 {
 		t.Fatalf("Root.Plugins = %+v, want 2", got.Root.Plugins)
 	}

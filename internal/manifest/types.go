@@ -16,11 +16,18 @@ type Manifest struct {
 	Values map[string]any
 }
 
-// Root is kraai.yaml at the manifest root: providers, hooks, plugins.
+// Root is kraai.yaml at the manifest root: providers and plugins.
+//
+// There is no `hooks:` key. One existed, pointing at a JavaScript file the
+// JavaScript CLI would have loaded, and survived that CLI's removal as a
+// field nothing read. A manifest declaring it now fails strict decoding with
+// "unknown field", which is what a key that does nothing should have done all
+// along. If lifecycle hooks return, they return as plugin provisions — the
+// plugin runtime is the extension surface now, and a hook is something a
+// plugin implements rather than a script kraai shells out to.
 type Root struct {
 	Version   int       `yaml:"version"`
 	Providers Providers `yaml:"providers"`
-	Hooks     string    `yaml:"hooks,omitempty"`
 	Plugins   []Plugin  `yaml:"plugins,omitempty"`
 }
 
