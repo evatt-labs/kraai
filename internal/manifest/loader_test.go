@@ -145,8 +145,22 @@ func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	if got.Root.Hooks != "./kraai.hooks.mjs" {
 		t.Errorf("Root.Hooks = %q", got.Root.Hooks)
 	}
-	if len(got.Root.Plugins) != 2 || got.Root.Plugins[1] != "./plugins/cost-guard.wasm" {
-		t.Errorf("Root.Plugins = %v", got.Root.Plugins)
+	if len(got.Root.Plugins) != 2 {
+		t.Fatalf("Root.Plugins = %+v, want 2", got.Root.Plugins)
+	}
+	costGuard := got.Root.Plugins[1]
+	if costGuard.Name != "cost-guard" || costGuard.Path != "./plugins/cost-guard.wasm" {
+		t.Errorf("Root.Plugins[1] = %+v", costGuard)
+	}
+	// Grants and provides are the operator's declaration, not the module's,
+	// so they have to survive the load intact — see manifest.Plugin.
+	if len(costGuard.Grants) != 1 || costGuard.Grants[0] != "http_fetch" {
+		t.Errorf("Root.Plugins[1].Grants = %v", costGuard.Grants)
+	}
+	if len(costGuard.Provides) != 1 ||
+		costGuard.Provides[0].Key != "policy.cost" ||
+		costGuard.Provides[0].Export != "kraai_export_check_cost" {
+		t.Errorf("Root.Plugins[1].Provides = %+v", costGuard.Provides)
 	}
 
 	api, ok := got.Services["api"]

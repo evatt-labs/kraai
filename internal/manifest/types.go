@@ -21,7 +21,54 @@ type Root struct {
 	Version   int       `yaml:"version"`
 	Providers Providers `yaml:"providers"`
 	Hooks     string    `yaml:"hooks,omitempty"`
-	Plugins   []string  `yaml:"plugins,omitempty"`
+	Plugins   []Plugin  `yaml:"plugins,omitempty"`
+}
+
+// Plugin is one entry of kraai.yaml's `plugins:` list: a WASM module to
+// load, what it may reach out to, and what it implements.
+//
+// Grants and Provides are written here rather than discovered from the
+// module, because a module cannot be trusted to describe its own sandbox.
+// Grants in particular is the whole of a plugin's access to the outside
+// world — a plugin gets exactly the host capabilities named here and
+// nothing else, so it is an operator's decision and belongs in the
+// operator's file. Provides is an allowlist for the same reason: only the
+// exports named here are ever registered, whatever else the module happens
+// to export.
+type Plugin struct {
+	// Name identifies this plugin in errors, in `kraai plugins` output, and
+	// as the source recorded against everything it registers.
+	Name string `yaml:"name"`
+	// Path is the module's .wasm file, relative to the manifest root.
+	//
+	// Always a local file. kraai does not fetch a plugin from a registry or
+	// the network — see internal/plugin.Host.Load's own doc comment for why
+	// a package-reference resolver is deliberately not built yet.
+	Path string `yaml:"path"`
+	// Grants names the host capabilities this plugin may call, from the set
+	// the host offers. Empty, the default, is a plugin that can reach
+	// nothing outside its own memory.
+	//
+	// Not validated here: internal/plugin's Host owns which capabilities
+	// exist and already refuses an unknown grant by name, so checking it
+	// here would be a second copy of that list, free to drift from the one
+	// that actually decides.
+	Grants []string `yaml:"grants,omitempty"`
+	// Provides names what this plugin implements: the key each provision is
+	// registered under, and the module export implementing it.
+	Provides []PluginProvision `yaml:"provides"`
+}
+
+// PluginProvision is one capability a plugin implements.
+type PluginProvision struct {
+	// Key is what the provision is registered under. Two plugins may name
+	// the same key deliberately — that is an override, and the later one
+	// wins with a recorded warning rather than an error.
+	Key string `yaml:"key"`
+	// Export is the module's own exported function implementing Key. It
+	// must match the provision signature internal/plugin's doc comment
+	// documents, or the plugin fails to load.
+	Export string `yaml:"export"`
 }
 
 // Providers names which vendor fulfils each capability kraai.yaml declares,
