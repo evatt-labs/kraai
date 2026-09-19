@@ -156,7 +156,7 @@ func (r *resourceType) getSchema(ctx context.Context) (Schema, error) {
 // path below preserves it rather than collapsing a real error into the same
 // return shape.
 func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	identifier, properties, found, err := r.resolve(ctx, ref.Name)
+	identifier, properties, found, err := r.resolve(ctx, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,30 @@ func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.Sta
 // found)"), the exact failure this method exists to close. A type with no
 // listScope is unaffected: resourceModel stays nil and ListResources is
 // called exactly as it always was.
-func (r *resourceType) resolve(ctx context.Context, name string) (identifier string, properties map[string]any, found bool, err error) {
+// An adopted resource is found by the identity the manifest declared rather
+// than by the name kraai would have derived, because kraai did not create it
+// and so has no name to derive.
+//
+//   - id is the Cloud Control identifier itself. Returned straight through,
+//     exactly as the LookupByName fast path returns a derived name, so the
+//     caller's own GetResource is what confirms it actually exists — an id
+//     that names nothing reads as absence, not as a phantom resource.
+//   - name replaces the derived name in the list-and-match walk below, so a
+//     byTag or byAttr type adopts by whatever its match function already
+//     compares.
+//
+// internal/plan refuses to create anything whose Ref carries an import and
+// does not resolve, so "adopt this" can never quietly become "make a new one
+// under a different name".
+func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifier string, properties map[string]any, found bool, err error) {
+	name := ref.Name
+	if ref.Import != nil {
+		if ref.Import.ID != "" {
+			return ref.Import.ID, nil, true, nil
+		}
+		name = ref.Import.Name
+	}
+
 	if r.lookup == resource.LookupByName {
 		return name, nil, true, nil
 	}
@@ -442,7 +465,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 			"%s has no update handler; a differing property requires replacement, not an update", r.typeName)
 	}
 
-	identifier, properties, found, err := r.resolve(ctx, ref.Name)
+	identifier, properties, found, err := r.resolve(ctx, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -492,7 +515,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 // both when resolve finds no identifier at all, and when Cloud Control
 // itself reports the resource gone (Client.DeleteResource's own contract).
 func (r *resourceType) Delete(ctx context.Context, ref resource.Ref) error {
-	identifier, _, found, err := r.resolve(ctx, ref.Name)
+	identifier, _, found, err := r.resolve(ctx, ref)
 	if err != nil {
 		return err
 	}

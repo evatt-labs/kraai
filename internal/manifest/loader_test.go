@@ -220,8 +220,10 @@ func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	if !ok {
 		t.Fatalf("Environment.Resources = %+v, want an %q entry", env.Resources, "api")
 	}
-	if imports.Databases["DB"].ID != "0e1f...-uuid" {
-		t.Errorf("imported DB ref = %+v", imports.Databases["DB"])
+	// Keyed by capability, so an import for a capability the fixed struct
+	// never had a field for — a DNS zone, a VPC — is expressible too.
+	if got := imports[manifest.CapabilityDatabase]["DB"].ID; got != "0e1f...-uuid" {
+		t.Errorf("imported DB ref = %+v", imports[manifest.CapabilityDatabase])
 	}
 
 	if got.Values["region"] != "enam" || got.Values["tier"] != "production" {

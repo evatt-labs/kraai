@@ -73,6 +73,9 @@ func (s *simple) checkDriver(config map[string]any) error {
 
 // Get reports the resource's current state, or (nil, nil) when it is absent.
 func (s *simple) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
+	if err := resource.RejectImport(s.provider, s.typ, ref); err != nil {
+		return nil, err
+	}
 	id, ok, err := s.find(ctx, ref.Name)
 	if err != nil {
 		return nil, err

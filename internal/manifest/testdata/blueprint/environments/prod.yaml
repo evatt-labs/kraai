@@ -8,5 +8,5 @@ routes:
       custom_domain: true
 resources:
   api:
-    databases:
+    database:
       DB: { id: 0e1f...-uuid }

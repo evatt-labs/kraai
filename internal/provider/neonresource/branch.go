@@ -246,6 +246,9 @@ func verifyRegion(wantRegion string, project *neon.Project) error {
 // configuration pointing at something that should already exist, so its
 // absence is a misconfiguration, not a resource waiting to be created.
 func (b *branchResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
+	if err := resource.RejectImport(Provider, TypeBranch, ref); err != nil {
+		return nil, err
+	}
 	project, err := b.resolveProject(ctx)
 	if err != nil {
 		return nil, err
