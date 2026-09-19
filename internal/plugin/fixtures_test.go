@@ -14,6 +14,8 @@ const (
 	// exercise the host's side of the contract, not to demonstrate a
 	// production-quality allocator, so "always the same fixed region" is
 	// deliberately as simple as the ABI allows.
+	// wasmPageBytes is the WebAssembly page size, fixed by the spec.
+	wasmPageBytes    = 65536
 	fixtureAllocBase = 8192
 	fixtureOutBase   = 32768
 	// fixtureMemPages leaves headroom for the 16KB payload
@@ -322,6 +324,74 @@ func buildUnboundedReentrantAllocPlugin(capName string) []byte {
 
 	call := m.addFunc(tI32I32ToI64, funcBody(concatBytes(iLocalGet(0), iLocalGet(1), iCall(imported))))
 	m.addExportFunc(fixtureHostCallExport, call)
+
+	m.setMemoryPages(fixtureMemPages)
+	m.addExportMemory(exportMemory, 0)
+	return m.bytes()
+}
+
+// fixtureCapabilitiesExport and fixtureCapabilitiesPayload build a module
+// that answers one provision with a fixed byte string.
+//
+// The payload is opaque to this package: it is JSON only to whatever calls
+// the provision, and nothing here parses or validates it. It lives here
+// because the committed module built from it
+// (testdata/capabilities_plugin.wasm) has to be reproducible byte for byte
+// by TestCapabilitiesPluginTestdataMatchesTheFixture, and that means the
+// exact bytes have to be written down somewhere this package can reach.
+//
+// internal/assemble is the package that gives it meaning — see its
+// CapabilitiesKey.
+const (
+	fixtureCapabilitiesExport  = "kraai_export_capabilities"
+	fixtureCapabilitiesPayload = `[{"name":"search","summary":"A search index.",` +
+		`"binding":{"type":"object","properties":{"binding":{"type":"string"},` +
+		`"index":{"type":"string"}},"required":["binding"],"additionalProperties":false}}]`
+)
+
+// constantOutputBody emits a capability body that ignores its input and
+// writes payload, prefixed by StatusOK, into the fixed output region.
+//
+// One i32.store8 per byte rather than a data section: the assembler here
+// implements only the sections its fixtures need (see wasmbuilder_test.go),
+// and a couple of hundred stores is a smaller addition than a data-section
+// encoder used exactly once.
+func constantOutputBody(payload string) []byte {
+	// The real constraint, which also makes the int32 conversion below
+	// provably safe: everything written lands between fixtureOutBase and the
+	// end of the module's memory, after the one status byte.
+	const maxPayload = fixtureMemPages*wasmPageBytes - fixtureOutBase - 1
+	if len(payload) > maxPayload {
+		panic("fixture payload does not fit in the module's memory")
+	}
+
+	// Bounded by the check above, which gosec's own analysis does not follow
+	// across the loop below — hence the annotation rather than a wider
+	// suppression on the function.
+	//nolint:gosec // len(payload) <= maxPayload, a constant far below MaxInt32
+	outLen := int32(len(payload) + 1)
+
+	instrs := concatBytes(iI32Const(fixtureOutBase), iI32Const(0), iI32Store8())
+	for i := range len(payload) {
+		//nolint:gosec // same bound: i < len(payload) <= maxPayload
+		at := int32(fixtureOutBase + 1 + i)
+		instrs = concatBytes(instrs, iI32Const(at), iI32Const(int32(payload[i])), iI32Store8())
+	}
+	return concatBytes(instrs,
+		iI32Const(fixtureOutBase), iI64ExtendI32U(), iI64Const(32), iI64Shl(),
+		iI32Const(outLen), iI64ExtendI32U(), iI64Or(),
+	)
+}
+
+// buildCapabilitiesPlugin returns a conformant module whose one provision
+// returns fixtureCapabilitiesPayload.
+func buildCapabilitiesPlugin() []byte {
+	m := &wasmModule{}
+	addStandardTriad(m, goodVersionBody(), goodAllocBody(), nil)
+
+	tI32I32ToI64 := m.addType([]byte{valI32, valI32}, []byte{valI64})
+	capabilities := m.addFunc(tI32I32ToI64, funcBody(constantOutputBody(fixtureCapabilitiesPayload)))
+	m.addExportFunc(fixtureCapabilitiesExport, capabilities)
 
 	m.setMemoryPages(fixtureMemPages)
 	m.addExportMemory(exportMemory, 0)

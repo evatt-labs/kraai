@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,18 +12,9 @@ import (
 
 	"github.com/evatt-labs/kraai/internal/assemble"
 	"github.com/evatt-labs/kraai/internal/manifest"
-	"github.com/evatt-labs/kraai/internal/plugin"
 )
 
-// PluginLoader loads every plugin a resolved manifest declares, reading
-// modules through fsys.
-//
-// A function type for the same reason RegistryAssembler and CatalogAssembler
-// are: this command's tests supply plugins without compiling WASM or
-// touching a cache directory. Production wiring is in NewRootCommand.
-type PluginLoader func(ctx context.Context, m *manifest.Manifest, fsys plugin.FS) (*assemble.Plugins, error)
-
-func newPluginsCommand(loader PluginLoader, catalog CatalogAssembler) *cobra.Command {
+func newPluginsCommand(resolve ManifestResolver) *cobra.Command {
 	var (
 		dir     string
 		setArgs []string
@@ -47,7 +37,7 @@ func newPluginsCommand(loader PluginLoader, catalog CatalogAssembler) *cobra.Com
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runPlugins(cmd, envName, dir, setArgs, jsonOut, loader, catalog)
+			return runPlugins(cmd, envName, dir, setArgs, jsonOut, resolve)
 		},
 	}
 
@@ -71,25 +61,14 @@ func newPluginsCommand(loader PluginLoader, catalog CatalogAssembler) *cobra.Com
 // from the environment. Defaulting to some environment would silently pick
 // which template values a plugin list was rendered against.
 func runPlugins(
-	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
-	loader PluginLoader, catalog CatalogAssembler,
+	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool, resolve ManifestResolver,
 ) error {
 	fsys, err := manifest.NewFS(dir)
 	if err != nil {
 		return err
 	}
 
-	vocabulary, err := catalog()
-	if err != nil {
-		return err
-	}
-
-	m, err := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), vocabulary).Load(envName, setArgs)
-	if err != nil {
-		return err
-	}
-
-	loaded, err := loader(cmd.Context(), m, fsys)
+	resolved, err := resolve(cmd.Context(), fsys, envName, setArgs)
 	if err != nil {
 		return err
 	}
@@ -97,12 +76,12 @@ func runPlugins(
 	// path: this command instantiates a real WASM runtime, and a command
 	// that exits without closing it leaks the runtime and its pooled
 	// instances for whatever remains of the process.
-	defer func() { _ = loaded.Close(cmd.Context()) }()
+	defer func() { _ = resolved.Close(cmd.Context()) }()
 
 	if jsonOut {
-		return writePluginsJSON(cmd.OutOrStdout(), m, loaded)
+		return writePluginsJSON(cmd.OutOrStdout(), resolved)
 	}
-	return writePluginsText(cmd.OutOrStdout(), m, loaded)
+	return writePluginsText(cmd.OutOrStdout(), resolved)
 }
 
 // pluginsDocument is the machine-readable contract, projected to plain
@@ -120,9 +99,9 @@ type pluginJSON struct {
 	Provides []string `json:"provides"`
 }
 
-func toPluginsDocument(m *manifest.Manifest, loaded *assemble.Plugins) pluginsDocument {
+func toPluginsDocument(resolved *assemble.Resolved) pluginsDocument {
 	doc := pluginsDocument{Plugins: []pluginJSON{}, Warnings: []string{}}
-	for _, declared := range m.Root.Plugins {
+	for _, declared := range resolved.Manifest.Root.Plugins {
 		entry := pluginJSON{
 			Name:     declared.Name,
 			Path:     declared.Path,
@@ -135,16 +114,16 @@ func toPluginsDocument(m *manifest.Manifest, loaded *assemble.Plugins) pluginsDo
 		sort.Strings(entry.Provides)
 		doc.Plugins = append(doc.Plugins, entry)
 	}
-	for _, w := range loaded.Registry.Warnings() {
+	for _, w := range resolved.Plugins.Registry.Warnings() {
 		doc.Warnings = append(doc.Warnings, w.String())
 	}
 	return doc
 }
 
-func writePluginsJSON(w io.Writer, m *manifest.Manifest, loaded *assemble.Plugins) error {
+func writePluginsJSON(w io.Writer, resolved *assemble.Resolved) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	return enc.Encode(toPluginsDocument(m, loaded))
+	return enc.Encode(toPluginsDocument(resolved))
 }
 
 // writePluginsText renders one row per plugin, then any override warnings.
@@ -152,8 +131,8 @@ func writePluginsJSON(w io.Writer, m *manifest.Manifest, loaded *assemble.Plugin
 // Warnings are printed after the table rather than beside a row because an
 // override is about two plugins at once — naming it on either one alone
 // would read as a property of that plugin rather than of the pair.
-func writePluginsText(w io.Writer, m *manifest.Manifest, loaded *assemble.Plugins) error {
-	doc := toPluginsDocument(m, loaded)
+func writePluginsText(w io.Writer, resolved *assemble.Resolved) error {
+	doc := toPluginsDocument(resolved)
 
 	var b strings.Builder
 	if len(doc.Plugins) == 0 {

@@ -20,7 +20,7 @@ import (
 // stdin.
 func execDestroy(t *testing.T, assembler RegistryAssembler, args []string) (string, error) {
 	t.Helper()
-	cmd := newDestroyCommand(assembler, fixtureCatalogAssembler)
+	cmd := newDestroyCommand(assembler, fixtureResolver)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -31,7 +31,7 @@ func execDestroy(t *testing.T, assembler RegistryAssembler, args []string) (stri
 }
 
 func TestNewDestroyCommand_Flags(t *testing.T) {
-	cmd := newDestroyCommand(unreachableAssembler, fixtureCatalogAssembler)
+	cmd := newDestroyCommand(unreachableAssembler, fixtureResolver)
 
 	if f := cmd.Flags().Lookup("dir"); f == nil || f.DefValue != "." {
 		t.Errorf("--dir flag = %+v, want default \".\"", f)

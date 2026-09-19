@@ -110,7 +110,7 @@ func protectedFixture(t *testing.T) string {
 // (see isInteractive's doc comment).
 func execApply(t *testing.T, assembler RegistryAssembler, args []string) (string, error) {
 	t.Helper()
-	cmd := newApplyCommand(assembler, fixtureCatalogAssembler)
+	cmd := newApplyCommand(assembler, fixtureResolver)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -121,7 +121,7 @@ func execApply(t *testing.T, assembler RegistryAssembler, args []string) (string
 }
 
 func TestNewApplyCommand_Flags(t *testing.T) {
-	cmd := newApplyCommand(unreachableAssembler, fixtureCatalogAssembler)
+	cmd := newApplyCommand(unreachableAssembler, fixtureResolver)
 
 	if f := cmd.Flags().Lookup("dir"); f == nil || f.DefValue != "." {
 		t.Errorf("--dir flag = %+v, want default \".\"", f)
@@ -358,7 +358,7 @@ func TestRunApply_NonProtectedEnvironment_ConfirmNameIgnored(t *testing.T) {
 // comment for why that seam exists.
 
 func newTestCommand(stdin string) (*cobra.Command, *bytes.Buffer) {
-	cmd := newApplyCommand(unreachableAssembler, fixtureCatalogAssembler)
+	cmd := newApplyCommand(unreachableAssembler, fixtureResolver)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetIn(strings.NewReader(stdin))

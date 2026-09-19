@@ -3,12 +3,18 @@ package plugin
 import (
 	"bytes"
 	"os"
+	"strings"
 	"testing"
 )
 
 // validPluginTestdata is the path to a committed, conformant module that
 // packages outside this one load in their own tests.
 const validPluginTestdata = "testdata/valid_plugin.wasm"
+
+// capabilitiesPluginTestdata is a second committed module, whose one
+// provision returns a fixed payload — what internal/assemble loads to prove
+// a plugin can extend the capability vocabulary.
+const capabilitiesPluginTestdata = "testdata/capabilities_plugin.wasm"
 
 // TestValidPluginTestdataMatchesTheFixture is what keeps that committed
 // binary honest.
@@ -57,5 +63,37 @@ func TestValidPluginTestdataExports(t *testing.T) {
 	}
 	if fixtureNoopExport != "kraai_bench_noop" {
 		t.Errorf("noop export renamed to %q; update internal/assemble's plugin tests", fixtureNoopExport)
+	}
+}
+
+// The same drift guard as above, for the module internal/assemble loads to
+// prove a plugin's declared capabilities reach the catalog. Its payload is
+// opaque here — see fixtureCapabilitiesPayload — so byte equality is the only
+// check this package can meaningfully make, and is the one that matters: the
+// committed file must still be what this fixture builds.
+func TestCapabilitiesPluginTestdataMatchesTheFixture(t *testing.T) {
+	committed, err := os.ReadFile(capabilitiesPluginTestdata)
+	if err != nil {
+		t.Fatalf("reading %s: %v", capabilitiesPluginTestdata, err)
+	}
+	if want := buildCapabilitiesPlugin(); !bytes.Equal(committed, want) {
+		t.Fatalf("%s is %d bytes and no longer matches buildCapabilitiesPlugin (%d bytes) — "+
+			"regenerate it, and check internal/assemble's tests still expect the same payload",
+			capabilitiesPluginTestdata, len(committed), len(want))
+	}
+}
+
+// The export and payload internal/assemble names when loading that module.
+// Pinned here for the same reason the echo fixture's export is: a change
+// here should fail here, with an explanation, rather than in another
+// package as a load error or a confusing decode failure.
+func TestCapabilitiesPluginTestdataContract(t *testing.T) {
+	if fixtureCapabilitiesExport != "kraai_export_capabilities" {
+		t.Errorf("capabilities export renamed to %q; update internal/assemble's plugin tests",
+			fixtureCapabilitiesExport)
+	}
+	if !strings.Contains(fixtureCapabilitiesPayload, `"name":"search"`) {
+		t.Errorf("the fixture payload no longer declares the capability internal/assemble's "+
+			"tests assert on: %s", fixtureCapabilitiesPayload)
 	}
 }
