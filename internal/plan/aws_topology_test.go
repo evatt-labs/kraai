@@ -343,3 +343,107 @@ func TestPlan_StaticSiteLosesOrderingWhenBindingNamesDiffer(t *testing.T) {
 			"and groupKey's doc comment need updating.", waves)
 	}
 }
+
+// TestPlan_CustomDomainRouteOrdersCertificateDomainMapping is #110's own
+// acceptance criterion against the real AWS registrations: a route with a
+// custom domain plans a domain name and a mapping, named by the hostname
+// rather than the service, and they order behind the certificate and the API
+// they need.
+//
+// The certificate lives in a different binding (tls, "CERT") from the domain
+// name (compute, "api"), so nothing in DependsOn connects them. What orders
+// the domain name after it is the read edge #119 added — this is the case
+// that made that fix stop being latent.
+func TestPlan_CustomDomainRouteOrdersCertificateDomainMapping(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{
+			manifest.CapabilityCompute: {Vendor: "aws"},
+			manifest.CapabilityTLS:     {Vendor: "aws"},
+		}},
+		Services: map[string]manifest.Service{
+			"api": {
+				Dir:     ".",
+				Compute: &manifest.Compute{Trigger: manifest.TriggerHTTP, Handler: "run.sh"},
+				Bindings: manifest.Bindings{
+					manifest.CapabilityTLS: {{"binding": "CERT", "domain": "api.example.com"}},
+				},
+			},
+		},
+		Environment: manifest.Environment{
+			Kind: manifest.EnvironmentKindPersistent,
+			Routes: map[string][]manifest.Route{
+				"api": {{Pattern: "api.example.com", CustomDomain: true, Certificate: "CERT"}},
+			},
+		},
+	}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	domain := findServiceAction(t, p, "api", awsprovider.TypeAPIGatewayV2DomainName)
+	mapping := findServiceAction(t, p, "api", awsprovider.TypeAPIGatewayV2ApiMapping)
+	api := findServiceAction(t, p, "api", awsprovider.TypeAPIGatewayV2API)
+	cert := findServiceAction(t, p, "api", awsprovider.TypeCertificateManagerCertificate)
+
+	// Named by the hostname: that is the identity Cloud Control addresses
+	// these by, and the only name that would find them again.
+	for _, a := range []Action{domain, mapping} {
+		if a.Ref.Name != "api.example.com" {
+			t.Errorf("%s named %q, want the route pattern", a.Type, a.Ref.Name)
+		}
+		// In the compute binding group, so DependsOn on the API resolves
+		// and the tls binding is readable.
+		if a.Binding != "api" {
+			t.Errorf("%s in binding %q, want the service's compute group", a.Type, a.Binding)
+		}
+		if a.Spec.Config["route"] == nil {
+			t.Errorf("%s has no route in its config", a.Type)
+		}
+	}
+
+	if cert.Wave >= domain.Wave {
+		t.Errorf("certificate wave %d, domain name wave %d — the domain presents the "+
+			"certificate and must come strictly after it", cert.Wave, domain.Wave)
+	}
+	if api.Wave >= mapping.Wave || domain.Wave >= mapping.Wave {
+		t.Errorf("api %d / domain %d / mapping %d — the mapping needs both first",
+			api.Wave, domain.Wave, mapping.Wave)
+	}
+
+	// The API is told to close its generated hostname.
+	if api.Spec.Config["customDomains"] == nil {
+		t.Error("the API's config carries no customDomains, so it cannot close execute-api")
+	}
+}
+
+// Without a custom-domain route, neither type is planned and the API keeps
+// its generated hostname — the ordinary case, unchanged.
+func TestPlan_NoCustomDomainPlansNoDomainName(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityCompute: {Vendor: "aws"}}},
+		Services: map[string]manifest.Service{
+			"api": {Dir: ".", Compute: &manifest.Compute{Trigger: manifest.TriggerHTTP}},
+		},
+		Environment: manifest.Environment{
+			Kind:   manifest.EnvironmentKindPersistent,
+			Routes: map[string][]manifest.Route{"api": {{Pattern: "api.example.com"}}},
+		},
+	}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	for _, a := range p.Actions {
+		if a.Type == awsprovider.TypeAPIGatewayV2DomainName || a.Type == awsprovider.TypeAPIGatewayV2ApiMapping {
+			t.Errorf("%s was planned with no custom-domain route", a.Type)
+		}
+		if a.Type == awsprovider.TypeAPIGatewayV2API && a.Spec.Config["customDomains"] != nil {
+			t.Error("the API's config carries customDomains without a custom domain")
+		}
+	}
+}

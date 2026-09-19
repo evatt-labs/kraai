@@ -99,6 +99,9 @@ providers:
       region: aws-us-east-2
       database: shopdb
       role: app_user
+
+  tls:
+    vendor: aws
 ```
 
 ### Services
@@ -128,6 +131,8 @@ services:
           DATABASE_URL: DB.connection_uri     # resolved at apply, never stored
     databases:
       - { binding: DB, driver: postgres }
+    tls:
+      - { binding: CERT, domain: api.acme.example }
 
   # Invoked on a schedule. No HTTP surface, no adapter layer.
   reaper:
@@ -168,8 +173,20 @@ naming:
 routes:
   api:
     - pattern: api.acme.example
-      custom_domain: true
+      custom_domain: true          # the generated execute-api hostname stops serving
+      certificate: CERT            # the tls binding on `api` presented for it
+resources:
+  api:
+    tls:
+      CERT: { id: arn:aws:acm:us-east-1:123456789012:certificate/... }
 ```
+
+A custom domain is built from three things: the API Gateway domain name, the
+mapping from it to the service's API, and the certificate it presents. kraai
+creates the first two and adopts the third — `resources:` names the ACM
+certificate by ARN, and kraai owns it from then on, `destroy` included. It
+does not issue certificates: DNS validation needs a record in a zone kraai
+does not manage, so the certificate is made once, by hand, and adopted.
 
 ```yaml
 # environments/acmeshop-pull-request-00042.yaml

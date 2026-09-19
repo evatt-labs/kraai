@@ -7,3 +7,4 @@ services:
     keyvalue: [{ binding: CACHE }]
     objects:  [{ binding: ASSETS }]
     queues:   [{ binding: JOBS, consumer: true }]
+    tls:      [{ binding: CERT, domain: api.acme.com }]

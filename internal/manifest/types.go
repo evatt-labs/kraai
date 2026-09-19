@@ -443,10 +443,25 @@ type Naming struct {
 }
 
 // Route is one entry of a service's `routes:` list on an environment
-// overlay.
+// overlay: a hostname the service answers on.
+//
+// A custom domain is a real resource with a real dependency — the TLS
+// certificate presented on it — so it is not something a route can simply
+// assert. CustomDomain says the service's front door is this hostname and
+// nothing else; Certificate names which of the service's `tls:` bindings
+// carries the certificate for it. Both or neither: a custom domain without a
+// certificate cannot be served, and a certificate with no custom domain to
+// present it on does nothing.
 type Route struct {
-	Pattern      string `yaml:"pattern"`
-	CustomDomain bool   `yaml:"custom_domain,omitempty"`
+	// Pattern is the hostname, e.g. "api.example.com".
+	Pattern string `yaml:"pattern"`
+	// CustomDomain makes Pattern the only door: the provider's own generated
+	// hostname for the service stops serving.
+	CustomDomain bool `yaml:"custom_domain,omitempty"`
+	// Certificate names the `tls:` binding on this route's service whose
+	// certificate is presented for Pattern. Required when CustomDomain is
+	// set, forbidden otherwise.
+	Certificate string `yaml:"certificate,omitempty"`
 }
 
 // ResourceImports is one service's adopted resources, keyed by capability

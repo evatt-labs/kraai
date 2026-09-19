@@ -408,6 +408,38 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newAPIGatewayResource(client),
 		},
 		{
+			Provider: Provider, Type: TypeAPIGatewayV2DomainName,
+			Capability: manifest.CapabilityCompute,
+			// Named by the route's hostname, not the service: Cloud Control
+			// addresses a domain name by the domain string itself.
+			NameFrom: resource.NameFromRoute,
+			// No same-binding dependency. The certificate it presents lives
+			// in the service's tls binding, and the read edge the planner
+			// draws for ReadsBindings (#119) is what orders this after it.
+			Applies: []resource.Applicability{
+				resource.RequiresTrigger(manifest.TriggerHTTP),
+				resource.RequiresSettings(httpFrontDoorIs(httpFrontDoorAPIGateway)),
+				resource.RequiresCustomDomain(),
+			},
+			Lookup:   resource.LookupByName,
+			Resource: newDomainNameResource(client),
+		},
+		{
+			Provider: Provider, Type: TypeAPIGatewayV2ApiMapping,
+			Capability: manifest.CapabilityCompute,
+			NameFrom:   resource.NameFromRoute,
+			// Needs the API's id and the domain to map it onto, both of which
+			// exist only once created.
+			DependsOn: []string{key(TypeAPIGatewayV2API), key(TypeAPIGatewayV2DomainName)},
+			Applies: []resource.Applicability{
+				resource.RequiresTrigger(manifest.TriggerHTTP),
+				resource.RequiresSettings(httpFrontDoorIs(httpFrontDoorAPIGateway)),
+				resource.RequiresCustomDomain(),
+			},
+			Lookup:   resource.LookupByAttr,
+			Resource: newAPIMappingResource(client),
+		},
+		{
 			Provider: Provider, Type: TypePermissionAPIGateway, VendorType: realTypeLambdaPermission,
 			Capability: manifest.CapabilityCompute,
 			// Needs both its function (AddPermission's FunctionName) and
