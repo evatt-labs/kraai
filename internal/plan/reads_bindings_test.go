@@ -10,16 +10,19 @@ import (
 )
 
 // TestPlan_ComputeReadsBindingsIncludesEveryDeclaredBinding is this
-// workstream's acceptance criterion at the planner level: a service's
-// compute item must carry every binding the service declares — across
-// Databases, KeyValue, Objects and Queues — sorted, so apply can later
-// union secrets across all of them (see internal/apply's package doc).
+// workstream's acceptance criterion at the planner level: a compute type
+// declared to read its whole service carries every binding the service
+// declares — across Databases, KeyValue, Objects and Queues — sorted, so
+// apply can later union secrets across all of them (see internal/apply's
+// package doc). Its own binding is in the set too: the indexes hand an
+// action exactly what is named here, and the service key is where its own
+// siblings publish.
 func TestPlan_ComputeReadsBindingsIncludesEveryDeclaredBinding(t *testing.T) {
 	f := newRegistryFixture(t)
 	compute := newFakeResource()
 	if err := f.reg.Register(resource.Registration{
 		Provider: "aws", Type: "AWS::Lambda::Function", Capability: manifest.CapabilityCompute,
-		Lookup: resource.LookupByName, Resource: compute,
+		Lookup: resource.LookupByName, Resource: compute, Reads: resource.ReadsServiceBindings,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -33,9 +36,94 @@ func TestPlan_ComputeReadsBindingsIncludesEveryDeclaredBinding(t *testing.T) {
 	}
 
 	fn := findAction(t, p, "aws", "AWS::Lambda::Function")
-	want := []string{"CACHE", "DB", "JOBS", "UPLOADS"}
+	want := []string{"CACHE", "DB", "JOBS", "UPLOADS", "api"}
 	if !reflect.DeepEqual(fn.ReadsBindings, want) {
-		t.Fatalf("ReadsBindings = %v, want %v (sorted, every declared binding)", fn.ReadsBindings, want)
+		t.Fatalf("ReadsBindings = %v, want %v (sorted, every declared binding and its own)", fn.ReadsBindings, want)
+	}
+}
+
+// TestPlan_ComputeReadsOwnBindingByDefault is #208: a compute type that
+// says nothing about what it reads gets its own binding and no other, so a
+// declared read (#119) cannot order it behind bindings it never touches.
+// Before this, every compute type got the whole service, and an artifact
+// bucket waited a wave on a Postgres branch.
+//
+// Its own binding is present rather than the list being empty: a type that
+// reads what a sibling in its own group published — an API mapping reading
+// its API's id — sees nothing if the service key is not in the set, because
+// the attribute index walks exactly the bindings named. That was a live gap
+// for any service declaring a binding, since the old set was the declared
+// bindings alone.
+func TestPlan_ComputeReadsOwnBindingByDefault(t *testing.T) {
+	f := newRegistryFixture(t)
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::S3::Bucket", Capability: manifest.CapabilityCompute,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	m := f.oneServiceManifest()
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
+
+	p, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	bucket := findAction(t, p, "aws", "AWS::S3::Bucket")
+	if want := []string{"api"}; !reflect.DeepEqual(bucket.ReadsBindings, want) {
+		t.Fatalf("ReadsBindings = %v, want %v (its own binding, nothing the service declares)",
+			bucket.ReadsBindings, want)
+	}
+	// And so it shares wave 0 with the bindings, instead of sitting behind
+	// them.
+	if bucket.Wave != 0 {
+		t.Errorf("wave = %d, want 0: a type reading nothing from its siblings has no reason to wait", bucket.Wave)
+	}
+}
+
+// A route-named type reads the bindings its own route names — the tls
+// binding whose certificate it presents — and its own, and no other binding
+// the service declares.
+func TestPlan_RouteReadsItsRoutesBindings(t *testing.T) {
+	f := newRegistryFixture(t)
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::ApiGatewayV2::DomainName", Capability: manifest.CapabilityCompute,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+		NameFrom: resource.NameFromRoute, Reads: resource.ReadsRouteBindings,
+		Applies: []resource.Applicability{resource.RequiresCustomDomain()},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	// Something has to provide the certificate binding the route names, or
+	// the manifest does not plan at all.
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::CertificateManager::Certificate", Capability: manifest.CapabilityTLS,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	m := f.oneServiceManifest()
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityTLS] = &manifest.Provider{Vendor: "aws"}
+	svc := m.Services["api"]
+	svc.Bindings[manifest.CapabilityTLS] = []manifest.Binding{{"binding": "CERT", "domain": "api.example.com"}}
+	m.Services["api"] = svc
+	m.Environment.Routes = map[string][]manifest.Route{
+		"api": {{Pattern: "api.example.com", CustomDomain: true, Certificate: "CERT"}},
+	}
+
+	p, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	domain := findAction(t, p, "aws", "AWS::ApiGatewayV2::DomainName")
+	if want := []string{"CERT", "api"}; !reflect.DeepEqual(domain.ReadsBindings, want) {
+		t.Fatalf("ReadsBindings = %v, want %v (the route's certificate binding and its own)",
+			domain.ReadsBindings, want)
 	}
 }
 
@@ -48,7 +136,7 @@ func TestPlan_ComputeReadsBindingsOrderIsDeterministic(t *testing.T) {
 	compute := newFakeResource()
 	if err := f.reg.Register(resource.Registration{
 		Provider: "aws", Type: "AWS::Lambda::Function", Capability: manifest.CapabilityCompute,
-		Lookup: resource.LookupByName, Resource: compute,
+		Lookup: resource.LookupByName, Resource: compute, Reads: resource.ReadsServiceBindings,
 	}); err != nil {
 		t.Fatal(err)
 	}

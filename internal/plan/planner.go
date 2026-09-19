@@ -2,6 +2,7 @@ package plan
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -282,14 +283,11 @@ func (p *Planner) expandCompute(
 		config["include"] = include
 	}
 
-	reads := declaredBindings(svc)
-
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
 		item := Item{
 			ServiceKey: svcKey, Binding: svcKey, Capability: manifest.CapabilityCompute,
 			Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
-			ReadsBindings: reads,
 		}
 		switch r.NameFrom {
 		case resource.NameFromRoute:
@@ -297,8 +295,9 @@ func (p *Planner) expandCompute(
 			// itself: the vendor addresses these by the domain string, and no
 			// name derived from the service would find one. Same binding
 			// group as the rest of the service's compute, so DependsOn on the
-			// API resolves and the certificate binding is readable.
+			// API resolves and the route's own bindings are readable.
 			for _, route := range customDomains {
+				item.ReadsBindings = readsFor(r.Reads, svcKey, svc, route)
 				out = append(out, plannedItem{
 					Item: item,
 					ref:  resource.Ref{Provider: r.Provider, Type: r.Type, Name: route.Pattern},
@@ -311,6 +310,7 @@ func (p *Planner) expandCompute(
 				})
 			}
 		default:
+			item.ReadsBindings = readsFor(r.Reads, svcKey, svc, manifest.Route{})
 			out = append(out, plannedItem{
 				Item:      item,
 				ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
@@ -350,22 +350,36 @@ func routeConfigs(routes []manifest.Route) []any {
 	return out
 }
 
-// declaredBindings returns every binding svc declares, across every
-// capability, sorted ascending.
+// readsFor is the ReadsBindings an item gets: its own binding, plus
+// whatever its registration's scope widens that to. The own binding is
+// always present because apply's secret and attribute indexes hand an
+// action exactly the bindings named here, and a type that reads what its
+// own binding published — an API mapping reading its API's id — would
+// otherwise see nothing.
 //
-// This is the set a compute item's ReadsBindings gets: the service's own
-// compute resource reads every credential its own bindings produce, there
-// being no way today to declare a narrower scope. Sorted so a repeated
-// Plan call is byte-for-byte identical regardless of authoring order.
-func declaredBindings(svc manifest.Service) []string {
-	var bindings []string
-	for _, entries := range svc.Bindings {
-		for _, entry := range entries {
-			bindings = append(bindings, entry.Name())
+// Sorted and deduplicated so a repeated Plan call is byte-for-byte
+// identical regardless of authoring order, and so an own binding that a
+// scope also names appears once.
+func readsFor(scope resource.ReadScope, own string, svc manifest.Service, route manifest.Route) []string {
+	reads := []string{own}
+	switch scope {
+	case resource.ReadsServiceBindings:
+		for _, entries := range svc.Bindings {
+			for _, entry := range entries {
+				reads = append(reads, entry.Name())
+			}
 		}
+	case resource.ReadsRouteBindings:
+		// Validated at load: a custom-domain route names a tls binding on
+		// its service. A route with no certificate is not a custom-domain
+		// route and never reaches here with this scope.
+		if route.Certificate != "" {
+			reads = append(reads, route.Certificate)
+		}
+	case resource.ReadsOwnBinding:
 	}
-	sort.Strings(bindings)
-	return bindings
+	sort.Strings(reads)
+	return slices.Compact(reads)
 }
 
 // sortedCapabilities returns bindings' capability names in ascending order,
@@ -447,11 +461,12 @@ func (p *Planner) expandBinding(
 			Item: Item{
 				ServiceKey: svcKey, Binding: binding, Capability: capability,
 				Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
-				// A non-compute item reads only the binding it was expanded
-				// from. Set explicitly rather than left nil so it never
-				// falls through to a default inside apply: what an item may
-				// read is this package's decision.
-				ReadsBindings: []string{binding},
+				// Set explicitly rather than left nil so it never falls
+				// through to a default inside apply: what an item may read
+				// is this package's decision, from the registration's own
+				// scope. A binding has no route, so the route scope reads
+				// nothing beyond the binding itself.
+				ReadsBindings: readsFor(r.Reads, binding, m.Services[svcKey], manifest.Route{}),
 			},
 			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name, Import: adopted},
 			spec:      resource.Spec{Binding: binding, Name: name, Config: config},
