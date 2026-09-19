@@ -3,6 +3,7 @@ package plan
 import (
 	"context"
 	"sort"
+	"strconv"
 
 	"golang.org/x/sync/errgroup"
 
@@ -318,6 +319,26 @@ func sortedCapabilities(bindings manifest.Bindings) []string {
 	return out
 }
 
+// importFor returns the adopted-resource reference a manifest declares for
+// one (service, capability, binding), or nil when it declares none.
+//
+// Every resource type a binding expands to shares it: a binding names one
+// real resource, and the several registrations it produces are facets of that
+// one thing rather than separate resources to adopt individually. A provider
+// whose type cannot be adopted says so itself — see each provider's own
+// lookup — rather than this package deciding which of them an import was
+// meant for.
+//
+// Validated at load (manifest.Loader.validateImports), so exactly one of ID
+// and Name is set by the time it reaches here.
+func importFor(m *manifest.Manifest, svcKey, capability, binding string) *resource.Import {
+	ref, ok := m.Environment.Resources[svcKey][capability][binding]
+	if !ok {
+		return nil
+	}
+	return &resource.Import{ID: ref.ID, Name: ref.Name}
+}
+
 // annotate names the manifest path a binding-expansion failure came from,
 // so a validation error points at the entry to fix rather than just the
 // underlying registry complaint.
@@ -354,6 +375,12 @@ func (p *Planner) expandBinding(
 
 	name := namer.Resource(environmentName, svcKey, binding)
 
+	// An adopted resource has no identity kraai can derive, so the manifest's
+	// own reference travels on the Ref for a provider's lookup to use instead
+	// of the derived name. Absent for the overwhelmingly common case of a
+	// resource kraai creates itself.
+	adopted := importFor(m, svcKey, capability, binding)
+
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
 		out = append(out, plannedItem{
@@ -366,7 +393,7 @@ func (p *Planner) expandBinding(
 				// read is this package's decision.
 				ReadsBindings: []string{binding},
 			},
-			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
+			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name, Import: adopted},
 			spec:      resource.Spec{Binding: binding, Name: name, Config: config},
 			res:       r.Resource,
 			dependsOn: r.DependsOn,
@@ -430,6 +457,20 @@ func decide(ctx context.Context, it plannedItem) Action {
 	action.Current = state
 
 	if state == nil {
+		// An import that does not resolve is a failure, never a create.
+		// "Adopt the resource I already have" and "make me a new one under a
+		// name I did not choose" are different requests, and a manifest that
+		// asked for the first must not silently get the second — a typo in an
+		// id would otherwise provision a duplicate alongside the resource it
+		// was meant to take over.
+		if it.ref.Import != nil {
+			action.Kind = ActionFailed
+			action.Err = kerrors.Validation(
+				"%s/%s: no resource matches the import declared for binding %q (%s) — "+
+					"it must already exist to be adopted",
+				it.Provider, it.Type, it.Binding, describeImport(it.ref.Import))
+			return action
+		}
 		action.Kind = ActionCreate
 		return action
 	}
@@ -455,6 +496,15 @@ func decide(ctx context.Context, it plannedItem) Action {
 
 	action.Kind = ActionNoChange
 	return action
+}
+
+// describeImport renders an import reference for an error message, naming
+// which of the two ways it identified its resource.
+func describeImport(imp *resource.Import) string {
+	if imp.ID != "" {
+		return "id " + strconv.Quote(imp.ID)
+	}
+	return "name " + strconv.Quote(imp.Name)
 }
 
 // sortedKeys returns m's keys in ascending order, so iterating a manifest's

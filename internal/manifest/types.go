@@ -442,17 +442,20 @@ type Route struct {
 	CustomDomain bool   `yaml:"custom_domain,omitempty"`
 }
 
-// ResourceImports is one service's imported/adopted resources: the
-// reference written directly into the manifest is the resource's identity,
-// keyed by binding name within each resource kind. Once referenced, an
-// imported resource is owned exactly like one kraai created itself — there
-// is no separate never-delete flag, so `destroy` can remove it too.
-type ResourceImports struct {
-	Databases map[string]ImportRef `yaml:"databases,omitempty"`
-	KeyValue  map[string]ImportRef `yaml:"keyvalue,omitempty"`
-	Objects   map[string]ImportRef `yaml:"objects,omitempty"`
-	Queues    map[string]ImportRef `yaml:"queues,omitempty"`
-}
+// ResourceImports is one service's adopted resources, keyed by capability
+// and then by binding name: the reference written into the manifest is that
+// resource's identity, because a resource kraai did not create has none it
+// could derive.
+//
+// Once referenced, an imported resource is owned exactly like one kraai
+// created itself — there is no separate never-delete flag, so `destroy` can
+// remove it too.
+//
+// Keyed by capability rather than being a fixed struct of four fields, for
+// the reason Service.Bindings is: the capabilities that exist come from the
+// registered providers. The fixed struct could not express importing a DNS
+// zone or a VPC, which are among the most likely things to already exist.
+type ResourceImports map[string]map[string]ImportRef
 
 // ImportRef identifies a pre-existing, adopted resource: either an id or a
 // name, whichever the provider's own lookup needs.

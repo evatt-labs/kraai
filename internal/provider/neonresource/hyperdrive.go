@@ -31,6 +31,9 @@ type hyperdriveResource struct {
 
 // Get reports the configuration's state, or (nil, nil) when absent.
 func (h *hyperdriveResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
+	if err := resource.RejectImport(HyperdriveProvider, TypeHyperdrive, ref); err != nil {
+		return nil, err
+	}
 	config, err := h.client.Hyperdrive.FindByName(ctx, ref.Name)
 	if err != nil || config == nil {
 		return nil, err
