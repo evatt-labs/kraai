@@ -23,12 +23,14 @@ func TestRegisterWiresEveryType(t *testing.T) {
 		lookup     resource.LookupStrategy
 	}{
 		{Provider + "/" + TypeS3Bucket, manifest.CapabilityObjects, nil, resource.LookupByName},
-		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityCDN,
-			[]string{key(TypeS3Bucket), key(TypeCertificateManagerCertificate)}, resource.LookupByAttr},
+		// No DependsOn across bindings: the bucket and certificate are
+		// reached through the cdn entry's origin and certificate references
+		// (capabilities.go), which is what orders the distribution after them.
+		{Provider + "/" + TypeCloudFrontDistribution, manifest.CapabilityCDN, nil, resource.LookupByAttr},
 		{Provider + "/" + TypeCertificateManagerCertificate, manifest.CapabilityTLS, nil, resource.LookupByTag},
 		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityDNS, nil, resource.LookupByAPI},
 		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityDNS,
-			[]string{key(TypeRoute53HostedZone), key(TypeCloudFrontDistribution)}, resource.LookupByAttr},
+			[]string{key(TypeRoute53HostedZone)}, resource.LookupByAttr},
 		{Provider + "/" + TypeLambdaFunction, manifest.CapabilityCompute,
 			[]string{key(TypeArtifactBucket), key(TypeIAMRole)}, resource.LookupByName},
 		{Provider + "/" + TypeAPIGatewayV2API, manifest.CapabilityCompute, nil, resource.LookupByTag},

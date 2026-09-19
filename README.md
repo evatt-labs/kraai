@@ -160,6 +160,13 @@ The packaging step honours `.gitignore`, so build output and virtualenvs stay
 out of the artifact. `include:` re-adds what the artifact genuinely needs.
 `.env` and `.git` are excluded unconditionally and cannot be re-added.
 
+When one binding needs another, its entry names the other: a `cdn` entry's
+`origin` names the `objects` binding it fronts and its `certificate` the `tls`
+binding it presents; a `dns` entry's `alias` names the `cdn` binding a record
+points at. The name must be a binding declared on the same service, and kraai
+orders the referencing resources after what they name. Two bindings that
+merely share a name are not related.
+
 ### Environments
 
 The overlay is what makes the same manifest a throwaway preview or production.

@@ -75,12 +75,19 @@ func Register(reg *resource.Registry, client *Client) error {
 //
 // Every registration below that used to carry a Phase purely to sequence it
 // ahead of or behind another type — the IAM role and artifact bucket ahead
-// of the function that needs them, RecordSet after CloudFront, CloudFront
-// after its bucket and certificate — now declares that relationship as a
-// DependsOn edge instead. internal/plan resolves each edge to the concrete
-// instance within the same service (see resource.Registration.DependsOn's
-// own doc comment), so "the function" always means this service's own
-// function, never another service's.
+// of the function that needs them, RecordSet after its zone — now declares
+// that relationship as a DependsOn edge instead. internal/plan resolves each
+// edge to the concrete instance within the same binding (see
+// resource.Registration.DependsOn's own doc comment), so "the function"
+// always means this service's own function, never another service's.
+//
+// A relationship between two bindings — CloudFront after the bucket it
+// fronts and the certificate it presents, RecordSet after the distribution
+// it aliases — is not a DependsOn, because those live in different bindings
+// and a DependsOn cannot see across. The manifest entry names the other
+// binding (cdn's origin and certificate, dns's alias; declared as
+// references in Capabilities), and internal/plan orders the entry after
+// what it names.
 //
 // This still does not fully solve the real cross-resource dependency a
 // Route53-fronted, ACM-certified CloudFront site has: an ACM certificate
@@ -166,11 +173,12 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeCloudFrontDistribution,
 			Capability: manifest.CapabilityCDN,
-			// Needs the bucket as its origin and the certificate as its
-			// viewer certificate — a real edge, replacing what used to be
-			// phase co-location (both PhaseStorage, CloudFront
-			// PhaseCompute) with no ordering guarantee against either.
-			DependsOn: []string{key(TypeS3Bucket), key(TypeCertificateManagerCertificate)},
+			// No DependsOn. The bucket it fronts and the certificate it
+			// presents live in other bindings, and a DependsOn resolves only
+			// within its own — it used to name both, and resolved only when
+			// the three bindings happened to share a name. The cdn entry's
+			// origin and certificate references (Capabilities) are what
+			// order this after them now, whatever they are called.
 			// AWS enforces alias uniqueness globally, so Aliases is a safe
 			// attribute to search on for this type's identity. See
 			// cloudfrontMatch's doc comment for the gap this leaves open —
@@ -185,11 +193,13 @@ func Registrations(client *Client) []resource.Registration {
 			Provider: Provider, Type: TypeRoute53RecordSet,
 			Capability: manifest.CapabilityDNS,
 			// Needs the zone to create a record inside (HostedZoneId is
-			// this type's own parent-container property) and the
-			// distribution as its alias target — the common case this
-			// registers. See this function's own doc comment for the
-			// validation-record ordering this does not solve.
-			DependsOn: []string{key(TypeRoute53HostedZone), key(TypeCloudFrontDistribution)},
+			// this type's own parent-container property): same binding, a
+			// real DependsOn. The distribution it aliases is another
+			// binding's, reached through the dns entry's alias reference
+			// (Capabilities) rather than a DependsOn that would resolve only
+			// under a shared name. See this function's own doc comment for
+			// the validation-record ordering this does not solve.
+			DependsOn: []string{key(TypeRoute53HostedZone)},
 			// See recordSetMatch's doc comment: not byName, because
 			// RecordSet's primary identifier is a compound
 			// (HostedZoneId|Name|Type) this package's byName fast path has

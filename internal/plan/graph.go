@@ -17,21 +17,18 @@ import (
 // the whole manifest — a service's Lambda permission depends on that
 // service's own function, not on every function in the manifest.
 //
-// # The binding name is the coupling, including across capabilities
+// # A group is one binding; a relationship between bindings is a read
 //
 // Note what is deliberately absent from this key: the capability. Two
-// entries under different capabilities that share a binding name are one
-// group, which is what lets a CloudFront distribution (cdn) order behind the
-// S3 bucket it fronts (objects) and the certificate it presents (tls) now
-// that those are three capabilities rather than one.
-//
-// The converse is the trap: give them different binding names and the edges
-// silently do not resolve, because a dependency naming a type the group
-// never planned contributes no edge — by design, for a registration its own
-// conditions filtered out. A distribution then lands in the same wave as its
-// own origin. The binding name is the only thing a manifest has to say
-// "these belong together", and nothing enforces that an author knew it. See
-// evatt-labs/kraai#197.
+// entries under different capabilities that share a binding name are
+// therefore one group. That is not how two bindings are meant to be
+// related, and no registration should count on it: a DependsOn that
+// reaches across capabilities resolves only when names happen to coincide
+// and silently contributes nothing otherwise, which was the trap
+// evatt-labs/kraai#197 closed. A CloudFront distribution (cdn) orders
+// behind the S3 bucket it fronts (objects) because its manifest entry
+// names that binding as its origin, and the planner turns the reference
+// into a read edge (readsFor) — whatever either binding is called.
 type groupKey struct {
 	serviceKey string
 	binding    string

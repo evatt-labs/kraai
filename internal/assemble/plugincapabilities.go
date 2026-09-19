@@ -52,6 +52,11 @@ type capabilityDeclaration struct {
 	// a nil Schema does for a compiled-in provider, never a placeholder.
 	ProviderSettings map[string]any `json:"providerSettings,omitempty"`
 	Binding          map[string]any `json:"binding,omitempty"`
+	// References names the Binding keys whose value is another binding on
+	// the same service — see resource.CapabilityDef.References. Checked
+	// against the Binding schema when the catalog is built, like a
+	// compiled-in provider's.
+	References []string `json:"references,omitempty"`
 }
 
 // pluginCapabilities asks one loaded plugin what capabilities it declares.
@@ -92,7 +97,7 @@ func decodeCapabilities(pluginName string, out []byte) ([]resource.CapabilityDef
 			return nil, kerrors.Validation(
 				"plugin %q: capability %d declares no name", pluginName, i)
 		}
-		def := resource.CapabilityDef{Name: d.Name, Summary: d.Summary}
+		def := resource.CapabilityDef{Name: d.Name, Summary: d.Summary, References: d.References}
 		if d.ProviderSettings != nil {
 			def.ProviderSettings = resource.NewSchema(
 				pluginName+" "+d.Name+" provider settings", d.ProviderSettings)

@@ -366,3 +366,48 @@ func TestVendorsFor(t *testing.T) {
 		t.Errorf("VendorsFor(frobnicate) = %v, want empty", got)
 	}
 }
+
+// A reference is a key of the entry, so it must be one the entry's schema
+// accepts: otherwise every manifest writing it is rejected by the schema
+// before the reference is read, and the declaration is dead.
+func TestNewCatalogRejectsAReferenceTheBindingSchemaDoesNotAccept(t *testing.T) {
+	withOrigin := NewSchema("cdn binding", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"binding": map[string]any{"type": "string"},
+			"origin":  map[string]any{"type": "string"},
+		},
+		"required":             []any{"binding", "origin"},
+		"additionalProperties": false,
+	})
+
+	c, err := NewCatalog(fakeProvider{name: "v", defs: []CapabilityDef{
+		{Name: "cdn", Summary: "s", Binding: withOrigin, References: []string{"origin"}},
+	}})
+	if err != nil {
+		t.Fatalf("a reference to a declared property was rejected: %v", err)
+	}
+	if got := c.References("cdn", "v"); len(got) != 1 || got[0] != "origin" {
+		t.Errorf("References(cdn, v) = %v, want [origin]", got)
+	}
+	if got := c.References("cdn", "nobody"); got != nil {
+		t.Errorf("References for an unknown vendor = %v, want nil", got)
+	}
+
+	_, err = NewCatalog(fakeProvider{name: "v", defs: []CapabilityDef{
+		{Name: "cdn", Summary: "s", Binding: withOrigin, References: []string{"certificate"}},
+	}})
+	if err == nil {
+		t.Fatal("a reference to a key the schema does not accept was accepted")
+	}
+	if !strings.Contains(err.Error(), "certificate") {
+		t.Errorf("error should name the key: %v", err)
+	}
+
+	_, err = NewCatalog(fakeProvider{name: "v", defs: []CapabilityDef{
+		{Name: "cdn", Summary: "s", References: []string{"origin"}},
+	}})
+	if err == nil {
+		t.Fatal("a reference on a capability with no binding schema was accepted")
+	}
+}

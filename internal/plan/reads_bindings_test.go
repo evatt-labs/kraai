@@ -204,3 +204,31 @@ func actionProviderFor(typ string) string {
 	}
 	return "cloudflare"
 }
+
+// A binding that references another (manifest.Service.References, resolved
+// by the loader) reads it, whatever its registration's own scope says: the
+// manifest said this entry needs that one, and a read is what orders them.
+func TestPlan_BindingReferencesAreReads(t *testing.T) {
+	f := newRegistryFixture(t)
+
+	m := f.oneServiceManifest()
+	svc := m.Services["api"]
+	svc.References = map[string][]string{"UPLOADS": {"DB"}}
+	m.Services["api"] = svc
+
+	p, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	bucket := findAction(t, p, "cloudflare", "r2_bucket")
+	if want := []string{"DB", "UPLOADS"}; !reflect.DeepEqual(bucket.ReadsBindings, want) {
+		t.Fatalf("ReadsBindings = %v, want %v (its own binding and the one it references)",
+			bucket.ReadsBindings, want)
+	}
+	branch := findAction(t, p, "neon", "branch")
+	if bucket.Wave <= branch.Wave {
+		t.Errorf("bucket wave %d, branch wave %d — a referenced binding must come strictly first",
+			bucket.Wave, branch.Wave)
+	}
+}

@@ -46,6 +46,23 @@ type CapabilityDef struct {
 	// a key here is what makes that key writable in a manifest, and an entry
 	// key absent from here is rejected by name.
 	Binding *Schema
+	// References names the keys of a Binding entry whose string value is the
+	// name of another binding on the same service — a cdn entry's `origin`
+	// naming the objects binding it fronts, its `certificate` naming the tls
+	// binding it presents.
+	//
+	// This is how a relationship between two bindings is spelled: by name,
+	// in the entry that needs the other. The manifest loader checks that
+	// each named binding exists on the service, and the planner reads each
+	// as a declared read, so the referencing entry's resources are ordered
+	// after the referenced binding's and can read what it published. Without
+	// a declaration like this the only coupling two bindings had was
+	// happening to share a name, which nothing enforced and nothing
+	// reported (evatt-labs/kraai#197).
+	//
+	// Every key must be a top-level property of Binding; a reference to a
+	// key the schema does not accept is rejected at catalog construction.
+	References []string
 	// Summary is one line describing what this provider's implementation of
 	// Name actually provisions — shown by `kraai capabilities`.
 	Summary string
@@ -167,6 +184,16 @@ func (c *Catalog) add(p Provider) error {
 					"provider %q capability %q: invalid binding schema", p.Name(), def.Name)
 			}
 		}
+		for _, key := range def.References {
+			// A reference is a key of the entry, so the entry's schema must
+			// accept it — otherwise every manifest that wrote the key would
+			// be rejected by the schema before the reference was ever read.
+			if def.Binding == nil || !def.Binding.hasProperty(key) {
+				return kerrors.Validation(
+					"provider %q capability %q: reference key %q is not a property of its binding schema",
+					p.Name(), def.Name, key)
+			}
+		}
 
 		c.byCapability[def.Name] = append(
 			c.byCapability[def.Name], CatalogEntry{Provider: p.Name(), Capability: def})
@@ -237,6 +264,22 @@ func (c *Catalog) ValidateBinding(capability, vendor string, entry map[string]an
 			return nil
 		}
 		return e.Capability.Binding.Validate(entry)
+	}
+	return nil
+}
+
+// References returns the binding-entry keys that name other bindings, as
+// the vendor fulfilling capability declared them (CapabilityDef.References),
+// sorted. Empty when the vendor declares none, or declares no such
+// capability — the same "nothing to check" ValidateBinding answers nil for.
+func (c *Catalog) References(capability, vendor string) []string {
+	for _, e := range c.byCapability[capability] {
+		if e.Provider != vendor {
+			continue
+		}
+		out := append([]string(nil), e.Capability.References...)
+		sort.Strings(out)
+		return out
 	}
 	return nil
 }

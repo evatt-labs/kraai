@@ -52,9 +52,14 @@ type vocabulary struct {
 	// entry — enough to prove the loader consults the vendor's schema and
 	// reports what it says, without this package owning a schema.
 	bindingErr error
+	// references is what References returns per capability, for every
+	// vendor. Nil means no capability declares any.
+	references map[string][]string
 }
 
 func (v vocabulary) Names() []string { return v.names }
+
+func (v vocabulary) References(capability, _ string) []string { return v.references[capability] }
 
 func (v vocabulary) VendorsFor(capability string) []string {
 	if v.vendors == nil {
