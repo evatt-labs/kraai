@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.3](https://github.com/evatt-labs/kraai/compare/v0.6.2...v0.6.3) (2026-09-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* a manifest binding Route 53, ACM or CloudFront through `objects:` must move those entries to `dns:`, `tls:` and `cdn:`.
+
+### Features
+
+* decompose objects into objects, dns, tls and cdn ([#198](https://github.com/evatt-labs/kraai/issues/198)) ([25136a5](https://github.com/evatt-labs/kraai/commit/25136a5f6dcf24538d95a17b35769d1241880105)), closes [#125](https://github.com/evatt-labs/kraai/issues/125)
+* **manifest:** check a capability's vendor against what that vendor declares ([#200](https://github.com/evatt-labs/kraai/issues/200)) ([6b3e2dd](https://github.com/evatt-labs/kraai/commit/6b3e2dda35af819aeb0fe3ab227e54ea33e33e5c)), closes [#189](https://github.com/evatt-labs/kraai/issues/189)
+* **resource:** declare the vendor-type split instead of inventing it ([#195](https://github.com/evatt-labs/kraai/issues/195)) ([2e8649f](https://github.com/evatt-labs/kraai/commit/2e8649f7338774a002924dd362f9b8fb3dd3cd19)), closes [#124](https://github.com/evatt-labs/kraai/issues/124)
+
 ## [0.6.2](https://github.com/evatt-labs/kraai/compare/v0.6.1...v0.6.2) (2026-09-18)
 
 
