@@ -134,12 +134,8 @@ func Registrations(client *Client) []resource.Registration {
 			// identity tag, and a zone found without one is refused rather
 			// than reported absent — see hostedZoneOwned for why absent
 			// would be the worse answer here.
-			Lookup: resource.LookupByAPI,
-			Resource: &resourceType{
-				provider: Provider, typeName: TypeRoute53HostedZone,
-				lookup: resource.LookupByAPI, client: client, match: hostedZoneMatch,
-				stampTag: hostedZoneStampTag, owns: hostedZoneOwned,
-			},
+			Lookup:   resource.LookupByAPI,
+			Resource: newHostedZoneResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeCertificateManagerCertificate,
@@ -153,11 +149,13 @@ func Registrations(client *Client) []resource.Registration {
 			// can have multiple certificates outstanding during rotation —
 			// so identity is a kraai-owned tag, stamped into the
 			// CreateResource desired state itself (certificateStampTag).
-			Lookup: resource.LookupByTag,
-			Resource: &resourceType{
-				provider: Provider, typeName: TypeCertificateManagerCertificate,
-				lookup: resource.LookupByTag, client: client, match: certificateMatch, stampTag: certificateStampTag,
-			},
+			//
+			// Validated through the dns binding the tls entry names as its
+			// zone (a reference, so the zone is ordered first and its id is
+			// readable): ACM writes the validation record itself and waits
+			// for ISSUED. See certificate.go.
+			Lookup:   resource.LookupByTag,
+			Resource: newCertificateResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeS3Bucket,

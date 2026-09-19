@@ -491,8 +491,13 @@ func TestOwnershipHooksAreWiredWhereTheNamespaceIsGlobal(t *testing.T) {
 		key(TypeRoute53HostedZone): {owns: true, stamps: true},
 	}
 	for _, reg := range Registrations(&Client{}) {
-		inner, ok := reg.Resource.(*resourceType)
-		if !ok {
+		var inner *resourceType
+		switch r := reg.Resource.(type) {
+		case *resourceType:
+			inner = r
+		case *hostedZoneResource:
+			inner = r.inner
+		default:
 			continue
 		}
 		exp := want[reg.Key()]
