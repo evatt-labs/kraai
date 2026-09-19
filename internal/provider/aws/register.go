@@ -131,9 +131,9 @@ func Registrations(client *Client) []resource.Registration {
 			Provider: Provider, Type: TypeCertificateManagerCertificate,
 			Capability: manifest.CapabilityTLS,
 			// No DependsOn: CloudFront needs an issued certificate to
-			// reference as its viewer certificate (expressed as
-			// CloudFront's own DependsOn below), but nothing in this stack
-			// needs to exist before a certificate request can be made.
+			// reference as its viewer certificate (the cdn entry's
+			// certificate reference), but nothing in this stack needs to
+			// exist before a certificate request can be made.
 			//
 			// DomainName is explicitly not unique — the same domain
 			// can have multiple certificates outstanding during rotation —
@@ -149,8 +149,8 @@ func Registrations(client *Client) []resource.Registration {
 			Provider: Provider, Type: TypeS3Bucket,
 			Capability: manifest.CapabilityObjects,
 			// No DependsOn: CloudFront's origin must exist before the
-			// distribution fronting it does (expressed as CloudFront's own
-			// DependsOn below), but a bucket itself needs nothing first.
+			// distribution fronting it does (the cdn entry's origin
+			// reference), but a bucket itself needs nothing first.
 			//
 			// BucketName is settable at create, globally unique, and is the
 			// resource's own Ref/primary identifier (CloudFormation
