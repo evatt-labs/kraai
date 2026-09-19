@@ -146,6 +146,28 @@ func buildGraph(items []plannedItem, serviceDependsOn map[string][]string) (adj 
 		}
 	}
 
+	// Read edges: a consumer runs after every producer in each binding it
+	// reads. This is what makes a credential or attribute handoff safe to
+	// rely on. apply hands a consumer whatever its read bindings have
+	// published *so far*, and within one wave "so far" is a race — a
+	// consumer sharing a wave with its producer snapshots an empty index and
+	// fails at the provider, far from the cause. Declaring a read now means
+	// the graph orders it, so the pair can never share a wave.
+	//
+	// Only bindings other than the consumer's own: same-binding producers are
+	// ordered by DependsOn already, and a binding's items reading their own
+	// binding is the common case that must not become a self-edge.
+	for i, it := range items {
+		for _, read := range it.ReadsBindings {
+			if read == it.Binding {
+				continue
+			}
+			for _, producerIdx := range byGroup[groupKey{it.ServiceKey, read}] {
+				addEdge(producerIdx, i)
+			}
+		}
+	}
+
 	for svc, deps := range serviceDependsOn {
 		for _, dep := range deps {
 			for _, from := range byService[dep] {

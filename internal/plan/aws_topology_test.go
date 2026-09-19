@@ -118,6 +118,7 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 	apiBucket := findServiceAction(t, p, "api", awsprovider.TypeArtifactBucket)
 	apiRole := findServiceAction(t, p, "api", awsprovider.TypeIAMRole)
 	apiFunction := findServiceAction(t, p, "api", awsprovider.TypeLambdaFunction)
+	apiBranch := findServiceAction(t, p, "api", neonresource.TypeBranch)
 	apiGateway := findServiceAction(t, p, "api", awsprovider.TypeAPIGatewayV2API)
 	apiPermission := findServiceAction(t, p, "api", awsprovider.TypePermissionAPIGateway)
 
@@ -139,15 +140,31 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 	}
 	// Exact values, not just relative order — the specific topology this
 	// workstream's own PR body documents.
-	if apiBucket.Wave != 0 || apiRole.Wave != 0 || apiGateway.Wave != 0 {
-		t.Errorf("api: bucket/role/gateway waves = %d/%d/%d, want all 0",
+	// #119: the function reads DB's credential (envSecrets), so it must run
+	// strictly after the branch that produces it. This is the ordering that
+	// used to hold by accident — the function was pushed to wave 1 by its
+	// bucket and role — and now holds because a declared read is an edge.
+	if apiBranch.Wave >= apiFunction.Wave {
+		t.Errorf("api: DB branch wave %d, function wave %d — the function reads the branch's "+
+			"credential and must come strictly after it", apiBranch.Wave, apiFunction.Wave)
+	}
+
+	// Absolute waves. Every compute item sits one wave behind the DB branch,
+	// because expandCompute gives every compute type the same ReadsBindings
+	// (the service's full binding set) and a declared read is now an ordering
+	// edge (#119). Only the function actually reads a credential; the bucket,
+	// role and gateway are over-ordered by a wave. That is the cost of the
+	// planner having no per-type way to say who reads what — #208 — and it is
+	// a cost in latency, never in correctness.
+	if apiBucket.Wave != 1 || apiRole.Wave != 1 || apiGateway.Wave != 1 {
+		t.Errorf("api: bucket/role/gateway waves = %d/%d/%d, want all 1 (behind the DB branch)",
 			apiBucket.Wave, apiRole.Wave, apiGateway.Wave)
 	}
-	if apiFunction.Wave != 1 {
-		t.Errorf("api: function wave = %d, want 1", apiFunction.Wave)
+	if apiFunction.Wave != 2 {
+		t.Errorf("api: function wave = %d, want 2", apiFunction.Wave)
 	}
-	if apiPermission.Wave != 2 {
-		t.Errorf("api: permission wave = %d, want 2", apiPermission.Wave)
+	if apiPermission.Wave != 3 {
+		t.Errorf("api: permission wave = %d, want 3", apiPermission.Wave)
 	}
 
 	// "tick": schedule-triggered, no HTTP surface at all — must plan an
@@ -159,14 +176,14 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 	tickFunction := findServiceAction(t, p, "tick", awsprovider.TypeLambdaFunction)
 	tickPermission := findServiceAction(t, p, "tick", awsprovider.TypePermissionEventsRule)
 
-	if tickBucket.Wave != 0 || tickRole.Wave != 0 {
-		t.Errorf("tick: bucket/role waves = %d/%d, want both 0", tickBucket.Wave, tickRole.Wave)
+	if tickBucket.Wave != 1 || tickRole.Wave != 1 {
+		t.Errorf("tick: bucket/role waves = %d/%d, want both 1", tickBucket.Wave, tickRole.Wave)
 	}
-	if tickFunction.Wave != 1 {
-		t.Errorf("tick: function wave = %d, want 1", tickFunction.Wave)
+	if tickFunction.Wave != 2 {
+		t.Errorf("tick: function wave = %d, want 2", tickFunction.Wave)
 	}
-	if tickPermission.Wave != 2 {
-		t.Errorf("tick: permission wave = %d, want 2", tickPermission.Wave)
+	if tickPermission.Wave != 3 {
+		t.Errorf("tick: permission wave = %d, want 3", tickPermission.Wave)
 	}
 
 	for _, a := range p.Actions {
@@ -190,8 +207,8 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 			maxWave = a.Wave
 		}
 	}
-	if maxWave != 2 {
-		t.Errorf("plan spans %d wave(s) (0..%d), want exactly 3 (0..2)", maxWave+1, maxWave)
+	if maxWave != 3 {
+		t.Errorf("plan spans %d wave(s) (0..%d), want exactly 4 (0..3)", maxWave+1, maxWave)
 	}
 }
 

@@ -230,3 +230,88 @@ func TestComputeWaves_EmptyItems(t *testing.T) {
 		t.Fatalf("waves = %v, want empty", waves)
 	}
 }
+
+// reader is item with ReadsBindings set — a consumer of another binding's
+// credentials or attributes.
+func reader(serviceKey, binding, providerType string, reads ...string) plannedItem {
+	it := item(serviceKey, binding, providerType)
+	it.ReadsBindings = reads
+	return it
+}
+
+// A declared read is an ordering edge. Without it a consumer can share a
+// wave with the producer it reads from, snapshot an empty handoff index, and
+// fail at the provider far from the cause — the race #119 describes. The
+// graph already models what runs before what; a read is one more thing it
+// has to know.
+func TestComputeWaves_ReadEdgeOrdersConsumerAfterProducer(t *testing.T) {
+	items := []plannedItem{
+		// The consumer is listed first and has no DependsOn of its own, so
+		// nothing but the read edge can move it off wave 0.
+		reader("svc", "api", "aws/function", "DB"),
+		item("svc", "DB", "neon/branch"),
+	}
+	waves, err := computeWaves(items, nil)
+	if err != nil {
+		t.Fatalf("computeWaves: %v", err)
+	}
+	if waves[1] != 0 {
+		t.Errorf("producer wave = %d, want 0", waves[1])
+	}
+	if waves[0] != 1 {
+		t.Errorf("consumer wave = %d, want 1: it reads DB and must run after everything DB produced", waves[0])
+	}
+}
+
+// Every producer in a read binding orders the consumer, not just one — a
+// binding expands to several resources and the consumer cannot know which of
+// them publishes what it needs.
+func TestComputeWaves_ReadEdgeCoversEveryProducerInTheBinding(t *testing.T) {
+	items := []plannedItem{
+		reader("svc", "api", "aws/function", "DB"),
+		item("svc", "DB", "neon/branch"),
+		item("svc", "DB", "cloudflare/hyperdrive", "neon/branch"),
+	}
+	waves, err := computeWaves(items, nil)
+	if err != nil {
+		t.Fatalf("computeWaves: %v", err)
+	}
+	// branch 0, hyperdrive 1 (depends on branch), function 2 (reads both).
+	if waves[1] != 0 || waves[2] != 1 {
+		t.Errorf("producer waves = %d/%d, want 0/1", waves[1], waves[2])
+	}
+	if waves[0] != 2 {
+		t.Errorf("consumer wave = %d, want 2: after the last producer in DB", waves[0])
+	}
+}
+
+// Reading one's own binding is the common case and must not become a
+// self-edge, which would stall the sort as a cycle.
+func TestComputeWaves_ReadOfOwnBindingIsNotAnEdge(t *testing.T) {
+	items := []plannedItem{
+		reader("svc", "DB", "neon/branch", "DB"),
+	}
+	waves, err := computeWaves(items, nil)
+	if err != nil {
+		t.Fatalf("computeWaves: %v", err)
+	}
+	if waves[0] != 0 {
+		t.Errorf("wave = %d, want 0", waves[0])
+	}
+}
+
+// Read edges are scoped to the consumer's own service, like every other
+// edge — a binding named DB in another service is a different resource.
+func TestComputeWaves_ReadEdgeScopedToService(t *testing.T) {
+	items := []plannedItem{
+		reader("svc-a", "api", "aws/function", "DB"),
+		item("svc-b", "DB", "neon/branch"),
+	}
+	waves, err := computeWaves(items, nil)
+	if err != nil {
+		t.Fatalf("computeWaves: %v", err)
+	}
+	if waves[0] != 0 {
+		t.Errorf("consumer wave = %d, want 0: svc-b's DB is not svc-a's DB", waves[0])
+	}
+}
