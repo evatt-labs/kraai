@@ -1,6 +1,10 @@
 package aws
 
-import "testing"
+import (
+	"context"
+	"strings"
+	"testing"
+)
 
 func TestCloudfrontMatch(t *testing.T) {
 	cases := []struct {
@@ -274,5 +278,61 @@ func TestRecordSetMatch(t *testing.T) {
 				t.Fatalf("recordSetMatch = %v, want %v", got, tc.match)
 			}
 		})
+	}
+}
+
+// A zone is found by name, which proves nothing about who made it; the tag
+// kraai stamps on create is what does. A zone with no tag is refused, not
+// reported absent — absent would have plan create a second zone of the same
+// name, which Route 53 allows and which shadows the real one.
+func TestHostedZoneOwned(t *testing.T) {
+	tagged := func(value string) []any {
+		return []any{map[string]any{"Key": identityTagKey, "Value": value}}
+	}
+	cases := []struct {
+		name       string
+		properties map[string]any
+		owned      bool
+		wantErr    string
+	}{
+		{"kraai's own zone", map[string]any{"Name": "acme.example.", hostedZoneTagsProperty: tagged("acme.example")}, true, ""},
+		{"tagged with a trailing dot", map[string]any{"Name": "acme.example.", hostedZoneTagsProperty: tagged("acme.example.")}, true, ""},
+		{"kraai's tag for a different zone", map[string]any{"Name": "acme.example.", hostedZoneTagsProperty: tagged("other.example")}, false, ""},
+		{"no kraai tag", map[string]any{"Name": "acme.example.", hostedZoneTagsProperty: []any{map[string]any{"Key": "team", "Value": "web"}}}, false, "not created by kraai"},
+		{"no tags at all", map[string]any{"Name": "acme.example."}, false, "not created by kraai"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			owned, err := hostedZoneOwned(context.Background(), "Z123", tc.properties)
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("err = %v, want it to say %q", err, tc.wantErr)
+				}
+				// The way out is named: adopt it, under the zone's real name.
+				for _, want := range []string{"resources:", `{name: "acme.example"}`, "Z123"} {
+					if !strings.Contains(err.Error(), want) {
+						t.Errorf("error should mention %q: %v", want, err)
+					}
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("hostedZoneOwned: %v", err)
+			}
+			if owned != tc.owned {
+				t.Fatalf("owned = %v, want %v", owned, tc.owned)
+			}
+		})
+	}
+}
+
+func TestHostedZoneStampTagWritesHostedZoneTags(t *testing.T) {
+	desired := map[string]any{"Name": "acme.example"}
+	hostedZoneStampTag(desired, "acme.example")
+	if _, hasTags := desired["Tags"]; hasTags {
+		t.Error("the tag landed under Tags, which this type does not have")
+	}
+	if !arrayTagsMatchIn(desired, hostedZoneTagsProperty, "acme.example") {
+		t.Errorf("desired = %v, want the identity tag under %s", desired, hostedZoneTagsProperty)
 	}
 }

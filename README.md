@@ -195,6 +195,14 @@ certificate by ARN, and kraai owns it from then on, `destroy` included. It
 does not issue certificates: DNS validation needs a record in a zone kraai
 does not manage, so the certificate is made once, by hand, and adopted.
 
+Adoption is also how kraai takes over something it finds under a name it
+would have used itself. A hosted zone is identified by its real DNS name, and
+one that exists in the account without kraai's tag is refused, naming the
+`resources:` entry that would adopt it, rather than silently treated as
+kraai's — or shadowed by a second zone of the same name. An S3 bucket owned by
+another account reads as absent, and the create that follows is refused by S3
+itself, naming the collision.
+
 ```yaml
 # environments/acmeshop-pull-request-00042.yaml
 kind: ephemeral

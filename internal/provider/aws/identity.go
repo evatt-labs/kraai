@@ -1,6 +1,11 @@
 package aws
 
-import "strings"
+import (
+	"context"
+	"strings"
+
+	"github.com/evatt-labs/kraai/internal/kerrors"
+)
 
 // cloudfrontMatch implements AWS::CloudFront::Distribution's LookupByAttr
 // strategy: AWS enforces alias (CNAME) uniqueness globally, so a
@@ -59,7 +64,13 @@ type stampFunc func(desired map[string]any, name string)
 // arrayTagsMatch reports whether properties carries identityTagKey=name in
 // an array-of-{Key,Value} shaped Tags property.
 func arrayTagsMatch(properties map[string]any, name string) bool {
-	tags, ok := properties["Tags"].([]any)
+	return arrayTagsMatchIn(properties, "Tags", name)
+}
+
+// arrayTagsMatchIn is arrayTagsMatch for a type that spells its tag
+// property differently — Route 53 calls a hosted zone's HostedZoneTags.
+func arrayTagsMatchIn(properties map[string]any, property, name string) bool {
+	tags, ok := properties[property].([]any)
 	if !ok {
 		return false
 	}
@@ -81,8 +92,14 @@ func arrayTagsMatch(properties map[string]any, name string) bool {
 // shaped Tags property, replacing any prior entry for the same key rather
 // than appending a duplicate.
 func arrayTagsStampTag(desired map[string]any, name string) {
+	arrayTagsStampTagIn(desired, "Tags", name)
+}
+
+// arrayTagsStampTagIn is arrayTagsStampTag for a differently spelled tag
+// property; see arrayTagsMatchIn.
+func arrayTagsStampTagIn(desired map[string]any, property, name string) {
 	var tags []any
-	if existing, ok := desired["Tags"].([]any); ok {
+	if existing, ok := desired[property].([]any); ok {
 		for _, t := range existing {
 			if tagMap, ok := t.(map[string]any); ok {
 				if key, _ := tagMap["Key"].(string); key == identityTagKey {
@@ -93,7 +110,7 @@ func arrayTagsStampTag(desired map[string]any, name string) {
 		}
 	}
 	tags = append(tags, map[string]any{"Key": identityTagKey, "Value": name})
-	desired["Tags"] = tags
+	desired[property] = tags
 }
 
 // certificateMatch implements AWS::CertificateManager::Certificate's
@@ -147,7 +164,55 @@ func hostedZoneMatch(properties map[string]any, name string) bool {
 	if !ok {
 		return false
 	}
-	return strings.TrimSuffix(zoneName, ".") == strings.TrimSuffix(name, ".")
+	return zoneNamesEqual(zoneName, name)
+}
+
+// zoneNamesEqual compares two zone names ignoring the trailing dot Route 53
+// reports and a manifest will not reliably write.
+func zoneNamesEqual(a, b string) bool {
+	return strings.TrimSuffix(a, ".") == strings.TrimSuffix(b, ".")
+}
+
+// hostedZoneTagsProperty is where AWS::Route53::HostedZone carries its
+// tags; the type does not spell it Tags.
+const hostedZoneTagsProperty = "HostedZoneTags"
+
+// hostedZoneStampTag marks a zone kraai creates with its identity tag, so
+// hostedZoneOwned can later tell it from one somebody else made under the
+// same name. Not the lookup — that is hostedZoneMatch on the name — but
+// the ownership evidence the lookup alone cannot give, since a zone name
+// is nothing kraai derived (the registration is NameFromEntry).
+func hostedZoneStampTag(desired map[string]any, name string) {
+	arrayTagsStampTagIn(desired, hostedZoneTagsProperty, name)
+}
+
+// hostedZoneOwned implements ownsFunc for AWS::Route53::HostedZone.
+//
+// A zone found by name that carries kraai's identity tag for that name is
+// kraai's. One that does not was made by someone else — by hand, by another
+// tool — and is refused rather than reported absent: absent would have plan
+// propose creating a second zone of the same name, which Route 53 permits
+// and which then shadows the real one with a zone nothing delegates to. The
+// manifest's resources: block adopts a zone kraai did not create, and the
+// error says so; an imported Ref is never asked this question at all.
+func hostedZoneOwned(_ context.Context, identifier string, properties map[string]any) (bool, error) {
+	zoneName, _ := properties["Name"].(string)
+	tags, _ := properties[hostedZoneTagsProperty].([]any)
+	for _, t := range tags {
+		tagMap, ok := t.(map[string]any)
+		if !ok {
+			continue
+		}
+		if key, _ := tagMap["Key"].(string); key != identityTagKey {
+			continue
+		}
+		value, _ := tagMap["Value"].(string)
+		return zoneNamesEqual(value, zoneName), nil
+	}
+	return false, kerrors.Validation(
+		"hosted zone %q (%s) exists in this account but was not created by kraai; "+
+			"adopt it under the environment's resources: block (dns: <binding>: {name: %q}) or remove it",
+		strings.TrimSuffix(zoneName, "."), identifier, strings.TrimSuffix(zoneName, "."))
 }
 
 // recordSetMatch implements AWS::Route53::RecordSet's LookupByAttr

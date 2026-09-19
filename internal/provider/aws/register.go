@@ -128,10 +128,17 @@ func Registrations(client *Client) []resource.Registration {
 			// after Route53's native ListHostedZonesByName, but this
 			// package's Cloud-Control-only engine resolves it via the same
 			// list-and-match mechanism as LookupByAttr.
+			//
+			// Named by the manifest, so being found by name proves nothing
+			// about who made it: the zone kraai creates is stamped with its
+			// identity tag, and a zone found without one is refused rather
+			// than reported absent — see hostedZoneOwned for why absent
+			// would be the worse answer here.
 			Lookup: resource.LookupByAPI,
 			Resource: &resourceType{
 				provider: Provider, typeName: TypeRoute53HostedZone,
 				lookup: resource.LookupByAPI, client: client, match: hostedZoneMatch,
+				stampTag: hostedZoneStampTag, owns: hostedZoneOwned,
 			},
 		},
 		{
@@ -174,8 +181,17 @@ func Registrations(client *Client) []resource.Registration {
 			// an absent BucketName rather than rejecting the request. See
 			// injectDerivedName's own doc comment for the full failure mode
 			// this closed.
-			Lookup:   resource.LookupByName,
-			Resource: &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: client},
+			//
+			// Bucket names are global, and Cloud Control resolves one any
+			// account owns (artifactbucket.go's Get has the live evidence),
+			// so the engine asks this account's own ListBuckets before
+			// believing a bucket is ours — the artifact bucket's check,
+			// through the engine's own hook (evatt-labs/kraai#120).
+			Lookup: resource.LookupByName,
+			Resource: &resourceType{
+				provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: client,
+				owns: bucketOwnedBy(client),
+			},
 		},
 		{
 			Provider: Provider, Type: TypeCloudFrontDistribution,
