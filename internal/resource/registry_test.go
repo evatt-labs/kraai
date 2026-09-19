@@ -723,6 +723,61 @@ func TestNameFromZeroValueIsBinding(t *testing.T) {
 	}
 }
 
+func TestReadsIsValidated(t *testing.T) {
+	base := Registration{
+		Provider: "aws", Type: "AWS::ApiGatewayV2::DomainName", Capability: "compute",
+		Lookup: LookupByName, Resource: newStub(t),
+	}
+
+	for _, ok := range []ReadScope{ReadsOwnBinding, ReadsServiceBindings} {
+		reg := base
+		reg.Reads = ok
+		if err := NewRegistry().Register(reg); err != nil {
+			t.Errorf("Register with Reads=%s: %v", ok, err)
+		}
+	}
+
+	// The route scope needs a route to read, which only a route-named
+	// instance has.
+	reg := base
+	reg.Reads = ReadsRouteBindings
+	reg.NameFrom = NameFromRoute
+	if err := NewRegistry().Register(reg); err != nil {
+		t.Errorf("Register with Reads=route bindings and NameFrom=route: %v", err)
+	}
+	reg.NameFrom = NameFromBinding
+	err := NewRegistry().Register(reg)
+	if err == nil {
+		t.Fatal("a binding-named registration reading its route's bindings was accepted")
+	}
+	if !strings.Contains(err.Error(), "not named from a route") {
+		t.Errorf("error should say why: %v", err)
+	}
+
+	reg = base
+	reg.Reads = ReadScope(99)
+	err = NewRegistry().Register(reg)
+	if err == nil {
+		t.Fatal("an unknown read scope was accepted")
+	}
+	if !strings.Contains(err.Error(), "ReadScope(99)") {
+		t.Errorf("error should show the bad value: %v", err)
+	}
+}
+
+// The zero value is the narrow case: a registration that says nothing
+// reads its own binding and is ordered behind nothing else.
+func TestReadsZeroValueIsOwnBinding(t *testing.T) {
+	var reg Registration
+	if reg.Reads != ReadsOwnBinding {
+		t.Errorf("zero Reads = %s, want own binding", reg.Reads)
+	}
+	if ReadsOwnBinding.String() != "own binding" || ReadsServiceBindings.String() != "service bindings" ||
+		ReadsRouteBindings.String() != "route bindings" {
+		t.Errorf("String() = %q/%q/%q", ReadsOwnBinding, ReadsServiceBindings, ReadsRouteBindings)
+	}
+}
+
 // RequiresCustomDomain is not satisfied by an absent service, unlike a
 // trigger: a custom domain is asked for by name, and a binding resolve has
 // no route to have asked with.

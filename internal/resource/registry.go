@@ -89,6 +89,23 @@ type Registration struct {
 	// a type name the planner knows about, so internal/plan stays ignorant of
 	// which vendor types are hostname-shaped.
 	NameFrom NameStrategy
+	// Reads is which of its service's bindings an instance reads credentials
+	// and identifiers from. The zero value, ReadsOwnBinding, is the common
+	// case: a type reaches only what its own binding's resources publish.
+	//
+	// The planner turns this into plan.Item.ReadsBindings, and a declared
+	// read is an ordering edge (#119): an instance runs strictly after every
+	// producer in each binding it reads. So the scope is a latency claim as
+	// much as a data one — a type declared to read the whole service waits
+	// on every binding the service has, whether or not it touches them.
+	// Before this field every compute type was given the whole service, and
+	// an artifact bucket waited on a Postgres branch it had nothing to do
+	// with (#208).
+	//
+	// Registration data rather than a Resource interface method, for the
+	// same reason DependsOn is: the telemetry decorator cannot drop what it
+	// never wraps.
+	Reads ReadScope
 	// Applies restricts this registration to the manifests and services it
 	// is meaningful for. Empty means it always applies, which is the common
 	// case; several entries are ANDed.
@@ -156,6 +173,45 @@ func (s NameStrategy) String() string {
 
 // Valid reports whether s is a declared strategy.
 func (s NameStrategy) Valid() bool { return s == NameFromBinding || s == NameFromRoute }
+
+// ReadScope is which bindings a registration's instances read from. An
+// instance always reads its own binding; a scope only ever widens that.
+type ReadScope int
+
+const (
+	// ReadsOwnBinding reads what the instance's own binding publishes and
+	// nothing else — the zero value, and what every type that never names a
+	// sibling binding should leave in place.
+	ReadsOwnBinding ReadScope = iota
+	// ReadsServiceBindings reads every binding the service declares. For a
+	// type whose reads are decided by the manifest rather than by the type —
+	// a function whose envSecrets may name any binding's credential — this
+	// is the only honest scope, and it is the one that costs a wave.
+	ReadsServiceBindings
+	// ReadsRouteBindings reads the bindings the instance's own route names:
+	// today, the tls binding whose certificate it presents. Only meaningful
+	// with NameFromRoute, since only a route-named instance has a route.
+	ReadsRouteBindings
+)
+
+// String implements fmt.Stringer for readable validation errors.
+func (s ReadScope) String() string {
+	switch s {
+	case ReadsOwnBinding:
+		return "own binding"
+	case ReadsServiceBindings:
+		return "service bindings"
+	case ReadsRouteBindings:
+		return "route bindings"
+	default:
+		return "ReadScope(" + strconv.Itoa(int(s)) + ")"
+	}
+}
+
+// Valid reports whether s is a declared scope.
+func (s ReadScope) Valid() bool {
+	return s == ReadsOwnBinding || s == ReadsServiceBindings || s == ReadsRouteBindings
+}
 
 // ScopeFor returns the serialization scope spec resolves to under this
 // registration's Scope function, or "" when the registration is unscoped
@@ -481,6 +537,15 @@ func validate(reg Registration) error {
 		return kerrors.Validation(
 			"resource registration %q declares unknown name strategy %s",
 			reg.Provider+"/"+reg.Type, reg.NameFrom)
+	case !reg.Reads.Valid():
+		return kerrors.Validation(
+			"resource registration %q declares unknown read scope %s",
+			reg.Provider+"/"+reg.Type, reg.Reads)
+	case reg.Reads == ReadsRouteBindings && reg.NameFrom != NameFromRoute:
+		return kerrors.Validation(
+			"resource registration %q reads its route's bindings but is not named from a route — "+
+				"only a NameFromRoute instance has a route to read",
+			reg.Provider+"/"+reg.Type)
 	case reg.VendorType == reg.Type && reg.VendorType != "":
 		return kerrors.Validation(
 			"resource registration %q declares VendorType equal to Type — leave it empty, "+

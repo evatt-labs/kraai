@@ -2,6 +2,7 @@ package plan
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -149,22 +150,23 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 			"credential and must come strictly after it", apiBranch.Wave, apiFunction.Wave)
 	}
 
-	// Absolute waves. Every compute item sits one wave behind the DB branch,
-	// because expandCompute gives every compute type the same ReadsBindings
-	// (the service's full binding set) and a declared read is now an ordering
-	// edge (#119). Only the function actually reads a credential; the bucket,
-	// role and gateway are over-ordered by a wave. That is the cost of the
-	// planner having no per-type way to say who reads what — #208 — and it is
-	// a cost in latency, never in correctness.
-	if apiBucket.Wave != 1 || apiRole.Wave != 1 || apiGateway.Wave != 1 {
-		t.Errorf("api: bucket/role/gateway waves = %d/%d/%d, want all 1 (behind the DB branch)",
+	// Absolute waves. The bucket, role and gateway share wave 0 with the DB
+	// branch: none of them reads a credential, and each registration says so
+	// by leaving Reads at its own binding (#208). Only the function reads the
+	// whole service, and it is the only compute item a declared read (#119)
+	// orders behind the branch — where its bucket and role already put it.
+	if apiBucket.Wave != 0 || apiRole.Wave != 0 || apiGateway.Wave != 0 {
+		t.Errorf("api: bucket/role/gateway waves = %d/%d/%d, want all 0 (alongside the DB branch)",
 			apiBucket.Wave, apiRole.Wave, apiGateway.Wave)
 	}
-	if apiFunction.Wave != 2 {
-		t.Errorf("api: function wave = %d, want 2", apiFunction.Wave)
+	if apiBranch.Wave != 0 {
+		t.Errorf("api: DB branch wave = %d, want 0", apiBranch.Wave)
 	}
-	if apiPermission.Wave != 3 {
-		t.Errorf("api: permission wave = %d, want 3", apiPermission.Wave)
+	if apiFunction.Wave != 1 {
+		t.Errorf("api: function wave = %d, want 1", apiFunction.Wave)
+	}
+	if apiPermission.Wave != 2 {
+		t.Errorf("api: permission wave = %d, want 2", apiPermission.Wave)
 	}
 
 	// "tick": schedule-triggered, no HTTP surface at all — must plan an
@@ -176,14 +178,14 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 	tickFunction := findServiceAction(t, p, "tick", awsprovider.TypeLambdaFunction)
 	tickPermission := findServiceAction(t, p, "tick", awsprovider.TypePermissionEventsRule)
 
-	if tickBucket.Wave != 1 || tickRole.Wave != 1 {
-		t.Errorf("tick: bucket/role waves = %d/%d, want both 1", tickBucket.Wave, tickRole.Wave)
+	if tickBucket.Wave != 0 || tickRole.Wave != 0 {
+		t.Errorf("tick: bucket/role waves = %d/%d, want both 0", tickBucket.Wave, tickRole.Wave)
 	}
-	if tickFunction.Wave != 2 {
-		t.Errorf("tick: function wave = %d, want 2", tickFunction.Wave)
+	if tickFunction.Wave != 1 {
+		t.Errorf("tick: function wave = %d, want 1", tickFunction.Wave)
 	}
-	if tickPermission.Wave != 3 {
-		t.Errorf("tick: permission wave = %d, want 3", tickPermission.Wave)
+	if tickPermission.Wave != 2 {
+		t.Errorf("tick: permission wave = %d, want 2", tickPermission.Wave)
 	}
 
 	for _, a := range p.Actions {
@@ -207,8 +209,8 @@ func TestPlan_AWSAPITopology_WaveAssignment(t *testing.T) {
 			maxWave = a.Wave
 		}
 	}
-	if maxWave != 3 {
-		t.Errorf("plan spans %d wave(s) (0..%d), want exactly 4 (0..3)", maxWave+1, maxWave)
+	if maxWave != 2 {
+		t.Errorf("plan spans %d wave(s) (0..%d), want exactly 3 (0..2)", maxWave+1, maxWave)
 	}
 }
 
@@ -416,6 +418,16 @@ func TestPlan_CustomDomainRouteOrdersCertificateDomainMapping(t *testing.T) {
 	// The API is told to close its generated hostname.
 	if api.Spec.Config["customDomains"] == nil {
 		t.Error("the API's config carries no customDomains, so it cannot close execute-api")
+	}
+
+	// What each reads is exactly what it needs (#208): the domain name its
+	// route's certificate binding, the mapping only its own — which must be
+	// present, or the mapping could not read the id its API published.
+	if got, want := domain.ReadsBindings, []string{"CERT", "api"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("domain name reads %v, want %v", got, want)
+	}
+	if got, want := mapping.ReadsBindings, []string{"api"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("api mapping reads %v, want %v", got, want)
 	}
 }
 

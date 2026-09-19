@@ -214,6 +214,13 @@ func Registrations(client *Client) []resource.Registration {
 			// sees a Code property — this is not aspirational ordering,
 			// the bucket must already exist.
 			DependsOn: []string{key(TypeArtifactBucket), key(TypeIAMRole)},
+			// The one compute type whose reads the manifest decides: envSecrets
+			// may name any binding's credential (lambda.go resolveEnv), so the
+			// function reads the whole service and is ordered after every
+			// binding it has. Every other type here reads its own binding and
+			// leaves the default in place — an artifact bucket does not wait on
+			// a Postgres branch (#208).
+			Reads: resource.ReadsServiceBindings,
 			// No Triggers restriction: every service with AWS compute gets
 			// a Lambda function regardless of how it's invoked — an HTTP
 			// handler and a scheduled handler are both, in the end, a
@@ -414,8 +421,10 @@ func Registrations(client *Client) []resource.Registration {
 			// addresses a domain name by the domain string itself.
 			NameFrom: resource.NameFromRoute,
 			// No same-binding dependency. The certificate it presents lives
-			// in the service's tls binding, and the read edge the planner
-			// draws for ReadsBindings (#119) is what orders this after it.
+			// in the tls binding its route names, and the read edge the
+			// planner draws for that binding (#119) is what orders this after
+			// it — and after nothing else the service happens to declare.
+			Reads: resource.ReadsRouteBindings,
 			Applies: []resource.Applicability{
 				resource.RequiresTrigger(manifest.TriggerHTTP),
 				resource.RequiresSettings(httpFrontDoorIs(httpFrontDoorAPIGateway)),
