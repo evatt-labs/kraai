@@ -19,10 +19,14 @@ func routeSpec(certBinding string) resource.Spec {
 
 // The certificate ARN is read from the tls binding the route named, under the
 // cross-binding key apply publishes it as.
+//
+// The attribute is spelled out as a literal, not the constant: the live ACM
+// schema publishes the ARN as CertificateArn, and a test using the constant
+// on both sides passed while the constant said "Id".
 func TestDomainNameTranslateReadsTheCertificateFromItsBinding(t *testing.T) {
 	spec := routeSpec("CERT")
 	spec.Attributes = map[string]map[string]any{
-		"CERT." + key(TypeCertificateManagerCertificate): {certificateArnAttribute: "arn:aws:acm:us-east-1:1:certificate/abc"},
+		"CERT." + key(TypeCertificateManagerCertificate): {"CertificateArn": "arn:aws:acm:us-east-1:1:certificate/abc"},
 	}
 
 	translated, err := newDomainNameResource(&Client{}).translate(spec)
