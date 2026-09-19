@@ -37,6 +37,24 @@ jobs:
       # Omitting it makes the action read release-please-config.json and
       # .release-please-manifest.json (its defaults), where release-type
       # and the 0.x bump rules already live.
+      #
+      # Those rules are `versioning: always-bump-patch`: every release is a
+      # patch bump, whatever the commits say. kraai is a long way from 1.0,
+      # and spending a minor on each breaking change would walk the version
+      # up faster than the project is actually maturing.
+      #
+      # bump-minor-pre-major and bump-patch-for-minor-pre-major are kept
+      # alongside it deliberately. They are the `default` strategy's own 0.x
+      # guards and do nothing while always-bump-patch is set — but if the
+      # strategy is ever changed back, dropping them now would silently
+      # restore the behaviour that made a `feat!:` commit open a 1.0.0
+      # release PR.
+      #
+      # What this costs: a breaking change no longer shows in the version
+      # number. The CHANGELOG still carries it — release-please writes the
+      # `feat!:` subject and any BREAKING CHANGE footer either way — so the
+      # signal moves from the version to the release notes rather than
+      # disappearing.
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
