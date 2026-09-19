@@ -172,6 +172,28 @@ func TestDecodeCapabilities(t *testing.T) {
 		}
 	})
 
+	t.Run("references travel with the declaration", func(t *testing.T) {
+		defs, err := decodeCapabilities("p", []byte(`[{
+			"name": "cdn",
+			"binding": {"type": "object", "properties": {"binding": {"type": "string"},
+				"origin": {"type": "string"}}, "additionalProperties": false},
+			"references": ["origin"]
+		}]`))
+		if err != nil {
+			t.Fatalf("decodeCapabilities: %v", err)
+		}
+		if len(defs[0].References) != 1 || defs[0].References[0] != "origin" {
+			t.Errorf("References = %v, want [origin]", defs[0].References)
+		}
+		// And are held to the schema like a compiled-in provider's.
+		if _, err := resource.NewCatalog(resource.FuncProvider{
+			ProviderName:     "p",
+			CapabilitiesFunc: func() []resource.CapabilityDef { return defs },
+		}); err != nil {
+			t.Errorf("a plugin's valid reference was rejected by the catalog: %v", err)
+		}
+	})
+
 	t.Run("absent schemas stay nil rather than becoming empty ones", func(t *testing.T) {
 		// nil means "nothing to validate" for a compiled-in provider too, and
 		// an empty schema would instead mean "an object with no permitted

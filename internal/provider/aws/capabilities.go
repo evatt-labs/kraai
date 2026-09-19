@@ -32,6 +32,8 @@ func Capabilities() []resource.CapabilityDef {
 			Name:    manifest.CapabilityDNS,
 			Summary: "Route 53 hosted zone and the record sets inside it.",
 			Binding: dnsBindingSchema,
+			// alias names the cdn binding a record in this zone points at.
+			References: []string{"alias"},
 		},
 		{
 			Name:    manifest.CapabilityTLS,
@@ -42,6 +44,11 @@ func Capabilities() []resource.CapabilityDef {
 			Name:    manifest.CapabilityCDN,
 			Summary: "CloudFront distribution in front of an S3 origin.",
 			Binding: cdnBindingSchema,
+			// origin names the objects binding fronted, certificate the tls
+			// binding presented. Declared here, not as DependsOn on the
+			// distribution's registration: a DependsOn resolves within one
+			// binding, and these are relationships between bindings.
+			References: []string{"origin", "certificate"},
 		},
 		{
 			Name: manifest.CapabilityCompute,

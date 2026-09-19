@@ -125,7 +125,8 @@ var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]
 })
 
 // dnsBindingSchema validates one entry of a service's `dns:` list: the zone
-// to create and the name a record in it answers for.
+// to create, the name a record in it answers for, and the cdn binding that
+// record aliases (a reference — see Capabilities).
 //
 // A name of its own rather than reusing the binding name, because a binding
 // name is kraai's handle for the resource and a zone name is a real, external
@@ -145,6 +146,7 @@ var dnsBindingSchema = resource.NewSchema("aws dns binding", map[string]any{
 		"binding": map[string]any{"type": "string"},
 		"zone":    map[string]any{"type": "string"},
 		"name":    map[string]any{"type": "string"},
+		"alias":   map[string]any{"type": "string"},
 	},
 	"required":             []any{"binding", "zone"},
 	"additionalProperties": false,
@@ -170,7 +172,14 @@ var tlsBindingSchema = resource.NewSchema("aws tls binding", map[string]any{
 })
 
 // cdnBindingSchema validates one entry of a service's `cdn:` list: the
-// aliases the distribution answers on.
+// objects binding it fronts, the tls binding it presents, and the aliases
+// the distribution answers on.
+//
+// origin and certificate are references (see Capabilities): each names
+// another binding on the same service, which the loader checks exists and
+// the planner orders this entry after. origin is required because a
+// distribution with nothing behind it is not a thing; certificate is not,
+// because CloudFront serves its default certificate on its own hostname.
 //
 // Aliases rather than a single name because a distribution genuinely
 // serves several, and because this package's own identity strategy for
@@ -183,13 +192,15 @@ var tlsBindingSchema = resource.NewSchema("aws tls binding", map[string]any{
 var cdnBindingSchema = resource.NewSchema("aws cdn binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
-		"binding": map[string]any{"type": "string"},
+		"binding":     map[string]any{"type": "string"},
+		"origin":      map[string]any{"type": "string"},
+		"certificate": map[string]any{"type": "string"},
 		"aliases": map[string]any{
 			"type":  "array",
 			"items": map[string]any{"type": "string"},
 		},
 	},
-	"required":             []any{"binding"},
+	"required":             []any{"binding", "origin"},
 	"additionalProperties": false,
 })
 

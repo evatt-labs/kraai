@@ -262,6 +262,15 @@ func (s *Schema) unrecognizedKeyError(unknown []string) error {
 		s.label, strings.Join(msgs, ", "), recognized)
 }
 
+// hasProperty reports whether name is one of s's top-level properties.
+// Read from the document rather than the compiled schema so it can answer
+// before compilation, which is when Catalog.add asks.
+func (s *Schema) hasProperty(name string) bool {
+	props, _ := s.doc["properties"].(map[string]any)
+	_, ok := props[name]
+	return ok
+}
+
 // topLevelProperties returns doc's top-level "properties" key names,
 // sorted — deterministic across map iteration order, exactly as the
 // retired validateKnownSettings sorted allKnown before formatting it.

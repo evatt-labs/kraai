@@ -1,9 +1,11 @@
 package aws
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/resource"
 )
 
 // TestCapabilitiesRequireNoCredentialsOrClient proves the proposal's core
@@ -81,5 +83,37 @@ func TestObjectsBindingSchema(t *testing.T) {
 	}
 	if err := objectsBindingSchema.Validate(map[string]any{"binding": "bucket", "versioned": true}); err == nil {
 		t.Fatal("expected an error for an unrecognized key")
+	}
+}
+
+// The cross-binding relationships a static site needs are declared as
+// references, and every reference names a key its binding schema accepts —
+// which NewCatalog checks, so this is also the proof the declarations build.
+func TestCapabilitiesDeclareTheStaticSiteReferences(t *testing.T) {
+	catalog, err := resource.NewCatalog(resource.FuncProvider{
+		ProviderName: Provider, CapabilitiesFunc: Capabilities,
+	})
+	if err != nil {
+		t.Fatalf("NewCatalog: %v", err)
+	}
+	if got, want := catalog.References(manifest.CapabilityCDN, Provider), []string{"certificate", "origin"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("cdn references = %v, want %v", got, want)
+	}
+	if got, want := catalog.References(manifest.CapabilityDNS, Provider), []string{"alias"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("dns references = %v, want %v", got, want)
+	}
+
+	// A distribution with nothing behind it is not a thing.
+	err = catalog.ValidateBinding(manifest.CapabilityCDN, Provider, map[string]any{"binding": "EDGE"})
+	if err == nil {
+		t.Error("a cdn entry with no origin was accepted")
+	}
+	if err := catalog.ValidateBinding(manifest.CapabilityCDN, Provider,
+		map[string]any{"binding": "EDGE", "origin": "ASSETS", "certificate": "CERT", "aliases": []any{"acme.example"}}); err != nil {
+		t.Errorf("a complete cdn entry was rejected: %v", err)
+	}
+	if err := catalog.ValidateBinding(manifest.CapabilityDNS, Provider,
+		map[string]any{"binding": "ZONE", "zone": "acme.example", "alias": "EDGE"}); err != nil {
+		t.Errorf("a dns entry with an alias was rejected: %v", err)
 	}
 }

@@ -245,13 +245,11 @@ func TestPlan_AWSAPITopology_Deterministic(t *testing.T) {
 
 // TestPlan_StaticSiteOrdersAcrossCapabilities is the decomposition's own
 // acceptance criterion: the five types that used to share the `objects`
-// capability now sit under four, and must still order correctly.
-//
-// They do because groupKey is (service, binding) and carries no capability,
-// so four entries sharing one binding name are one expansion group and their
-// DependsOn edges resolve across capabilities exactly as they did when all
-// five were one binding. That is load-bearing and invisible — hence this
-// test, and its companion below for what happens when the names differ.
+// capability now sit under four bindings with four different names, and
+// still order correctly — because each entry names the binding it needs
+// (cdn's origin and certificate, dns's alias), and a reference is a read
+// the graph orders (evatt-labs/kraai#197). The manifest is built by hand,
+// so References is set the way the loader would have resolved it.
 func TestPlan_StaticSiteOrdersAcrossCapabilities(t *testing.T) {
 	reg := awsAPITopologyFixture(t)
 	m := &manifest.Manifest{
@@ -262,12 +260,16 @@ func TestPlan_StaticSiteOrdersAcrossCapabilities(t *testing.T) {
 			manifest.CapabilityCDN:     {Vendor: "aws"},
 		}},
 		Services: map[string]manifest.Service{
-			"site": {Dir: ".", Bindings: manifest.Bindings{
-				manifest.CapabilityObjects: {{"binding": "SITE"}},
-				manifest.CapabilityTLS:     {{"binding": "SITE", "domain": "acme.example"}},
-				manifest.CapabilityCDN:     {{"binding": "SITE"}},
-				manifest.CapabilityDNS:     {{"binding": "SITE", "zone": "acme.example"}},
-			}},
+			"site": {
+				Dir: ".",
+				Bindings: manifest.Bindings{
+					manifest.CapabilityObjects: {{"binding": "ASSETS"}},
+					manifest.CapabilityTLS:     {{"binding": "CERT", "domain": "acme.example"}},
+					manifest.CapabilityCDN:     {{"binding": "EDGE", "origin": "ASSETS", "certificate": "CERT"}},
+					manifest.CapabilityDNS:     {{"binding": "ZONE", "zone": "acme.example", "alias": "EDGE"}},
+				},
+				References: map[string][]string{"EDGE": {"ASSETS", "CERT"}, "ZONE": {"EDGE"}},
+			},
 		},
 	}
 
@@ -303,19 +305,14 @@ func TestPlan_StaticSiteOrdersAcrossCapabilities(t *testing.T) {
 	}
 }
 
-// The companion to the test above, pinning the hazard rather than the
-// guarantee: the same four entries under different binding names are four
-// groups, no DependsOn resolves across them, and the distribution lands in
-// the same wave as the bucket it is supposed to front.
-//
-// Asserted rather than left undiscovered, because this is what the
-// decomposition made reachable — one capability meant one binding meant one
-// group, and there was nothing to get wrong. Not currently a live bug: none
-// of these four types can be created at all yet (evatt-labs/kraai#117). When
-// evatt-labs/kraai#197 decides what a cross-capability edge should mean, this
-// test is what has to change, and it should fail loudly when it does rather
-// than quietly keep passing.
-func TestPlan_StaticSiteLosesOrderingWhenBindingNamesDiffer(t *testing.T) {
+// The companion, pinning what is no longer load-bearing: four entries that
+// share a binding name but reference nothing are not related by the name.
+// The distribution lands in the same wave as the bucket, and that is
+// correct — a name coincidence was the silent trap evatt-labs/kraai#197
+// closed, and if it ever orders again something is inferring a
+// relationship the manifest never wrote. (A real cdn entry cannot reach
+// here without an origin; the schema requires one.)
+func TestPlan_StaticSiteSharedNamesAreNotARelationship(t *testing.T) {
 	reg := awsAPITopologyFixture(t)
 	m := &manifest.Manifest{
 		Root: manifest.Root{Providers: manifest.Providers{
@@ -324,8 +321,8 @@ func TestPlan_StaticSiteLosesOrderingWhenBindingNamesDiffer(t *testing.T) {
 		}},
 		Services: map[string]manifest.Service{
 			"site": {Dir: ".", Bindings: manifest.Bindings{
-				manifest.CapabilityObjects: {{"binding": "ASSETS"}},
-				manifest.CapabilityCDN:     {{"binding": "EDGE"}},
+				manifest.CapabilityObjects: {{"binding": "SITE"}},
+				manifest.CapabilityCDN:     {{"binding": "SITE"}},
 			}},
 		},
 	}
@@ -340,9 +337,7 @@ func TestPlan_StaticSiteLosesOrderingWhenBindingNamesDiffer(t *testing.T) {
 		waves[a.Type] = a.Wave
 	}
 	if waves["AWS::CloudFront::Distribution"] != waves["AWS::S3::Bucket"] {
-		t.Fatalf("expected the documented hazard — distribution and bucket in one wave — got %v. "+
-			"If this now orders correctly, evatt-labs/kraai#197 has been fixed and both this test "+
-			"and groupKey's doc comment need updating.", waves)
+		t.Fatalf("distribution and bucket were ordered by their shared name alone: %v", waves)
 	}
 }
 

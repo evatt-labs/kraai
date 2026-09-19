@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"slices"
 	"sort"
 	"strings"
 
@@ -41,6 +42,10 @@ type Vocabulary interface {
 	// vendor fulfilling capability declared for it, returning nil when
 	// there is no such schema to check against.
 	ValidateBinding(capability, vendor string, entry map[string]any) error
+	// References returns the entry keys whose value names another binding
+	// on the same service, as the vendor fulfilling capability declared
+	// them. Empty when there are none.
+	References(capability, vendor string) []string
 }
 
 // Loader resolves a manifest directory into one validated Manifest.
@@ -471,9 +476,12 @@ func (l *Loader) validateServices(root *Root, services map[string]Service) error
 					name, TriggerHTTP, TriggerSchedule, svc.Compute.Trigger)
 			}
 		}
-		if err := l.validateBindings(root, name, svc.Bindings, known); err != nil {
+		references, err := l.validateBindings(root, name, svc, known)
+		if err != nil {
 			return err
 		}
+		svc.References = references
+		services[name] = svc
 		for _, dep := range svc.DependsOn {
 			if dep == name {
 				return kerrors.Validation("services.%s.depends_on: a service cannot depend on itself", name)
@@ -495,18 +503,25 @@ func (l *Loader) validateServices(root *Root, services map[string]Service) error
 // report a shape it will never be held to. A capability with no vendor
 // configured is left alone here — internal/plan reports that, once, with the
 // binding it failed to expand.
-func (l *Loader) validateBindings(root *Root, svc string, bindings Bindings, known map[string]bool) error {
+// validateBindings checks every binding entry of svc and returns the
+// references each entry makes to its siblings, keyed by binding name — what
+// Service.References carries, resolved here because this is the one place
+// that has both the entries and the vocabulary that says which keys are
+// references.
+func (l *Loader) validateBindings(root *Root, name string, svc Service, known map[string]bool) (map[string][]string, error) {
+	bindings := svc.Bindings
 	capabilities := make([]string, 0, len(bindings))
 	for capability := range bindings {
 		capabilities = append(capabilities, capability)
 	}
 	sort.Strings(capabilities)
 
+	var references map[string][]string
 	for _, capability := range capabilities {
 		if !known[capability] {
-			return kerrors.Validation(
+			return nil, kerrors.Validation(
 				"services.%s.%s: no registered provider declares capability %q — declared: %s",
-				svc, capability, capability, strings.Join(l.vocabulary.Names(), ", "))
+				name, capability, capability, strings.Join(l.vocabulary.Names(), ", "))
 		}
 
 		configured, hasVendor := root.Providers.For(capability)
@@ -518,20 +533,61 @@ func (l *Loader) validateBindings(root *Root, svc string, bindings Bindings, kno
 			// capability whose vendor declares no Binding schema would
 			// otherwise reach the planner unnamed.
 			if entry.Name() == "" {
-				return kerrors.Validation(
+				return nil, kerrors.Validation(
 					"services.%s.%s[%d]: %s is required and must be a non-empty string",
-					svc, capability, i, BindingKey)
+					name, capability, i, BindingKey)
 			}
 			if !hasVendor {
 				continue
 			}
 			if err := l.vocabulary.ValidateBinding(capability, configured.Vendor, entry); err != nil {
-				return kerrors.Wrap(err, kerrors.CodeValidation,
-					"services.%s.%s[%d]", svc, capability, i)
+				return nil, kerrors.Wrap(err, kerrors.CodeValidation,
+					"services.%s.%s[%d]", name, capability, i)
+			}
+			for _, key := range l.vocabulary.References(capability, configured.Vendor) {
+				raw, present := entry[key]
+				if !present {
+					continue
+				}
+				target, ok := raw.(string)
+				if !ok || target == "" {
+					return nil, kerrors.Validation(
+						"services.%s.%s[%d].%s: must name a binding on service %q, got %v",
+						name, capability, i, key, name, raw)
+				}
+				if target == entry.Name() {
+					return nil, kerrors.Validation(
+						"services.%s.%s[%d].%s: %q names this binding itself",
+						name, capability, i, key, target)
+				}
+				if !hasAnyBinding(svc, target) {
+					return nil, kerrors.Validation(
+						"services.%s.%s[%d].%s: %q is not a binding declared on service %q",
+						name, capability, i, key, target, name)
+				}
+				if references == nil {
+					references = map[string][]string{}
+				}
+				references[entry.Name()] = append(references[entry.Name()], target)
 			}
 		}
 	}
-	return nil
+	for binding, targets := range references {
+		sort.Strings(targets)
+		references[binding] = slices.Compact(targets)
+	}
+	return references, nil
+}
+
+// hasAnyBinding reports whether svc declares a binding named name under
+// any capability.
+func hasAnyBinding(svc Service, name string) bool {
+	for capability := range svc.Bindings {
+		if hasBinding(svc, capability, name) {
+			return true
+		}
+	}
+	return false
 }
 
 // sortedServiceNames returns services' keys in ascending order.

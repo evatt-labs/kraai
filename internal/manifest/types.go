@@ -241,6 +241,16 @@ type Service struct {
 	// it — not any vendor's.
 	Bindings Bindings `yaml:",inline"`
 
+	// References is, per binding name, the sibling bindings that entry names
+	// through the keys its vendor declared as references
+	// (resource.CapabilityDef.References) — a cdn entry's origin, say —
+	// sorted. Not read from YAML: the Loader resolves it while validating
+	// bindings, which is the one place that has both the entries and the
+	// vocabulary saying which keys are references. internal/plan turns each
+	// into a declared read, so the referencing binding's resources run after
+	// the referenced binding's and can read what it published.
+	References map[string][]string `yaml:"-"`
+
 	// DependsOn names other services in this manifest that must be fully
 	// provisioned before this one. The escape hatch for ordering that is
 	// real but that no resource.Registration can see: a registration's own

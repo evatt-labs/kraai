@@ -350,18 +350,24 @@ func routeConfigs(routes []manifest.Route) []any {
 	return out
 }
 
-// readsFor is the ReadsBindings an item gets: its own binding, plus
-// whatever its registration's scope widens that to. The own binding is
+// readsFor is the ReadsBindings an item gets: its own binding, every
+// sibling its own manifest entry references (manifest.Service.References),
+// plus whatever its registration's scope widens that to. The own binding is
 // always present because apply's secret and attribute indexes hand an
 // action exactly the bindings named here, and a type that reads what its
 // own binding published — an API mapping reading its API's id — would
 // otherwise see nothing.
 //
+// A reference is a read regardless of scope: the manifest said "this entry
+// needs that one", and that is exactly what a read edge means. It is the
+// only coupling between two bindings the planner honours; two entries that
+// merely share a name are not related by it.
+//
 // Sorted and deduplicated so a repeated Plan call is byte-for-byte
 // identical regardless of authoring order, and so an own binding that a
 // scope also names appears once.
 func readsFor(scope resource.ReadScope, own string, svc manifest.Service, route manifest.Route) []string {
-	reads := []string{own}
+	reads := append([]string{own}, svc.References[own]...)
 	switch scope {
 	case resource.ReadsServiceBindings:
 		for _, entries := range svc.Bindings {
