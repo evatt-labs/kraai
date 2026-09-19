@@ -494,10 +494,10 @@ func decide(ctx context.Context, it plannedItem) Action {
 	// first and unconditionally — before Get, and therefore regardless of
 	// whether the resource already exists. See SpecValidator's own doc
 	// comment (validate.go) for the bug this fixes: a check reachable only
-	// through ImmutableDiffer (below) never runs on a brand-new
+	// through Differ (below) never runs on a brand-new
 	// environment's first plan, where every action is ActionCreate.
 	//
-	// Same dynamic-type type assertion as ImmutableDiffer's, on the same
+	// Same dynamic-type type assertion as Differ's, on the same
 	// getter-narrowed it.res — no new path to a mutating verb.
 	if validator, ok := it.res.(SpecValidator); ok {
 		if err := validator.ValidateSpec(it.spec); err != nil {
@@ -536,20 +536,24 @@ func decide(ctx context.Context, it plannedItem) Action {
 	}
 
 	// A type assertion checks it.res's dynamic type, not its static
-	// interface (getter) — so this reaches ImmutableDiffer on the
-	// underlying resource.Resource without this package ever holding a
-	// value statically typed as resource.Resource itself. ImmutableDiffer
-	// has no mutating method to reach even if it did.
-	if differ, ok := it.res.(ImmutableDiffer); ok {
-		differs, dErr := differ.DiffersFromState(it.spec, state)
+	// interface (getter) — so this reaches Differ on the underlying
+	// resource.Resource without this package ever holding a value
+	// statically typed as resource.Resource itself. Differ has no mutating
+	// method to reach even if it did.
+	if differ, ok := it.res.(Differ); ok {
+		difference, dErr := differ.Diff(it.spec, state)
 		if dErr != nil {
 			action.Kind = ActionFailed
 			action.Err = kerrors.Wrap(dErr, kerrors.CodeUnexpected,
 				"comparing %s/%s %q to its desired spec", it.Provider, it.Type, it.ref.Name)
 			return action
 		}
-		if differs {
+		switch difference {
+		case resource.Immutable:
 			action.Kind = ActionReplace
+			return action
+		case resource.Mutable:
+			action.Kind = ActionUpdate
 			return action
 		}
 	}

@@ -114,7 +114,7 @@ func TestAPIGatewayGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	}
 }
 
-func TestAPIGatewayDiffersFromStateNeverCallsSTS(t *testing.T) {
+func TestAPIGatewayDiffNeverCallsSTS(t *testing.T) {
 	fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/ProtocolType"}}}
 	fsts := &fakeSTS{account: "123456789012"}
 	api := newAPIGatewayResourceForTest(fc, fsts)
@@ -122,14 +122,14 @@ func TestAPIGatewayDiffersFromStateNeverCallsSTS(t *testing.T) {
 	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{}}
 	state := &resource.State{Attributes: map[string]any{"ProtocolType": "WEBSOCKET"}}
 
-	differs, err := api.DiffersFromState(spec, state)
+	difference, err := api.Diff(spec, state)
 	if err != nil {
-		t.Fatalf("DiffersFromState: %v", err)
+		t.Fatalf("Diff: %v", err)
 	}
-	if !differs {
+	if difference != resource.Immutable {
 		t.Fatal("expected a ProtocolType difference to be detected")
 	}
 	if fsts.calls != 0 {
-		t.Fatalf("STS called %d times during DiffersFromState, want 0", fsts.calls)
+		t.Fatalf("STS called %d times during Diff, want 0", fsts.calls)
 	}
 }

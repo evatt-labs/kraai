@@ -17,11 +17,16 @@ const (
 	ActionNoChange
 	// ActionReplace means the resource exists but its desired spec differs
 	// on a field the registered type cannot reconcile with Update — see
-	// ImmutableDiffer in diff.go.
+	// Differ in diff.go.
 	ActionReplace
 	// ActionFailed means Get itself failed: no outcome could be decided for
 	// this resource. See Action.Err.
 	ActionFailed
+	// ActionUpdate means the resource exists and its desired spec differs
+	// only in properties the registered type can change in place — see
+	// Differ. Appended rather than placed beside ActionReplace so the
+	// existing kinds keep their values.
+	ActionUpdate
 )
 
 // String implements fmt.Stringer for readable output and error messages.
@@ -35,6 +40,8 @@ func (k ActionKind) String() string {
 		return "replace"
 	case ActionFailed:
 		return "failed"
+	case ActionUpdate:
+		return "update"
 	default:
 		return fmt.Sprintf("ActionKind(%d)", int(k))
 	}

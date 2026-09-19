@@ -289,8 +289,15 @@ type optionalResource struct {
 
 func (o optionalResource) Secrets(*State) map[string]Secret { return o.secrets }
 
-func (o optionalResource) DiffersFromState(Spec, *State) (bool, error) {
-	return o.differs, o.diffErr
+func (o optionalResource) Diff(Spec, *State) (Difference, error) {
+	// The fixture keeps its bool: "differs" means "needs replace", Immutable.
+	if o.diffErr != nil {
+		return Same, o.diffErr
+	}
+	if o.differs {
+		return Immutable, nil
+	}
+	return Same, nil
 }
 
 func (o optionalResource) ValidateSpec(Spec) error { return o.validateErr }
@@ -330,9 +337,9 @@ func TestInstrumentedForwardsOptionalInterfaces(t *testing.T) {
 		t.Error("decorated resource does not satisfy SecretProducer; add a forwarder in otel.go")
 	}
 	if _, ok := decorated.(interface {
-		DiffersFromState(Spec, *State) (bool, error)
+		Diff(Spec, *State) (Difference, error)
 	}); !ok {
-		t.Error("decorated resource does not satisfy ImmutableDiffer; add a forwarder in otel.go")
+		t.Error("decorated resource does not satisfy Differ; add a forwarder in otel.go")
 	}
 	if _, ok := decorated.(interface {
 		ValidateSpec(Spec) error
@@ -361,14 +368,14 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 		t.Errorf("Secrets() lost the producer's key: got %v", got)
 	}
 
-	differs, err := decorated.(interface {
-		DiffersFromState(Spec, *State) (bool, error)
-	}).DiffersFromState(Spec{}, &State{})
+	difference, err := decorated.(interface {
+		Diff(Spec, *State) (Difference, error)
+	}).Diff(Spec{}, &State{})
 	if err != nil {
-		t.Fatalf("DiffersFromState() error = %v", err)
+		t.Fatalf("Diff() error = %v", err)
 	}
-	if !differs {
-		t.Error("DiffersFromState() = false, want the inner resource's true")
+	if difference != Immutable {
+		t.Errorf("Diff() = %v, want the inner resource's Immutable", difference)
 	}
 
 	if err := decorated.(interface {

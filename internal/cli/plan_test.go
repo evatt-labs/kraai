@@ -456,7 +456,7 @@ func TestWritePlanText_MultiWaveAndEveryKind(t *testing.T) {
 	}
 	out := buf.String()
 	for _, want := range []string{
-		"1 to create, 1 to replace, 1 unchanged, 1 failed (4 total)",
+		"1 to create, 0 to update, 1 to replace, 1 unchanged, 1 failed (4 total)",
 		"wave 0:", "wave 1:",
 		"+", "~", "=", "!",
 		"queue api down",
@@ -501,7 +501,7 @@ func TestCountActions_NilPlanIsZero(t *testing.T) {
 func TestSummaryLine_Format(t *testing.T) {
 	c := actionCounts{Create: 1, Replace: 2, NoChange: 3, Failed: 4}
 	got := summaryLine("env", c)
-	want := `plan for "env": 1 to create, 2 to replace, 3 unchanged, 4 failed (10 total)`
+	want := `plan for "env": 1 to create, 0 to update, 2 to replace, 3 unchanged, 4 failed (10 total)`
 	if got != want {
 		t.Errorf("summaryLine() = %q, want %q", got, want)
 	}

@@ -40,7 +40,7 @@ type translatedResource struct {
 	inner     *resourceType
 	translate func(spec resource.Spec) (resource.Spec, error)
 	// immutable lists the manifest-declared properties whose change forces
-	// a replacement, for DiffersFromState to compare. Sibling identifiers
+	// a replacement, for Diff to compare. Sibling identifiers
 	// are deliberately absent from it — see that method.
 	immutable map[string]func(spec resource.Spec) (string, error)
 }
@@ -69,7 +69,7 @@ func (t *translatedResource) Delete(ctx context.Context, ref resource.Ref) error
 	return t.inner.Delete(ctx, ref)
 }
 
-// DiffersFromState compares only the properties the manifest declares.
+// Diff compares only the properties the manifest declares.
 //
 // It cannot defer to the generic engine here, because that would need the
 // full translated config and translation needs sibling identifiers that a
@@ -82,20 +82,23 @@ func (t *translatedResource) Delete(ctx context.Context, ref resource.Ref) error
 // Implemented rather than omitted because it is an optional interface: a
 // type that does not implement it reports every changed spec as no-change,
 // which would silently ignore a CIDR being edited.
-func (t *translatedResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+func (t *translatedResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	if state == nil {
-		return false, nil
+		return resource.Same, nil
 	}
+	// Every property this type compares is one it declared immutable, so a
+	// difference is Immutable by construction; the mutable answer is not
+	// something this comparison can produce.
 	for property, want := range t.immutable {
 		desired, err := want(spec)
 		if err != nil {
-			return false, err
+			return resource.Same, err
 		}
 		if current, ok := state.Attributes[property].(string); ok && current != desired {
-			return true, nil
+			return resource.Immutable, nil
 		}
 	}
-	return false, nil
+	return resource.Same, nil
 }
 
 // relationshipResource is a link between two other resources, with no

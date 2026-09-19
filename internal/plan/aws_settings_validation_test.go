@@ -54,9 +54,9 @@ func (s specValidatorOnly) Get(context.Context, resource.Ref) (*resource.State, 
 // registration, exactly as internal/assemble.Registry wires a live run. A
 // fake resource, or a direct unit test against decodeLambdaSettings alone,
 // would not prove that wiring; the bug this whole mechanism exists to
-// close — settings validation used to run only inside DiffersFromState,
+// close — settings validation used to run only inside Diff,
 // which never executes on a fresh environment's first plan because
-// DiffersFromState only runs once Get has already found an existing
+// Diff only runs once Get has already found an existing
 // resource, so a typo'd or invalid setting reached nothing at all —
 // passed every unit test the pre-fix code had.
 //
@@ -110,7 +110,7 @@ func validComputeSettings() map[string]any {
 // fakeResource in this plan starts with no recorded state, i.e. Get
 // returns (nil, nil) for everything — a brand-new environment, the exact
 // condition under which the pre-fix bug (settings_validate.go's
-// validateKnownSettings, reachable only via DiffersFromState) planned
+// validateKnownSettings, reachable only via Diff) planned
 // clean. reservedConcurency (missing the second "r") is the proposal's own
 // named regression fixture.
 func TestAWSComputeSettingsValidation_FailsOnFreshEnvironment(t *testing.T) {

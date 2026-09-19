@@ -56,7 +56,7 @@ func TestLambdaURLCreateDefaultsToIAMAuth(t *testing.T) {
 	}
 }
 
-func TestLambdaURLGetUpdateDeleteDiffersFromState(t *testing.T) {
+func TestLambdaURLGetUpdateDeleteDiff(t *testing.T) {
 	fc := &fakeClient{
 		list:         []string{"url1"},
 		byIdentifier: map[string]map[string]any{"url1": {"TargetFunctionArn": "myenv-api"}},
@@ -78,8 +78,8 @@ func TestLambdaURLGetUpdateDeleteDiffersFromState(t *testing.T) {
 	if _, err := url.Update(context.Background(), resource.Ref{Name: "myenv-api"}, spec); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
-	if _, err := url.DiffersFromState(spec, &resource.State{Attributes: map[string]any{"TargetFunctionArn": "myenv-api"}}); err != nil {
-		t.Fatalf("DiffersFromState: %v", err)
+	if _, err := url.Diff(spec, &resource.State{Attributes: map[string]any{"TargetFunctionArn": "myenv-api"}}); err != nil {
+		t.Fatalf("Diff: %v", err)
 	}
 	if err := url.Delete(context.Background(), resource.Ref{Name: "myenv-api"}); err != nil {
 		t.Fatalf("Delete: %v", err)

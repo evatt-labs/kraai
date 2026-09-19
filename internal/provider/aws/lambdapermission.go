@@ -213,7 +213,7 @@ func (p *lambdaPermissionResource) Delete(ctx context.Context, ref resource.Ref)
 	return p.inner.Delete(ctx, ref)
 }
 
-// DiffersFromState checks FunctionName and Principal only — never
+// Diff checks FunctionName and Principal only — never
 // SourceArn, which needs either a cached-but-still-live AccountID call
 // (the EventBridge variant) or a live cross-resource lookup with the same
 // race apiGatewaySourceARN's own doc comment describes (the API Gateway
@@ -225,13 +225,13 @@ func (p *lambdaPermissionResource) Delete(ctx context.Context, ref resource.Ref)
 // Principal changing is not a case kraai's own usage of this type can
 // produce (both are derived from the same service name and never change
 // independently of it).
-func (p *lambdaPermissionResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+func (p *lambdaPermissionResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	partial := spec
 	partial.Config = map[string]any{
 		"FunctionName": spec.Name,
 		"Principal":    p.principal,
 	}
-	return p.inner.DiffersFromState(partial, state)
+	return p.inner.Diff(partial, state)
 }
 
 // lambdaPermissionMatch implements AWS::Lambda::Permission's LookupByAttr

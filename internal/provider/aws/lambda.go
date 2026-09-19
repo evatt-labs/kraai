@@ -41,11 +41,11 @@ func artifactObjectKey(serviceName, sha256Hex string) string {
 //
 // Building the deployment zip is pure local file I/O — safe to do during
 // `kraai plan`, which only ever calls Get and, where implemented,
-// DiffersFromState (internal/plan narrows every resource.Resource to a
+// Diff (internal/plan narrows every resource.Resource to a
 // getter, see that package's own doc). Uploading the built artifact to S3
 // is not safe there: `kraai plan` must never mutate anything, and
-// DiffersFromState's signature carries no context to run a network call
-// under cleanly regardless. So DiffersFromState here (see its own doc
+// Diff's signature carries no context to run a network call
+// under cleanly regardless. So Diff here (see its own doc
 // comment) never builds or uploads an artifact at all — it only ever
 // checks FunctionName, this type's sole createOnlyProperty — and the real
 // packaging-plus-upload sequence runs exclusively inside Create/Update,
@@ -204,7 +204,7 @@ func (l *lambdaFunctionResource) Delete(ctx context.Context, ref resource.Ref) e
 	return l.inner.Delete(ctx, ref)
 }
 
-// DiffersFromState checks only FunctionName, this type's sole
+// Diff checks only FunctionName, this type's sole
 // createOnlyProperty (this package's own register.go: "FunctionName is
 // settable at create; CloudFormation marks it 'Update requires:
 // Replacement'"). See this type's own doc comment for
@@ -213,17 +213,17 @@ func (l *lambdaFunctionResource) Delete(ctx context.Context, ref resource.Ref) e
 //
 // Settings validation used to live here too, on the reasoning that this
 // was "the one thing every compute service reaches unconditionally." That
-// reasoning was wrong: DiffersFromState only runs once internal/plan's
+// reasoning was wrong: Diff only runs once internal/plan's
 // decide has already found an existing resource via Get, so it is never
 // reached on a fresh environment's first plan, where every resource is
 // ActionCreate — a typo'd or invalid setting reached nothing at all.
 // ValidateSpec (below) is the actual unconditional reach now, via
 // plan.SpecValidator; see its own doc comment for the fix and
 // plan.SpecValidator's for the full failure mode this replaced.
-func (l *lambdaFunctionResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+func (l *lambdaFunctionResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	nameOnly := spec
 	nameOnly.Config = map[string]any{"FunctionName": spec.Name}
-	return l.inner.DiffersFromState(nameOnly, state)
+	return l.inner.Diff(nameOnly, state)
 }
 
 // ValidateSpec implements plan.SpecValidator: decodeLambdaSettings is pure
@@ -233,9 +233,9 @@ func (l *lambdaFunctionResource) DiffersFromState(spec resource.Spec, state *res
 // the unknown-key check (validateKnownSettings, settings_validate.go) —
 // and this is where it runs unconditionally, before internal/plan's decide
 // ever calls Get. See plan.SpecValidator's own doc comment for why this
-// replaced hanging the same check off DiffersFromState, and for the real
+// replaced hanging the same check off Diff, and for the real
 // `kraai plan` evidence (a typo'd reservedConcurrency, an invalid
-// httpFrontDoor) that DiffersFromState alone missed on a fresh environment.
+// httpFrontDoor) that Diff alone missed on a fresh environment.
 func (l *lambdaFunctionResource) ValidateSpec(spec resource.Spec) error {
 	settingsMap, _ := spec.Config["settings"].(map[string]any)
 	_, err := decodeLambdaSettings(settingsMap)

@@ -191,7 +191,7 @@ func TestLambdaPermissionGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	}
 }
 
-func TestLambdaPermissionDiffersFromStateNeverCallsSTS(t *testing.T) {
+func TestLambdaPermissionDiffNeverCallsSTS(t *testing.T) {
 	fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/FunctionName", "/properties/Principal"}}}
 	fsts := &fakeSTS{account: "123456789012"}
 	perm := newEventsRulePermissionForTest(fc, fsts)
@@ -199,14 +199,14 @@ func TestLambdaPermissionDiffersFromStateNeverCallsSTS(t *testing.T) {
 	spec := resource.Spec{Name: "myenv-tick"}
 	state := &resource.State{Attributes: map[string]any{"FunctionName": "myenv-tick-old", "Principal": "events.amazonaws.com"}}
 
-	differs, err := perm.DiffersFromState(spec, state)
+	difference, err := perm.Diff(spec, state)
 	if err != nil {
-		t.Fatalf("DiffersFromState: %v", err)
+		t.Fatalf("Diff: %v", err)
 	}
-	if !differs {
+	if difference != resource.Immutable {
 		t.Fatal("expected a FunctionName difference to be detected")
 	}
 	if fsts.calls != 0 {
-		t.Fatalf("STS called %d times during DiffersFromState, want 0", fsts.calls)
+		t.Fatalf("STS called %d times during Diff, want 0", fsts.calls)
 	}
 }

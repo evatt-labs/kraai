@@ -31,6 +31,10 @@ const (
 	// earlier wave had a failure and apply refuses to start a wave that
 	// depends on one that did not fully succeed.
 	OutcomeSkipped
+	// OutcomeUpdated means Update succeeded: the resource was changed in
+	// place, never deleted. Appended so the existing outcomes keep their
+	// values.
+	OutcomeUpdated
 )
 
 // String implements fmt.Stringer for readable output and error messages.
@@ -46,6 +50,8 @@ func (o Outcome) String() string {
 		return "failed"
 	case OutcomeSkipped:
 		return "skipped"
+	case OutcomeUpdated:
+		return "updated"
 	default:
 		return fmt.Sprintf("Outcome(%d)", int(o))
 	}

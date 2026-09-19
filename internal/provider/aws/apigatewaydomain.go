@@ -108,14 +108,14 @@ func (d *domainNameResource) Delete(ctx context.Context, ref resource.Ref) error
 	return d.inner.Delete(ctx, ref)
 }
 
-// DiffersFromState compares the certificate presented: rotating to a new
+// Diff compares the certificate presented: rotating to a new
 // certificate is the one change a domain name legitimately sees.
-func (d *domainNameResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+func (d *domainNameResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	translated, err := d.translate(spec)
 	if err != nil {
-		return false, err
+		return resource.Same, err
 	}
-	return d.inner.DiffersFromState(translated, state)
+	return d.inner.Diff(translated, state)
 }
 
 // apiMappingResource maps a custom domain to the service's API at its
@@ -199,10 +199,10 @@ func (a *apiMappingResource) Delete(ctx context.Context, ref resource.Ref) error
 	return a.inner.Delete(ctx, ref)
 }
 
-func (a *apiMappingResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+func (a *apiMappingResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	translated, err := a.translate(spec)
 	if err != nil {
-		return false, err
+		return resource.Same, err
 	}
-	return a.inner.DiffersFromState(translated, state)
+	return a.inner.Diff(translated, state)
 }

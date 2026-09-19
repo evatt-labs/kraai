@@ -32,7 +32,7 @@ type countingResource struct {
 	createErr error
 	deleteErr error
 	// differs, when true, makes this resource implement
-	// plan.ImmutableDiffer and always report a difference — the only way
+	// plan.Differ and always report a difference — the only way
 	// to make the planner emit plan.ActionReplace for a hand-built fixture.
 	differs bool
 
@@ -61,12 +61,17 @@ func (c *countingResource) Delete(context.Context, resource.Ref) error {
 	return c.deleteErr
 }
 
-// DiffersFromState implements plan.ImmutableDiffer unconditionally; c.differs
+// Diff implements plan.Differ unconditionally; c.differs
 // says what it reports. Every countingResource has this method, but the
 // planner only reaches it for a resource that already exists (Get returned
 // non-nil), matching internal/plan/planner.go's decide().
-func (c *countingResource) DiffersFromState(resource.Spec, *resource.State) (bool, error) {
-	return c.differs, nil
+func (c *countingResource) Diff(resource.Spec, *resource.State) (resource.Difference, error) {
+	// The fake keeps its bool: "differs" here means "needs replace", which
+	// is Immutable — every test using it is about the --replace gate.
+	if c.differs {
+		return resource.Immutable, nil
+	}
+	return resource.Same, nil
 }
 
 // countingAssembler builds a RegistryAssembler resolving
@@ -530,7 +535,7 @@ func TestWriteApplyText_MultiWaveAndEveryOutcome(t *testing.T) {
 	}
 	out := buf.String()
 	for _, want := range []string{
-		"1 created, 1 unchanged, 1 replaced, 1 failed, 1 skipped (5 total)",
+		"1 created, 0 updated, 1 unchanged, 1 replaced, 1 failed, 1 skipped (5 total)",
 		"wave 0:", "wave 1:", "wave 2:",
 		"+", "~", "=", "!", "-",
 		"queue create boom",
@@ -579,7 +584,7 @@ func TestCountOutcomes_NilResultIsZero(t *testing.T) {
 func TestApplySummaryLine_Format(t *testing.T) {
 	c := applyCounts{Created: 1, Unchanged: 2, Replaced: 3, Failed: 4, Skipped: 5}
 	got := applySummaryLine("env", c)
-	want := `apply for "env": 1 created, 2 unchanged, 3 replaced, 4 failed, 5 skipped (15 total)`
+	want := `apply for "env": 1 created, 0 updated, 2 unchanged, 3 replaced, 4 failed, 5 skipped (15 total)`
 	if got != want {
 		t.Errorf("applySummaryLine() = %q, want %q", got, want)
 	}

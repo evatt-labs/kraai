@@ -112,8 +112,8 @@ func (r *iamRoleResource) Delete(ctx context.Context, ref resource.Ref) error {
 	return r.inner.Delete(ctx, ref)
 }
 
-// DiffersFromState implements plan.ImmutableDiffer structurally (see
-// resourceType.DiffersFromState's own doc comment on why this package
+// Diff implements plan.Differ structurally (see
+// resourceType.Diff's own doc comment on why this package
 // satisfies that interface without importing internal/plan).
 //
 // RoleName is IAM::Role's createOnlyProperty (renaming a role means
@@ -125,6 +125,6 @@ func (r *iamRoleResource) Delete(ctx context.Context, ref resource.Ref) error {
 // resolution to compute, unlike the Lambda function's own artifact
 // packaging (see lambda.go's doc comment on why that one is not this
 // simple).
-func (r *iamRoleResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
-	return r.inner.DiffersFromState(r.translate(spec), state)
+func (r *iamRoleResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	return r.inner.Diff(r.translate(spec), state)
 }

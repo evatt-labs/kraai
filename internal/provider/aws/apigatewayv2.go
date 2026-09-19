@@ -90,8 +90,6 @@ func (a *apiGatewayResource) translate(ctx context.Context, spec resource.Spec) 
 		// boundary it wants — so it is closed when, and only when, a custom
 		// domain exists to be the only one.
 		//
-		// At create only. See DiffersFromState below for why an API that
-		// already exists is not converged onto this.
 		"DisableExecuteApiEndpoint": hasCustomDomains(spec),
 	}
 	return translated, nil
@@ -128,29 +126,17 @@ func (a *apiGatewayResource) Delete(ctx context.Context, ref resource.Ref) error
 	return a.inner.Delete(ctx, ref)
 }
 
-// DiffersFromState checks only ProtocolType, this type's sole
-// createOnlyProperty (Name is "Update requires: No interruption" per its
-// own CloudFormation reference, matching this package's own existing
-// comment on why ApiGatewayV2::Api is byTag rather than byName; Target's
-// own update behavior is likewise "No interruption"). A static literal,
-// zero I/O — Target is deliberately excluded here for the same reason
-// lambda.go excludes Code and eventsrule.go/lambdapermission.go exclude
-// their own account-id-derived ARNs from their diff-only configs: it is
-// not createOnly, so its absence here cannot itself produce a false
-// "differs", and computing it would need the same AccountID call this
-// method's ctx-less signature has no clean way to run during `kraai plan`.
-func (a *apiGatewayResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
-	// ProtocolType only. DisableExecuteApiEndpoint is deliberately not
-	// compared, and the reason is a limitation worth reading before
-	// "fixing" it: the generic engine diffs createOnly properties because a
-	// difference in one means replace, and replace is the only change plan
-	// can express. DisableExecuteApiEndpoint is mutable. Reporting it as a
-	// difference would replace the API — a new ApiId, a broken mapping,
-	// downtime — to flip a boolean. So an API created before its custom
-	// domain was declared keeps its generated hostname open until kraai can
-	// update in place. See TestAPIGatewayCannotCloseExecuteAPIOnAnExistingAPI
-	// and evatt-labs/kraai#210.
-	protocolOnly := spec
-	protocolOnly.Config = map[string]any{"ProtocolType": apiGatewayProtocolType}
-	return a.inner.DiffersFromState(protocolOnly, state)
+// Diff compares the two properties kraai sets that a live API can differ
+// on. ProtocolType is createOnly and means replace. DisableExecuteApiEndpoint
+// is mutable, and its whole reason to exist is an API created before its
+// custom domain was declared — the engine reports it as an update, so the
+// generated hostname is closed on the next apply rather than staying open
+// until someone notices.
+func (a *apiGatewayResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	compared := spec
+	compared.Config = map[string]any{
+		"ProtocolType":              apiGatewayProtocolType,
+		"DisableExecuteApiEndpoint": hasCustomDomains(spec),
+	}
+	return a.inner.Diff(compared, state)
 }

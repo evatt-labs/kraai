@@ -61,9 +61,10 @@ func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver) *cob
 		Short: "Apply the manifest, creating, replacing, or leaving resources as planned",
 		Long: "apply loads the manifest for <environment>, computes the same plan `kraai\n" +
 			"plan` would, and executes it: creating what does not exist, replacing what\n" +
-			"cannot be reconciled in place (only with --replace), and leaving everything\n" +
-			"else untouched. It never calls Update — every registered resource type is\n" +
-			"immutable in the fields that matter, so a difference always means replace.",
+			"cannot be reconciled in place (only with --replace), updating in place what\n" +
+			"can be, and leaving everything else untouched. Whether a difference means\n" +
+			"update or replace comes from the provider's own schema: a createOnly\n" +
+			"property, or any property on a type with no update handler, means replace.",
 		Args:          cobra.ExactArgs(1),
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -269,6 +270,8 @@ func outcomeSymbol(o apply.Outcome) string {
 		return "+"
 	case apply.OutcomeReplaced:
 		return "~"
+	case apply.OutcomeUpdated:
+		return "^"
 	case apply.OutcomeUnchanged:
 		return "="
 	case apply.OutcomeFailed:
@@ -285,6 +288,7 @@ func outcomeSymbol(o apply.Outcome) string {
 // actionCounts.
 type applyCounts struct {
 	Created   int
+	Updated   int
 	Unchanged int
 	Replaced  int
 	Failed    int
@@ -292,7 +296,7 @@ type applyCounts struct {
 }
 
 func (c applyCounts) total() int {
-	return c.Created + c.Unchanged + c.Replaced + c.Failed + c.Skipped
+	return c.Created + c.Updated + c.Unchanged + c.Replaced + c.Failed + c.Skipped
 }
 
 func countOutcomes(r *apply.Result) applyCounts {
@@ -308,6 +312,8 @@ func countOutcomes(r *apply.Result) applyCounts {
 			c.Unchanged++
 		case apply.OutcomeReplaced:
 			c.Replaced++
+		case apply.OutcomeUpdated:
+			c.Updated++
 		case apply.OutcomeFailed:
 			c.Failed++
 		case apply.OutcomeSkipped:
@@ -321,8 +327,8 @@ func countOutcomes(r *apply.Result) applyCounts {
 // outcome list, mirroring internal/cli/plan.go's summaryLine.
 func applySummaryLine(envName string, c applyCounts) string {
 	return fmt.Sprintf(
-		"apply for %q: %d created, %d unchanged, %d replaced, %d failed, %d skipped (%d total)",
-		envName, c.Created, c.Unchanged, c.Replaced, c.Failed, c.Skipped, c.total(),
+		"apply for %q: %d created, %d updated, %d unchanged, %d replaced, %d failed, %d skipped (%d total)",
+		envName, c.Created, c.Updated, c.Unchanged, c.Replaced, c.Failed, c.Skipped, c.total(),
 	)
 }
 
@@ -377,7 +383,9 @@ type applyDocument struct {
 
 // applySummaryJSON is applyDocument's counts-and-flags block.
 type applySummaryJSON struct {
-	Created     int  `json:"created"`
+	Created int `json:"created"`
+	// Updated is additive to the contract, like plan's "update".
+	Updated     int  `json:"updated"`
 	Unchanged   int  `json:"unchanged"`
 	Replaced    int  `json:"replaced"`
 	Failed      int  `json:"failed"`
@@ -408,7 +416,7 @@ func toApplyDocument(envName string, result *apply.Result) applyDocument {
 	doc := applyDocument{
 		Environment: envName,
 		Summary: applySummaryJSON{
-			Created: c.Created, Unchanged: c.Unchanged, Replaced: c.Replaced,
+			Created: c.Created, Updated: c.Updated, Unchanged: c.Unchanged, Replaced: c.Replaced,
 			Failed: c.Failed, Skipped: c.Skipped, Total: c.total(),
 		},
 		Results: []applyResultJSON{},

@@ -302,12 +302,12 @@ func TestLambdaFunctionValidateSpec(t *testing.T) {
 	})
 }
 
-func TestLambdaFunctionDiffersFromStateChecksOnlyFunctionName(t *testing.T) {
+func TestLambdaFunctionDiffChecksOnlyFunctionName(t *testing.T) {
 	fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/FunctionName"}}}
 	fsts := &fakeSTS{account: "123456789012"}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, fsts)
 
-	// A spec whose dir does not even exist must still work: DiffersFromState
+	// A spec whose dir does not even exist must still work: Diff
 	// never packages anything (see the type's own doc comment).
 	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
 		"dir": "/nonexistent/path",
@@ -317,15 +317,15 @@ func TestLambdaFunctionDiffersFromStateChecksOnlyFunctionName(t *testing.T) {
 	}}
 	state := &resource.State{Attributes: map[string]any{"FunctionName": "myenv-api-old"}}
 
-	differs, err := fn.DiffersFromState(spec, state)
+	difference, err := fn.Diff(spec, state)
 	if err != nil {
-		t.Fatalf("DiffersFromState: %v", err)
+		t.Fatalf("Diff: %v", err)
 	}
-	if !differs {
+	if difference != resource.Immutable {
 		t.Fatal("expected a FunctionName difference to be detected")
 	}
 	if fsts.calls != 0 {
-		t.Fatalf("STS called %d times during DiffersFromState, want 0 (no artifact packaging or role ARN needed to compare FunctionName)", fsts.calls)
+		t.Fatalf("STS called %d times during Diff, want 0 (no artifact packaging or role ARN needed to compare FunctionName)", fsts.calls)
 	}
 }
 

@@ -252,6 +252,8 @@ func actionSymbol(k plan.ActionKind) string {
 		return "+"
 	case plan.ActionReplace:
 		return "~"
+	case plan.ActionUpdate:
+		return "^"
 	case plan.ActionFailed:
 		return "!"
 	case plan.ActionNoChange:
@@ -265,13 +267,14 @@ func actionSymbol(k plan.ActionKind) string {
 // the JSON summary object alike.
 type actionCounts struct {
 	Create   int
+	Update   int
 	Replace  int
 	NoChange int
 	Failed   int
 }
 
 func (c actionCounts) total() int {
-	return c.Create + c.Replace + c.NoChange + c.Failed
+	return c.Create + c.Update + c.Replace + c.NoChange + c.Failed
 }
 
 func countActions(p *plan.Plan) actionCounts {
@@ -283,6 +286,8 @@ func countActions(p *plan.Plan) actionCounts {
 		switch a.Kind {
 		case plan.ActionCreate:
 			c.Create++
+		case plan.ActionUpdate:
+			c.Update++
 		case plan.ActionReplace:
 			c.Replace++
 		case plan.ActionNoChange:
@@ -299,8 +304,8 @@ func countActions(p *plan.Plan) actionCounts {
 // failures) before scanning individual resources.
 func summaryLine(envName string, c actionCounts) string {
 	return fmt.Sprintf(
-		"plan for %q: %d to create, %d to replace, %d unchanged, %d failed (%d total)",
-		envName, c.Create, c.Replace, c.NoChange, c.Failed, c.total(),
+		"plan for %q: %d to create, %d to update, %d to replace, %d unchanged, %d failed (%d total)",
+		envName, c.Create, c.Update, c.Replace, c.NoChange, c.Failed, c.total(),
 	)
 }
 
@@ -338,7 +343,11 @@ type planDocument struct {
 // actionCounts plus Plan.HasChanges/Plan.HasFailures so a script can
 // branch on either without recomputing them from Actions itself.
 type planSummaryJSON struct {
-	Create      int  `json:"create"`
+	Create int `json:"create"`
+	// Update is additive to the contract: a consumer summing the original
+	// four counts to reach total now undercounts, and one keyed on "replace"
+	// for everything that changes an existing resource misses these.
+	Update      int  `json:"update"`
 	Replace     int  `json:"replace"`
 	NoChange    int  `json:"no_change"`
 	Failed      int  `json:"failed"`
@@ -375,7 +384,7 @@ func toPlanDocument(envName string, p *plan.Plan) planDocument {
 	doc := planDocument{
 		Environment: envName,
 		Summary: planSummaryJSON{
-			Create: c.Create, Replace: c.Replace, NoChange: c.NoChange, Failed: c.Failed,
+			Create: c.Create, Update: c.Update, Replace: c.Replace, NoChange: c.NoChange, Failed: c.Failed,
 			Total: c.total(),
 		},
 		Actions: []planActionJSON{},

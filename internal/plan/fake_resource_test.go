@@ -86,18 +86,17 @@ func (f *fakeResource) mutatingCalls() int32 {
 	return atomic.LoadInt32(&f.createCalls) + atomic.LoadInt32(&f.updateCalls) + atomic.LoadInt32(&f.deleteCalls)
 }
 
-// fakeDiffer wraps a fakeResource to also implement ImmutableDiffer, so
-// tests can exercise the Replace path and the "comparison itself failed"
-// path without every fakeResource needing an opinion on immutability it
-// doesn't have — mirroring why ImmutableDiffer is optional in the first
-// place.
+// fakeDiffer wraps a fakeResource to also implement Differ, so tests can
+// exercise the Replace and Update paths and the "comparison itself failed"
+// path without every fakeResource needing an opinion on drift it doesn't
+// have — mirroring why Differ is optional in the first place.
 type fakeDiffer struct {
 	*fakeResource
-	differs func(spec resource.Spec, state *resource.State) (bool, error)
+	diff func(spec resource.Spec, state *resource.State) (resource.Difference, error)
 }
 
-func (f *fakeDiffer) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
-	return f.differs(spec, state)
+func (f *fakeDiffer) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	return f.diff(spec, state)
 }
 
 // fakeValidator wraps a fakeResource to also implement SpecValidator, so
