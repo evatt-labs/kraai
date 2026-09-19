@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -127,17 +128,19 @@ func TestAPIGatewayClosesExecuteAPIOnlyWithACustomDomain(t *testing.T) {
 	}
 }
 
-// An API created before its route was declared does NOT converge: kraai
-// has no in-place update, plan's only "differs" outcome is replace, and
-// replacing an API Gateway to flip DisableExecuteApiEndpoint would change
-// its ApiId and break the mapping. So the toggle takes effect at create and
-// nowhere else, and this test pins that gap rather than hiding it — when an
-// update path exists (evatt-labs/kraai#210), this is the test that should start failing.
-func TestAPIGatewayCannotCloseExecuteAPIOnAnExistingAPI(t *testing.T) {
+// An API created before its route was declared now converges: the toggle is
+// a mutable property on a type with an update handler, so the engine reports
+// an update and the next apply closes the generated hostname. This is the
+// inverse of the test that used to sit here pinning the gap (#210).
+func TestAPIGatewayClosesExecuteAPIOnAnExistingAPI(t *testing.T) {
 	r := &apiGatewayResource{
 		inner: &resourceType{
 			provider: Provider, typeName: TypeAPIGatewayV2API, lookup: resource.LookupByTag, client: &fakeClient{},
-			schema: Schema{CreateOnlyProperties: []string{"/properties/ProtocolType"}}, schemaLoaded: true,
+			schema: Schema{
+				CreateOnlyProperties: []string{"/properties/ProtocolType"},
+				Handlers:             map[string]json.RawMessage{"create": {}, "read": {}, "update": {}, "delete": {}},
+			},
+			schemaLoaded: true,
 		},
 		client: &Client{},
 	}
@@ -149,13 +152,18 @@ func TestAPIGatewayCannotCloseExecuteAPIOnAnExistingAPI(t *testing.T) {
 		"ProtocolType": apiGatewayProtocolType, "DisableExecuteApiEndpoint": false,
 	}}
 
-	differs, err := r.DiffersFromState(spec, state)
+	difference, err := r.Diff(spec, state)
 	if err != nil {
-		t.Fatalf("DiffersFromState: %v", err)
+		t.Fatalf("Diff: %v", err)
 	}
-	if differs {
-		t.Fatal("the API was reported as differing — if kraai can now update in place, " +
-			"apiGatewayResource.DiffersFromState should compare DisableExecuteApiEndpoint and " +
-			"this test needs inverting")
+	if difference != resource.Mutable {
+		t.Fatalf("Diff = %v, want Mutable: the open execute-api endpoint must plan as an "+
+			"in-place update, never a replace and never converged", difference)
+	}
+
+	// And the converse: an API already closed is not touched.
+	state.Attributes["DisableExecuteApiEndpoint"] = true
+	if difference, _ := r.Diff(spec, state); difference != resource.Same {
+		t.Errorf("Diff on an already-closed API = %v, want Same", difference)
 	}
 }

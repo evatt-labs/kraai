@@ -10,7 +10,7 @@
 // would require an explicit assertion back to resource.Resource.
 //
 // decide also asserts that same narrowed value against two optional,
-// non-mutating interfaces declared here — ImmutableDiffer (diff.go) and
+// non-mutating interfaces declared here — Differ (diff.go) and
 // SpecValidator (validate.go). Both return only a bool/error pair: a
 // provider's own type is the only place that knows whether a spec is
 // invalid or a live difference is real, and getter alone cannot ask it.

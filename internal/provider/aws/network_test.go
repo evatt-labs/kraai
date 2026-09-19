@@ -80,37 +80,37 @@ func TestSubnetCreateFailsLoudlyWithoutTheVPCAttribute(t *testing.T) {
 	}
 }
 
-// TestDiffersFromStateNeedsNoAttributes is the regression test for a failure
-// a live plan found: plan calls DiffersFromState on every existing resource,
+// TestDiffNeedsNoAttributes is the regression test for a failure
+// a live plan found: plan calls Diff on every existing resource,
 // and a plan runs before anything is applied, so Spec.Attributes is empty by
 // construction. A comparison that needed a sibling identifier reported every
 // subnet and route table as unreadable on the second run.
-func TestDiffersFromStateNeedsNoAttributes(t *testing.T) {
+func TestDiffNeedsNoAttributes(t *testing.T) {
 	res := networkResource(t, &fakeClient{}, TypeSubnet)
 	differ, ok := res.(interface {
-		DiffersFromState(resource.Spec, *resource.State) (bool, error)
+		Diff(resource.Spec, *resource.State) (resource.Difference, error)
 	})
 	if !ok {
-		t.Fatal("the subnet resource no longer implements DiffersFromState, so an edited CIDR would read as no-change")
+		t.Fatal("the subnet resource no longer implements Diff, so an edited CIDR would read as no-change")
 	}
 
 	spec := networkSpec("NET", map[string]any{"subnet": "10.90.1.0/24"}, nil)
 	state := &resource.State{Attributes: map[string]any{"CidrBlock": "10.90.1.0/24", "VpcId": "vpc-abc"}}
 
-	differs, err := differ.DiffersFromState(spec, state)
+	difference, err := differ.Diff(spec, state)
 	if err != nil {
-		t.Fatalf("DiffersFromState with no attributes: %v", err)
+		t.Fatalf("Diff with no attributes: %v", err)
 	}
-	if differs {
+	if difference != resource.Same {
 		t.Fatal("an unchanged subnet reported as differing")
 	}
 
 	changed := networkSpec("NET", map[string]any{"subnet": "10.90.2.0/24"}, nil)
-	differs, err = differ.DiffersFromState(changed, state)
+	difference, err = differ.Diff(changed, state)
 	if err != nil {
-		t.Fatalf("DiffersFromState: %v", err)
+		t.Fatalf("Diff: %v", err)
 	}
-	if !differs {
+	if difference != resource.Immutable {
 		t.Fatal("an edited CIDR did not report as differing, so it would never be replaced")
 	}
 }

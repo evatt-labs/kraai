@@ -27,7 +27,7 @@
 // for the case this package exists to unblock — an apply that failed
 // halfway, leaving some resources created and others not.
 //
-// Every other Kind is attempted: ActionNoChange and ActionReplace because
+// Every other Kind is attempted: ActionNoChange, ActionUpdate and ActionReplace because
 // the resource is known to exist, ActionFailed for the reason below.
 //
 // # Failure semantics are deliberately the opposite of apply's

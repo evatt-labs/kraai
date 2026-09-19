@@ -459,7 +459,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 
 	t.Run("a value the caller already set for the identifying property is never overwritten", func(t *testing.T) {
 		// artifactbucket.go's own Create rewrites Config to a real bucket
-		// name that differs from spec.Name (the derived service name plus
+		// name that difference from spec.Name (the derived service name plus
 		// an "-artifacts" suffix) — injectDerivedName must respect that
 		// deliberate choice rather than clobbering it with spec.Name.
 		fc := &fakeClient{
@@ -633,7 +633,7 @@ func TestResourceTypeUpdate(t *testing.T) {
 			t.Fatalf("state = %+v", state)
 		}
 		if len(fc.updateCalls) != 0 {
-			t.Fatal("expected no UpdateResource call when nothing differs")
+			t.Fatal("expected no UpdateResource call when nothing difference")
 		}
 	})
 
@@ -738,19 +738,19 @@ func TestResourceTypeDelete(t *testing.T) {
 	})
 }
 
-func TestResourceTypeDiffersFromState(t *testing.T) {
-	t.Run("a createOnlyProperty that differs is a replacement", func(t *testing.T) {
+func TestResourceTypeDiff(t *testing.T) {
+	t.Run("a createOnlyProperty that difference is a replacement", func(t *testing.T) {
 		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
-		differs, err := r.DiffersFromState(
+		difference, err := r.Diff(
 			resource.Spec{Config: map[string]any{"BucketName": "new-name"}},
 			&resource.State{Attributes: map[string]any{"BucketName": "old-name"}},
 		)
 		if err != nil {
-			t.Fatalf("DiffersFromState: %v", err)
+			t.Fatalf("Diff: %v", err)
 		}
-		if !differs {
+		if difference != resource.Immutable {
 			t.Fatal("expected a createOnlyProperty change to be reported as differing")
 		}
 	})
@@ -759,14 +759,14 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/DistributionConfig/CallerReference"}}}
 		r := &resourceType{provider: Provider, typeName: TypeCloudFrontDistribution, lookup: resource.LookupByAttr, client: fc}
 
-		differs, err := r.DiffersFromState(
+		difference, err := r.Diff(
 			resource.Spec{Config: map[string]any{"DistributionConfig": map[string]any{"CallerReference": "b", "Comment": "whatever"}}},
 			&resource.State{Attributes: map[string]any{"DistributionConfig": map[string]any{"CallerReference": "a", "Comment": "different but not create-only"}}},
 		)
 		if err != nil {
-			t.Fatalf("DiffersFromState: %v", err)
+			t.Fatalf("Diff: %v", err)
 		}
-		if !differs {
+		if difference != resource.Immutable {
 			t.Fatal("expected the nested createOnlyProperty change to be reported as differing")
 		}
 	})
@@ -775,14 +775,14 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
-		differs, err := r.DiffersFromState(
+		difference, err := r.Diff(
 			resource.Spec{Config: map[string]any{"BucketName": "same-name"}},
 			&resource.State{Attributes: map[string]any{"BucketName": "same-name"}},
 		)
 		if err != nil {
-			t.Fatalf("DiffersFromState: %v", err)
+			t.Fatalf("Diff: %v", err)
 		}
-		if differs {
+		if difference != resource.Same {
 			t.Fatal("expected an identical createOnlyProperty to report no difference")
 		}
 	})
@@ -794,14 +794,14 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
-		differs, err := r.DiffersFromState(
+		difference, err := r.Diff(
 			resource.Spec{Config: map[string]any{}},
 			&resource.State{Attributes: map[string]any{"BucketName": "whatever"}},
 		)
 		if err != nil {
-			t.Fatalf("DiffersFromState: %v", err)
+			t.Fatalf("Diff: %v", err)
 		}
-		if differs {
+		if difference != resource.Same {
 			t.Fatal("expected no difference when the manifest never declares the property at all")
 		}
 	})
@@ -810,14 +810,14 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
-		differs, err := r.DiffersFromState(
+		difference, err := r.Diff(
 			resource.Spec{Config: map[string]any{"BucketName": "new-name"}},
 			&resource.State{Attributes: map[string]any{}},
 		)
 		if err != nil {
-			t.Fatalf("DiffersFromState: %v", err)
+			t.Fatalf("Diff: %v", err)
 		}
-		if !differs {
+		if difference != resource.Immutable {
 			t.Fatal("expected a manifest-declared property Cloud Control never reported to be treated as differing")
 		}
 	})
@@ -826,11 +826,11 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 		fc := &fakeClient{schema: Schema{}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
-		differs, err := r.DiffersFromState(resource.Spec{Config: map[string]any{"Anything": "goes"}}, &resource.State{Attributes: map[string]any{}})
+		difference, err := r.Diff(resource.Spec{Config: map[string]any{"Anything": "goes"}}, &resource.State{Attributes: map[string]any{}})
 		if err != nil {
-			t.Fatalf("DiffersFromState: %v", err)
+			t.Fatalf("Diff: %v", err)
 		}
-		if differs {
+		if difference != resource.Same {
 			t.Fatal("expected no createOnlyProperties to mean no replacement")
 		}
 	})
@@ -840,8 +840,8 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		for range 3 {
-			if _, err := r.DiffersFromState(resource.Spec{Config: map[string]any{}}, &resource.State{}); err != nil {
-				t.Fatalf("DiffersFromState: %v", err)
+			if _, err := r.Diff(resource.Spec{Config: map[string]any{}}, &resource.State{}); err != nil {
+				t.Fatalf("Diff: %v", err)
 			}
 		}
 		if fc.schemaCalls != 1 {
@@ -853,7 +853,7 @@ func TestResourceTypeDiffersFromState(t *testing.T) {
 		fc := &fakeClient{schemaErr: errors.New("throttled")}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
-		if _, err := r.DiffersFromState(resource.Spec{}, &resource.State{}); err == nil {
+		if _, err := r.Diff(resource.Spec{}, &resource.State{}); err == nil {
 			t.Fatal("expected the schema-fetch failure to be reported")
 		}
 	})

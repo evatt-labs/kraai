@@ -97,7 +97,7 @@ func TestPlan_AbsentResourcesPlanAsCreate(t *testing.T) {
 }
 
 // TestPlan_ExistingResourcesPlanAsNoChange covers a resource Get finds,
-// with no ImmutableDiffer opinion, planning as ActionNoChange.
+// with no Differ opinion, planning as ActionNoChange.
 func TestPlan_ExistingResourcesPlanAsNoChange(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := &manifest.Manifest{
@@ -130,7 +130,7 @@ func TestPlan_ExistingResourcesPlanAsNoChange(t *testing.T) {
 func TestPlan_ImmutableDiffPlansAsReplace(t *testing.T) {
 	differ := &fakeDiffer{
 		fakeResource: newFakeResource(),
-		differs:      func(resource.Spec, *resource.State) (bool, error) { return true, nil },
+		diff:         func(resource.Spec, *resource.State) (resource.Difference, error) { return resource.Immutable, nil },
 	}
 	reg := resource.NewRegistry()
 	must(t, reg.Register(resource.Registration{
@@ -159,12 +159,12 @@ func TestPlan_ImmutableDiffPlansAsReplace(t *testing.T) {
 	}
 }
 
-// TestPlan_ImmutableDiffErrorPlansAsFailed covers DiffersFromState itself
+// TestPlan_ImmutableDiffErrorPlansAsFailed covers Diff itself
 // failing.
 func TestPlan_ImmutableDiffErrorPlansAsFailed(t *testing.T) {
 	f := newRegistryFixture(t)
 	boom := errors.New("boom")
-	differ := &fakeDiffer{fakeResource: f.r2, differs: func(resource.Spec, *resource.State) (bool, error) { return false, boom }}
+	differ := &fakeDiffer{fakeResource: f.r2, diff: func(resource.Spec, *resource.State) (resource.Difference, error) { return resource.Same, boom }}
 
 	reg := resource.NewRegistry()
 	must(t, reg.Register(resource.Registration{
@@ -194,7 +194,7 @@ func TestPlan_ImmutableDiffErrorPlansAsFailed(t *testing.T) {
 // bug SpecValidator exists to fix: a resource that does not exist yet
 // (ActionCreate, Get returns nil) must still be validated. Before decide
 // called ValidateSpec, a bad spec's only validation path was
-// ImmutableDiffer/DiffersFromState, which decide never even type-asserts
+// Differ/Diff, which decide never even type-asserts
 // on this branch — the exact reason a typo'd reservedConcurrency and an
 // invalid httpFrontDoor both planned clean against a real, brand-new
 // kraai-api environment. Also asserts Get was never called: ValidateSpec
@@ -235,7 +235,7 @@ func TestPlan_SpecValidatorRunsOnActionCreate(t *testing.T) {
 // TestPlan_SpecValidatorAlsoRunsWhenResourceExists covers the other half:
 // unconditional means every branch, not just the one that was broken.
 // ValidateSpec fails before Get ever runs, so a resource that does in fact
-// already exist never even reaches ImmutableDiffer.
+// already exist never even reaches Differ.
 func TestPlan_SpecValidatorAlsoRunsWhenResourceExists(t *testing.T) {
 	boom := errors.New("bad spec")
 	validator := &fakeValidatingDiffer{
@@ -266,16 +266,16 @@ func TestPlan_SpecValidatorAlsoRunsWhenResourceExists(t *testing.T) {
 		t.Fatalf("action = %+v, want ActionFailed wrapping %v", got, boom)
 	}
 	if validator.getCalls != 0 {
-		t.Fatalf("Get called %d times, want 0: ValidateSpec should have failed first, before Get/DiffersFromState ran", validator.getCalls)
+		t.Fatalf("Get called %d times, want 0: ValidateSpec should have failed first, before Get/Diff ran", validator.getCalls)
 	}
 	if validator.differCalls != 0 {
-		t.Fatalf("DiffersFromState called %d times, want 0", validator.differCalls)
+		t.Fatalf("Diff called %d times, want 0", validator.differCalls)
 	}
 }
 
-// fakeValidatingDiffer implements both SpecValidator and ImmutableDiffer,
+// fakeValidatingDiffer implements both SpecValidator and Differ,
 // so TestPlan_SpecValidatorAlsoRunsWhenResourceExists can prove
-// ValidateSpec's failure short-circuits decide before DiffersFromState (and
+// ValidateSpec's failure short-circuits decide before Diff (and
 // even Get, per fakeResource's own getCalls counter) is ever reached, not
 // merely that both happen to agree on the outcome.
 type fakeValidatingDiffer struct {
@@ -289,9 +289,18 @@ func (f *fakeValidatingDiffer) ValidateSpec(spec resource.Spec) error {
 	return f.validate(spec)
 }
 
-func (f *fakeValidatingDiffer) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+func (f *fakeValidatingDiffer) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	f.differCalls++
-	return f.differs(spec, state)
+	// The fake keeps its bool: every test using it means "differs" as
+	// "needs replace", which is Immutable.
+	differs, err := f.differs(spec, state)
+	if err != nil {
+		return resource.Same, err
+	}
+	if differs {
+		return resource.Immutable, nil
+	}
+	return resource.Same, nil
 }
 
 // TestPlan_GetFailureReportsWithoutAbortingTheRun is the partial-failure
@@ -878,5 +887,44 @@ func TestPlan_NoNamingOverlayMatchesUnprefixedDerivation(t *testing.T) {
 	kv := findAction(t, got, "cloudflare", "kv_namespace")
 	if want := naming.ResourceName(envName, "api", "CACHE"); kv.Ref.Name != want {
 		t.Errorf("kv Ref.Name = %q, want %q", kv.Ref.Name, want)
+	}
+}
+
+// TestPlan_MutableDiffPlansAsUpdate is the third answer: a resource that
+// exists and differs in a property its type can change in place plans as an
+// update, not a replace and not no-change. Before Differ existed the only
+// outcomes were those two, which is how a mutable property that drifted —
+// an API's open execute-api endpoint — reported converged forever.
+func TestPlan_MutableDiffPlansAsUpdate(t *testing.T) {
+	differ := &fakeDiffer{
+		fakeResource: newFakeResource(),
+		diff:         func(resource.Spec, *resource.State) (resource.Difference, error) { return resource.Mutable, nil },
+	}
+	differ.states["swift-otter-badger-10203-api-uploads"] = &resource.State{ID: "exists"}
+
+	reg := resource.NewRegistry()
+	must(t, reg.Register(resource.Registration{
+		Provider: "cloudflare", Type: "r2_bucket", Capability: manifest.CapabilityObjects,
+		Lookup: resource.LookupByName, Resource: differ,
+	}))
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
+		Services: map[string]manifest.Service{
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
+		},
+	}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	a := findAction(t, p, "cloudflare", "r2_bucket")
+	if a.Kind != ActionUpdate {
+		t.Fatalf("Kind = %v, want ActionUpdate", a.Kind)
+	}
+	// Current is carried, as for every existing resource, so apply has the
+	// live state to patch against.
+	if a.Current == nil {
+		t.Error("an update action carries no Current state")
 	}
 }

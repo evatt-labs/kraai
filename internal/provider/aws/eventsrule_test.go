@@ -97,7 +97,7 @@ func TestEventsRuleGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	}
 }
 
-func TestEventsRuleDiffersFromStateNeverCallsSTS(t *testing.T) {
+func TestEventsRuleDiffNeverCallsSTS(t *testing.T) {
 	// Name is the only createOnlyProperty this type checks (see the type's
 	// own doc comment); resolving the account id is not needed to answer
 	// that, and must not happen during plan.
@@ -108,14 +108,14 @@ func TestEventsRuleDiffersFromStateNeverCallsSTS(t *testing.T) {
 	spec := resource.Spec{Name: "myenv-tick", Binding: "myenv-tick", Config: map[string]any{"schedule": "rate(1 hour)"}}
 	state := &resource.State{Attributes: map[string]any{"Name": "myenv-tick-old"}}
 
-	differs, err := rule.DiffersFromState(spec, state)
+	difference, err := rule.Diff(spec, state)
 	if err != nil {
-		t.Fatalf("DiffersFromState: %v", err)
+		t.Fatalf("Diff: %v", err)
 	}
-	if !differs {
+	if difference != resource.Immutable {
 		t.Fatal("expected a Name difference to be detected")
 	}
 	if sts.calls != 0 {
-		t.Fatalf("STS called %d times during DiffersFromState, want 0", sts.calls)
+		t.Fatalf("STS called %d times during Diff, want 0", sts.calls)
 	}
 }

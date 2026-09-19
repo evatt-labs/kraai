@@ -639,8 +639,14 @@ type Schema struct {
 	// CreateOnlyProperties are the properties that force a replacement
 	// rather than an in-place update — the authoritative source for
 	// plan's replace-or-update decision, consumed via resourceType's
-	// DiffersFromState (plan.ImmutableDiffer).
+	// Diff (plan.Differ).
 	CreateOnlyProperties []string `json:"createOnlyProperties"`
+	// WriteOnlyProperties are accepted on create and update but never
+	// returned by a read — a Lambda function's Code, say. Excluded from the
+	// mutable comparison in resourceType.Diff: comparing a value the vendor
+	// will never echo back would report every such property as drifted on
+	// every plan, forever.
+	WriteOnlyProperties []string `json:"writeOnlyProperties"`
 	// Handlers lists this type's implemented verbs by name ("create",
 	// "read", "update", "delete", "list"). Decoded as raw JSON because this
 	// package only ever asks whether a key is present — an
@@ -668,7 +674,7 @@ func (s Schema) HasUpdateHandler() bool {
 // comment), and a resource type's schema does not
 // change within a single kraai invocation, so one DescribeType call per type
 // per process is the right amount of caching — enough to avoid repeating an
-// expensive call on every Get/Create/Update/DiffersFromState, not so much
+// expensive call on every Get/Create/Update/Diff, not so much
 // that a real schema change (a new AWS API version) would need vendored
 // files kept in sync by hand.
 func (c *Client) DescribeType(ctx context.Context, typeName string) (Schema, error) {

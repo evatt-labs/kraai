@@ -295,9 +295,9 @@ func (a *Applier) mutate(
 		return act.Current, OutcomeUnchanged, nil
 
 	case plan.ActionReplace:
-		// Delete then Create, never Update: every registered type refuses
-		// Update with resource.ErrImmutable, so a replace is genuinely a
-		// new resource under the same Ref.
+		// Delete then Create: the plan said the difference is in something
+		// the type cannot change in place (plan.Differ reported Immutable),
+		// so a replace is genuinely a new resource under the same Ref.
 		var state *resource.State
 		err := locker.Do(scope, func() error {
 			if err := res.Delete(ctx, act.Ref); err != nil {
@@ -308,6 +308,19 @@ func (a *Applier) mutate(
 			return err
 		})
 		return state, OutcomeReplaced, err
+
+	case plan.ActionUpdate:
+		// In place, under the same scope lock a create takes, and not
+		// behind --replace: that gate exists because a replace deletes, and
+		// an update does not. Update is every Resource's own verb; until
+		// plan could report a mutable difference, nothing called it.
+		var state *resource.State
+		err := locker.Do(scope, func() error {
+			var err error
+			state, err = res.Update(ctx, act.Ref, spec)
+			return err
+		})
+		return state, OutcomeUpdated, err
 
 	default:
 		// ActionFailed cannot reach here: the pre-flight gate refuses the
@@ -328,6 +341,8 @@ func verb(o Outcome) string {
 		return "read"
 	case OutcomeCreated:
 		return "create"
+	case OutcomeUpdated:
+		return "update"
 	default:
 		return o.String()
 	}

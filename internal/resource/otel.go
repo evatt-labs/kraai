@@ -146,7 +146,7 @@ func (i *instrumented) Delete(ctx context.Context, ref Ref) error {
 // SecretProducer" was really asking *instrumented, which always answered
 // no even when the wrapped type implemented it. Two behaviours shipped
 // silently dead as a result: plan could never emit ActionReplace
-// (internal/plan's decide type-asserts ImmutableDiffer), and apply's
+// (internal/plan's decide type-asserts Differ), and apply's
 // credential handoff resolved nothing (internal/apply type-asserts
 // SecretProducer). A third, plan.SpecValidator, was forwarded from the
 // start to avoid becoming a fourth instance of the same bug.
@@ -176,22 +176,22 @@ func (i *instrumented) Secrets(state *State) map[string]Secret {
 	return producer.Secrets(state)
 }
 
-// DiffersFromState forwards to the inner resource when it can answer, and
-// otherwise reports no difference — the same answer a caller gets from a
-// type that does not implement the interface.
+// Diff forwards to the inner resource when it can answer, and otherwise
+// reports no difference — the same answer a caller gets from a type that
+// does not implement the interface.
 //
 // The interface is spelled out structurally rather than imported: it is
-// declared in internal/plan, which imports this package, so naming
-// plan.ImmutableDiffer here would be an import cycle. internal/provider/aws
-// satisfies it the same way, for the same reason.
-func (i *instrumented) DiffersFromState(spec Spec, state *State) (bool, error) {
+// declared in internal/plan, which imports this package, so naming it here
+// would be an import cycle. Difference itself lives in this package for the
+// same reason.
+func (i *instrumented) Diff(spec Spec, state *State) (Difference, error) {
 	differ, ok := i.inner.(interface {
-		DiffersFromState(Spec, *State) (bool, error)
+		Diff(Spec, *State) (Difference, error)
 	})
 	if !ok {
-		return false, nil
+		return Same, nil
 	}
-	return differ.DiffersFromState(spec, state)
+	return differ.Diff(spec, state)
 }
 
 // ValidateSpec forwards to the inner resource when it can validate, and
@@ -199,7 +199,7 @@ func (i *instrumented) DiffersFromState(spec Spec, state *State) (bool, error) {
 // that does not implement the interface.
 //
 // The interface is spelled out structurally rather than imported, for the
-// same import-cycle reason DiffersFromState's own doc comment gives:
+// same import-cycle reason Diff's own doc comment gives:
 // plan.SpecValidator is declared in internal/plan, which imports this
 // package.
 func (i *instrumented) ValidateSpec(spec Spec) error {

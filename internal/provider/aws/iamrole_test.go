@@ -77,7 +77,7 @@ func TestIAMRoleCreateAppendsSettingsManagedPolicies(t *testing.T) {
 
 func TestIAMRoleDoesNotRequireLambdaOnlySettings(t *testing.T) {
 	// runtime/architecture/layerArn are required for a Lambda function but
-	// have nothing to do with its role; a role Create/DiffersFromState must
+	// have nothing to do with its role; a role Create/Diff must
 	// not fail just because those Lambda-only settings are unset.
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
@@ -89,8 +89,8 @@ func TestIAMRoleDoesNotRequireLambdaOnlySettings(t *testing.T) {
 	if _, err := role.Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create with no settings at all: %v", err)
 	}
-	if _, err := role.DiffersFromState(spec, &resource.State{Attributes: map[string]any{}}); err != nil {
-		t.Fatalf("DiffersFromState with no settings at all: %v", err)
+	if _, err := role.Diff(spec, &resource.State{Attributes: map[string]any{}}); err != nil {
+		t.Fatalf("Diff with no settings at all: %v", err)
 	}
 }
 

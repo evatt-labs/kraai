@@ -29,6 +29,10 @@ type fakeResource struct {
 	createCalls int32
 	updateCalls int32
 	deleteCalls int32
+	// updateState, when set, is what Update returns. Nil keeps the fake's
+	// historical answer — ErrImmutable, "this cannot be updated" — which
+	// every replace test relies on to prove Update was never the path taken.
+	updateState *resource.State
 	inFlight    int32
 	maxInFlight int32
 
@@ -96,6 +100,9 @@ func (f *fakeResource) Create(ctx context.Context, spec resource.Spec) (*resourc
 
 func (f *fakeResource) Update(context.Context, resource.Ref, resource.Spec) (*resource.State, error) {
 	atomic.AddInt32(&f.updateCalls, 1)
+	if f.updateState != nil {
+		return f.updateState, nil
+	}
 	return nil, resource.ErrImmutable
 }
 

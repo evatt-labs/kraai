@@ -121,17 +121,17 @@ func (e *eventsRuleResource) Delete(ctx context.Context, ref resource.Ref) error
 	return e.inner.Delete(ctx, ref)
 }
 
-// DiffersFromState checks only Name, this type's sole createOnlyProperty
+// Diff checks only Name, this type's sole createOnlyProperty
 // (a rule's ScheduleExpression, State and Targets are all updatable in
 // place per AWS's own resource schema). Deliberately not the full
 // translate: that needs the account id, which needs a network call this
-// method's ctx-less signature (see resourceType.DiffersFromState's own doc
+// method's ctx-less signature (see resourceType.Diff's own doc
 // comment on the same constraint) would otherwise have to make via
 // context.Background() — avoided entirely here because Name alone is
 // already everything a createOnlyProperties comparison for this type can
 // ever act on.
-func (e *eventsRuleResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+func (e *eventsRuleResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	nameOnly := spec
 	nameOnly.Config = map[string]any{"Name": spec.Name}
-	return e.inner.DiffersFromState(nameOnly, state)
+	return e.inner.Diff(nameOnly, state)
 }

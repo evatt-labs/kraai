@@ -113,7 +113,7 @@ type resourceType struct {
 	// schemaMu, schema and schemaLoaded cache this type's CloudFormation
 	// resource-provider schema for the process's lifetime (Client.DescribeType's
 	// own doc comment explains why caching, not vendoring, is the right
-	// amount of work here). Every Update and DiffersFromState call needs
+	// amount of work here). Every Update and Diff call needs
 	// this schema; fetching it once per type rather than once per call
 	// avoids turning every write-path call into two API round trips.
 	//
@@ -348,9 +348,9 @@ func (r *resourceType) readBackIfEmpty(ctx context.Context, identifier string, p
 // injectDerivedName ensures a LookupByName type's desired state carries
 // this create's own derived name, resolving which property that is from
 // the type's own CloudFormation resource-provider schema (getSchema,
-// already fetched and cached for Update/DiffersFromState) rather than a
+// already fetched and cached for Update/Diff) rather than a
 // hand-maintained property-per-type table. schemaPropertyPath — already
-// used to walk createOnlyProperties in DiffersFromState — does the
+// used to walk createOnlyProperties in Diff — does the
 // identical JSON-Pointer-to-map-key conversion here for
 // schema.PrimaryIdentifier.
 //
@@ -525,66 +525,101 @@ func (r *resourceType) Delete(ctx context.Context, ref resource.Ref) error {
 	return r.client.DeleteResource(ctx, r.typeName, identifier)
 }
 
-// DiffersFromState reports whether spec disagrees with state on one of this
-// type's createOnlyProperties, implementing plan.ImmutableDiffer
-// structurally: this package does not import internal/plan (out of scope
-// for this workstream, and plan is being built in parallel), it merely
-// satisfies plan's interface by having a method of the matching name and
-// signature, which is how plan's own type assertion finds it.
+// Diff compares spec to the live state three ways, from the vendor's own
+// resource schema, implementing plan.Differ structurally (declared in
+// internal/plan, which imports this package — see internal/resource/otel.go
+// for the same arrangement).
 //
-// # Why context.Background() here, and only here
+// Only properties spec.Config sets are compared: a property kraai never
+// wrote is the vendor's to default, and comparing it would report drift
+// kraai cannot act on. Among those:
 //
-// Every other network call in this package takes the caller's context.
-// plan.ImmutableDiffer's signature — defined by another workstream, out of
-// scope to change here — carries no context parameter at all, so the schema
-// fetch this method needs has no caller context to propagate. In practice
-// this is low-risk: getSchema's own cache means the fetch only actually
-// happens once per type per process, and a real DescribeType call is small
-// and fast relative to the async operations this package's other calls
-// wait on. Flagged in this workstream's PR description as something the
-// planner workstream may want to reconsider — a context-carrying
-// ImmutableDiffer would let this propagate cancellation like everything
-// else here.
-func (r *resourceType) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+//   - A createOnly property that differs is Immutable: the vendor cannot
+//     change it in place, so the plan is a replace. Absent from the live
+//     state counts as differing, as it always has — a required identity
+//     property the vendor does not echo is a state this engine cannot
+//     reason about, and replace is the conservative answer.
+//   - Any other differing property is Mutable when the type has an update
+//     handler, and Immutable when it does not — a type with no update
+//     handler can only be replaced, whatever the property.
+//
+// Two exclusions keep the mutable comparison from inventing drift. A
+// writeOnly property (a Lambda function's Code) is never returned by a read,
+// so comparing it would report an update on every plan, forever. And a
+// mutable property absent from the live state is not compared at all: the
+// vendor may simply not return an unset value, and "unset" versus "not
+// returned" is not distinguishable from here. That rule cannot fabricate an
+// update; it can only miss one where the vendor returns nothing, which is
+// the safer error.
+//
+// Takes no context because plan.Differ's signature has none; getSchema is
+// cached after the first call, so this only reaches the network once per
+// type per process.
+func (r *resourceType) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	schema, err := r.getSchema(context.Background())
 	if err != nil {
-		return false, err
+		return resource.Same, err
 	}
 
+	createOnly := map[string]bool{}
 	for _, pointer := range schema.CreateOnlyProperties {
 		path := schemaPropertyPath(pointer)
 		if len(path) == 0 {
 			continue
 		}
+		createOnly[pointer] = true
 
 		desiredVal, hasDesired := lookupPath(spec.Config, path)
 		if !hasDesired {
-			// Not declared in the manifest at all — the manifest is kraai's
-			// only source of truth, so a property it never mentions is
-			// never touched, and its absence here can never itself be the
-			// source of a disagreement.
 			continue
 		}
 		desiredNorm, err := normalizeForCompare(desiredVal)
 		if err != nil {
-			return false, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing desired %s for %s", pointer, r.typeName)
+			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing desired %s for %s", pointer, r.typeName)
 		}
 
 		currentVal, hasCurrent := lookupPath(state.Attributes, path)
 		if !hasCurrent {
-			// Declared in the manifest but Cloud Control never reported it —
-			// treat as a real difference rather than assuming a match it
-			// cannot support evidence for.
-			return true, nil
+			return resource.Immutable, nil
 		}
 		currentNorm, err := normalizeForCompare(currentVal)
 		if err != nil {
-			return false, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
+			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
 
 		if !reflect.DeepEqual(desiredNorm, currentNorm) {
-			return true, nil
+			return resource.Immutable, nil
 		}
 	}
-	return false, nil
+
+	writeOnly := map[string]bool{}
+	for _, pointer := range schema.WriteOnlyProperties {
+		writeOnly[pointer] = true
+	}
+
+	for property, desiredVal := range spec.Config {
+		pointer := "/properties/" + property
+		if createOnly[pointer] || writeOnly[pointer] {
+			continue
+		}
+		currentVal, hasCurrent := state.Attributes[property]
+		if !hasCurrent {
+			continue
+		}
+		desiredNorm, err := normalizeForCompare(desiredVal)
+		if err != nil {
+			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing desired %s for %s", pointer, r.typeName)
+		}
+		currentNorm, err := normalizeForCompare(currentVal)
+		if err != nil {
+			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
+		}
+		if !reflect.DeepEqual(desiredNorm, currentNorm) {
+			if schema.HasUpdateHandler() {
+				return resource.Mutable, nil
+			}
+			return resource.Immutable, nil
+		}
+	}
+	return resource.Same, nil
 }

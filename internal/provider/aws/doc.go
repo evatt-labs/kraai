@@ -27,7 +27,7 @@
 //
 // Async polling, JSON Patch emission and createOnlyProperties-driven
 // replacement detection are shared, generic mechanisms (client.go's
-// pollToTerminal, patch.go's buildPatch, resource.go's DiffersFromState) —
+// pollToTerminal, patch.go's buildPatch, resource.go's Diff) —
 // no per-type write logic exists, matching the read path's one-engine
 // design.
 package aws

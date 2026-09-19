@@ -243,7 +243,7 @@ would do. This is verbatim output from the manifest above:
 
 ```
 $ kraai plan production
-plan for "production": 12 to create, 0 to replace, 0 unchanged, 0 failed (12 total)
+plan for "production": 12 to create, 0 to update, 0 to replace, 0 unchanged, 0 failed (12 total)
 
 wave 0:
   +  create  "acme-shop-production-api"     aws/AWS::S3::Bucket::ArtifactBucket

@@ -91,8 +91,8 @@ func (u *lambdaURLResource) Delete(ctx context.Context, ref resource.Ref) error 
 	return u.inner.Delete(ctx, ref)
 }
 
-func (u *lambdaURLResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
-	return u.inner.DiffersFromState(u.translate(spec), state)
+func (u *lambdaURLResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	return u.inner.Diff(u.translate(spec), state)
 }
 
 // lambdaURLMatch implements AWS::Lambda::Url's LookupByAttr strategy: a

@@ -892,3 +892,39 @@ func TestOutcome_String(t *testing.T) {
 		}
 	}
 }
+
+// An update runs the resource's own Update verb, in place, under the scope
+// lock, and records the state it returns — the first time anything calls
+// Update. It is deliberately not behind --replace: that gate exists because
+// a replace deletes, and an update does not.
+func TestApply_Update_CallsUpdateInPlaceWithoutTheReplaceGate(t *testing.T) {
+	db := newFakeResource()
+	db.updateState = &resource.State{
+		Ref: resource.Ref{Provider: "neon", Type: "branch", Name: "api-DB"}, ID: "same-id",
+		Attributes: map[string]any{"Flag": true},
+	}
+	reg := newRegistry(t, resource.Registration{
+		Provider: "neon", Type: "branch", Capability: "database",
+		Lookup: resource.LookupByName, Resource: db,
+	})
+
+	update := action("api", "DB", "neon", "branch", 0, plan.ActionUpdate)
+	p := &plan.Plan{Actions: []plan.Action{update}}
+
+	// No WithAllowReplace: an update must not need it.
+	result, err := New(reg).Apply(context.Background(), p)
+	if err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	r := findResult(t, result, "api-DB")
+	if r.Outcome != OutcomeUpdated {
+		t.Errorf("Outcome = %v, want OutcomeUpdated", r.Outcome)
+	}
+	if db.updateCalls != 1 {
+		t.Errorf("updateCalls = %d, want 1", db.updateCalls)
+	}
+	if db.createCalls != 0 || db.deleteCalls != 0 {
+		t.Errorf("create=%d delete=%d, want 0/0: an update must never delete or recreate",
+			db.createCalls, db.deleteCalls)
+	}
+}
