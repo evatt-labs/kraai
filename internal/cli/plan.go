@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/evatt-labs/kraai/internal/assemble"
 	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -29,7 +30,24 @@ import (
 // exercised without any of it. The production wiring is in NewRootCommand.
 type RegistryAssembler func(ctx context.Context, m *manifest.Manifest) (*resource.Registry, error)
 
-func newPlanCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cobra.Command {
+// ManifestResolver loads a manifest directory end to end: the manifest, the
+// plugins it declares, and the capability catalog those plugins may have
+// extended.
+//
+// One dependency rather than the catalog-then-loader pair it replaced,
+// because the two can no longer be built independently — a plugin may
+// introduce a capability the manifest then names, so the vocabulary depends
+// on the manifest's plugin list and the manifest's validity depends on the
+// vocabulary. internal/assemble.Resolve owns that ordering; a command only
+// has to close what comes back.
+//
+// A function type for the same reason RegistryAssembler is: a test supplies a
+// manifest without compiling WASM or importing a provider package.
+type ManifestResolver func(
+	ctx context.Context, fsys manifest.FS, envName string, setArgs []string,
+) (*assemble.Resolved, error)
+
+func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobra.Command {
 	var (
 		dir     string
 		setArgs []string
@@ -46,7 +64,7 @@ func newPlanCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cobr
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPlan(cmd, args[0], dir, setArgs, jsonOut, assembler, catalog)
+			return runPlan(cmd, args[0], dir, setArgs, jsonOut, assembler, resolve)
 		},
 	}
 
@@ -97,7 +115,7 @@ func newPlanCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cobr
 // pay for itself.
 func runPlan(
 	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
-	assembler RegistryAssembler, catalog CatalogAssembler,
+	assembler RegistryAssembler, resolve ManifestResolver,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
 		return kerrors.Validation(
@@ -132,19 +150,18 @@ func runPlan(
 		return err
 	}
 
-	// The capability vocabulary kraai.yaml's `providers:` keys are checked
-	// against. Built from static provider declarations, so it needs no
-	// credential and no manifest — see internal/assemble.Capabilities.
-	vocabulary, err := catalog()
+	// Resolving loads the manifest, loads the plugins it declares, and
+	// validates the one against a vocabulary the other may have extended —
+	// see internal/assemble.Resolve for why that has to happen in that order.
+	resolved, err := resolve(cmd.Context(), fsys, envName, setArgs)
 	if err != nil {
 		return err
 	}
-
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), vocabulary)
-	m, err := loader.Load(envName, setArgs)
-	if err != nil {
-		return err
-	}
+	// Tears down the plugin runtime on every exit from here, including the
+	// happy path: a command that returns without closing it leaks the wazero
+	// runtime and its pooled instances for the rest of the process.
+	defer func() { _ = resolved.Close(cmd.Context()) }()
+	m := resolved.Manifest
 
 	ctx := cmd.Context()
 

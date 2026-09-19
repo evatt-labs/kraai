@@ -47,7 +47,7 @@ func isRealTerminal(r io.Reader) bool {
 	return term.IsTerminal(int(f.Fd()))
 }
 
-func newApplyCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cobra.Command {
+func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobra.Command {
 	var (
 		dir         string
 		setArgs     []string
@@ -70,7 +70,7 @@ func newApplyCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cob
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runApply(
 				cmd, args[0], dir, setArgs, jsonOut, replaceFlag, confirmName,
-				assembler, catalog, isRealTerminal)
+				assembler, resolve, isRealTerminal)
 		},
 	}
 
@@ -118,7 +118,7 @@ func newApplyCommand(assembler RegistryAssembler, catalog CatalogAssembler) *cob
 // change to build.
 func runApply(
 	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut, allowReplace bool,
-	confirmName string, assembler RegistryAssembler, catalog CatalogAssembler,
+	confirmName string, assembler RegistryAssembler, resolve ManifestResolver,
 	interactive isInteractive,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
@@ -140,19 +140,18 @@ func runApply(
 		return err
 	}
 
-	// The capability vocabulary kraai.yaml's `providers:` keys are checked
-	// against. Built from static provider declarations, so it needs no
-	// credential and no manifest — see internal/assemble.Capabilities.
-	vocabulary, err := catalog()
+	// Resolving loads the manifest, loads the plugins it declares, and
+	// validates the one against a vocabulary the other may have extended —
+	// see internal/assemble.Resolve for why that has to happen in that order.
+	resolved, err := resolve(cmd.Context(), fsys, envName, setArgs)
 	if err != nil {
 		return err
 	}
-
-	loader := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), vocabulary)
-	m, err := loader.Load(envName, setArgs)
-	if err != nil {
-		return err
-	}
+	// Tears down the plugin runtime on every exit from here, including the
+	// happy path: a command that returns without closing it leaks the wazero
+	// runtime and its pooled instances for the rest of the process.
+	defer func() { _ = resolved.Close(cmd.Context()) }()
+	m := resolved.Manifest
 
 	// The protected-environment gate runs before the registry is even
 	// assembled: a protected environment that fails confirmation should

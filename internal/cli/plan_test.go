@@ -11,10 +11,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/assemble"
 	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/plan"
+	"github.com/evatt-labs/kraai/internal/plugin"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -166,7 +168,7 @@ func requireCode(t *testing.T, err error, code kerrors.Code) *kerrors.KError {
 // and executes it with args, capturing stdout.
 func execPlan(t *testing.T, assembler RegistryAssembler, args []string) (string, error) {
 	t.Helper()
-	cmd := newPlanCommand(assembler, fixtureCatalogAssembler)
+	cmd := newPlanCommand(assembler, fixtureResolver)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -351,7 +353,7 @@ func TestRunPlan_SetFlagReachesLoader(t *testing.T) {
 }
 
 func TestNewPlanCommand_Flags(t *testing.T) {
-	cmd := newPlanCommand(unreachableAssembler, fixtureCatalogAssembler)
+	cmd := newPlanCommand(unreachableAssembler, fixtureResolver)
 
 	dirFlag := cmd.Flags().Lookup("dir")
 	if dirFlag == nil || dirFlag.DefValue != "." {
@@ -546,6 +548,32 @@ func unreachableAssembler(context.Context, *manifest.Manifest) (*resource.Regist
 // resource.Catalog without importing internal/assemble or any provider
 // package — the same isolation fakeCatalogAssembler gives `kraai
 // capabilities`.
+// fixtureResolver is the ManifestResolver these tests inject: a real manifest
+// load against the fake catalog below, with no plugins.
+//
+// Real loading on purpose — several tests here exist to prove the loader is
+// actually reached (that --set arrives, that a bad environment name is
+// rejected), which a resolver returning a canned manifest would quietly stop
+// covering. What it skips is only the plugin half, which needs a compiled
+// WASM module and is covered in internal/assemble against a real one.
+func fixtureResolver(
+	_ context.Context, fsys manifest.FS, envName string, setArgs []string,
+) (*assemble.Resolved, error) {
+	catalog, err := fixtureCatalogAssembler()
+	if err != nil {
+		return nil, err
+	}
+	m, err := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), catalog).Load(envName, setArgs)
+	if err != nil {
+		return nil, err
+	}
+	return &assemble.Resolved{
+		Manifest: m,
+		Catalog:  catalog,
+		Plugins:  &assemble.Plugins{Registry: plugin.NewRegistry()},
+	}, nil
+}
+
 func fixtureCatalogAssembler() (*resource.Catalog, error) {
 	return resource.NewCatalog(
 		resource.FuncProvider{ProviderName: "fake", CapabilitiesFunc: func() []resource.CapabilityDef {

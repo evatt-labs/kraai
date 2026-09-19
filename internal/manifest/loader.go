@@ -80,7 +80,7 @@ func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
 		return nil, err
 	}
 
-	root, err := l.loadRoot(values)
+	root, err := l.loadRoot(values, l.validateRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +109,31 @@ func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
 	}, nil
 }
 
-// loadRoot loads kraai.yaml or kraai.yaml.j2 — exactly one must exist.
-func (l *Loader) loadRoot(values map[string]any) (*Root, error) {
+// LoadRoot resolves kraai.yaml alone — rendered against the same values a
+// full Load would use, and checked for everything that does not depend on
+// knowing which capabilities exist.
+//
+// This is the bootstrap half of a chicken-and-egg: a manifest declares the
+// plugins, and a plugin may declare capabilities, and those capabilities have
+// to be in the vocabulary before the manifest that names them can be
+// validated. Reading the root first breaks the cycle — a `plugins:` list
+// cannot itself depend on a plugin-declared capability.
+//
+// Needs no Vocabulary, deliberately: a caller in the middle of assembling one
+// does not have it yet. Every check that does need it stays in Load, which
+// still refuses to run without one, so nothing is skipped — only deferred to
+// the pass that can actually make it.
+func (l *Loader) LoadRoot(envName string, setArgs []string) (*Root, error) {
+	values, err := LoadValues(l.fs, envName, setArgs)
+	if err != nil {
+		return nil, err
+	}
+	return l.loadRoot(values, l.validateRootShape)
+}
+
+// loadRoot loads kraai.yaml or kraai.yaml.j2 — exactly one must exist —
+// and runs validate against the decoded result.
+func (l *Loader) loadRoot(values map[string]any, validate func(*Root) error) (*Root, error) {
 	plainData, plainErr := l.readOptional(rootFile)
 	if plainErr != nil {
 		return nil, plainErr
@@ -129,7 +152,7 @@ func (l *Loader) loadRoot(values map[string]any) (*Root, error) {
 		if err := DecodeStrict(plainData, rootFile, &root); err != nil {
 			return nil, err
 		}
-		return &root, l.validateRoot(&root)
+		return &root, validate(&root)
 	case tplData != nil:
 		rendered, err := l.template.Render(rootTemplate, tplData, values)
 		if err != nil {
@@ -139,10 +162,21 @@ func (l *Loader) loadRoot(values map[string]any) (*Root, error) {
 		if err := DecodeStrict(rendered, rootTemplate, &root); err != nil {
 			return nil, err
 		}
-		return &root, l.validateRoot(&root)
+		return &root, validate(&root)
 	default:
 		return nil, kerrors.Validation("%s is required (or %s)", rootFile, rootTemplate)
 	}
+}
+
+// validateRootShape checks everything about kraai.yaml that does not depend
+// on knowing which capabilities exist — its version, and its `plugins:`
+// list. Split out so LoadRoot can run it during bootstrap, before there is a
+// Vocabulary to check the rest against.
+func (l *Loader) validateRootShape(root *Root) error {
+	if root.Version != 1 {
+		return kerrors.Validation("%s: version: must be 1, got %d", rootFile, root.Version)
+	}
+	return validatePlugins(root.Plugins)
 }
 
 // validateRoot checks kraai.yaml's version and every key under `providers:`.
@@ -154,11 +188,7 @@ func (l *Loader) loadRoot(values map[string]any) (*Root, error) {
 // got as far as naming a vendor. Sorted so a manifest with more than one bad
 // key reports the same one first on every run.
 func (l *Loader) validateRoot(root *Root) error {
-	if root.Version != 1 {
-		return kerrors.Validation("%s: version: must be 1, got %d", rootFile, root.Version)
-	}
-
-	if err := validatePlugins(root.Plugins); err != nil {
+	if err := l.validateRootShape(root); err != nil {
 		return err
 	}
 

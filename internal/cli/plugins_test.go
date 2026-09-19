@@ -41,31 +41,31 @@ func pluginFixtureDir(t *testing.T) string {
 	})
 }
 
-// emptyPluginLoader stands in for a load that succeeded and produced no
-// warnings.
-func emptyPluginLoader(context.Context, *manifest.Manifest, plugin.FS) (*assemble.Plugins, error) {
-	return &assemble.Plugins{Registry: plugin.NewRegistry()}, nil
-}
-
-// overridingPluginLoader produces a registry carrying one recorded override,
-// so the command's warning rendering is exercised without two real modules.
-func overridingPluginLoader(context.Context, *manifest.Manifest, plugin.FS) (*assemble.Plugins, error) {
-	reg := plugin.NewRegistry()
+// overridingResolver is fixtureResolver with one recorded override in the
+// registry, so the command's warning rendering is exercised without needing
+// two real modules.
+func overridingResolver(
+	ctx context.Context, fsys manifest.FS, envName string, setArgs []string,
+) (*assemble.Resolved, error) {
+	resolved, err := fixtureResolver(ctx, fsys, envName, setArgs)
+	if err != nil {
+		return nil, err
+	}
 	handle := plugin.HandleFunc(func(context.Context, []byte) ([]byte, error) { return nil, nil })
-	reg.Register("policy.cost", "example", handle)
-	reg.Register("policy.cost", "cost-guard", handle)
-	return &assemble.Plugins{Registry: reg}, nil
+	resolved.Plugins.Registry.Register("policy.cost", "example", handle)
+	resolved.Plugins.Registry.Register("policy.cost", "cost-guard", handle)
+	return resolved, nil
 }
 
-func failingPluginLoader(err error) PluginLoader {
-	return func(context.Context, *manifest.Manifest, plugin.FS) (*assemble.Plugins, error) {
+func failingResolver(err error) ManifestResolver {
+	return func(context.Context, manifest.FS, string, []string) (*assemble.Resolved, error) {
 		return nil, err
 	}
 }
 
-func execPlugins(t *testing.T, loader PluginLoader, args []string) (string, error) {
+func execPlugins(t *testing.T, resolve ManifestResolver, args []string) (string, error) {
 	t.Helper()
-	cmd := newPluginsCommand(loader, fixtureCatalogAssembler)
+	cmd := newPluginsCommand(resolve)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -76,7 +76,7 @@ func execPlugins(t *testing.T, loader PluginLoader, args []string) (string, erro
 
 func TestRunPlugins_ListsEachDeclaredPlugin(t *testing.T) {
 	dir := pluginFixtureDir(t)
-	out, err := execPlugins(t, emptyPluginLoader, []string{"--env", testEnvName, "--dir", dir})
+	out, err := execPlugins(t, fixtureResolver, []string{"--env", testEnvName, "--dir", dir})
 	if err != nil {
 		t.Fatalf("plugins: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestRunPlugins_NoneDeclared(t *testing.T) {
 		"kraai.yaml":                            "version: 1\n",
 		"environments/" + testEnvName + ".yaml": "kind: ephemeral\n",
 	})
-	out, err := execPlugins(t, emptyPluginLoader, []string{"--env", testEnvName, "--dir", dir})
+	out, err := execPlugins(t, fixtureResolver, []string{"--env", testEnvName, "--dir", dir})
 	if err != nil {
 		t.Fatalf("plugins: %v", err)
 	}
@@ -116,7 +116,7 @@ func TestRunPlugins_NoneDeclared(t *testing.T) {
 // the manifest alone, so it has to reach the output.
 func TestRunPlugins_ReportsAnOverride(t *testing.T) {
 	dir := pluginFixtureDir(t)
-	out, err := execPlugins(t, overridingPluginLoader, []string{"--env", testEnvName, "--dir", dir})
+	out, err := execPlugins(t, overridingResolver, []string{"--env", testEnvName, "--dir", dir})
 	if err != nil {
 		t.Fatalf("plugins: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestRunPlugins_ReportsAnOverride(t *testing.T) {
 
 func TestRunPlugins_JSON(t *testing.T) {
 	dir := pluginFixtureDir(t)
-	out, err := execPlugins(t, emptyPluginLoader, []string{"--env", testEnvName, "--dir", dir, "--json"})
+	out, err := execPlugins(t, fixtureResolver, []string{"--env", testEnvName, "--dir", dir, "--json"})
 	if err != nil {
 		t.Fatalf("plugins: %v", err)
 	}
@@ -156,7 +156,7 @@ func TestRunPlugins_JSON(t *testing.T) {
 func TestRunPlugins_LoadFailurePropagates(t *testing.T) {
 	dir := pluginFixtureDir(t)
 	sentinel := kerrors.Validation("plugin %q declares ABI version 2, want 1", "example")
-	_, err := execPlugins(t, failingPluginLoader(sentinel),
+	_, err := execPlugins(t, failingResolver(sentinel),
 		[]string{"--env", testEnvName, "--dir", dir})
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "ABI version") {
@@ -169,12 +169,12 @@ func TestRunPlugins_LoadFailurePropagates(t *testing.T) {
 // defaulting that would silently pick one.
 func TestRunPlugins_EnvironmentIsRequired(t *testing.T) {
 	dir := pluginFixtureDir(t)
-	if _, err := execPlugins(t, emptyPluginLoader, []string{"--dir", dir}); err == nil {
+	if _, err := execPlugins(t, fixtureResolver, []string{"--dir", dir}); err == nil {
 		t.Fatal("the command ran without an environment")
 	}
 }
 
 func TestRunPlugins_MissingManifestIsError(t *testing.T) {
-	_, err := execPlugins(t, emptyPluginLoader, []string{"--env", testEnvName, "--dir", t.TempDir()})
+	_, err := execPlugins(t, fixtureResolver, []string{"--env", testEnvName, "--dir", t.TempDir()})
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }

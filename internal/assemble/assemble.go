@@ -34,7 +34,7 @@ const (
 	vendorAWS        = "aws"
 )
 
-// supportedVendors lists every vendor Registry can wire up, in a fixed
+// supportedVendors lists every vendor Registry can build a client for, in a fixed
 // order, for the "which vendors ARE supported" half of an unknown-vendor
 // error.
 var supportedVendors = []string{vendorAWS, vendorCloudflare, vendorNeon}
@@ -162,7 +162,10 @@ func vendorsUsed(m *manifest.Manifest) (map[string]*manifest.Provider, error) {
 		}
 		if !isSupportedVendor(p.Vendor) {
 			return nil, kerrors.Validation(
-				"capability %q configures unknown vendor %q — supported vendors: %s",
+				"capability %q configures vendor %q, which kraai has no resource "+
+					"implementation for — vendors it can provision: %s. A plugin can declare a "+
+					"capability's vocabulary without implementing its resources, in which case a "+
+					"manifest may name the capability but cannot yet plan it",
 				capability, p.Vendor, strings.Join(supportedVendors, ", "))
 		}
 		if _, seen := out[p.Vendor]; !seen {
