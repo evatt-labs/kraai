@@ -111,6 +111,13 @@ func Registrations(client *Client) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
 			Capability: manifest.CapabilityDNS,
+			// A zone's identity is its DNS name, which the manifest supplies
+			// as the entry's zone. Nothing kraai could derive from an
+			// environment and a binding is a zone name, and hostedZoneMatch
+			// compares the live zone's Name against this. This was the first
+			// of the three blockers evatt-labs/kraai#117 turned out to have.
+			NameFrom: resource.NameFromEntry,
+			NameKey:  "zone",
 			// No DependsOn: nothing else in this stack needs to exist
 			// before a zone can be created, only after — the certificate's
 			// validation record and the CDN's alias record are both scoped

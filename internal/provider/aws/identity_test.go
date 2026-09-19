@@ -239,6 +239,11 @@ func TestHostedZoneMatch(t *testing.T) {
 		match      bool
 	}{
 		{name: "matches the zone Name", properties: map[string]any{"Name": "example.com."}, want: "example.com.", match: true},
+		// Route 53 reports the name with a trailing dot; a manifest's zone
+		// will usually not have one. The registration is NameFromEntry, so
+		// name here is exactly what the manifest wrote.
+		{name: "the manifest's zone without a trailing dot", properties: map[string]any{"Name": "example.com."}, want: "example.com", match: true},
+		{name: "a subdomain is not its parent", properties: map[string]any{"Name": "www.example.com."}, want: "example.com", match: false},
 		{name: "a different name does not match", properties: map[string]any{"Name": "other.com."}, want: "example.com.", match: false},
 		{name: "Name missing entirely", properties: map[string]any{}, want: "example.com.", match: false},
 		{name: "Name present but not a string", properties: map[string]any{"Name": 42}, want: "example.com.", match: false},

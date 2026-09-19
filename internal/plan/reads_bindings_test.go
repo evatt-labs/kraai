@@ -3,6 +3,7 @@ package plan
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -230,5 +231,73 @@ func TestPlan_BindingReferencesAreReads(t *testing.T) {
 	if bucket.Wave <= branch.Wave {
 		t.Errorf("bucket wave %d, branch wave %d — a referenced binding must come strictly first",
 			bucket.Wave, branch.Wave)
+	}
+}
+
+// A NameFromEntry registration's instance is named by the value its entry
+// carries under NameKey, verbatim — a hosted zone is the zone name the
+// manifest declared, never anything derived from the environment. Reading
+// the same key with nothing there is a plan error naming the entry, not a
+// silently derived name the registration said it does not have.
+func TestPlan_NameFromEntryNamesByTheEntry(t *testing.T) {
+	f := newRegistryFixture(t)
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::Route53::HostedZone", Capability: manifest.CapabilityDNS,
+		Lookup: resource.LookupByAPI, Resource: newFakeResource(),
+		NameFrom: resource.NameFromEntry, NameKey: "zone",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	m := f.oneServiceManifest()
+	m.Root.Providers[manifest.CapabilityDNS] = &manifest.Provider{Vendor: "aws"}
+	svc := m.Services["api"]
+	svc.Bindings[manifest.CapabilityDNS] = []manifest.Binding{{"binding": "ZONE", "zone": "acme.example"}}
+	m.Services["api"] = svc
+
+	p, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	zone := findAction(t, p, "aws", "AWS::Route53::HostedZone")
+	if zone.Ref.Name != "acme.example" || zone.Spec.Name != "acme.example" {
+		t.Errorf("zone named %q / spec %q, want the entry's zone", zone.Ref.Name, zone.Spec.Name)
+	}
+	// Still one binding group with its siblings, so a DependsOn on it
+	// resolves and a reference to the binding reads it.
+	if zone.Binding != "ZONE" {
+		t.Errorf("zone in binding %q, want ZONE", zone.Binding)
+	}
+
+	svc.Bindings[manifest.CapabilityDNS] = []manifest.Binding{{"binding": "ZONE"}}
+	m.Services["api"] = svc
+	_, err = New(f.reg).Plan(context.Background(), m, envName)
+	if err == nil {
+		t.Fatal("an entry with no zone planned a hosted zone with a made-up name")
+	}
+	for _, want := range []string{"services.api.dns.ZONE", `"zone"`} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error should mention %q: %v", want, err)
+		}
+	}
+}
+
+// A compute resolve has no entry, so a NameFromEntry registration wired
+// under compute is a registration bug, reported rather than fallen through.
+func TestPlan_NameFromEntryUnderComputeIsAnError(t *testing.T) {
+	f := newRegistryFixture(t)
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::Bogus::Type", Capability: manifest.CapabilityCompute,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+		NameFrom: resource.NameFromEntry, NameKey: "zone",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	m := f.oneServiceManifest()
+	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
+
+	_, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err == nil || !strings.Contains(err.Error(), "registered under compute") {
+		t.Fatalf("err = %v, want the registration reported", err)
 	}
 }

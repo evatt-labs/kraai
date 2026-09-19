@@ -699,6 +699,11 @@ func TestNameFromIsValidated(t *testing.T) {
 			t.Errorf("Register with NameFrom=%s: %v", ok, err)
 		}
 	}
+	entry := base
+	entry.NameFrom, entry.NameKey = NameFromEntry, "zone"
+	if err := NewRegistry().Register(entry); err != nil {
+		t.Errorf("Register with NameFrom=entry and a NameKey: %v", err)
+	}
 
 	reg := base
 	reg.NameFrom = NameStrategy(99)
@@ -711,6 +716,35 @@ func TestNameFromIsValidated(t *testing.T) {
 	}
 }
 
+// NameFromEntry reads a key, so the two must agree: a strategy with no key
+// has no name, and a key on any other strategy is never read.
+func TestNameKeyAndNameFromMustAgree(t *testing.T) {
+	base := Registration{
+		Provider: "aws", Type: "AWS::Route53::HostedZone", Capability: "dns",
+		Lookup: LookupByAPI, Resource: newStub(t),
+	}
+
+	reg := base
+	reg.NameFrom = NameFromEntry
+	err := NewRegistry().Register(reg)
+	if err == nil {
+		t.Fatal("named from its entry with no NameKey was accepted")
+	}
+	if !strings.Contains(err.Error(), "no NameKey") {
+		t.Errorf("error should say what is missing: %v", err)
+	}
+
+	reg = base
+	reg.NameKey = "zone"
+	err = NewRegistry().Register(reg)
+	if err == nil {
+		t.Fatal("a NameKey on a binding-named registration was accepted")
+	}
+	if !strings.Contains(err.Error(), `NameKey "zone"`) {
+		t.Errorf("error should name the key nothing reads: %v", err)
+	}
+}
+
 // The zero value is the common case, so an existing registration that says
 // nothing keeps naming by binding.
 func TestNameFromZeroValueIsBinding(t *testing.T) {
@@ -718,8 +752,8 @@ func TestNameFromZeroValueIsBinding(t *testing.T) {
 	if reg.NameFrom != NameFromBinding {
 		t.Errorf("zero NameFrom = %s, want binding", reg.NameFrom)
 	}
-	if NameFromBinding.String() != "binding" || NameFromRoute.String() != "route" {
-		t.Errorf("String() = %q/%q", NameFromBinding, NameFromRoute)
+	if NameFromBinding.String() != "binding" || NameFromRoute.String() != "route" || NameFromEntry.String() != "entry" {
+		t.Errorf("String() = %q/%q/%q", NameFromBinding, NameFromRoute, NameFromEntry)
 	}
 }
 

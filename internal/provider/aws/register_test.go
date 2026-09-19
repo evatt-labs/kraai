@@ -458,3 +458,24 @@ func TestRoleKeysDeclareTheirVendorType(t *testing.T) {
 		}
 	}
 }
+
+// A hosted zone is identified by the zone name the manifest supplies — the
+// first of evatt-labs/kraai#117's three blockers. Pinned through Register
+// so the strategy and the key it reads cannot drift apart from the schema
+// that declares the key (dnsBindingSchema requires zone).
+func TestHostedZoneIsNamedByItsZone(t *testing.T) {
+	reg := resource.NewRegistry()
+	if err := Register(reg, &Client{}); err != nil {
+		t.Fatalf("Register: %v", err)
+	}
+	zone, ok := reg.Lookup(key(TypeRoute53HostedZone))
+	if !ok {
+		t.Fatal("no hosted zone registration")
+	}
+	if zone.NameFrom != resource.NameFromEntry || zone.NameKey != "zone" {
+		t.Errorf("NameFrom=%s NameKey=%q, want entry/zone", zone.NameFrom, zone.NameKey)
+	}
+	if err := dnsBindingSchema.Validate(map[string]any{"binding": "ZONE"}); err == nil {
+		t.Error("the dns schema accepted an entry with no zone, which is the name the registration reads")
+	}
+}
