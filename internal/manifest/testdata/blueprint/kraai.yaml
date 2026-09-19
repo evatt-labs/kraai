@@ -3,6 +3,8 @@ version: 1
 providers:
   compute:
     vendor: cloudflare
+  tls:
+    vendor: aws
   database:
     vendor: neon
     settings:

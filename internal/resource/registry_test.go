@@ -682,3 +682,59 @@ func TestVendorTypeIsValidatedAgainstType(t *testing.T) {
 		})
 	}
 }
+
+// NameFrom is validated at Register like Lookup is: a strategy the planner
+// does not know would silently fall through to the default and name a
+// hostname-shaped resource by its service.
+func TestNameFromIsValidated(t *testing.T) {
+	base := Registration{
+		Provider: "aws", Type: "AWS::ApiGatewayV2::DomainName", Capability: "compute",
+		Lookup: LookupByName, Resource: newStub(t),
+	}
+
+	for _, ok := range []NameStrategy{NameFromBinding, NameFromRoute} {
+		reg := base
+		reg.NameFrom = ok
+		if err := NewRegistry().Register(reg); err != nil {
+			t.Errorf("Register with NameFrom=%s: %v", ok, err)
+		}
+	}
+
+	reg := base
+	reg.NameFrom = NameStrategy(99)
+	err := NewRegistry().Register(reg)
+	if err == nil {
+		t.Fatal("an unknown name strategy was accepted")
+	}
+	if !strings.Contains(err.Error(), "NameStrategy(99)") {
+		t.Errorf("error should show the bad value: %v", err)
+	}
+}
+
+// The zero value is the common case, so an existing registration that says
+// nothing keeps naming by binding.
+func TestNameFromZeroValueIsBinding(t *testing.T) {
+	var reg Registration
+	if reg.NameFrom != NameFromBinding {
+		t.Errorf("zero NameFrom = %s, want binding", reg.NameFrom)
+	}
+	if NameFromBinding.String() != "binding" || NameFromRoute.String() != "route" {
+		t.Errorf("String() = %q/%q", NameFromBinding, NameFromRoute)
+	}
+}
+
+// RequiresCustomDomain is not satisfied by an absent service, unlike a
+// trigger: a custom domain is asked for by name, and a binding resolve has
+// no route to have asked with.
+func TestRequiresCustomDomain(t *testing.T) {
+	reg := Registration{Applies: []Applicability{RequiresCustomDomain()}}
+	if !reg.Matches(ApplicabilityContext{CustomDomain: true}) {
+		t.Error("a service with a custom domain did not match")
+	}
+	if reg.Matches(ApplicabilityContext{CustomDomain: false}) {
+		t.Error("a service without one matched")
+	}
+	if reg.Matches(ApplicabilityContext{}) {
+		t.Error("an empty context matched — 'nobody asked' read as 'everyone gets one'")
+	}
+}

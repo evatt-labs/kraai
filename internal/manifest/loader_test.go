@@ -71,6 +71,16 @@ func testVocabulary(t *testing.T) manifest.Vocabulary {
 		{Name: manifest.CapabilityNetwork, Summary: "a private network"},
 		{Name: manifest.CapabilityObjects, Summary: "an object store", Binding: nameOnly},
 		{Name: manifest.CapabilityQueues, Summary: "a queue", Binding: queuesBinding},
+		// The three that used to be folded into objects. tls carries the
+		// domain a certificate is for, which the blueprint's route needs.
+		{Name: manifest.CapabilityDNS, Summary: "a zone"},
+		{Name: manifest.CapabilityTLS, Summary: "a certificate", Binding: resource.NewSchema("tls binding", map[string]any{
+			"type":                 "object",
+			"properties":           map[string]any{"binding": map[string]any{"type": "string"}, "domain": map[string]any{"type": "string"}},
+			"required":             []any{"binding", "domain"},
+			"additionalProperties": false,
+		})},
+		{Name: manifest.CapabilityCDN, Summary: "a cdn"},
 	}
 
 	// Every vendor testdata/ names declares the same set, so a fixture can
@@ -210,7 +220,8 @@ func TestLoad_BlueprintExamplesParse(t *testing.T) {
 		t.Errorf("Environment.Naming = %+v", env.Naming)
 	}
 	routes, ok := env.Routes["api"]
-	if !ok || len(routes) != 1 || routes[0].Pattern != "api.acme.com" || !routes[0].CustomDomain {
+	if !ok || len(routes) != 1 || routes[0].Pattern != "api.acme.com" || !routes[0].CustomDomain ||
+		routes[0].Certificate != "CERT" {
 		t.Errorf("Environment.Routes = %+v", env.Routes)
 	}
 	imports, ok := env.Resources["api"]

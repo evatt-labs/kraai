@@ -2,6 +2,7 @@ package resource
 
 import (
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -76,6 +77,18 @@ type Registration struct {
 	DependsOn []string
 	// Lookup is how instances are found.
 	Lookup LookupStrategy
+	// NameFrom is where an instance's derived name comes from. The zero
+	// value, NameFromBinding, is the common case: one instance per binding,
+	// named by the environment, service and binding.
+	//
+	// NameFromRoute is for a type whose identity in the vendor's own API is
+	// a hostname — an API Gateway domain name is addressed by the domain
+	// string itself, and no name kraai could derive from a service would find
+	// it. The planner emits one instance per custom-domain route, named by
+	// the route's pattern. A naming strategy on the registration rather than
+	// a type name the planner knows about, so internal/plan stays ignorant of
+	// which vendor types are hostname-shaped.
+	NameFrom NameStrategy
 	// Applies restricts this registration to the manifests and services it
 	// is meaningful for. Empty means it always applies, which is the common
 	// case; several entries are ANDed.
@@ -115,6 +128,34 @@ type Registration struct {
 	// Resource implements the verbs.
 	Resource Resource
 }
+
+// NameStrategy is where a registration's instances get their derived names.
+type NameStrategy int
+
+const (
+	// NameFromBinding names one instance per binding by environment, service
+	// and binding — internal/naming.Namer.Resource, or Namer.Service for
+	// compute.
+	NameFromBinding NameStrategy = iota
+	// NameFromRoute names one instance per custom-domain route by the
+	// route's pattern, verbatim.
+	NameFromRoute
+)
+
+// String implements fmt.Stringer for readable validation errors.
+func (s NameStrategy) String() string {
+	switch s {
+	case NameFromBinding:
+		return "binding"
+	case NameFromRoute:
+		return "route"
+	default:
+		return "NameStrategy(" + strconv.Itoa(int(s)) + ")"
+	}
+}
+
+// Valid reports whether s is a declared strategy.
+func (s NameStrategy) Valid() bool { return s == NameFromBinding || s == NameFromRoute }
 
 // ScopeFor returns the serialization scope spec resolves to under this
 // registration's Scope function, or "" when the registration is unscoped
@@ -163,6 +204,10 @@ type ApplicabilityContext struct {
 	// Settings is the service's merged compute settings, nil for a caller
 	// with none.
 	Settings map[string]any
+	// CustomDomain reports whether the service being resolved for has a
+	// route declaring one. False for a caller with no service, and for a
+	// service whose routes are all default-hostname.
+	CustomDomain bool
 }
 
 // Applicability reports whether a registration applies in a context.
@@ -236,6 +281,20 @@ func RequiresTrigger(triggers ...string) Applicability {
 // manifest.MergeSettings' output, which is never nil.
 func RequiresSettings(want func(settings map[string]any) bool) Applicability {
 	return func(ctx ApplicabilityContext) bool { return want(ctx.Settings) }
+}
+
+// RequiresCustomDomain is satisfied when the service has a route declaring a
+// custom domain — the resources that exist only to serve one (a provider's
+// domain-name object, the mapping from it to the service's API) apply to no
+// other service.
+//
+// Unlike RequiresTrigger, an absent service does not satisfy this: a custom
+// domain is something a manifest asks for by name, and a caller resolving a
+// binding rather than compute has no route to have asked with. That is the
+// same reasoning as RequiresSettings, for the same reason — "nobody asked"
+// must not read as "everyone gets one".
+func RequiresCustomDomain() Applicability {
+	return func(ctx ApplicabilityContext) bool { return ctx.CustomDomain }
 }
 
 // And is satisfied when every one of conditions is. Listing conditions in
@@ -418,6 +477,10 @@ func validate(reg Registration) error {
 	case dependsOnSelf(reg):
 		return kerrors.Validation(
 			"resource registration %q declares itself in DependsOn", reg.Provider+"/"+reg.Type)
+	case !reg.NameFrom.Valid():
+		return kerrors.Validation(
+			"resource registration %q declares unknown name strategy %s",
+			reg.Provider+"/"+reg.Type, reg.NameFrom)
 	case reg.VendorType == reg.Type && reg.VendorType != "":
 		return kerrors.Validation(
 			"resource registration %q declares VendorType equal to Type — leave it empty, "+

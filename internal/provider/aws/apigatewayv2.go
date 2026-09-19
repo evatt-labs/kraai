@@ -84,8 +84,24 @@ func (a *apiGatewayResource) translate(ctx context.Context, spec resource.Spec) 
 		"Name":         spec.Name,
 		"ProtocolType": apiGatewayProtocolType,
 		"Target":       target,
+		// The generated execute-api hostname keeps serving unless told
+		// otherwise. With a custom domain declared it is a second, unlisted
+		// door — the exact thing kraai-api's manifest calls out as the
+		// boundary it wants — so it is closed when, and only when, a custom
+		// domain exists to be the only one.
+		//
+		// At create only. See DiffersFromState below for why an API that
+		// already exists is not converged onto this.
+		"DisableExecuteApiEndpoint": hasCustomDomains(spec),
 	}
 	return translated, nil
+}
+
+// hasCustomDomains reports whether the planner attached any custom-domain
+// route to this service's compute config.
+func hasCustomDomains(spec resource.Spec) bool {
+	routes, _ := spec.Config["customDomains"].([]any)
+	return len(routes) > 0
 }
 
 func (a *apiGatewayResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
@@ -124,6 +140,16 @@ func (a *apiGatewayResource) Delete(ctx context.Context, ref resource.Ref) error
 // "differs", and computing it would need the same AccountID call this
 // method's ctx-less signature has no clean way to run during `kraai plan`.
 func (a *apiGatewayResource) DiffersFromState(spec resource.Spec, state *resource.State) (bool, error) {
+	// ProtocolType only. DisableExecuteApiEndpoint is deliberately not
+	// compared, and the reason is a limitation worth reading before
+	// "fixing" it: the generic engine diffs createOnly properties because a
+	// difference in one means replace, and replace is the only change plan
+	// can express. DisableExecuteApiEndpoint is mutable. Reporting it as a
+	// difference would replace the API — a new ApiId, a broken mapping,
+	// downtime — to flip a boolean. So an API created before its custom
+	// domain was declared keeps its generated hostname open until kraai can
+	// update in place. See TestAPIGatewayCannotCloseExecuteAPIOnAnExistingAPI
+	// and evatt-labs/kraai#210.
 	protocolOnly := spec
 	protocolOnly.Config = map[string]any{"ProtocolType": apiGatewayProtocolType}
 	return a.inner.DiffersFromState(protocolOnly, state)

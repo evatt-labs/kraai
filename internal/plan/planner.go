@@ -247,10 +247,18 @@ func (p *Planner) expandCompute(
 	}
 	mergedSettings := manifest.MergeSettings(provider.Settings, svcSettings)
 
+	// A service's custom-domain routes decide two things: whether the
+	// resources that exist only to serve one apply at all (RequiresCustomDomain
+	// in the context), and what the service's own API is told about its
+	// front door (the route in Spec.Config, so a provider can stop serving its
+	// generated hostname once a custom one exists).
+	customDomains := customDomainRoutes(m, svcKey)
+
 	regs, err := p.registry.Resolve(manifest.CapabilityCompute, resource.ApplicabilityContext{
-		Vendors:  m.Root.Providers.Vendors(),
-		Trigger:  trigger,
-		Settings: mergedSettings,
+		Vendors:      m.Root.Providers.Vendors(),
+		Trigger:      trigger,
+		Settings:     mergedSettings,
+		CustomDomain: len(customDomains) > 0,
 	})
 	if err != nil {
 		return nil, err
@@ -258,6 +266,9 @@ func (p *Planner) expandCompute(
 
 	name := namer.Service(environmentName, svcKey)
 	config := map[string]any{"dir": svc.Dir, "settings": mergedSettings}
+	if len(customDomains) > 0 {
+		config["customDomains"] = routeConfigs(customDomains)
+	}
 	if trigger != "" {
 		config["trigger"] = trigger
 	}
@@ -275,19 +286,68 @@ func (p *Planner) expandCompute(
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
-		out = append(out, plannedItem{
-			Item: Item{
-				ServiceKey: svcKey, Binding: svcKey, Capability: manifest.CapabilityCompute,
-				Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
-				ReadsBindings: reads,
-			},
-			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
-			spec:      resource.Spec{Binding: svcKey, Name: name, Config: config},
-			res:       r.Resource,
-			dependsOn: r.DependsOn,
-		})
+		item := Item{
+			ServiceKey: svcKey, Binding: svcKey, Capability: manifest.CapabilityCompute,
+			Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
+			ReadsBindings: reads,
+		}
+		switch r.NameFrom {
+		case resource.NameFromRoute:
+			// One instance per custom-domain route, named by the hostname
+			// itself: the vendor addresses these by the domain string, and no
+			// name derived from the service would find one. Same binding
+			// group as the rest of the service's compute, so DependsOn on the
+			// API resolves and the certificate binding is readable.
+			for _, route := range customDomains {
+				out = append(out, plannedItem{
+					Item: item,
+					ref:  resource.Ref{Provider: r.Provider, Type: r.Type, Name: route.Pattern},
+					spec: resource.Spec{
+						Binding: svcKey, Name: route.Pattern,
+						Config: map[string]any{"route": routeConfig(route)},
+					},
+					res:       r.Resource,
+					dependsOn: r.DependsOn,
+				})
+			}
+		default:
+			out = append(out, plannedItem{
+				Item:      item,
+				ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
+				spec:      resource.Spec{Binding: svcKey, Name: name, Config: config},
+				res:       r.Resource,
+				dependsOn: r.DependsOn,
+			})
+		}
 	}
 	return out, nil
+}
+
+// customDomainRoutes returns the routes on svcKey that declare a custom
+// domain, in manifest order. Validated at load, so each names a tls binding
+// on the service.
+func customDomainRoutes(m *manifest.Manifest, svcKey string) []manifest.Route {
+	var out []manifest.Route
+	for _, route := range m.Environment.Routes[svcKey] {
+		if route.CustomDomain {
+			out = append(out, route)
+		}
+	}
+	return out
+}
+
+// routeConfig projects one route onto the Spec.Config vocabulary a provider
+// reads: the hostname, and the binding whose certificate it presents.
+func routeConfig(route manifest.Route) map[string]any {
+	return map[string]any{"pattern": route.Pattern, "certificate": route.Certificate}
+}
+
+func routeConfigs(routes []manifest.Route) []any {
+	out := make([]any, 0, len(routes))
+	for _, route := range routes {
+		out = append(out, routeConfig(route))
+	}
+	return out
 }
 
 // declaredBindings returns every binding svc declares, across every
