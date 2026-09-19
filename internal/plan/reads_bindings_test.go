@@ -301,3 +301,52 @@ func TestPlan_NameFromEntryUnderComputeIsAnError(t *testing.T) {
 		t.Fatalf("err = %v, want the registration reported", err)
 	}
 }
+
+// expandBinding hands the entry to Resolve, so a registration conditioned
+// on what the entry says applies exactly when it says it.
+func TestPlan_BindingEntryReachesApplicability(t *testing.T) {
+	f := newRegistryFixture(t)
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::Route53::RecordSet", Capability: manifest.CapabilityDNS,
+		Lookup: resource.LookupByAttr, Resource: newFakeResource(),
+		NameFrom: resource.NameFromEntry, NameKey: "zone",
+		Applies: []resource.Applicability{resource.RequiresBindingKey("alias")},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	// The zone itself always applies, so a dns entry with no alias still
+	// resolves to something.
+	if err := f.reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::Route53::HostedZone", Capability: manifest.CapabilityDNS,
+		Lookup: resource.LookupByAPI, Resource: newFakeResource(),
+		NameFrom: resource.NameFromEntry, NameKey: "zone",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	m := f.oneServiceManifest()
+	m.Root.Providers[manifest.CapabilityDNS] = &manifest.Provider{Vendor: "aws"}
+	svc := m.Services["api"]
+	svc.Bindings[manifest.CapabilityDNS] = []manifest.Binding{{"binding": "ZONE", "zone": "acme.example"}}
+	m.Services["api"] = svc
+
+	p, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	for _, a := range p.Actions {
+		if a.Type == "AWS::Route53::RecordSet" {
+			t.Fatal("a record set was planned for an entry with nothing to point it at")
+		}
+	}
+
+	svc.Bindings[manifest.CapabilityDNS] = []manifest.Binding{{"binding": "ZONE", "zone": "acme.example", "alias": "EDGE"}}
+	m.Services["api"] = svc
+	p, err = New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	if rec := findAction(t, p, "aws", "AWS::Route53::RecordSet"); rec.Ref.Name != "acme.example" {
+		t.Errorf("record set named %q, want its zone", rec.Ref.Name)
+	}
+}

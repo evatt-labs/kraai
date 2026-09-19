@@ -7,38 +7,6 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// cloudfrontMatch implements AWS::CloudFront::Distribution's LookupByAttr
-// strategy: AWS enforces alias (CNAME) uniqueness globally, so a
-// distribution's Aliases is a safe attribute to search on.
-//
-// # Known gap: a distribution with no configured alias
-//
-// DistributionConfig.Aliases is optional — a distribution serving only its
-// default *.cloudfront.net domain carries none. Such a distribution cannot
-// be found by this strategy at all, since there is no alias for name to
-// match against. No lookup strategy here covers this case for CloudFront
-// specifically; it is surfaced here rather than silently accepted, and the
-// write-path
-// workstream needs an answer before it can create a distribution with no
-// alias and expect a later Get to find it (a kraai-owned tag, the same
-// mechanism ApiGatewayV2::Api uses below, is the likely fix).
-func cloudfrontMatch(properties map[string]any, name string) bool {
-	config, ok := properties["DistributionConfig"].(map[string]any)
-	if !ok {
-		return false
-	}
-	aliases, ok := config["Aliases"].([]any)
-	if !ok {
-		return false
-	}
-	for _, alias := range aliases {
-		if s, ok := alias.(string); ok && s == name {
-			return true
-		}
-	}
-	return false
-}
-
 // identityTagKey is the kraai-owned tag byTag types are found by.
 //
 // A byTag type's Create sets this tag in the create call itself (see
@@ -216,40 +184,17 @@ func hostedZoneOwned(_ context.Context, identifier string, properties map[string
 }
 
 // recordSetMatch implements AWS::Route53::RecordSet's LookupByAttr
-// strategy.
+// strategy: among the records of one zone (recordSetListScope), the apex A
+// record. name is the zone (the registration is NameFromEntry on "zone"),
+// so the apex is the record whose Name is the zone itself.
 //
-// Not byName: RecordSet's Cloud Control primary identifier is compound —
-// HostedZoneId, Name and Type strung together — and this package's byName
-// fast path (resourceType.resolve) assumes the derived name already is a
-// single opaque identifier string, which a compound identifier is not. That
-// fast path exists to skip a lookup call entirely for types like S3 and
-// Lambda where the derived name is the identifier verbatim; forcing
-// RecordSet through it would mean fabricating a compound-identifier string
-// kraai has no reliable format for, rather than the reasonably safe
-// list-and-match this package's engine already has a mechanism for. Not
-// mentioned among the first types this reasoning was applied to (S3,
-// CloudFront, ACM and HostedZone, not RecordSet) — this workstream extends
-// the same reasoning to a fifth type by the same test: is the identifier
-// derivable and settable at create time without a lookup, or not.
-//
-// # Known gap: Name alone does not disambiguate record type or zone
-//
-// matchFunc's contract carries exactly one derived name to compare against
-// (see cloudfrontMatch and apigatewayv2Match, which have the identical
-// limitation against their own single attribute). Cloud Control's
-// ListResources for this type enumerates record sets across every hosted
-// zone in the account, so a Name collision is possible both across zones
-// (the same "www" exists in many zones) and within one zone across record
-// types (an A and an AAAA record for the same name are different
-// resources). This match cannot see either HostedZoneId or Type, so it
-// returns the first ListResources candidate whose Name matches — real
-// ambiguity, surfaced here rather than hidden, and worth a manifest-level
-// naming convention (folding the zone and type into the derived name) or a
-// richer matchFunc contract if kraai.dev's own manifest ever needs more
-// than one record type at the same name.
+// Not byName: RecordSet's Cloud Control primary identifier is compound
+// (HostedZoneId|Name|Type|SetIdentifier), which this package's byName fast
+// path cannot construct without a lookup.
 func recordSetMatch(properties map[string]any, name string) bool {
 	recordName, _ := properties["Name"].(string)
-	return recordName == name
+	recordType, _ := properties["Type"].(string)
+	return recordType == recordSetType && zoneNamesEqual(recordName, name)
 }
 
 // apigatewayv2Match implements AWS::ApiGatewayV2::Api's LookupByTag strategy.

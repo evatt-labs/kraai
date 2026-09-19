@@ -125,8 +125,10 @@ var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]
 })
 
 // dnsBindingSchema validates one entry of a service's `dns:` list: the zone
-// to create, the name a record in it answers for, and the cdn binding that
-// record aliases (a reference — see Capabilities).
+// to create, and the cdn binding its apex aliases (a reference — see
+// Capabilities). The one record kraai writes is the apex; a name for
+// anything else was declared once and never read, and is not accepted now
+// that something is.
 //
 // A name of its own rather than reusing the binding name, because a binding
 // name is kraai's handle for the resource and a zone name is a real, external
@@ -135,17 +137,13 @@ var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]
 // is. That the two are separate is exactly what sharing one capability with
 // `objects` made impossible to express.
 //
-// Nothing reads these keys yet: routing them into each type's desired state
-// is evatt-labs/kraai#117, which this decomposition unblocks rather than
-// closes. They are declared now because declaring them is what makes the
-// split mean anything — a `dns:` entry that accepts only a binding name is
-// the same undifferentiated shape under a new spelling.
+// zone names the hosted zone (hostedzone.go) and alias the distribution its
+// apex record points at (recordset.go).
 var dnsBindingSchema = resource.NewSchema("aws dns binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
 		"binding": map[string]any{"type": "string"},
 		"zone":    map[string]any{"type": "string"},
-		"name":    map[string]any{"type": "string"},
 		"alias":   map[string]any{"type": "string"},
 	},
 	"required":             []any{"binding", "zone"},
@@ -193,8 +191,8 @@ var tlsBindingSchema = resource.NewSchema("aws tls binding", map[string]any{
 // alias cannot be found again, so this is the one key here that is already
 // load-bearing for more than configuration.
 //
-// See dnsBindingSchema for why these keys are declared before anything reads
-// them (evatt-labs/kraai#117).
+// aliases are the hostnames the distribution answers on, which need the
+// certificate; without any, it answers on its own *.cloudfront.net name.
 var cdnBindingSchema = resource.NewSchema("aws cdn binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{

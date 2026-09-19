@@ -6,73 +6,6 @@ import (
 	"testing"
 )
 
-func TestCloudfrontMatch(t *testing.T) {
-	cases := []struct {
-		name       string
-		properties map[string]any
-		want       string
-		match      bool
-	}{
-		{
-			name: "matches an alias in the list",
-			properties: map[string]any{
-				"DistributionConfig": map[string]any{
-					"Aliases": []any{"other.example.com", "target.example.com"},
-				},
-			},
-			want:  "target.example.com",
-			match: true,
-		},
-		{
-			name: "no matching alias",
-			properties: map[string]any{
-				"DistributionConfig": map[string]any{
-					"Aliases": []any{"other.example.com"},
-				},
-			},
-			want:  "target.example.com",
-			match: false,
-		},
-		{
-			name: "a distribution with no aliases configured at all cannot be found this way",
-			properties: map[string]any{
-				"DistributionConfig": map[string]any{},
-			},
-			want:  "target.example.com",
-			match: false,
-		},
-		{
-			name:       "DistributionConfig missing entirely",
-			properties: map[string]any{},
-			want:       "target.example.com",
-			match:      false,
-		},
-		{
-			name: "Aliases present but not a list",
-			properties: map[string]any{
-				"DistributionConfig": map[string]any{"Aliases": "not-a-list"},
-			},
-			want:  "target.example.com",
-			match: false,
-		},
-		{
-			name: "a non-string element in Aliases is skipped, not fatal",
-			properties: map[string]any{
-				"DistributionConfig": map[string]any{"Aliases": []any{42, "target.example.com"}},
-			},
-			want:  "target.example.com",
-			match: true,
-		},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			if got := cloudfrontMatch(tc.properties, tc.want); got != tc.match {
-				t.Fatalf("cloudfrontMatch = %v, want %v", got, tc.match)
-			}
-		})
-	}
-}
-
 func TestApigatewayv2Match(t *testing.T) {
 	cases := []struct {
 		name       string
@@ -261,6 +194,8 @@ func TestHostedZoneMatch(t *testing.T) {
 	}
 }
 
+// Among one zone's records (the list is scoped to it), the apex A record —
+// name is the zone, so the apex is the record named exactly that.
 func TestRecordSetMatch(t *testing.T) {
 	cases := []struct {
 		name       string
@@ -268,9 +203,11 @@ func TestRecordSetMatch(t *testing.T) {
 		want       string
 		match      bool
 	}{
-		{name: "matches the record Name", properties: map[string]any{"Name": "www.example.com."}, want: "www.example.com.", match: true},
-		{name: "a different name does not match", properties: map[string]any{"Name": "other.example.com."}, want: "www.example.com.", match: false},
-		{name: "Name missing entirely", properties: map[string]any{}, want: "www.example.com.", match: false},
+		{name: "the apex A record", properties: map[string]any{"Name": "example.com.", "Type": "A"}, want: "example.com", match: true},
+		{name: "the apex AAAA record is a different resource", properties: map[string]any{"Name": "example.com.", "Type": "AAAA"}, want: "example.com", match: false},
+		{name: "a subdomain is not the apex", properties: map[string]any{"Name": "www.example.com.", "Type": "A"}, want: "example.com", match: false},
+		{name: "the zone's NS record", properties: map[string]any{"Name": "example.com.", "Type": "NS"}, want: "example.com", match: false},
+		{name: "Name missing entirely", properties: map[string]any{"Type": "A"}, want: "example.com", match: false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

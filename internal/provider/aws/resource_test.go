@@ -555,7 +555,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		fc := &fakeClient{createID: "E123", createProps: map[string]any{}}
 		r := &resourceType{
 			provider: Provider, typeName: TypeCloudFrontDistribution, lookup: resource.LookupByAttr,
-			client: fc, match: cloudfrontMatch,
+			client: fc, match: matchNameField,
 		}
 
 		_, err := r.Create(context.Background(), resource.Spec{

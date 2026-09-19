@@ -454,8 +454,11 @@ func (p *Planner) expandBinding(
 	// invokes the service it belongs to is nobody's business here. Both are
 	// zero-valued rather than invented, which the conditions that read them
 	// treat as "this caller has no opinion" — see resource.RequiresTrigger.
+	// The entry itself is what a binding has to say, for a registration
+	// that applies only to an entry saying something in particular.
 	regs, err := p.registry.Resolve(capability, resource.ApplicabilityContext{
 		Vendors: m.Root.Providers.Vendors(),
+		Binding: config,
 	})
 	if err != nil {
 		return nil, err
