@@ -52,6 +52,8 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 		dir     string
 		setArgs []string
 		jsonOut bool
+
+		detailedExitCode bool
 	)
 
 	cmd := &cobra.Command{
@@ -64,7 +66,7 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPlan(cmd, args[0], dir, setArgs, jsonOut, assembler, resolve)
+			return runPlan(cmd, args[0], dir, setArgs, jsonOut, detailedExitCode, assembler, resolve)
 		},
 	}
 
@@ -73,6 +75,8 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 		"override a manifest value (key=value); may be repeated")
 	cmd.Flags().BoolVar(&jsonOut, "json", false,
 		"print the plan as JSON instead of human-readable text")
+	cmd.Flags().BoolVar(&detailedExitCode, "detailed-exitcode", false,
+		"exit 0 when there is nothing to do, 2 when changes are present, 1 when any resource could not be planned")
 
 	return cmd
 }
@@ -84,37 +88,24 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 //
 // # Exit code
 //
-// `kraai plan` is meant to keep its own, separate, Terraform-style
-// exit-code convention (0 no changes / 1 error / 2 changes present,
-// matching `-detailed-exitcode`) rather than the generic kerrors table the
-// rest of the CLI uses. That convention needs a channel for "the command
-// succeeded but should still report a distinguished non-zero exit code" —
-// main.go's single centralized error handler currently derives the exit
-// code purely from whether Execute returned an error, via
-// kerrors.ExitCode. Reusing kerrors' "2" for that would collide with its
-// existing meaning (CodeValidation), so the "changes present" signal can't
-// simply piggyback on the generic table — it needs its own channel, e.g. a
-// package-level var+accessor mirroring root.go's debugFlag/DebugRequested,
-// read by main.go after Execute returns nil.
+// A plan that computes returns nil and exits 0 by default — including one
+// containing ActionFailed entries, which are reported in the output, not
+// fatal (see internal/plan's package doc, "Partial failure"). A plan that
+// could not be computed at all (bad environment name, missing or invalid
+// manifest, registry assembly failure, the planner itself failing) returns
+// a *kerrors.KError and exits non-zero through the normal exit-code table.
 //
-// That plumbing is a change to cmd/kraai's shared, tested error-handling
-// contract, not something specific to plan — apply and destroy will
-// eventually want the same "succeeded, but here's additional signal"
-// channel for their own reasons. Bolting a one-off version of it onto
-// this command alone, in isolation, risks a shape that has to be redone
-// when those commands arrive. So this implementation takes the
-// achievable, explicitly-scoped subset instead: a plan that computes
-// successfully — including one that contains ActionFailed entries, which
-// are reported in the output, not fatal (see internal/plan's package doc,
-// "Partial failure") — returns nil and exits 0. A plan that could not be
-// computed at all (bad environment name, missing/invalid manifest,
-// registry assembly failure, or the planner itself failing) returns a
-// *kerrors.KError and exits non-zero through the normal exit-code table.
-// The distinct "2 means changes are present" signal is a named gap, not a
-// silent one — worth building when apply/destroy make the shared plumbing
-// pay for itself.
+// --detailed-exitcode is Terraform's convention for a script that wants to
+// branch on the plan without parsing it: 0 nothing to do, 2 changes
+// present, 1 something is wrong. "Something is wrong" includes a plan with
+// failed entries, because a script that gates apply on "2 means go" must
+// not be told "0, nothing to do" about a plan that could not read half its
+// resources. The signal travels beside the error return, through root.go's
+// exitSignal, because a plan with changes is not an error and must not
+// print like one, and because the kerrors table's own 2 already means
+// CodeValidation.
 func runPlan(
-	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
+	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut, detailedExitCode bool,
 	assembler RegistryAssembler, resolve ManifestResolver,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
@@ -175,11 +166,27 @@ func runPlan(
 		return err
 	}
 
+	if detailedExitCode {
+		switch {
+		case result.HasFailures():
+			signalExit(planExitFailed)
+		case result.HasChanges():
+			signalExit(planExitChanges)
+		}
+	}
+
 	if jsonOut {
 		return writePlanJSON(cmd.OutOrStdout(), envName, result)
 	}
 	return writePlanText(cmd.OutOrStdout(), envName, result)
 }
+
+// The --detailed-exitcode convention, matching Terraform's: 0 is nothing to
+// do and needs no constant.
+const (
+	planExitFailed  = 1
+	planExitChanges = 2
+)
 
 // writePlanText renders result as aligned, human-readable text — the
 // first output a kraai user sees, per the task's presentation bar. It

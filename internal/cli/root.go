@@ -27,10 +27,26 @@ import (
 // before that lands.
 var debugFlag bool
 
+// exitSignal is the exit code a command that *succeeded* asked cmd/kraai
+// to use anyway — `kraai plan --detailed-exitcode` reporting "changes are
+// present" as 2 the way Terraform does. A second channel beside the error
+// return, because a plan with changes is not an error and must not print
+// like one, while the kerrors table's codes already mean something else.
+// Same package-level shape and same reset-on-NewRootCommand rule as
+// debugFlag, with the same HAZARD under t.Parallel().
+var exitSignal int
+
+// signalExit records the exit code a successful command wants. Only the
+// last call counts; a command signals at most once, at its end.
+func signalExit(code int) {
+	exitSignal = code
+}
+
 // NewRootCommand builds the kraai root command, which the verb subcommands
 // attach themselves to as children.
 func NewRootCommand() *cobra.Command {
 	debugFlag = false
+	exitSignal = 0
 
 	root := &cobra.Command{
 		Use:   "kraai",
@@ -63,6 +79,14 @@ func NewRootCommand() *cobra.Command {
 // exit/stdio directly.
 func DebugRequested() bool {
 	return debugFlag
+}
+
+// ExitSignal returns the exit code the most recent Execute call asked for
+// despite succeeding, or 0 when it asked for none. cmd/kraai reads it only
+// when Execute returned nil: a command that failed exits by its error, and
+// whatever it may have signalled before failing is moot.
+func ExitSignal() int {
+	return exitSignal
 }
 
 // Execute runs the root command with the given args (typically os.Args[1:])
