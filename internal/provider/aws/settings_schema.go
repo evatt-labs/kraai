@@ -153,15 +153,21 @@ var dnsBindingSchema = resource.NewSchema("aws dns binding", map[string]any{
 })
 
 // tlsBindingSchema validates one entry of a service's `tls:` list: the
-// domain a certificate is requested for, and any additional names it covers.
+// domain a certificate is requested for, any additional names it covers,
+// and the dns binding whose zone validates it (a reference — see
+// Capabilities).
 //
-// See dnsBindingSchema for why these keys are declared before anything reads
-// them (evatt-labs/kraai#117).
+// zone is not required by the schema because an adopted certificate
+// (resources:) needs none; a certificate kraai requests cannot be validated
+// without one, and certificate.go refuses to request it. Note that
+// CloudFront accepts only certificates in us-east-1, so a certificate for a
+// distribution must be requested with the provider's region set there.
 var tlsBindingSchema = resource.NewSchema("aws tls binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
 		"binding": map[string]any{"type": "string"},
 		"domain":  map[string]any{"type": "string"},
+		"zone":    map[string]any{"type": "string"},
 		"alternateNames": map[string]any{
 			"type":  "array",
 			"items": map[string]any{"type": "string"},

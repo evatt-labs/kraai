@@ -39,6 +39,8 @@ func Capabilities() []resource.CapabilityDef {
 			Name:    manifest.CapabilityTLS,
 			Summary: "ACM certificate, validated through Route 53.",
 			Binding: tlsBindingSchema,
+			// zone names the dns binding whose hosted zone validates it.
+			References: []string{"zone"},
 		},
 		{
 			Name:    manifest.CapabilityCDN,
