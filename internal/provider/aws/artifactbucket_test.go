@@ -411,3 +411,58 @@ func TestArtifactBucketDeleteOwnershipCheckFailureIsNeverSilentlyPermitted(t *te
 		t.Fatalf("DeleteResource was called (%v) despite ownership being undetermined", fc.deleteCalls)
 	}
 }
+
+// bucketOwnedBy is the artifact bucket's ownership answer, offered to the
+// generic engine for the objects bucket — the same global namespace, the
+// same three outcomes, through the engine's own hook rather than a second
+// wrapper type.
+func TestBucketOwnedBy(t *testing.T) {
+	const bucket = "myenv-api-UPLOADS"
+
+	t.Run("a bucket in this account's own list is owned", func(t *testing.T) {
+		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{Buckets: []s3types.Bucket{{Name: aws.String(bucket)}}}}}
+		owned, err := bucketOwnedBy(&Client{s3: fs3})(context.Background(), bucket, nil)
+		if err != nil || !owned {
+			t.Fatalf("owned = %v, %v, want true", owned, err)
+		}
+	})
+
+	t.Run("a bucket not in it is not", func(t *testing.T) {
+		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}}
+		owned, err := bucketOwnedBy(&Client{s3: fs3})(context.Background(), bucket, nil)
+		if err != nil || owned {
+			t.Fatalf("owned = %v, %v, want false", owned, err)
+		}
+	})
+
+	t.Run("a failed list is an error, not an answer", func(t *testing.T) {
+		fs3 := &fakeS3{listBucketsErr: errors.New("AccessDenied: s3:ListAllMyBuckets")}
+		if _, err := bucketOwnedBy(&Client{s3: fs3})(context.Background(), bucket, nil); err == nil {
+			t.Fatal("a failed ownership check answered instead of failing")
+		}
+	})
+
+	// Through the engine: the objects bucket, as registered, reads a
+	// foreign bucket as absent — the exact bug the artifact bucket fixed
+	// for itself, now closed for the other S3::Bucket registration too.
+	t.Run("the objects bucket reads a foreign bucket as absent", func(t *testing.T) {
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{bucket: {"BucketName": bucket}}}
+		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}}
+		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc,
+			owns: bucketOwnedBy(&Client{s3: fs3})}
+
+		state, err := r.Get(context.Background(), resource.Ref{Name: bucket})
+		if err != nil {
+			t.Fatalf("Get: %v", err)
+		}
+		if state != nil {
+			t.Fatalf("Get = %+v, want nil: this bucket belongs to a different AWS account", state)
+		}
+		if err := r.Delete(context.Background(), resource.Ref{Name: bucket}); err != nil {
+			t.Fatalf("Delete: %v", err)
+		}
+		if len(fc.deleteCalls) != 0 {
+			t.Fatalf("deleteCalls = %v, want none against a stranger's bucket", fc.deleteCalls)
+		}
+	})
+}

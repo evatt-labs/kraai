@@ -101,6 +101,25 @@ type artifactBucketResource struct {
 	client *Client
 }
 
+// bucketOwnedBy adapts Client.OwnsBucket to the generic engine's ownsFunc,
+// for a bucket the bare engine manages under its derived name — the objects
+// capability's S3::Bucket. Same exposure as the artifact bucket, same
+// answer: a bucket this account does not own reads as absent, and the
+// create S3 then refuses names the collision.
+func bucketOwnedBy(client *Client) ownsFunc {
+	return func(ctx context.Context, identifier string, _ map[string]any) (bool, error) {
+		owned, err := client.OwnsBucket(ctx, identifier)
+		if err != nil {
+			return false, err
+		}
+		if !owned {
+			recordForeignBucket(ctx, identifier,
+				"bucket exists but is not owned by this account; reporting it as absent")
+		}
+		return owned, nil
+	}
+}
+
 func newArtifactBucketResource(client *Client) *artifactBucketResource {
 	return &artifactBucketResource{
 		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: client},

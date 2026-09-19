@@ -858,3 +858,109 @@ func TestResourceTypeDiff(t *testing.T) {
 		}
 	})
 }
+
+// The engine's ownership hook: what resolve finds is not necessarily ours.
+// Set by the two registrations that need it (the objects bucket, the hosted
+// zone); nil for every type whose lookup is already account-scoped.
+func TestResourceTypeOwnership(t *testing.T) {
+	deny := func(context.Context, string, map[string]any) (bool, error) { return false, nil }
+	allow := func(context.Context, string, map[string]any) (bool, error) { return true, nil }
+	broken := func(context.Context, string, map[string]any) (bool, error) { return false, errors.New("list denied") }
+
+	t.Run("Get reports an unowned instance as absent", func(t *testing.T) {
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{"my-bucket": {"BucketName": "my-bucket"}}}
+		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc, owns: deny}
+
+		state, err := r.Get(context.Background(), resource.Ref{Name: "my-bucket"})
+		if err != nil {
+			t.Fatalf("Get: %v", err)
+		}
+		if state != nil {
+			t.Fatalf("Get = %+v, want nil for an instance this account does not own", state)
+		}
+	})
+
+	t.Run("Get reports an owned instance", func(t *testing.T) {
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{"my-bucket": {"BucketName": "my-bucket"}}}
+		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc, owns: allow}
+
+		state, err := r.Get(context.Background(), resource.Ref{Name: "my-bucket"})
+		if err != nil || state == nil {
+			t.Fatalf("Get = %+v, %v, want the owned instance", state, err)
+		}
+	})
+
+	t.Run("a hook failure is an error, never silently absent", func(t *testing.T) {
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{"my-bucket": {}}}
+		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc, owns: broken}
+
+		if _, err := r.Get(context.Background(), resource.Ref{Name: "my-bucket"}); err == nil {
+			t.Fatal("a check that could not run answered 'absent'")
+		}
+		if err := r.Delete(context.Background(), resource.Ref{Name: "my-bucket"}); err == nil {
+			t.Fatal("a check that could not run permitted a delete")
+		}
+	})
+
+	t.Run("an import is never asked", func(t *testing.T) {
+		// Adoption is the manifest asserting ownership by hand; asking the
+		// hook would refuse exactly the resource the import exists to reach.
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{"Z123": {"Name": "acme.example."}}}
+		r := &resourceType{provider: Provider, typeName: TypeRoute53HostedZone, lookup: resource.LookupByAPI, client: fc,
+			match: hostedZoneMatch, owns: broken}
+
+		state, err := r.Get(context.Background(), resource.Ref{Name: "acme.example", Import: &resource.Import{ID: "Z123"}})
+		if err != nil || state == nil {
+			t.Fatalf("Get = %+v, %v, want the imported instance without consulting the hook", state, err)
+		}
+	})
+
+	t.Run("Delete skips an unowned instance without calling DeleteResource", func(t *testing.T) {
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{"my-bucket": {"BucketName": "my-bucket"}}}
+		var sawProps map[string]any
+		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc,
+			owns: func(_ context.Context, _ string, props map[string]any) (bool, error) {
+				sawProps = props
+				return false, nil
+			}}
+
+		if err := r.Delete(context.Background(), resource.Ref{Name: "my-bucket"}); err != nil {
+			t.Fatalf("Delete: %v", err)
+		}
+		if len(fc.deleteCalls) != 0 {
+			t.Fatalf("deleteCalls = %v, want none for an instance this account does not own", fc.deleteCalls)
+		}
+		// byName resolves without reading; Delete reads before asking, so a
+		// hook that needs the properties (the hosted zone's tags) has them.
+		if sawProps == nil {
+			t.Fatal("the hook was asked without the instance's properties")
+		}
+	})
+
+	t.Run("Delete proceeds for an owned instance", func(t *testing.T) {
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{"my-bucket": {}}}
+		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc, owns: allow}
+
+		if err := r.Delete(context.Background(), resource.Ref{Name: "my-bucket"}); err != nil {
+			t.Fatalf("Delete: %v", err)
+		}
+		if len(fc.deleteCalls) != 1 {
+			t.Fatalf("deleteCalls = %v, want one", fc.deleteCalls)
+		}
+	})
+
+	t.Run("Create stamps a tag for a type found another way", func(t *testing.T) {
+		// Not byTag — the lookup is by name — but the tag is how owns later
+		// tells what kraai made from what it did not.
+		fc := &fakeClient{createID: "Z1", createProps: map[string]any{}}
+		r := &resourceType{provider: Provider, typeName: TypeRoute53HostedZone, lookup: resource.LookupByAPI, client: fc,
+			match: hostedZoneMatch, stampTag: hostedZoneStampTag}
+
+		if _, err := r.Create(context.Background(), resource.Spec{Name: "acme.example", Config: map[string]any{"Name": "acme.example"}}); err != nil {
+			t.Fatalf("Create: %v", err)
+		}
+		if !arrayTagsMatchIn(fc.createCalls[0], hostedZoneTagsProperty, "acme.example") {
+			t.Fatalf("desired = %v, want the identity tag under %s", fc.createCalls[0], hostedZoneTagsProperty)
+		}
+	})
+}

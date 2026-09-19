@@ -41,6 +41,24 @@ type ccAPI interface {
 	DescribeType(ctx context.Context, typeName string) (Schema, error)
 }
 
+// ownsFunc reports whether a found instance is this account's and kraai's
+// to manage. identifier and properties are what resolve found; properties
+// may be nil for a byName type that never had to read them, in which case
+// the caller has read them before asking.
+//
+// nil is the common case and means Cloud Control's own answer is trusted:
+// for a type whose lookup walks ListResources — byAttr, byTag, byApi — the
+// list is account-scoped, so a stranger's instance can never be a
+// candidate. A byName type resolving a global namespace (S3) is the case
+// that needs one: GetResource answers for a bucket any account owns.
+//
+// (false, nil) reports the instance as absent, so plan proposes creating
+// it and the vendor refuses by name — the honest outcome for a namespace
+// collision. An error refuses instead, for a type where "absent" would
+// lead somewhere worse: a hosted zone kraai did not create must not be
+// shadowed by a second zone of the same name.
+type ownsFunc func(ctx context.Context, identifier string, properties map[string]any) (bool, error)
+
 // matchFunc reports whether a resource's decoded properties are the one
 // ref.Name identifies, for the byAttr and byTag lookup strategies. name is
 // the derived resource name (Ref.Name), not necessarily the value
@@ -101,6 +119,12 @@ type resourceType struct {
 	// because not every byTag type spells "Tags" the same way (see
 	// identity.go's array-shaped versus flat-map-shaped Tags).
 	stampTag stampFunc
+
+	// owns, when set, gates Get and Delete on ownership of what resolve
+	// found — see ownsFunc. Never consulted for an imported Ref: adoption
+	// is the manifest asserting ownership by hand, which is the whole point
+	// of an import.
+	owns ownsFunc
 
 	// listScope is non-nil exactly for a type whose Cloud Control list
 	// handler is parent-scoped (see listScopeFunc's own doc comment) — for
@@ -179,11 +203,30 @@ func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.Sta
 		}
 	}
 
+	owned, err := r.owned(ctx, ref, identifier, properties)
+	if err != nil {
+		return nil, err
+	}
+	if !owned {
+		return nil, nil
+	}
+
 	return &resource.State{
 		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
 		ID:         identifier,
 		Attributes: properties,
 	}, nil
+}
+
+// owned applies r.owns to a found instance, or reports it owned when there
+// is no hook to ask or the Ref is an import. An error from the hook is an
+// error, never a silent "not ours": a check that could not run has not
+// answered.
+func (r *resourceType) owned(ctx context.Context, ref resource.Ref, identifier string, properties map[string]any) (bool, error) {
+	if r.owns == nil || ref.Import != nil {
+		return true, nil
+	}
+	return r.owns(ctx, identifier, properties)
 }
 
 // resolve finds the Cloud Control primary identifier for name, per this
@@ -297,15 +340,17 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 		return nil, err
 	}
 
-	if r.lookup == resource.LookupByTag {
-		if r.stampTag == nil {
-			return nil, kerrors.Validation(
-				"%s is registered LookupByTag but declares no stampTag function", r.typeName)
-		}
+	if r.lookup == resource.LookupByTag && r.stampTag == nil {
+		return nil, kerrors.Validation(
+			"%s is registered LookupByTag but declares no stampTag function", r.typeName)
+	}
+	if r.stampTag != nil {
 		// The identity tag rides in this same CreateResource call:
 		// writing it as a follow-up call would leave a window where a crash
 		// between create and tag orphans the resource unfindably — the one
-		// failure no later run could clean up.
+		// failure no later run could clean up. Required for byTag, whose
+		// lookup is the tag; also set by a type found another way that
+		// marks what it created so owns can tell it from what it did not.
 		r.stampTag(desired, spec.Name)
 	}
 
@@ -514,12 +559,35 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 // Delete removes the resource, treating one already absent as success —
 // both when resolve finds no identifier at all, and when Cloud Control
 // itself reports the resource gone (Client.DeleteResource's own contract).
+//
+// Ownership is asked here as well as in Get, and cannot be bypassed: nothing
+// guarantees Get ran before Delete in the same process on the same world,
+// and a guard living only in Get would be skipped by any caller reaching
+// Delete on its own. What is not ours is treated as already gone, which is
+// this method's own "deleting something absent is success" contract.
 func (r *resourceType) Delete(ctx context.Context, ref resource.Ref) error {
-	identifier, _, found, err := r.resolve(ctx, ref)
+	identifier, properties, found, err := r.resolve(ctx, ref)
 	if err != nil {
 		return err
 	}
 	if !found {
+		return nil
+	}
+	if r.owns != nil && ref.Import == nil && properties == nil {
+		// A byName resolve read nothing; the hook may need the properties.
+		properties, found, err = r.client.GetResource(ctx, r.typeName, identifier)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return nil
+		}
+	}
+	owned, err := r.owned(ctx, ref, identifier, properties)
+	if err != nil {
+		return err
+	}
+	if !owned {
 		return nil
 	}
 	return r.client.DeleteResource(ctx, r.typeName, identifier)

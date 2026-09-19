@@ -479,3 +479,28 @@ func TestHostedZoneIsNamedByItsZone(t *testing.T) {
 		t.Error("the dns schema accepted an entry with no zone, which is the name the registration reads")
 	}
 }
+
+// The two globally-namespaced registrations the bare engine manages carry
+// an ownership hook (evatt-labs/kraai#120); the hosted zone also stamps
+// the tag that hook reads. Every other registration leaves both nil — its
+// lookup walks an account-scoped list, and a stranger's instance can never
+// be a candidate.
+func TestOwnershipHooksAreWiredWhereTheNamespaceIsGlobal(t *testing.T) {
+	want := map[string]struct{ owns, stamps bool }{
+		key(TypeS3Bucket):          {owns: true},
+		key(TypeRoute53HostedZone): {owns: true, stamps: true},
+	}
+	for _, reg := range Registrations(&Client{}) {
+		inner, ok := reg.Resource.(*resourceType)
+		if !ok {
+			continue
+		}
+		exp := want[reg.Key()]
+		if (inner.owns != nil) != exp.owns {
+			t.Errorf("%s: owns set = %v, want %v", reg.Key(), inner.owns != nil, exp.owns)
+		}
+		if exp.stamps && inner.stampTag == nil {
+			t.Errorf("%s: no stampTag, so nothing it creates would ever read as its own", reg.Key())
+		}
+	}
+}
