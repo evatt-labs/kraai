@@ -62,7 +62,7 @@ func TestGenerateEnvironmentName_PropagatesEachDrawsError(t *testing.T) {
 	orig := drawInt
 	defer func() { drawInt = orig }()
 
-	for failAt := 0; failAt < 4; failAt++ {
+	for failAt := range 4 {
 		calls := 0
 		drawInt = func(n int) (int64, error) {
 			defer func() { calls++ }()

@@ -111,7 +111,7 @@ func Wait(ctx context.Context, url string, opts Options) bool {
 	opts = opts.withDefaults()
 
 	streak := 0
-	for i := 0; i < opts.Attempts; i++ {
+	for i := range opts.Attempts {
 		if probe(ctx, opts.Client, url, opts.ProbeTimeout) {
 			streak++
 		} else {

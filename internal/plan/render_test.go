@@ -35,6 +35,10 @@ func TestRender_EveryActionKind(t *testing.T) {
 			Item: Item{ServiceKey: "api", Binding: "JOBS", Provider: "cloudflare", Type: "queue", Wave: 1},
 			Ref:  resource.Ref{Name: "env-api-jobs"}, Kind: ActionFailed, Err: errors.New("timeout"),
 		},
+		{
+			Item: Item{ServiceKey: "api", Binding: "QUEUE", Provider: "cloudflare", Type: "queue", Wave: 1},
+			Ref:  resource.Ref{Name: "env-api-queue"}, Kind: ActionUpdate,
+		},
 	}}
 
 	got := Render(p)
@@ -45,6 +49,7 @@ func TestRender_EveryActionKind(t *testing.T) {
 		"= \"env-api-cache\" unchanged",
 		"~ replace \"env-api-uploads\" (immutable field differs)",
 		"! could not read \"env-api-jobs\": timeout",
+		"^ update \"env-api-queue\" (mutable field differs)",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("Render output missing %q; got:\n%s", want, got)

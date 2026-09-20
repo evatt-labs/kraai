@@ -247,7 +247,7 @@ func TestDeleteTreatsAbsenceAsSuccess(t *testing.T) {
 // failed write echoes back the object that was sent. Errors carry the named
 // status fields only.
 //
-//nolint:gosec // G101: a deliberately fake credential, which is what the test is about
+// G101: a deliberately fake credential, which is what the test is about
 func TestErrorsDoNotEchoTheResponseBody(t *testing.T) {
 	const secret = "hunter2-should-never-appear"
 	client, _, _ := newTestClient(t, func(*recorded) (int, string) {

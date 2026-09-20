@@ -109,7 +109,7 @@ func ParseConfig(data []byte) (*Config, error) {
 		}
 		found = true
 		cfg.Server = strings.TrimSuffix(c.Cluster.Server, "/")
-		cfg.TLS.InsecureSkipVerify = c.Cluster.InsecureSkipTLSVerify //nolint:gosec // G402: only when the kubeconfig explicitly asks for it
+		cfg.TLS.InsecureSkipVerify = c.Cluster.InsecureSkipTLSVerify // G402: only when the kubeconfig explicitly asks for it
 		ca, err := readMaybeFile(c.Cluster.CertificateAuthorityData, c.Cluster.CertificateAuthority)
 		if err != nil {
 			return nil, kerrors.Wrap(err, kerrors.CodeValidation, "cluster %q certificate authority", clusterName)

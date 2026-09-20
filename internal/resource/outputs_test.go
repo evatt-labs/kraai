@@ -118,7 +118,7 @@ func TestSecretIsNotCached(t *testing.T) {
 		return "value", nil
 	})
 
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		if _, err := out.Secret(t.Context(), ref, "uri"); err != nil {
 			t.Fatal(err)
 		}
@@ -163,7 +163,7 @@ func TestOutputsAreConcurrencySafe(t *testing.T) {
 	out := NewOutputs()
 	var wg sync.WaitGroup
 
-	for i := 0; i < 64; i++ {
+	for i := range 64 {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
@@ -177,7 +177,7 @@ func TestOutputsAreConcurrencySafe(t *testing.T) {
 	}
 	wg.Wait()
 
-	for i := 0; i < 64; i++ {
+	for i := range 64 {
 		ref := Ref{Provider: "cloudflare", Type: "kv_namespace", Name: fmt.Sprintf("ns-%d", i)}
 		if state, ok := out.Get(ref); !ok || state.ID != fmt.Sprintf("id-%d", i) {
 			t.Fatalf("lost the write for %s", ref.Name)

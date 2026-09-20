@@ -207,7 +207,7 @@ func TestComputeWaves_Deterministic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("computeWaves: %v", err)
 	}
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		got, err := computeWaves(items, nil)
 		if err != nil {
 			t.Fatalf("computeWaves (run %d): %v", i, err)

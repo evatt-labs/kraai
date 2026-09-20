@@ -35,6 +35,8 @@ func symbol(k ActionKind) string {
 		return "+"
 	case ActionReplace:
 		return "~"
+	case ActionUpdate:
+		return "^"
 	case ActionFailed:
 		return "!"
 	case ActionNoChange:
@@ -53,6 +55,8 @@ func describe(a Action) string {
 		return fmt.Sprintf("%q unchanged", a.Ref.Name)
 	case ActionReplace:
 		return fmt.Sprintf("replace %q (immutable field differs)", a.Ref.Name)
+	case ActionUpdate:
+		return fmt.Sprintf("update %q (mutable field differs)", a.Ref.Name)
 	case ActionFailed:
 		return fmt.Sprintf("could not read %q: %v", a.Ref.Name, a.Err)
 	default:

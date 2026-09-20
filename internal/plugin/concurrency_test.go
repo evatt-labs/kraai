@@ -35,11 +35,11 @@ func TestConcurrentInvoke(t *testing.T) {
 
 	var wg sync.WaitGroup
 	errs := make(chan error, goroutines)
-	for g := 0; g < goroutines; g++ {
+	for g := range goroutines {
 		wg.Add(1)
 		go func(g int) {
 			defer wg.Done()
-			for i := 0; i < callsEach; i++ {
+			for i := range callsEach {
 				payload := fmt.Sprintf("goroutine-%d-call-%d", g, i)
 				out, err := p.Invoke(ctx, "test/echo", []byte(payload))
 				if err != nil {

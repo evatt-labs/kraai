@@ -22,7 +22,7 @@ func unsetCredentialEnv(t *testing.T) {
 		}
 		t.Cleanup(func() {
 			if had {
-				_ = os.Setenv(key, prev)
+				t.Setenv(key, prev)
 			}
 		})
 	}

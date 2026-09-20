@@ -130,7 +130,7 @@ func kvTitle(i int) string {
 func kvPage(start, n int) string {
 	var b strings.Builder
 	b.WriteString(`[`)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if i > 0 {
 			b.WriteString(",")
 		}

@@ -373,7 +373,7 @@ func constantOutputBody(payload string) []byte {
 
 	instrs := concatBytes(iI32Const(fixtureOutBase), iI32Const(0), iI32Store8())
 	for i := range len(payload) {
-		//nolint:gosec // same bound: i < len(payload) <= maxPayload
+		// same bound: i < len(payload) <= maxPayload
 		at := int32(fixtureOutBase + 1 + i)
 		instrs = concatBytes(instrs, iI32Const(at), iI32Const(int32(payload[i])), iI32Store8())
 	}

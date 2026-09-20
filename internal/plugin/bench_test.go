@@ -29,7 +29,7 @@ func BenchmarkNoopCall(b *testing.B) {
 	fn := mod.ExportedFunction(fixtureNoopExport)
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		if _, err := fn.Call(ctx); err != nil {
 			b.Fatalf("Call: %v", err)
 		}
@@ -66,7 +66,7 @@ func BenchmarkInvokeRoundTrip(b *testing.B) {
 	payload := make([]byte, 16*1024)
 
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		if _, err := p.Invoke(ctx, "bench/echo", payload); err != nil {
 			b.Fatalf("Invoke: %v", err)
 		}

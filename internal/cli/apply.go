@@ -10,9 +10,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"golang.org/x/term"
-
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/evatt-labs/kraai/internal/apply"
 	"github.com/evatt-labs/kraai/internal/env"

@@ -57,11 +57,11 @@ func (cs *countingServer) connections() int64 {
 func fire(t *testing.T, client *http.Client, url string, workers, perWorker int) {
 	t.Helper()
 	var wg sync.WaitGroup
-	for i := 0; i < workers; i++ {
+	for range workers {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for j := 0; j < perWorker; j++ {
+			for range perWorker {
 				resp, err := client.Get(url)
 				if err != nil {
 					t.Errorf("GET: %v", err)
@@ -171,7 +171,7 @@ func TestUntunedTransportChurnsMoreThanTuned(t *testing.T) {
 	measure := func(client *http.Client) int64 {
 		srv := newCountingServer(handler)
 		defer srv.Close()
-		for round := 0; round < rounds; round++ {
+		for range rounds {
 			barrier.reset(workers)
 			// One request per worker per round, so a round completes only
 			// once every connection it opened has gone idle.

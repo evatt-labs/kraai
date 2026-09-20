@@ -45,7 +45,7 @@ func TestIsValidEnvironmentName_Golden(t *testing.T) {
 // validator" — every draw from a CSPRNG-backed generator must satisfy the
 // frozen NamePattern.
 func TestGenerateEnvironmentName_MatchesOwnValidator(t *testing.T) {
-	for i := 0; i < 200; i++ {
+	for range 200 {
 		name, err := GenerateEnvironmentName()
 		if err != nil {
 			t.Fatalf("GenerateEnvironmentName() error: %v", err)
@@ -61,7 +61,7 @@ func TestGenerateEnvironmentName_MatchesOwnValidator(t *testing.T) {
 // across many draws would mean the RNG isn't varying.
 func TestGenerateEnvironmentName_Varies(t *testing.T) {
 	seen := map[string]struct{}{}
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		name, err := GenerateEnvironmentName()
 		if err != nil {
 			t.Fatalf("GenerateEnvironmentName() error: %v", err)

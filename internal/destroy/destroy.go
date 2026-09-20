@@ -124,7 +124,7 @@ func (d *Destroyer) runWave(
 	g.SetLimit(d.concurrency)
 
 	for _, i := range idxs {
-		i := i
+
 		g.Go(func() error {
 			results[i] = d.execute(ctx, actions[i], locker)
 			return nil

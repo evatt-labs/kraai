@@ -136,7 +136,7 @@ func valueTypesEqual(a, b []api.ValueType) bool {
 // p.compiled and hands them to a new pool.
 func (p *Plugin) fillPool(ctx context.Context, size int) error {
 	instances := make([]api.Module, 0, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		mod, err := p.newInstance(ctx)
 		if err != nil {
 			for _, m := range instances {
