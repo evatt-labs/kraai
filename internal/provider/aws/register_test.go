@@ -357,10 +357,10 @@ func TestPermissionRegistrationsDeclareAListScope(t *testing.T) {
 			if !ok {
 				t.Fatalf("Resource = %T, want *lambdaPermissionResource", reg.Resource)
 			}
-			if perm.inner.listScope == nil {
+			if perm.listScope == nil {
 				t.Fatal("listScope is nil — this registration would send an unscoped ListResources request, exactly the failure this fix closes")
 			}
-			model, err := perm.inner.listScope("myenv-api")
+			model, err := perm.listScope("myenv-api")
 			if err != nil {
 				t.Fatalf("listScope: %v", err)
 			}
@@ -376,8 +376,9 @@ func TestPermissionRegistrationsDeclareAListScope(t *testing.T) {
 // actually submits, by reaching the resourceType it is or wraps.
 //
 // Reflection, and reading an unexported field, because that is what makes the
-// invariant checkable at all: every resource here either is a *resourceType or
-// holds one as `inner`, and typeName is what every Cloud Control call is made
+// invariant checkable at all: every resource here either is a *resourceType,
+// embeds one (typeName is then a promoted field), or holds one as `inner`,
+// and typeName is what every Cloud Control call is made
 // against. Nothing exports it, and exporting it purely to be asserted on would
 // widen the package's surface for a test's convenience.
 func drivenTypeName(t *testing.T, res resource.Resource) string {
@@ -499,7 +500,7 @@ func TestOwnershipHooksAreWiredWhereTheNamespaceIsGlobal(t *testing.T) {
 		case *resourceType:
 			inner = r
 		case *hostedZoneResource:
-			inner = r.inner
+			inner = r.resourceType
 		default:
 			continue
 		}

@@ -24,17 +24,18 @@ const certificateValidationMethod = "DNS"
 // something else writes the record. Naming the zone is what lets ACM finish
 // the job itself, which is why this translate refuses to run without one.
 type certificateResource struct {
-	inner *resourceType
+	*resourceType
 }
 
 func newCertificateResource(client *Client) *certificateResource {
-	return &certificateResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeCertificateManagerCertificate,
-			lookup: resource.LookupByTag, client: client,
-			match: certificateMatch, stampTag: certificateStampTag,
-		},
+	c := &certificateResource{}
+	c.resourceType = &resourceType{
+		provider: Provider, typeName: TypeCertificateManagerCertificate,
+		lookup: resource.LookupByTag, client: client,
+		match: certificateMatch, stampTag: certificateStampTag,
+		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return c.translate(spec) },
 	}
+	return c
 }
 
 // translate builds the request: the domain and its alternate names, DNS
@@ -54,7 +55,7 @@ func (c *certificateResource) translate(spec resource.Spec) (resource.Spec, erro
 				"by a record in a hosted zone it manages, so name a dns binding as zone, or adopt "+
 				"an existing certificate under the environment's resources: block", spec.Binding)
 	}
-	zoneID, err := spec.Attribute(zone+"."+key(TypeRoute53HostedZone), "Id")
+	zoneID, err := referencedAttribute(spec, zone, TypeRoute53HostedZone, "Id")
 	if err != nil {
 		return resource.Spec{}, kerrors.Wrap(err, kerrors.CodeValidation,
 			"resolving the zone %q validates the certificate for %q in", zone, domain)
@@ -89,30 +90,6 @@ func (c *certificateResource) translate(spec resource.Spec) (resource.Spec, erro
 	return translated, nil
 }
 
-func (c *certificateResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return c.inner.Get(ctx, ref)
-}
-
-func (c *certificateResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := c.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return c.inner.Create(ctx, translated)
-}
-
-func (c *certificateResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := c.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return c.inner.Update(ctx, ref, translated)
-}
-
-func (c *certificateResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return c.inner.Delete(ctx, ref)
-}
-
 // Diff defers to the schema: DomainName and SubjectAlternativeNames are
 // createOnly, so a changed name is a replacement; ValidationMethod is
 // writeOnly and never compared. An adopted certificate carries no zone in
@@ -125,9 +102,5 @@ func (c *certificateResource) Diff(spec resource.Spec, state *resource.State) (r
 		// where it matters.
 		return resource.Same, nil
 	}
-	translated, err := c.translate(spec)
-	if err != nil {
-		return resource.Same, err
-	}
-	return c.inner.Diff(translated, state)
+	return c.resourceType.Diff(spec, state)
 }

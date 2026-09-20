@@ -87,23 +87,25 @@
 // That is collision-free by construction: at most one binding — the
 // action's own — may ever claim a bare name.
 //
-// # Known gap: sibling attributes, not just secrets
+// # Attributes travel the same way
 //
-// resource.Spec has no equivalent of Secrets for attributes, so a resource
-// wanting a sibling binding's bucket name rather than its credential has no
-// contract-level way to receive it, and derives the name itself through
-// internal/naming. That works because naming is deterministic, but it is a
-// workaround. A namespaced Spec.Attributes populated from resource.Outputs
-// the way secretIndex is populated from SecretProducer is the natural fix
-// whenever a resource actually needs one.
+// Every successful action's State.Attributes are indexed under its
+// (ServiceKey, Binding) and Ref.Key(), and handed to later actions through
+// the same ReadsBindings: bare Ref.Key() for a producer in the action's own
+// binding, "<binding>.<Ref.Key()>" for one in a binding it reads. That is
+// how a distribution learns its origin bucket's endpoint and a record set
+// its distribution's domain, without either deriving a name. The graph
+// orders a reader after what it reads, so the index is populated by the
+// time it is consulted.
 //
-// # Replace is delete-then-create, never Update
+// # Replace is delete-then-create; update is Update
 //
-// Every registered resource.Resource returns resource.ErrImmutable from
-// Update, and plan.ActionReplace already means "this field cannot be
-// reconciled with Update", so the replace path is Delete followed by
-// Create — a genuinely new resource under the same Ref. Apply never calls
-// Update: no registered type could do anything useful with it.
+// plan.ActionReplace means the difference is in a property the vendor
+// cannot change in place, so the path is Delete followed by Create — a
+// genuinely new resource under the same Ref, behind --replace because a
+// delete is involved. plan.ActionUpdate means the vendor can, and the
+// resource's own Update is called under the same scope lock a create
+// takes, with no gate: nothing is deleted.
 //
 // # Scope locking, within one run
 //

@@ -26,17 +26,18 @@ const recordSetType = "A"
 // That closes the two ambiguities recordSetMatch used to document: listing
 // one zone removes the cross-zone one, and matching on Type the other.
 type recordSetResource struct {
-	inner *resourceType
+	*resourceType
 }
 
 func newRecordSetResource(client *Client) *recordSetResource {
-	return &recordSetResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeRoute53RecordSet,
-			lookup: resource.LookupByAttr, client: client,
-			match: recordSetMatch, listScope: recordSetListScope,
-		},
+	r := &recordSetResource{}
+	r.resourceType = &resourceType{
+		provider: Provider, typeName: TypeRoute53RecordSet,
+		lookup: resource.LookupByAttr, client: client,
+		match: recordSetMatch, listScope: recordSetListScope,
+		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return r.translate(spec) },
 	}
+	return r
 }
 
 // recordSetListScope scopes the list to the record's own zone. Route 53
@@ -74,7 +75,7 @@ func (r *recordSetResource) translate(spec resource.Spec) (resource.Spec, error)
 		return resource.Spec{}, kerrors.Wrap(err, kerrors.CodeValidation,
 			"resolving the zone for the apex record of %q", spec.Name)
 	}
-	target, err := spec.Attribute(alias+"."+key(TypeCloudFrontDistribution), "DomainName")
+	target, err := referencedAttribute(spec, alias, TypeCloudFrontDistribution, "DomainName")
 	if err != nil {
 		return resource.Spec{}, kerrors.Wrap(err, kerrors.CodeValidation,
 			"resolving the distribution the apex record of %q aliases", spec.Name)
@@ -92,30 +93,6 @@ func (r *recordSetResource) translate(spec resource.Spec) (resource.Spec, error)
 		},
 	}
 	return translated, nil
-}
-
-func (r *recordSetResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return r.inner.Get(ctx, ref)
-}
-
-func (r *recordSetResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := r.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return r.inner.Create(ctx, translated)
-}
-
-func (r *recordSetResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := r.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return r.inner.Update(ctx, ref, translated)
-}
-
-func (r *recordSetResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return r.inner.Delete(ctx, ref)
 }
 
 // Diff compares where the record points. The zone and the name are its

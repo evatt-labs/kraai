@@ -47,18 +47,20 @@ const apiGatewayProtocolType = "HTTP"
 // use case (one Lambda behind one API, $default route, auto-deployed
 // stage) completely.
 type apiGatewayResource struct {
-	inner  *resourceType
+	*resourceType
 	client *Client
 }
 
 func newAPIGatewayResource(client *Client) *apiGatewayResource {
-	return &apiGatewayResource{
-		inner: &resourceType{
+	a := &apiGatewayResource{
+		resourceType: &resourceType{
 			provider: Provider, typeName: TypeAPIGatewayV2API, lookup: resource.LookupByTag,
 			client: client, match: apigatewayv2Match, stampTag: apigatewayv2StampTag,
 		},
 		client: client,
 	}
+	a.resourceType.translate = a.translate
+	return a
 }
 
 // translate builds this API's real properties: Name and ProtocolType
@@ -102,30 +104,6 @@ func hasCustomDomains(spec resource.Spec) bool {
 	return len(routes) > 0
 }
 
-func (a *apiGatewayResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return a.inner.Get(ctx, ref)
-}
-
-func (a *apiGatewayResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := a.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return a.inner.Create(ctx, translated)
-}
-
-func (a *apiGatewayResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := a.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return a.inner.Update(ctx, ref, translated)
-}
-
-func (a *apiGatewayResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return a.inner.Delete(ctx, ref)
-}
-
 // Diff compares the two properties kraai sets that a live API can differ
 // on. ProtocolType is createOnly and means replace. DisableExecuteApiEndpoint
 // is mutable, and its whole reason to exist is an API created before its
@@ -138,5 +116,5 @@ func (a *apiGatewayResource) Diff(spec resource.Spec, state *resource.State) (re
 		"ProtocolType":              apiGatewayProtocolType,
 		"DisableExecuteApiEndpoint": hasCustomDomains(spec),
 	}
-	return a.inner.Diff(compared, state)
+	return a.compare(compared, state)
 }

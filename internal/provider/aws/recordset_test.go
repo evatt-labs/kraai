@@ -77,7 +77,7 @@ func TestRecordSetGetListsItsOwnZone(t *testing.T) {
 		},
 	}
 	rs := newRecordSetResource(&Client{})
-	rs.inner.client = client
+	rs.client = client
 
 	state, err := rs.Get(context.Background(), resource.Ref{Provider: Provider, Type: TypeRoute53RecordSet, Name: "acme.example"})
 	if err != nil {

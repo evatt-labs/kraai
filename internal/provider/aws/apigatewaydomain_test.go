@@ -113,12 +113,6 @@ func TestAPIMappingListScopeAndMatch(t *testing.T) {
 // The API closes its generated hostname exactly when a custom domain exists
 // — and only then, or every API without one would lose its only door.
 func TestAPIGatewayClosesExecuteAPIOnlyWithACustomDomain(t *testing.T) {
-	fc := &fakeClient{}
-	r := &apiGatewayResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeAPIGatewayV2API, lookup: resource.LookupByTag, client: fc},
-		client: &Client{},
-	}
-	_ = r
 	with := resource.Spec{Name: "env-api", Config: map[string]any{
 		"customDomains": []any{map[string]any{"pattern": "api.example.com", "certificate": "CERT"}},
 	}}
@@ -137,17 +131,13 @@ func TestAPIGatewayClosesExecuteAPIOnlyWithACustomDomain(t *testing.T) {
 // an update and the next apply closes the generated hostname. This is the
 // inverse of the test that used to sit here pinning the gap (#210).
 func TestAPIGatewayClosesExecuteAPIOnAnExistingAPI(t *testing.T) {
-	r := &apiGatewayResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeAPIGatewayV2API, lookup: resource.LookupByTag, client: &fakeClient{},
-			schema: Schema{
-				CreateOnlyProperties: []string{"/properties/ProtocolType"},
-				Handlers:             map[string]json.RawMessage{"create": {}, "read": {}, "update": {}, "delete": {}},
-			},
-			schemaLoaded: true,
-		},
-		client: &Client{},
+	r := newAPIGatewayResource(&Client{})
+	r.resourceType.client = &fakeClient{}
+	r.schema = Schema{
+		CreateOnlyProperties: []string{"/properties/ProtocolType"},
+		Handlers:             map[string]json.RawMessage{"create": {}, "read": {}, "update": {}, "delete": {}},
 	}
+	r.schemaLoaded = true
 	spec := resource.Spec{Name: "env-api", Config: map[string]any{
 		"customDomains": []any{map[string]any{"pattern": "api.example.com", "certificate": "CERT"}},
 	}}

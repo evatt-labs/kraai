@@ -15,11 +15,9 @@ import (
 // other wrapper in this package.
 
 func newEventsRuleResourceForTest(fc *fakeClient, sts *fakeSTS) *eventsRuleResource {
-	client := &Client{cc: nil, sts: sts, region: "us-east-1"}
-	return &eventsRuleResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByName, client: fc},
-		client: client,
-	}
+	e := newEventsRuleResource(&Client{cc: nil, sts: sts, region: "us-east-1"})
+	e.resourceType.client = fc
+	return e
 }
 
 func TestEventsRuleCreateBuildsTheFunctionARN(t *testing.T) {

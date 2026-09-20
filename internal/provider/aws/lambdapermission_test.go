@@ -96,16 +96,9 @@ func TestAPIGatewaySourceARN(t *testing.T) {
 }
 
 func newEventsRulePermissionForTest(fc *fakeClient, sts *fakeSTS) *lambdaPermissionResource {
-	client := &Client{sts: sts, region: "us-east-1"}
-	return &lambdaPermissionResource{
-		inner: &resourceType{
-			provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
-			client: fc, match: lambdaPermissionMatch,
-		},
-		client:    client,
-		principal: "events.amazonaws.com",
-		sourceARN: eventBridgeRuleSourceARN,
-	}
+	p := newLambdaPermissionResource(&Client{sts: sts, region: "us-east-1"}, "events.amazonaws.com", eventBridgeRuleSourceARN)
+	p.resourceType.client = fc
+	return p
 }
 
 func TestLambdaPermissionCreateForEventsRule(t *testing.T) {
@@ -143,15 +136,8 @@ func TestLambdaPermissionCreateForAPIGateway(t *testing.T) {
 	fc := &fakeClient{createID: "perm2", createProps: map[string]any{}}
 	cc := fakeAPIGatewayCC("abc123", "myenv-api")
 	client := &Client{cc: cc, cf: emptySchemaCF(), sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"}
-	perm := &lambdaPermissionResource{
-		inner: &resourceType{
-			provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
-			client: fc, match: lambdaPermissionMatch,
-		},
-		client:    client,
-		principal: "apigateway.amazonaws.com",
-		sourceARN: apiGatewaySourceARN,
-	}
+	perm := newLambdaPermissionResource(client, "apigateway.amazonaws.com", apiGatewaySourceARN)
+	perm.resourceType.client = fc
 
 	spec := resource.Spec{Name: "myenv-api"}
 	if _, err := perm.Create(context.Background(), spec); err != nil {

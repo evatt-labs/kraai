@@ -22,17 +22,18 @@ const hostedZoneIDPrefix = "/hostedzone/"
 // zone kraai could never find again — the silent-leak case
 // evatt-labs/kraai#117 named. The translate here is what closes it.
 type hostedZoneResource struct {
-	inner *resourceType
+	*resourceType
 }
 
 func newHostedZoneResource(client *Client) *hostedZoneResource {
-	return &hostedZoneResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeRoute53HostedZone,
-			lookup: resource.LookupByAPI, client: client, match: hostedZoneMatch,
-			stampTag: hostedZoneStampTag, owns: hostedZoneOwned,
-		},
+	h := &hostedZoneResource{}
+	h.resourceType = &resourceType{
+		provider: Provider, typeName: TypeRoute53HostedZone,
+		lookup: resource.LookupByAPI, client: client, match: hostedZoneMatch,
+		stampTag: hostedZoneStampTag, owns: hostedZoneOwned,
+		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return h.translate(spec) },
 	}
+	return h
 }
 
 // translate builds the zone's desired state: its name, which is the
@@ -46,30 +47,6 @@ func (h *hostedZoneResource) translate(spec resource.Spec) (resource.Spec, error
 	translated := spec
 	translated.Config = map[string]any{"Name": spec.Name}
 	return translated, nil
-}
-
-func (h *hostedZoneResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return h.inner.Get(ctx, ref)
-}
-
-func (h *hostedZoneResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := h.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return h.inner.Create(ctx, translated)
-}
-
-func (h *hostedZoneResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := h.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return h.inner.Update(ctx, ref, translated)
-}
-
-func (h *hostedZoneResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return h.inner.Delete(ctx, ref)
 }
 
 // Diff compares the one property kraai sets. Name is createOnly, so a
