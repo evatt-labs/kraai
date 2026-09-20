@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"slices"
 	"sort"
 	"strings"
 
@@ -504,11 +503,11 @@ func (l *Loader) validateServices(root *Root, services map[string]Service) error
 // configured is left alone here — internal/plan reports that, once, with the
 // binding it failed to expand.
 // validateBindings checks every binding entry of svc and returns the
-// references each entry makes to its siblings, keyed by binding name — what
-// Service.References carries, resolved here because this is the one place
-// that has both the entries and the vocabulary that says which keys are
-// references.
-func (l *Loader) validateBindings(root *Root, name string, svc Service, known map[string]bool) (map[string][]string, error) {
+// references each entry makes to its siblings, keyed by binding name and
+// then by the entry key — what Service.References carries, resolved here
+// because this is the one place that has both the entries and the
+// vocabulary that says which keys are references.
+func (l *Loader) validateBindings(root *Root, name string, svc Service, known map[string]bool) (map[string]map[string]string, error) {
 	bindings := svc.Bindings
 	capabilities := make([]string, 0, len(bindings))
 	for capability := range bindings {
@@ -516,7 +515,7 @@ func (l *Loader) validateBindings(root *Root, name string, svc Service, known ma
 	}
 	sort.Strings(capabilities)
 
-	var references map[string][]string
+	var references map[string]map[string]string
 	for _, capability := range capabilities {
 		if !known[capability] {
 			return nil, kerrors.Validation(
@@ -566,15 +565,14 @@ func (l *Loader) validateBindings(root *Root, name string, svc Service, known ma
 						name, capability, i, key, target, name)
 				}
 				if references == nil {
-					references = map[string][]string{}
+					references = map[string]map[string]string{}
 				}
-				references[entry.Name()] = append(references[entry.Name()], target)
+				if references[entry.Name()] == nil {
+					references[entry.Name()] = map[string]string{}
+				}
+				references[entry.Name()][key] = target
 			}
 		}
-	}
-	for binding, targets := range references {
-		sort.Strings(targets)
-		references[binding] = slices.Compact(targets)
 	}
 	return references, nil
 }

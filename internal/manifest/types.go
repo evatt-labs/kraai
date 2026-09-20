@@ -243,13 +243,16 @@ type Service struct {
 
 	// References is, per binding name, the sibling bindings that entry names
 	// through the keys its vendor declared as references
-	// (resource.CapabilityDef.References) — a cdn entry's origin, say —
-	// sorted. Not read from YAML: the Loader resolves it while validating
-	// bindings, which is the one place that has both the entries and the
-	// vocabulary saying which keys are references. internal/plan turns each
-	// into a declared read, so the referencing binding's resources run after
-	// the referenced binding's and can read what it published.
-	References map[string][]string `yaml:"-"`
+	// (resource.CapabilityDef.References), keyed by that key — a cdn
+	// entry's {origin: ASSETS, certificate: CERT}. Not read from YAML: the
+	// Loader resolves it while validating bindings, which is the one place
+	// that has both the entries and the vocabulary saying which keys are
+	// references. internal/plan turns each into a declared read for the
+	// resource types that declare they read that key
+	// (resource.Registration.ReadsKeys), so those run after the referenced
+	// binding's resources and can read what they published — and their
+	// siblings that read nothing are not ordered behind anything.
+	References map[string]map[string]string `yaml:"-"`
 
 	// DependsOn names other services in this manifest that must be fully
 	// provisioned before this one. The escape hatch for ordering that is

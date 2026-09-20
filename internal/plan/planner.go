@@ -73,6 +73,19 @@ type plannedItem struct {
 	// computeWaves. Kept off Item because nothing downstream needs the raw
 	// keys once Wave has been computed from them.
 	dependsOn []string
+	// reads are the read edges computeWaves draws for this item: one per
+	// binding it reads wholesale (its scope), one per reference narrowed
+	// to the producer type it reads (Registration.ReadsReferences). Item's
+	// ReadsBindings is the union of their bindings, which is what apply
+	// hands the item; the edges are finer than that on purpose.
+	reads []readEdge
+}
+
+// readEdge is one thing an item runs after: every producer in binding when
+// typeKey is empty, or the one producer of typeKey in it.
+type readEdge struct {
+	binding string
+	typeKey string
 }
 
 // Plan walks m's services and reports what would happen to every resource
@@ -305,7 +318,8 @@ func (p *Planner) expandCompute(
 			// group as the rest of the service's compute, so DependsOn on the
 			// API resolves and the route's own bindings are readable.
 			for _, route := range customDomains {
-				item.ReadsBindings = readsFor(r.Reads, svcKey, svc, route)
+				var reads []readEdge
+				item.ReadsBindings, reads = readsFor(r, svcKey, svc, route)
 				out = append(out, plannedItem{
 					Item: item,
 					ref:  resource.Ref{Provider: r.Provider, Type: r.Type, Name: route.Pattern},
@@ -315,16 +329,19 @@ func (p *Planner) expandCompute(
 					},
 					res:       r.Resource,
 					dependsOn: r.DependsOn,
+					reads:     reads,
 				})
 			}
 		default:
-			item.ReadsBindings = readsFor(r.Reads, svcKey, svc, manifest.Route{})
+			var reads []readEdge
+			item.ReadsBindings, reads = readsFor(r, svcKey, svc, manifest.Route{})
 			out = append(out, plannedItem{
 				Item:      item,
 				ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
 				spec:      resource.Spec{Binding: svcKey, Name: name, Config: config},
 				res:       r.Resource,
 				dependsOn: r.DependsOn,
+				reads:     reads,
 			})
 		}
 	}
@@ -358,29 +375,42 @@ func routeConfigs(routes []manifest.Route) []any {
 	return out
 }
 
-// readsFor is the ReadsBindings an item gets: its own binding, every
-// sibling its own manifest entry references (manifest.Service.References),
-// plus whatever its registration's scope widens that to. The own binding is
+// readsFor is what an item reads: its own binding, the producers its own
+// manifest entry references under the keys its registration declares
+// (manifest.Service.References × Registration.ReadsReferences), plus
+// whatever its registration's scope widens that to. The own binding is
 // always present because apply's secret and attribute indexes hand an
 // action exactly the bindings named here, and a type that reads what its
 // own binding published — an API mapping reading its API's id — would
 // otherwise see nothing.
 //
-// A reference is a read regardless of scope: the manifest said "this entry
-// needs that one", and that is exactly what a read edge means. It is the
-// only coupling between two bindings the planner honours; two entries that
-// merely share a name are not related by it.
+// The bindings are for apply; the edges are for the graph, and are finer.
+// A scope read is an edge from every producer in the binding. A reference
+// read is an edge from the one type the registration says it reads, in
+// the binding the entry names, and no other — a certificate runs after
+// the zone it validates in, not after the record set beside that zone.
+// See resource.Registration.ReadsReferences for the cycle that made it so.
 //
 // Sorted and deduplicated so a repeated Plan call is byte-for-byte
-// identical regardless of authoring order, and so an own binding that a
-// scope also names appears once.
-func readsFor(scope resource.ReadScope, own string, svc manifest.Service, route manifest.Route) []string {
-	reads := append([]string{own}, svc.References[own]...)
-	switch scope {
+// identical regardless of authoring order.
+func readsFor(reg resource.Registration, own string, svc manifest.Service, route manifest.Route) ([]string, []readEdge) {
+	bindings := []string{own}
+	var edges []readEdge
+	wide := func(binding string) {
+		bindings = append(bindings, binding)
+		edges = append(edges, readEdge{binding: binding})
+	}
+	for _, ref := range reg.ReadsReferences {
+		if target, ok := svc.References[own][ref.Key]; ok {
+			bindings = append(bindings, target)
+			edges = append(edges, readEdge{binding: target, typeKey: ref.Type})
+		}
+	}
+	switch reg.Reads {
 	case resource.ReadsServiceBindings:
 		for _, entries := range svc.Bindings {
 			for _, entry := range entries {
-				reads = append(reads, entry.Name())
+				wide(entry.Name())
 			}
 		}
 	case resource.ReadsRouteBindings:
@@ -388,12 +418,18 @@ func readsFor(scope resource.ReadScope, own string, svc manifest.Service, route 
 		// its service. A route with no certificate is not a custom-domain
 		// route and never reaches here with this scope.
 		if route.Certificate != "" {
-			reads = append(reads, route.Certificate)
+			wide(route.Certificate)
 		}
 	case resource.ReadsOwnBinding:
 	}
-	sort.Strings(reads)
-	return slices.Compact(reads)
+	sort.Strings(bindings)
+	sort.Slice(edges, func(i, j int) bool {
+		if edges[i].binding != edges[j].binding {
+			return edges[i].binding < edges[j].binding
+		}
+		return edges[i].typeKey < edges[j].typeKey
+	})
+	return slices.Compact(bindings), slices.Compact(edges)
 }
 
 // sortedCapabilities returns bindings' capability names in ascending order,
@@ -488,21 +524,23 @@ func (p *Planner) expandBinding(
 			}
 			name = value
 		}
+		// Set explicitly rather than left nil so it never falls through to a
+		// default inside apply: what an item may read is this package's
+		// decision, from the registration's own scope and references. A
+		// binding has no route, so the route scope reads nothing beyond the
+		// binding itself.
+		readsBindings, reads := readsFor(r, binding, m.Services[svcKey], manifest.Route{})
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: binding, Capability: capability,
 				Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
-				// Set explicitly rather than left nil so it never falls
-				// through to a default inside apply: what an item may read
-				// is this package's decision, from the registration's own
-				// scope. A binding has no route, so the route scope reads
-				// nothing beyond the binding itself.
-				ReadsBindings: readsFor(r.Reads, binding, m.Services[svcKey], manifest.Route{}),
+				ReadsBindings: readsBindings,
 			},
 			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name, Import: adopted},
 			spec:      resource.Spec{Binding: binding, Name: name, Config: config},
 			res:       r.Resource,
 			dependsOn: r.DependsOn,
+			reads:     reads,
 		})
 	}
 	return out, nil

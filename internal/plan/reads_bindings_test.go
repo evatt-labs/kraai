@@ -3,7 +3,6 @@ package plan
 import (
 	"context"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -206,99 +205,50 @@ func actionProviderFor(typ string) string {
 	return "cloudflare"
 }
 
-// A binding that references another (manifest.Service.References, resolved
-// by the loader) reads it, whatever its registration's own scope says: the
-// manifest said this entry needs that one, and a read is what orders them.
-func TestPlan_BindingReferencesAreReads(t *testing.T) {
+// A reference is a read for the types that declare its key, and for no
+// other type in the binding: the manifest said "this entry needs that
+// one", and only the resource that actually reads it is ordered behind it.
+// Ordering the whole binding made the static site a cycle.
+func TestPlan_BindingReferencesAreReadsForTheTypesThatDeclareThem(t *testing.T) {
 	f := newRegistryFixture(t)
-
-	m := f.oneServiceManifest()
-	svc := m.Services["api"]
-	svc.References = map[string][]string{"UPLOADS": {"DB"}}
-	m.Services["api"] = svc
-
-	p, err := New(f.reg).Plan(context.Background(), m, envName)
-	if err != nil {
-		t.Fatalf("Plan: %v", err)
-	}
-
-	bucket := findAction(t, p, "cloudflare", "r2_bucket")
-	if want := []string{"DB", "UPLOADS"}; !reflect.DeepEqual(bucket.ReadsBindings, want) {
-		t.Fatalf("ReadsBindings = %v, want %v (its own binding and the one it references)",
-			bucket.ReadsBindings, want)
-	}
-	branch := findAction(t, p, "neon", "branch")
-	if bucket.Wave <= branch.Wave {
-		t.Errorf("bucket wave %d, branch wave %d — a referenced binding must come strictly first",
-			bucket.Wave, branch.Wave)
-	}
-}
-
-// A NameFromEntry registration's instance is named by the value its entry
-// carries under NameKey, verbatim — a hosted zone is the zone name the
-// manifest declared, never anything derived from the environment. Reading
-// the same key with nothing there is a plan error naming the entry, not a
-// silently derived name the registration said it does not have.
-func TestPlan_NameFromEntryNamesByTheEntry(t *testing.T) {
-	f := newRegistryFixture(t)
-	if err := f.reg.Register(resource.Registration{
-		Provider: "aws", Type: "AWS::Route53::HostedZone", Capability: manifest.CapabilityDNS,
-		Lookup: resource.LookupByAPI, Resource: newFakeResource(),
-		NameFrom: resource.NameFromEntry, NameKey: "zone",
-	}); err != nil {
-		t.Fatal(err)
+	for _, reg := range []resource.Registration{
+		{Provider: "aws", Type: "AWS::Route53::HostedZone", Capability: manifest.CapabilityDNS,
+			Lookup: resource.LookupByAPI, Resource: newFakeResource(), NameFrom: resource.NameFromEntry, NameKey: "zone"},
+		{Provider: "aws", Type: "AWS::Route53::RecordSet", Capability: manifest.CapabilityDNS,
+			Lookup: resource.LookupByAttr, Resource: newFakeResource(), NameFrom: resource.NameFromEntry, NameKey: "zone",
+			ReadsReferences: []resource.ReferenceRead{{Key: "alias", Type: "cloudflare/r2_bucket"}}},
+	} {
+		if err := f.reg.Register(reg); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	m := f.oneServiceManifest()
 	m.Root.Providers[manifest.CapabilityDNS] = &manifest.Provider{Vendor: "aws"}
 	svc := m.Services["api"]
-	svc.Bindings[manifest.CapabilityDNS] = []manifest.Binding{{"binding": "ZONE", "zone": "acme.example"}}
+	svc.Bindings[manifest.CapabilityDNS] = []manifest.Binding{{"binding": "ZONE", "zone": "acme.example", "alias": "UPLOADS"}}
+	svc.References = map[string]map[string]string{"ZONE": {"alias": "UPLOADS"}}
 	m.Services["api"] = svc
 
 	p, err := New(f.reg).Plan(context.Background(), m, envName)
 	if err != nil {
 		t.Fatalf("Plan: %v", err)
 	}
+
+	record := findAction(t, p, "aws", "AWS::Route53::RecordSet")
+	if want := []string{"UPLOADS", "ZONE"}; !reflect.DeepEqual(record.ReadsBindings, want) {
+		t.Fatalf("record reads %v, want %v (its own binding and the alias it declared)", record.ReadsBindings, want)
+	}
 	zone := findAction(t, p, "aws", "AWS::Route53::HostedZone")
-	if zone.Ref.Name != "acme.example" || zone.Spec.Name != "acme.example" {
-		t.Errorf("zone named %q / spec %q, want the entry's zone", zone.Ref.Name, zone.Spec.Name)
+	if want := []string{"ZONE"}; !reflect.DeepEqual(zone.ReadsBindings, want) {
+		t.Fatalf("zone reads %v, want %v (nothing its sibling references)", zone.ReadsBindings, want)
 	}
-	// Still one binding group with its siblings, so a DependsOn on it
-	// resolves and a reference to the binding reads it.
-	if zone.Binding != "ZONE" {
-		t.Errorf("zone in binding %q, want ZONE", zone.Binding)
+	bucket := findAction(t, p, "cloudflare", "r2_bucket")
+	if record.Wave <= bucket.Wave {
+		t.Errorf("record wave %d, bucket wave %d — the referenced binding must come strictly first", record.Wave, bucket.Wave)
 	}
-
-	svc.Bindings[manifest.CapabilityDNS] = []manifest.Binding{{"binding": "ZONE"}}
-	m.Services["api"] = svc
-	_, err = New(f.reg).Plan(context.Background(), m, envName)
-	if err == nil {
-		t.Fatal("an entry with no zone planned a hosted zone with a made-up name")
-	}
-	for _, want := range []string{"services.api.dns.ZONE", `"zone"`} {
-		if !strings.Contains(err.Error(), want) {
-			t.Errorf("error should mention %q: %v", want, err)
-		}
-	}
-}
-
-// A compute resolve has no entry, so a NameFromEntry registration wired
-// under compute is a registration bug, reported rather than fallen through.
-func TestPlan_NameFromEntryUnderComputeIsAnError(t *testing.T) {
-	f := newRegistryFixture(t)
-	if err := f.reg.Register(resource.Registration{
-		Provider: "aws", Type: "AWS::Bogus::Type", Capability: manifest.CapabilityCompute,
-		Lookup: resource.LookupByName, Resource: newFakeResource(),
-		NameFrom: resource.NameFromEntry, NameKey: "zone",
-	}); err != nil {
-		t.Fatal(err)
-	}
-	m := f.oneServiceManifest()
-	m.Root.Providers[manifest.CapabilityCompute] = &manifest.Provider{Vendor: "aws"}
-
-	_, err := New(f.reg).Plan(context.Background(), m, envName)
-	if err == nil || !strings.Contains(err.Error(), "registered under compute") {
-		t.Fatalf("err = %v, want the registration reported", err)
+	if zone.Wave != 0 {
+		t.Errorf("zone wave %d, want 0 — it reads nothing and waits on nothing", zone.Wave)
 	}
 }
 

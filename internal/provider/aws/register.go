@@ -154,8 +154,9 @@ func Registrations(client *Client) []resource.Registration {
 			// zone (a reference, so the zone is ordered first and its id is
 			// readable): ACM writes the validation record itself and waits
 			// for ISSUED. See certificate.go.
-			Lookup:   resource.LookupByTag,
-			Resource: newCertificateResource(client),
+			ReadsReferences: []resource.ReferenceRead{{Key: "zone", Type: key(TypeRoute53HostedZone)}},
+			Lookup:          resource.LookupByTag,
+			Resource:        newCertificateResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeS3Bucket,
@@ -204,6 +205,10 @@ func Registrations(client *Client) []resource.Registration {
 			// Found by kraai's tag, not by alias: a distribution need not
 			// have one, and an alias is the manifest's to change. See
 			// cloudfront.go.
+			ReadsReferences: []resource.ReferenceRead{
+				{Key: "origin", Type: key(TypeS3Bucket)},
+				{Key: "certificate", Type: key(TypeCertificateManagerCertificate)},
+			},
 			Lookup:   resource.LookupByTag,
 			Resource: newCloudFrontResource(client),
 		},
@@ -221,9 +226,10 @@ func Registrations(client *Client) []resource.Registration {
 			// The apex record of the zone its entry declares, so it shares
 			// the zone's name; planned only when the entry names an alias
 			// to point it at. See recordset.go.
-			NameFrom: resource.NameFromEntry,
-			NameKey:  "zone",
-			Applies:  []resource.Applicability{resource.RequiresBindingKey("alias")},
+			NameFrom:        resource.NameFromEntry,
+			NameKey:         "zone",
+			ReadsReferences: []resource.ReferenceRead{{Key: "alias", Type: key(TypeCloudFrontDistribution)}},
+			Applies:         []resource.Applicability{resource.RequiresBindingKey("alias")},
 			// See recordSetMatch's doc comment: not byName, because
 			// RecordSet's primary identifier is a compound this package's
 			// byName fast path has no reliable way to construct.

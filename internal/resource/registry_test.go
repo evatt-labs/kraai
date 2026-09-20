@@ -842,3 +842,24 @@ func TestRequiresBindingKey(t *testing.T) {
 		t.Error("no entry at all matched")
 	}
 }
+
+// A reference read is a key and the type read through it; half of one is
+// a registration that would order nothing while looking as if it did.
+func TestReadsReferencesAreValidated(t *testing.T) {
+	base := Registration{
+		Provider: "aws", Type: "AWS::CertificateManager::Certificate", Capability: "tls",
+		Lookup: LookupByTag, Resource: newStub(t),
+	}
+	reg := base
+	reg.ReadsReferences = []ReferenceRead{{Key: "zone", Type: "aws/AWS::Route53::HostedZone"}}
+	if err := NewRegistry().Register(reg); err != nil {
+		t.Errorf("a complete reference read was rejected: %v", err)
+	}
+	for _, half := range []ReferenceRead{{Key: "zone"}, {Type: "aws/AWS::Route53::HostedZone"}} {
+		reg := base
+		reg.ReadsReferences = []ReferenceRead{half}
+		if err := NewRegistry().Register(reg); err == nil {
+			t.Errorf("a reference read %+v with a half missing was accepted", half)
+		}
+	}
+}
