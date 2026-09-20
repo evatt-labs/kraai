@@ -56,6 +56,12 @@ That has consequences worth knowing:
 - No state to lose, lock incorrectly, or drift from reality.
 - Adopting a resource created by hand means naming it in the manifest, which
   is the record.
+- Some resources are found again only by a tag kraai writes when it creates
+  them — `kraai:resource-name` on an ACM certificate, an API Gateway API, a
+  CloudFront distribution, a Route 53 hosted zone. That tag is the resource's
+  identity, not a label: strip or rewrite it and the resource is orphaned,
+  invisible to every later plan and destroy, with nothing that can clean it
+  up. Tag policies and cost-allocation tidy-ups must leave it alone.
 
 Ordering comes from a **dependency graph**, not fixed phases. Registrations
 declare what must exist first; the planner topologically sorts that into
@@ -190,10 +196,12 @@ resources:
 
 A custom domain is built from three things: the API Gateway domain name, the
 mapping from it to the service's API, and the certificate it presents. kraai
-creates the first two and adopts the third — `resources:` names the ACM
-certificate by ARN, and kraai owns it from then on, `destroy` included. It
-does not issue certificates: DNS validation needs a record in a zone kraai
-does not manage, so the certificate is made once, by hand, and adopted.
+creates the first two and, here, adopts the third — `resources:` names the
+ACM certificate by ARN, and kraai owns it from then on, `destroy` included.
+kraai issues a certificate itself when the `tls` entry names a `dns` binding
+as its `zone`: ACM validates it through that zone and waits for it to be
+issued. A certificate for a zone kraai does not manage, as above, is made
+once, by hand, and adopted.
 
 Adoption is also how kraai takes over something it finds under a name it
 would have used itself. A hosted zone is identified by its real DNS name, and
