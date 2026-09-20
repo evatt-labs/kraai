@@ -1,4 +1,4 @@
-# Mirrors internal/../../.github/workflows/go-ci.yml so `make check` runs the
+# Mirrors .github/workflows/go-ci.yml so `make check` runs the
 # same checks CI does, from one command, before a PR goes up. CI is not
 # changed to call this file; the two are kept in sync by eye.
 

@@ -10,7 +10,7 @@ You implement or change a resource type or capability under
 
 ## 1. AGENTS.md wins
 
-Read `/home/rosalyn/Code/kraai/AGENTS.md` first. It is the source of truth
+Read `AGENTS.md` at the repository root first. It is the source of truth
 for this repo. Where anything below conflicts with it, follow AGENTS.md and
 say so in your report.
 
