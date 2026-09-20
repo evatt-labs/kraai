@@ -656,6 +656,54 @@ type Schema struct {
 	Handlers map[string]json.RawMessage `json:"handlers"`
 }
 
+// listHandler is the part of a schema's list handler this package reads: the
+// input model the handler requires. Cloud Control's list handlers for a
+// parent-scoped type (a function's permissions, a domain's mappings, a
+// zone's records) refuse an unscoped call, and say so here rather than only
+// in the error that comes back.
+type listHandler struct {
+	HandlerSchema struct {
+		Required []string `json:"required"`
+		OneOf    []struct {
+			Required []string `json:"required"`
+		} `json:"oneOf"`
+	} `json:"handlerSchema"`
+}
+
+// ListRequirements returns the property sets a list call must supply, as
+// alternatives: satisfying any one is enough. Empty when the list handler
+// declares no input model, which is every type that lists the whole
+// account unscoped.
+//
+// AWS::Lambda::Permission declares required [FunctionName], one
+// alternative. AWS::Route53::RecordSet declares a oneOf of [HostedZoneId]
+// and [HostedZoneName], two. A required list beside a oneOf applies to
+// every alternative.
+func (s Schema) ListRequirements() [][]string {
+	raw, ok := s.Handlers["list"]
+	if !ok {
+		return nil
+	}
+	var handler listHandler
+	if err := json.Unmarshal(raw, &handler); err != nil {
+		// A list handler this package cannot read is one it cannot check;
+		// the call proceeds and Cloud Control's own error stands.
+		return nil
+	}
+	base := handler.HandlerSchema.Required
+	if len(handler.HandlerSchema.OneOf) == 0 {
+		if len(base) == 0 {
+			return nil
+		}
+		return [][]string{base}
+	}
+	alternatives := make([][]string, 0, len(handler.HandlerSchema.OneOf))
+	for _, alt := range handler.HandlerSchema.OneOf {
+		alternatives = append(alternatives, append(append([]string(nil), base...), alt.Required...))
+	}
+	return alternatives
+}
+
 // HasUpdateHandler reports whether this type's schema declares an update
 // handler at all. A type without one cannot be reconciled in place — Update
 // must refuse with resource.ErrImmutable rather than attempt a call Cloud

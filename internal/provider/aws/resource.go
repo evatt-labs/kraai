@@ -3,6 +3,8 @@ package aws
 import (
 	"context"
 	"reflect"
+	"sort"
+	"strings"
 	"sync"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -301,6 +303,10 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 		}
 	}
 
+	if err := r.checkListScope(ctx, resourceModel); err != nil {
+		return "", nil, false, err
+	}
+
 	candidates, err := r.client.ListResources(ctx, r.typeName, resourceModel)
 	if err != nil {
 		return "", nil, false, err
@@ -320,6 +326,66 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 		}
 	}
 	return "", nil, false, nil
+}
+
+// checkListScope holds the list request about to be sent to what the type's
+// own schema says its list handler requires (Schema.ListRequirements).
+//
+// This is the check that would have prevented an outage rather than
+// diagnosed it: AWS::Lambda::Permission's list handler requires
+// FunctionName, the registration once declared no scope, every Get failed
+// with Cloud Control's InvalidRequestException, and apply's preflight
+// refused the whole run (evatt-labs/kraai#132). The requirement was in the
+// schema the whole time. Now a registration whose scope disagrees with the
+// schema fails here, before the request, naming what the handler wants —
+// and a type whose handler wants nothing is not asked to declare anything.
+//
+// One DescribeType per type per process (getSchema caches), which plan
+// already pays for every existing resource's Diff.
+func (r *resourceType) checkListScope(ctx context.Context, resourceModel map[string]any) error {
+	schema, err := r.getSchema(ctx)
+	if err != nil {
+		return err
+	}
+	alternatives := schema.ListRequirements()
+	if len(alternatives) == 0 {
+		return nil
+	}
+	for _, required := range alternatives {
+		satisfied := true
+		for _, property := range required {
+			if _, ok := resourceModel[property]; !ok {
+				satisfied = false
+				break
+			}
+		}
+		if satisfied {
+			return nil
+		}
+	}
+	wants := make([]string, 0, len(alternatives))
+	for _, required := range alternatives {
+		wants = append(wants, strings.Join(required, "+"))
+	}
+	if resourceModel == nil {
+		return kerrors.Validation(
+			"%s's list handler requires %s in its request, but the registration declares no listScope; "+
+				"an unscoped list would be refused by Cloud Control",
+			r.typeName, strings.Join(wants, " or "))
+	}
+	return kerrors.Validation(
+		"%s's list handler requires %s in its request, but the registration's listScope supplied %v",
+		r.typeName, strings.Join(wants, " or "), sortedKeys(resourceModel))
+}
+
+// sortedKeys is a map's keys in order, for an error message.
+func sortedKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // Create provisions the resource from spec, submitting spec.Config as Cloud

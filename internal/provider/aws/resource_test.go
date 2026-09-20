@@ -8,6 +8,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
@@ -961,6 +964,134 @@ func TestResourceTypeOwnership(t *testing.T) {
 		}
 		if !arrayTagsMatchIn(fc.createCalls[0], hostedZoneTagsProperty, "acme.example") {
 			t.Fatalf("desired = %v, want the identity tag under %s", fc.createCalls[0], hostedZoneTagsProperty)
+		}
+	})
+}
+
+// emptySchemaCF is a CloudFormation client whose every DescribeType answers
+// with a schema declaring nothing — for a test that drives a real *Client
+// through a lookup, which consults the type's schema before listing.
+func emptySchemaCF() *fakeCF {
+	return &fakeCF{out: &cloudformation.DescribeTypeOutput{Schema: aws.String("{}")}}
+}
+
+// listSchema is a Schema whose list handler declares the given input model,
+// as Cloud Control publishes it.
+func listSchema(handlerSchema string) Schema {
+	return Schema{Handlers: map[string]json.RawMessage{
+		"list": json.RawMessage(`{"handlerSchema": ` + handlerSchema + `}`),
+	}}
+}
+
+func TestSchemaListRequirements(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		schema Schema
+		want   [][]string
+	}{
+		{"no list handler", Schema{}, nil},
+		{"a list handler with no input model", Schema{Handlers: map[string]json.RawMessage{"list": json.RawMessage(`{}`)}}, nil},
+		{"one required property (Lambda::Permission)", listSchema(`{"properties": {"FunctionName": {}}, "required": ["FunctionName"]}`),
+			[][]string{{"FunctionName"}}},
+		{"alternatives (Route53::RecordSet)", listSchema(`{"oneOf": [{"required": ["HostedZoneId"]}, {"required": ["HostedZoneName"]}]}`),
+			[][]string{{"HostedZoneId"}, {"HostedZoneName"}}},
+		{"a required beside alternatives applies to each", listSchema(`{"required": ["Region"], "oneOf": [{"required": ["A"]}, {"required": ["B"]}]}`),
+			[][]string{{"Region", "A"}, {"Region", "B"}}},
+		{"unreadable handler is unchecked", Schema{Handlers: map[string]json.RawMessage{"list": json.RawMessage(`"nope"`)}}, nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.schema.ListRequirements(); !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("ListRequirements() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+// The check that would have prevented the Lambda::Permission outage
+// (evatt-labs/kraai#132): a list request is held to what the type's own
+// schema says its list handler requires, before it is sent.
+func TestResourceTypeListScopeIsCheckedAgainstTheSchema(t *testing.T) {
+	permission := listSchema(`{"required": ["FunctionName"]}`)
+	record := listSchema(`{"oneOf": [{"required": ["HostedZoneId"]}, {"required": ["HostedZoneName"]}]}`)
+
+	t.Run("no listScope on a type whose handler requires one is refused before the call", func(t *testing.T) {
+		fc := &fakeClient{schema: permission, list: []string{"perm1"}}
+		r := &resourceType{provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
+			client: fc, match: lambdaPermissionMatch}
+
+		_, err := r.Get(context.Background(), resource.Ref{Name: "myenv-api"})
+		if err == nil {
+			t.Fatal("an unscoped list of a parent-scoped type was sent")
+		}
+		for _, want := range []string{"FunctionName", "declares no listScope"} {
+			if !strings.Contains(err.Error(), want) {
+				t.Errorf("error should mention %q: %v", want, err)
+			}
+		}
+		if fc.listCalls != 0 {
+			t.Fatalf("listCalls = %d, want 0", fc.listCalls)
+		}
+	})
+
+	t.Run("a listScope supplying what the handler requires proceeds", func(t *testing.T) {
+		fc := &fakeClient{schema: permission, list: []string{"perm1"},
+			byIdentifier: map[string]map[string]any{"perm1": {"FunctionName": "myenv-api"}}}
+		r := &resourceType{provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
+			client: fc, match: lambdaPermissionMatch, listScope: lambdaPermissionListScope}
+
+		if state, err := r.Get(context.Background(), resource.Ref{Name: "myenv-api"}); err != nil || state == nil {
+			t.Fatalf("Get = %+v, %v", state, err)
+		}
+	})
+
+	t.Run("a listScope supplying the wrong property is refused, naming both", func(t *testing.T) {
+		fc := &fakeClient{schema: permission, list: []string{"perm1"}}
+		r := &resourceType{provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
+			client: fc, match: lambdaPermissionMatch,
+			listScope: func(string) (map[string]any, error) { return map[string]any{"Function": "x"}, nil }}
+
+		_, err := r.Get(context.Background(), resource.Ref{Name: "myenv-api"})
+		if err == nil || !strings.Contains(err.Error(), "FunctionName") || !strings.Contains(err.Error(), "[Function]") {
+			t.Fatalf("err = %v, want the required and the supplied properties named", err)
+		}
+		if fc.listCalls != 0 {
+			t.Fatalf("listCalls = %d, want 0", fc.listCalls)
+		}
+	})
+
+	t.Run("any one alternative satisfies a oneOf", func(t *testing.T) {
+		fc := &fakeClient{schema: record, list: []string{}}
+		r := &resourceType{provider: Provider, typeName: TypeRoute53RecordSet, lookup: resource.LookupByAttr,
+			client: fc, match: recordSetMatch, listScope: recordSetListScope}
+
+		if _, err := r.Get(context.Background(), resource.Ref{Name: "acme.example"}); err != nil {
+			t.Fatalf("Get: %v — HostedZoneName is one of the accepted alternatives", err)
+		}
+	})
+
+	t.Run("a handler that requires nothing needs no scope", func(t *testing.T) {
+		fc := &fakeClient{schema: Schema{Handlers: map[string]json.RawMessage{"list": json.RawMessage(`{}`)}}, list: []string{}}
+		r := &resourceType{provider: Provider, typeName: TypeCloudFrontDistribution, lookup: resource.LookupByTag,
+			client: fc, match: arrayTagsMatch}
+
+		if _, err := r.Get(context.Background(), resource.Ref{Name: "x"}); err != nil {
+			t.Fatalf("Get: %v", err)
+		}
+		if fc.listCalls != 1 {
+			t.Fatalf("listCalls = %d, want 1", fc.listCalls)
+		}
+	})
+
+	t.Run("a schema that cannot be fetched fails the lookup, never sends unscoped", func(t *testing.T) {
+		fc := &fakeClient{schemaErr: errors.New("throttled"), list: []string{}}
+		r := &resourceType{provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
+			client: fc, match: lambdaPermissionMatch, listScope: lambdaPermissionListScope}
+
+		if _, err := r.Get(context.Background(), resource.Ref{Name: "myenv-api"}); err == nil {
+			t.Fatal("a lookup proceeded with no schema to check against")
+		}
+		if fc.listCalls != 0 {
+			t.Fatalf("listCalls = %d, want 0", fc.listCalls)
 		}
 	})
 }
