@@ -54,23 +54,13 @@ func testVocabulary(t *testing.T) manifest.Vocabulary {
 		"additionalProperties": false,
 	})
 
-	queuesBinding := resource.NewSchema("queues binding", map[string]any{
-		"type": "object",
-		"properties": map[string]any{
-			"binding":  map[string]any{"type": "string"},
-			"consumer": map[string]any{"type": "boolean"},
-		},
-		"required":             []any{"binding"},
-		"additionalProperties": false,
-	})
-
 	defs := []resource.CapabilityDef{
 		{Name: manifest.CapabilityCompute, Summary: "a service's own deployable unit"},
 		{Name: manifest.CapabilityDatabase, Summary: "a database", Binding: databaseBinding},
 		{Name: manifest.CapabilityKeyValue, Summary: "a key-value store", Binding: nameOnly},
 		{Name: manifest.CapabilityNetwork, Summary: "a private network"},
 		{Name: manifest.CapabilityObjects, Summary: "an object store", Binding: nameOnly},
-		{Name: manifest.CapabilityQueues, Summary: "a queue", Binding: queuesBinding},
+		{Name: manifest.CapabilityQueues, Summary: "a queue", Binding: nameOnly},
 		// The three that used to be folded into objects. tls carries the
 		// domain a certificate is for, which the blueprint's route needs.
 		{Name: manifest.CapabilityDNS, Summary: "a zone"},
@@ -205,7 +195,7 @@ func TestLoad_BlueprintExamplesParse(t *testing.T) {
 		t.Errorf("api objects bindings = %+v", api.Bindings[manifest.CapabilityObjects])
 	}
 	queues := api.Bindings[manifest.CapabilityQueues]
-	if len(queues) != 1 || queues[0].Name() != "JOBS" || queues[0]["consumer"] != true {
+	if len(queues) != 1 || queues[0].Name() != "JOBS" {
 		t.Errorf("api queues bindings = %+v", queues)
 	}
 

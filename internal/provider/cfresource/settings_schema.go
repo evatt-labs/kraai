@@ -17,22 +17,14 @@ import "github.com/evatt-labs/kraai/internal/resource"
 // cannot be written in a manifest that selects this provider.
 
 // databaseBindingSchema validates one entry of a service's `databases:`
-// list. Declared independently of internal/provider/neonresource's schema,
-// which happens to match today; see that package's own databaseBindingSchema
-// doc comment for why the duplication is deliberate.
+// list: a binding name and an optional driver. No caching block: that is
+// Hyperdrive's, and D1 has none — internal/provider/neonresource's own
+// schema declares it, for the branch a Hyperdrive configuration fronts.
 var databaseBindingSchema = resource.NewSchema("database binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
 		"binding": map[string]any{"type": "string"},
 		"driver":  map[string]any{"type": "string"},
-		"caching": map[string]any{
-			"type": "object",
-			"properties": map[string]any{
-				"disabled": map[string]any{"type": "boolean"},
-				"maxAge":   map[string]any{"type": "integer"},
-			},
-			"additionalProperties": false,
-		},
 	},
 	"required":             []any{"binding"},
 	"additionalProperties": false,
@@ -60,14 +52,16 @@ var objectsBindingSchema = resource.NewSchema("objects binding", map[string]any{
 })
 
 // queuesBindingSchema validates one entry of a service's `queues:` list: a
-// binding name plus the optional "consumer" flag that says whether this
-// service processes the queue rather than only producing to it.
+// bare binding name.
+//
+// It used to accept a "consumer" flag saying the service processes the queue
+// rather than only producing to it. A consumer is a Worker, and kraai
+// implements no Cloudflare compute (evatt-labs/kraai#135), so the flag was
+// planned into a Spec nothing read — accepted, documented and inert. It
+// returns with the Worker that consumes.
 var queuesBindingSchema = resource.NewSchema("queues binding", map[string]any{
-	"type": "object",
-	"properties": map[string]any{
-		"binding":  map[string]any{"type": "string"},
-		"consumer": map[string]any{"type": "boolean"},
-	},
+	"type":                 "object",
+	"properties":           map[string]any{"binding": map[string]any{"type": "string"}},
 	"required":             []any{"binding"},
 	"additionalProperties": false,
 })

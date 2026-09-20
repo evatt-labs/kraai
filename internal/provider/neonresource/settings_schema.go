@@ -48,16 +48,14 @@ var databaseSettingsSchema = resource.NewSchema("neon database settings", map[st
 
 // databaseBindingSchema validates one entry of a service's `databases:`
 // list: a required binding name, an optional driver, and an optional nested
-// caching block.
+// caching block — Hyperdrive's query cache, read by hyperdrive.go when a
+// Workers compute side asks for a configuration in front of the branch.
 //
 // Declared independently of internal/provider/cfresource's own
-// databaseBindingSchema, which happens to declare the same shape today,
-// rather than shared between the two packages: CapabilityDef is a
-// per-provider declaration by design (see resource.Provider's own doc
-// comment), and the two are free to diverge the moment one vendor accepts
-// something the other cannot. Duplicated here and in cfresource rather than
-// factored into a shared helper both would import, which would make a
-// coincidence look like a contract for a few dozen lines of map literal.
+// databaseBindingSchema: CapabilityDef is a per-provider declaration by
+// design (see resource.Provider's own doc comment), and the two have
+// diverged exactly as intended — D1 has no query cache to configure, so
+// cfresource's does not accept one.
 var databaseBindingSchema = resource.NewSchema("database binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{

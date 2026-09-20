@@ -96,7 +96,7 @@ func (f *registryFixture) oneServiceManifest() *manifest.Manifest {
 					manifest.CapabilityDatabase: {{"binding": "DB", "driver": "postgres"}},
 					manifest.CapabilityKeyValue: {{"binding": "CACHE"}},
 					manifest.CapabilityObjects:  {{"binding": "UPLOADS"}},
-					manifest.CapabilityQueues:   {{"binding": "JOBS", "consumer": true}},
+					manifest.CapabilityQueues:   {{"binding": "JOBS"}},
 				},
 			},
 		},

@@ -11,8 +11,17 @@ type HyperdriveService struct{ c *Client }
 
 // HyperdriveConfig is a Hyperdrive configuration as the API reports it.
 type HyperdriveConfig struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Caching *Caching `json:"caching,omitempty"`
+}
+
+// Caching is Hyperdrive's query cache setting, in the API's own field
+// names. A nil Caching on Create leaves the cache at Cloudflare's defaults
+// (enabled, 60 seconds); a zero MaxAge is omitted for the same reason.
+type Caching struct {
+	Disabled bool `json:"disabled"`
+	MaxAge   int  `json:"max_age,omitempty"`
 }
 
 // Origin is the database a Hyperdrive configuration fronts.
@@ -42,15 +51,19 @@ type Origin struct {
 // validation-error format for this endpoint is not verified to keep request
 // fields out of its response, and the one request field here is a live
 // database password — so this does not depend on that being true.
-func (s *HyperdriveService) Create(ctx context.Context, name string, o Origin, sslMode string) (string, error) {
+func (s *HyperdriveService) Create(ctx context.Context, name string, o Origin, sslMode string, caching *Caching) (string, error) {
+	body := map[string]any{
+		"name":   name,
+		"origin": o,
+		"mtls":   map[string]string{"sslmode": sslMode},
+	}
+	if caching != nil {
+		body["caching"] = caching
+	}
 	config, err := do[HyperdriveConfig](ctx, s.c, request{
 		method: "POST",
 		path:   s.c.accountPath("hyperdrive", "configs"),
-		body: map[string]any{
-			"name":   name,
-			"origin": o,
-			"mtls":   map[string]string{"sslmode": sslMode},
-		},
+		body:   body,
 	})
 	if err != nil {
 		return "", kerrors.Validation(

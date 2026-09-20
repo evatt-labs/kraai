@@ -38,7 +38,13 @@ func (h *hyperdriveResource) Get(ctx context.Context, ref resource.Ref) (*resour
 	if err != nil || config == nil {
 		return nil, err
 	}
-	return h.state(config.Name, config.ID), nil
+	state := h.state(config.Name, config.ID)
+	if config.Caching != nil {
+		state.Attributes["caching"] = map[string]any{
+			"disabled": config.Caching.Disabled, "max_age": config.Caching.MaxAge,
+		}
+	}
+	return state, nil
 }
 
 // Create builds the configuration from the connection string of the branch
@@ -73,11 +79,51 @@ func (h *hyperdriveResource) Create(ctx context.Context, spec resource.Spec) (*r
 		Database: conn.Database,
 		User:     conn.User,
 		Password: conn.Password,
-	}, conn.SSLMode)
+	}, conn.SSLMode, cachingFromSpec(spec))
 	if err != nil {
 		return nil, err
 	}
 	return h.state(spec.Name, id), nil
+}
+
+// cachingFromSpec reads the database entry's caching block, in the
+// manifest's own spelling (disabled, maxAge), into the request's. Nil when
+// the entry declares none, which leaves Cloudflare's defaults in place
+// rather than restating them.
+func cachingFromSpec(spec resource.Spec) *cloudflare.Caching {
+	block, ok := spec.Config["caching"].(map[string]any)
+	if !ok {
+		return nil
+	}
+	caching := &cloudflare.Caching{}
+	caching.Disabled, _ = block["disabled"].(bool)
+	switch v := block["maxAge"].(type) {
+	case int:
+		caching.MaxAge = v
+	case float64:
+		caching.MaxAge = int(v)
+	}
+	return caching
+}
+
+// Diff compares the caching the entry declares with what the configuration
+// carries. A difference is Immutable: Update is refused for this type, so
+// the plan is a replacement — cheap for a configuration, which holds no
+// data of its own. Nothing is compared when the entry declares no caching;
+// the defaults are Cloudflare's, and reporting drift against a value the
+// manifest never wrote is the failure the engine's own diff avoids.
+func (h *hyperdriveResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	want := cachingFromSpec(spec)
+	if want == nil {
+		return resource.Same, nil
+	}
+	live, _ := state.Attributes["caching"].(map[string]any)
+	disabled, _ := live["disabled"].(bool)
+	maxAge, _ := live["max_age"].(int)
+	if disabled != want.Disabled || (want.MaxAge != 0 && maxAge != want.MaxAge) {
+		return resource.Immutable, nil
+	}
+	return resource.Same, nil
 }
 
 // Update is refused. Cloudflare can patch a configuration's origin, but the

@@ -6,5 +6,5 @@ services:
       - { binding: PG, driver: postgres, caching: { disabled: false, maxAge: 60 } }
     keyvalue: [{ binding: CACHE }]
     objects:  [{ binding: ASSETS }]
-    queues:   [{ binding: JOBS, consumer: true }]
+    queues:   [{ binding: JOBS }]
     tls:      [{ binding: CERT, domain: api.acme.com }]
