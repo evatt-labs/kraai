@@ -190,7 +190,7 @@ func TestHyperdriveCreateHidesTheUnderlyingError(t *testing.T) {
 
 	_, err := client.Hyperdrive.Create(t.Context(), "env-hd", Origin{
 		Scheme: "postgresql", Host: "h", Port: 5432, Database: "d", User: "u", Password: password,
-	}, "require")
+	}, "require", nil)
 	if err == nil {
 		t.Fatal("expected an error")
 	}
@@ -208,7 +208,7 @@ func TestHyperdriveCreateSendsOriginFields(t *testing.T) {
 	id, err := client.Hyperdrive.Create(t.Context(), "env-hd", Origin{
 		Scheme: "postgresql", Host: "h.example.com", Port: 5432,
 		Database: "appdb", User: "app", Password: "p",
-	}, "verify-full")
+	}, "verify-full", &Caching{Disabled: true, MaxAge: 30})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -226,6 +226,22 @@ func TestHyperdriveCreateSendsOriginFields(t *testing.T) {
 	mtls, _ := (*seen)[0].body["mtls"].(map[string]any)
 	if mtls["sslmode"] != "verify-full" {
 		t.Fatalf("sslmode = %v", mtls["sslmode"])
+	}
+	caching, _ := (*seen)[0].body["caching"].(map[string]any)
+	if caching["disabled"] != true || caching["max_age"] != float64(30) {
+		t.Fatalf("caching body = %v, want the API's own field names", caching)
+	}
+}
+
+// A nil caching sends no caching key at all, leaving Cloudflare's defaults
+// rather than restating them.
+func TestHyperdriveCreateOmitsCachingWhenNil(t *testing.T) {
+	client, seen := newTestClient(t, func(*recorded) (int, string) { return ok(`{"id":"hd-1","name":"env-hd"}`) })
+	if _, err := client.Hyperdrive.Create(t.Context(), "env-hd", Origin{Scheme: "postgresql", Host: "h"}, "require", nil); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if _, present := (*seen)[0].body["caching"]; present {
+		t.Fatal("a caching key was sent for a nil caching")
 	}
 }
 

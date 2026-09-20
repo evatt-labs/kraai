@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -926,5 +927,75 @@ func TestRegistrationsOmitTheCompanionWithoutAClient(t *testing.T) {
 	}
 	if _, ok := reg.Lookup("cloudflare/hyperdrive"); ok {
 		t.Fatal("a Hyperdrive config was registered with no client to create it")
+	}
+}
+
+// The entry's caching block reaches the request in Cloudflare's own field
+// names, and an entry declaring none sends none — Cloudflare's defaults
+// are not restated.
+func TestHyperdriveCreateSendsTheEntrysCaching(t *testing.T) {
+	uri := func(context.Context) (string, error) {
+		return "postgresql://app:pw@ep-x.neon.tech:5432/appdb?sslmode=verify-full", nil
+	}
+	for _, tc := range []struct {
+		name   string
+		config map[string]any
+		want   map[string]any
+	}{
+		{"disabled with a max age", map[string]any{"caching": map[string]any{"disabled": true, "maxAge": 30}},
+			map[string]any{"disabled": true, "max_age": float64(30)}},
+		{"enabled, default age", map[string]any{"caching": map[string]any{"disabled": false}},
+			map[string]any{"disabled": false}},
+		{"none declared", map[string]any{}, nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cc, seen := cfClient(t, func(c call) (int, string) {
+				if c.method == "POST" {
+					return cfOK(`{"id":"hd-1","name":"env-a-api-db"}`)
+				}
+				return cfOK(`[]`)
+			})
+			h := &hyperdriveResource{client: cc}
+			if _, err := h.Create(t.Context(), resource.Spec{
+				Binding: "DB", Name: "env-a-api-db", Config: tc.config,
+				Secrets: map[string]resource.Secret{SecretConnectionURI: uri},
+			}); err != nil {
+				t.Fatalf("Create: %v", err)
+			}
+			got, present := (*seen)[0].body["caching"]
+			if tc.want == nil {
+				if present {
+					t.Fatalf("caching = %v sent for an entry declaring none", got)
+				}
+				return
+			}
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("caching = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+// A changed caching block is a replacement — Update is refused for this
+// type — and an entry declaring none never reports drift against
+// Cloudflare's defaults.
+func TestHyperdriveDiffOnCaching(t *testing.T) {
+	h := &hyperdriveResource{}
+	live := &resource.State{Attributes: map[string]any{"caching": map[string]any{"disabled": false, "max_age": 60}}}
+
+	spec := resource.Spec{Config: map[string]any{"caching": map[string]any{"disabled": false, "maxAge": 60}}}
+	if d, _ := h.Diff(spec, live); d != resource.Same {
+		t.Errorf("Diff of the same caching = %v, want Same", d)
+	}
+	spec = resource.Spec{Config: map[string]any{"caching": map[string]any{"disabled": true}}}
+	if d, _ := h.Diff(spec, live); d != resource.Immutable {
+		t.Errorf("Diff after disabling = %v, want Immutable", d)
+	}
+	spec = resource.Spec{Config: map[string]any{"caching": map[string]any{"maxAge": 5}}}
+	if d, _ := h.Diff(spec, live); d != resource.Immutable {
+		t.Errorf("Diff after a new max age = %v, want Immutable", d)
+	}
+	if d, _ := h.Diff(resource.Spec{Config: map[string]any{}}, live); d != resource.Same {
+		t.Errorf("Diff with nothing declared = %v, want Same", d)
 	}
 }

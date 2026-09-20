@@ -70,10 +70,13 @@ func TestDatabaseBindingSchema(t *testing.T) {
 	if err := databaseBindingSchema.Validate(map[string]any{"binding": "DB", "driver": "sqlite"}); err != nil {
 		t.Fatalf("a valid binding entry was rejected: %v", err)
 	}
+	// D1 has no query cache; a caching block belongs to Hyperdrive, on the
+	// Neon vendor's own schema. Accepting it here would plan a value nothing
+	// reads.
 	if err := databaseBindingSchema.Validate(map[string]any{
 		"binding": "DB", "caching": map[string]any{"disabled": true, "maxAge": 60},
-	}); err != nil {
-		t.Fatalf("a valid caching block was rejected: %v", err)
+	}); err == nil {
+		t.Fatal("a caching block was accepted on a D1 binding")
 	}
 	if err := databaseBindingSchema.Validate(map[string]any{}); err == nil {
 		t.Fatal("expected an error for a missing binding")
@@ -86,10 +89,13 @@ func TestDatabaseBindingSchema(t *testing.T) {
 }
 
 func TestQueuesBindingSchema(t *testing.T) {
-	if err := queuesBindingSchema.Validate(map[string]any{"binding": "q", "consumer": true}); err != nil {
+	if err := queuesBindingSchema.Validate(map[string]any{"binding": "q"}); err != nil {
 		t.Fatalf("a valid binding entry was rejected: %v", err)
 	}
-	if err := queuesBindingSchema.Validate(map[string]any{"binding": "q", "consumer": "yes"}); err == nil {
-		t.Fatal("expected an error for a wrong-typed consumer value")
+	// A consumer is a Worker, and there is no Worker to consume yet
+	// (evatt-labs/kraai#135). Until there is, the flag is not accepted
+	// rather than accepted and ignored.
+	if err := queuesBindingSchema.Validate(map[string]any{"binding": "q", "consumer": true}); err == nil {
+		t.Fatal("a consumer flag was accepted with nothing to consume")
 	}
 }
