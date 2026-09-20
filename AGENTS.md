@@ -121,6 +121,13 @@ golangci-lint run ./...        # v2.13.2, must be 0 issues
 gofmt -l .                     # must be empty
 ```
 
+Two of these rules are enforced by hooks in `.claude/settings.json` when
+working through Claude Code: `gofmt -w` runs after every edit, and any
+`kraai apply`, `kraai destroy` or mutating `aws` CLI verb is denied unless the
+session sets `KRAAI_ALLOW_MUTATE=1`. Read-only commands listed there
+(`go test`, `kraai plan`, `gh pr view`, `aws sts get-caller-identity` and
+similar) run without a permission prompt.
+
 Only `cmd/kraai` may call `os.Exit`, print with `fmt.Print*`, or read
 environment variables. `internal/env` is the single exception.
 
