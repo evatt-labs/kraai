@@ -42,6 +42,23 @@ jobs:
       # failure rather than as "the test job went red".
       - run: go test ./... -coverprofile=coverage.out
 
+      # The floor is a ratchet, not a target: it sits below where the suite
+      # is (89.8% when it was set) so an ordinary change never trips it,
+      # and it moves up, never down, when the number has clearly settled
+      # higher. A local go tool cover gate rather than a Codecov status:
+      # deterministic, tokenless, and it fails the job itself instead of a
+      # check that fail_ci_if_error: false below deliberately lets slide.
+      - name: coverage floor
+        env:
+          COVERAGE_FLOOR: "85"
+        run: |
+          total=$(go tool cover -func=coverage.out | awk '/^total:/ { sub("%", "", $NF); print $NF }')
+          echo "total statement coverage: ${total}% (floor ${COVERAGE_FLOOR}%)"
+          if awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { exit (total + 0 < floor + 0) ? 0 : 1 }'; then
+            echo "::error::statement coverage ${total}% is below the ${COVERAGE_FLOOR}% floor"
+            exit 1
+          fi
+
       # Same codecov project as the JS line (see ci.yml) — tokenless,
       # subject to Codecov's public rate limit, same tradeoff already
       # accepted there.
