@@ -1,0 +1,60 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(go vet:*)",
+      "Bash(gofmt:*)",
+      "Bash(golangci-lint run:*)",
+      "Bash(go run ./cmd/kraai plan:*)",
+      "Bash(go run ./cmd/kraai capabilities:*)",
+      "Bash(go run ./cmd/kraai version:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh release list:*)",
+      "Bash(gh release view:*)",
+      "Bash(aws sts get-caller-identity:*)",
+      "Bash(aws cloudcontrol get-resource:*)",
+      "Bash(aws cloudcontrol list-resources:*)",
+      "Bash(aws cloudformation describe-type:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-mutations.sh",
+            "timeout": 10,
+            "statusMessage": "Checking for infrastructure mutations"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && gofmt -l . 2>/dev/null | xargs -r gofmt -w",
+            "timeout": 30,
+            "statusMessage": "gofmt"
+          }
+        ]
+      }
+    ]
+  }
+}
