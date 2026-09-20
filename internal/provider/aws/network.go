@@ -37,36 +37,21 @@ const attachmentTypeIGW = "IGW"
 // network types differ only in which properties they build, and every other
 // verb is identical.
 type translatedResource struct {
-	inner     *resourceType
-	translate func(spec resource.Spec) (resource.Spec, error)
+	*resourceType
 	// immutable lists the manifest-declared properties whose change forces
 	// a replacement, for Diff to compare. Sibling identifiers
 	// are deliberately absent from it — see that method.
 	immutable map[string]func(spec resource.Spec) (string, error)
 }
 
-func (t *translatedResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return t.inner.Get(ctx, ref)
-}
-
-func (t *translatedResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := t.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return t.inner.Create(ctx, translated)
-}
-
-func (t *translatedResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := t.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return t.inner.Update(ctx, ref, translated)
-}
-
-func (t *translatedResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return t.inner.Delete(ctx, ref)
+// translated wires translate into engine's own hook and wraps it with the
+// immutable comparison Diff below; immutable may be nil for a type nothing
+// compares.
+func translated(engine *resourceType, translate func(spec resource.Spec) (resource.Spec, error),
+	immutable map[string]func(spec resource.Spec) (string, error),
+) *translatedResource {
+	engine.translate = func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return translate(spec) }
+	return &translatedResource{resourceType: engine, immutable: immutable}
 }
 
 // Diff compares only the properties the manifest declares.
@@ -248,14 +233,8 @@ func registerNetwork(client ccAPI) []resource.Registration {
 		{
 			Provider: Provider, Type: TypeVPC, Capability: manifest.CapabilityNetwork,
 			Lookup: resource.LookupByTag,
-			Resource: &translatedResource{
-				inner: taggedLookup(client, TypeVPC),
-				immutable: map[string]func(resource.Spec) (string, error){
-					"CidrBlock": func(spec resource.Spec) (string, error) {
-						return configString(spec, "cidr")
-					},
-				},
-				translate: func(spec resource.Spec) (resource.Spec, error) {
+			Resource: translated(taggedLookup(client, TypeVPC),
+				func(spec resource.Spec) (resource.Spec, error) {
 					cidr, err := configString(spec, "cidr")
 					if err != nil {
 						return spec, err
@@ -273,27 +252,24 @@ func registerNetwork(client ccAPI) []resource.Registration {
 					}
 					return translated, nil
 				},
-			},
+				map[string]func(resource.Spec) (string, error){
+					"CidrBlock": func(spec resource.Spec) (string, error) {
+						return configString(spec, "cidr")
+					},
+				}),
 		},
 		{
 			Provider: Provider, Type: TypeInternetGateway, Capability: manifest.CapabilityNetwork,
 			Lookup: resource.LookupByTag,
-			Resource: &translatedResource{
-				inner:     taggedLookup(client, TypeInternetGateway),
-				translate: tagOnly,
-			},
+			Resource: translated(taggedLookup(client, TypeInternetGateway),
+				tagOnly,
+				nil),
 		},
 		{
 			Provider: Provider, Type: TypeSubnet, Capability: manifest.CapabilityNetwork,
 			Lookup: resource.LookupByTag, DependsOn: []string{vpcKey},
-			Resource: &translatedResource{
-				inner: taggedLookup(client, TypeSubnet),
-				immutable: map[string]func(resource.Spec) (string, error){
-					"CidrBlock": func(spec resource.Spec) (string, error) {
-						return configString(spec, "subnet")
-					},
-				},
-				translate: func(spec resource.Spec) (resource.Spec, error) {
+			Resource: translated(taggedLookup(client, TypeSubnet),
+				func(spec resource.Spec) (resource.Spec, error) {
 					cidr, err := configString(spec, "subnet")
 					if err != nil {
 						return spec, err
@@ -310,14 +286,17 @@ func registerNetwork(client ccAPI) []resource.Registration {
 					}
 					return translated, nil
 				},
-			},
+				map[string]func(resource.Spec) (string, error){
+					"CidrBlock": func(spec resource.Spec) (string, error) {
+						return configString(spec, "subnet")
+					},
+				}),
 		},
 		{
 			Provider: Provider, Type: TypeRouteTable, Capability: manifest.CapabilityNetwork,
 			Lookup: resource.LookupByTag, DependsOn: []string{vpcKey},
-			Resource: &translatedResource{
-				inner: taggedLookup(client, TypeRouteTable),
-				translate: func(spec resource.Spec) (resource.Spec, error) {
+			Resource: translated(taggedLookup(client, TypeRouteTable),
+				func(spec resource.Spec) (resource.Spec, error) {
 					vpcID, err := spec.Attribute(vpcKey, "VpcId")
 					if err != nil {
 						return spec, err
@@ -326,7 +305,7 @@ func registerNetwork(client ccAPI) []resource.Registration {
 					translated.Config = map[string]any{"VpcId": vpcID}
 					return translated, nil
 				},
-			},
+				nil),
 		},
 		{
 			Provider: Provider, Type: TypeVPCGatewayAttachment, Capability: manifest.CapabilityNetwork,

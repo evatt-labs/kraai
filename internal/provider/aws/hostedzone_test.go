@@ -14,7 +14,7 @@ import (
 func TestHostedZoneCreateWritesTheNameAndTheTag(t *testing.T) {
 	client := &fakeClient{createID: "Z123", createProps: map[string]any{"Id": "Z123", "Name": "acme.example."}}
 	zone := newHostedZoneResource(&Client{})
-	zone.inner.client = client
+	zone.client = client
 
 	state, err := zone.Create(context.Background(), resource.Spec{Binding: "ZONE", Name: "acme.example"})
 	if err != nil {
@@ -38,7 +38,7 @@ func TestHostedZoneCreateWritesTheNameAndTheTag(t *testing.T) {
 func TestHostedZoneCreateRefusesANamelessSpec(t *testing.T) {
 	client := &fakeClient{}
 	zone := newHostedZoneResource(&Client{})
-	zone.inner.client = client
+	zone.client = client
 
 	_, err := zone.Create(context.Background(), resource.Spec{Binding: "ZONE"})
 	if err == nil {

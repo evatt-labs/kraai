@@ -51,15 +51,17 @@ func artifactObjectKey(serviceName, sha256Hex string) string {
 // packaging-plus-upload sequence runs exclusively inside Create/Update,
 // which only `kraai apply` ever calls.
 type lambdaFunctionResource struct {
-	inner  *resourceType
+	*resourceType
 	client *Client
 }
 
 func newLambdaFunctionResource(client *Client) *lambdaFunctionResource {
-	return &lambdaFunctionResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeLambdaFunction, lookup: resource.LookupByName, client: client},
-		client: client,
+	l := &lambdaFunctionResource{
+		resourceType: &resourceType{provider: Provider, typeName: TypeLambdaFunction, lookup: resource.LookupByName, client: client},
+		client:       client,
 	}
+	l.resourceType.translate = l.translate
+	return l
 }
 
 // translate packages the service's artifact, uploads it, resolves its
@@ -180,30 +182,6 @@ func resolveEnv(ctx context.Context, spec resource.Spec, settings LambdaSettings
 	return env, nil
 }
 
-func (l *lambdaFunctionResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return l.inner.Get(ctx, ref)
-}
-
-func (l *lambdaFunctionResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := l.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return l.inner.Create(ctx, translated)
-}
-
-func (l *lambdaFunctionResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := l.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return l.inner.Update(ctx, ref, translated)
-}
-
-func (l *lambdaFunctionResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return l.inner.Delete(ctx, ref)
-}
-
 // Diff checks only FunctionName, this type's sole
 // createOnlyProperty (this package's own register.go: "FunctionName is
 // settable at create; CloudFormation marks it 'Update requires:
@@ -223,7 +201,7 @@ func (l *lambdaFunctionResource) Delete(ctx context.Context, ref resource.Ref) e
 func (l *lambdaFunctionResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	nameOnly := spec
 	nameOnly.Config = map[string]any{"FunctionName": spec.Name}
-	return l.inner.Diff(nameOnly, state)
+	return l.compare(nameOnly, state)
 }
 
 // ValidateSpec implements plan.SpecValidator: decodeLambdaSettings is pure

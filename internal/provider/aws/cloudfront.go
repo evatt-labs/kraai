@@ -35,17 +35,18 @@ const (
 // is a value the manifest may change, which an identity must not be. The
 // kraai tag is what every other tagged type uses, and it survives both.
 type cloudFrontResource struct {
-	inner *resourceType
+	*resourceType
 }
 
 func newCloudFrontResource(client *Client) *cloudFrontResource {
-	return &cloudFrontResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeCloudFrontDistribution,
-			lookup: resource.LookupByTag, client: client,
-			match: arrayTagsMatch, stampTag: arrayTagsStampTag,
-		},
+	c := &cloudFrontResource{}
+	c.resourceType = &resourceType{
+		provider: Provider, typeName: TypeCloudFrontDistribution,
+		lookup: resource.LookupByTag, client: client,
+		match: arrayTagsMatch, stampTag: arrayTagsStampTag,
+		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return c.translate(spec) },
 	}
+	return c
 }
 
 // distributionShape is the projection of a DistributionConfig kraai sets and
@@ -68,7 +69,7 @@ func (c *cloudFrontResource) shapeFromSpec(spec resource.Spec) (distributionShap
 	// The regional endpoint, not DomainName: the global one redirects for a
 	// while after a bucket is created outside us-east-1, and a CloudFront
 	// origin does not follow redirects.
-	originDomain, err := spec.Attribute(origin+"."+key(TypeS3Bucket), "RegionalDomainName")
+	originDomain, err := referencedAttribute(spec, origin, TypeS3Bucket, "RegionalDomainName")
 	if err != nil {
 		return distributionShape{}, kerrors.Wrap(err, kerrors.CodeValidation,
 			"resolving the origin bucket for cdn binding %q", spec.Binding)
@@ -76,7 +77,7 @@ func (c *cloudFrontResource) shapeFromSpec(spec resource.Spec) (distributionShap
 
 	shape := distributionShape{origin: originDomain, enabled: true}
 	if certificate, _ := spec.Config["certificate"].(string); certificate != "" {
-		arn, err := spec.Attribute(certificate+"."+key(TypeCertificateManagerCertificate), certificateArnAttribute)
+		arn, err := referencedAttribute(spec, certificate, TypeCertificateManagerCertificate, certificateArnAttribute)
 		if err != nil {
 			return distributionShape{}, kerrors.Wrap(err, kerrors.CodeValidation,
 				"resolving the certificate for cdn binding %q", spec.Binding)
@@ -173,30 +174,6 @@ func (c *cloudFrontResource) translate(spec resource.Spec) (resource.Spec, error
 	translated := spec
 	translated.Config = map[string]any{"DistributionConfig": config}
 	return translated, nil
-}
-
-func (c *cloudFrontResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return c.inner.Get(ctx, ref)
-}
-
-func (c *cloudFrontResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := c.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return c.inner.Create(ctx, translated)
-}
-
-func (c *cloudFrontResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := c.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return c.inner.Update(ctx, ref, translated)
-}
-
-func (c *cloudFrontResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return c.inner.Delete(ctx, ref)
 }
 
 // Diff compares the projection kraai decides, not the whole

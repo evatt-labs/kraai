@@ -61,6 +61,19 @@ type ccAPI interface {
 // shadowed by a second zone of the same name.
 type ownsFunc func(ctx context.Context, identifier string, properties map[string]any) (bool, error)
 
+// translateFunc builds a type's real desired state from the vendor-neutral
+// Spec the planner hands it: the manifest's vocabulary (a cdn entry's
+// origin, a compute block's settings) into the vendor's property names,
+// reading what referenced bindings published along the way. Set on a
+// resourceType, it runs inside Create, Update and Diff, so a type needs
+// nothing but a translate to be a full resource — the pass-through wrapper
+// per type that used to carry one is gone. A type with none submits
+// Spec.Config as it is.
+//
+// The context is for translates that resolve something live (an account
+// id for an ARN); Diff has none and passes a background one.
+type translateFunc func(ctx context.Context, spec resource.Spec) (resource.Spec, error)
+
 // matchFunc reports whether a resource's decoded properties are the one
 // ref.Name identifies, for the byAttr and byTag lookup strategies. name is
 // the derived resource name (Ref.Name), not necessarily the value
@@ -121,6 +134,10 @@ type resourceType struct {
 	// because not every byTag type spells "Tags" the same way (see
 	// identity.go's array-shaped versus flat-map-shaped Tags).
 	stampTag stampFunc
+
+	// translate, when set, shapes the Spec before Create, Update and Diff
+	// use it — see translateFunc.
+	translate translateFunc
 
 	// owns, when set, gates Get and Delete on ownership of what resolve
 	// found — see ownsFunc. Never consulted for an imported Ref: adoption
@@ -388,6 +405,15 @@ func sortedKeys(m map[string]any) []string {
 	return keys
 }
 
+// referencedAttribute reads an attribute a resource in another binding
+// published, under the "<binding>.<Ref.Key()>" key apply namespaces it by —
+// the cdn distribution reading its origin bucket's endpoint. The binding is
+// the one the entry named (a reference), the type the one the registration
+// declared it reads.
+func referencedAttribute(spec resource.Spec, binding, typeName, name string) (string, error) {
+	return spec.Attribute(binding+"."+key(typeName), name)
+}
+
 // Create provisions the resource from spec, submitting spec.Config as Cloud
 // Control's desired state and polling the resulting ProgressEvent to a
 // terminal state.
@@ -395,6 +421,10 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 	if spec.Name == "" {
 		return nil, kerrors.Validation(
 			"cannot create %s for binding %q without a derived name", r.typeName, spec.Binding)
+	}
+	spec, err := r.translated(ctx, spec)
+	if err != nil {
+		return nil, err
 	}
 
 	desired := make(map[string]any, len(spec.Config)+1)
@@ -575,6 +605,10 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		return nil, kerrors.Wrap(resource.ErrImmutable, kerrors.CodeValidation,
 			"%s has no update handler; a differing property requires replacement, not an update", r.typeName)
 	}
+	spec, err = r.translated(ctx, spec)
+	if err != nil {
+		return nil, err
+	}
 
 	identifier, properties, found, err := r.resolve(ctx, ref)
 	if err != nil {
@@ -690,6 +724,27 @@ func (r *resourceType) Delete(ctx context.Context, ref resource.Ref) error {
 // cached after the first call, so this only reaches the network once per
 // type per process.
 func (r *resourceType) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	spec, err := r.translated(context.Background(), spec)
+	if err != nil {
+		return resource.Same, err
+	}
+	return r.compare(spec, state)
+}
+
+// translated applies r.translate to spec, or returns spec as it is when the
+// type has none.
+func (r *resourceType) translated(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
+	if r.translate == nil {
+		return spec, nil
+	}
+	return r.translate(ctx, spec)
+}
+
+// compare is Diff after translation: spec.Config is already the vendor's
+// property vocabulary. A type whose Diff narrows what it compares (an API
+// Gateway API, a Lambda function) shapes the Config itself and calls this,
+// so the translate does not run over a shape it did not build.
+func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	schema, err := r.getSchema(context.Background())
 	if err != nil {
 		return resource.Same, err

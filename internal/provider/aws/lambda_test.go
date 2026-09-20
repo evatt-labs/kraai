@@ -12,11 +12,9 @@ import (
 )
 
 func newLambdaFunctionResourceForTest(fc *fakeClient, s3 *fakeS3, sts *fakeSTS) *lambdaFunctionResource {
-	client := &Client{s3: s3, sts: sts, region: "us-east-1"}
-	return &lambdaFunctionResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeLambdaFunction, lookup: resource.LookupByName, client: fc},
-		client: client,
-	}
+	l := newLambdaFunctionResource(&Client{s3: s3, sts: sts, region: "us-east-1"})
+	l.resourceType.client = fc
+	return l
 }
 
 func baseLambdaSpec(t *testing.T, dir string, extraSettings map[string]any) resource.Spec {

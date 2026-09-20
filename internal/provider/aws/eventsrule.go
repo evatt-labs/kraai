@@ -55,15 +55,17 @@ const eventsRuleTargetID = "lambda"
 // not complete without AWS::Lambda::Permission, which a future workstream
 // needs to add. Flagged here and in this workstream's PR description.
 type eventsRuleResource struct {
-	inner  *resourceType
+	*resourceType
 	client *Client
 }
 
 func newEventsRuleResource(client *Client) *eventsRuleResource {
-	return &eventsRuleResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByName, client: client},
-		client: client,
+	e := &eventsRuleResource{
+		resourceType: &resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByName, client: client},
+		client:       client,
 	}
+	e.resourceType.translate = e.translate
+	return e
 }
 
 // translate builds this rule's real EventBridge properties, resolving the
@@ -97,30 +99,6 @@ func (e *eventsRuleResource) translate(ctx context.Context, spec resource.Spec) 
 	return translated, nil
 }
 
-func (e *eventsRuleResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return e.inner.Get(ctx, ref)
-}
-
-func (e *eventsRuleResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := e.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return e.inner.Create(ctx, translated)
-}
-
-func (e *eventsRuleResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := e.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return e.inner.Update(ctx, ref, translated)
-}
-
-func (e *eventsRuleResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return e.inner.Delete(ctx, ref)
-}
-
 // Diff checks only Name, this type's sole createOnlyProperty
 // (a rule's ScheduleExpression, State and Targets are all updatable in
 // place per AWS's own resource schema). Deliberately not the full
@@ -133,5 +111,5 @@ func (e *eventsRuleResource) Delete(ctx context.Context, ref resource.Ref) error
 func (e *eventsRuleResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	nameOnly := spec
 	nameOnly.Config = map[string]any{"Name": spec.Name}
-	return e.inner.Diff(nameOnly, state)
+	return e.compare(nameOnly, state)
 }

@@ -128,15 +128,15 @@ func apiGatewaySourceARN(ctx context.Context, client *Client, spec resource.Spec
 // lambdaPermissionResource grants principal permission to invoke a
 // service's function, scoped to sourceARN's result.
 type lambdaPermissionResource struct {
-	inner     *resourceType
+	*resourceType
 	client    *Client
 	principal string
 	sourceARN sourceARNFunc
 }
 
 func newLambdaPermissionResource(client *Client, principal string, sourceARN sourceARNFunc) *lambdaPermissionResource {
-	return &lambdaPermissionResource{
-		inner: &resourceType{
+	p := &lambdaPermissionResource{
+		resourceType: &resourceType{
 			provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
 			client: client, match: lambdaPermissionMatch, listScope: lambdaPermissionListScope,
 		},
@@ -144,6 +144,8 @@ func newLambdaPermissionResource(client *Client, principal string, sourceARN sou
 		principal: principal,
 		sourceARN: sourceARN,
 	}
+	p.resourceType.translate = p.translate
+	return p
 }
 
 // lambdaPermissionListScope declares AWS::Lambda::Permission's list scope
@@ -189,30 +191,6 @@ func (p *lambdaPermissionResource) translate(ctx context.Context, spec resource.
 	return translated, nil
 }
 
-func (p *lambdaPermissionResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return p.inner.Get(ctx, ref)
-}
-
-func (p *lambdaPermissionResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := p.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return p.inner.Create(ctx, translated)
-}
-
-func (p *lambdaPermissionResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := p.translate(ctx, spec)
-	if err != nil {
-		return nil, err
-	}
-	return p.inner.Update(ctx, ref, translated)
-}
-
-func (p *lambdaPermissionResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return p.inner.Delete(ctx, ref)
-}
-
 // Diff checks FunctionName and Principal only — never
 // SourceArn, which needs either a cached-but-still-live AccountID call
 // (the EventBridge variant) or a live cross-resource lookup with the same
@@ -231,7 +209,7 @@ func (p *lambdaPermissionResource) Diff(spec resource.Spec, state *resource.Stat
 		"FunctionName": spec.Name,
 		"Principal":    p.principal,
 	}
-	return p.inner.Diff(partial, state)
+	return p.compare(partial, state)
 }
 
 // lambdaPermissionMatch implements AWS::Lambda::Permission's LookupByAttr

@@ -9,9 +9,9 @@ import (
 )
 
 func newIAMRoleResourceForTest(fc *fakeClient) *iamRoleResource {
-	return &iamRoleResource{
-		inner: &resourceType{provider: Provider, typeName: TypeIAMRole, lookup: resource.LookupByName, client: fc},
-	}
+	r := newIAMRoleResource(&Client{})
+	r.client = fc
+	return r
 }
 
 func TestIAMRoleCreateAlwaysIncludesBasicExecutionPolicy(t *testing.T) {

@@ -44,13 +44,16 @@ const awsLambdaBasicExecutionRoleArn = "arn:aws:iam::aws:policy/service-role/AWS
 // is exactly what resource.Registration.DependsOn replaced (see its own
 // doc comment).
 type iamRoleResource struct {
-	inner *resourceType
+	*resourceType
 }
 
 func newIAMRoleResource(client *Client) *iamRoleResource {
-	return &iamRoleResource{
-		inner: &resourceType{provider: Provider, typeName: TypeIAMRole, lookup: resource.LookupByName, client: client},
+	r := &iamRoleResource{}
+	r.resourceType = &resourceType{
+		provider: Provider, typeName: TypeIAMRole, lookup: resource.LookupByName, client: client,
+		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return r.translate(spec), nil },
 	}
+	return r
 }
 
 // translate builds this role's real IAM properties. The incoming spec's
@@ -96,35 +99,7 @@ func toAnySlice(in []string) []any {
 	return out
 }
 
-func (r *iamRoleResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return r.inner.Get(ctx, ref)
-}
-
-func (r *iamRoleResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	return r.inner.Create(ctx, r.translate(spec))
-}
-
-func (r *iamRoleResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	return r.inner.Update(ctx, ref, r.translate(spec))
-}
-
-func (r *iamRoleResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return r.inner.Delete(ctx, ref)
-}
-
 // Diff implements plan.Differ structurally (see
 // resourceType.Diff's own doc comment on why this package
 // satisfies that interface without importing internal/plan).
 //
-// RoleName is IAM::Role's createOnlyProperty (renaming a role means
-// deleting and recreating it — the AssumeRolePolicyDocument and
-// ManagedPolicyArns this package sets are both updatable in place per
-// AWS's own resource schema), so translating and delegating is safe here
-// with no side effects: nothing this method needs (RoleName, a fixed trust
-// policy, a fixed managed-policy ARN) requires network I/O or a secret
-// resolution to compute, unlike the Lambda function's own artifact
-// packaging (see lambda.go's doc comment on why that one is not this
-// simple).
-func (r *iamRoleResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
-	return r.inner.Diff(r.translate(spec), state)
-}

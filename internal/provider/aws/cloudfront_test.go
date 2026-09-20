@@ -107,7 +107,7 @@ func TestCloudFrontTranslateRefusals(t *testing.T) {
 func TestCloudFrontCreateStampsTheTag(t *testing.T) {
 	cf := newCloudFrontResource(&Client{})
 	client := &fakeClient{createID: "E123", createProps: map[string]any{"DomainName": "d123.cloudfront.net"}}
-	cf.inner.client = client
+	cf.client = client
 
 	if _, err := cf.Create(context.Background(), cdnSpec(map[string]any{"origin": "ASSETS"}, cdnAttrs("b", ""))); err != nil {
 		t.Fatalf("Create: %v", err)

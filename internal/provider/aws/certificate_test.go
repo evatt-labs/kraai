@@ -78,7 +78,7 @@ func TestCertificateTranslateRefusesWithoutAZone(t *testing.T) {
 func TestCertificateTranslateFailsLoudlyWithoutTheZoneAttribute(t *testing.T) {
 	cert := newCertificateResource(&Client{})
 	client := &fakeClient{}
-	cert.inner.client = client
+	cert.client = client
 
 	_, err := cert.Create(context.Background(), certificateSpec(map[string]any{"domain": "acme.example", "zone": "ZONE"}, ""))
 	if err == nil {
@@ -96,7 +96,7 @@ func TestCertificateTranslateFailsLoudlyWithoutTheZoneAttribute(t *testing.T) {
 func TestCertificateCreateStampsTheTag(t *testing.T) {
 	cert := newCertificateResource(&Client{})
 	client := &fakeClient{createID: "arn:aws:acm:us-east-1:1:certificate/abc"}
-	cert.inner.client = client
+	cert.client = client
 
 	if _, err := cert.Create(context.Background(),
 		certificateSpec(map[string]any{"domain": "acme.example", "zone": "ZONE"}, "Z123")); err != nil {

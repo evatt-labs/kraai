@@ -47,16 +47,17 @@ func routeFromSpec(spec resource.Spec) (pattern, certificate string, err error) 
 // itself, which is exactly the derived name a NameFromRoute registration
 // gets. No tag, no attribute search.
 type domainNameResource struct {
-	inner *resourceType
+	*resourceType
 }
 
 func newDomainNameResource(client *Client) *domainNameResource {
-	return &domainNameResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeAPIGatewayV2DomainName,
-			lookup: resource.LookupByName, client: client,
-		},
+	d := &domainNameResource{}
+	d.resourceType = &resourceType{
+		provider: Provider, typeName: TypeAPIGatewayV2DomainName,
+		lookup: resource.LookupByName, client: client,
+		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return d.translate(spec) },
 	}
+	return d
 }
 
 // translate builds the domain's desired state. The certificate ARN comes
@@ -68,8 +69,7 @@ func (d *domainNameResource) translate(spec resource.Spec) (resource.Spec, error
 	if err != nil {
 		return resource.Spec{}, err
 	}
-	arn, err := spec.Attribute(
-		certificate+"."+key(TypeCertificateManagerCertificate), certificateArnAttribute)
+	arn, err := referencedAttribute(spec, certificate, TypeCertificateManagerCertificate, certificateArnAttribute)
 	if err != nil {
 		return resource.Spec{}, kerrors.Wrap(err, kerrors.CodeValidation,
 			"resolving the certificate for custom domain %q", pattern)
@@ -86,40 +86,6 @@ func (d *domainNameResource) translate(spec resource.Spec) (resource.Spec, error
 	return translated, nil
 }
 
-func (d *domainNameResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return d.inner.Get(ctx, ref)
-}
-
-func (d *domainNameResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := d.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return d.inner.Create(ctx, translated)
-}
-
-func (d *domainNameResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := d.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return d.inner.Update(ctx, ref, translated)
-}
-
-func (d *domainNameResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return d.inner.Delete(ctx, ref)
-}
-
-// Diff compares the certificate presented: rotating to a new
-// certificate is the one change a domain name legitimately sees.
-func (d *domainNameResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
-	translated, err := d.translate(spec)
-	if err != nil {
-		return resource.Same, err
-	}
-	return d.inner.Diff(translated, state)
-}
-
 // apiMappingResource maps a custom domain to the service's API at its
 // default stage.
 //
@@ -129,17 +95,18 @@ func (d *domainNameResource) Diff(spec resource.Spec, state *resource.State) (re
 // kraai's model — a custom domain fronts one service — so matching on the
 // domain alone is sufficient and documented rather than accidental.
 type apiMappingResource struct {
-	inner *resourceType
+	*resourceType
 }
 
 func newAPIMappingResource(client *Client) *apiMappingResource {
-	return &apiMappingResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeAPIGatewayV2ApiMapping,
-			lookup: resource.LookupByAttr, client: client,
-			match: apiMappingMatch, listScope: apiMappingListScope,
-		},
+	a := &apiMappingResource{}
+	a.resourceType = &resourceType{
+		provider: Provider, typeName: TypeAPIGatewayV2ApiMapping,
+		lookup: resource.LookupByAttr, client: client,
+		match: apiMappingMatch, listScope: apiMappingListScope,
+		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return a.translate(spec) },
 	}
+	return a
 }
 
 func apiMappingListScope(name string) (map[string]any, error) {
@@ -175,36 +142,4 @@ func (a *apiMappingResource) translate(spec resource.Spec) (resource.Spec, error
 		"Stage":      apiGatewayDefaultStage,
 	}
 	return translated, nil
-}
-
-func (a *apiMappingResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	return a.inner.Get(ctx, ref)
-}
-
-func (a *apiMappingResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
-	translated, err := a.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return a.inner.Create(ctx, translated)
-}
-
-func (a *apiMappingResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
-	translated, err := a.translate(spec)
-	if err != nil {
-		return nil, err
-	}
-	return a.inner.Update(ctx, ref, translated)
-}
-
-func (a *apiMappingResource) Delete(ctx context.Context, ref resource.Ref) error {
-	return a.inner.Delete(ctx, ref)
-}
-
-func (a *apiMappingResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
-	translated, err := a.translate(spec)
-	if err != nil {
-		return resource.Same, err
-	}
-	return a.inner.Diff(translated, state)
 }

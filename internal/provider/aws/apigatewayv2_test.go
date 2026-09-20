@@ -22,14 +22,9 @@ var apiGatewayV2RealProperties = map[string]bool{
 }
 
 func newAPIGatewayResourceForTest(fc *fakeClient, sts *fakeSTS) *apiGatewayResource {
-	client := &Client{sts: sts, region: "us-east-1"}
-	return &apiGatewayResource{
-		inner: &resourceType{
-			provider: Provider, typeName: TypeAPIGatewayV2API, lookup: resource.LookupByTag,
-			client: fc, match: apigatewayv2Match, stampTag: apigatewayv2StampTag,
-		},
-		client: client,
-	}
+	a := newAPIGatewayResource(&Client{sts: sts, region: "us-east-1"})
+	a.resourceType.client = fc
+	return a
 }
 
 // TestAPIGatewayCreateEmitsOnlyRealProperties is the test PR #80's third
