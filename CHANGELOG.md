@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.6](https://github.com/evatt-labs/kraai/compare/v0.6.5...v0.6.6) (2026-09-20)
+
+
+### Features
+
+* **aws:** grant the distribution read on the bucket it fronts ([#229](https://github.com/evatt-labs/kraai/issues/229)) ([1552419](https://github.com/evatt-labs/kraai/commit/1552419bbcd07cdb5a6befc5981ea7da273197db)), closes [#219](https://github.com/evatt-labs/kraai/issues/219)
+
 ## [0.6.5](https://github.com/evatt-labs/kraai/compare/v0.6.4...v0.6.5) (2026-09-20)
 
 
