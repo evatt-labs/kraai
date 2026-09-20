@@ -1,6 +1,7 @@
 package plan
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -236,7 +237,56 @@ func TestComputeWaves_EmptyItems(t *testing.T) {
 func reader(serviceKey, binding, providerType string, reads ...string) plannedItem {
 	it := item(serviceKey, binding, providerType)
 	it.ReadsBindings = reads
+	for _, r := range reads {
+		it.reads = append(it.reads, readEdge{binding: r})
+	}
 	return it
+}
+
+// narrowReader is item reading one type of another binding — a reference
+// read, as Registration.ReadsReferences declares one.
+func narrowReader(serviceKey, binding, providerType, readBinding, readType string) plannedItem {
+	it := item(serviceKey, binding, providerType)
+	it.ReadsBindings = []string{readBinding}
+	it.reads = []readEdge{{binding: readBinding, typeKey: readType}}
+	return it
+}
+
+// A reference read is an edge from the one producer the reader declared,
+// not from everything in that binding: the certificate after the zone it
+// validates in, never after the record set beside the zone — which is the
+// edge that closed the static site into a cycle.
+func TestComputeWaves_ReferenceReadOrdersAfterOneProducerOnly(t *testing.T) {
+	items := []plannedItem{
+		narrowReader("svc", "CERT", "aws/cert", "ZONE", "aws/zone"),
+		item("svc", "ZONE", "aws/zone"),
+		narrowReader("svc", "ZONE", "aws/record", "EDGE", "aws/dist"),
+		narrowReader("svc", "EDGE", "aws/dist", "CERT", "aws/cert"),
+	}
+	waves, err := computeWaves(items, nil)
+	if err != nil {
+		t.Fatalf("computeWaves: %v — a reference read pulled in the whole binding", err)
+	}
+	// zone 0, cert 1 (after the zone only), dist 2, record 3.
+	if want := []int{1, 0, 3, 2}; !reflect.DeepEqual(waves, want) {
+		t.Errorf("waves = %v, want %v", waves, want)
+	}
+}
+
+// A referenced type the binding never planned contributes no edge, like an
+// unplanned DependsOn; the reader is not held back by nothing.
+func TestComputeWaves_ReferenceReadOfAnUnplannedTypeIsNoEdge(t *testing.T) {
+	items := []plannedItem{
+		narrowReader("svc", "CERT", "aws/cert", "ZONE", "aws/zone"),
+		item("svc", "ZONE", "aws/record"),
+	}
+	waves, err := computeWaves(items, nil)
+	if err != nil {
+		t.Fatalf("computeWaves: %v", err)
+	}
+	if waves[0] != 0 {
+		t.Errorf("reader wave = %d, want 0: the type it reads was never planned", waves[0])
+	}
 }
 
 // A declared read is an ordering edge. Without it a consumer can share a

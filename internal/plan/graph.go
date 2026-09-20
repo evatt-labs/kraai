@@ -154,12 +154,25 @@ func buildGraph(items []plannedItem, serviceDependsOn map[string][]string) (adj 
 	// Only bindings other than the consumer's own: same-binding producers are
 	// ordered by DependsOn already, and a binding's items reading their own
 	// binding is the common case that must not become a self-edge.
+	//
+	// A read is either a whole binding (a scope: every producer in it) or
+	// one type in a binding (a reference: the producer the registration
+	// says it reads). A referenced type the binding never planned
+	// contributes no edge, as an unplanned DependsOn does not; the reader's
+	// own translate then fails naming what never published.
 	for i, it := range items {
-		for _, read := range it.ReadsBindings {
-			if read == it.Binding {
+		for _, read := range it.reads {
+			if read.binding == it.Binding {
 				continue
 			}
-			for _, producerIdx := range byGroup[groupKey{it.ServiceKey, read}] {
+			producers := byGroup[groupKey{it.ServiceKey, read.binding}]
+			if read.typeKey != "" {
+				if producerIdx, ok := producers[read.typeKey]; ok {
+					addEdge(producerIdx, i)
+				}
+				continue
+			}
+			for _, producerIdx := range producers {
 				addEdge(producerIdx, i)
 			}
 		}

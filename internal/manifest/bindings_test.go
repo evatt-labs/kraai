@@ -223,7 +223,10 @@ func TestValidateServicesResolvesReferences(t *testing.T) {
 	if err := l.validateServices(root, services); err != nil {
 		t.Fatalf("validateServices: %v", err)
 	}
-	want := map[string][]string{"EDGE": {"ASSETS", "CERT"}, "ZONE": {"EDGE"}}
+	want := map[string]map[string]string{
+		"EDGE": {"origin": "ASSETS", "certificate": "CERT"},
+		"ZONE": {"alias": "EDGE"},
+	}
 	if got := services["site"].References; !reflect.DeepEqual(got, want) {
 		t.Errorf("References = %v, want %v", got, want)
 	}

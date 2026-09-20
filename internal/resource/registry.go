@@ -115,6 +115,24 @@ type Registration struct {
 	// same reason DependsOn is: the telemetry decorator cannot drop what it
 	// never wraps.
 	Reads ReadScope
+	// ReadsReferences names what this type reads through its binding
+	// entry's references (CapabilityDef.References): for each, the entry
+	// key and the registration key of the type it reads from in the
+	// referenced binding — a certificate reads {zone,
+	// aws/AWS::Route53::HostedZone}, a record set {alias,
+	// aws/AWS::CloudFront::Distribution}. Each becomes a read edge from
+	// exactly that producer to this type's instances, and nothing else.
+	//
+	// Both halves are narrow on purpose. A binding's types do not all read
+	// what its entry names — a hosted zone reads nothing, the record set
+	// beside it reads the alias — and a referenced binding's types are not
+	// all what the reader needs: the certificate needs the zone, not the
+	// record set beside the zone that points at the distribution that
+	// presents the certificate. Ordering whole bindings behind whole
+	// bindings made that static site a cycle. A type that declares nothing
+	// here reads none of its entry's references; a reference nothing reads
+	// is validated by the loader and orders nothing.
+	ReadsReferences []ReferenceRead
 	// Applies restricts this registration to the manifests and services it
 	// is meaningful for. Empty means it always applies, which is the common
 	// case; several entries are ANDed.
@@ -188,6 +206,13 @@ func (s NameStrategy) String() string {
 // Valid reports whether s is a declared strategy.
 func (s NameStrategy) Valid() bool {
 	return s == NameFromBinding || s == NameFromRoute || s == NameFromEntry
+}
+
+// ReferenceRead is one reference a type reads: the entry key that names the
+// binding, and the registration key of the type read from it.
+type ReferenceRead struct {
+	Key  string
+	Type string
 }
 
 // ReadScope is which bindings a registration's instances read from. An
@@ -579,6 +604,10 @@ func validate(reg Registration) error {
 		return kerrors.Validation(
 			"resource registration %q declares NameKey %q but is named from its %s, which never reads it",
 			reg.Provider+"/"+reg.Type, reg.NameKey, reg.NameFrom)
+	case incompleteReferenceRead(reg):
+		return kerrors.Validation(
+			"resource registration %q declares a reference read with an empty key or type",
+			reg.Provider+"/"+reg.Type)
 	case !reg.Reads.Valid():
 		return kerrors.Validation(
 			"resource registration %q declares unknown read scope %s",
@@ -610,6 +639,16 @@ func validate(reg Registration) error {
 // dependsOnSelf reports whether reg names its own key in DependsOn — a
 // trivial one-node cycle that internal/plan's graph would otherwise have to
 // detect at plan time, on every plan, for a mistake that is fully knowable
+// incompleteReferenceRead reports whether any ReferenceRead lacks a half.
+func incompleteReferenceRead(reg Registration) bool {
+	for _, r := range reg.ReadsReferences {
+		if r.Key == "" || r.Type == "" {
+			return true
+		}
+	}
+	return false
+}
+
 // at registration time.
 func dependsOnSelf(reg Registration) bool {
 	key := reg.Key()

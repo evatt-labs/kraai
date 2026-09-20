@@ -268,7 +268,10 @@ func TestPlan_StaticSiteOrdersAcrossCapabilities(t *testing.T) {
 					manifest.CapabilityCDN:     {{"binding": "EDGE", "origin": "ASSETS", "certificate": "CERT"}},
 					manifest.CapabilityDNS:     {{"binding": "ZONE", "zone": "acme.example", "alias": "EDGE"}},
 				},
-				References: map[string][]string{"EDGE": {"ASSETS", "CERT"}, "ZONE": {"EDGE"}},
+				References: map[string]map[string]string{
+					"EDGE": {"origin": "ASSETS", "certificate": "CERT"},
+					"ZONE": {"alias": "EDGE"},
+				},
 			},
 		},
 	}
@@ -301,6 +304,64 @@ func TestPlan_StaticSiteOrdersAcrossCapabilities(t *testing.T) {
 		}
 		if e >= l {
 			t.Errorf("%s (wave %d) must come before %s (wave %d)", c.earlier, e, c.later, l)
+		}
+	}
+}
+
+// TestPlan_StaticSiteWithAValidatedCertificateIsNotACycle is the live
+// failure that made reference reads per type: a certificate validated
+// through the zone (tls → dns), a distribution presenting it (cdn → tls),
+// and the zone's record pointing at the distribution (dns → cdn). As
+// binding-level edges that is a cycle — the zone waited on the distribution
+// its sibling record points at — and `kraai plan` refused the manifest.
+// Only the record reads the alias, only the certificate reads the zone, and
+// the plan is four waves.
+func TestPlan_StaticSiteWithAValidatedCertificateIsNotACycle(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{
+			manifest.CapabilityObjects: {Vendor: "aws"},
+			manifest.CapabilityDNS:     {Vendor: "aws"},
+			manifest.CapabilityTLS:     {Vendor: "aws"},
+			manifest.CapabilityCDN:     {Vendor: "aws"},
+		}},
+		Services: map[string]manifest.Service{
+			"site": {
+				Dir: ".",
+				Bindings: manifest.Bindings{
+					manifest.CapabilityObjects: {{"binding": "ASSETS"}},
+					manifest.CapabilityDNS:     {{"binding": "ZONE", "zone": "acme.example", "alias": "EDGE"}},
+					manifest.CapabilityTLS:     {{"binding": "CERT", "domain": "acme.example", "zone": "ZONE"}},
+					manifest.CapabilityCDN:     {{"binding": "EDGE", "origin": "ASSETS", "certificate": "CERT", "aliases": []any{"acme.example"}}},
+				},
+				References: map[string]map[string]string{
+					"ZONE": {"alias": "EDGE"},
+					"CERT": {"zone": "ZONE"},
+					"EDGE": {"origin": "ASSETS", "certificate": "CERT"},
+				},
+			},
+		},
+	}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v — the static site's own shape planned as a cycle", err)
+	}
+
+	waves := map[string]int{}
+	for _, a := range p.Actions {
+		waves[a.Type] = a.Wave
+	}
+	want := map[string]int{
+		"AWS::S3::Bucket":                      0,
+		"AWS::Route53::HostedZone":             0,
+		"AWS::CertificateManager::Certificate": 1,
+		"AWS::CloudFront::Distribution":        2,
+		"AWS::Route53::RecordSet":              3,
+	}
+	for typ, wave := range want {
+		if waves[typ] != wave {
+			t.Errorf("%s in wave %d, want %d (waves: %v)", typ, waves[typ], wave, waves)
 		}
 	}
 }
