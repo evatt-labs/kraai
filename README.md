@@ -426,9 +426,7 @@ Designed and **not** built — each has a tracking issue:
 
 - Per-environment locking, so concurrent applies are currently unguarded ([#113](https://github.com/evatt-labs/kraai/issues/113))
 - Status record and TTL-based expiry ([#113](https://github.com/evatt-labs/kraai/issues/113))
-- Custom domains / routes ([#110](https://github.com/evatt-labs/kraai/issues/110))
-- Lifecycle hooks ([#111](https://github.com/evatt-labs/kraai/issues/111))
-- Adopting existing resources ([#112](https://github.com/evatt-labs/kraai/issues/112))
+- Garbage collection of elapsed ephemeral environments ([#136](https://github.com/evatt-labs/kraai/issues/136))
 
 The `unbuilt` and `dead-field` labels track the rest, and the
 [public roadmap](https://github.com/orgs/evatt-labs/projects/1) shows what is
