@@ -121,6 +121,10 @@ golangci-lint run ./...        # v2.13.2, must be 0 issues
 gofmt -l .                     # must be empty
 ```
 
+`make check` runs all four plus `go vet` and the coverage floor CI enforces;
+`make plan-examples` runs `kraai plan` read-only against every manifest
+under `examples/`.
+
 Two of these rules are enforced by hooks in `.claude/settings.json` when
 working through Claude Code: `gofmt -w` runs after every edit, and any
 `kraai apply`, `kraai destroy` or mutating `aws` CLI verb is denied unless the
