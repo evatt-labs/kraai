@@ -1,0 +1,8 @@
+services:
+  data:
+    dir: .
+    databases:
+      - { binding: DB, driver: postgres, caching: { disabled: false, maxAge: 60 } }
+    keyvalue: [{ binding: CACHE }]
+    objects: [{ binding: ASSETS }]
+    queues: [{ binding: JOBS }]

@@ -1,0 +1,19 @@
+version: 1
+
+# Fixture for #232: declares every Cloudflare capability kraai implements —
+# a Neon Postgres branch, a Workers KV namespace, an R2 bucket and a
+# Cloudflare Queue. See ../README.md for the exact plan invocation and for
+# why this manifest deliberately does not configure providers.compute.
+providers:
+  database:
+    vendor: neon
+    settings:
+      project: kraai-example
+      database: exampledb
+      role: app
+  keyvalue:
+    vendor: cloudflare
+  objects:
+    vendor: cloudflare
+  queues:
+    vendor: cloudflare
