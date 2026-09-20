@@ -35,6 +35,23 @@ type fakeClient struct {
 	createProps map[string]any
 	createErr   error
 	createCalls []map[string]any
+	// createOrder records the typeName of every CreateResource call, in
+	// order, so a test can assert two types were created in the right
+	// sequence (cloudfront_test.go's OAC-before-distribution).
+	createOrder []string
+	// createResults, keyed by typeName, overrides createID/createProps/
+	// createErr for a call against that specific type — needed once a
+	// single fakeClient creates more than one type in the same test (the
+	// CloudFront composite resource creates both an OriginAccessControl
+	// and a Distribution through the same client). A type with no entry
+	// here falls back to createID/createProps/createErr above, which is
+	// what every existing, single-type test in this file already relies
+	// on.
+	createResults map[string]struct {
+		id    string
+		props map[string]any
+		err   error
+	}
 
 	updateProps   map[string]any
 	updateErr     error
@@ -70,8 +87,15 @@ func (f *fakeClient) ListResources(_ context.Context, _ string, resourceModel ma
 	return f.list, nil
 }
 
-func (f *fakeClient) CreateResource(_ context.Context, _ string, desiredState map[string]any) (string, map[string]any, error) {
+func (f *fakeClient) CreateResource(_ context.Context, typeName string, desiredState map[string]any) (string, map[string]any, error) {
 	f.createCalls = append(f.createCalls, desiredState)
+	f.createOrder = append(f.createOrder, typeName)
+	if result, ok := f.createResults[typeName]; ok {
+		if result.err != nil {
+			return "", nil, result.err
+		}
+		return result.id, result.props, nil
+	}
 	if f.createErr != nil {
 		return "", nil, f.createErr
 	}
