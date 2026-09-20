@@ -366,6 +366,57 @@ func TestNewPlanCommand_Flags(t *testing.T) {
 	if jsonFlag == nil || jsonFlag.DefValue != "false" {
 		t.Errorf("--json flag = %+v, want default \"false\"", jsonFlag)
 	}
+	exitFlag := cmd.Flags().Lookup("detailed-exitcode")
+	if exitFlag == nil || exitFlag.DefValue != "false" {
+		t.Errorf("--detailed-exitcode flag = %+v, want default \"false\"", exitFlag)
+	}
+}
+
+// --detailed-exitcode is the Terraform convention: 0 nothing to do, 2
+// changes present, 1 something could not be planned. The signal rides
+// beside a nil error — a plan with changes is not a failure and prints like
+// one in no case — and is absent entirely without the flag, so nothing that
+// scripts today's 0 changes underneath it.
+func TestRunPlan_DetailedExitCode(t *testing.T) {
+	cases := []struct {
+		name   string
+		dir    func(*testing.T) string
+		getter *fakeGetter
+		flag   bool
+		want   int
+	}{
+		{"changes present", oneKeyValueBindingFixture, &fakeGetter{}, true, planExitChanges},
+		{"nothing to do", minimalFixture, &fakeGetter{}, true, 0},
+		{"a resource could not be planned", oneKeyValueBindingFixture, &fakeGetter{err: errors.New("kv api unreachable")}, true, planExitFailed},
+		{"without the flag, changes are still 0", oneKeyValueBindingFixture, &fakeGetter{}, false, 0},
+		{"without the flag, failures are still 0", oneKeyValueBindingFixture, &fakeGetter{err: errors.New("kv api unreachable")}, false, 0},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			// execPlan runs the command directly, not through
+			// NewRootCommand, which is what resets the signal.
+			exitSignal = 0
+			args := []string{testEnvName, "--dir", tc.dir(t)}
+			if tc.flag {
+				args = append(args, "--detailed-exitcode")
+			}
+			if _, err := execPlan(t, keyValueAssembler(t, tc.getter), args); err != nil {
+				t.Fatalf("execPlan: %v — the exit code is a signal, never an error", err)
+			}
+			if got := ExitSignal(); got != tc.want {
+				t.Errorf("ExitSignal() = %d, want %d", got, tc.want)
+			}
+		})
+	}
+}
+
+// The signal does not outlive the command that raised it.
+func TestNewRootCommandResetsTheExitSignal(t *testing.T) {
+	signalExit(planExitChanges)
+	NewRootCommand()
+	if ExitSignal() != 0 {
+		t.Errorf("ExitSignal() = %d after NewRootCommand, want 0", ExitSignal())
+	}
 }
 
 func TestNewPlanCommand_RequiresExactlyOneArg(t *testing.T) {

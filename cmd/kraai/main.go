@@ -19,18 +19,23 @@ import (
 
 func main() {
 	err := cli.Execute(os.Args[1:])
-	os.Exit(handle(err, cli.DebugRequested(), os.Getenv, os.Stderr))
+	os.Exit(handle(err, cli.DebugRequested(), cli.ExitSignal(), os.Getenv, os.Stderr))
 }
 
 // handle is main's pure, testable core: given the error Execute produced,
-// whether --debug was set, an env lookup function, and where to print,
-// it prints kraai's error presentation and returns the process exit code
-// to use. Splitting this out of main keeps
-// the debug-mode decision and the exit-code mapping unit-testable without
-// capturing os.Stdout/os.Stderr or forking a subprocess.
-func handle(err error, debugFlag bool, getenv func(string) string, stderr io.Writer) int {
+// whether --debug was set, the exit code a successful command signalled
+// (cli.ExitSignal), an env lookup function, and where to print, it prints
+// kraai's error presentation and returns the process exit code to use.
+// Splitting this out of main keeps the debug-mode decision and the
+// exit-code mapping unit-testable without capturing os.Stdout/os.Stderr or
+// forking a subprocess.
+//
+// A signalled code is honoured only on success: it is how `plan
+// --detailed-exitcode` says "2, changes present" without that being an
+// error, and a command that failed exits by its error regardless.
+func handle(err error, debugFlag bool, signal int, getenv func(string) string, stderr io.Writer) int {
 	if err == nil {
-		return 0
+		return signal
 	}
 
 	// Best-effort: if stderr itself is broken there's nothing more useful

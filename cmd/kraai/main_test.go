@@ -30,7 +30,7 @@ func TestHandle_ExitCodeTable(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			var stderr bytes.Buffer
-			got := handle(tc.err, false, noEnv, &stderr)
+			got := handle(tc.err, false, 0, noEnv, &stderr)
 			if got != tc.want {
 				t.Errorf("handle(%v) exit code = %d, want %d", tc.err, got, tc.want)
 			}
@@ -40,7 +40,7 @@ func TestHandle_ExitCodeTable(t *testing.T) {
 
 func TestHandle_SuccessPrintsNothing(t *testing.T) {
 	var stderr bytes.Buffer
-	handle(nil, false, noEnv, &stderr)
+	handle(nil, false, 0, noEnv, &stderr)
 	if stderr.Len() != 0 {
 		t.Errorf("handle(nil, ...) wrote %q to stderr, want nothing", stderr.String())
 	}
@@ -54,7 +54,7 @@ func TestHandle_DebugFlagTriggersStack(t *testing.T) {
 	err := kerrors.Validation("bad region %q", "mars")
 
 	var stderr bytes.Buffer
-	handle(err, true, noEnv, &stderr)
+	handle(err, true, 0, noEnv, &stderr)
 
 	assertStackOutput(t, stderr.String(), err)
 }
@@ -69,7 +69,7 @@ func TestHandle_DebugEnvTriggersStack(t *testing.T) {
 	}
 
 	var stderr bytes.Buffer
-	handle(err, false, getenv, &stderr)
+	handle(err, false, 0, getenv, &stderr)
 
 	assertStackOutput(t, stderr.String(), err)
 }
@@ -78,7 +78,7 @@ func TestHandle_NeitherDebugFlagNorEnvPrintsMessageOnly(t *testing.T) {
 	err := kerrors.Validation("bad region %q", "mars")
 
 	var stderr bytes.Buffer
-	handle(err, false, noEnv, &stderr)
+	handle(err, false, 0, noEnv, &stderr)
 
 	got := stderr.String()
 	if strings.Contains(got, "main.go") || strings.Contains(got, "kerrors.go") {
@@ -102,7 +102,7 @@ func TestHandle_EnvOtherThanOneDoesNotEnableDebug(t *testing.T) {
 	}
 
 	var stderr bytes.Buffer
-	handle(err, false, getenv, &stderr)
+	handle(err, false, 0, getenv, &stderr)
 
 	if strings.TrimSpace(stderr.String()) != err.Error() {
 		t.Errorf("handle() with KRAAI_DEBUG=true wrote %q, want just the message chain %q", stderr.String(), err.Error())
@@ -147,5 +147,21 @@ func assertStackOutput(t *testing.T, output string, err error) {
 	}
 	if !strings.Contains(output, "main_test.go") {
 		t.Errorf("stack output %q does not contain the expected stack frame (main_test.go)", output)
+	}
+}
+
+// A signalled exit code is what a successful command exits with, printing
+// nothing; a failed command exits by its error and the signal is moot.
+func TestHandle_SignalOnlyOnSuccess(t *testing.T) {
+	var stderr bytes.Buffer
+	if got := handle(nil, false, 2, noEnv, &stderr); got != 2 {
+		t.Errorf("handle(nil, signal 2) = %d, want 2", got)
+	}
+	if stderr.Len() != 0 {
+		t.Errorf("a signalled success wrote %q to stderr, want nothing", stderr.String())
+	}
+	err := kerrors.Validation("bad manifest")
+	if got := handle(err, false, 2, noEnv, &stderr); got != kerrors.ExitCode(err) {
+		t.Errorf("handle(err, signal 2) = %d, want the error's own code %d", got, kerrors.ExitCode(err))
 	}
 }

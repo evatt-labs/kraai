@@ -254,7 +254,10 @@ kraai plugins --env <name>     # load the manifest's plugins and show what they 
 ```
 
 `plan` against a real account is safe and is the best way to see what kraai
-would do. This is verbatim output from the manifest above:
+would do. `--detailed-exitcode` gives a script something to branch on without
+parsing the output: 0 when there is nothing to do, 2 when changes are present,
+1 when a resource could not be planned — Terraform's convention. This is
+verbatim output from the manifest above:
 
 ```
 $ kraai plan production
