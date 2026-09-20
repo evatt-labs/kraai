@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.5](https://github.com/evatt-labs/kraai/compare/v0.6.4...v0.6.5) (2026-09-20)
+
+
+### Bug Fixes
+
+* **plan:** a reference read orders after the one type it reads ([#226](https://github.com/evatt-labs/kraai/issues/226)) ([4e42bad](https://github.com/evatt-labs/kraai/commit/4e42bad08ef45d0b209265d0a0ada1fc1ee4e856))
+
 ## [0.6.4](https://github.com/evatt-labs/kraai/compare/v0.6.3...v0.6.4) (2026-09-20)
 
 
