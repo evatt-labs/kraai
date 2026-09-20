@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.6.4](https://github.com/evatt-labs/kraai/compare/v0.6.3...v0.6.4) (2026-09-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* a `databases:` entry under the cloudflare vendor no longer accepts `caching`, and a `queues:` entry no longer accepts `consumer`. Both were accepted and ignored.
+* **aws:** the dns entry's `name` key is no longer accepted. It was declared before anything read it, and the one record kraai writes is the zone apex. CloudFront cannot yet read the private bucket it fronts; that
+* a `cdn` entry must name the `objects` binding it fronts as `origin`; a `dns` record's target is its entry's `alias`. Neither key existed before, and a `cdn` entry without `origin` no longer loads.
+* a route with `custom_domain: true` must name a `certificate:` — a tls binding on its service. A manifest that declared one without it loaded and did nothing; it now fails at load saying what is missing.
+* `hooks:` in kraai.yaml is no longer accepted. It did nothing.
+* an environment's `resources:` block is keyed by capability, so `databases:` becomes `database:`.
+* `plugins:` is now a list of objects, not of paths. Each entry names the module, what it may reach, and what it implements.
+
+### Features
+
+* a binding names the bindings it needs ([#215](https://github.com/evatt-labs/kraai/issues/215)) ([bf91738](https://github.com/evatt-labs/kraai/commit/bf9173833448bb7193880b391a3aa1d2da5d204a))
+* a registration declares which bindings it reads ([#214](https://github.com/evatt-labs/kraai/issues/214)) ([8862dfd](https://github.com/evatt-labs/kraai/commit/8862dfdcb4f89d8bde7052b4d2e6ef5f4c591d9e)), closes [#208](https://github.com/evatt-labs/kraai/issues/208)
+* **aws:** a hosted zone is named by the zone its entry declares ([#216](https://github.com/evatt-labs/kraai/issues/216)) ([100f810](https://github.com/evatt-labs/kraai/commit/100f81094840f4d6a52d40d5227337756fd524ed)), closes [#117](https://github.com/evatt-labs/kraai/issues/117)
+* **aws:** check a list request against what the type's schema requires ([#224](https://github.com/evatt-labs/kraai/issues/224)) ([97715b0](https://github.com/evatt-labs/kraai/commit/97715b07349d429030bfc93c07a138bfefcce6a0)), closes [#132](https://github.com/evatt-labs/kraai/issues/132)
+* **aws:** create hosted zones, and certificates validated through them ([#218](https://github.com/evatt-labs/kraai/issues/218)) ([80a145e](https://github.com/evatt-labs/kraai/commit/80a145ed004dd2d0d2683fac5a7e6c0ccbee6f46)), closes [#117](https://github.com/evatt-labs/kraai/issues/117)
+* **aws:** create the distribution and the apex record ([#220](https://github.com/evatt-labs/kraai/issues/220)) ([4532588](https://github.com/evatt-labs/kraai/commit/4532588bec8139565f3b3b04532f4c5d0a3af2e4)), closes [#117](https://github.com/evatt-labs/kraai/issues/117)
+* **aws:** the engine checks ownership of what it finds ([#217](https://github.com/evatt-labs/kraai/issues/217)) ([f601e9f](https://github.com/evatt-labs/kraai/commit/f601e9ff7240e4637471907234ac45a87a69973a)), closes [#120](https://github.com/evatt-labs/kraai/issues/120)
+* Hyperdrive reads the entry's caching; drop the keys nothing reads ([#223](https://github.com/evatt-labs/kraai/issues/223)) ([7005a59](https://github.com/evatt-labs/kraai/commit/7005a5911fbcb772140b7c370c2a53ebba40fa2d)), closes [#192](https://github.com/evatt-labs/kraai/issues/192)
+* let plugins declare capabilities ([#205](https://github.com/evatt-labs/kraai/issues/205)) ([9476186](https://github.com/evatt-labs/kraai/commit/94761867126ba7cced64e87f1cf78491ecdd6d11)), closes [#126](https://github.com/evatt-labs/kraai/issues/126)
+* load the plugins a manifest declares ([#202](https://github.com/evatt-labs/kraai/issues/202)) ([3693e06](https://github.com/evatt-labs/kraai/commit/3693e06e6ef34f37b2054efefc9425348748dc60)), closes [#199](https://github.com/evatt-labs/kraai/issues/199)
+* make resource imports reach the planner and the provider ([#206](https://github.com/evatt-labs/kraai/issues/206)) ([6ff3ec0](https://github.com/evatt-labs/kraai/commit/6ff3ec03b3eb6303101337486a1faf281f6eb19e)), closes [#112](https://github.com/evatt-labs/kraai/issues/112)
+* **plan:** --detailed-exitcode reports changes present as 2 ([#221](https://github.com/evatt-labs/kraai/issues/221)) ([063e356](https://github.com/evatt-labs/kraai/commit/063e356c8d2e567fdca28ea27c94868c853c0b7b)), closes [#121](https://github.com/evatt-labs/kraai/issues/121)
+* remove the hooks field nothing read ([#207](https://github.com/evatt-labs/kraai/issues/207)) ([8692b2c](https://github.com/evatt-labs/kraai/commit/8692b2cb3e9c9432abe946170b74f025aa49d1a1)), closes [#111](https://github.com/evatt-labs/kraai/issues/111)
+* routes build a custom domain, presenting an adopted certificate ([#211](https://github.com/evatt-labs/kraai/issues/211)) ([be92603](https://github.com/evatt-labs/kraai/commit/be926031a2d069d0aab7a46a84b6a3ddd9856f29)), closes [#110](https://github.com/evatt-labs/kraai/issues/110)
+* update a resource in place when its difference is mutable ([#212](https://github.com/evatt-labs/kraai/issues/212)) ([5b0aeb4](https://github.com/evatt-labs/kraai/commit/5b0aeb461b899ad221e83b7d35933f055e81f9e6))
+
+
+### Bug Fixes
+
+* **aws:** read the certificate ARN under CertificateArn, not Id ([#213](https://github.com/evatt-labs/kraai/issues/213)) ([7efafff](https://github.com/evatt-labs/kraai/commit/7efafff25b7d77f5867e164540aca5e2bf97c08a))
+* **plan:** a declared read is an ordering edge ([#209](https://github.com/evatt-labs/kraai/issues/209)) ([983d769](https://github.com/evatt-labs/kraai/commit/983d769d949ad4b2b35b3d6f8ef9f9355d769e19)), closes [#119](https://github.com/evatt-labs/kraai/issues/119)
+
 ## [0.6.3](https://github.com/evatt-labs/kraai/compare/v0.6.2...v0.6.3) (2026-09-19)
 
 
