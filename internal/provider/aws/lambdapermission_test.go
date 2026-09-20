@@ -71,7 +71,7 @@ func TestEventBridgeRuleSourceARN(t *testing.T) {
 func TestAPIGatewaySourceARN(t *testing.T) {
 	t.Run("resolves when the API Gateway already exists", func(t *testing.T) {
 		cc := fakeAPIGatewayCC("abc123", "myenv-api")
-		client := &Client{cc: cc, sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"}
+		client := &Client{cc: cc, cf: emptySchemaCF(), sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"}
 
 		arn, err := apiGatewaySourceARN(context.Background(), client, resource.Spec{Name: "myenv-api"})
 		if err != nil {
@@ -86,7 +86,7 @@ func TestAPIGatewaySourceARN(t *testing.T) {
 	t.Run("the same-phase race surfaces as a clear, named error", func(t *testing.T) {
 		// No candidates at all: the gateway does not exist yet.
 		cc := &fakeCC{listOut: []*cloudcontrol.ListResourcesOutput{{}}}
-		client := &Client{cc: cc, sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"}
+		client := &Client{cc: cc, cf: emptySchemaCF(), sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"}
 
 		_, err := apiGatewaySourceARN(context.Background(), client, resource.Spec{Name: "myenv-api"})
 		if err == nil {
@@ -142,7 +142,7 @@ func TestLambdaPermissionCreateForAPIGateway(t *testing.T) {
 	// doc comments for why the two interfaces exist at different layers.
 	fc := &fakeClient{createID: "perm2", createProps: map[string]any{}}
 	cc := fakeAPIGatewayCC("abc123", "myenv-api")
-	client := &Client{cc: cc, sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"}
+	client := &Client{cc: cc, cf: emptySchemaCF(), sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"}
 	perm := &lambdaPermissionResource{
 		inner: &resourceType{
 			provider: Provider, typeName: realTypeLambdaPermission, lookup: resource.LookupByAttr,
