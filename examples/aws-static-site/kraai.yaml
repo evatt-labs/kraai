@@ -1,0 +1,29 @@
+version: 1
+
+# Fixture for #232: declares every AWS static-site capability — object
+# storage, a hosted zone, a certificate validated through it, and a CDN in
+# front of the bucket, presenting that certificate on the zone's apex. See
+# ../README.md for the exact plan invocation.
+# Every AWS capability below shares one Cloud Control client
+# (internal/assemble.vendorsUsed picks the alphabetically-first
+# capability's settings to build it — "cdn" here), so region is repeated
+# on each block rather than relying on that tie-break: whichever one wins,
+# the region is still us-east-1. CloudFront only accepts a certificate
+# from us-east-1, whichever region the distribution itself serves from.
+providers:
+  cdn:
+    vendor: aws
+    settings:
+      region: us-east-1
+  dns:
+    vendor: aws
+    settings:
+      region: us-east-1
+  objects:
+    vendor: aws
+    settings:
+      region: us-east-1
+  tls:
+    vendor: aws
+    settings:
+      region: us-east-1

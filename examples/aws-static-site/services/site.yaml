@@ -1,0 +1,16 @@
+services:
+  site:
+    dir: .
+    objects: [{ binding: ASSETS }]
+    dns:
+      - { binding: ZONE, zone: kraai-example.test, alias: CDN }
+    tls:
+      - binding: CERT
+        domain: kraai-example.test
+        zone: ZONE
+        alternateNames: [www.kraai-example.test]
+    cdn:
+      - binding: CDN
+        origin: ASSETS
+        certificate: CERT
+        aliases: [kraai-example.test, www.kraai-example.test]

@@ -1,0 +1,15 @@
+version: 1
+
+# Fixture for #232: declares every AWS capability a Lambda-backed HTTP
+# service inside a private network exercises. See ../README.md for the
+# exact plan invocation.
+providers:
+  compute:
+    vendor: aws
+    settings:
+      region: us-east-1
+      runtime: python3.13
+      architecture: arm64
+      package: zip
+  network:
+    vendor: aws

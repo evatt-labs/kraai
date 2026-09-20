@@ -1,0 +1,16 @@
+services:
+  api:
+    dir: handler
+    compute:
+      trigger: http
+      handler: app.handler
+      settings:
+        memorySize: 256
+        timeout: 10
+    # A private network the service's other resources could sit inside.
+    # kraai does not yet wire compute into a network binding's VPC (no
+    # Lambda VpcConfig is built from it — see ../README.md's note on this
+    # gap) so this binding is provisioned and torn down alongside the
+    # service without the function actually running inside it.
+    network:
+      - { binding: NET, cidr: 10.90.0.0/16, subnet: 10.90.1.0/24 }
