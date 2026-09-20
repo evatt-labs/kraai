@@ -18,7 +18,7 @@ func preflight(p *plan.Plan, allowReplace bool) error {
 	var failed, blockedReplace []string
 
 	for _, a := range p.Actions {
-		switch a.Kind {
+		switch a.Kind { //nolint:exhaustive // deliberately partial: preflight only refuses on ActionFailed and unpermitted ActionReplace, every other Kind is fine to proceed on and needs no branch here
 		case plan.ActionFailed:
 			failed = append(failed, describeAction(a))
 		case plan.ActionReplace:

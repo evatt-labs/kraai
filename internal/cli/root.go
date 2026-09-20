@@ -5,8 +5,9 @@
 package cli
 
 import (
-	"github.com/evatt-labs/kraai/internal/assemble"
 	"github.com/spf13/cobra"
+
+	"github.com/evatt-labs/kraai/internal/assemble"
 )
 
 // debugFlag backs the root command's --debug persistent flag. It's a

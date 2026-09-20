@@ -13,9 +13,8 @@ package neonresource
 import (
 	"context"
 
-	"github.com/evatt-labs/kraai/internal/manifest"
-
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/provider/neon"
 	"github.com/evatt-labs/kraai/internal/resource"
 )

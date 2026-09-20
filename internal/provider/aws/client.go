@@ -358,7 +358,7 @@ func (c *Client) ListResources(ctx context.Context, typeName string, resourceMod
 	var identifiers []string
 	var nextToken *string
 
-	for page := 0; page < maxListPages; page++ {
+	for range maxListPages {
 		out, err := c.cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{
 			TypeName:      aws.String(typeName),
 			ResourceModel: modelJSON,
@@ -849,7 +849,7 @@ func (c *Client) PutObject(ctx context.Context, bucket, key string, body []byte)
 // treated as if it meant the same thing as absence.
 func (c *Client) EmptyBucket(ctx context.Context, bucket string) error {
 	var token *string
-	for page := 0; page < maxEmptyBucketPages; page++ {
+	for range maxEmptyBucketPages {
 		out, err := c.s3.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 			Bucket:            aws.String(bucket),
 			ContinuationToken: token,
@@ -1006,7 +1006,7 @@ func (c *Client) EmptyBucket(ctx context.Context, bucket string) error {
 // comparison via ExpectedBucketOwner could not.
 func (c *Client) OwnsBucket(ctx context.Context, bucket string) (bool, error) {
 	var token *string
-	for page := 0; page < maxOwnsBucketPages; page++ {
+	for range maxOwnsBucketPages {
 		out, err := c.s3.ListBuckets(ctx, &s3.ListBucketsInput{
 			Prefix:            aws.String(bucket),
 			ContinuationToken: token,

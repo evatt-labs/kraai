@@ -19,7 +19,7 @@ type decodeTarget struct {
 	Nested     *decodeNested  `yaml:"nested,omitempty"`
 	ByKey      map[string]int `yaml:"by_key,omitempty"`
 	Structs    []decodeNested `yaml:"structs,omitempty"`
-	NoTag      string         //nolint:revive // exercising the untagged-field fallback deliberately
+	NoTag      string         // exercising the untagged-field fallback deliberately
 	Skipped    string         `yaml:"-"`
 	unexported string         //nolint:unused // exercising the unexported-field skip deliberately
 }
@@ -280,7 +280,7 @@ func TestDecodeStrict_UnsupportedMapKeyType(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected an error")
 	}
-	kerr, ok := err.(*kerrors.KError) //nolint:errorlint
+	kerr, ok := err.(*kerrors.KError) //nolint:errorlint // asserting the concrete constructor return type is the point
 	if !ok {
 		t.Fatalf("expected *kerrors.KError, got %T", err)
 	}

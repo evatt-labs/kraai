@@ -110,7 +110,7 @@ func (c *Client) WaitForConnectable(ctx context.Context, info ConnectionInfo, at
 		attempts = DefaultConnectAttempts
 	}
 	var last error
-	for i := 0; i < attempts; i++ {
+	for i := range attempts {
 		err := c.probe(ctx, info)
 		if err == nil {
 			return nil

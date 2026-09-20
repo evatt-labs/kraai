@@ -20,7 +20,7 @@ func TestScopeLocker_SerializesSameScope(t *testing.T) {
 	var mu sync.Mutex
 	var current, peak int
 	var wg sync.WaitGroup
-	for i := 0; i < n; i++ {
+	for range n {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -55,7 +55,7 @@ func TestScopeLocker_DifferentScopesRunConcurrently(t *testing.T) {
 	release := make(chan struct{})
 	var wg sync.WaitGroup
 	for _, scope := range []string{"neon:project:p1", "neon:project:p2"} {
-		scope := scope
+
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -88,7 +88,7 @@ func TestScopeLocker_EmptyScopeIsUnlocked(t *testing.T) {
 	started := make(chan struct{}, n)
 	release := make(chan struct{})
 	var wg sync.WaitGroup
-	for i := 0; i < n; i++ {
+	for range n {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -101,7 +101,7 @@ func TestScopeLocker_EmptyScopeIsUnlocked(t *testing.T) {
 	}
 
 	deadline := time.After(2 * time.Second)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		select {
 		case <-started:
 		case <-deadline:

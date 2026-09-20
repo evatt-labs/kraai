@@ -316,7 +316,7 @@ func TestApply_ConcurrencyBounded(t *testing.T) {
 	})
 
 	var actions []plan.Action
-	for i := 0; i < n; i++ {
+	for i := range n {
 		actions = append(actions, action("api", bindingName(i), "cf", "kv", 1, plan.ActionCreate))
 	}
 	p := &plan.Plan{Actions: actions}
@@ -382,7 +382,7 @@ func TestApply_ScopedRegistration_SerializesSameScope(t *testing.T) {
 	})
 
 	var actions []plan.Action
-	for i := 0; i < n; i++ {
+	for i := range n {
 		actions = append(actions, action(fmt.Sprintf("svc%d", i), "DB", "neon", "branch", 0, plan.ActionCreate))
 	}
 	p := &plan.Plan{Actions: actions}
@@ -459,7 +459,7 @@ func TestApply_UnscopedRegistration_Unaffected(t *testing.T) {
 	})
 
 	var actions []plan.Action
-	for i := 0; i < n; i++ {
+	for i := range n {
 		actions = append(actions, action("api", bindingName(i), "cf", "kv", 1, plan.ActionCreate))
 	}
 	p := &plan.Plan{Actions: actions}

@@ -161,7 +161,6 @@ func (a *Applier) runWave(
 
 	failed := make([]bool, len(idxs))
 	for pos, i := range idxs {
-		pos, i := pos, i
 		g.Go(func() error {
 			res := a.execute(ctx, actions[i], outputs, secrets, attrs, locker)
 			results[i] = res
@@ -271,7 +270,7 @@ func (a *Applier) mutate(
 	res := reg.Resource
 	scope := reg.ScopeFor(spec)
 
-	switch act.Kind {
+	switch act.Kind { //nolint:exhaustive // plan.ActionFailed is handled by the default below, which documents why: preflight already refuses the whole run if any ActionFailed is present, so this default exists for a plan.ActionKind this package does not know about, not for ActionFailed specifically
 	case plan.ActionCreate:
 		var state *resource.State
 		err := locker.Do(scope, func() error {
@@ -334,7 +333,7 @@ func (a *Applier) mutate(
 // wrapped error message in execute — "create failed for provider/type
 // name" reads better than the noun outcome would ("created failed for...").
 func verb(o Outcome) string {
-	switch o {
+	switch o { //nolint:exhaustive // OutcomeFailed and OutcomeSkipped fall through to the default below, which is already the correct rendering for them (o.String()) — this is a display helper for the four outcomes that can fail mid-verb, not an exhaustive account of Outcome
 	case OutcomeReplaced:
 		return "replace (delete then create)"
 	case OutcomeUnchanged:

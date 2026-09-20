@@ -397,7 +397,7 @@ func TestDestroy_ConcurrencyBounded(t *testing.T) {
 	})
 
 	var actions []plan.Action
-	for i := 0; i < n; i++ {
+	for i := range n {
 		actions = append(actions, action("api", bindingName(i), "cf", "kv", 1, plan.ActionNoChange))
 	}
 	p := &plan.Plan{Actions: actions}
@@ -442,7 +442,7 @@ func TestDestroy_ScopedRegistration_SerializesSameScope(t *testing.T) {
 	})
 
 	var actions []plan.Action
-	for i := 0; i < n; i++ {
+	for i := range n {
 		actions = append(actions, action(fmt.Sprintf("svc%d", i), "DB", "neon", "branch", 0, plan.ActionNoChange))
 	}
 	p := &plan.Plan{Actions: actions}

@@ -125,19 +125,19 @@ func TestKError_StdlibIsCompatible(t *testing.T) {
 	}
 }
 
-// customErr is a concrete error type used to prove errors.As can recover a
+// customError is a concrete error type used to prove errors.As can recover a
 // type further down KError's Unwrap chain, not just *KError itself.
-type customErr struct{ detail string }
+type customError struct{ detail string }
 
-func (e *customErr) Error() string { return "custom: " + e.detail }
+func (e *customError) Error() string { return "custom: " + e.detail }
 
 func TestKError_StdlibAsCompatible(t *testing.T) {
-	cause := &customErr{detail: "disk full"}
+	cause := &customError{detail: "disk full"}
 	kerr := kerrors.Wrap(cause, kerrors.CodeUnexpected, "writing state file")
 
-	var got *customErr
+	var got *customError
 	if !errors.As(kerr, &got) {
-		t.Fatalf("errors.As(kerr, *customErr) = false, want true")
+		t.Fatalf("errors.As(kerr, *customError) = false, want true")
 	}
 	if got != cause {
 		t.Errorf("errors.As recovered %+v, want the original %+v", got, cause)

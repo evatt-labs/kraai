@@ -332,7 +332,7 @@ func (p *Planner) expandCompute(
 					reads:     reads,
 				})
 			}
-		default:
+		case resource.NameFromBinding:
 			var reads []readEdge
 			item.ReadsBindings, reads = readsFor(r, svcKey, svc, manifest.Route{})
 			out = append(out, plannedItem{
@@ -343,6 +343,13 @@ func (p *Planner) expandCompute(
 				dependsOn: r.DependsOn,
 				reads:     reads,
 			})
+		default:
+			// A NameStrategy this switch does not know about must not
+			// silently take NameFromBinding's shape — that shape's Ref.Name
+			// comes from the binding-derived `name` computed above, which
+			// may not even mean anything for a strategy this package has
+			// never seen.
+			return nil, kerrors.Validation("%s: unknown NameStrategy %v", r.Key(), r.NameFrom)
 		}
 	}
 	return out, nil
@@ -639,6 +646,12 @@ func decide(ctx context.Context, it plannedItem) Action {
 		case resource.Mutable:
 			action.Kind = ActionUpdate
 			return action
+		case resource.Same:
+			// Falls through to ActionNoChange below, same as before this
+			// case existed — spelled out explicitly so a fourth
+			// resource.Difference value added later cannot silently take
+			// this path too; exhaustive forces this switch to be revisited
+			// instead.
 		}
 	}
 

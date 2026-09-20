@@ -12,11 +12,129 @@ linters:
   default: standard
   enable:
     - bodyclose
+    - copyloopvar
+    - depguard
+    - errname
+    - errorlint
+    - exhaustive
     - forbidigo
     - gocritic
     - gosec
+    - intrange
+    - misspell
+    - nilerr
+    - nolintlint
     - revive
+    - thelper
+    - unparam
+    - usetesting
   settings:
+    depguard:
+      rules:
+        # internal/resource is the contract every provider and every
+        # orchestration package (plan/apply/destroy) depends on — never the
+        # reverse. See this repo's Architecture wiki page and AGENTS.md's
+        # own package-boundary language for the intent this encodes; the
+        # PR description that introduced this rule records the `go list
+        # -deps` check that these boundaries hold on the tree as it stood
+        # when the rule was added.
+        resource-no-upward-imports:
+          files:
+            - "**/internal/resource/**"
+          list-mode: original
+          deny:
+            - pkg: github.com/evatt-labs/kraai/internal/provider
+              desc: "internal/resource must not import a provider package — providers depend on resource, not the reverse"
+            - pkg: github.com/evatt-labs/kraai/internal/plan
+              desc: "internal/resource must not import internal/plan — plan is a consumer of this package"
+            - pkg: github.com/evatt-labs/kraai/internal/apply
+              desc: "internal/resource must not import internal/apply — apply is a consumer of this package"
+            - pkg: github.com/evatt-labs/kraai/internal/destroy
+              desc: "internal/resource must not import internal/destroy — destroy is a consumer of this package"
+            - pkg: github.com/evatt-labs/kraai/internal/cli
+              desc: "internal/resource must not import internal/cli — cli is the outermost layer"
+        # plan, apply and destroy see a provider's behaviour only through
+        # the resource.Resource contract (and through internal/assemble,
+        # which wires a manifest's provider choice to a registration) —
+        # never by importing a provider package directly.
+        #
+        # Non-test code holds this today with no exception (verified with
+        # `go list -f '{{join .Imports "\n"}}'` per package before this
+        # rule was added). Two of internal/plan's own tests are a
+        # deliberate, documented exception: aws_topology_test.go and
+        # aws_settings_validation_test.go register the real, unmodified
+        # provider Registrations and swap out only Resource.Get for a fake,
+        # specifically so the topology/settings-validation assertions run
+        # against production wiring rather than a hand-rolled stand-in —
+        # see aws_topology_test.go's own doc comment. That is a test-only
+        # exception, not a crack in the boundary: nothing in the shipped
+        # binary's import graph changes.
+        orchestration-no-provider-imports:
+          files:
+            - "**/internal/plan/**"
+            - "**/internal/apply/**"
+            - "**/internal/destroy/**"
+            - "!**/*_test.go"
+          list-mode: original
+          deny:
+            - pkg: github.com/evatt-labs/kraai/internal/provider
+              desc: "plan/apply/destroy see providers only through internal/resource and internal/assemble, never directly"
+        # A provider adapts one vendor to the resource.Resource contract; it
+        # has no business knowing about the cli layer above it or the
+        # orchestration packages that consume resource.Resource, since both
+        # would be an import cycle back down to the provider anyway.
+        provider-no-downward-imports:
+          files:
+            - "**/internal/provider/**"
+          list-mode: original
+          deny:
+            - pkg: github.com/evatt-labs/kraai/internal/cli
+              desc: "a provider must not import internal/cli — cli is the outermost layer"
+            - pkg: github.com/evatt-labs/kraai/internal/plan
+              desc: "a provider must not import internal/plan — plan depends on providers only through internal/resource"
+            - pkg: github.com/evatt-labs/kraai/internal/apply
+              desc: "a provider must not import internal/apply — apply depends on providers only through internal/resource"
+            - pkg: github.com/evatt-labs/kraai/internal/destroy
+              desc: "a provider must not import internal/destroy — destroy depends on providers only through internal/resource"
+    exhaustive:
+      # Explicit-cases-only, even with a default clause present: the whole
+      # point is that adding a fourth resource.Difference or a sixth
+      # plan.ActionKind must force every switch over it to be revisited, not
+      # let a default silently absorb the new value the way plan/render.go's
+      # Render did for ActionUpdate before this PR (see this PR's
+      # description for the real, previously-silent gap this default would
+      # otherwise have hidden forever).
+      default-signifies-exhaustive: false
+      # AGENTS.md's own bug class is kraai's own domain enums
+      # (resource.LookupStrategy, resource.Difference, plan.ActionKind and
+      # the like) — a switch this package does not own, over an enum a
+      # vendor or the standard library controls, is a different problem:
+      # this codebase cannot add a case for a reflect.Kind or an AWS
+      # OperationStatus value that does not exist yet, and vendor enums are
+      # large enough that enumerating them buys nothing a well-reasoned
+      # default does not already provide. Excluded here rather than
+      # nolint-ed per call site, since every switch over one of these three
+      # types in this codebase already has a deliberate, documented
+      # default/fallthrough (internal/manifest/strict.go's two switches,
+      # internal/provider/aws/client.go's terminal-status poll).
+      #
+      # Matched against each type's full import path plus its name, not
+      # its package name or this codebase's local import alias — verified
+      # empirically: "^reflect\.Kind$" matches (reflect's import path and
+      # package name happen to be identical), but the equivalent
+      # "^yaml\.Kind$" and "^types\.OperationStatus$" do not, only the full
+      # "go.yaml.in/yaml/v3.Kind" and the cloudcontrol package's own full
+      # path do.
+      ignore-enum-types: 'reflect\.Kind$|go\.yaml\.in/yaml/v3\.Kind$|github\.com/aws/aws-sdk-go-v2/service/cloudcontrol/types\.OperationStatus$'
+    gocritic:
+      enabled-checks:
+        - ruleguard
+      settings:
+        ruleguard:
+          rules: 'rules/*.go'
+    nolintlint:
+      require-explanation: true
+      require-specific: true
     forbidigo:
       # Only cmd/kraai's centralized handler may call os.Exit, print error
       # output straight to stdout/stderr, or read env vars. Every other
@@ -52,8 +170,29 @@ linters:
       - path: ^internal/env/
         linters:
           - forbidigo
+      # unparam is real signal in production code — a parameter nothing
+      # calls with more than one value there usually means the parameter
+      # should not exist. In tests it is mostly noise: a fixture/helper
+      # function is deliberately written more general than any one test
+      # currently exercises, so a future test can pass something else
+      # without a signature change. All 11 findings this linter produced
+      # on this tree, at the PR that enabled it, were exactly that shape —
+      # see that PR's description for the full list. Narrowing the scope
+      # here rather than nolint-ing each one; see AGENTS.md's guidance on
+      # not spraying nolint for something the tool is structurally wrong
+      # about for this codebase's test style.
+      - path: _test\.go
+        linters:
+          - unparam
 
 formatters:
   enable:
+    - gci
     - gofmt
     - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/evatt-labs/kraai)

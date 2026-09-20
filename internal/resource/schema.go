@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"errors"
 	"sort"
 	"strings"
 	"sync"
@@ -133,8 +134,8 @@ func (s *Schema) Validate(data map[string]any) error {
 		return nil
 	}
 
-	verr, ok := err.(*jsonschema.ValidationError)
-	if !ok {
+	var verr *jsonschema.ValidationError
+	if !errors.As(err, &verr) {
 		// Not expected from this library's Validate, but handled rather
 		// than assumed away: a caller still gets a real error naming this
 		// schema, not a silently swallowed one.

@@ -222,7 +222,7 @@ func TestPlan_AWSAPITopology_Deterministic(t *testing.T) {
 	m := kraaiAPIManifest()
 
 	var first *Plan
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		p, err := New(awsAPITopologyFixture(t)).Plan(context.Background(), m, envName)
 		if err != nil {
 			t.Fatalf("Plan (run %d): %v", i, err)

@@ -431,7 +431,7 @@ func listCursor[R any, T any](
 	var all []T
 	cursor := ""
 
-	for page := 0; page < maxListPages; page++ {
+	for range maxListPages {
 		pageQuery := url.Values{}
 		for k, v := range query {
 			pageQuery[k] = v
