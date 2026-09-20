@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go"
 
 	"github.com/evatt-labs/kraai/internal/httpx"
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -122,6 +123,19 @@ type s3API interface {
 	// bucket-scoped (see OwnsBucket's own doc comment for why that
 	// property is exactly what makes it useful here).
 	ListBuckets(ctx context.Context, params *s3.ListBucketsInput, optFns ...func(*s3.Options)) (*s3.ListBucketsOutput, error)
+	// PutBucketPolicy replaces a bucket's entire policy — cloudfront.go's
+	// only use of it, granting the CloudFront distribution fronting an
+	// objects bucket read access to it. A bucket policy is not part of
+	// AWS::S3::Bucket's own Cloud Control schema, so this is object-data-
+	// plane territory in the same sense PutObject is.
+	PutBucketPolicy(ctx context.Context, params *s3.PutBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.PutBucketPolicyOutput, error)
+	// GetBucketPolicy reads a bucket's current policy, or fails with
+	// NoSuchBucketPolicy/NoSuchBucket when there is none — see
+	// Client.GetBucketPolicy for how those are translated to absence.
+	GetBucketPolicy(ctx context.Context, params *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error)
+	// DeleteBucketPolicy removes a bucket's policy, tolerating one already
+	// absent — see Client.DeleteBucketPolicy.
+	DeleteBucketPolicy(ctx context.Context, params *s3.DeleteBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.DeleteBucketPolicyOutput, error)
 }
 
 // stsAPI is the subset of *sts.Client this package calls: GetCallerIdentity,
@@ -1012,6 +1026,74 @@ func (c *Client) OwnsBucket(ctx context.Context, bucket string) (bool, error) {
 		token = out.ContinuationToken
 	}
 	return false, kerrors.Validation("checking ownership of bucket %q did not terminate within %d pages", bucket, maxOwnsBucketPages)
+}
+
+// bucketPolicyAbsent reports whether err is S3's way of saying a bucket
+// policy — or the bucket itself — is not there: NoSuchBucketPolicy and
+// NoSuchBucket, the two codes GetBucketPolicy and DeleteBucketPolicy must
+// both treat as absence rather than failure. S3 does not model
+// NoSuchBucketPolicy as its own Go error type the way NoSuchBucket
+// (s3types.NoSuchBucket) is; both surface through the generic
+// smithy.APIError interface that every typed S3 error also implements, so
+// one ErrorCode check recognizes either.
+func bucketPolicyAbsent(err error) bool {
+	var apiErr smithy.APIError
+	if !errors.As(err, &apiErr) {
+		return false
+	}
+	switch apiErr.ErrorCode() {
+	case "NoSuchBucketPolicy", "NoSuchBucket":
+		return true
+	default:
+		return false
+	}
+}
+
+// PutBucketPolicy replaces bucket's entire policy with document.
+//
+// Nothing else in this package writes a policy on an objects bucket —
+// cloudfront.go's composite distribution resource is the only caller,
+// granting the CloudFront distribution fronting it read access to the
+// objects it serves.
+func (c *Client) PutBucketPolicy(ctx context.Context, bucket, document string) error {
+	_, err := c.s3.PutBucketPolicy(ctx, &s3.PutBucketPolicyInput{
+		Bucket: aws.String(bucket),
+		Policy: aws.String(document),
+	})
+	if err != nil {
+		return kerrors.Wrap(err, kerrors.CodeUnexpected, "putting bucket policy on %q", bucket)
+	}
+	return nil
+}
+
+// GetBucketPolicy returns bucket's current policy document, or found=false
+// when the bucket has no policy at all or does not exist — both read as
+// absence here, per the same absence-versus-failure discipline as
+// GetResource and OwnsBucket. Every other error is real and returned
+// wrapped, never folded into an absent result.
+func (c *Client) GetBucketPolicy(ctx context.Context, bucket string) (string, bool, error) {
+	out, err := c.s3.GetBucketPolicy(ctx, &s3.GetBucketPolicyInput{Bucket: aws.String(bucket)})
+	if err != nil {
+		if bucketPolicyAbsent(err) {
+			return "", false, nil
+		}
+		return "", false, kerrors.Wrap(err, kerrors.CodeUnexpected, "getting bucket policy for %q", bucket)
+	}
+	if out.Policy == nil {
+		return "", false, nil
+	}
+	return *out.Policy, true, nil
+}
+
+// DeleteBucketPolicy removes bucket's policy, tolerating one already
+// absent or a bucket already gone — the same already-absent-is-success
+// contract as Client.DeleteResource.
+func (c *Client) DeleteBucketPolicy(ctx context.Context, bucket string) error {
+	_, err := c.s3.DeleteBucketPolicy(ctx, &s3.DeleteBucketPolicyInput{Bucket: aws.String(bucket)})
+	if err != nil && !bucketPolicyAbsent(err) {
+		return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting bucket policy for %q", bucket)
+	}
+	return nil
 }
 
 // AccountID returns the AWS account id the configured credentials

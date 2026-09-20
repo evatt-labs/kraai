@@ -65,3 +65,14 @@ func ruleARN(region, account, name string) string {
 func executeAPIArn(region, account, apiID string) string {
 	return fmt.Sprintf("arn:aws:execute-api:%s:%s:%s/*/*", region, account, apiID)
 }
+
+// distributionARN builds a CloudFront distribution's ARN from its
+// provider-assigned id. Like IAM, CloudFront's ARNs carry no region segment
+// — a distribution is global, not regional — and unlike every other type
+// this package registers, Cloud Control's own schema for
+// AWS::CloudFront::Distribution publishes no Arn attribute at all, so this
+// is the one ARN in this file built from an id Cloud Control did assign
+// rather than a name kraai derived.
+func distributionARN(account, id string) string {
+	return fmt.Sprintf("arn:aws:cloudfront::%s:distribution/%s", account, id)
+}

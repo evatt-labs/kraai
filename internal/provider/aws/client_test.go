@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
@@ -854,6 +855,23 @@ type fakeS3 struct {
 	listBucketsErr error
 	listBucketsAt  int
 	listBucketsReq []*s3.ListBucketsInput
+
+	// putPolicyErr scripts PutBucketPolicy; putPolicyReq records every call.
+	putPolicyErr error
+	putPolicyReq []*s3.PutBucketPolicyInput
+
+	// getPolicyOut/getPolicyErr script GetBucketPolicy; a nil getPolicyOut
+	// with no getPolicyErr answers with no policy at all (Policy == nil),
+	// distinct from the NoSuchBucketPolicy tests construct explicitly via
+	// getPolicyErr.
+	getPolicyOut *s3.GetBucketPolicyOutput
+	getPolicyErr error
+	getPolicyReq []*s3.GetBucketPolicyInput
+
+	// deletePolicyErr scripts DeleteBucketPolicy; deletePolicyReq records
+	// every call.
+	deletePolicyErr error
+	deletePolicyReq []*s3.DeleteBucketPolicyInput
 }
 
 func (f *fakeS3) PutObject(_ context.Context, params *s3.PutObjectInput, _ ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
@@ -918,6 +936,33 @@ func (f *fakeS3) ListBuckets(_ context.Context, params *s3.ListBucketsInput, _ .
 		f.listBucketsAt++
 	}
 	return out, nil
+}
+
+func (f *fakeS3) PutBucketPolicy(_ context.Context, params *s3.PutBucketPolicyInput, _ ...func(*s3.Options)) (*s3.PutBucketPolicyOutput, error) {
+	f.putPolicyReq = append(f.putPolicyReq, params)
+	if f.putPolicyErr != nil {
+		return nil, f.putPolicyErr
+	}
+	return &s3.PutBucketPolicyOutput{}, nil
+}
+
+func (f *fakeS3) GetBucketPolicy(_ context.Context, params *s3.GetBucketPolicyInput, _ ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error) {
+	f.getPolicyReq = append(f.getPolicyReq, params)
+	if f.getPolicyErr != nil {
+		return nil, f.getPolicyErr
+	}
+	if f.getPolicyOut != nil {
+		return f.getPolicyOut, nil
+	}
+	return &s3.GetBucketPolicyOutput{}, nil
+}
+
+func (f *fakeS3) DeleteBucketPolicy(_ context.Context, params *s3.DeleteBucketPolicyInput, _ ...func(*s3.Options)) (*s3.DeleteBucketPolicyOutput, error) {
+	f.deletePolicyReq = append(f.deletePolicyReq, params)
+	if f.deletePolicyErr != nil {
+		return nil, f.deletePolicyErr
+	}
+	return &s3.DeleteBucketPolicyOutput{}, nil
 }
 
 // fakeSTS is a hand-rolled stsAPI: no AWS account, no network needed.
@@ -1194,6 +1239,104 @@ func TestClientOwnsBucket(t *testing.T) {
 		}
 		if owned {
 			t.Fatal("OwnsBucket = true alongside a non-nil error; a failed check must never assert ownership")
+		}
+	})
+}
+
+func TestClientPutBucketPolicy(t *testing.T) {
+	t.Run("puts the policy on the bucket", func(t *testing.T) {
+		fs3 := &fakeS3{}
+		c := &Client{s3: fs3}
+		if err := c.PutBucketPolicy(context.Background(), "my-bucket", `{"Version":"2012-10-17"}`); err != nil {
+			t.Fatalf("PutBucketPolicy: %v", err)
+		}
+		if len(fs3.putPolicyReq) != 1 {
+			t.Fatalf("got %d PutBucketPolicy calls, want 1", len(fs3.putPolicyReq))
+		}
+		if *fs3.putPolicyReq[0].Bucket != "my-bucket" || *fs3.putPolicyReq[0].Policy != `{"Version":"2012-10-17"}` {
+			t.Fatalf("request = %+v", fs3.putPolicyReq[0])
+		}
+	})
+
+	t.Run("wraps an error", func(t *testing.T) {
+		c := &Client{s3: &fakeS3{putPolicyErr: errors.New("access denied")}}
+		if err := c.PutBucketPolicy(context.Background(), "b", "{}"); err == nil {
+			t.Fatal("expected an error")
+		}
+	})
+}
+
+func TestClientGetBucketPolicy(t *testing.T) {
+	t.Run("returns the live policy", func(t *testing.T) {
+		c := &Client{s3: &fakeS3{getPolicyOut: &s3.GetBucketPolicyOutput{Policy: aws.String(`{"Version":"2012-10-17"}`)}}}
+		policy, found, err := c.GetBucketPolicy(context.Background(), "b")
+		if err != nil || !found || policy != `{"Version":"2012-10-17"}` {
+			t.Fatalf("policy, found, err = %q, %v, %v", policy, found, err)
+		}
+	})
+
+	t.Run("NoSuchBucketPolicy is absence, not an error", func(t *testing.T) {
+		// S3 does not model this one as its own Go error type — see
+		// bucketPolicyAbsent's own doc comment — so the fake reports it
+		// exactly as the SDK would: a generic smithy.APIError carrying
+		// only the code.
+		c := &Client{s3: &fakeS3{getPolicyErr: &smithy.GenericAPIError{Code: "NoSuchBucketPolicy"}}}
+		_, found, err := c.GetBucketPolicy(context.Background(), "b")
+		if err != nil || found {
+			t.Fatalf("found, err = %v, %v, want (false, nil)", found, err)
+		}
+	})
+
+	t.Run("NoSuchBucket is absence, not an error", func(t *testing.T) {
+		c := &Client{s3: &fakeS3{getPolicyErr: &s3types.NoSuchBucket{}}}
+		_, found, err := c.GetBucketPolicy(context.Background(), "b")
+		if err != nil || found {
+			t.Fatalf("found, err = %v, %v, want (false, nil)", found, err)
+		}
+	})
+
+	t.Run("every other error is real", func(t *testing.T) {
+		c := &Client{s3: &fakeS3{getPolicyErr: errors.New("throttled")}}
+		_, found, err := c.GetBucketPolicy(context.Background(), "b")
+		if err == nil {
+			t.Fatal("expected an error")
+		}
+		if found {
+			t.Fatal("found = true alongside a non-nil error")
+		}
+	})
+}
+
+func TestClientDeleteBucketPolicy(t *testing.T) {
+	t.Run("deletes the policy", func(t *testing.T) {
+		fs3 := &fakeS3{}
+		c := &Client{s3: fs3}
+		if err := c.DeleteBucketPolicy(context.Background(), "b"); err != nil {
+			t.Fatalf("DeleteBucketPolicy: %v", err)
+		}
+		if len(fs3.deletePolicyReq) != 1 || *fs3.deletePolicyReq[0].Bucket != "b" {
+			t.Fatalf("request = %+v", fs3.deletePolicyReq)
+		}
+	})
+
+	t.Run("NoSuchBucketPolicy is success", func(t *testing.T) {
+		c := &Client{s3: &fakeS3{deletePolicyErr: &smithy.GenericAPIError{Code: "NoSuchBucketPolicy"}}}
+		if err := c.DeleteBucketPolicy(context.Background(), "b"); err != nil {
+			t.Fatalf("DeleteBucketPolicy: %v", err)
+		}
+	})
+
+	t.Run("NoSuchBucket is success", func(t *testing.T) {
+		c := &Client{s3: &fakeS3{deletePolicyErr: &s3types.NoSuchBucket{}}}
+		if err := c.DeleteBucketPolicy(context.Background(), "b"); err != nil {
+			t.Fatalf("DeleteBucketPolicy: %v", err)
+		}
+	})
+
+	t.Run("every other error is real", func(t *testing.T) {
+		c := &Client{s3: &fakeS3{deletePolicyErr: errors.New("throttled")}}
+		if err := c.DeleteBucketPolicy(context.Background(), "b"); err == nil {
+			t.Fatal("expected an error")
 		}
 	})
 }

@@ -21,6 +21,13 @@ const (
 	TypeRoute53RecordSet              = "AWS::Route53::RecordSet"
 )
 
+// TypeCloudFrontOriginAccessControl is the Cloud Control type of the
+// OriginAccessControl a cloudFrontResource creates before its distribution
+// and references from the distribution's origin. Not a registry entry: it
+// has no manifest vocabulary of its own, and only cloudFrontResource ever
+// creates, finds or deletes one — see cloudfront.go.
+const TypeCloudFrontOriginAccessControl = "AWS::CloudFront::OriginAccessControl"
+
 // Tier 2 compute types (aws-provider-compute): what it takes to actually run
 // a deployed Lambda, beyond the function and its HTTP front door registered
 // above. TypeArtifactBucket is this package's own registry vocabulary rather
