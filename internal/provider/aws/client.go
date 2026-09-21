@@ -182,6 +182,12 @@ type Client struct {
 	accountMu     sync.Mutex
 	accountID     string
 	accountLoaded bool
+
+	// reads memoizes what Cloud Control has already answered this process,
+	// so the many lookups that sweep one type (every by-tag registration
+	// lists a type and reads each instance) cost one request per resource
+	// rather than one per lookup. Forgotten per type on any mutation of it.
+	reads readCache
 }
 
 // Option configures a Client.
@@ -238,9 +244,16 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 	// otelhttp instrumentation as everything else, without replacing any of
 	// the SDK's own retry or credential-resolution behaviour — WithHTTPClient
 	// only substitutes the transport those layers run on top of.
+	//
+	// Adaptive retries with a longer budget: Cloud Control throttles a plan's
+	// burst of reads well before the SDK's three standard attempts are
+	// spent, and adaptive mode paces the client to the limit it hits rather
+	// than failing the plan on it.
 	cfg, err := awsconfig.LoadDefaultConfig(ctx,
 		awsconfig.WithRegion(settings.Region),
 		awsconfig.WithHTTPClient(httpx.NewClient(60*time.Second, nil, nil)),
+		awsconfig.WithRetryMode(aws.RetryModeAdaptive),
+		awsconfig.WithRetryMaxAttempts(cloudControlMaxAttempts),
 	)
 	if err != nil {
 		// LoadDefaultConfig's error can name a credential file path but never
@@ -276,6 +289,9 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 // it, teardown) treats "does not exist" as "already deleted, keep going",
 // so misreading an outage as absence would orphan a real resource.
 func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (map[string]any, bool, error) {
+	if properties, found, hit := c.reads.get(typeName, identifier); hit {
+		return properties, found, nil
+	}
 	out, err := c.cc.GetResource(ctx, &cloudcontrol.GetResourceInput{
 		TypeName:   aws.String(typeName),
 		Identifier: aws.String(identifier),
@@ -283,6 +299,7 @@ func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (
 	if err != nil {
 		var notFound *cctypes.ResourceNotFoundException
 		if errors.As(err, &notFound) {
+			c.reads.putGet(typeName, identifier, "", false)
 			return nil, false, nil
 		}
 		return nil, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "getting %s %q", typeName, identifier)
@@ -295,6 +312,7 @@ func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (
 	if err := json.Unmarshal([]byte(*out.ResourceDescription.Properties), &properties); err != nil {
 		return nil, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding properties for %s %q", typeName, identifier)
 	}
+	c.reads.putGet(typeName, identifier, *out.ResourceDescription.Properties, true)
 	return properties, true, nil
 }
 
@@ -354,6 +372,13 @@ func (c *Client) ListResources(ctx context.Context, typeName string, resourceMod
 		s := string(body)
 		modelJSON = &s
 	}
+	model := ""
+	if modelJSON != nil {
+		model = *modelJSON
+	}
+	if identifiers, hit := c.reads.list(typeName, model); hit {
+		return identifiers, nil
+	}
 
 	var identifiers []string
 	var nextToken *string
@@ -383,6 +408,7 @@ func (c *Client) ListResources(ctx context.Context, typeName string, resourceMod
 			}
 		}
 		if out.NextToken == nil || *out.NextToken == "" {
+			c.reads.putList(typeName, model, identifiers)
 			return identifiers, nil
 		}
 		nextToken = out.NextToken
@@ -531,6 +557,10 @@ func decodeResourceModel(model *string) (map[string]any, error) {
 // state, returning the provider-assigned identifier and the resulting
 // properties.
 func (c *Client) CreateResource(ctx context.Context, typeName string, desiredState map[string]any) (string, map[string]any, error) {
+	// Before and after: a read of this type in flight during the call must
+	// not repopulate the cache with the world as it was.
+	c.reads.forget(typeName)
+	defer c.reads.forget(typeName)
 	body, err := json.Marshal(desiredState)
 	if err != nil {
 		return "", nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding desired state for %s", typeName)
@@ -574,6 +604,8 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 // identifier and polls to a terminal state, returning the resulting
 // properties.
 func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
+	c.reads.forget(typeName)
+	defer c.reads.forget(typeName)
 	out, err := c.cc.UpdateResource(ctx, &cloudcontrol.UpdateResourceInput{
 		TypeName:      aws.String(typeName),
 		Identifier:    aws.String(identifier),
@@ -609,6 +641,8 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 // handler itself discovers the resource is already gone and reports a
 // terminal FAILED with HandlerErrorCodeNotFound.
 func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string) error {
+	c.reads.forget(typeName)
+	defer c.reads.forget(typeName)
 	out, err := c.cc.DeleteResource(ctx, &cloudcontrol.DeleteResourceInput{
 		TypeName:   aws.String(typeName),
 		Identifier: aws.String(identifier),
