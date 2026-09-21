@@ -90,7 +90,8 @@ func Capabilities() []resource.CapabilityDef {
 		{
 			Name: manifest.CapabilityNetwork,
 			Summary: "Private VPC with a public subnet: internet gateway, route " +
-				"table and the default route making the subnet reachable.",
+				"table, the default route making the subnet reachable, and " +
+				"gateway endpoints routing S3 and DynamoDB inside the VPC.",
 			// No ProviderSettings beyond the provider-level "region"
 			// DecodeSettings already checks: the address plan is per
 			// binding, not per provider, so it lives in Binding.

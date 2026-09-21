@@ -23,6 +23,26 @@ const (
 // everything it has no more specific route for.
 const defaultRoute = "0.0.0.0/0"
 
+// TypeVPCEndpoint is AWS::EC2::VPCEndpoint's Cloud Control TypeName. Two
+// roles of it register under a network: gateway endpoints for S3 and
+// DynamoDB, which route those services' traffic inside the VPC.
+const TypeVPCEndpoint = "AWS::EC2::VPCEndpoint"
+
+// The registry keys for the two gateway endpoints every network gets. Both
+// are free, and without them a function inside the network reaches neither
+// its bucket nor its table: a Lambda network interface has no public IP, so
+// a public AWS endpoint is unreachable from a subnet with no NAT.
+var (
+	TypeS3Endpoint       = resource.RoleType(TypeVPCEndpoint, "S3")
+	TypeDynamoDBEndpoint = resource.RoleType(TypeVPCEndpoint, "DynamoDB")
+)
+
+// gatewayServiceName is the endpoint service a gateway endpoint attaches
+// to, spelled the way EC2 names them per region.
+func gatewayServiceName(region, service string) string {
+	return "com.amazonaws." + region + "." + service
+}
+
 // attachmentTypeIGW is the first half of a VPCGatewayAttachment's identifier.
 // Cloud Control spells it "IGW", not the "internet-gateway" the EC2 API uses
 // elsewhere, and an identifier built with the wrong spelling reads as an
@@ -181,6 +201,23 @@ func taggedLookup(client ccAPI, typeName string) *resourceType {
 	}
 }
 
+// roleTaggedLookup is taggedLookup for a type that registers under more
+// than one role in the same binding, two gateway endpoints say. Every
+// instance in the binding shares the derived name, so the tag value carries
+// the role too, or a lookup for one role would find whichever instance was
+// listed first.
+func roleTaggedLookup(client ccAPI, typeName, role string) *resourceType {
+	value := func(name string) string { return name + "/" + role }
+	return &resourceType{
+		provider: Provider,
+		typeName: typeName,
+		lookup:   resource.LookupByTag,
+		match:    func(properties map[string]any, name string) bool { return arrayTagsMatch(properties, value(name)) },
+		stampTag: func(desired map[string]any, name string) { arrayTagsStampTag(desired, value(name)) },
+		client:   client,
+	}
+}
+
 // endpointID resolves the provider id of the typeName instance carrying the
 // identity tag for name.
 //
@@ -218,18 +255,54 @@ func configString(spec resource.Spec, field string) (string, error) {
 }
 
 // registerNetwork returns the registrations for one private network: a VPC,
-// a public subnet, and the routing that makes the subnet reach the internet.
+// a public subnet, the routing that makes the subnet reach the internet, and
+// gateway endpoints routing S3 and DynamoDB traffic inside the VPC. region
+// names the endpoint services, which EC2 spells per region.
 //
 // Every one of them belongs to a single manifest binding, so they share a
 // derived name and are ordered against each other purely by DependsOn.
-func registerNetwork(client ccAPI) []resource.Registration {
+func registerNetwork(client ccAPI, region string) []resource.Registration {
 	vpcKey := key(TypeVPC)
 	igwKey := key(TypeInternetGateway)
 	subnetKey := key(TypeSubnet)
 	routeTableKey := key(TypeRouteTable)
 	attachmentKey := key(TypeVPCGatewayAttachment)
 
+	// gatewayEndpoint registers one gateway endpoint on the network's route
+	// table. Found by tag, since an endpoint's id is EC2's and nothing the
+	// manifest says names it, with the service in the tag value so the two
+	// endpoints in one binding stay distinguishable (roleTaggedLookup).
+	gatewayEndpoint := func(typeKey, service string) resource.Registration {
+		return resource.Registration{
+			Provider: Provider, Type: typeKey, VendorType: TypeVPCEndpoint,
+			Capability: manifest.CapabilityNetwork,
+			Lookup:     resource.LookupByTag, DependsOn: []string{vpcKey, routeTableKey},
+			Resource: translated(roleTaggedLookup(client, TypeVPCEndpoint, service),
+				func(spec resource.Spec) (resource.Spec, error) {
+					vpcID, err := spec.Attribute(vpcKey, "VpcId")
+					if err != nil {
+						return spec, err
+					}
+					routeTableID, err := spec.Attribute(routeTableKey, "RouteTableId")
+					if err != nil {
+						return spec, err
+					}
+					translated := spec
+					translated.Config = map[string]any{
+						"VpcId":           vpcID,
+						"ServiceName":     gatewayServiceName(region, service),
+						"VpcEndpointType": "Gateway",
+						"RouteTableIds":   []any{routeTableID},
+					}
+					return translated, nil
+				},
+				nil),
+		}
+	}
+
 	return []resource.Registration{
+		gatewayEndpoint(TypeS3Endpoint, "s3"),
+		gatewayEndpoint(TypeDynamoDBEndpoint, "dynamodb"),
 		{
 			Provider: Provider, Type: TypeVPC, Capability: manifest.CapabilityNetwork,
 			Lookup: resource.LookupByTag,

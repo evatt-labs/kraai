@@ -13,7 +13,8 @@ them is read-only and safe.
 
 `compute` + `network` + `queues` + `database` + `keyvalue`: an
 HTTP-triggered Lambda function behind an API Gateway HTTP API, alongside a
-private VPC (internet gateway, public subnet, route table), a standard SQS
+private VPC (internet gateway, public subnet, route table, S3 and DynamoDB
+gateway endpoints), a standard SQS
 queue, a DynamoDB on-demand table (`driver: dynamodb`), an Aurora DSQL
 cluster (`driver: postgres`) and an ElastiCache Serverless cache
 (`driver: redis`, Valkey) placed in the VPC behind a security group
@@ -28,14 +29,16 @@ function has (see below).
 The function runs inside the `network` binding: its `VpcConfig` names the
 binding's subnet and the VPC's default security group, and its execution
 role gains `AWSLambdaVPCAccessExecutionRole`. That is what lets it reach the
-cache. It is also what cuts it off from everything else: the network builds
-one public subnet with an internet gateway, a Lambda network interface never
-gets a public IP, and no NAT gateway or VPC endpoint is built (#244), so
-from inside the VPC the function cannot reach the internet or the public
-SQS, DynamoDB, DSQL and S3 endpoints. The queue, table and cluster bindings
-on this service are granted and named, not reachable, until #244 lands. The
-manifest declares all of them regardless, because its job is exercising
-every capability AWS claims, not a topology that works end to end.
+cache, and, through the gateway endpoints every network carries for S3 and
+DynamoDB, the table. It is also what cuts it off from everything else: the
+network builds one public subnet with an internet gateway, a Lambda network
+interface never gets a public IP, and no NAT gateway or interface endpoint
+is built (#244), so from inside the VPC the function cannot reach the
+internet or the public SQS and DSQL endpoints. The queue and cluster
+bindings on this service are granted and named, not reachable, until #244
+lands. The manifest declares all of them regardless, because its job is
+exercising every capability AWS claims, not a topology that works end to
+end.
 
 ```
 go run ./cmd/kraai plan kraai-example --dir examples/aws-api

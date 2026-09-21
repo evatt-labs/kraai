@@ -447,6 +447,8 @@ func TestRoleKeysDeclareTheirVendorType(t *testing.T) {
 		TypePermissionAPIGateway: realTypeLambdaPermission,
 		TypePermissionEventsRule: realTypeLambdaPermission,
 		TypeCacheSecurityGroup:   TypeSecurityGroup,
+		TypeS3Endpoint:           TypeVPCEndpoint,
+		TypeDynamoDBEndpoint:     TypeVPCEndpoint,
 	}
 	for key, vendorType := range want {
 		reg, ok := byType[key]
