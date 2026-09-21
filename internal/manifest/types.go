@@ -1,6 +1,9 @@
 package manifest
 
-import "sort"
+import (
+	"sort"
+	"time"
+)
 
 // Manifest is the fully-resolved, validated manifest for one environment:
 // kraai.yaml's root config, every services/*.yaml file merged into one
@@ -436,7 +439,12 @@ func (b Binding) Config() map[string]any {
 // schema-validated.
 type Environment struct {
 	// Kind is "ephemeral" or "persistent" — validated in Validate.
-	Kind      string                     `yaml:"kind"`
+	Kind string `yaml:"kind"`
+	// TTL is how long an ephemeral environment lives after its last
+	// apply, as a Go duration ("72h"). Apply records the absolute
+	// deadline in the environment's status; kraai gc reaps what is past
+	// it. Refused on a persistent environment, which never expires.
+	TTL       string                     `yaml:"ttl,omitempty"`
 	Protected bool                       `yaml:"protected,omitempty"`
 	Naming    *Naming                    `yaml:"naming,omitempty"`
 	Routes    map[string][]Route         `yaml:"routes,omitempty"`
@@ -497,4 +505,18 @@ type ResourceImports map[string]map[string]ImportRef
 type ImportRef struct {
 	ID   string `yaml:"id,omitempty"`
 	Name string `yaml:"name,omitempty"`
+}
+
+// TTLDuration returns the environment's ttl as a duration, zero when it
+// declares none. Validated at load, so a parse failure here is unreachable
+// and reported as zero.
+func (e Environment) TTLDuration() time.Duration {
+	if e.TTL == "" {
+		return 0
+	}
+	ttl, err := time.ParseDuration(e.TTL)
+	if err != nil {
+		return 0
+	}
+	return ttl
 }

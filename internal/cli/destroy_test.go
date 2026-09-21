@@ -9,6 +9,7 @@ import (
 
 	"github.com/evatt-labs/kraai/internal/destroy"
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/plan"
 	"github.com/evatt-labs/kraai/internal/resource"
@@ -20,7 +21,7 @@ import (
 // stdin.
 func execDestroy(t *testing.T, assembler RegistryAssembler, args []string) (string, error) {
 	t.Helper()
-	cmd := newDestroyCommand(assembler, fixtureResolver)
+	cmd := newDestroyCommand(assembler, fixtureResolver, memoryStores(lock.NewMemory()))
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -31,7 +32,7 @@ func execDestroy(t *testing.T, assembler RegistryAssembler, args []string) (stri
 }
 
 func TestNewDestroyCommand_Flags(t *testing.T) {
-	cmd := newDestroyCommand(unreachableAssembler, fixtureResolver)
+	cmd := newDestroyCommand(unreachableAssembler, fixtureResolver, memoryStores(lock.NewMemory()))
 
 	if f := cmd.Flags().Lookup("dir"); f == nil || f.DefValue != "." {
 		t.Errorf("--dir flag = %+v, want default \".\"", f)

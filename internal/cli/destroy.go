@@ -18,7 +18,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/plan"
 )
 
-func newDestroyCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobra.Command {
+func newDestroyCommand(assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler) *cobra.Command {
 	var (
 		dir         string
 		setArgs     []string
@@ -43,7 +43,7 @@ func newDestroyCommand(assembler RegistryAssembler, resolve ManifestResolver) *c
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDestroy(
 				cmd, args[0], dir, setArgs, jsonOut, confirmName,
-				assembler, resolve, isRealTerminal)
+				assembler, resolve, stores, isRealTerminal)
 		},
 	}
 
@@ -90,7 +90,7 @@ func newDestroyCommand(assembler RegistryAssembler, resolve ManifestResolver) *c
 // reporting channel.
 func runDestroy(
 	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
-	confirmName string, assembler RegistryAssembler, resolve ManifestResolver,
+	confirmName string, assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler,
 	interactive isInteractive,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
@@ -136,6 +136,12 @@ func runDestroy(
 
 	ctx := cmd.Context()
 
+	store, release, err := guard(ctx, cmd.ErrOrStderr(), envName, m, stores)
+	if err != nil {
+		return err
+	}
+	defer release()
+
 	reg, err := assembler(ctx, m)
 	if err != nil {
 		return err
@@ -149,6 +155,14 @@ func runDestroy(
 	result, err := destroy.New(reg).Destroy(ctx, p)
 	if err != nil {
 		return err
+	}
+	// A clean destroy ends the environment, status record included. A
+	// destroy with failures leaves the record: something is still there,
+	// and the record is how a sweep will find it again.
+	if store != nil && !result.HasFailures() {
+		if err := store.DeleteStatus(ctx, envName); err != nil {
+			return err
+		}
 	}
 
 	var writeErr error

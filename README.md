@@ -260,6 +260,7 @@ kraai destroy <environment>    # tear down, in reverse dependency order
 kraai capabilities             # what each provider offers (no credentials needed)
 kraai plugins --env <name>     # load the manifest's plugins and show what they provide
 kraai iam-policy <environment> # the least-privilege IAM policy the manifest needs
+kraai status <environment>     # last apply, by whom, and when the environment expires
 ```
 
 `iam-policy` prints an IAM policy document granting every action the
@@ -320,7 +321,19 @@ overlay, so the same manifest in a preview environment produces
 width. Add `--json` for a machine-readable projection.)
 
 Exit codes are small and CI-branchable: `0` success, `1` unexpected, `2`
-validation, `4` confirmation required.
+validation, `3` lock held by another run, `4` confirmation required.
+
+`apply` and `destroy` take a per-environment lock first, so two runs against
+one environment cannot interleave: the second exits `3` naming the holder. The
+lock is an object in a bucket in your own AWS account
+(`kraai-lock-<account>-<region>`, created on first use), taken with S3's
+conditional writes, and a lock a crashed run left behind is broken after two
+hours. A manifest with no AWS provider has nowhere to lock and says so on
+stderr before proceeding. `apply` also leaves a status record beside the lock,
+which `kraai status <environment>` prints: when it was applied, by whom, how it
+went, and, for an ephemeral environment whose overlay declares `ttl: 72h`, the
+deadline after which `kraai gc` may reap it. `destroy` removes the record.
+Nothing in either is consulted to decide what a resource should look like.
 
 An environment marked `protected: true` requires confirming its name before
 apply or destroy — interactively, or `--confirm-name` in CI. There is no
@@ -441,9 +454,8 @@ providers above.
 
 Designed and **not** built — each has a tracking issue:
 
-- Per-environment locking, so concurrent applies are currently unguarded ([#113](https://github.com/evatt-labs/kraai/issues/113))
-- Status record and TTL-based expiry ([#113](https://github.com/evatt-labs/kraai/issues/113))
-- Garbage collection of elapsed ephemeral environments ([#136](https://github.com/evatt-labs/kraai/issues/136))
+- Garbage collection of elapsed ephemeral environments ([#136](https://github.com/evatt-labs/kraai/issues/136)); the deadline it reads is recorded, the sweep is not built
+- A lock backend for manifests with no AWS provider (an R2 bucket for Cloudflare-only manifests)
 
 The `unbuilt` and `dead-field` labels track the rest, and the
 [public roadmap](https://github.com/orgs/evatt-labs/projects/1) shows what is

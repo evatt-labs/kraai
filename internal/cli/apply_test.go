@@ -14,6 +14,7 @@ import (
 
 	"github.com/evatt-labs/kraai/internal/apply"
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/plan"
 	"github.com/evatt-labs/kraai/internal/resource"
@@ -115,7 +116,7 @@ func protectedFixture(t *testing.T) string {
 // (see isInteractive's doc comment).
 func execApply(t *testing.T, assembler RegistryAssembler, args []string) (string, error) {
 	t.Helper()
-	cmd := newApplyCommand(assembler, fixtureResolver)
+	cmd := newApplyCommand(assembler, fixtureResolver, memoryStores(lock.NewMemory()))
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -126,7 +127,7 @@ func execApply(t *testing.T, assembler RegistryAssembler, args []string) (string
 }
 
 func TestNewApplyCommand_Flags(t *testing.T) {
-	cmd := newApplyCommand(unreachableAssembler, fixtureResolver)
+	cmd := newApplyCommand(unreachableAssembler, fixtureResolver, memoryStores(lock.NewMemory()))
 
 	if f := cmd.Flags().Lookup("dir"); f == nil || f.DefValue != "." {
 		t.Errorf("--dir flag = %+v, want default \".\"", f)
@@ -363,7 +364,7 @@ func TestRunApply_NonProtectedEnvironment_ConfirmNameIgnored(t *testing.T) {
 // comment for why that seam exists.
 
 func newTestCommand(stdin string) (*cobra.Command, *bytes.Buffer) {
-	cmd := newApplyCommand(unreachableAssembler, fixtureResolver)
+	cmd := newApplyCommand(unreachableAssembler, fixtureResolver, memoryStores(lock.NewMemory()))
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetIn(strings.NewReader(stdin))

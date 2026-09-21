@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
@@ -708,6 +709,15 @@ func validateEnvironment(path string, env *Environment) error {
 	default:
 		return kerrors.Validation("%s: kind: must be %q or %q, got %q",
 			path, EnvironmentKindEphemeral, EnvironmentKindPersistent, env.Kind)
+	}
+	if env.TTL != "" {
+		if env.Kind != EnvironmentKindEphemeral {
+			return kerrors.Validation("%s: ttl: only an ephemeral environment expires; a %s one has no ttl", path, env.Kind)
+		}
+		ttl, err := time.ParseDuration(env.TTL)
+		if err != nil || ttl <= 0 {
+			return kerrors.Validation("%s: ttl: must be a positive duration such as 72h, got %q", path, env.TTL)
+		}
 	}
 
 	// naming.prefix becomes a leading segment of every DNS-safe resource
