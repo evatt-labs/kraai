@@ -225,11 +225,9 @@ func roleTaggedLookup(client ccAPI, typeName, role string) *resourceType {
 // *sibling* resource in the same binding — the VPC a subnet attaches to —
 // which kraai created and named itself.
 //
-// The gap that leaves: if that sibling was itself adopted, it carries the
-// manifest's identity rather than a derived name and this lookup will not
-// find it. Importing a whole network is therefore not yet supported, which is
-// the same shape as evatt-labs/kraai#197 — one resource needing another's
-// identity across a boundary this function cannot see.
+// If that sibling was itself adopted, it carries the manifest's identity
+// rather than a derived name and this lookup will not find it, so importing
+// a whole network is not yet supported.
 func endpointID(ctx context.Context, client ccAPI, typeName, name string) (string, bool, error) {
 	id, _, found, err := taggedLookup(client, typeName).resolve(ctx, resource.Ref{Name: name})
 	return id, found, err

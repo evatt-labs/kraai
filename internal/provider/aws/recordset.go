@@ -20,11 +20,9 @@ const recordSetType = "A"
 // planned when the entry names an alias (RequiresBindingKey): a zone with
 // nothing to point at has no record to write.
 //
-// Found by listing the zone's records — Cloud Control's list handler for
-// this type requires a zone to list in, and accepts HostedZoneName, which is
-// exactly the name this instance carries — and matching the apex A record.
-// That closes the two ambiguities recordSetMatch used to document: listing
-// one zone removes the cross-zone one, and matching on Type the other.
+// Found by listing the zone's records, since Cloud Control's list handler
+// for this type requires a zone and accepts HostedZoneName, which is the
+// name this instance carries, and matching the apex A record.
 type recordSetResource struct {
 	*resourceType
 }

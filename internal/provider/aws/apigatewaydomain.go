@@ -19,12 +19,9 @@ const (
 const apiGatewayDefaultStage = "$default"
 
 // certificateArnAttribute is the property AWS::CertificateManager::Certificate
-// publishes its ARN under: CertificateArn, its primary identifier and its one
-// read-only property in the live CloudFormation schema (DescribeType,
-// 2026-09-19). This shipped as "Id" first, and the test that covered it used
-// the constant on both sides, so nothing could disagree until a real account
-// did. Read through Spec.Attribute, which fails naming what *was* published
-// if a schema ever changes, rather than guessing at a different key.
+// publishes its ARN under: its primary identifier and its one read-only
+// property. Read through Spec.Attribute, which fails naming what was
+// published if the schema ever changes.
 const certificateArnAttribute = "CertificateArn"
 
 // routeFromSpec reads the route a NameFromRoute item was planned for.

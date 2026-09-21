@@ -11,15 +11,13 @@ import (
 const TypeDSQLCluster = "AWS::DSQL::Cluster"
 
 // DriverPostgres is the driver a database binding declares to ask this
-// provider for a PostgreSQL-protocol database. The engine behind it is
-// Aurora DSQL: serverless, reachable without a VPC, authenticated with IAM
-// rather than a password, and created in seconds, which is what an
-// environment kraai makes and destroys per branch wants from a database.
+// provider for a PostgreSQL-protocol database. The default engine is Aurora
+// DSQL: serverless, reachable without a VPC, authenticated with IAM rather
+// than a password, and created in seconds.
 const DriverPostgres = "postgres"
 
-// engineDSQL is the one engine a postgres binding has on this provider
-// today. Named so a binding can ask for it explicitly, and so an Aurora
-// engine can register beside it under its own value.
+// engineDSQL is the default engine of a postgres binding on this provider;
+// engineAurora registers beside it under its own value.
 const engineDSQL = "dsql"
 
 // dsqlPort is the port every DSQL cluster listens on; dsqlDatabase and
