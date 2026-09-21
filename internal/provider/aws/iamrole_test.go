@@ -10,7 +10,7 @@ import (
 
 func newIAMRoleResourceForTest(fc *fakeClient) *iamRoleResource {
 	r := newIAMRoleResource(&Client{})
-	r.client = fc
+	r.resourceType.client = fc
 	return r
 }
 
@@ -122,5 +122,160 @@ func TestIAMRoleGetAndDeletePassThroughUnchanged(t *testing.T) {
 	}
 	if err := role.Delete(context.Background(), resource.Ref{Name: "myenv-api"}); err != nil {
 		t.Fatalf("Delete: %v", err)
+	}
+}
+
+func bindingsConfig(entries ...map[string]any) []any {
+	out := make([]any, 0, len(entries))
+	for _, e := range entries {
+		out = append(out, e)
+	}
+	return out
+}
+
+func awsBinding(capability, binding, name string) map[string]any {
+	return map[string]any{
+		"capability": capability, "binding": binding, "vendor": "aws", "name": name,
+		"config": map[string]any{},
+	}
+}
+
+// bindingsPolicy returns the statements of the one inline policy the role
+// carries for its service's bindings, or nil when it carries none.
+func bindingsPolicy(t *testing.T, desired map[string]any) []any {
+	t.Helper()
+	raw, present := desired["Policies"]
+	if !present {
+		return nil
+	}
+	policies, ok := raw.([]any)
+	if !ok || len(policies) != 1 {
+		t.Fatalf("Policies = %v, want exactly one inline policy", raw)
+	}
+	policy := policies[0].(map[string]any)
+	if policy["PolicyName"] != bindingsPolicyName {
+		t.Fatalf("PolicyName = %v, want %q", policy["PolicyName"], bindingsPolicyName)
+	}
+	document := policy["PolicyDocument"].(map[string]any)
+	statements, ok := document["Statement"].([]any)
+	if !ok {
+		t.Fatalf("Statement = %v, want a list", document["Statement"])
+	}
+	return statements
+}
+
+func TestIAMRoleGrantsEachAWSBindingAndNothingElse(t *testing.T) {
+	fc := &fakeClient{
+		createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+	}
+	fsts := &fakeSTS{account: "123456789012"}
+	role := newIAMRoleResource(&Client{sts: fsts, region: "us-east-1"})
+	role.resourceType.client = fc
+
+	spec := resource.Spec{
+		Name: "myenv-api",
+		Config: map[string]any{
+			"settings": map[string]any{},
+			"bindings": bindingsConfig(
+				map[string]any{
+					"capability": "database", "binding": "DB", "vendor": "neon", "name": "myenv-api-db",
+					"config": map[string]any{"driver": "postgres"},
+				},
+				awsBinding("network", "NET", "myenv-api-net"),
+				awsBinding("objects", "ASSETS", "myenv-api-assets"),
+				awsBinding("queues", "JOBS", "myenv-api-jobs"),
+			),
+		},
+	}
+	if _, err := role.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	statements := bindingsPolicy(t, fc.createCalls[0])
+	if len(statements) != 2 {
+		t.Fatalf("got %d statements, want 2 (objects and queues; neon and network grant nothing): %v",
+			len(statements), statements)
+	}
+	bucket := statements[0].(map[string]any)
+	if resources, _ := bucket["Resource"].([]any); len(resources) != 2 ||
+		resources[0] != "arn:aws:s3:::myenv-api-assets" || resources[1] != "arn:aws:s3:::myenv-api-assets/*" {
+		t.Fatalf("objects statement = %v, want the bucket and its objects", bucket)
+	}
+	queue := statements[1].(map[string]any)
+	if queue["Resource"] != "arn:aws:sqs:us-east-1:123456789012:myenv-api-jobs" {
+		t.Fatalf("queues statement Resource = %v, want the queue's ARN built from region, account and name", queue["Resource"])
+	}
+	if actions, _ := queue["Action"].([]any); len(actions) == 0 || actions[0] != "sqs:SendMessage" {
+		t.Fatalf("queues statement Action = %v", queue["Action"])
+	}
+	if fsts.calls != 1 {
+		t.Fatalf("STS called %d times, want exactly once for the one grant that needs an account id", fsts.calls)
+	}
+}
+
+// A service with no binding that needs a grant emits no inline policy at
+// all: IAM rejects an empty statement list, and the role must not reach
+// for the account id it would never use.
+func TestIAMRoleWithoutGrantsEmitsNoPolicyAndNoSTSCall(t *testing.T) {
+	fc := &fakeClient{
+		createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+	}
+	fsts := &fakeSTS{account: "123456789012"}
+	role := newIAMRoleResource(&Client{sts: fsts, region: "us-east-1"})
+	role.resourceType.client = fc
+
+	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
+		"settings": map[string]any{},
+		"bindings": bindingsConfig(awsBinding("network", "NET", "myenv-api-net")),
+	}}
+	if _, err := role.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if _, present := fc.createCalls[0]["Policies"]; present {
+		t.Fatalf("Policies = %v, want absent", fc.createCalls[0]["Policies"])
+	}
+	if fsts.calls != 0 {
+		t.Fatalf("STS called %d times, want 0", fsts.calls)
+	}
+}
+
+// Plan compares a role before any binding has been applied, so the grant
+// must be computable from the spec alone: a role whose live policy already
+// names the queue is unchanged, and one whose policy lacks a newly declared
+// queue is a mutable update — not a rewrite on every apply.
+func TestIAMRoleDiffSeesGrantsWithoutAttributes(t *testing.T) {
+	fc := &fakeClient{schema: Schema{
+		PrimaryIdentifier:    []string{"/properties/RoleName"},
+		CreateOnlyProperties: []string{"/properties/RoleName"},
+		Handlers:             map[string]json.RawMessage{"update": json.RawMessage(`{}`)},
+	}}
+	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"})
+	role.resourceType.client = fc
+
+	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
+		"settings": map[string]any{},
+		"bindings": bindingsConfig(awsBinding("queues", "JOBS", "myenv-api-jobs")),
+	}}
+	desired, err := role.translate(context.Background(), spec)
+	if err != nil {
+		t.Fatalf("translate: %v", err)
+	}
+	live := map[string]any{
+		"RoleName":                 "myenv-api",
+		"AssumeRolePolicyDocument": lambdaAssumeRolePolicy,
+		"ManagedPolicyArns":        []any{awsLambdaBasicExecutionRoleArn},
+		"Policies":                 desired.Config["Policies"],
+	}
+	same, err := role.Diff(spec, &resource.State{Attributes: live})
+	if err != nil || same != resource.Same {
+		t.Fatalf("Diff(granted) = %v, %v; want Same", same, err)
+	}
+
+	live["Policies"] = []any{}
+	changed, err := role.Diff(spec, &resource.State{Attributes: live})
+	if err != nil || changed != resource.Mutable {
+		t.Fatalf("Diff(ungranted) = %v, %v; want Mutable", changed, err)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -397,5 +398,84 @@ func TestLambdaFunctionCreateOmitsLayersWhenUnset(t *testing.T) {
 	}
 	if got, ok := fc.createCalls[0]["Layers"]; ok {
 		t.Errorf("Layers present in desired state (%v), want omitted entirely", got)
+	}
+}
+
+// A function receives what each of its service's AWS bindings resolved to,
+// under the binding's own name: the queue's URL and ARN as published by the
+// queue, the bucket's name as derived.
+func TestLambdaFunctionPublishesBindingsToItsEnvironment(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	spec := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"LOG_LEVEL": "debug"}})
+	spec.Config["bindings"] = bindingsConfig(
+		awsBinding("objects", "ASSETS", "myenv-api-assets"),
+		awsBinding("queues", "JOBS", "myenv-api-jobs"),
+		map[string]any{"capability": "database", "binding": "DB", "vendor": "neon", "name": "myenv-api-db",
+			"config": map[string]any{"driver": "postgres"}},
+	)
+	spec.Attributes = map[string]map[string]any{
+		"JOBS." + key(TypeSQSQueue): {"QueueUrl": "https://sqs/myenv-api-jobs", "Arn": "arn:aws:sqs:::myenv-api-jobs"},
+	}
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	env := fc.createCalls[0]["Environment"].(map[string]any)["Variables"].(map[string]any)
+	want := map[string]any{
+		"LOG_LEVEL":          "debug",
+		"JOBS_QUEUE_URL":     "https://sqs/myenv-api-jobs",
+		"JOBS_QUEUE_ARN":     "arn:aws:sqs:::myenv-api-jobs",
+		"ASSETS_BUCKET_NAME": "myenv-api-assets",
+	}
+	if !reflect.DeepEqual(env, want) {
+		t.Fatalf("Environment.Variables = %v, want %v", env, want)
+	}
+}
+
+// The queue publishes its URL only once applied; a function asked to build
+// its environment before that must say which binding it is missing rather
+// than deploy without the variable.
+func TestLambdaFunctionFailsLoudlyWithoutTheQueueAttributes(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(awsBinding("queues", "JOBS", "myenv-api-jobs"))
+	_, err := fn.Create(context.Background(), spec)
+	if err == nil || !strings.Contains(err.Error(), "JOBS."+key(TypeSQSQueue)) {
+		t.Fatalf("Create without queue attributes: err = %v, want one naming the missing queue", err)
+	}
+	if len(fc.createCalls) != 0 {
+		t.Fatalf("CreateResource was called %d times, want 0", len(fc.createCalls))
+	}
+}
+
+// A variable the manifest sets by hand and one a binding derives for the
+// same name is a conflict, reported rather than resolved either way.
+func TestLambdaFunctionRejectsABindingVariableTheSettingsAlsoSet(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	spec := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"ASSETS_BUCKET_NAME": "elsewhere"}})
+	spec.Config["bindings"] = bindingsConfig(awsBinding("objects", "ASSETS", "myenv-api-assets"))
+	_, err := fn.Create(context.Background(), spec)
+	if err == nil || !strings.Contains(err.Error(), "ASSETS_BUCKET_NAME") {
+		t.Fatalf("Create with a colliding variable: err = %v, want one naming ASSETS_BUCKET_NAME", err)
 	}
 }

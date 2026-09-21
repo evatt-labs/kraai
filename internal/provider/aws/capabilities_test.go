@@ -117,3 +117,15 @@ func TestCapabilitiesDeclareTheStaticSiteReferences(t *testing.T) {
 		t.Errorf("a dns entry with an alias was rejected: %v", err)
 	}
 }
+
+func TestQueuesBindingSchema(t *testing.T) {
+	if err := queuesBindingSchema.Validate(map[string]any{"binding": "JOBS"}); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+	if err := queuesBindingSchema.Validate(map[string]any{}); err == nil {
+		t.Fatal("expected an error for a missing binding")
+	}
+	if err := queuesBindingSchema.Validate(map[string]any{"binding": "JOBS", "fifo": true}); err == nil {
+		t.Fatal("expected an error for an unrecognized key: a queue's shape is not yet configurable")
+	}
+}

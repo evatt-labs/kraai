@@ -76,3 +76,7 @@ func executeAPIArn(region, account, apiID string) string {
 func distributionARN(account, id string) string {
 	return fmt.Sprintf("arn:aws:cloudfront::%s:distribution/%s", account, id)
 }
+
+func bucketARN(name string) string {
+	return "arn:aws:s3:::" + name
+}

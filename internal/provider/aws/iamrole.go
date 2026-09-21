@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 
+	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -45,15 +46,43 @@ const awsLambdaBasicExecutionRoleArn = "arn:aws:iam::aws:policy/service-role/AWS
 // doc comment).
 type iamRoleResource struct {
 	*resourceType
+	client *Client
 }
 
 func newIAMRoleResource(client *Client) *iamRoleResource {
-	r := &iamRoleResource{}
+	r := &iamRoleResource{client: client}
 	r.resourceType = &resourceType{
 		provider: Provider, typeName: TypeIAMRole, lookup: resource.LookupByName, client: client,
-		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return r.translate(spec), nil },
+		translate: r.translate,
 	}
 	return r
+}
+
+// bindingsPolicyName names the one inline policy carrying every grant the
+// service's bindings need. One policy, rewritten whole, rather than one per
+// binding: IAM::Role's Policies is a single list property, and a binding
+// removed from the manifest must take its grant with it.
+const bindingsPolicyName = "kraai-bindings"
+
+// queueActions is what a function needs to produce to and consume from a
+// queue it binds. Not sqs:*: managing the queue is kraai's job, not the
+// function's.
+var queueActions = []any{
+	"sqs:SendMessage",
+	"sqs:ReceiveMessage",
+	"sqs:DeleteMessage",
+	"sqs:GetQueueAttributes",
+	"sqs:GetQueueUrl",
+	"sqs:ChangeMessageVisibility",
+}
+
+// bucketActions is what a function needs to read, write and enumerate the
+// objects in a bucket it binds. Bucket configuration stays kraai's.
+var bucketActions = []any{
+	"s3:GetObject",
+	"s3:PutObject",
+	"s3:DeleteObject",
+	"s3:ListBucket",
 }
 
 // translate builds this role's real IAM properties. The incoming spec's
@@ -70,7 +99,14 @@ func newIAMRoleResource(client *Client) *iamRoleResource {
 // nothing to do with any of the three — requiring them here would fail
 // every role's Create/Update on a missing Lambda-only setting this type
 // never uses.
-func (r *iamRoleResource) translate(spec resource.Spec) resource.Spec {
+//
+// The grants for the service's bindings are built here too, from the
+// derived names internal/plan supplies, with ARNs constructed locally. That
+// keeps the role in the first wave, and keeps Diff honest: plan compares a
+// role before any binding has published an attribute, so a grant derived
+// from attributes would read as absent on every plan and be rewritten on
+// every apply.
+func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
 	settingsMap, _ := spec.Config["settings"].(map[string]any)
 	var extra []string
 	if arns, ok := settingsMap["managedPolicyArns"].([]any); ok {
@@ -88,7 +124,70 @@ func (r *iamRoleResource) translate(spec resource.Spec) resource.Spec {
 		"AssumeRolePolicyDocument": lambdaAssumeRolePolicy,
 		"ManagedPolicyArns":        toAnySlice(policies),
 	}
-	return translated
+
+	statements, err := r.bindingStatements(ctx, spec)
+	if err != nil {
+		return resource.Spec{}, err
+	}
+	// Emitted only when a binding needs a grant: an empty inline policy is
+	// not a no-op, IAM rejects a document with no statements.
+	if len(statements) > 0 {
+		translated.Config["Policies"] = []any{map[string]any{
+			"PolicyName": bindingsPolicyName,
+			"PolicyDocument": map[string]any{
+				"Version":   "2012-10-17",
+				"Statement": statements,
+			},
+		}}
+	}
+	return translated, nil
+}
+
+// bindingStatements builds one policy statement per binding this provider
+// fulfils and a function needs a grant for. A binding another vendor
+// fulfils is reached with a credential, not IAM, and contributes nothing.
+// The account id is resolved only once a grant actually needs it, so a
+// service with no such binding never calls STS.
+func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.Spec) ([]any, error) {
+	bindings, err := decodeServiceBindings(spec)
+	if err != nil {
+		return nil, err
+	}
+	var statements []any
+	account := ""
+	for _, b := range bindings {
+		if b.Vendor != Provider {
+			continue
+		}
+		var statement map[string]any
+		switch b.Capability {
+		case manifest.CapabilityQueues:
+			if account == "" {
+				if account, err = r.client.AccountID(ctx); err != nil {
+					return nil, err
+				}
+			}
+			statement = map[string]any{
+				"Effect":   "Allow",
+				"Action":   queueActions,
+				"Resource": queueARN(r.client.Region(), account, b.Name),
+			}
+		case manifest.CapabilityObjects:
+			// The bucket for listing, its objects for everything else: S3
+			// scopes the two to different ARNs.
+			statement = map[string]any{
+				"Effect":   "Allow",
+				"Action":   bucketActions,
+				"Resource": []any{bucketARN(b.Name), bucketARN(b.Name) + "/*"},
+			}
+		default:
+			// dns, tls, cdn and network bindings carry no grant: a function
+			// reaches none of them at runtime.
+			continue
+		}
+		statements = append(statements, statement)
+	}
+	return statements, nil
 }
 
 func toAnySlice(in []string) []any {

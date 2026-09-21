@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -122,6 +123,9 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 	if err != nil {
 		return resource.Spec{}, err
 	}
+	if err := addBindingEnv(spec, env); err != nil {
+		return resource.Spec{}, err
+	}
 
 	translated := spec
 	translated.Config = map[string]any{
@@ -180,6 +184,64 @@ func resolveEnv(ctx context.Context, spec resource.Spec, settings LambdaSettings
 		env[envVar] = value
 	}
 	return env, nil
+}
+
+// addBindingEnv publishes what each of the service's AWS bindings resolved
+// to, so the function can reach it by its binding's name: a queues binding
+// JOBS becomes JOBS_QUEUE_URL and JOBS_QUEUE_ARN, an objects binding ASSETS
+// becomes ASSETS_BUCKET_NAME. Read from Spec.Attributes, which the applier
+// fills from what the binding's own resource published: this type reads
+// every binding on its service (register.go), so it always runs after them.
+//
+// A binding another vendor fulfils publishes a credential, which
+// settings.envSecrets maps by hand (resolveEnv). A name the manifest already
+// chose for a variable is not overwritten: two sources for one variable is
+// a conflict to report, not to resolve quietly.
+func addBindingEnv(spec resource.Spec, env map[string]any) error {
+	bindings, err := decodeServiceBindings(spec)
+	if err != nil {
+		return err
+	}
+	set := func(name string, value any) error {
+		if _, taken := env[name]; taken {
+			return kerrors.Validation(
+				"binding %q: environment variable %q is set by settings and by a binding; rename one",
+				spec.Binding, name)
+		}
+		env[name] = value
+		return nil
+	}
+	for _, b := range bindings {
+		if b.Vendor != Provider {
+			continue
+		}
+		prefix := b.envPrefix()
+		switch b.Capability {
+		case manifest.CapabilityQueues:
+			queueKey := b.attributeKey(spec, TypeSQSQueue)
+			url, err := spec.Attribute(queueKey, "QueueUrl")
+			if err != nil {
+				return err
+			}
+			arn, err := spec.Attribute(queueKey, "Arn")
+			if err != nil {
+				return err
+			}
+			if err := set(prefix+"_QUEUE_URL", url); err != nil {
+				return err
+			}
+			if err := set(prefix+"_QUEUE_ARN", arn); err != nil {
+				return err
+			}
+		case manifest.CapabilityObjects:
+			// The bucket's name is its identity, derived rather than
+			// published, so nothing has to be read back.
+			if err := set(prefix+"_BUCKET_NAME", b.Name); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // Diff checks only FunctionName, this type's sole

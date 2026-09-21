@@ -2,6 +2,7 @@ package plan
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -307,4 +308,77 @@ func actionTypesFor(p *Plan, svcKey string) map[string]bool {
 		}
 	}
 	return out
+}
+
+// TestPlan_ComputeSpecCarriesTheServiceBindings pins the channel a
+// provider's compute types learn what their service binds through: a sorted
+// list of every binding with its capability, vendor, derived resource name
+// and entry config, in Spec.Config["bindings"] — and its absence for a
+// service that binds nothing, so a provider can tell "none" from "empty".
+func TestPlan_ComputeSpecCarriesTheServiceBindings(t *testing.T) {
+	f := newComputeRegistryFixture(t)
+	providers := f.providers()
+	providers["queues"] = &manifest.Provider{Vendor: "fakecloud"}
+	providers[manifest.CapabilityDatabase] = &manifest.Provider{Vendor: "fakedb"}
+	if err := f.reg.Register(resource.Registration{
+		Provider: "fakecloud", Type: "queue", Capability: "queues",
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+	}); err != nil {
+		t.Fatalf("Register(queue): %v", err)
+	}
+	if err := f.reg.Register(resource.Registration{
+		Provider: "fakedb", Type: "db", Capability: manifest.CapabilityDatabase,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+	}); err != nil {
+		t.Fatalf("Register(db): %v", err)
+	}
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: providers},
+		Services: map[string]manifest.Service{
+			"api": {
+				Dir:     ".",
+				Compute: &manifest.Compute{Trigger: manifest.TriggerHTTP, Handler: "run.sh"},
+				Bindings: manifest.Bindings{
+					"queues":                    {{"binding": "MAIL"}, {"binding": "JOBS"}},
+					manifest.CapabilityDatabase: {{"binding": "DB", "driver": "postgres"}},
+				},
+			},
+			"tick": {
+				Dir:     ".",
+				Compute: &manifest.Compute{Trigger: manifest.TriggerSchedule, Handler: "tick", Schedule: "rate(1 hour)"},
+			},
+		},
+	}
+
+	p, err := New(f.reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	var api, tick Action
+	for _, a := range p.Actions {
+		if a.Type != "function" {
+			continue
+		}
+		switch a.ServiceKey {
+		case "api":
+			api = a
+		case "tick":
+			tick = a
+		}
+	}
+	if _, present := tick.Spec.Config["bindings"]; present {
+		t.Errorf("tick binds nothing but its Spec.Config carries bindings: %v", tick.Spec.Config["bindings"])
+	}
+	want := []any{
+		map[string]any{"capability": "database", "binding": "DB", "vendor": "fakedb",
+			"name": naming.ResourceName(envName, "api", "DB"), "config": map[string]any{"driver": "postgres"}},
+		map[string]any{"capability": "queues", "binding": "JOBS", "vendor": "fakecloud",
+			"name": naming.ResourceName(envName, "api", "JOBS"), "config": map[string]any{}},
+		map[string]any{"capability": "queues", "binding": "MAIL", "vendor": "fakecloud",
+			"name": naming.ResourceName(envName, "api", "MAIL"), "config": map[string]any{}},
+	}
+	if got := api.Spec.Config["bindings"]; !reflect.DeepEqual(got, want) {
+		t.Errorf("api Spec.Config[bindings] =\n%#v\nwant\n%#v", got, want)
+	}
 }

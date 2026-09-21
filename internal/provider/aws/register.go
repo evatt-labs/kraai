@@ -244,6 +244,17 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newRecordSetResource(client),
 		},
 		{
+			Provider: Provider, Type: TypeSQSQueue,
+			Capability: manifest.CapabilityQueues,
+			// No DependsOn: a queue needs nothing first. The function that
+			// receives its URL reads every binding on the service and is
+			// ordered after it; the role that grants it builds the ARN
+			// locally and waits on nothing. See queue.go for why this is
+			// byAttr rather than byName.
+			Lookup:   resource.LookupByAttr,
+			Resource: newQueueResource(client),
+		},
+		{
 			Provider: Provider, Type: TypeLambdaFunction,
 			Capability: manifest.CapabilityCompute,
 			// Needs its artifact bucket to upload the deployment package
