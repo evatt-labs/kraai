@@ -102,6 +102,8 @@ type fakeGetter struct {
 	err   error
 	// deleteErr scripts Delete, for a destroy that must fail.
 	deleteErr error
+	// diff scripts Diff, for a plan whose resource exists and differs.
+	diff resource.Difference
 }
 
 func (f *fakeGetter) Get(context.Context, resource.Ref) (*resource.State, error) {
@@ -114,6 +116,9 @@ func (f *fakeGetter) Update(context.Context, resource.Ref, resource.Spec) (*reso
 	return nil, nil
 }
 func (f *fakeGetter) Delete(context.Context, resource.Ref) error { return f.deleteErr }
+func (f *fakeGetter) Diff(resource.Spec, *resource.State) (resource.Difference, error) {
+	return f.diff, nil
+}
 
 // keyValueAssembler builds a RegistryAssembler resolving CapabilityKeyValue
 // on vendor "fake" to a single fakeGetter, matching oneKeyValueBindingFixture
@@ -388,6 +393,7 @@ func TestRunPlan_DetailedExitCode(t *testing.T) {
 		want   int
 	}{
 		{"changes present", oneKeyValueBindingFixture, &fakeGetter{}, true, planExitChanges},
+		{"update-only changes", oneKeyValueBindingFixture, &fakeGetter{state: &resource.State{ID: "kv-1"}, diff: resource.Mutable}, true, planExitChanges},
 		{"nothing to do", minimalFixture, &fakeGetter{}, true, 0},
 		{"a resource could not be planned", oneKeyValueBindingFixture, &fakeGetter{err: errors.New("kv api unreachable")}, true, planExitFailed},
 		{"without the flag, changes are still 0", oneKeyValueBindingFixture, &fakeGetter{}, false, 0},
@@ -790,5 +796,26 @@ func TestPlanJSON_CarriesVendorTypeOnEveryAction(t *testing.T) {
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("vendor_type by type = %v, want %v", got, want)
+	}
+}
+
+// An update is a change: the summary must say so even when nothing is
+// created or replaced.
+func TestRunPlan_JSONOutput_UpdateOnlyHasChanges(t *testing.T) {
+	dir := oneKeyValueBindingFixture(t)
+	getter := &fakeGetter{state: &resource.State{ID: "kv-1"}, diff: resource.Mutable}
+	out, err := execPlan(t, keyValueAssembler(t, getter), []string{testEnvName, "--dir", dir, "--json"})
+	if err != nil {
+		t.Fatalf("execPlan: %v", err)
+	}
+	var doc planDocument
+	if err := json.Unmarshal([]byte(out), &doc); err != nil {
+		t.Fatalf("json.Unmarshal(%q): %v", out, err)
+	}
+	if doc.Summary.Update != 1 || doc.Summary.Total != 1 {
+		t.Fatalf("Summary = %+v, want one update action", doc.Summary)
+	}
+	if !doc.Summary.HasChanges {
+		t.Errorf("Summary.HasChanges = false, want true for an update-only plan")
 	}
 }

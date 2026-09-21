@@ -105,11 +105,11 @@ type Plan struct {
 	Actions []Action
 }
 
-// HasChanges reports whether applying this plan would create or replace
-// anything.
+// HasChanges reports whether applying this plan would create, update or
+// replace anything.
 func (p *Plan) HasChanges() bool {
 	for _, a := range p.Actions {
-		if a.Kind == ActionCreate || a.Kind == ActionReplace {
+		if a.Kind == ActionCreate || a.Kind == ActionReplace || a.Kind == ActionUpdate {
 			return true
 		}
 	}

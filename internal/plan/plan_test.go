@@ -31,6 +31,7 @@ func TestPlan_HasChanges(t *testing.T) {
 		{"only failed", []Action{{Kind: ActionFailed}}, false},
 		{"has create", []Action{{Kind: ActionNoChange}, {Kind: ActionCreate}}, true},
 		{"has replace", []Action{{Kind: ActionReplace}}, true},
+		{"has update", []Action{{Kind: ActionUpdate}}, true},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
