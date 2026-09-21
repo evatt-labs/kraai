@@ -17,12 +17,10 @@ const certificateValidationMethod = "DNS"
 // certificateResource requests an ACM certificate for the tls entry's
 // domain, validated through the dns binding the entry names as its zone.
 //
-// The bare engine could not create one: DomainName is required, so an empty
-// desired state was refused loudly (evatt-labs/kraai#117), but a translate
-// supplying only the name would have been worse — a DNS-validated
-// certificate with no zone to validate in stays PENDING_VALIDATION until
-// something else writes the record. Naming the zone is what lets ACM finish
-// the job itself, which is why this translate refuses to run without one.
+// A DNS-validated certificate with no zone to validate in stays
+// PENDING_VALIDATION until something else writes the record. Naming the
+// zone is what lets ACM finish the job itself, which is why translate
+// refuses to run without one.
 type certificateResource struct {
 	*resourceType
 }

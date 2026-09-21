@@ -16,11 +16,9 @@ const hostedZoneIDPrefix = "/hostedzone/"
 // hostedZoneResource provisions a Route 53 public hosted zone named by the
 // dns entry's zone.
 //
-// The bare engine could not create one: this type is LookupByAPI, so the
-// generic name injection (byName only) never ran, and Name is not a
-// required property, so an empty desired state was accepted and produced a
-// zone kraai could never find again — the silent-leak case
-// evatt-labs/kraai#117 named. The translate here is what closes it.
+// Name is not a required property and this type is not byName, so without
+// the translate an empty desired state would produce a zone kraai could
+// never find again.
 type hostedZoneResource struct {
 	*resourceType
 }
