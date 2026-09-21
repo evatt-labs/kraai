@@ -1,33 +1,20 @@
 // Package aws adapts the AWS Cloud Control API to the resource contract.
 //
-// # One engine, not one client per service
+// Cloud Control exposes uniform Get, Create, Update, Delete and List across
+// its resource types, which maps one to one onto internal/resource's
+// per-verb interface. This package is therefore one generic Resource
+// implementation (resourceType), parameterized per registration by its
+// CloudFormation TypeName and its identity lookup strategy, and adding a
+// type is a registry entry rather than a client. Per-type code exists only
+// where the vendor's property vocabulary has to be built from the
+// manifest's (a translate), or where a verb needs something Cloud Control
+// cannot express (an S3 upload, a bucket policy).
 //
-// Cloud Control exposes uniform GetResource/CreateResource/UpdateResource/
-// DeleteResource/ListResources across 1,598 FULLY_MUTABLE public resource
-// types, which maps 1:1 onto internal/resource's per-verb Resource interface
-// (verified against a live account, 2026-09-13). So this package is one
-// generic Resource implementation, parameterized per registration by its
-// CloudFormation TypeName and its identity lookup strategy; adding a
-// resource type is a registry entry, never a new client.
-//
-// # The write path
-//
-// Create, Update and Delete are real. Create submits spec.Config as Cloud
-// Control's desired state (stamping the identity tag into it first for a
-// byTag type, whose identity comes from a kraai-owned tag rather than a
-// provider-assigned attribute) and polls the resulting ProgressEvent to a
-// terminal state. Update fetches the current schema; a type with no update handler
-// (IMMUTABLE provisioning: create/read/delete only) refuses with
-// resource.ErrImmutable rather than attempting a call Cloud Control would
-// reject, and everything else diffs current properties against spec.Config
-// into an RFC 6902 JSON Patch document, submits it, and polls to terminal.
-// Delete treats an already-absent resource as success, both when resolve
-// finds no identifier and when Cloud Control's own delete reports the
-// resource gone — the same absence-is-success contract Get already holds.
-//
-// Async polling, JSON Patch emission and createOnlyProperties-driven
-// replacement detection are shared, generic mechanisms (client.go's
-// pollToTerminal, patch.go's buildPatch, resource.go's Diff) —
-// no per-type write logic exists, matching the read path's one-engine
-// design.
+// Create submits the desired state, stamping the identity tag into it first
+// for a byTag type, and polls to a terminal state. Update refuses with
+// resource.ErrImmutable for a type whose schema has no update handler, and
+// otherwise submits an RFC 6902 patch. Delete treats an already-absent
+// resource as success. Diff derives replace-versus-update from the type's
+// own schema (createOnlyProperties, writeOnlyProperties, handlers), fetched
+// once per type per process.
 package aws

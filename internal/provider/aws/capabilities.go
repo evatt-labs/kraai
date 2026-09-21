@@ -5,27 +5,15 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// Capabilities declares, without a client, without credentials, and
-// without any network call, every capability this package's registrations
-// can fulfil. See Registrations' own doc comment for why the "objects" and
-// "compute" registrations below are grouped under one capability each
-// rather than split further — nothing here invents a capability name
-// internal/manifest does not already export.
-//
-// Called by internal/assemble to build the static catalog `kraai
-// capabilities` prints, and covered by a test proving it needs nothing
-// Registrations does (TestCapabilitiesRequireNoCredentialsOrClient) and by
-// a drift test proving every capability Registrations actually uses is
-// declared here (TestCapabilitiesCoverEveryRegisteredCapability).
+// Capabilities declares, without a client, credentials or a network call,
+// every capability this package's registrations can fulfil. Nothing here
+// invents a capability name internal/manifest does not export, and a drift
+// test checks every capability Registrations uses is declared here.
 func Capabilities() []resource.CapabilityDef {
 	return []resource.CapabilityDef{
 		{
 			Name:    manifest.CapabilityObjects,
 			Summary: "S3 bucket.",
-			// No ProviderSettings: no registration under this capability
-			// reads a provider-level settings map at all. Binding is what
-			// says everything a service's `objects:` entry may carry
-			// (settings_schema.go).
 			Binding: objectsBindingSchema,
 		},
 		{
@@ -47,9 +35,7 @@ func Capabilities() []resource.CapabilityDef {
 			Summary: "CloudFront distribution in front of an S3 origin.",
 			Binding: cdnBindingSchema,
 			// origin names the objects binding fronted, certificate the tls
-			// binding presented. Declared here, not as DependsOn on the
-			// distribution's registration: a DependsOn resolves within one
-			// binding, and these are relationships between bindings.
+			// binding presented.
 			References: []string{"origin", "certificate"},
 		},
 		{
@@ -57,13 +43,7 @@ func Capabilities() []resource.CapabilityDef {
 			Summary: "Lambda function behind an HTTP front door (API Gateway or a " +
 				"function URL) or an EventBridge schedule, with its own IAM " +
 				"execution role and artifact bucket.",
-			// ProviderSettings is the live replacement for
-			// settings_validate.go's validateKnownSettings — see
-			// computeSettingsSchema's own doc comment (settings_schema.go)
-			// for what it unions and why. No Binding: compute is one
-			// block per service (manifest.Service.Compute), not a
-			// `services.<svc>.compute[]` list, so there is no per-entry
-			// binding shape to validate.
+			// No Binding: compute is one block per service, not a list.
 			ProviderSettings: computeSettingsSchema,
 		},
 		{
@@ -99,9 +79,7 @@ func Capabilities() []resource.CapabilityDef {
 				"reachable, gateway endpoints routing S3 and DynamoDB inside the " +
 				"VPC, and, when the entry declares a private block, a pair of " +
 				"private subnets with NAT egress.",
-			// No ProviderSettings beyond the provider-level "region"
-			// DecodeSettings already checks: the address plan is per
-			// binding, not per provider, so it lives in Binding.
+			// The address plan is per binding, not per provider.
 			Binding: networkBindingSchema,
 		},
 	}
