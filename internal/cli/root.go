@@ -70,6 +70,7 @@ func NewRootCommand() *cobra.Command {
 	root.AddCommand(newApplyCommand(assemble.Registry, assemble.ResolveWithDeclarations, assemble.LockStore))
 	root.AddCommand(newDestroyCommand(assemble.Registry, assemble.ResolveWithDeclarations, assemble.LockStore))
 	root.AddCommand(newStatusCommand(assemble.ResolveWithDeclarations, assemble.LockStore))
+	root.AddCommand(newGCCommand(assemble.Registry, assemble.ResolveWithDeclarations, assemble.LockStore))
 
 	return root
 }

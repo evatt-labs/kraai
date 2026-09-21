@@ -100,6 +100,8 @@ func templatedVendorFixture(t *testing.T) string {
 type fakeGetter struct {
 	state *resource.State
 	err   error
+	// deleteErr scripts Delete, for a destroy that must fail.
+	deleteErr error
 }
 
 func (f *fakeGetter) Get(context.Context, resource.Ref) (*resource.State, error) {
@@ -111,7 +113,7 @@ func (f *fakeGetter) Create(context.Context, resource.Spec) (*resource.State, er
 func (f *fakeGetter) Update(context.Context, resource.Ref, resource.Spec) (*resource.State, error) {
 	return nil, nil
 }
-func (f *fakeGetter) Delete(context.Context, resource.Ref) error { return nil }
+func (f *fakeGetter) Delete(context.Context, resource.Ref) error { return f.deleteErr }
 
 // keyValueAssembler builds a RegistryAssembler resolving CapabilityKeyValue
 // on vendor "fake" to a single fakeGetter, matching oneKeyValueBindingFixture
