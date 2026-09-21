@@ -11,32 +11,27 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// ccAPI is the Cloud Control surface this package's generic Resource needs,
-// defined at this, its actual consumer — not the SDK's Input/Output shape.
-// A fake in resource_test.go implements it and needs neither an AWS account
-// nor a network.
+// ccAPI is the Cloud Control surface the generic Resource needs, in this
+// package's vocabulary rather than the SDK's. A fake in resource_test.go
+// implements it.
 type ccAPI interface {
 	// GetResource returns typeName/identifier's current properties, or
-	// found=false when the resource does not exist. See Client.GetResource
-	// for the absence-versus-failure contract this must preserve.
+	// found=false when the resource does not exist. Only absence is
+	// found=false with a nil error; see Client.GetResource.
 	GetResource(ctx context.Context, typeName, identifier string) (properties map[string]any, found bool, err error)
 	// ListResources returns the primary identifier of every instance of
-	// typeName. resourceModel is nil for a type whose list handler enumerates
-	// every instance in the account/region unscoped; non-nil for a
-	// parent-scoped type (resourceType.listScope), whose list handler
-	// requires it and reports the scoping parent's own absence as
-	// ResourceNotFoundException rather than an empty result — see
-	// Client.ListResources for how that is translated back to absence.
+	// typeName. resourceModel is nil for a type whose list handler
+	// enumerates the account unscoped, and names the parent for a
+	// parent-scoped type; see Client.ListResources.
 	ListResources(ctx context.Context, typeName string, resourceModel map[string]any) ([]string, error)
 	// CreateResource submits desiredState and polls to a terminal state,
 	// returning the provider-assigned identifier and resulting properties.
 	CreateResource(ctx context.Context, typeName string, desiredState map[string]any) (identifier string, properties map[string]any, err error)
 	// UpdateResource submits an RFC 6902 JSON Patch document against
-	// identifier and polls to a terminal state, returning the resulting
-	// properties.
+	// identifier and polls to a terminal state.
 	UpdateResource(ctx context.Context, typeName, identifier string, patch []byte) (properties map[string]any, err error)
 	// DeleteResource submits a delete and polls to a terminal state.
-	// Deleting something already absent is success; see Client.DeleteResource.
+	// Deleting something already absent is success.
 	DeleteResource(ctx context.Context, typeName, identifier string) error
 	// DescribeType fetches and decodes typeName's CloudFormation resource
 	// provider schema.
@@ -44,138 +39,81 @@ type ccAPI interface {
 }
 
 // ownsFunc reports whether a found instance is this account's and kraai's
-// to manage. identifier and properties are what resolve found; properties
-// may be nil for a byName type that never had to read them, in which case
-// the caller has read them before asking.
+// to manage. properties may be nil for a byName type that never had to
+// read them, in which case the caller reads them before asking.
 //
-// nil is the common case and means Cloud Control's own answer is trusted:
-// for a type whose lookup walks ListResources — byAttr, byTag, byApi — the
-// list is account-scoped, so a stranger's instance can never be a
-// candidate. A byName type resolving a global namespace (S3) is the case
-// that needs one: GetResource answers for a bucket any account owns.
-//
-// (false, nil) reports the instance as absent, so plan proposes creating
-// it and the vendor refuses by name — the honest outcome for a namespace
-// collision. An error refuses instead, for a type where "absent" would
-// lead somewhere worse: a hosted zone kraai did not create must not be
-// shadowed by a second zone of the same name.
+// nil means Cloud Control's own answer is trusted, which holds for every
+// lookup that walks the account-scoped ListResources. A byName type
+// resolving a global namespace (S3) needs one: GetResource answers for a
+// bucket any account owns. (false, nil) reports the instance absent, so
+// plan proposes creating it and the vendor refuses by name. An error
+// refuses instead, for a type where "absent" would lead somewhere worse: a
+// hosted zone kraai did not create must not be shadowed by a second zone.
 type ownsFunc func(ctx context.Context, identifier string, properties map[string]any) (bool, error)
 
 // translateFunc builds a type's real desired state from the vendor-neutral
-// Spec the planner hands it: the manifest's vocabulary (a cdn entry's
-// origin, a compute block's settings) into the vendor's property names,
-// reading what referenced bindings published along the way. Set on a
-// resourceType, it runs inside Create, Update and Diff, so a type needs
-// nothing but a translate to be a full resource — the pass-through wrapper
-// per type that used to carry one is gone. A type with none submits
-// Spec.Config as it is.
-//
-// The context is for translates that resolve something live (an account
-// id for an ARN); Diff has none and passes a background one.
+// Spec the planner hands it, reading what referenced bindings published
+// along the way. It runs inside Create, Update and Diff, so a type needs
+// nothing but a translate to be a full resource. A type with none submits
+// Spec.Config as it is. Diff has no context and passes a background one.
 type translateFunc func(ctx context.Context, spec resource.Spec) (resource.Spec, error)
 
 // matchFunc reports whether a resource's decoded properties are the one
-// ref.Name identifies, for the byAttr and byTag lookup strategies. name is
-// the derived resource name (Ref.Name), not necessarily the value
-// stored in the matched attribute directly — see cloudfrontMatch and
-// apigatewayv2Match in identity.go for what each type actually compares.
+// name identifies, for the byAttr and byTag lookup strategies. name is the
+// derived resource name, not necessarily the value in the matched
+// attribute; see identity.go for what each type compares.
 type matchFunc func(properties map[string]any, name string) bool
 
-// listScopeFunc builds the ResourceModel a parent-scoped type's ListResources
-// call must carry, from the derived name resolve is already looking an
-// instance up by. The counterpart to matchFunc, at the opposite end of the
-// same walk: matchFunc filters candidates ListResources already returned;
-// listScopeFunc decides what ListResources is even allowed to be called
-// with in the first place.
-//
-// # Why a per-type function, not a per-type table in this file
-//
-// AWS::Lambda::Permission is not the only Cloud Control type whose list
-// handler is scoped to a parent rather than enumerating an account/region —
-// it is simply the one a real `kraai plan` run against a live account
-// (409032463870) found first. A hardcoded "this TypeName needs that
-// property" table would need a new entry, in this generic file, every time
-// a future type turns out to share the same shape — exactly the
-// per-type-table failure mode stampTag and LookupStrategy already exist to
-// avoid for identity. Declaring the scope as a function on the
-// registration instead keeps this file's only knowledge of the concept
-// "some types need a scoped list," never which types or which property.
-//
-// Returns an error rather than a bare map so a type that cannot populate
-// its own declared scope (see lambdaPermissionListScope's empty-name case)
-// fails loudly through resolve rather than resolve silently falling back to
-// an unscoped ListResources call — a request Cloud Control has already been
-// observed to reject outright for a parent-scoped type (see this package's
-// PR description for the real ListResources error this closes).
+// listScopeFunc builds the ResourceModel a parent-scoped type's
+// ListResources call must carry, from the name being looked up. Cloud
+// Control rejects an unscoped list for such a type outright, so a scope
+// that cannot be populated returns an error rather than an empty map.
 type listScopeFunc func(name string) (map[string]any, error)
 
 // resourceType adapts one Cloud Control-backed AWS resource type to the
-// resource contract. One value of this type per registry entry in
-// register.go; the CloudFormation TypeName and lookup strategy are what
-// varies between AWS::S3::Bucket, AWS::Lambda::Function and the rest — the
-// verbs themselves do not.
+// resource contract. One value per registry entry; the TypeName and lookup
+// strategy vary, the verbs do not.
 type resourceType struct {
 	provider string
 	typeName string
 	lookup   resource.LookupStrategy
 	client   ccAPI
 
-	// match is nil for LookupByName, where ref.Name already is the primary
-	// identifier and no candidate needs testing. Required for
-	// LookupByAttr, LookupByTag and LookupByAPI (see hostedZoneMatch's doc
-	// comment for why byApi uses the same match mechanism as byAttr here).
+	// match is nil for LookupByName, where ref.Name is the primary
+	// identifier. Required for every other strategy.
 	match matchFunc
 
-	// stampTag is required exactly when lookup is LookupByTag: it writes
-	// this type's identity tag into the CreateResource desired state.
-	// Kept separate from match, rather than deriving one from the other,
-	// because the two run against different shapes — stampTag builds
-	// desired state going out, match reads properties coming back — and
-	// because not every byTag type spells "Tags" the same way (see
-	// identity.go's array-shaped versus flat-map-shaped Tags).
+	// stampTag writes this type's identity tag into the CreateResource
+	// desired state. Required for LookupByTag; also set by a type found
+	// another way that marks what it created so owns can tell it apart.
+	// Separate from match because the two run against different shapes,
+	// and not every type spells "Tags" the same way.
 	stampTag stampFunc
 
 	// translate, when set, shapes the Spec before Create, Update and Diff
-	// use it — see translateFunc.
+	// use it.
 	translate translateFunc
 
 	// owns, when set, gates Get and Delete on ownership of what resolve
-	// found — see ownsFunc. Never consulted for an imported Ref: adoption
-	// is the manifest asserting ownership by hand, which is the whole point
-	// of an import.
+	// found. Never consulted for an imported Ref: adoption is the manifest
+	// asserting ownership by hand.
 	owns ownsFunc
 
-	// listScope is non-nil exactly for a type whose Cloud Control list
-	// handler is parent-scoped (see listScopeFunc's own doc comment) — for
-	// example AWS::Lambda::Permission, whose list handler requires a
-	// ResourceModel naming the FunctionName whose permissions to list. nil
-	// for every other type, which behaves exactly as before this field
-	// existed: resolve calls ListResources with no ResourceModel at all.
+	// listScope is non-nil exactly for a type whose list handler is
+	// parent-scoped, such as AWS::Lambda::Permission's, which requires the
+	// FunctionName whose permissions to list.
 	listScope listScopeFunc
 
-	// schemaMu, schema and schemaLoaded cache this type's CloudFormation
-	// resource-provider schema for the process's lifetime (Client.DescribeType's
-	// own doc comment explains why caching, not vendoring, is the right
-	// amount of work here). Every Update and Diff call needs
-	// this schema; fetching it once per type rather than once per call
-	// avoids turning every write-path call into two API round trips.
-	//
-	// A mutex guarding a plain bool rather than sync.Once: a wave's
-	// resources run concurrently under errgroup.SetLimit, and more
-	// than one resource of the same type can be updated in the same wave,
-	// so this is genuinely reachable from multiple goroutines. sync.Once
-	// would also cache a transient failure (a single throttled
-	// DescribeType) forever for the rest of the run; caching only on
-	// success means a later retry can still succeed.
+	// The type's CloudFormation schema, fetched once per process. A mutex
+	// and a bool rather than sync.Once so a transient DescribeType failure
+	// is not cached for the rest of the run.
 	schemaMu     sync.Mutex
 	schema       Schema
 	schemaLoaded bool
 }
 
-// getSchema returns this type's cached CloudFormation resource-provider
-// schema, fetching it on first use. A failed fetch is not cached, so the
-// next call retries rather than being stuck on one transient error for the
-// rest of the process.
+// getSchema returns this type's cached CloudFormation schema, fetching it
+// on first use. A failed fetch is not cached.
 func (r *resourceType) getSchema(ctx context.Context) (Schema, error) {
 	r.schemaMu.Lock()
 	defer r.schemaMu.Unlock()
@@ -192,12 +130,8 @@ func (r *resourceType) getSchema(ctx context.Context) (Schema, error) {
 }
 
 // Get reports the resource's current state, or (nil, nil) when it does not
-// exist.
-//
-// Absence is an answer, not a failure: Client.GetResource already
-// translates Cloud Control's ResourceNotFoundException this way, and every
-// path below preserves it rather than collapsing a real error into the same
-// return shape.
+// exist. Every path preserves absence rather than collapsing a real error
+// into the same return shape.
 func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
 	identifier, properties, found, err := r.resolve(ctx, ref)
 	if err != nil {
@@ -207,9 +141,7 @@ func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.Sta
 		return nil, nil
 	}
 
-	// byAttr/byTag resolution already fetched the matching candidate's
-	// properties while checking the match (see resolve) — reusing them here
-	// avoids a second GetResource call for the identical identifier.
+	// A list-and-match resolve already read the candidate's properties.
 	if properties == nil {
 		properties, found, err = r.client.GetResource(ctx, r.typeName, identifier)
 		if err != nil {
@@ -217,7 +149,6 @@ func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.Sta
 		}
 		if !found {
 			// Deleted between resolving its identifier and reading it.
-			// Still an absence, not a second error path.
 			return nil, nil
 		}
 	}
@@ -238,9 +169,8 @@ func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.Sta
 }
 
 // owned applies r.owns to a found instance, or reports it owned when there
-// is no hook to ask or the Ref is an import. An error from the hook is an
-// error, never a silent "not ours": a check that could not run has not
-// answered.
+// is no hook or the Ref is an import. An error from the hook is an error,
+// never a silent "not ours".
 func (r *resourceType) owned(ctx context.Context, ref resource.Ref, identifier string, properties map[string]any) (bool, error) {
 	if r.owns == nil || ref.Import != nil {
 		return true, nil
@@ -248,46 +178,18 @@ func (r *resourceType) owned(ctx context.Context, ref resource.Ref, identifier s
 	return r.owns(ctx, identifier, properties)
 }
 
-// resolve finds the Cloud Control primary identifier for name, per this
+// resolve finds the Cloud Control primary identifier for ref, per this
 // type's lookup strategy.
 //
-// For LookupByName, name already is the primary identifier — Cloud Control's
-// own resource schema makes the derived name settable and unique at create
-// time for every byName type this package registers (verified per type in
-// register.go), so no lookup call precedes Get.
+// For LookupByName, the name is the identifier and no call is made. For the
+// others, this walks ListResources and calls GetResource on each candidate
+// until match reports a hit: an N+1 shape, accepted because ListResources
+// does not reliably carry the attribute being matched. A parent-scoped type
+// lists with the ResourceModel its listScope builds.
 //
-// For LookupByAttr and LookupByTag, this walks ListResources's identifiers
-// and calls GetResource on each until match reports a hit or the list is
-// exhausted. That is real cost — an N+1 call shape — accepted deliberately
-// because ListResources does not reliably carry the attribute being matched
-// (see Client.ListResources); calling GetResource per candidate is the only
-// way to test against properties Cloud Control actually guarantees.
-//
-// When this type declares listScope (a parent-scoped type — see
-// listScopeFunc's own doc comment), the ListResources call itself must carry
-// a ResourceModel naming the parent, or Cloud Control rejects the call
-// outright rather than returning an empty list — verified against a live
-// account: AWS::Lambda::Permission::ListResources with no ResourceModel
-// returns InvalidRequestException ("Missing or invalid ResourceModel
-// property... Required property: (#: required key [FunctionName] not
-// found)"), the exact failure this method exists to close. A type with no
-// listScope is unaffected: resourceModel stays nil and ListResources is
-// called exactly as it always was.
-// An adopted resource is found by the identity the manifest declared rather
-// than by the name kraai would have derived, because kraai did not create it
-// and so has no name to derive.
-//
-//   - id is the Cloud Control identifier itself. Returned straight through,
-//     exactly as the LookupByName fast path returns a derived name, so the
-//     caller's own GetResource is what confirms it actually exists — an id
-//     that names nothing reads as absence, not as a phantom resource.
-//   - name replaces the derived name in the list-and-match walk below, so a
-//     byTag or byAttr type adopts by whatever its match function already
-//     compares.
-//
-// internal/plan refuses to create anything whose Ref carries an import and
-// does not resolve, so "adopt this" can never quietly become "make a new one
-// under a different name".
+// An adopted resource is found by the identity the manifest declared: an
+// id is returned as is, so the caller's own GetResource confirms it exists;
+// a name replaces the derived name in the walk.
 func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifier string, properties map[string]any, found bool, err error) {
 	name := ref.Name
 	if ref.Import != nil {
@@ -308,12 +210,9 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 			return "", nil, false, err
 		}
 		if len(resourceModel) == 0 {
-			// listScope reported success but produced nothing to scope
-			// with — a bug in the declared listScope, not a legitimate
-			// "no scope needed" case (that is nil listScope, checked
-			// above). Refuse rather than silently falling through to the
-			// unscoped ListResources call this method exists to stop
-			// making for parent-scoped types.
+			// A declared scope that produced nothing is a bug in the
+			// scope, not a "no scope needed" case; refuse rather than send
+			// the unscoped list Cloud Control would reject.
 			return "", nil, false, kerrors.Validation(
 				"%s declares a list scope but it produced no resource model for %q; refusing to send an unscoped ListResources request",
 				r.typeName, name)
@@ -334,8 +233,7 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 			return "", nil, false, err
 		}
 		if !ok {
-			// Listed, then gone by the time it was read. Not a match; try
-			// the next candidate rather than failing the whole lookup.
+			// Listed, then gone by the time it was read.
 			continue
 		}
 		if r.match(props, name) {
@@ -345,20 +243,11 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 	return "", nil, false, nil
 }
 
-// checkListScope holds the list request about to be sent to what the type's
-// own schema says its list handler requires (Schema.ListRequirements).
-//
-// This is the check that would have prevented an outage rather than
-// diagnosed it: AWS::Lambda::Permission's list handler requires
-// FunctionName, the registration once declared no scope, every Get failed
-// with Cloud Control's InvalidRequestException, and apply's preflight
-// refused the whole run (evatt-labs/kraai#132). The requirement was in the
-// schema the whole time. Now a registration whose scope disagrees with the
-// schema fails here, before the request, naming what the handler wants —
-// and a type whose handler wants nothing is not asked to declare anything.
-//
-// One DescribeType per type per process (getSchema caches), which plan
-// already pays for every existing resource's Diff.
+// checkListScope holds the list request about to be sent to what the
+// type's own schema says its list handler requires. A registration whose
+// scope disagrees with the schema fails here, before the request, naming
+// what the handler wants; the requirement was always in the schema, and
+// this is the check that turns it from an outage into a message.
 func (r *resourceType) checkListScope(ctx context.Context, resourceModel map[string]any) error {
 	schema, err := r.getSchema(ctx)
 	if err != nil {
@@ -406,17 +295,14 @@ func sortedKeys(m map[string]any) []string {
 }
 
 // referencedAttribute reads an attribute a resource in another binding
-// published, under the "<binding>.<Ref.Key()>" key apply namespaces it by —
-// the cdn distribution reading its origin bucket's endpoint. The binding is
-// the one the entry named (a reference), the type the one the registration
-// declared it reads.
+// published, under the "<binding>.<Ref.Key()>" key apply namespaces it by.
 func referencedAttribute(spec resource.Spec, binding, typeName, name string) (string, error) {
 	return spec.Attribute(binding+"."+key(typeName), name)
 }
 
-// Create provisions the resource from spec, submitting spec.Config as Cloud
-// Control's desired state and polling the resulting ProgressEvent to a
-// terminal state.
+// Create provisions the resource from spec, submitting the translated
+// spec.Config as Cloud Control's desired state and polling to a terminal
+// state.
 func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
 	if spec.Name == "" {
 		return nil, kerrors.Validation(
@@ -441,12 +327,9 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 			"%s is registered LookupByTag but declares no stampTag function", r.typeName)
 	}
 	if r.stampTag != nil {
-		// The identity tag rides in this same CreateResource call:
-		// writing it as a follow-up call would leave a window where a crash
-		// between create and tag orphans the resource unfindably — the one
-		// failure no later run could clean up. Required for byTag, whose
-		// lookup is the tag; also set by a type found another way that
-		// marks what it created so owns can tell it from what it did not.
+		// The identity tag rides in this same CreateResource call: a
+		// follow-up tag call would leave a window where a crash orphans the
+		// resource unfindably, the one failure no later run can clean up.
 		r.stampTag(desired, spec.Name)
 	}
 
@@ -463,18 +346,10 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 }
 
 // readBackIfEmpty fetches a just-created resource's properties when the
-// create itself reported none.
-//
-// Cloud Control populates a create's ResourceModel for some types and leaves
-// it empty for others — every EC2 type here returns nothing, so a VPC would
-// publish no VpcId and every resource depending on it would fail with
-// nothing to point at. A read costs one call on the create path only, and
-// only for the types that need it.
-//
-// A failed read-back is not a failed create: the resource exists either way,
-// and reporting an error here would make apply try to create it again. The
-// dependent that needed the missing value fails on its own terms instead,
-// naming what it could not resolve.
+// create reported none, which every EC2 type does: a VPC would otherwise
+// publish no VpcId. A failed read-back is not a failed create; the resource
+// exists either way, and the dependent that needed the value fails on its
+// own terms.
 func (r *resourceType) readBackIfEmpty(ctx context.Context, identifier string, properties map[string]any) map[string]any {
 	if len(properties) > 0 || identifier == "" {
 		return properties
@@ -486,70 +361,20 @@ func (r *resourceType) readBackIfEmpty(ctx context.Context, identifier string, p
 	return fetched
 }
 
-// injectDerivedName ensures a LookupByName type's desired state carries
-// this create's own derived name, resolving which property that is from
-// the type's own CloudFormation resource-provider schema (getSchema,
-// already fetched and cached for Update/Diff) rather than a
-// hand-maintained property-per-type table. schemaPropertyPath — already
-// used to walk createOnlyProperties in Diff — does the
-// identical JSON-Pointer-to-map-key conversion here for
-// schema.PrimaryIdentifier.
+// injectDerivedName ensures a LookupByName type's desired state carries its
+// derived name under the property the schema's primaryIdentifier names.
 //
-// # Why this exists
-//
-// For LookupByName, the derived name *is* the provider's own primary
-// identifier — but Create otherwise submits spec.Config verbatim,
-// and nothing before this method ever puts the name into it.
-// AWS::S3::Bucket's own CloudFormation reference documents the resulting
-// failure mode explicitly: "If you don't specify a name, AWS
-// CloudFormation generates a unique ID and uses that ID for the bucket
-// name." An absent BucketName is not rejected, it is silently
-// reinterpreted as "generate one" — Get, which looks up the *derived* name
-// specifically, can then never find what Create actually made, and every
-// subsequent plan reports create again: an unbounded, silent resource
-// leak. Found live on TypeS3Bucket's bare registration (the only
-// LookupByName type with no per-type translate of its own to paper over
-// it); closed here for every LookupByName type at once rather than
-// per-type, so the same bug class cannot reappear the next time one is
-// registered bare.
-//
-// # Never clobbers a value the caller already set
-//
-// A per-type translate (lambda.go's FunctionName, iamrole.go's RoleName,
-// eventsrule.go's Name, artifactbucket.go's BucketName) already builds its
-// own real desired state and sets the identifying property itself, often
-// to a transformed value (artifactbucket.go's real bucket name differs
-// from spec.Name, the generic service name it derives from). This method
-// only fills the property in when it is entirely absent from desired —
-// presence, not truthiness, so a caller-set empty string is still treated
-// as deliberate and left alone. The alternative (always overwrite with
-// spec.Name) would silently break artifactbucket.go's own name rewrite,
-// for no benefit: a type that already sets its identity knows better than
-// a generic fallback what value belongs there.
-//
-// # Compound and unresolvable identifiers fail loudly, never guess
-//
-// A byName type's PrimaryIdentifier is expected to be exactly one
-// top-level property (verified per type in register.go's own comments:
-// BucketName, FunctionName, RoleName, Name).
-// AWS::Route53::RecordSet is the real counterexample this package already
-// knows about — its primary identifier is the compound
-// (HostedZoneId, Name, Type), and no single property is "the name" to
-// inject into; guessing one would just relocate this method's own bug
-// class into a different property instead of closing it. Anything other
-// than exactly one top-level path — zero (an identifier-less or
-// not-yet-meaningful schema), more than one (compound), or a nested path
-// this method does not attempt to address — is refused with a loud,
-// type-named error rather than silently submitting a desired state this
-// method could not actually populate. Rule 20: a create that cannot carry
-// its own identity must never reach CreateResource silently; a type in
-// this state needs its own translate (see artifactbucket.go or
-// apigatewayv2.go for the pattern), not the generic engine.
+// For byName the derived name is the provider's identifier, but nothing
+// else puts it into the desired state, and S3 silently generates a name for
+// an absent BucketName rather than rejecting the request: Get then never
+// finds what Create made, and every plan creates again. Only fills the
+// property when it is entirely absent, so a translate that set it, even to
+// a transformed value, is left alone. A compound or nested identifier is
+// refused rather than guessed at; such a type needs its own translate.
 func (r *resourceType) injectDerivedName(ctx context.Context, spec resource.Spec, desired map[string]any) error {
 	if r.lookup != resource.LookupByName {
-		// byTag stamps its own identity (stampTag, above, run by Create
-		// itself); byAttr/byApi let the provider assign the identifier.
-		// Only byName's identity is ever the derived name itself.
+		// byTag stamps its own identity; byAttr and byApi let the provider
+		// assign the identifier.
 		return nil
 	}
 
@@ -574,13 +399,11 @@ func (r *resourceType) injectDerivedName(ctx context.Context, spec resource.Spec
 
 	prop := path[0]
 	if _, exists := desired[prop]; exists {
-		// A translate already set this deliberately; never override it.
 		return nil
 	}
 	if spec.Name == "" {
-		// Unreachable today — Create refuses an empty spec.Name before this
-		// method ever runs — but kept explicit rather than trusting that
-		// ordering to hold forever (Rule 20).
+		// Create refuses an empty name before this runs; kept explicit
+		// rather than trusting that ordering forever.
 		return kerrors.Validation(
 			"cannot create %s: no derived name available to populate %q", r.typeName, prop)
 	}
@@ -589,13 +412,8 @@ func (r *resourceType) injectDerivedName(ctx context.Context, spec resource.Spec
 }
 
 // Update reconciles an existing resource to spec, or refuses with
-// resource.ErrImmutable when this type's schema has no update handler
-// (IMMUTABLE provisioning: create/read/delete only).
-//
-// The current state is fetched here rather than accepted as a parameter —
-// the Resource contract's Update signature is (ctx, ref, spec), matching
-// every other provider in this repo — so the diff Update needs is built
-// from a fresh Get rather than state the caller might be holding stale.
+// resource.ErrImmutable when this type's schema has no update handler. The
+// current state is read fresh here rather than trusted from the caller.
 func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
 	schema, err := r.getSchema(ctx)
 	if err != nil {
@@ -618,8 +436,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		return nil, kerrors.Validation("cannot update %s %q: it does not currently exist", r.typeName, ref.Name)
 	}
 	if properties == nil {
-		// byName resolve() returns no properties (it has no reason to fetch
-		// them) — Get one fresh set to diff against, same as Get itself does.
+		// A byName resolve reads nothing.
 		properties, found, err = r.client.GetResource(ctx, r.typeName, identifier)
 		if err != nil {
 			return nil, err
@@ -634,10 +451,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		return nil, err
 	}
 	if len(patch) == 0 || string(patch) == "[]" {
-		// Nothing in spec.Config differs from the live properties. Returning
-		// the current state rather than special-casing "no-op" keeps this
-		// method's return shape identical whether or not anything changed,
-		// and avoids a pointless UpdateResource round trip.
+		// Nothing differs; skip the round trip.
 		return &resource.State{
 			Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
 			ID:         identifier,
@@ -656,15 +470,9 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 	}, nil
 }
 
-// Delete removes the resource, treating one already absent as success —
-// both when resolve finds no identifier at all, and when Cloud Control
-// itself reports the resource gone (Client.DeleteResource's own contract).
-//
-// Ownership is asked here as well as in Get, and cannot be bypassed: nothing
-// guarantees Get ran before Delete in the same process on the same world,
-// and a guard living only in Get would be skipped by any caller reaching
-// Delete on its own. What is not ours is treated as already gone, which is
-// this method's own "deleting something absent is success" contract.
+// Delete removes the resource, treating one already absent as success.
+// Ownership is asked here as well as in Get, since nothing guarantees Get
+// ran first; what is not ours is treated as already gone.
 func (r *resourceType) Delete(ctx context.Context, ref resource.Ref) error {
 	identifier, properties, found, err := r.resolve(ctx, ref)
 	if err != nil {
@@ -694,35 +502,19 @@ func (r *resourceType) Delete(ctx context.Context, ref resource.Ref) error {
 }
 
 // Diff compares spec to the live state three ways, from the vendor's own
-// resource schema, implementing plan.Differ structurally (declared in
-// internal/plan, which imports this package — see internal/resource/otel.go
-// for the same arrangement).
+// schema, implementing plan.Differ structurally.
 //
 // Only properties spec.Config sets are compared: a property kraai never
-// wrote is the vendor's to default, and comparing it would report drift
-// kraai cannot act on. Among those:
+// wrote is the vendor's to default. A createOnly property that differs, or
+// is absent from the live state, is Immutable. Any other differing property
+// is Mutable when the type has an update handler and Immutable when it does
+// not. A writeOnly property is never compared, since a read never returns
+// it, and a mutable property absent from the live state is not compared
+// either: "unset" and "not returned" are indistinguishable from here, and
+// that rule can only miss an update, never invent one.
 //
-//   - A createOnly property that differs is Immutable: the vendor cannot
-//     change it in place, so the plan is a replace. Absent from the live
-//     state counts as differing, as it always has — a required identity
-//     property the vendor does not echo is a state this engine cannot
-//     reason about, and replace is the conservative answer.
-//   - Any other differing property is Mutable when the type has an update
-//     handler, and Immutable when it does not — a type with no update
-//     handler can only be replaced, whatever the property.
-//
-// Two exclusions keep the mutable comparison from inventing drift. A
-// writeOnly property (a Lambda function's Code) is never returned by a read,
-// so comparing it would report an update on every plan, forever. And a
-// mutable property absent from the live state is not compared at all: the
-// vendor may simply not return an unset value, and "unset" versus "not
-// returned" is not distinguishable from here. That rule cannot fabricate an
-// update; it can only miss one where the vendor returns nothing, which is
-// the safer error.
-//
-// Takes no context because plan.Differ's signature has none; getSchema is
-// cached after the first call, so this only reaches the network once per
-// type per process.
+// Takes no context because plan.Differ's signature has none; the schema is
+// cached after the first call.
 func (r *resourceType) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	spec, err := r.translated(context.Background(), spec)
 	if err != nil {
@@ -741,9 +533,8 @@ func (r *resourceType) translated(ctx context.Context, spec resource.Spec) (reso
 }
 
 // compare is Diff after translation: spec.Config is already the vendor's
-// property vocabulary. A type whose Diff narrows what it compares (an API
-// Gateway API, a Lambda function) shapes the Config itself and calls this,
-// so the translate does not run over a shape it did not build.
+// property vocabulary. A type whose Diff narrows what it compares shapes the
+// Config itself and calls this.
 func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	schema, err := r.getSchema(context.Background())
 	if err != nil {

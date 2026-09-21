@@ -25,50 +25,31 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// maxListPages bounds a ListResources page walk, as a backstop against a
-// NextToken that never stops advancing — the same defensive pattern the
-// Neon client uses for its cursor walk.
+// maxListPages bounds a ListResources page walk against a NextToken that
+// never stops advancing.
 const maxListPages = 100
 
-// maxEmptyBucketPages bounds EmptyBucket's page walk over ListObjectsV2, the
-// same defensive backstop maxListPages applies to ListResources, against a
-// NextContinuationToken that never stops advancing.
+// maxEmptyBucketPages bounds EmptyBucket's page walk over ListObjectsV2.
 const maxEmptyBucketPages = 100
 
-// maxOwnsBucketPages bounds OwnsBucket's page walk over ListBuckets, the
-// same defensive backstop maxListPages and maxEmptyBucketPages apply to
-// their own list loops, against a ContinuationToken that never stops
-// advancing. In practice OwnsBucket's own Prefix filter (see its doc
-// comment) narrows a real account's response to at most a handful of
-// buckets, so this bound is never expected to matter — it exists for the
-// same reason the other two do: an API that stops honouring its own
-// pagination contract must not spin this loop forever.
+// maxOwnsBucketPages bounds OwnsBucket's page walk over ListBuckets. Its
+// Prefix filter narrows a real account's response to a handful of buckets,
+// so this exists only so a broken pagination contract cannot spin forever.
 const maxOwnsBucketPages = 100
 
-// Default polling bounds for asynchronous Cloud Control operations
-// (CreateResource, UpdateResource, DeleteResource). These are generous on
-// the ceiling and cheap on the floor: a CloudFront distribution's
-// propagation alone can run past fifteen minutes, while an S3 bucket create
-// typically finishes in under a second, so the backoff starts small and
-// grows rather than picking one fixed interval that is wrong for most
-// resource types. WithPollTimings overrides all three, which is how tests
-// exercise polling without real waiting.
+// Default polling bounds for asynchronous Cloud Control operations. A
+// CloudFront distribution's propagation alone can run past fifteen minutes,
+// while an S3 bucket create finishes in under a second, so the backoff
+// starts small and grows. WithPollTimings overrides all three.
 const (
 	defaultPollInitialDelay = 2 * time.Second
 	defaultPollMaxDelay     = 30 * time.Second
 	defaultPollTimeout      = 40 * time.Minute
 )
 
-// cloudControlAPI is the subset of *cloudcontrol.Client this package's
-// *Client calls: the five verbs Cloud Control exposes uniformly across every
-// resource type (see this package's own doc comment) plus the status poll
-// the async ones require.
-//
-// Shaped like the SDK's own method signatures rather than this package's
-// vocabulary, unlike ccAPI in resource.go: this is the seam being
-// substituted in client_test.go, and the thing on the other side of it is
-// the SDK client itself, which is a concrete struct with no interface of
-// its own to depend on instead.
+// cloudControlAPI is the subset of *cloudcontrol.Client this package calls,
+// shaped like the SDK's own signatures because the thing on the other side
+// of this seam is the SDK client, which has no interface of its own.
 type cloudControlAPI interface {
 	GetResource(ctx context.Context, params *cloudcontrol.GetResourceInput, optFns ...func(*cloudcontrol.Options)) (*cloudcontrol.GetResourceOutput, error)
 	ListResources(ctx context.Context, params *cloudcontrol.ListResourcesInput, optFns ...func(*cloudcontrol.Options)) (*cloudcontrol.ListResourcesOutput, error)
@@ -84,91 +65,53 @@ type cloudFormationAPI interface {
 	DescribeType(ctx context.Context, params *cloudformation.DescribeTypeInput, optFns ...func(*cloudformation.Options)) (*cloudformation.DescribeTypeOutput, error)
 }
 
-// s3API is the subset of *s3.Client this package calls: PutObject, to
-// upload a Lambda deployment artifact to the per-environment artifact
-// bucket (aws-provider-compute), ListObjectsV2/DeleteObjects, to empty an
-// artifact bucket before Cloud Control deletes it (EmptyBucket below), and
-// ListBuckets, to answer "do we actually own this bucket" (OwnsBucket
-// below) — see that method's own doc comment for why this package needs
-// that question answered at all.
-//
-// Deliberately not Cloud-Control-routed like every other verb in this
-// package: Cloud Control manages a bucket's own existence
-// (AWS::S3::Bucket's Get/Create/Delete), but has no notion of "put this
-// object in it," "list what's in it," "remove these objects," or "which
-// buckets does this account actually own" — object data planes and
-// account-scoped listing are not part of the Cloud Control resource-
-// provider surface for any type. This is the one place this package
-// reaches past Cloud Control to a service-specific SDK client, for exactly
-// the operations Cloud Control cannot express.
+// s3API is the subset of *s3.Client this package calls. Cloud Control
+// manages a bucket's existence but has no notion of the objects in it, a
+// bucket's policy, or which buckets an account owns, so this is the one
+// place the package reaches past Cloud Control to a service SDK.
 type s3API interface {
 	PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error)
 	// GetObject, DeleteObject, HeadBucket, CreateBucket and
 	// PutPublicAccessBlock serve the environment lock and status record
-	// (lockstore.go): a conditional create and delete on a lock object,
-	// and the one-time creation of the account's lock bucket.
+	// (lockstore.go).
 	GetObject(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error)
 	DeleteObject(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
 	HeadBucket(ctx context.Context, params *s3.HeadBucketInput, optFns ...func(*s3.Options)) (*s3.HeadBucketOutput, error)
 	CreateBucket(ctx context.Context, params *s3.CreateBucketInput, optFns ...func(*s3.Options)) (*s3.CreateBucketOutput, error)
 	PutPublicAccessBlock(ctx context.Context, params *s3.PutPublicAccessBlockInput, optFns ...func(*s3.Options)) (*s3.PutPublicAccessBlockOutput, error)
-	// ListObjectsV2 lists (up to 1000) current objects in a bucket per
-	// call — EmptyBucket's only listing primitive. This package never
-	// enables object versioning on a bucket it creates (artifactbucket.go's
-	// Create submits only BucketName, no VersioningConfiguration property,
-	// and Update is refused outright for this type — see that file's
-	// Delete doc comment for the full finding), so ListObjectVersions,
-	// which would additionally surface noncurrent versions and delete
-	// markers, is not part of this seam: adding it would be handling a
-	// state this package's own bucket can never reach.
+	// ListObjectsV2 and DeleteObjects serve EmptyBucket. This package never
+	// enables versioning on a bucket it creates, so ListObjectVersions is
+	// not needed.
 	ListObjectsV2(ctx context.Context, params *s3.ListObjectsV2Input, optFns ...func(*s3.Options)) (*s3.ListObjectsV2Output, error)
-	// DeleteObjects removes up to 1000 objects in a single request —
-	// EmptyBucket's batch delete primitive, chosen over one DeleteObject
-	// call per key because this runs on every teardown and the two
-	// services' page/batch ceilings are identical (see EmptyBucket's doc
-	// comment).
 	DeleteObjects(ctx context.Context, params *s3.DeleteObjectsInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectsOutput, error)
-	// ListBuckets returns the buckets this AWS account itself owns,
-	// optionally narrowed by Prefix — OwnsBucket's only primitive, and the
-	// one call in this seam that is inherently account-scoped rather than
-	// bucket-scoped (see OwnsBucket's own doc comment for why that
-	// property is exactly what makes it useful here).
+	// ListBuckets serves OwnsBucket: the one call here that is
+	// account-scoped rather than bucket-scoped.
 	ListBuckets(ctx context.Context, params *s3.ListBucketsInput, optFns ...func(*s3.Options)) (*s3.ListBucketsOutput, error)
-	// PutBucketPolicy replaces a bucket's entire policy — cloudfront.go's
-	// only use of it, granting the CloudFront distribution fronting an
-	// objects bucket read access to it. A bucket policy is not part of
-	// AWS::S3::Bucket's own Cloud Control schema, so this is object-data-
-	// plane territory in the same sense PutObject is.
+	// PutBucketPolicy, GetBucketPolicy and DeleteBucketPolicy serve
+	// cloudfront.go, which grants a distribution read access to the bucket
+	// it fronts.
 	PutBucketPolicy(ctx context.Context, params *s3.PutBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.PutBucketPolicyOutput, error)
-	// GetBucketPolicy reads a bucket's current policy, or fails with
-	// NoSuchBucketPolicy/NoSuchBucket when there is none — see
-	// Client.GetBucketPolicy for how those are translated to absence.
 	GetBucketPolicy(ctx context.Context, params *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error)
-	// DeleteBucketPolicy removes a bucket's policy, tolerating one already
-	// absent — see Client.DeleteBucketPolicy.
 	DeleteBucketPolicy(ctx context.Context, params *s3.DeleteBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.DeleteBucketPolicyOutput, error)
 }
 
 // stsAPI is the subset of *sts.Client this package calls: GetCallerIdentity,
-// to resolve the AWS account id an ARN needs.
+// to resolve the account id an ARN needs.
 type stsAPI interface {
 	GetCallerIdentity(ctx context.Context, params *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error)
 }
 
 // secretsManagerAPI is the subset of *secretsmanager.Client this package
-// calls: GetSecretValue, to read the master credential RDS manages for an
-// Aurora cluster at the moment a function needs it.
+// calls: GetSecretValue, to read the credential RDS manages for an Aurora
+// cluster at the moment a function needs it.
 type secretsManagerAPI interface {
 	GetSecretValue(ctx context.Context, params *secretsmanager.GetSecretValueInput, optFns ...func(*secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error)
 }
 
-// Client is a thin Cloud Control + CloudFormation client.
-//
-// "Thin" here means its exported methods already speak this package's own
-// vocabulary — a decoded properties map, a plain identifier list — rather
-// than the SDK's Input/Output types. resource.go's ccAPI interface is
-// satisfied by *Client precisely because of that shape, so nothing above
-// this file needs to know the SDK exists.
+// Client is a thin Cloud Control and CloudFormation client whose exported
+// methods speak this package's vocabulary (a decoded properties map, an
+// identifier list) rather than the SDK's, so *Client satisfies ccAPI and
+// nothing above this file needs to know the SDK exists.
 type Client struct {
 	cc  cloudControlAPI
 	cf  cloudFormationAPI
@@ -176,13 +119,9 @@ type Client struct {
 	sts stsAPI
 	sm  secretsManagerAPI
 
-	// region is the resolved AWS region every ARN this package constructs
-	// (see AccountID's doc comment) is built against. Set from the SDK
-	// config's own resolved value in New, not from Settings.Region
-	// directly — Settings.Region may be empty and deferred to the SDK's own
-	// resolution chain (see Settings.Region's doc comment), and by the time
-	// LoadDefaultConfig returns, cfg.Region already holds whatever that
-	// chain actually settled on.
+	// region is the SDK's resolved region, which every ARN this package
+	// builds is against. Taken from the loaded config rather than
+	// Settings.Region, which may be empty and deferred to the SDK's chain.
 	region string
 
 	// Polling bounds for the async verbs. Defaulted in New, overridable via
@@ -191,21 +130,16 @@ type Client struct {
 	pollMaxDelay     time.Duration
 	pollTimeout      time.Duration
 
-	// accountMu/accountID/accountLoaded cache the caller's AWS account id
-	// for the process's lifetime, the same lazy-on-first-use, cache-only-
-	// on-success shape resourceType.getSchema already uses and for the
-	// identical reason: more than one Tier 2 resource (the Lambda's own
-	// Role ARN, an EventBridge Rule's Target ARN) needs it, an account's id
-	// cannot change mid-process, and a single transient STS throttle should
-	// not be cached as a permanent failure.
+	// The caller's account id, fetched once and cached only on success, so
+	// one throttled STS call is not a permanent failure.
 	accountMu     sync.Mutex
 	accountID     string
 	accountLoaded bool
 
 	// reads memoizes what Cloud Control has already answered this process,
-	// so the many lookups that sweep one type (every by-tag registration
-	// lists a type and reads each instance) cost one request per resource
-	// rather than one per lookup. Forgotten per type on any mutation of it.
+	// so the lookups that sweep one type (every by-tag registration lists
+	// a type and reads each instance) cost one request per resource rather
+	// than one per lookup. Forgotten per type on any mutation of it.
 	reads readCache
 }
 
@@ -223,8 +157,7 @@ func WithCloudFormationAPI(api cloudFormationAPI) Option {
 	return func(c *Client) { c.cf = api }
 }
 
-// WithS3API substitutes the S3 caller, which is how tests exercise artifact
-// upload without an AWS account or network.
+// WithS3API substitutes the S3 caller.
 func WithS3API(api s3API) Option {
 	return func(c *Client) { c.s3 = api }
 }
@@ -240,10 +173,8 @@ func WithSecretsManagerAPI(api secretsManagerAPI) Option {
 }
 
 // WithPollTimings overrides the backoff and overall timeout used to poll an
-// asynchronous operation's ProgressEvent to a terminal state. Tests use this
-// to exercise polling, timeout and cancellation behavior in milliseconds
-// rather than the production defaults, which are sized for real Cloud
-// Control propagation times (minutes, not milliseconds).
+// asynchronous operation to a terminal state, so tests can exercise polling
+// in milliseconds.
 func WithPollTimings(initialDelay, maxDelay, timeout time.Duration) Option {
 	return func(c *Client) {
 		c.pollInitialDelay = initialDelay
@@ -252,27 +183,15 @@ func WithPollTimings(initialDelay, maxDelay, timeout time.Duration) Option {
 	}
 }
 
-// New builds a Client for settings.Region, authenticating via the AWS SDK's
-// own default credential chain (environment, shared config, IMDS) — kraai
-// never reads or handles an AWS credential itself, delegating entirely to
-// the SDK's own auth resolution.
+// New builds a Client for settings.Region, authenticating through the SDK's
+// own default credential chain. kraai never handles an AWS credential
+// itself.
 func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error) {
-	// awsconfig.WithHTTPClient: kraai shares one tuned HTTP client across
-	// every provider for connection reuse rather than letting each SDK build
-	// its own. The SDK builds its own HTTP client per service (cloudcontrol,
-	// cloudformation, s3, sts) unless told otherwise, which is a fifth
-	// independently-pooled client alongside internal/reachability,
-	// internal/provider/neon and internal/provider/cloudflare. httpx.NewClient's *http.Client satisfies
-	// the SDK's minimal HTTPClient interface (a Do(*http.Request) method),
-	// so this puts every AWS call through the same shared pool and the same
-	// otelhttp instrumentation as everything else, without replacing any of
-	// the SDK's own retry or credential-resolution behaviour — WithHTTPClient
-	// only substitutes the transport those layers run on top of.
-	//
-	// Adaptive retries with a longer budget: Cloud Control throttles a plan's
-	// burst of reads well before the SDK's three standard attempts are
-	// spent, and adaptive mode paces the client to the limit it hits rather
-	// than failing the plan on it.
+	// One shared, instrumented HTTP transport across every provider rather
+	// than a pool per SDK service; WithHTTPClient substitutes only the
+	// transport under the SDK's retry and credential layers. Adaptive
+	// retries with a longer budget, because Cloud Control throttles a
+	// plan's burst of reads well before three standard attempts are spent.
 	cfg, err := awsconfig.LoadDefaultConfig(ctx,
 		awsconfig.WithRegion(settings.Region),
 		awsconfig.WithHTTPClient(httpx.NewClient(60*time.Second, nil, nil)),
@@ -280,8 +199,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		awsconfig.WithRetryMaxAttempts(cloudControlMaxAttempts),
 	)
 	if err != nil {
-		// LoadDefaultConfig's error can name a credential file path but never
-		// a credential value, so wrapping it is safe.
+		// The error can name a credential file path but never a value.
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "loading AWS configuration for region %q", settings.Region)
 	}
 
@@ -305,14 +223,10 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 // GetResource returns typeName/identifier's current properties, or
 // found=false when Cloud Control reports the resource does not exist.
 //
-// # Absence versus failure
-//
-// ResourceNotFoundException is the only outcome translated to found=false,
-// err=nil. Every other error — throttling, access denied, a network
-// failure, a malformed response — is returned as a real error with
-// found=false and must not be read as absence: Get's caller (and, through
-// it, teardown) treats "does not exist" as "already deleted, keep going",
-// so misreading an outage as absence would orphan a real resource.
+// ResourceNotFoundException is the only outcome translated to found=false
+// with a nil error. Every other error is real and must not be read as
+// absence: teardown treats "does not exist" as "already deleted, keep
+// going", so misreading an outage as absence would orphan a resource.
 func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (map[string]any, bool, error) {
 	if properties, found, hit := c.reads.get(typeName, identifier); hit {
 		return properties, found, nil
@@ -342,51 +256,17 @@ func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (
 }
 
 // ListResources returns the primary identifier of every instance of
-// typeName Cloud Control can see, across all pages.
+// typeName Cloud Control can see, across all pages. Identifiers only, never
+// properties: Cloud Control guarantees only the identifier per listed
+// resource, and a lookup must not trust a field List never promised.
 //
-// Deliberately returns identifiers only, never properties. Cloud Control's
-// own documentation guarantees only the identifier per resource — "it may
-// include part or all of the resource's properties" — and its own worked
-// example shows a type (Kinesis streams) whose list response carries a
-// single property while everything else requires GetResource. Exposing a
-// partial, type-dependent properties map here would invite exactly the bug
-// this package's byAttr/byTag lookups must not have: trusting a field that
-// List never promised to populate.
-//
-// # resourceModel: parent-scoped types
-//
-// Most Cloud Control list handlers enumerate every instance of typeName in
-// the account/region and resourceModel is nil. A parent-scoped type's list
-// handler instead requires a ResourceModel identifying the parent whose
-// instances to list — AWS::Lambda::Permission is the first this package
-// registers (resourceType.listScope), verified directly against Cloud
-// Control on the live Evatt Labs account (409032463870, us-east-1):
-//
-//	$ aws cloudcontrol list-resources --type-name AWS::Lambda::Permission --region us-east-1
-//	InvalidRequestException: Missing or invalid ResourceModel property in
-//	AWS::Lambda::Permission list handler request input. Required property:
-//	(#: required key [FunctionName] not found)
-//
-//	$ aws cloudcontrol list-resources --type-name AWS::Lambda::Permission \
-//	    --resource-model '{"FunctionName":"does-not-exist"}' --region us-east-1
-//	ResourceNotFoundException: AWS::Lambda::Permission Handler returned
-//	status FAILED: The resource you requested does not exist.
-//	(HandlerErrorCode: NotFound)
-//
-// The second call is the reason resourceModel != nil changes error
-// handling below, not just the request: naming a parent that does not
-// exist is reported as ResourceNotFoundException, not an empty result —
-// unlike every unscoped list handler this package has observed, where "no
-// instances" and "no error" are the same response. Translated to an empty
-// identifier list here, deliberately mirroring GetResource's own
-// absence-versus-failure contract: a permission's parent function not
-// existing yet means the permission does not exist yet either, which is
-// exactly the (nil, nil) Get must return for plan to report "create," not
-// "failed" (see resource.Resource's own doc comment). This translation is
-// gated on resourceModel != nil precisely because it was only ever
-// observed for a scoped list; an unscoped ListResources returning
-// ResourceNotFoundException remains a real, unexpected error, exactly as
-// it was before this parameter existed.
+// resourceModel is nil for the usual unscoped list handler. A parent-scoped
+// handler requires a ResourceModel naming the parent, and reports a parent
+// that does not exist as ResourceNotFoundException rather than an empty
+// list. That is translated to an empty list here, and only for a scoped
+// call: a permission's parent function not existing yet means the
+// permission does not exist yet, which is the absence plan needs to report
+// a create rather than a failure.
 func (c *Client) ListResources(ctx context.Context, typeName string, resourceModel map[string]any) ([]string, error) {
 	var modelJSON *string
 	if resourceModel != nil {
@@ -442,10 +322,8 @@ func (c *Client) ListResources(ctx context.Context, typeName string, resourceMod
 }
 
 // pollTimings resolves the effective backoff and timeout, falling back to
-// the production defaults when a Client was built by a struct literal
-// rather than New — every existing test in this package does exactly that
-// (e.g. &Client{cc: cc}), and a zero-value delay would otherwise make the
-// poll loop busy-spin instead of backing off.
+// the defaults for a Client built by a struct literal, as tests do, so the
+// poll loop never busy-spins on a zero delay.
 func (c *Client) pollTimings() (initialDelay, maxDelay, timeout time.Duration) {
 	initialDelay, maxDelay, timeout = c.pollInitialDelay, c.pollMaxDelay, c.pollTimeout
 	if initialDelay <= 0 {
@@ -461,22 +339,14 @@ func (c *Client) pollTimings() (initialDelay, maxDelay, timeout time.Duration) {
 }
 
 // pollToTerminal polls requestToken's status until it reaches a terminal
-// OperationStatus (SUCCESS, FAILED or CANCEL_COMPLETE), or until an
-// infra-level failure: the status call itself erroring, an empty response,
-// context cancellation, or this poll's own timeout elapsing.
+// OperationStatus, or until the status call fails, ctx is cancelled, or the
+// poll timeout elapses. It returns the raw terminal event rather than
+// deciding whether FAILED is an error: Delete treats NotFound as success
+// and Create does not, and each verb keeps that decision.
 //
-// It deliberately does not decide whether a terminal FAILED counts as an
-// application-level error — Delete's "deleting something already absent is
-// success" contract needs to inspect the terminal event's ErrorCode itself
-// (NotFound is success for Delete, a real failure for Create/Update), so
-// returning the raw terminal event and letting each verb interpret it keeps
-// that decision where the contract actually lives, rather than baking one
-// verb's success criteria into the shared poll loop.
-//
-// Backoff starts at initialDelay and doubles up to maxDelay on every
-// non-terminal response, honouring Cloud Control's own RetryAfter hint when
-// it is later than the computed backoff would be. Never spins without a
-// delay: every iteration either returns or waits.
+// Backoff starts at initialDelay and doubles up to maxDelay, honouring Cloud
+// Control's RetryAfter hint when it is later. Every iteration either
+// returns or waits.
 func (c *Client) pollToTerminal(ctx context.Context, requestToken, typeName, identifier string) (*cctypes.ProgressEvent, error) {
 	initialDelay, maxDelay, timeout := c.pollTimings()
 	ctx, cancel := context.WithTimeout(ctx, timeout)
@@ -526,10 +396,8 @@ func (c *Client) pollToTerminal(ctx context.Context, requestToken, typeName, ide
 }
 
 // terminalFailureCodes are the HandlerErrorCodes that mean the caller did
-// something the API will never accept as-is — a validation problem, not an
-// unexpected platform failure. Everything else (throttling, internal
-// errors, network failures, an unset code) is CodeUnexpected: retryable or
-// unknown, not something the caller can fix by changing the manifest.
+// something the API will never accept as is: a validation problem the
+// manifest can fix. Everything else is CodeUnexpected.
 var terminalFailureCodes = map[cctypes.HandlerErrorCode]bool{
 	cctypes.HandlerErrorCodeNotUpdatable:                 true,
 	cctypes.HandlerErrorCodeInvalidRequest:               true,
@@ -542,10 +410,8 @@ var terminalFailureCodes = map[cctypes.HandlerErrorCode]bool{
 	cctypes.HandlerErrorCodeServiceLimitExceeded:         true,
 }
 
-// translateFailure maps a terminal FAILED/CANCEL_COMPLETE ProgressEvent onto
-// a kerrors bucket, naming the resource and the last status per this
-// workstream's requirement that a stuck or failed operation return a useful
-// error rather than a bare "it failed."
+// translateFailure maps a terminal FAILED or CANCEL_COMPLETE event onto a
+// kerrors bucket, naming the resource, the status and the handler's code.
 func translateFailure(op, typeName, identifier string, event *cctypes.ProgressEvent) error {
 	statusMessage := "no status message"
 	if event.StatusMessage != nil && *event.StatusMessage != "" {
@@ -560,13 +426,9 @@ func translateFailure(op, typeName, identifier string, event *cctypes.ProgressEv
 		"%s %s %q: operation ended %s (error code %q)", op, typeName, identifier, event.OperationStatus, event.ErrorCode)
 }
 
-// decodeResourceModel decodes a terminal ProgressEvent's ResourceModel —
-// "a JSON string containing the resource model, consisting of each resource
-// property and its current value" per Cloud Control's own documentation —
-// into this package's plain properties map. Read from the ProgressEvent
-// itself rather than issuing a follow-up GetResource: Cloud Control already
-// promises the final model on SUCCESS, and a follow-up call would just be
-// an extra round trip to re-fetch what the operation already returned.
+// decodeResourceModel decodes a terminal ProgressEvent's ResourceModel into
+// a properties map. Cloud Control promises the final model on SUCCESS, so no
+// follow-up GetResource is needed.
 func decodeResourceModel(model *string) (map[string]any, error) {
 	if model == nil || *model == "" {
 		return map[string]any{}, nil
@@ -625,7 +487,7 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 	return identifier, properties, nil
 }
 
-// UpdateResource submits patch (an RFC 6902 JSON Patch document) against
+// UpdateResource submits patch, an RFC 6902 JSON Patch document, against
 // identifier and polls to a terminal state, returning the resulting
 // properties.
 func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
@@ -659,12 +521,9 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 }
 
 // DeleteResource submits a delete for identifier and polls to a terminal
-// state. Deleting something already absent is success, exactly as Get
-// reports absence rather than failure (see resource.Resource's doc
-// comment): that holds both when Cloud Control rejects the delete
-// synchronously with ResourceNotFoundException, and when the async delete
-// handler itself discovers the resource is already gone and reports a
-// terminal FAILED with HandlerErrorCodeNotFound.
+// state. Deleting something already absent is success, both when Cloud
+// Control rejects the delete with ResourceNotFoundException and when the
+// async handler reports a terminal FAILED with NotFound.
 func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string) error {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
@@ -697,49 +556,31 @@ func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string
 }
 
 // Schema is the subset of a CloudFormation resource-provider schema this
-// package currently decodes.
-//
-// DescribeType's Schema field is the full resource-provider schema as a JSON
-// string — up to 116KB for AWS::CloudFront::Distribution, per the
-// aws-provider-core workstream's own measurement — carrying properties,
-// required, handlers and more. Only the fields relevant to identity and
-// replacement detection are decoded here; the rest is left for the
-// write-path workstream that actually needs schema-driven diffing.
+// package decodes: what identity, replacement detection, list scoping and
+// the IAM policy need. The full schema runs to 116KB for a distribution.
 type Schema struct {
 	// PrimaryIdentifier is the property path (or paths, for a compound
 	// identifier) Cloud Control treats as this type's primary identifier.
 	PrimaryIdentifier []string `json:"primaryIdentifier"`
 	// CreateOnlyProperties are the properties that force a replacement
-	// rather than an in-place update — the authoritative source for
-	// plan's replace-or-update decision, consumed via resourceType's
-	// Diff (plan.Differ).
+	// rather than an in-place update.
 	CreateOnlyProperties []string `json:"createOnlyProperties"`
 	// WriteOnlyProperties are accepted on create and update but never
-	// returned by a read — a Lambda function's Code, say. Excluded from the
-	// mutable comparison in resourceType.Diff: comparing a value the vendor
-	// will never echo back would report every such property as drifted on
-	// every plan, forever.
+	// returned by a read, such as a Lambda function's Code.
 	WriteOnlyProperties []string `json:"writeOnlyProperties"`
-	// Handlers lists this type's implemented verbs by name ("create",
-	// "read", "update", "delete", "list"). Decoded as raw JSON because this
-	// package only ever asks whether a key is present — an
-	// IMMUTABLE-provisioning type (create/read/delete, no update handler)
-	// omits "update" entirely rather than declaring it empty, so presence of
-	// the key is the whole signal HasUpdateHandler needs.
+	// Handlers lists this type's implemented verbs by name. Raw JSON
+	// because presence of a key is most of what this package asks: a type
+	// with no update handler omits "update" entirely.
 	Handlers map[string]json.RawMessage `json:"handlers"`
 	// Tagging carries the actions the type's tag handling needs, beside
-	// the per-verb handler permissions; both feed the policy kraai prints
-	// for a manifest (Permissions).
+	// the per-verb handler permissions; both feed Permissions.
 	Tagging struct {
 		Permissions []string `json:"permissions"`
 	} `json:"tagging"`
 }
 
-// listHandler is the part of a schema's list handler this package reads: the
-// input model the handler requires. Cloud Control's list handlers for a
-// parent-scoped type (a function's permissions, a domain's mappings, a
-// zone's records) refuse an unscoped call, and say so here rather than only
-// in the error that comes back.
+// listHandler is the part of a schema's list handler this package reads:
+// the input model the handler requires.
 type listHandler struct {
 	HandlerSchema struct {
 		Required []string `json:"required"`
@@ -751,13 +592,10 @@ type listHandler struct {
 
 // ListRequirements returns the property sets a list call must supply, as
 // alternatives: satisfying any one is enough. Empty when the list handler
-// declares no input model, which is every type that lists the whole
-// account unscoped.
-//
-// AWS::Lambda::Permission declares required [FunctionName], one
-// alternative. AWS::Route53::RecordSet declares a oneOf of [HostedZoneId]
-// and [HostedZoneName], two. A required list beside a oneOf applies to
-// every alternative.
+// declares no input model. AWS::Lambda::Permission requires [FunctionName];
+// AWS::Route53::RecordSet declares a oneOf of [HostedZoneId] and
+// [HostedZoneName]. A required list beside a oneOf applies to every
+// alternative.
 func (s Schema) ListRequirements() [][]string {
 	raw, ok := s.Handlers["list"]
 	if !ok {
@@ -784,26 +622,16 @@ func (s Schema) ListRequirements() [][]string {
 }
 
 // HasUpdateHandler reports whether this type's schema declares an update
-// handler at all. A type without one cannot be reconciled in place — Update
-// must refuse with resource.ErrImmutable rather than attempt a call Cloud
-// Control will reject, per this workstream's brief.
+// handler. A type without one can only be replaced.
 func (s Schema) HasUpdateHandler() bool {
 	_, ok := s.Handlers["update"]
 	return ok
 }
 
 // DescribeType fetches and decodes typeName's CloudFormation resource
-// provider schema.
-//
-// Fetched at runtime on first use per type and cached for the process's
-// lifetime (resourceType.getSchema), never vendored: this package's own
-// measurement found schema sizes up to 116KB (see the Schema type's own doc
-// comment), and a resource type's schema does not
-// change within a single kraai invocation, so one DescribeType call per type
-// per process is the right amount of caching — enough to avoid repeating an
-// expensive call on every Get/Create/Update/Diff, not so much
-// that a real schema change (a new AWS API version) would need vendored
-// files kept in sync by hand.
+// provider schema. Fetched on first use and cached per type per process by
+// resourceType.getSchema, never vendored: a schema does not change within
+// one invocation, and vendored files would need keeping in sync by hand.
 func (c *Client) DescribeType(ctx context.Context, typeName string) (Schema, error) {
 	out, err := c.cf.DescribeType(ctx, &cloudformation.DescribeTypeInput{
 		Type:     cftypes.RegistryTypeResource,
@@ -827,19 +655,13 @@ func (c *Client) DescribeType(ctx context.Context, typeName string) (Schema, err
 	return schema, nil
 }
 
-// Region returns the AWS region this Client resolved at construction (see
-// the region field's own doc comment).
+// Region returns the AWS region this Client resolved at construction.
 func (c *Client) Region() string { return c.region }
 
-// PutObject uploads body to bucket/key, replacing any existing object at
-// that key.
-//
-// No existence check first: S3 PutObject is itself an overwrite, so a
-// HeadObject-then-PutObject round trip would only add a request without
-// changing the outcome. This package's callers additionally never call it
-// with the same key twice for different content — the artifact key is a
-// content hash (aws-provider-compute's zip determinism), so a repeat
-// PutObject for an unchanged input writes back bytes S3 already holds.
+// PutObject uploads body to bucket/key, replacing any existing object. No
+// existence check first: PutObject is itself an overwrite, and the artifact
+// key is a content hash, so a repeat write for unchanged input writes back
+// bytes S3 already holds.
 func (c *Client) PutObject(ctx context.Context, bucket, key string, body []byte) error {
 	_, err := c.s3.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
@@ -852,66 +674,17 @@ func (c *Client) PutObject(ctx context.Context, bucket, key string, body []byte)
 	return nil
 }
 
-// EmptyBucket deletes every object in bucket, so a subsequent
-// AWS::S3::Bucket delete (Client.DeleteResource, routed through Cloud
-// Control) can succeed. This closes a real, reproduced failure: `kraai
-// destroy` against a live account left every artifact bucket behind,
-// because S3 refuses to delete a non-empty bucket —
+// EmptyBucket deletes every object in bucket, so a subsequent bucket delete
+// through Cloud Control can succeed; S3 refuses to delete a non-empty
+// bucket, and a destroy once left every artifact bucket behind.
 //
-//	deleting AWS::S3::Bucket "kraaiapi-pull-request-00001-api-artifacts":
-//	operation ended FAILED (error code "GeneralServiceException"): The
-//	bucket you tried to delete is not empty (Service: S3, Status Code: 409)
-//
-// — and artifactBucketResource.Delete used to hand that delete straight to
-// the generic Cloud Control engine with no emptying step at all.
-//
-// # Why this is a Client method, not Cloud Control logic
-//
-// Emptying a bucket is exactly the kind of object-data-plane operation
-// Cloud Control cannot express (see the s3API doc comment): it belongs
-// beside PutObject, the one other place this package reaches past Cloud
-// Control to the S3 SDK directly, not inside DeleteResource's generic
-// poll-to-terminal machinery, which has no notion of a bucket's contents
-// at all.
-//
-// # One DeleteObjects call per ListObjectsV2 page, not list-then-rebatch
-//
-// ListObjectsV2 returns at most 1000 keys per page; DeleteObjects accepts
-// at most 1000 keys per request. Those ceilings are identical, so each
-// page is deleted as its own batch immediately, rather than accumulating
-// every key across every page in memory and re-chunking afterward — fewer
-// round trips than one DeleteObject per key (this runs on every teardown),
-// and no unbounded buffering for a bucket with many objects. The loop
-// keeps following NextContinuationToken while IsTruncated is true, so a
-// bucket with more than 1000 objects is still fully emptied, not just its
-// first page.
-//
-// # No version or delete-marker handling — verified, not assumed
-//
-// artifactbucket.go's Create submits only {"BucketName": realName} as
-// desired state (see that file's own doc comment on why Config must be
-// replaced rather than carried through), never a VersioningConfiguration
-// property, and Update is refused outright for this type — there is no
-// path through this package that ever turns versioning on for a bucket it
-// created. S3 buckets are unversioned by default. A ListObjectsV2 pass
-// over current objects therefore already sees everything a kraai-created
-// artifact bucket can ever hold; there are no noncurrent versions or
-// delete markers to additionally list and remove. Handling them anyway
-// would be speculative code for a state this package's own bucket cannot
-// reach — the s3API doc comment records the same finding at the interface
-// boundary.
-//
-// # Absence is success, per resource.Resource.Delete's own contract
-//
-// A NoSuchBucket error from the listing call means the bucket is already
-// gone: teardown must be retryable (internal/destroy/doc.go), and a
-// destroy that already emptied and deleted this bucket on a prior,
-// partially-failed run must be able to finish cleanly on a retry rather
-// than erroring on a bucket that no longer exists. Every other failure —
-// access denied, throttling, a malformed response, an object-level error
-// reported inside a nominally successful DeleteObjects response — is real
-// and is returned wrapped with kerrors, naming the bucket, never silently
-// treated as if it meant the same thing as absence.
+// Each ListObjectsV2 page is deleted as its own DeleteObjects batch, since
+// both are capped at 1000 keys. No version or delete-marker handling: this
+// package never enables versioning on a bucket it creates, so current
+// objects are everything such a bucket can hold. A NoSuchBucket from the
+// listing means the bucket is already gone, which is success; every other
+// failure, including a per-object error inside a successful DeleteObjects
+// response, is returned naming the bucket.
 func (c *Client) EmptyBucket(ctx context.Context, bucket string) error {
 	var token *string
 	for range maxEmptyBucketPages {
@@ -939,13 +712,9 @@ func (c *Client) EmptyBucket(ctx context.Context, bucket string) error {
 			if err != nil {
 				return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting objects from bucket %q", bucket)
 			}
-			// A DeleteObjects call can return a 200 OK overall while
-			// individual keys failed — S3 reports those per-object, in
-			// Errors, not as a Go error from the call itself. Surfacing
-			// only the first is enough to make the failure actionable
-			// without flooding the caller with a redundant list when many
-			// keys fail for the same reason (e.g. one access-denied
-			// policy blocking every delete in the batch).
+			// A DeleteObjects call can succeed overall while individual
+			// keys failed; S3 reports those per object. The first is enough
+			// to act on.
 			if len(delOut.Errors) > 0 {
 				first := delOut.Errors[0]
 				key, code, msg := "<unknown key>", "<unknown code>", "<no message>"
@@ -974,101 +743,21 @@ func (c *Client) EmptyBucket(ctx context.Context, bucket string) error {
 
 // OwnsBucket reports whether bucket belongs to this AWS account.
 //
-// # The bug this closes
+// Bucket names are global, and Cloud Control's GetResource for a bucket
+// resolves that namespace without checking ownership, so a stranger's
+// bucket that collides with a derived name would read as "exists, no
+// change" and then be written into or deleted. HeadBucket cannot answer
+// this: with or without ExpectedBucketOwner it returns the same 403 for a
+// foreign bucket as for one of ours the caller's IAM cannot see, and AWS
+// documents that ambiguity as intentional. ListBuckets returns only the
+// buckets the authenticated account owns, so it can never be fooled by a
+// bucket policy and never has to compare an account id. A failure of the
+// call itself, most likely a missing s3:ListAllMyBuckets, is returned as an
+// error and must never be read as "not owned".
 //
-// S3 bucket names are unique globally, across every AWS account on Earth,
-// not just within this one — and Cloud Control's GetResource for
-// AWS::S3::Bucket resolves that global namespace without checking
-// ownership at all. Verified against the live Evatt Labs account
-// (409032463870, us-east-1):
-//
-//	$ aws s3api list-buckets --query "Buckets[?contains(Name,'dev-api')].Name"
-//	[]                                          # we own no such bucket
-//
-//	$ aws s3api head-bucket --bucket dev-api-artifacts
-//	An error occurred (403) when calling the HeadBucket operation: Forbidden
-//	                                            # it exists, owned by someone else
-//
-//	$ aws cloudcontrol get-resource --type-name AWS::S3::Bucket --identifier dev-api-artifacts
-//	{"BucketName":"dev-api-artifacts","Arn":"arn:aws:s3:::dev-api-artifacts", ...}
-//	                                            # full success
-//
-// Before this method existed, artifactBucketResource.Get trusted Cloud
-// Control's success unconditionally: a stranger's bucket that merely
-// happened to collide with this environment's derived name (dev,
-// dev-api-artifacts — exactly the kind of generic name every environment
-// produces) read as "exists, no change needed." destroy would then attempt
-// EmptyBucket/DeleteResource against a bucket kraai does not own, and
-// apply would skip creating the real bucket and upload the Lambda artifact
-// straight into a stranger's. See this workstream's PR description for the
-// full consequence chain.
-//
-// # Why ListBuckets, not HeadBucket + ExpectedBucketOwner
-//
-// S3 supports an expected-owner check on many operations
-// (x-amz-expected-bucket-owner, the Go SDK's ExpectedBucketOwner field),
-// and HeadBucket is the obvious first candidate for an ownership-aware
-// existence check. Verified against the live account that it does not
-// work for this: HeadBucket on the foreign bucket above returns an
-// identical 403 Forbidden whether or not ExpectedBucketOwner is set to
-// this account's own id, and a HeadBucket on a bucket name that does not
-// exist at all returns 404 either way — the ExpectedBucketOwner mismatch
-// produces no distinguishable signal from a bare access-denied. This is
-// not a gap in this package's probing; AWS's own HeadBucket reference
-// documents it as intentional: "If the bucket doesn't exist or you don't
-// have permission to access it, the HEAD request returns a generic 400 Bad
-// Request, 403 Forbidden, or 404 Not Found HTTP status code. A message
-// body isn't included, so you can't determine the exception beyond these
-// HTTP response codes." A 403 from HeadBucket therefore always carries the
-// same ambiguity this workstream's brief named explicitly: it cannot be
-// told apart from "this bucket is ours, but the caller's own IAM policy is
-// too narrow to list it" — and silently reading that ambiguous case as
-// "someone else owns this" would misreport a misconfigured policy as a
-// foreign bucket, which is exactly the failure mode this method must not
-// introduce.
-//
-// ListBuckets sidesteps the ambiguity rather than resolving it: per AWS's
-// own reference, it "[r]eturns a list of all buckets owned by the
-// authenticated sender of the request" — an account-scoped listing, not a
-// per-bucket permission check, so it can never be fooled by a bucket-level
-// policy (this account's own artifact bucket denying HeadBucket to an
-// over-narrow caller would still appear in this account's own
-// ListBuckets) and never needs to guess at a foreign account's ownership
-// (a bucket this account does not own can never appear in this account's
-// own bucket list, full stop — there is no cross-account visibility to be
-// ambiguous about). The two questions this workstream's brief asks Get to
-// keep separate — "does this bucket exist at all" and "do we own it" —
-// are answered by two different AWS APIs precisely so that a bucket-level
-// permission problem on our own bucket can never be misread as a
-// foreign-ownership one: Cloud Control's GetResource (existence, globally,
-// no ownership check) stays the existence check exactly as before, and
-// this method alone decides ownership. If ListBuckets itself fails — most
-// plausibly because the caller's IAM lacks the account-wide
-// s3:ListAllMyBuckets action this operation requires — that is a real,
-// account-level authorization problem unrelated to any specific bucket's
-// ownership, and is returned as an error here rather than folded into
-// either a true or false ownership answer; see this method's callers in
-// artifactbucket.go for why an error here must never be read as "not
-// owned."
-//
-// Filtered by Prefix rather than paged through the account's entire bucket
-// list: AWS's own documentation now warns that an unpaginated ListBuckets
-// call is rejected outright once an account's bucket quota exceeds 10,000,
-// so narrowing server-side to candidates that could possibly match bucket's
-// exact name is both cheaper and the only form of this call safe to rely
-// on regardless of account size. Prefix is a "begins with" filter, not an
-// exact match, so the loop below still checks each candidate's Name for
-// equality rather than trusting a single result.
-//
-// # AccountID is not needed here
-//
-// Every other ARN-constructing method in this package (see AccountID's own
-// doc comment) needs this account's id as a literal value to embed in a
-// constructed ARN. This method needs no such value: ListBuckets is
-// inherently scoped to "whatever account these credentials authenticate
-// as," so the question "is this ours" never has to compare an id at all —
-// another way the account-scoped API sidesteps the ambiguity a bare id
-// comparison via ExpectedBucketOwner could not.
+// Filtered by Prefix: an unpaginated ListBuckets is rejected once an
+// account exceeds 10,000 buckets. Prefix is "begins with", so each
+// candidate's name is still checked for equality.
 func (c *Client) OwnsBucket(ctx context.Context, bucket string) (bool, error) {
 	var token *string
 	for range maxOwnsBucketPages {
@@ -1093,14 +782,9 @@ func (c *Client) OwnsBucket(ctx context.Context, bucket string) (bool, error) {
 	return false, kerrors.Validation("checking ownership of bucket %q did not terminate within %d pages", bucket, maxOwnsBucketPages)
 }
 
-// bucketPolicyAbsent reports whether err is S3's way of saying a bucket
-// policy — or the bucket itself — is not there: NoSuchBucketPolicy and
-// NoSuchBucket, the two codes GetBucketPolicy and DeleteBucketPolicy must
-// both treat as absence rather than failure. S3 does not model
-// NoSuchBucketPolicy as its own Go error type the way NoSuchBucket
-// (s3types.NoSuchBucket) is; both surface through the generic
-// smithy.APIError interface that every typed S3 error also implements, so
-// one ErrorCode check recognizes either.
+// bucketPolicyAbsent reports whether err is S3 saying a bucket policy, or
+// the bucket itself, is not there. NoSuchBucketPolicy has no typed Go error
+// the way NoSuchBucket does, so one ErrorCode check recognizes either.
 func bucketPolicyAbsent(err error) bool {
 	var apiErr smithy.APIError
 	if !errors.As(err, &apiErr) {
@@ -1115,11 +799,6 @@ func bucketPolicyAbsent(err error) bool {
 }
 
 // PutBucketPolicy replaces bucket's entire policy with document.
-//
-// Nothing else in this package writes a policy on an objects bucket —
-// cloudfront.go's composite distribution resource is the only caller,
-// granting the CloudFront distribution fronting it read access to the
-// objects it serves.
 func (c *Client) PutBucketPolicy(ctx context.Context, bucket, document string) error {
 	_, err := c.s3.PutBucketPolicy(ctx, &s3.PutBucketPolicyInput{
 		Bucket: aws.String(bucket),
@@ -1132,10 +811,8 @@ func (c *Client) PutBucketPolicy(ctx context.Context, bucket, document string) e
 }
 
 // GetBucketPolicy returns bucket's current policy document, or found=false
-// when the bucket has no policy at all or does not exist — both read as
-// absence here, per the same absence-versus-failure discipline as
-// GetResource and OwnsBucket. Every other error is real and returned
-// wrapped, never folded into an absent result.
+// when the bucket has no policy or does not exist. Every other error is
+// returned, never folded into absence.
 func (c *Client) GetBucketPolicy(ctx context.Context, bucket string) (string, bool, error) {
 	out, err := c.s3.GetBucketPolicy(ctx, &s3.GetBucketPolicyInput{Bucket: aws.String(bucket)})
 	if err != nil {
@@ -1150,9 +827,8 @@ func (c *Client) GetBucketPolicy(ctx context.Context, bucket string) (string, bo
 	return *out.Policy, true, nil
 }
 
-// DeleteBucketPolicy removes bucket's policy, tolerating one already
-// absent or a bucket already gone — the same already-absent-is-success
-// contract as Client.DeleteResource.
+// DeleteBucketPolicy removes bucket's policy, tolerating one already absent
+// or a bucket already gone.
 func (c *Client) DeleteBucketPolicy(ctx context.Context, bucket string) error {
 	_, err := c.s3.DeleteBucketPolicy(ctx, &s3.DeleteBucketPolicyInput{Bucket: aws.String(bucket)})
 	if err != nil && !bucketPolicyAbsent(err) {
@@ -1162,32 +838,13 @@ func (c *Client) DeleteBucketPolicy(ctx context.Context, bucket string) error {
 }
 
 // AccountID returns the AWS account id the configured credentials
-// authenticate as, fetched once via STS GetCallerIdentity and cached for
-// the process's lifetime (see the Client.accountID field doc for why
-// caching, and why only on success).
+// authenticate as, fetched once via STS and cached for the process.
 //
-// # Why this exists: ARN construction without a live cross-resource lookup
-//
-// A Lambda's execution Role property and an EventBridge Rule's Target Arn
-// both require a full ARN, not a bare name — unlike AWS::Lambda::Url's
-// TargetFunctionArn, which documents bare-name acceptance. The role and the
-// function it assumes into are now a real DependsOn edge (register.go:
-// TypeLambdaFunction depends on TypeIAMRole), so a live GetResource lookup
-// of the role's Arn attribute would be safe today. The function and
-// EventBridge Rule are not ordered against each other at all — Rule
-// declares no DependsOn on the function (see eventsrule.go's own doc
-// comment) because PutTargets never validates the target's existence, so a
-// live lookup here would still race. Constructing every ARN this package
-// needs locally, from the account id plus the region plus the resource's
-// own derived name, removes the dependency entirely rather than papering
-// over a race with a retry — and does so uniformly, rather than requiring
-// every call site to know which of its cross-resource references the
-// dependency graph has already made safe and which it has not.
-//
-// Assumes the "aws" partition. kraai's stated first deployment target is
-// commercial AWS, used to run kraai.dev's own infrastructure; GovCloud/China
-// partitions, whose ARNs use "aws-us-gov"/"aws-cn", are not something this
-// workstream verified against and are out of scope here.
+// A Lambda's Role and an EventBridge Rule's Target need full ARNs. Building
+// every ARN locally from the account id, the region and the resource's
+// derived name removes any live cross-resource lookup, and with it any
+// ordering the lookup would need. Assumes the "aws" partition; GovCloud and
+// China are not verified.
 func (c *Client) AccountID(ctx context.Context) (string, error) {
 	c.accountMu.Lock()
 	defer c.accountMu.Unlock()
@@ -1208,11 +865,10 @@ func (c *Client) AccountID(ctx context.Context) (string, error) {
 	return c.accountID, nil
 }
 
-// SecretValue returns the string value of the secret at arn.
-//
-// Only the value is returned, never logged or kept: this is the producer
-// behind an Aurora cluster's credential (resource.Secret), called at the
-// moment a function's environment is built and nowhere else.
+// SecretValue returns the string value of the secret at arn. Only the value
+// is returned, never logged or kept: this is the producer behind an Aurora
+// cluster's credential, called at the moment a function's environment is
+// built.
 func (c *Client) SecretValue(ctx context.Context, arn string) (string, error) {
 	out, err := c.sm.GetSecretValue(ctx, &secretsmanager.GetSecretValueInput{SecretId: aws.String(arn)})
 	if err != nil {
@@ -1226,10 +882,9 @@ func (c *Client) SecretValue(ctx context.Context, arn string) (string, error) {
 }
 
 // Permissions returns every IAM action this type's handlers and tag
-// handling declare, across all verbs, sorted and without duplicates. A
-// verb kraai never calls on a type still contributes: the policy this
-// feeds covers plan, apply and destroy alike, and the difference is a
-// handful of actions not worth a second policy.
+// handling declare, across all verbs, sorted and without duplicates. A verb
+// kraai never calls still contributes: the policy this feeds covers plan,
+// apply and destroy alike.
 func (s Schema) Permissions() []string {
 	set := map[string]bool{}
 	for _, raw := range s.Handlers {
