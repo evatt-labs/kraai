@@ -597,3 +597,29 @@ func TestLambdaFunctionRefusesTwoNetworks(t *testing.T) {
 		t.Fatalf("Create with two networks: err = %v, want one naming both", err)
 	}
 }
+
+func TestLambdaFunctionPublishesTheDSQLDatabaseURL(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	pg := awsBinding("database", "PG", "myenv-api-pg")
+	pg["config"] = map[string]any{"driver": DriverPostgres}
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(pg)
+	spec.Attributes = map[string]map[string]any{
+		"PG." + key(TypeDSQLCluster): {"Endpoint": "abc123.dsql.us-east-1.on.aws"},
+	}
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	env := fc.createCalls[0]["Environment"].(map[string]any)["Variables"].(map[string]any)
+	want := map[string]any{"PG_DATABASE_URL": "postgres://admin@abc123.dsql.us-east-1.on.aws:5432/postgres?sslmode=require"}
+	if !reflect.DeepEqual(env, want) {
+		t.Fatalf("Environment.Variables = %v, want %v", env, want)
+	}
+}

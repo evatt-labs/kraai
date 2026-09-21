@@ -403,7 +403,7 @@ Known gaps, each with a tracking issue. AWS `dns`, `tls` and `cdn` build a
 static site's zone, certificate, distribution and apex record, but have not
 yet been exercised against a live account
 ([#117](https://github.com/evatt-labs/kraai/issues/117)). AWS `database`
-(DynamoDB only, `driver: dynamodb`), `keyvalue` (ElastiCache Serverless,
+(DynamoDB under `driver: dynamodb`, Aurora DSQL under `driver: postgres`), `keyvalue` (ElastiCache Serverless,
 `driver: redis`) and `queues` (SQS) plan against a live account and have not
 been applied from CI ([#232](https://github.com/evatt-labs/kraai/issues/232));
 a function inside a `network` binding reaches the cache but not the public

@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"maps"
 	"strings"
 	"testing"
 
@@ -23,9 +24,7 @@ func keyValueResource(t *testing.T, client ccAPI, typeName string) resource.Reso
 
 func cacheSpec(config map[string]any, attrs map[string]map[string]any) resource.Spec {
 	base := map[string]any{"driver": DriverRedis, "network": "NET"}
-	for k, v := range config {
-		base[k] = v
-	}
+	maps.Copy(base, config)
 	return resource.Spec{Binding: "CACHE", Name: "env-svc-cache", Config: base, Attributes: attrs}
 }
 

@@ -98,6 +98,14 @@ var tableActions = []any{
 	"dynamodb:DescribeTable",
 }
 
+// clusterActions is what a function needs to open a connection to a DSQL
+// cluster: a token as the admin role DSQL manages, or as a database role
+// the admin has granted to the execution role.
+var clusterActions = []any{
+	"dsql:DbConnectAdmin",
+	"dsql:DbConnect",
+}
+
 // bucketActions is what a function needs to read, write and enumerate the
 // objects in a bucket it binds. Bucket configuration stays kraai's.
 var bucketActions = []any{
@@ -202,13 +210,29 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 				"Resource": queueARN(r.client.Region(), account, b.Name),
 			}
 		case manifest.CapabilityDatabase:
-			if driver, _ := b.Config["driver"].(string); driver != DriverDynamoDB {
+			driver, _ := b.Config["driver"].(string)
+			if driver != DriverDynamoDB && driver != DriverPostgres {
 				continue
 			}
 			if account == "" {
 				if account, err = r.client.AccountID(ctx); err != nil {
 					return nil, err
 				}
+			}
+			if driver == DriverPostgres {
+				// The cluster's ARN carries an identifier DSQL assigns,
+				// unknown until it exists; the grant names every cluster
+				// and the condition narrows it to the one carrying this
+				// binding's identity tag.
+				statement = map[string]any{
+					"Effect":   "Allow",
+					"Action":   clusterActions,
+					"Resource": dsqlClusterPattern(r.client.Region(), account),
+					"Condition": map[string]any{
+						"StringEquals": map[string]any{"aws:ResourceTag/" + identityTagKey: b.Name},
+					},
+				}
+				break
 			}
 			table := tableARN(r.client.Region(), account, b.Name)
 			statement = map[string]any{

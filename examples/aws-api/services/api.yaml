@@ -25,6 +25,11 @@ services:
         driver: dynamodb
         partitionKey: { name: pk }
         sortKey: { name: createdAt, type: N }
+      # An Aurora DSQL cluster, reached over its public endpoint with an
+      # IAM token. The function receives PG_DATABASE_URL (no password) and
+      # its execution role may connect as admin.
+      - binding: PG
+        driver: postgres
     # An ElastiCache Serverless cache (Valkey, redis protocol) inside NET,
     # behind a security group admitting the VPC. The function receives
     # CACHE_REDIS_URL and, running inside NET, can reach it.

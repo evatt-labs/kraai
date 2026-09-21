@@ -257,6 +257,19 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newDynamoTableResource(client),
 		},
 		{
+			Provider: Provider, Type: TypeDSQLCluster,
+			Capability: manifest.CapabilityDatabase,
+			// The postgres engine, beside the DynamoDB one above; each
+			// applies to the binding naming its driver. No DependsOn and
+			// no network: a DSQL cluster is reached over its public
+			// endpoint with an IAM token.
+			Applies: []resource.Applicability{bindingDriverIs(DriverPostgres)},
+			// No name property exists on the type, so identity is kraai's
+			// tag, stamped at create. See dsql.go.
+			Lookup:   resource.LookupByTag,
+			Resource: newDSQLClusterResource(client),
+		},
+		{
 			Provider: Provider, Type: TypeSQSQueue,
 			Capability: manifest.CapabilityQueues,
 			// No DependsOn: a queue needs nothing first. The function that

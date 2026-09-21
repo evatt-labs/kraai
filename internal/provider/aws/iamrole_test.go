@@ -294,7 +294,7 @@ func TestIAMRoleGrantsADynamoDBTableByItsDriver(t *testing.T) {
 	table := awsBinding("database", "DB", "myenv-api-db")
 	table["config"] = map[string]any{"driver": DriverDynamoDB, "partitionKey": map[string]any{"name": "pk"}}
 	other := awsBinding("database", "LEGACY", "myenv-api-legacy")
-	other["config"] = map[string]any{"driver": "postgres"}
+	other["config"] = map[string]any{"driver": "mysql"}
 	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
 		"settings": map[string]any{},
 		"bindings": bindingsConfig(table, other),
@@ -338,5 +338,42 @@ func TestIAMRoleAddsVPCAccessForANetworkBinding(t *testing.T) {
 	}
 	if _, present := fc.createCalls[0]["Policies"]; present {
 		t.Fatalf("Policies = %v, want absent: a network binding carries no grant of its own", fc.createCalls[0]["Policies"])
+	}
+}
+
+// A DSQL cluster's ARN is unknown until it exists, so the grant names every
+// cluster in the region and narrows to the one carrying the binding's
+// identity tag.
+func TestIAMRoleGrantsADSQLClusterByItsTag(t *testing.T) {
+	fc := &fakeClient{
+		createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+	}
+	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"})
+	role.resourceType.client = fc
+
+	pg := awsBinding("database", "PG", "myenv-api-pg")
+	pg["config"] = map[string]any{"driver": DriverPostgres}
+	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
+		"settings": map[string]any{}, "bindings": bindingsConfig(pg),
+	}}
+	if _, err := role.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	statements := bindingsPolicy(t, fc.createCalls[0])
+	if len(statements) != 1 {
+		t.Fatalf("got %d statements, want 1: %v", len(statements), statements)
+	}
+	statement := statements[0].(map[string]any)
+	if statement["Resource"] != "arn:aws:dsql:us-east-1:123456789012:cluster/*" {
+		t.Fatalf("Resource = %v, want every cluster in the region", statement["Resource"])
+	}
+	condition, _ := statement["Condition"].(map[string]any)
+	equals, _ := condition["StringEquals"].(map[string]any)
+	if equals["aws:ResourceTag/"+identityTagKey] != "myenv-api-pg" {
+		t.Fatalf("Condition = %v, want the identity tag narrowing to this binding's cluster", statement["Condition"])
+	}
+	if actions, _ := statement["Action"].([]any); len(actions) != 2 || actions[0] != "dsql:DbConnectAdmin" {
+		t.Fatalf("Action = %v", statement["Action"])
 	}
 }
