@@ -56,7 +56,7 @@ func roleEndpointID(ctx context.Context, client ccAPI, typeName, role, name stri
 // Every one applies only when the binding declares a private block, and
 // every one belongs to the same binding as the public half, so DependsOn
 // reaches across the two.
-func registerEgress(client ccAPI) []resource.Registration {
+func registerEgress(client ccAPI, region string) []resource.Registration {
 	vpcKey := key(TypeVPC)
 	publicSubnetKey := key(TypeSubnet)
 	attachmentKey := key(TypeVPCGatewayAttachment)
@@ -105,34 +105,8 @@ func registerEgress(client ccAPI) []resource.Registration {
 				},
 				nil),
 		},
-		{
-			Provider: Provider, Type: TypePrivateSubnet, VendorType: TypeSubnet,
-			Capability: manifest.CapabilityNetwork,
-			Applies:    withPrivate, Lookup: resource.LookupByTag, DependsOn: []string{vpcKey},
-			Resource: translated(roleTaggedLookup(client, TypeSubnet, privateRole),
-				func(spec resource.Spec) (resource.Spec, error) {
-					cidr, err := configString(spec, privateSubnetKey)
-					if err != nil {
-						return spec, err
-					}
-					vpcID, err := spec.Attribute(vpcKey, "VpcId")
-					if err != nil {
-						return spec, err
-					}
-					translated := spec
-					translated.Config = map[string]any{
-						"VpcId":               vpcID,
-						"CidrBlock":           cidr,
-						"MapPublicIpOnLaunch": false,
-					}
-					return translated, nil
-				},
-				map[string]func(resource.Spec) (string, error){
-					"CidrBlock": func(spec resource.Spec) (string, error) {
-						return configString(spec, privateSubnetKey)
-					},
-				}),
-		},
+		subnetRegistration(client, region, TypePrivateSubnet, privateRole, privateSubnetKey, 0, false, withPrivate),
+		subnetRegistration(client, region, TypePrivateSubnetB, privateBRole, privateSubnetKey, 1, false, withPrivate),
 		{
 			Provider: Provider, Type: TypePrivateRouteTable, VendorType: TypeRouteTable,
 			Capability: manifest.CapabilityNetwork,
@@ -180,36 +154,7 @@ func registerEgress(client ccAPI) []resource.Registration {
 				},
 			},
 		},
-		{
-			Provider: Provider, Type: TypePrivateSubnetRouteTableAssociation, VendorType: TypeSubnetRouteTableAssociation,
-			Capability: manifest.CapabilityNetwork,
-			Applies:    withPrivate, Lookup: resource.LookupByName,
-			DependsOn: []string{privateSubnet, privateRouteTable},
-			Resource: &relationshipResource{
-				provider: Provider, typeName: TypeSubnetRouteTableAssociation, client: client,
-				identify: func(ctx context.Context, name string) (string, bool, error) {
-					subnetID, found, err := roleEndpointID(ctx, client, TypeSubnet, privateRole, name)
-					if err != nil || !found {
-						return "", false, err
-					}
-					routeTableID, found, err := roleEndpointID(ctx, client, TypeRouteTable, privateRole, name)
-					if err != nil || !found {
-						return "", false, err
-					}
-					return findAssociation(ctx, client, subnetID, routeTableID)
-				},
-				desired: func(spec resource.Spec) (map[string]any, error) {
-					subnetID, err := spec.Attribute(privateSubnet, "SubnetId")
-					if err != nil {
-						return nil, err
-					}
-					routeTableID, err := spec.Attribute(privateRouteTable, "RouteTableId")
-					if err != nil {
-						return nil, err
-					}
-					return map[string]any{"SubnetId": subnetID, "RouteTableId": routeTableID}, nil
-				},
-			},
-		},
+		associationRegistration(client, TypePrivateSubnetRouteTableAssociation, privateSubnet, privateRole, privateRouteTable, privateRole, withPrivate),
+		associationRegistration(client, TypePrivateSubnetBRouteTableAssociation, key(TypePrivateSubnetB), privateBRole, privateRouteTable, privateRole, withPrivate),
 	}
 }

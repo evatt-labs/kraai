@@ -13,8 +13,9 @@ them is read-only and safe.
 
 `compute` + `network` + `queues` + `database` + `keyvalue`: an
 HTTP-triggered Lambda function behind an API Gateway HTTP API, alongside a
-private VPC (internet gateway, public subnet, route table, S3 and DynamoDB
-gateway endpoints, and a private subnet with NAT egress), a standard SQS
+private VPC (internet gateway, a pair of public subnets across two zones,
+route table, S3 and DynamoDB gateway endpoints, and a pair of private
+subnets with NAT egress), a standard SQS
 queue, a DynamoDB on-demand table (`driver: dynamodb`), an Aurora DSQL
 cluster (`driver: postgres`) and an ElastiCache Serverless cache
 (`driver: redis`, Valkey) placed in the VPC behind a security group
@@ -26,19 +27,24 @@ execution role carries an inline policy granting it the queue, the table
 and the cluster. The cache needs no grant, only network reach, which the
 function has (see below).
 
+Every subnet tier is a pair: kraai halves the declared block and places one
+subnet in each of two availability zones (`<region>a` and `<region>b`
+unless the binding's `azs` names others), which is what a database subnet
+group requires and a serverless cache prefers.
+
 The function runs inside the `network` binding: its `VpcConfig` names one
-of the binding's subnets and the VPC's default security group, and its
-execution role gains `AWSLambdaVPCAccessExecutionRole`. Which subnet
-depends on the binding. Without a `private` block the function sits in the
-public subnet, where a Lambda network interface never gets a public IP, so
-it reaches the cache and, through the gateway endpoints every network
-carries, S3 and DynamoDB, and nothing else. With one, as this manifest
-declares, the network also builds a private subnet, an Elastic IP, a NAT
-gateway in the public subnet and a default route through it, and the
-function sits in the private subnet with a route to the internet and so to
-SQS and DSQL. The NAT gateway is billed by the hour and takes minutes to
-create and delete, which is why it is opt-in (#244); this manifest opts in
-because its job is exercising every capability AWS claims.
+tier's two subnets and the VPC's default security group, and its execution
+role gains `AWSLambdaVPCAccessExecutionRole`. Which tier depends on the
+binding. Without a `private` block the function sits in the public subnets,
+where a Lambda network interface never gets a public IP, so it reaches the
+cache and, through the gateway endpoints every network carries, S3 and
+DynamoDB, and nothing else. With one, as this manifest declares, the
+network also builds the private pair, an Elastic IP, a NAT gateway in the
+first public subnet and a default route through it, and the function sits
+in the private subnets with a route to the internet and so to SQS and DSQL.
+The NAT gateway is billed by the hour and takes minutes to create and
+delete, which is why it is opt-in (#244); this manifest opts in because its
+job is exercising every capability AWS claims.
 
 ```
 go run ./cmd/kraai plan kraai-example --dir examples/aws-api

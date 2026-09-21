@@ -57,8 +57,8 @@ func TestSubnetCreateUsesTheVPCIdentifierFromAttributes(t *testing.T) {
 	if desired["VpcId"] != "vpc-abc" {
 		t.Fatalf("VpcId = %v, want the id published by the VPC", desired["VpcId"])
 	}
-	if desired["CidrBlock"] != "10.90.1.0/24" {
-		t.Fatalf("CidrBlock = %v, want the manifest's subnet block", desired["CidrBlock"])
+	if desired["CidrBlock"] != "10.90.1.0/25" || desired["AvailabilityZone"] != "us-east-1a" {
+		t.Fatalf("CidrBlock/AvailabilityZone = %v/%v, want the first half of the manifest's block in zone a", desired["CidrBlock"], desired["AvailabilityZone"])
 	}
 }
 
@@ -95,7 +95,7 @@ func TestDiffNeedsNoAttributes(t *testing.T) {
 	}
 
 	spec := networkSpec("NET", map[string]any{"subnet": "10.90.1.0/24"}, nil)
-	state := &resource.State{Attributes: map[string]any{"CidrBlock": "10.90.1.0/24", "VpcId": "vpc-abc"}}
+	state := &resource.State{Attributes: map[string]any{"CidrBlock": "10.90.1.0/25", "AvailabilityZone": "us-east-1a", "VpcId": "vpc-abc"}}
 
 	difference, err := differ.Diff(spec, state)
 	if err != nil {
@@ -252,8 +252,8 @@ func TestNetworkRegistrationsDeclareResolvableDependencies(t *testing.T) {
 			}
 		}
 	}
-	if len(regs) != 15 {
-		t.Fatalf("registerNetwork returned %d registrations, want 15", len(regs))
+	if len(regs) != 19 {
+		t.Fatalf("registerNetwork returned %d registrations, want 19", len(regs))
 	}
 }
 

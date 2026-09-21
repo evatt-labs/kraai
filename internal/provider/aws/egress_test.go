@@ -27,8 +27,8 @@ func TestEgressRegistrationsApplyOnlyWithAPrivateBlock(t *testing.T) {
 	public, err := reg.Resolve(manifest.CapabilityNetwork, resource.ApplicabilityContext{
 		Vendors: vendors, Binding: map[string]any{"cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24"},
 	})
-	if err != nil || len(public) != 9 {
-		t.Fatalf("Resolve(no private block) = %d registrations, %v; want 9", len(public), err)
+	if err != nil || len(public) != 11 {
+		t.Fatalf("Resolve(no private block) = %d registrations, %v; want 11", len(public), err)
 	}
 	for _, r := range public {
 		if r.Type == TypeNatGateway || r.Type == TypeEIP || r.Type == TypePrivateSubnet {
@@ -38,8 +38,8 @@ func TestEgressRegistrationsApplyOnlyWithAPrivateBlock(t *testing.T) {
 	private, err := reg.Resolve(manifest.CapabilityNetwork, resource.ApplicabilityContext{
 		Vendors: vendors, Binding: map[string]any{"cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": "10.90.2.0/24"},
 	})
-	if err != nil || len(private) != 15 {
-		t.Fatalf("Resolve(private block) = %d registrations, %v; want 15", len(private), err)
+	if err != nil || len(private) != 19 {
+		t.Fatalf("Resolve(private block) = %d registrations, %v; want 19", len(private), err)
 	}
 }
 
@@ -80,8 +80,8 @@ func TestPrivateSubnetIsPrivateAndDistinguishable(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 	desired := client.createCalls[0]
-	if desired["CidrBlock"] != "10.90.2.0/24" || desired["MapPublicIpOnLaunch"] != false || desired["VpcId"] != "vpc-abc" {
-		t.Fatalf("desired = %v, want the private block with no public IPs", desired)
+	if desired["CidrBlock"] != "10.90.2.0/25" || desired["AvailabilityZone"] != "us-east-1a" || desired["MapPublicIpOnLaunch"] != false || desired["VpcId"] != "vpc-abc" {
+		t.Fatalf("desired = %v, want the first half of the private block in zone a with no public IPs", desired)
 	}
 	if !arrayTagsMatch(desired, "env-svc-NET/"+privateRole) {
 		t.Fatalf("desired %v is not tagged as the private subnet", desired)
@@ -90,7 +90,7 @@ func TestPrivateSubnetIsPrivateAndDistinguishable(t *testing.T) {
 	differ := res.(interface {
 		Diff(resource.Spec, *resource.State) (resource.Difference, error)
 	})
-	live := &resource.State{Attributes: map[string]any{"CidrBlock": "10.90.2.0/24"}}
+	live := &resource.State{Attributes: map[string]any{"CidrBlock": "10.90.2.0/25", "AvailabilityZone": "us-east-1a"}}
 	if d, err := differ.Diff(privateNetworkSpec(nil), live); err != nil || d != resource.Same {
 		t.Fatalf("Diff(same block) = %v, %v; want Same", d, err)
 	}

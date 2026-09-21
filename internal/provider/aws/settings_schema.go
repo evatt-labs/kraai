@@ -210,10 +210,13 @@ var cdnBindingSchema = resource.NewSchema("aws cdn binding", map[string]any{
 
 // networkBindingSchema validates one entry of a service's `network:` list:
 // a binding name and the two address ranges, all required, and optionally
-// a private block. Declaring private opts the network into egress: a
-// private subnet with that block, a NAT gateway in the public subnet, and
-// the service's function placed in the private subnet (egress.go). Opt-in
-// because a NAT gateway is billed by the hour.
+// a private block and the two zones. Each tier's block is halved into two
+// subnets, one per zone (subnets.go), so a database subnet group or a
+// serverless cache has the two zones it wants; azs names the zones for an
+// account whose region does not expose a and b. Declaring private opts the
+// network into egress: private subnets with that block, a NAT gateway in
+// the first public subnet, and the service's function placed in the private
+// subnets (egress.go). Opt-in because a NAT gateway is billed by the hour.
 //
 // The CIDRs are checked for being strings and for being present, not for
 // being well-formed or for nesting correctly. EC2 rejects an unusable block
@@ -228,6 +231,12 @@ var networkBindingSchema = resource.NewSchema("aws network binding", map[string]
 		"cidr":    map[string]any{"type": "string"},
 		"subnet":  map[string]any{"type": "string"},
 		"private": map[string]any{"type": "string"},
+		"azs": map[string]any{
+			"type":     "array",
+			"items":    map[string]any{"type": "string"},
+			"minItems": 2,
+			"maxItems": 2,
+		},
 	},
 	"required":             []any{"binding", "cidr", "subnet"},
 	"additionalProperties": false,

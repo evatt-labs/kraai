@@ -74,8 +74,9 @@ func TestServerlessCacheCreateUsesItsGroupAndTheNetworkSubnet(t *testing.T) {
 	res := keyValueResource(t, fc, TypeElastiCacheServerlessCache)
 
 	attrs := map[string]map[string]any{
-		"NET." + key(TypeSubnet):    {"SubnetId": "subnet-1"},
-		key(TypeCacheSecurityGroup): {"GroupId": "sg-1"},
+		"NET." + key(TypeSubnet):        {"SubnetId": "subnet-1"},
+		"NET." + key(TypePublicSubnetB): {"SubnetId": "subnet-2"},
+		key(TypeCacheSecurityGroup):     {"GroupId": "sg-1"},
 	}
 	if _, err := res.Create(context.Background(), cacheSpec(nil, attrs)); err != nil {
 		t.Fatalf("Create: %v", err)
@@ -84,8 +85,8 @@ func TestServerlessCacheCreateUsesItsGroupAndTheNetworkSubnet(t *testing.T) {
 	if desired["ServerlessCacheName"] != "env-svc-cache" || desired["Engine"] != engineValkey || desired["MajorEngineVersion"] != "8" {
 		t.Fatalf("desired = %v, want the derived name on valkey 8", desired)
 	}
-	if subnets, _ := desired["SubnetIds"].([]any); len(subnets) != 1 || subnets[0] != "subnet-1" {
-		t.Fatalf("SubnetIds = %v, want the referenced subnet", desired["SubnetIds"])
+	if subnets, _ := desired["SubnetIds"].([]any); len(subnets) != 2 || subnets[0] != "subnet-1" || subnets[1] != "subnet-2" {
+		t.Fatalf("SubnetIds = %v, want both of the network's public subnets", desired["SubnetIds"])
 	}
 	if groups, _ := desired["SecurityGroupIds"].([]any); len(groups) != 1 || groups[0] != "sg-1" {
 		t.Fatalf("SecurityGroupIds = %v, want the cache's own group", desired["SecurityGroupIds"])
@@ -162,8 +163,13 @@ func TestKeyValueRegistrationsApplyToRedisAndReadTheNetwork(t *testing.T) {
 		t.Fatalf("Resolve(driver redis) = %v, %v; want the group and the cache", regs, err)
 	}
 	for _, r := range regs {
-		if len(r.ReadsReferences) != 1 || r.ReadsReferences[0].Key != "network" {
-			t.Errorf("%s reads %v, want the network reference", r.Type, r.ReadsReferences)
+		if len(r.ReadsReferences) == 0 {
+			t.Errorf("%s reads nothing, want the network reference", r.Type)
+		}
+		for _, read := range r.ReadsReferences {
+			if read.Key != "network" {
+				t.Errorf("%s reads %v, want only the network reference", r.Type, r.ReadsReferences)
+			}
 		}
 	}
 	if _, err := reg.Resolve(manifest.CapabilityKeyValue, resource.ApplicabilityContext{

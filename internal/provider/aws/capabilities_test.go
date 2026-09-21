@@ -202,3 +202,15 @@ func TestNetworkBindingSchemaAcceptsAPrivateBlock(t *testing.T) {
 		t.Fatal("a non-string private block was accepted")
 	}
 }
+
+func TestNetworkBindingSchemaAcceptsTwoZones(t *testing.T) {
+	base := map[string]any{"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24"}
+	base["azs"] = []any{"us-west-1a", "us-west-1c"}
+	if err := networkBindingSchema.Validate(base); err != nil {
+		t.Fatalf("a network naming two zones was rejected: %v", err)
+	}
+	base["azs"] = []any{"us-west-1a"}
+	if err := networkBindingSchema.Validate(base); err == nil {
+		t.Fatal("a network naming one zone was accepted")
+	}
+}
