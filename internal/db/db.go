@@ -2,26 +2,10 @@
 // database, waiting for it to accept connections, and running the statements
 // the provisioning flow needs.
 //
-// # Why a driver rather than psql
-//
-// The JavaScript this replaces shelled out to psql, which forced two pieces
-// of defensive design on it: connection details had to travel in PG*
-// environment variables rather than argv, because an argument holding a live
-// credential is readable by any local process through /proc/<pid>/cmdline;
-// and psql's stderr had to be discarded wholesale, because it echoes
-// connection details back.
-//
-// A driver removes the subprocess and both problems with it. Nothing is
-// spawned, so nothing has a command line to read, and errors come from a
-// library that does not print credentials rather than from a CLI that does.
-// It also makes the binary self-contained, which shelling out did not: a
-// released kraai cannot assume psql is installed, and it frequently is not.
-//
-// The larger gain is parameterization. Statements now bind values instead of
-// interpolating them, which removes an entire class of bug by construction
-// rather than by remembering to quote — see AssertNoBypassRLS, whose
-// JavaScript original interpolated a configured role straight into the
-// row-level-security check.
+// A driver rather than a psql subprocess: nothing spawned has a command
+// line for another process to read a credential from, errors come from a
+// library that does not print connection details, the binary needs no psql
+// installed, and statements bind values rather than interpolating them.
 package db
 
 import (
@@ -152,13 +136,9 @@ func (c *Client) probe(ctx context.Context, info ConnectionInfo) error {
 // neon_superuser membership by default, which silently defeats row-level
 // security for that role.
 //
-// The role is a bound parameter. The JavaScript this replaces interpolated it
-// straight into the statement while its own quoting helper sat unused in the
-// same file, and a role name is configuration rather than a constant. That
-// mattered more here than anywhere else in the package: this is the
-// row-level-security check, so a statement that can be steered into returning
-// false reports safety it never verified. Binding removes the possibility
-// rather than guarding against it.
+// The role is a bound parameter: a role name is configuration, and a
+// statement that could be steered into returning false would report safety
+// it never verified.
 //
 // A role that does not exist returns no rows, which fails closed.
 func (c *Client) AssertNoBypassRLS(ctx context.Context, info ConnectionInfo, role string) error {
