@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -142,17 +143,7 @@ func runDestroy(
 	}
 	defer release()
 
-	reg, err := assembler(ctx, m)
-	if err != nil {
-		return err
-	}
-
-	p, err := plan.New(reg).Plan(ctx, m, envName)
-	if err != nil {
-		return err
-	}
-
-	result, err := destroy.New(reg).Destroy(ctx, p)
+	result, err := destroyEnvironment(ctx, envName, m, assembler)
 	if err != nil {
 		return err
 	}
@@ -360,4 +351,20 @@ func writeDestroyJSON(w io.Writer, envName string, result *destroy.Result) error
 
 	_, err := w.Write(data)
 	return err
+}
+
+// destroyEnvironment plans the environment and tears it down: what destroy
+// does once the manifest is loaded and the lock held, shared with gc.
+func destroyEnvironment(
+	ctx context.Context, envName string, m *manifest.Manifest, assembler RegistryAssembler,
+) (*destroy.Result, error) {
+	reg, err := assembler(ctx, m)
+	if err != nil {
+		return nil, err
+	}
+	p, err := plan.New(reg).Plan(ctx, m, envName)
+	if err != nil {
+		return nil, err
+	}
+	return destroy.New(reg).Destroy(ctx, p)
 }

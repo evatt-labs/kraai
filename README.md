@@ -261,7 +261,16 @@ kraai capabilities             # what each provider offers (no credentials neede
 kraai plugins --env <name>     # load the manifest's plugins and show what they provide
 kraai iam-policy <environment> # the least-privilege IAM policy the manifest needs
 kraai status <environment>     # last apply, by whom, and when the environment expires
+kraai gc [--dry-run]           # destroy the ephemeral environments whose ttl has elapsed
 ```
+
+`gc` reads every environment the manifest directory declares and destroys
+those that are ephemeral and past the deadline their last apply recorded. A
+persistent environment is never touched, whatever its record says; a
+protected one is reported and left for a `destroy --confirm-name`; one with no
+record, no ttl, time left, or a lock another run holds is left alone. Each reap
+is an ordinary locked destroy, and a destroy that fails keeps the record so the
+next sweep retries. Run it on a schedule beside the preview workflow.
 
 `iam-policy` prints an IAM policy document granting every action the
 manifest's AWS resources need to be planned, applied and destroyed: each
@@ -454,7 +463,6 @@ providers above.
 
 Designed and **not** built — each has a tracking issue:
 
-- Garbage collection of elapsed ephemeral environments ([#136](https://github.com/evatt-labs/kraai/issues/136)); the deadline it reads is recorded, the sweep is not built
 - A lock backend for manifests with no AWS provider (an R2 bucket for Cloudflare-only manifests)
 
 The `unbuilt` and `dead-field` labels track the rest, and the
