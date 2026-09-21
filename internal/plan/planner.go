@@ -157,6 +157,33 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 	return &Plan{Actions: actions}, nil
 }
 
+// Expand returns every resource the manifest declares for environmentName,
+// in plan order, without reading any of them: what a plan would consider,
+// before it asks a provider what exists. For a caller that needs the set
+// of types a manifest reaches (the policy those types require) and has no
+// business, or no permission yet, touching the resources themselves.
+func (p *Planner) Expand(m *manifest.Manifest, environmentName string) ([]Item, error) {
+	if m == nil {
+		return nil, kerrors.Validation("plan: manifest is nil")
+	}
+	if environmentName == "" {
+		return nil, kerrors.Validation("plan: environment name must not be empty")
+	}
+	var prefix string
+	if m.Environment.Naming != nil {
+		prefix = m.Environment.Naming.Prefix
+	}
+	items, err := p.expand(m, environmentName, naming.NewNamer(prefix))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Item, 0, len(items))
+	for _, it := range items {
+		out = append(out, it.Item)
+	}
+	return out, nil
+}
+
 // serviceDependsOn projects m.Services down to the one field computeWaves
 // needs: each service's DependsOn, keyed by service name.
 //

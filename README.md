@@ -259,7 +259,16 @@ kraai apply <environment>      # create, or replace with --replace
 kraai destroy <environment>    # tear down, in reverse dependency order
 kraai capabilities             # what each provider offers (no credentials needed)
 kraai plugins --env <name>     # load the manifest's plugins and show what they provide
+kraai iam-policy <environment> # the least-privilege IAM policy the manifest needs
 ```
+
+`iam-policy` prints an IAM policy document granting every action the
+manifest's AWS resources need to be planned, applied and destroyed: each
+resource type's handler permissions, published in its CloudFormation schema,
+plus the calls kraai makes beside them. It reads schemas, never resources, so
+`cloudformation:DescribeType` is the one permission it needs to run. Actions
+are granted on every resource, since a schema publishes actions and not the
+identifiers the provider will assign.
 
 `plan` against a real account is safe and is the best way to see what kraai
 would do. `--detailed-exitcode` gives a script something to branch on without
