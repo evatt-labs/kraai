@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sort"
 	"sync"
 	"time"
 
@@ -717,6 +718,12 @@ type Schema struct {
 	// omits "update" entirely rather than declaring it empty, so presence of
 	// the key is the whole signal HasUpdateHandler needs.
 	Handlers map[string]json.RawMessage `json:"handlers"`
+	// Tagging carries the actions the type's tag handling needs, beside
+	// the per-verb handler permissions; both feed the policy kraai prints
+	// for a manifest (Permissions).
+	Tagging struct {
+		Permissions []string `json:"permissions"`
+	} `json:"tagging"`
 }
 
 // listHandler is the part of a schema's list handler this package reads: the
@@ -1207,4 +1214,37 @@ func (c *Client) SecretValue(ctx context.Context, arn string) (string, error) {
 		return "", kerrors.Validation("the secret at %s has no string value", arn)
 	}
 	return *out.SecretString, nil
+}
+
+// Permissions returns every IAM action this type's handlers and tag
+// handling declare, across all verbs, sorted and without duplicates. A
+// verb kraai never calls on a type still contributes: the policy this
+// feeds covers plan, apply and destroy alike, and the difference is a
+// handful of actions not worth a second policy.
+func (s Schema) Permissions() []string {
+	set := map[string]bool{}
+	for _, raw := range s.Handlers {
+		var handler struct {
+			Permissions []string `json:"permissions"`
+		}
+		if err := json.Unmarshal(raw, &handler); err != nil {
+			continue
+		}
+		for _, action := range handler.Permissions {
+			set[action] = true
+		}
+	}
+	for _, action := range s.Tagging.Permissions {
+		set[action] = true
+	}
+	return sortedActions(set)
+}
+
+func sortedActions(set map[string]bool) []string {
+	out := make([]string, 0, len(set))
+	for action := range set {
+		out = append(out, action)
+	}
+	sort.Strings(out)
+	return out
 }

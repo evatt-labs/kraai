@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -926,5 +927,31 @@ func TestPlan_MutableDiffPlansAsUpdate(t *testing.T) {
 	// live state to patch against.
 	if a.Current == nil {
 		t.Error("an update action carries no Current state")
+	}
+}
+
+// Expand lists what a plan would consider without reading anything: the
+// same items, with no Get behind them, for a caller that needs the types a
+// manifest reaches and cannot or must not touch the resources.
+func TestPlan_ExpandReadsNothing(t *testing.T) {
+	f := newComputeRegistryFixture(t)
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: f.providers()},
+		Services: map[string]manifest.Service{
+			"api": {Dir: ".", Compute: &manifest.Compute{Trigger: manifest.TriggerHTTP, Handler: "run.sh"}},
+		},
+	}
+	items, err := New(f.reg).Expand(m, envName)
+	if err != nil {
+		t.Fatalf("Expand: %v", err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("Expand returned %d items, want the function and the HTTP API", len(items))
+	}
+	if reads := atomic.LoadInt32(&f.function.getCalls) + atomic.LoadInt32(&f.httpAPI.getCalls); reads != 0 {
+		t.Fatalf("Expand read %d resources, want none", reads)
+	}
+	if _, err := New(f.reg).Expand(m, ""); err == nil {
+		t.Fatal("Expand with no environment name succeeded")
 	}
 }
