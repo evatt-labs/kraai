@@ -295,6 +295,9 @@ func (p *Planner) expandCompute(
 	if len(include) > 0 {
 		config["include"] = include
 	}
+	if bindings := serviceBindings(m, environmentName, svcKey, svc, namer); len(bindings) > 0 {
+		config["bindings"] = bindings
+	}
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
@@ -353,6 +356,44 @@ func (p *Planner) expandCompute(
 		}
 	}
 	return out, nil
+}
+
+// serviceBindings describes every binding svc declares, for the compute
+// resources that provision the service's access to them: an execution role
+// granting its function a queue, the function receiving that queue's URL.
+//
+// Each entry carries the capability, the binding name, the vendor fulfilling
+// it, the derived name of the binding's resource (the same name expandBinding
+// plans it under, so a provider can build the resource's ARN locally without
+// waiting on it) and the entry's own config. Sorted by capability then
+// binding, so the plan is the same on every run.
+//
+// A compute resource cannot otherwise learn what its service binds: a
+// compute Spec carries the service's compute block, and what a binding
+// published arrives in Spec.Attributes only once the binding has been
+// applied, which is after plan has already compared the role.
+func serviceBindings(
+	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service, namer naming.Namer,
+) []any {
+	var out []any
+	for _, capability := range sortedCapabilities(svc.Bindings) {
+		var vendor string
+		if provider, ok := m.Root.Providers.For(capability); ok {
+			vendor = provider.Vendor
+		}
+		entries := append([]manifest.Binding(nil), svc.Bindings[capability]...)
+		sort.SliceStable(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
+		for _, entry := range entries {
+			out = append(out, map[string]any{
+				"capability": capability,
+				"binding":    entry.Name(),
+				"vendor":     vendor,
+				"name":       namer.Resource(environmentName, svcKey, entry.Name()),
+				"config":     entry.Config(),
+			})
+		}
+	}
+	return out
 }
 
 // customDomainRoutes returns the routes on svcKey that declare a custom

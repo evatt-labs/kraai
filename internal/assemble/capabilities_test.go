@@ -73,7 +73,7 @@ func TestCapabilitiesResolvesEachCapabilityToItsProviders(t *testing.T) {
 		{manifest.CapabilityDatabase, []string{vendorCloudflare, vendorNeon}},
 		{manifest.CapabilityKeyValue, []string{vendorCloudflare}},
 		{manifest.CapabilityObjects, []string{vendorAWS, vendorCloudflare}},
-		{manifest.CapabilityQueues, []string{vendorCloudflare}},
+		{manifest.CapabilityQueues, []string{vendorAWS, vendorCloudflare}},
 	}
 	for _, c := range cases {
 		t.Run(c.capability, func(t *testing.T) {

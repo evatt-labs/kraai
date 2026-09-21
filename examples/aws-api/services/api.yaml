@@ -14,3 +14,7 @@ services:
     # service without the function actually running inside it.
     network:
       - { binding: NET, cidr: 10.90.0.0/16, subnet: 10.90.1.0/24 }
+    # A standard SQS queue. The function receives JOBS_QUEUE_URL and
+    # JOBS_QUEUE_ARN, and its execution role is granted the queue.
+    queues:
+      - { binding: JOBS }

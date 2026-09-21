@@ -515,3 +515,33 @@ func TestPlan_NoCustomDomainPlansNoDomainName(t *testing.T) {
 		}
 	}
 }
+
+// TestPlan_AWSQueueOrdersBeforeTheFunctionNotTheRole pins how a queues
+// binding fits the compute graph: the function reads every binding on its
+// service and so waits for the queue, while the role, which grants the
+// queue by an ARN it builds locally, stays in the first wave beside it.
+func TestPlan_AWSQueueOrdersBeforeTheFunctionNotTheRole(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := kraaiAPIManifest()
+	m.Root.Providers[manifest.CapabilityQueues] = &manifest.Provider{Vendor: "aws"}
+	api := m.Services["api"]
+	api.Bindings[manifest.CapabilityQueues] = []manifest.Binding{{"binding": "JOBS"}}
+	m.Services["api"] = api
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	queue := findServiceAction(t, p, "api", awsprovider.TypeSQSQueue)
+	role := findServiceAction(t, p, "api", awsprovider.TypeIAMRole)
+	function := findServiceAction(t, p, "api", awsprovider.TypeLambdaFunction)
+	if queue.Wave >= function.Wave {
+		t.Errorf("queue wave %d, function wave %d — the function reads the queue's URL, so the queue must come first",
+			queue.Wave, function.Wave)
+	}
+	if role.Wave != queue.Wave {
+		t.Errorf("role wave %d, queue wave %d — the role grants the queue by a locally built ARN and must not wait for it",
+			role.Wave, queue.Wave)
+	}
+}

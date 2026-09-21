@@ -227,3 +227,15 @@ var networkBindingSchema = resource.NewSchema("aws network binding", map[string]
 	"required":             []any{"binding", "cidr", "subnet"},
 	"additionalProperties": false,
 })
+
+// queuesBindingSchema validates one entry of a service's `queues:` list: a
+// bare binding name. A queue's shape (standard, SQS defaults throughout) is
+// not yet the manifest's to configure — see queueTranslate.
+var queuesBindingSchema = resource.NewSchema("aws queues binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding": map[string]any{"type": "string"},
+	},
+	"required":             []any{"binding"},
+	"additionalProperties": false,
+})

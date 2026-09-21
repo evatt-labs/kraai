@@ -13,3 +13,5 @@ providers:
       package: zip
   network:
     vendor: aws
+  queues:
+    vendor: aws

@@ -67,6 +67,11 @@ func Capabilities() []resource.CapabilityDef {
 			ProviderSettings: computeSettingsSchema,
 		},
 		{
+			Name:    manifest.CapabilityQueues,
+			Summary: "SQS standard queue, granted to the service's execution role.",
+			Binding: queuesBindingSchema,
+		},
+		{
 			Name: manifest.CapabilityNetwork,
 			Summary: "Private VPC with a public subnet: internet gateway, route " +
 				"table and the default route making the subnet reachable.",
