@@ -2,73 +2,20 @@ package aws
 
 import "github.com/evatt-labs/kraai/internal/resource"
 
-// computeSettingsSchema is the structural JSON Schema validating a compute
-// Spec's merged settings map (Spec.Config["settings"]) — the union of
-// every key any reader of that map recognizes.
-//
-// # What this replaces
-//
-// Before this workstream, the same union lived in
-// internal/provider/aws/settings_validate.go's validateKnownSettings,
-// hand-assembled from three separately declared key lists: lambdaSettingKeys
-// (compute_settings.go), providerSettingKeys (settings.go) and
-// lambdaURLSettingKeys (lambdaurl.go). That file is deleted in this
-// workstream; this schema is its structural replacement, exported as
-// resource.CapabilityDef.ProviderSettings (capabilities.go) so `kraai
-// capabilities` and any future caller can introspect it, and reused
-// directly by decodeLambdaSettings (compute_settings.go) — the same call
-// site validateKnownSettings ran from, reached unconditionally via
-// plan.SpecValidator (see lambda.go's ValidateSpec and that interface's own
-// doc comment).
-//
-// # Why one schema for three readers
-//
-// providers.compute.settings is one free-form map with three readers in
-// this package that know nothing of each other's vocabulary:
-// decodeLambdaSettings reads the Lambda-function-specific keys,
-// lambdaURLResource.translate reads "functionUrlAuthType", and this
-// package's own client construction (DecodeSettings, settings.go) reads
-// "region" — out of whichever provider block internal/assemble happened to
-// pick when more than one capability names aws (see
-// internal/assemble.vendorsUsed's own doc comment on that pre-existing,
-// out-of-scope ambiguity). A union in one place, referenced by every
-// reader that needs to reject an unrecognized key, is what lets none of
-// them import another's vocabulary directly — the same design
-// validateKnownSettings's own doc comment argued for, just backed by a
-// compiled schema instead of three hand-maintained []string vars.
-//
-// # Type and enum keywords here are deliberately conservative
-//
-// This schema declares "type" for every property (the structural-schema
-// requirement — resource.Schema's own doc comment) and, for
-// reservedConcurrency, "minimum": 0, which decodeLambdaSettings already
-// enforced in Go. It does NOT declare an "enum" for httpFrontDoor or
-// package: both are validated against their exact accepted values by
-// decodeLambdaSettings itself, after this schema runs, on the *decoded*
-// value (httpFrontDoor's default-substitution logic in particular —
-// normalizeHTTPFrontDoor treats an absent or unset value as
-// "apigateway" — runs after this schema, not before it). Duplicating
-// those enums here would risk the schema and the Go-level check silently
-// drifting apart, or rejecting an empty string before
-// normalizeHTTPFrontDoor gets a chance to treat it as "unset" — a case no
-// existing test exercises, and not a behavior this workstream is asked to
-// change. Type checking here is what closes the actual gap this
-// workstream targets (a wrong-typed value silently coerced away by
-// settingStr's `,_` type assertion); the specific-value enums stay exactly
-// where they already worked.
+// computeSettingsSchema validates a compute Spec's merged settings map: the
+// union of every key any reader of that map recognizes, so none of the
+// readers has to know the others' vocabulary. Types only, no enums for
+// httpFrontDoor or package: decodeLambdaSettings checks those exact values
+// after defaulting, and a duplicate enum here would reject an empty string
+// before normalizeHTTPFrontDoor could treat it as unset.
 var computeSettingsSchema = resource.NewSchema("aws compute settings", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
-		// Read by DecodeSettings (settings.go) to build the AWS client —
-		// not by any compute-specific decoder in this package — but
-		// reachable through the same merged settings map a compute Spec
-		// carries (manifest.MergeSettings, internal/plan's expandCompute),
-		// so it must be a recognized key here or a manifest author who sets
-		// it on a service's own compute.settings override trips the
-		// unknown-key check for a real, working setting.
+		// Read by DecodeSettings to build the client, but reachable through
+		// the same merged map, so it must be recognized here.
 		"region": map[string]any{"type": "string"},
 
-		// Read by decodeLambdaSettings (compute_settings.go).
+		// Read by decodeLambdaSettings.
 		"runtime":      map[string]any{"type": "string"},
 		"architecture": map[string]any{"type": "string"},
 		"layerArn":     map[string]any{"type": "string"},
@@ -82,16 +29,9 @@ var computeSettingsSchema = resource.NewSchema("aws compute settings", map[strin
 			"type":                 "object",
 			"additionalProperties": map[string]any{"type": "string"},
 		},
-		// No "items" schema, deliberately: decodeLambdaSettings' own
-		// decode of this key is tolerant by design — a non-string or
-		// empty entry is silently dropped rather than failing the whole
-		// decode (see its own type switch, compute_settings.go) — and a
-		// strict `items: {type: string}` here would reject a mixed-type
-		// array before that tolerant decode ever ran, changing existing,
-		// tested behavior this workstream was not asked to change
-		// (TestDecodeLambdaSettingsManagedPolicyArns). The array itself
-		// must still be an array; what each element is stays this
-		// field's own business.
+		// No items schema: decodeLambdaSettings drops a non-string entry
+		// rather than failing, and a strict items would reject the array
+		// first.
 		"managedPolicyArns": map[string]any{"type": "array"},
 		"httpFrontDoor":     map[string]any{"type": "string"},
 		"reservedConcurrency": map[string]any{
@@ -99,22 +39,14 @@ var computeSettingsSchema = resource.NewSchema("aws compute settings", map[strin
 		},
 		"package": map[string]any{"type": "string"},
 
-		// Read by lambdaURLResource.translate (lambdaurl.go).
+		// Read by lambdaURLResource.translate.
 		"functionUrlAuthType": map[string]any{"type": "string"},
 	},
 	"additionalProperties": false,
 })
 
-// objectsBindingSchema validates one entry of a service's `objects:` list
-// for this provider: a bare binding name.
-//
-// This is the shape, not a copy of one — internal/manifest carries no Go
-// struct for a binding entry to mirror, so what a manifest may write here is
-// exactly what this map says.
-//
-// The AWS "objects" capability reads no provider-level settings map beyond
-// the shared "region" DecodeSettings already type-checks, so it declares no
-// ProviderSettings schema; Binding is what it populates instead.
+// objectsBindingSchema validates one entry of a service's `objects:` list:
+// a bare binding name.
 var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -125,20 +57,10 @@ var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]
 })
 
 // dnsBindingSchema validates one entry of a service's `dns:` list: the zone
-// to create, and the cdn binding its apex aliases (a reference — see
-// Capabilities). The one record kraai writes is the apex; a name for
-// anything else was declared once and never read, and is not accepted now
-// that something is.
-//
-// A name of its own rather than reusing the binding name, because a binding
-// name is kraai's handle for the resource and a zone name is a real, external
-// thing an operator already owns — "acme.com" is not a legal binding name in
-// kraai's grammar, and a binding named SITE says nothing about which zone it
-// is. That the two are separate is exactly what sharing one capability with
-// `objects` made impossible to express.
-//
-// zone names the hosted zone (hostedzone.go) and alias the distribution its
-// apex record points at (recordset.go).
+// to create, and the cdn binding its apex aliases (a reference). A zone
+// name of its own rather than the binding name, because "acme.com" is not
+// a legal binding name and a binding named SITE says nothing about which
+// zone it is.
 var dnsBindingSchema = resource.NewSchema("aws dns binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -151,15 +73,11 @@ var dnsBindingSchema = resource.NewSchema("aws dns binding", map[string]any{
 })
 
 // tlsBindingSchema validates one entry of a service's `tls:` list: the
-// domain a certificate is requested for, any additional names it covers,
-// and the dns binding whose zone validates it (a reference — see
-// Capabilities).
-//
-// zone is not required by the schema because an adopted certificate
-// (resources:) needs none; a certificate kraai requests cannot be validated
-// without one, and certificate.go refuses to request it. Note that
-// CloudFront accepts only certificates in us-east-1, so a certificate for a
-// distribution must be requested with the provider's region set there.
+// domain a certificate is requested for, any additional names, and the dns
+// binding whose zone validates it (a reference). zone is not required
+// because an adopted certificate needs none; certificate.go refuses to
+// request one without it. CloudFront accepts only certificates in
+// us-east-1.
 var tlsBindingSchema = resource.NewSchema("aws tls binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -176,23 +94,9 @@ var tlsBindingSchema = resource.NewSchema("aws tls binding", map[string]any{
 })
 
 // cdnBindingSchema validates one entry of a service's `cdn:` list: the
-// objects binding it fronts, the tls binding it presents, and the aliases
-// the distribution answers on.
-//
-// origin and certificate are references (see Capabilities): each names
-// another binding on the same service, which the loader checks exists and
-// the planner orders this entry after. origin is required because a
-// distribution with nothing behind it is not a thing; certificate is not,
-// because CloudFront serves its default certificate on its own hostname.
-//
-// Aliases rather than a single name because a distribution genuinely
-// serves several, and because this package's own identity strategy for
-// CloudFront searches on them (cloudfrontMatch) — a distribution with no
-// alias cannot be found again, so this is the one key here that is already
-// load-bearing for more than configuration.
-//
-// aliases are the hostnames the distribution answers on, which need the
-// certificate; without any, it answers on its own *.cloudfront.net name.
+// objects binding it fronts (required; a reference), the tls binding it
+// presents (a reference; without one CloudFront serves its default
+// certificate on its own hostname), and the aliases it answers on.
 var cdnBindingSchema = resource.NewSchema("aws cdn binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -209,21 +113,12 @@ var cdnBindingSchema = resource.NewSchema("aws cdn binding", map[string]any{
 })
 
 // networkBindingSchema validates one entry of a service's `network:` list:
-// a binding name and the two address ranges, all required, and optionally
-// a private block and the two zones. Each tier's block is halved into two
-// subnets, one per zone (subnets.go), so a database subnet group or a
-// serverless cache has the two zones it wants; azs names the zones for an
-// account whose region does not expose a and b. Declaring private opts the
-// network into egress: private subnets with that block, a NAT gateway in
-// the first public subnet, and the service's function placed in the private
-// subnets (egress.go). Opt-in because a NAT gateway is billed by the hour.
-//
-// The CIDRs are checked for being strings and for being present, not for
-// being well-formed or for nesting correctly. EC2 rejects an unusable block
-// with a precise message naming the real constraint (a /16-to-/28 range, a
-// subnet inside its VPC, no overlap with an existing association), and
-// reproducing those rules here would mean maintaining a second, worse copy
-// of them.
+// the VPC and public blocks, required; optionally a private block, which
+// opts into NAT egress (billed by the hour), and the two zones for an
+// account whose region does not expose a and b. Each tier's block is halved
+// into two subnets, one per zone. CIDRs are checked for presence and type
+// only: EC2 rejects an unusable block with a precise message, and a second
+// copy of its rules here would be a worse one.
 var networkBindingSchema = resource.NewSchema("aws network binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -243,8 +138,8 @@ var networkBindingSchema = resource.NewSchema("aws network binding", map[string]
 })
 
 // queuesBindingSchema validates one entry of a service's `queues:` list: a
-// bare binding name. A queue's shape (standard, SQS defaults throughout) is
-// not yet the manifest's to configure — see queueTranslate.
+// bare binding name. A queue's shape is not yet the manifest's to
+// configure.
 var queuesBindingSchema = resource.NewSchema("aws queues binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -268,17 +163,11 @@ var dynamoKeySchema = map[string]any{
 }
 
 // databaseBindingSchema validates one entry of a service's `databases:`
-// list for this provider: the driver selecting the engine, and that
-// engine's own keys.
-//
-// driver is required here, unlike the other providers' database schemas,
-// because this provider does not have one engine to default to: DynamoDB
-// under dynamodb, Aurora DSQL under postgres, and the enum is where the
-// next is added. A DynamoDB table is keyed by the binding, a partition key
-// and optionally a sort key, which the table requires and the cluster
-// refuses (dynamodb.go, dsql.go): one entry shape serves both, so which
-// keys belong is each engine's to check. engine picks between products
-// behind one driver, dsql being the only postgres engine today.
+// list: the driver selecting the engine, required because this provider has
+// no engine to default to, and that engine's own keys. engine picks between
+// products behind the postgres driver, DSQL by default or Aurora. One entry
+// shape serves every engine, so which keys belong is each engine's to check:
+// the table requires a partition key and the clusters refuse one.
 var databaseBindingSchema = resource.NewSchema("aws database binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
@@ -293,14 +182,10 @@ var databaseBindingSchema = resource.NewSchema("aws database binding", map[strin
 	"additionalProperties": false,
 })
 
-// keyvalueBindingSchema validates one entry of a service's `keyvalue:` list
-// for this provider: the driver selecting the store, the network binding
-// the store is placed in (a reference, see Capabilities), and the engine.
-//
-// driver is required for the same reason databaseBindingSchema requires
-// it. network is required because the one store offered, an ElastiCache
-// Serverless cache, exists only inside a VPC. engine picks between Valkey,
-// the default, and Redis OSS; both speak the redis driver.
+// keyvalueBindingSchema validates one entry of a service's `keyvalue:` list:
+// the driver, the network binding the store is placed in (a reference,
+// required because an ElastiCache Serverless cache exists only inside a
+// VPC), and the engine, Valkey by default or Redis OSS.
 var keyvalueBindingSchema = resource.NewSchema("aws keyvalue binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{

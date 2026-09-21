@@ -19,81 +19,25 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// deterministicZipTime is the fixed modification time every entry in a
-// built artifact carries, in place of the real filesystem mtime.
-//
-// zip's format stores each entry's mtime in the archive bytes themselves;
-// two builds of byte-identical source files on two different days, or two
-// different machines with different checkouts, would otherwise produce two
-// different zips — and, downstream, two different content hashes, so every
-// apply would look like a code change even when nothing changed. DOS epoch
-// (1980-01-01, zip's own minimum representable time) rather than the Unix
-// epoch: archive/zip predates zip64 extended timestamps in its default
-// writer and silently clamps an out-of-range time to this value anyway, so
-// naming it explicitly documents the behavior instead of relying on a
-// zero-value time.Time to fall into it by accident.
+// deterministicZipTime is the fixed modification time every artifact entry
+// carries in place of the real mtime, so byte-identical sources on two
+// machines or two days produce one zip and one content hash. DOS epoch is
+// zip's own minimum representable time, which archive/zip clamps to anyway.
 var deterministicZipTime = time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC)
 
 // buildArtifact walks dir and produces a deterministic zip deployment
-// package plus the lowercase hex SHA-256 of the resulting bytes.
+// package plus the lowercase hex SHA-256 of its bytes.
 //
-// # Exclusions
+// Excluded, in precedence order: ".git" and any ".env*" basename,
+// unconditionally and never overridable by include; dir's own .gitignore;
+// then include re-adds paths .gitignore excluded, because a service's build
+// output is routinely gitignored and is exactly what the artifact needs. An
+// excluded directory is pruned, never walked.
 //
-// Not every file under dir belongs in the package. Three things are cut
-// before a single byte is read, in this precedence order:
-//
-//  1. Two unconditional denies, regardless of dir's .gitignore or include:
-//     — ".git" (never appears in a .gitignore's own vocabulary, and must
-//     never ship) and any path whose basename matches ".env*" (defence in
-//     depth: a credential reaching the artifact must not depend on a
-//     manifest author having remembered to gitignore it). See
-//     isUnconditionallyDenied. Never overridable.
-//  2. dir's own .gitignore, if one exists, via go-git's
-//     plumbing/format/gitignore subpackage — negation, directory-only
-//     patterns, anchoring and "**" all need real gitignore semantics to
-//     get right, which is exactly why this is not hand-rolled. See
-//     newArtifactExcluder.
-//  3. include, which re-adds a path .gitignore excluded (manifest.Compute.
-//     Include's own doc comment has the "why": .gitignore is not a
-//     deployment manifest, and a service's own build output is routinely
-//     gitignored precisely because it must never be committed, yet is
-//     exactly what the deployed artifact needs). include can never re-add
-//     what (1) denies — see newArtifactExcluder.
-//
-// An excluded directory is pruned with fs.SkipDir rather than walked and
-// filtered entry-by-entry: this is also what keeps a symlink inside an
-// excluded directory (a Python virtualenv's bin/python, say) from ever
-// reaching the symlink check below — buildArtifact never looks inside a
-// directory it has already decided not to package.
-//
-// # Determinism
-//
-// Determinism requires normalising everything the zip format itself is
-// willing to vary between two byte-identical source trees:
-//
-//   - File order: filepath.WalkDir's own traversal order is already
-//     lexical per directory level, but this still sorts the collected
-//     relative paths explicitly rather than depending on that being true
-//     of every OS/filesystem WalkDir might run on — the contract this
-//     function needs (same input bytes in, same output bytes out,
-//     regardless of host) is stronger than "WalkDir happens to be sorted
-//     today." Exclusions do not threaten this: they run during the walk,
-//     before sorting, so the sorted set they leave behind is exactly as
-//     order-independent as an unfiltered one.
-//   - Per-entry mtime: fixed to deterministicZipTime (see its own doc
-//     comment) rather than the real file mtime, which varies with checkout
-//     time, clone method and OS.
-//   - Per-entry mode: fixed to 0o644 for a regular file, 0o755 for a
-//     directory (directories are not written as entries at all — see
-//     below) — a real filesystem's mode bits (umask, an executable bit
-//     some checkouts preserve and others don't) are exactly the kind of
-//     host-dependent noise this function exists to strip.
-//
-// A symlink that survives every exclusion above is rejected rather than
-// silently followed or silently skipped: a build that quietly changes
-// shape depending on whether a symlink target exists on the machine
-// running it is not deterministic, and Rule 20 rules out resolving that
-// ambiguity by guessing.
+// Determinism: entries are sorted by path, every entry carries
+// deterministicZipTime and mode 0o644, and directories are not written as
+// entries. A symlink that survives exclusion is rejected rather than
+// followed or skipped, since either would make the build depend on the host.
 func buildArtifact(dir string, include []string) (data []byte, sha256Hex string, err error) {
 	type entry struct {
 		relPath string
@@ -111,8 +55,6 @@ func buildArtifact(dir string, include []string) (data []byte, sha256Hex string,
 			return err
 		}
 		if path == dir {
-			// The root itself is never a candidate entry and never subject
-			// to exclusion — only what's under it.
 			return nil
 		}
 		rel, relErr := filepath.Rel(dir, path)
@@ -177,11 +119,9 @@ func buildArtifact(dir string, include []string) (data []byte, sha256Hex string,
 	return buf.Bytes(), hex.EncodeToString(sum[:]), nil
 }
 
-// maxArtifactFileBytes bounds a single source file this package will read
-// into memory while building an artifact — a backstop against an
-// accidentally-enormous file (a checked-in dataset, a build cache directory
-// pointed at by mistake) silently ballooning process memory, the same
-// defensive-bound spirit as client.go's maxListPages.
+// maxArtifactFileBytes bounds a single source file read into memory while
+// building an artifact, against a checked-in dataset or a mispointed build
+// cache ballooning the process.
 const maxArtifactFileBytes = 256 << 20 // 256 MiB
 
 func readFileLimited(path string) ([]byte, error) {
@@ -202,33 +142,23 @@ func readFileLimited(path string) ([]byte, error) {
 	return data, nil
 }
 
-// gitignoreFileName is the one file buildArtifact's exclusion logic reads:
-// dir's own .gitignore, at dir's root only. Not the wider repository's
-// .gitignore (dir may be a subdirectory of a larger checkout, e.g. a
-// monorepo service directory) and not a .gitignore nested further down dir
-// — kraai's artifact excludes are a packaging concern scoped to the one
-// directory being packaged, not a full git-worktree reimplementation.
+// gitignoreFileName is the one file the exclusion logic reads: dir's own
+// .gitignore at its root, not the wider repository's and not one nested
+// further down. Packaging is scoped to the directory being packaged.
 const gitignoreFileName = ".gitignore"
 
-// artifactExcluder decides, for each path buildArtifact's walk visits,
-// whether it belongs in the deployment package. See buildArtifact's own
-// doc comment for the three-rule precedence this implements.
+// artifactExcluder decides, for each path the walk visits, whether it
+// belongs in the deployment package.
 type artifactExcluder struct {
 	matcher gitignore.Matcher
 }
 
-// newArtifactExcluder builds an artifactExcluder for dir: dir's own
-// .gitignore (absent is not an error — a service with no .gitignore simply
-// gets the two unconditional denies and nothing else) as the base pattern
-// set, with include appended as forced-inclusion patterns.
-//
-// include's patterns are appended, not prepended: gitignore.Matcher checks
-// patterns from last to first and stops at the first match (go-git's own
-// NewMatcher doc: "Patterns must be given in the order of increasing
-// priority"), so appending is what makes include win over a conflicting
-// .gitignore pattern. It cannot win over the two unconditional denies
-// checked in excluded below, because those never consult this matcher at
-// all — there is no pattern here for an include: entry to outrank.
+// newArtifactExcluder builds an artifactExcluder for dir from its
+// .gitignore, absent being fine, with include appended as negation
+// patterns. Appended, not prepended: the matcher checks patterns last to
+// first, so appending is what makes include win over a conflicting
+// .gitignore line. It cannot win over the unconditional denies, which never
+// consult the matcher.
 func newArtifactExcluder(dir string, include []string) (*artifactExcluder, error) {
 	patterns, err := readGitignorePatterns(dir)
 	if err != nil {
@@ -247,16 +177,10 @@ func newArtifactExcluder(dir string, include []string) (*artifactExcluder, error
 	return &artifactExcluder{matcher: gitignore.NewMatcher(patterns)}, nil
 }
 
-// excluded reports whether relComponents (dir-relative path, split on "/")
-// should be left out of the artifact. isDir must reflect whether the path
-// itself is a directory: gitignore's directory-only patterns (a trailing
-// "/" in .gitignore) only match when isDir is true, matching
-// gitignore.Matcher.Match's own contract.
-//
-// The unconditional check runs first and, if it fires, is the whole
-// answer: dir's .gitignore and include are never consulted for a path
-// this denies, which is what makes the deny actually unconditional rather
-// than merely default-on.
+// excluded reports whether relComponents, a dir-relative path split on "/",
+// should be left out. isDir must say whether the path is a directory, since
+// gitignore's directory-only patterns match only then. The unconditional
+// check runs first and, if it fires, is the whole answer.
 func (a *artifactExcluder) excluded(relComponents []string, isDir bool) bool {
 	basename := relComponents[len(relComponents)-1]
 	if isUnconditionallyDenied(basename) {
@@ -266,17 +190,9 @@ func (a *artifactExcluder) excluded(relComponents []string, isDir bool) bool {
 }
 
 // isUnconditionallyDenied reports whether basename is denied regardless of
-// dir's .gitignore or include: — see buildArtifact's own doc comment for
-// why these two, specifically, are never overridable: ".git" never appears
-// in a .gitignore's own vocabulary and must never ship regardless, and
-// ".env*" is the credential-leak guard itself — the one exclusion this
-// change must not let a forgetful or mistaken include: entry undo.
-//
-// Checked against a path's basename alone, not its full relative path:
-// buildArtifact prunes an excluded directory with fs.SkipDir before
-// descending into it, so by the time any entry is checked here, every
-// denied ancestor directory has already been pruned — there is nothing
-// left for a full-path check to catch that a basename check would miss.
+// .gitignore or include: ".git" must never ship, and ".env*" is the
+// credential-leak guard no include entry may undo. Basename only, because
+// the walk prunes a denied directory before descending into it.
 func isUnconditionallyDenied(basename string) bool {
 	if basename == gitignoreDenyGitDir {
 		return true
@@ -286,43 +202,17 @@ func isUnconditionallyDenied(basename string) bool {
 }
 
 // gitignoreDenyGitDir and gitignoreDenyEnvGlob are isUnconditionallyDenied's
-// two rules, named rather than inlined so the "these two, only these two"
-// claim in its doc comment is something a reader (or a future diff) can
-// verify at a glance.
+// two rules, named so "these two, only these two" is checkable at a glance.
 const (
 	gitignoreDenyGitDir  = ".git"
 	gitignoreDenyEnvGlob = ".env*"
 )
 
 // readGitignorePatterns reads dir's own .gitignore, if one exists, and
-// parses each non-blank, non-comment line into a gitignore.Pattern.
-//
-// A nil domain: dir is the packaging root, so every pattern is anchored
-// (in gitignore's own sense of "anchored" — i.e. not anchored at all,
-// matching git's default of an unanchored pattern matching at any depth)
-// relative to dir itself, exactly as .gitignore's own semantics already
-// mean for a .gitignore living at the root of what it governs.
-//
-// The read-and-split logic mirrors go-git's own dir.go readIgnoreFile line
-// for line (blank/comment detection, ParsePattern per surviving line),
-// deliberately hand-rolled here rather than calling that function
-// directly. dir.go's readIgnoreFile takes a billy.Filesystem, not a plain
-// path, and does considerably more than this function needs or wants: it
-// walks core.excludesfile from gitconfig, /etc/gitconfig, and
-// $HOME-relative paths, chasing the full precedence chain a real git
-// checkout resolves .gitignore/.gitconfig through. This function wants
-// exactly one file, dir's own .gitignore, nothing else — reusing
-// readIgnoreFile would mean either adapting a billy.Filesystem wrapper
-// around dir for no benefit, or accepting config-file lookups this
-// packaging step has no business performing. Note this does not avoid a
-// go-billy dependency at the module level: pattern.go and matcher.go
-// (ParsePattern and NewMatcher, used throughout this file) import only
-// stdlib, but they live in the same gitignore package as dir.go, and Go
-// compiles a package's files together — importing this package at all
-// pulls go-billy, gcfg and go-git's own config/ioutil packages into the
-// build regardless of whether dir.go's functions are ever called. Verified
-// via `go list -deps` against a throwaway import of exactly the two
-// functions this file uses; see this package's PR description.
+// parses each non-blank, non-comment line into a pattern with a nil domain,
+// so every pattern is relative to dir as a root .gitignore's are. Hand-rolled
+// rather than go-git's readIgnoreFile, which takes a billy filesystem and
+// chases the gitconfig excludesfile chain this packaging step must not.
 func readGitignorePatterns(dir string) ([]gitignore.Pattern, error) {
 	data, err := os.ReadFile(filepath.Join(dir, gitignoreFileName)) //nolint:gosec // dir is a caller-supplied service directory, not untrusted input
 	if err != nil {
