@@ -239,6 +239,21 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 			if err := set(prefix+"_BUCKET_NAME", b.Name); err != nil {
 				return err
 			}
+		case manifest.CapabilityKeyValue:
+			// The cache's endpoint only exists once created, so it is read
+			// from what the cache published. Reachable only from inside
+			// the cache's network, which the function does not yet run in
+			// (evatt-labs/kraai#237).
+			if driver, _ := b.Config["driver"].(string); driver != DriverRedis {
+				continue
+			}
+			url, err := cacheURL(spec, b.attributeKey(spec, TypeElastiCacheServerlessCache))
+			if err != nil {
+				return err
+			}
+			if err := set(prefix+"_REDIS_URL", url); err != nil {
+				return err
+			}
 		case manifest.CapabilityDatabase:
 			// Likewise the table's name. A database binding on another
 			// engine of this provider publishes something else, once one

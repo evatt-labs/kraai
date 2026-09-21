@@ -501,3 +501,28 @@ func TestLambdaFunctionPublishesADynamoDBTableName(t *testing.T) {
 		t.Fatalf("Environment.Variables = %v, want DB_TABLE_NAME only", env)
 	}
 }
+
+func TestLambdaFunctionPublishesTheCacheURL(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	cache := awsBinding("keyvalue", "CACHE", "myenv-api-cache")
+	cache["config"] = map[string]any{"driver": DriverRedis, "network": "NET"}
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(cache, awsBinding("network", "NET", "myenv-api-net"))
+	spec.Attributes = map[string]map[string]any{
+		"CACHE." + key(TypeElastiCacheServerlessCache): {"Endpoint": map[string]any{"Address": "c.cache.amazonaws.com", "Port": "6379"}},
+	}
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	env := fc.createCalls[0]["Environment"].(map[string]any)["Variables"].(map[string]any)
+	if !reflect.DeepEqual(env, map[string]any{"CACHE_REDIS_URL": "rediss://c.cache.amazonaws.com:6379"}) {
+		t.Fatalf("Environment.Variables = %v, want CACHE_REDIS_URL only", env)
+	}
+}

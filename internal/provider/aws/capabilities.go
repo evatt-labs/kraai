@@ -73,6 +73,15 @@ func Capabilities() []resource.CapabilityDef {
 			Binding: databaseBindingSchema,
 		},
 		{
+			Name: manifest.CapabilityKeyValue,
+			Summary: "ElastiCache Serverless cache (driver: redis; Valkey or Redis OSS) " +
+				"inside the network binding the entry names, with a security group " +
+				"admitting that network.",
+			Binding: keyvalueBindingSchema,
+			// network names the network binding whose VPC holds the cache.
+			References: []string{"network"},
+		},
+		{
 			Name:    manifest.CapabilityQueues,
 			Summary: "SQS standard queue, granted to the service's execution role.",
 			Binding: queuesBindingSchema,

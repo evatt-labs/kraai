@@ -31,6 +31,9 @@ func TestRegisterWiresEveryType(t *testing.T) {
 		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityDNS, nil, resource.LookupByAPI},
 		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityDNS,
 			[]string{key(TypeRoute53HostedZone)}, resource.LookupByAttr},
+		{Provider + "/" + TypeCacheSecurityGroup, manifest.CapabilityKeyValue, nil, resource.LookupByTag},
+		{Provider + "/" + TypeElastiCacheServerlessCache, manifest.CapabilityKeyValue,
+			[]string{key(TypeCacheSecurityGroup)}, resource.LookupByName},
 		{Provider + "/" + TypeDynamoDBTable, manifest.CapabilityDatabase, nil, resource.LookupByName},
 		{Provider + "/" + TypeSQSQueue, manifest.CapabilityQueues, nil, resource.LookupByAttr},
 		{Provider + "/" + TypeLambdaFunction, manifest.CapabilityCompute,
@@ -428,7 +431,7 @@ func TestVendorTypeMatchesTheTypeEachRegistrationDrives(t *testing.T) {
 	}
 }
 
-// The three registrations whose key diverges from their vendor type, named
+// The registrations whose key diverges from their vendor type, named
 // explicitly so the split is not merely self-consistent but is the split this
 // package intends — a test that only compared the two to each other would
 // pass if both were wrong together.
@@ -442,6 +445,7 @@ func TestRoleKeysDeclareTheirVendorType(t *testing.T) {
 		TypeArtifactBucket:       TypeS3Bucket,
 		TypePermissionAPIGateway: realTypeLambdaPermission,
 		TypePermissionEventsRule: realTypeLambdaPermission,
+		TypeCacheSecurityGroup:   TypeSecurityGroup,
 	}
 	for key, vendorType := range want {
 		reg, ok := byType[key]

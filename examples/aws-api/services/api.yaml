@@ -26,3 +26,9 @@ services:
         driver: dynamodb
         partitionKey: { name: pk }
         sortKey: { name: createdAt, type: N }
+    # An ElastiCache Serverless cache (Valkey, redis protocol) inside NET,
+    # behind a security group admitting the VPC. The function receives
+    # CACHE_REDIS_URL, but does not run inside NET yet (#237), so it cannot
+    # reach the cache until that lands.
+    keyvalue:
+      - { binding: CACHE, driver: redis, network: NET }

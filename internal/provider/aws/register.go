@@ -114,7 +114,7 @@ func Register(reg *resource.Registry, client *Client) error {
 // fix (e.g. DNS-validated certificates needing their own explicit ordering
 // hint, or a second RecordSet registration) to resolve.
 func Registrations(client *Client) []resource.Registration {
-	return append(registerNetwork(client), []resource.Registration{
+	return append(append(registerNetwork(client), registerKeyValue(client)...), []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
 			Capability: manifest.CapabilityDNS,
