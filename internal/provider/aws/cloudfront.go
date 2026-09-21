@@ -14,50 +14,36 @@ import (
 
 const (
 	// cloudFrontOriginID is the one origin a kraai distribution has, named
-	// for what it is rather than for the bucket, so a cache behaviour's
-	// TargetOriginId never has to change when the origin does.
+	// for what it is rather than for the bucket, so TargetOriginId never
+	// changes when the origin does.
 	cloudFrontOriginID = "origin"
 	// cloudFrontCachingOptimizedPolicyID is AWS's managed CachingOptimized
-	// cache policy, the recommended one for an S3 origin. A policy id is
-	// required on a cache behaviour now that ForwardedValues is legacy, and
-	// this one is the same in every account and region.
+	// cache policy, the same id in every account and region.
 	cloudFrontCachingOptimizedPolicyID = "658327ea-f89d-4fab-a63d-7e88639e58f6"
-	// cloudFrontHostedZoneID is the hosted zone every CloudFront
-	// distribution's domain lives in, fixed by AWS; a Route 53 alias record
-	// pointing at a distribution names it as the target's zone.
+	// cloudFrontHostedZoneID is the hosted zone every distribution's domain
+	// lives in, fixed by AWS; an alias record names it as the target's zone.
 	cloudFrontHostedZoneID = "Z2FDTNDATAQYW2"
 	cloudFrontMinimumTLS   = "TLSv1.2_2021"
 
 	// bucketGrantSid names the one statement this package's bucket policy
-	// ever writes, for a reader identifying it in a live policy document.
+	// writes.
 	bucketGrantSid = "AllowCloudFrontServicePrincipalReadOnly"
 
-	// oacIDConfigKey carries the OriginAccessControl id Create/Update
-	// resolved into translate, through a copy of spec.Config rather than a
-	// field on cloudFrontResource: one cloudFrontResource instance serves
-	// every cdn binding, and two bindings can be created concurrently, so
-	// nothing about a single Create/Update call can live on the struct
-	// itself. translate reads and strips this key before building the
-	// distribution's real desired state.
+	// oacIDConfigKey carries the OriginAccessControl id Create and Update
+	// resolved into translate, through a copy of spec.Config. One
+	// cloudFrontResource serves every cdn binding concurrently, so nothing
+	// about one call can live on the struct. translate strips it before
+	// building the desired state.
 	oacIDConfigKey = "kraai:originAccessControlId"
 )
 
 // cloudFrontResource provisions a distribution in front of the objects
 // bucket its entry names as origin, presenting the certificate its entry
-// names, answering on its aliases — and, because that bucket is private by
-// default, the OriginAccessControl and bucket policy that let the
-// distribution actually read it (evatt-labs/kraai#219).
-//
-// A composite, not a bare resourceType: the distribution, its
-// OriginAccessControl and the origin bucket's policy are three Cloud
-// Control-adjacent operations with one lifecycle, the same shape
-// artifactBucketResource already established for a bucket's own object
-// data plane. inner is the distribution's own engine; oac is a second engine
-// instance for the OriginAccessControl, created before the distribution and
-// deleted after it; client reaches the S3 bucket-policy verbs and
-// AccountID/OwnsBucket, none of which are part of ccAPI (see
-// artifactbucket.go's own doc comment for the identical reason it keeps a
-// concrete *Client beside its engine).
+// names, answering on its aliases, plus the OriginAccessControl and bucket
+// policy that let it read a private bucket. A composite: the distribution
+// (inner), its OAC (oac, created before and deleted after) and the bucket
+// policy have one lifecycle. client reaches the S3 policy verbs, AccountID
+// and OwnsBucket, none of which are in ccAPI.
 type cloudFrontResource struct {
 	inner  *resourceType
 	oac    *resourceType
@@ -81,23 +67,21 @@ func newCloudFrontResource(client *Client) *cloudFrontResource {
 }
 
 // originAccessControlMatchByName reports whether properties is the OAC
-// named name. OriginAccessControl names are unique per account, so a retry
-// after a Create that succeeded but crashed before this type learned its id
-// must find the existing one by name rather than create a second one this
-// package would then have no way to tell apart from the first.
+// named name. OAC names are unique per account, so a retry after a Create
+// that crashed before learning its id finds the existing one rather than
+// creating a second.
 func originAccessControlMatchByName(properties map[string]any, name string) bool {
 	config, _ := properties["OriginAccessControlConfig"].(map[string]any)
 	got, _ := config["Name"].(string)
 	return got == name
 }
 
-// distributionShape is the projection of a DistributionConfig kraai sets and
-// compares: what the manifest decides, and nothing CloudFront defaults.
-// originAccessControl and granted are not manifest input — shapeFromSpec
-// always wants both true, and shapeFromState reports what a live
-// distribution and its origin bucket's policy actually show — so a missing
-// OAC reference or an ungranted bucket policy diffs the same as any other
-// drift: Mutable, repaired by Update.
+// distributionShape is the projection of a DistributionConfig kraai sets
+// and compares: what the manifest decides, and nothing CloudFront defaults.
+// originAccessControl and granted are always wanted true, and
+// shapeFromState reports what the live distribution and bucket policy show,
+// so a missing OAC reference or an ungranted policy diffs as Mutable and is
+// repaired by Update.
 type distributionShape struct {
 	origin              string
 	bucket              string
@@ -108,7 +92,7 @@ type distributionShape struct {
 	granted             bool
 }
 
-// shapeFromSpec reads the entry and the attributes the references it names
+// shapeFromSpec reads the entry and the attributes its references
 // published: the origin bucket's regional endpoint and name, the
 // certificate's ARN.
 func (c *cloudFrontResource) shapeFromSpec(spec resource.Spec) (distributionShape, error) {
@@ -162,10 +146,8 @@ func (c *cloudFrontResource) shapeFromSpec(spec resource.Spec) (distributionShap
 }
 
 // shapeFromState reads the same projection back out of a live distribution.
-// originAccessControl is read off the one origin's OriginAccessControlId;
-// granted is read off the private attribute Get (below) records after
-// checking the origin bucket's live policy — it is not itself part of
-// DistributionConfig.
+// granted comes from the attribute Get records after checking the bucket's
+// live policy; it is not part of DistributionConfig.
 func shapeFromState(state *resource.State) distributionShape {
 	var shape distributionShape
 	config, _ := state.Attributes["DistributionConfig"].(map[string]any)
@@ -192,10 +174,9 @@ func shapeFromState(state *resource.State) distributionShape {
 	return shape
 }
 
-// firstOrigin returns state's one origin as a map, or nil when state carries
-// none — a distribution kraai created always has exactly one (translate
-// below), but a live read is never trusted to echo back a shape this
-// package did not itself just build.
+// firstOrigin returns state's one origin, or nil when it carries none. A
+// distribution kraai created always has exactly one, but a live read is
+// never trusted to echo a shape this package just built.
 func firstOrigin(state *resource.State) map[string]any {
 	config, _ := state.Attributes["DistributionConfig"].(map[string]any)
 	origins, _ := config["Origins"].([]any)
@@ -207,11 +188,8 @@ func firstOrigin(state *resource.State) map[string]any {
 }
 
 // bucketFromOriginDomain extracts the bucket name from an origin's regional
-// S3 endpoint, e.g. "my-bucket.s3.us-east-1.amazonaws.com" -> "my-bucket".
-// Sound because every bucket name kraai derives is restricted to [a-z0-9-]
-// (naming.ServiceName, artifactBucketName's own doc comment) — a domain
-// built from one can never contain a "." before the ".s3." segment that
-// would make taking the first label ambiguous.
+// S3 endpoint, "my-bucket.s3.us-east-1.amazonaws.com" to "my-bucket". Sound
+// because every bucket name kraai derives is restricted to [a-z0-9-].
 func bucketFromOriginDomain(domain string) string {
 	if i := strings.Index(domain, "."); i >= 0 {
 		return domain[:i]
@@ -219,17 +197,12 @@ func bucketFromOriginDomain(domain string) string {
 	return domain
 }
 
-// translate builds the distribution: one S3 origin, one cache behaviour
-// on AWS's managed CachingOptimized policy, HTTPS enforced, HTTP/2, and the
-// certificate for its aliases when it has any — CloudFront's own default
-// certificate otherwise, which is only ever valid for its own hostname.
-//
-// The OriginAccessControl id Create/Update already resolved travels in
-// under oacIDConfigKey (see that constant's own doc comment) rather than as
-// a parameter: translateFunc's signature is shared by every type this
-// package registers, and changing it for this one caller would ripple
-// through resource.go. Stripped from spec.Config before shapeFromSpec runs,
-// so it is never mistaken for manifest input.
+// translate builds the distribution: one S3 origin, one cache behaviour on
+// the managed CachingOptimized policy, HTTPS enforced, HTTP/2, and the
+// certificate for its aliases when it has any, CloudFront's default
+// certificate otherwise. The OAC id travels in under oacIDConfigKey and is
+// stripped before shapeFromSpec runs, so it is never read as manifest
+// input.
 func (c *cloudFrontResource) translate(spec resource.Spec) (resource.Spec, error) {
 	oacID, _ := spec.Config[oacIDConfigKey].(string)
 	if _, has := spec.Config[oacIDConfigKey]; has {
@@ -292,13 +265,9 @@ func (c *cloudFrontResource) translate(spec resource.Spec) (resource.Spec, error
 
 // Diff compares the projection kraai decides, not the whole
 // DistributionConfig: CloudFront fills the rest with defaults a read
-// returns and the desired state never carried, and comparing those would
-// report an update on every plan, forever. Nothing here is createOnly, and
-// the type has an update handler, so any difference is Mutable — including
-// a missing OriginAccessControl reference or an ungranted bucket policy
-// (distributionShape's own doc comment), which is exactly the gap that
-// closes evatt-labs/kraai#219: a distribution whose bucket policy Put
-// failed after Create no longer reads as Same on the next plan.
+// returns and the desired state never carried. Nothing here is createOnly
+// and the type has an update handler, so any difference is Mutable,
+// including a missing OAC reference or an ungranted bucket policy.
 func (c *cloudFrontResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	want, err := c.shapeFromSpec(spec)
 	if err != nil {
@@ -310,32 +279,17 @@ func (c *cloudFrontResource) Diff(spec resource.Spec, state *resource.State) (re
 	return resource.Mutable, nil
 }
 
-// kraaiOriginGrantedAttribute is the key Get (below) records under
-// State.Attributes reporting whether the origin bucket's live policy
-// currently grants this distribution read access. Chosen to read
-// unambiguously as kraai's own, never a CloudFront property: every real
-// CloudFormation property name in this file is PascalCase with no
-// separator, and Cloud Control's ResourceModel decode (client.go) can only
-// ever produce keys from CloudFront's own schema, so this can never collide
-// with one.
+// kraaiOriginGrantedAttribute is the key Get records under State.Attributes
+// reporting whether the origin bucket's live policy grants this
+// distribution read access. Spelled so it can never collide with a
+// CloudFront property, which are all PascalCase with no separator.
 const kraaiOriginGrantedAttribute = "kraai.OriginGranted"
 
-// Get reports the distribution's live state, plus (under
-// kraaiOriginGrantedAttribute) whether its origin bucket's policy currently
-// grants it read access.
-//
-// # Why this exists
-//
-// Without it, a Create whose distribution succeeded but whose bucket-policy
-// Put then failed would still read back as a normal, healthy distribution
-// on the next plan: Get would report the distribution, Diff would compare
-// only DistributionConfig, and the grant would never be retried. Recording
-// the live grant here, and comparing it in Diff via shapeFromState/
-// distributionShape.granted, turns that into an ordinary Mutable diff that
-// Update repairs.
-//
-// One extra GetBucketPolicy call per plan of a cdn binding, in addition to
-// the GetResource this method already made for the distribution itself.
+// Get reports the distribution's live state, plus whether its origin
+// bucket's policy currently grants it read access. Without that, a Create
+// whose distribution succeeded but whose policy Put failed would read as
+// healthy on the next plan and the grant would never be retried. One extra
+// GetBucketPolicy per plan of a cdn binding.
 func (c *cloudFrontResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
 	state, err := c.inner.Get(ctx, ref)
 	if err != nil || state == nil {
@@ -357,11 +311,10 @@ func (c *cloudFrontResource) Get(ctx context.Context, ref resource.Ref) (*resour
 }
 
 // checkGrant reports whether the origin bucket named in state's live
-// DistributionConfig currently carries a policy granting this exact
-// distribution s3:GetObject. false, not an error, when the distribution has
-// no recognizable origin yet — a state this package's own translate would
-// never produce, but Get must not fail outright on a distribution this
-// package did not create in the shape it expects.
+// DistributionConfig carries a policy granting this exact distribution
+// s3:GetObject. false, not an error, when the distribution has no
+// recognizable origin: Get must not fail on a distribution this package did
+// not create in the shape it expects.
 func (c *cloudFrontResource) checkGrant(ctx context.Context, state *resource.State) (bool, error) {
 	origin := firstOrigin(state)
 	domain, _ := origin["DomainName"].(string)
@@ -390,8 +343,8 @@ func (c *cloudFrontResource) checkGrant(ctx context.Context, state *resource.Sta
 }
 
 // bucketPolicyStatement and bucketPolicyDocumentShape are marshalled, never
-// hand-built as a string, so PutBucketPolicy and the test suite comparing
-// against it can never drift from each other on formatting.
+// hand-built as a string, so the policy written and the one tests compare
+// against cannot drift on formatting.
 type bucketPolicyStatement struct {
 	Sid       string                       `json:"Sid"`
 	Effect    string                       `json:"Effect"`
@@ -406,9 +359,9 @@ type bucketPolicyDocumentShape struct {
 	Statement []bucketPolicyStatement `json:"Statement"`
 }
 
-// bucketPolicyDocument builds the policy document granting distARN's
-// distribution s3:GetObject on bucket, conditioned on its own SourceArn so
-// no other distribution's requests are covered by it.
+// bucketPolicyDocument builds the policy granting distARN's distribution
+// s3:GetObject on bucket, conditioned on its SourceArn so no other
+// distribution's requests are covered.
 func bucketPolicyDocument(bucket, distARN string) (string, error) {
 	doc := bucketPolicyDocumentShape{
 		Version: "2012-10-17",
@@ -428,11 +381,8 @@ func bucketPolicyDocument(bucket, distARN string) (string, error) {
 	return string(body), nil
 }
 
-// policyDocumentsEqual compares two policy documents structurally rather
-// than as strings: a live policy S3 echoes back may reorder keys or
-// whitespace differently from what json.Marshal produced when this package
-// wrote it, and a byte-for-byte comparison would report drift that is not
-// there.
+// policyDocumentsEqual compares two policy documents structurally: a live
+// policy S3 echoes back may differ in key order or whitespace.
 func policyDocumentsEqual(a, b string) (bool, error) {
 	var av, bv any
 	if err := json.Unmarshal([]byte(a), &av); err != nil {
@@ -445,8 +395,7 @@ func policyDocumentsEqual(a, b string) (bool, error) {
 }
 
 // specWithOACID copies spec.Config and adds oacID under oacIDConfigKey,
-// without mutating the caller's own map — spec.Config may still be read
-// elsewhere (a concurrent Diff over the same spec value).
+// without mutating the caller's map, which a concurrent Diff may be reading.
 func specWithOACID(spec resource.Spec, oacID string) resource.Spec {
 	cfg := make(map[string]any, len(spec.Config)+1)
 	for k, v := range spec.Config {
@@ -458,13 +407,9 @@ func specWithOACID(spec resource.Spec, oacID string) resource.Spec {
 }
 
 // findOrCreateOAC returns the id of the OriginAccessControl named name,
-// creating one if none exists yet. name is the distribution's own derived
-// name: OAC names are unique per account, so this doubles as this
-// resource's identity for the OAC the same way the distribution's own tag
-// does for itself, and a retry after a Create that made the OAC but failed
-// before the distribution existed finds the same one again instead of
-// creating a second, orphaned OAC no later run could tell apart from the
-// first.
+// creating one if none exists. name is the distribution's derived name, so
+// a retry after a Create that made the OAC but failed before the
+// distribution finds the same one again.
 func (c *cloudFrontResource) findOrCreateOAC(ctx context.Context, name string) (string, error) {
 	ref := resource.Ref{Provider: Provider, Type: TypeCloudFrontOriginAccessControl, Name: name}
 	existing, err := c.oac.Get(ctx, ref)
@@ -508,12 +453,8 @@ func (c *cloudFrontResource) grant(ctx context.Context, bucket, distributionID s
 	return c.client.PutBucketPolicy(ctx, bucket, doc)
 }
 
-// Create provisions the OriginAccessControl before the distribution — the
-// distribution's origin must name the OAC's id, so the OAC has to exist
-// first — then grants the new distribution read access to its origin
-// bucket. Cloud Control cannot delete an OAC still referenced by a
-// distribution, so this ordering (and Delete's mirror of it) is the only
-// one either verb can use.
+// Create provisions the OAC before the distribution, whose origin must name
+// the OAC's id, then grants the new distribution read access to its bucket.
 func (c *cloudFrontResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
 	shape, err := c.shapeFromSpec(spec)
 	if err != nil {
@@ -536,14 +477,10 @@ func (c *cloudFrontResource) Create(ctx context.Context, spec resource.Spec) (*r
 	return state, nil
 }
 
-// Update reconciles the distribution to spec, then re-grants (or moves) the
-// bucket policy.
-//
-// The OriginAccessControl id comes from the live distribution's own origin
-// when it has one — a distribution created before this workstream has
-// none, and gets one made for it here rather than failing. If the origin
-// bucket changed, the old bucket's policy is removed first (tolerating one
-// already absent) before the new bucket is granted.
+// Update reconciles the distribution to spec, then re-grants or moves the
+// bucket policy. The OAC id comes from the live origin when it has one; a
+// distribution created without one gets one made here. If the origin bucket
+// changed, the old bucket's policy is removed before the new one is granted.
 func (c *cloudFrontResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
 	shape, err := c.shapeFromSpec(spec)
 	if err != nil {
@@ -585,18 +522,12 @@ func (c *cloudFrontResource) Update(ctx context.Context, ref resource.Ref, spec 
 	return state, nil
 }
 
-// Delete removes the distribution, then the OriginAccessControl it
-// referenced, then the origin bucket's policy — in that order because Cloud
-// Control refuses to delete an OAC still referenced by a distribution, and
-// because the distribution's own live state (read here, before deleting
-// it) is the only place the OAC id and origin bucket are still available:
-// Delete's own contract carries no spec, only a Ref.
-//
-// A distribution already absent is success, matching every other type's
-// Delete. The OAC and the bucket policy are each deleted tolerating their
-// own absence too, and the bucket policy is skipped entirely when
-// OwnsBucket reports the origin bucket is not this account's — deleting a
-// stranger's policy is never this package's to do.
+// Delete removes the distribution, then the OAC it referenced (Cloud
+// Control refuses to delete one still referenced), then the origin bucket's
+// policy. The live state is read first because it is the only place the
+// OAC id and origin bucket are still available; Delete carries only a Ref.
+// Each step tolerates its own absence, and the policy is skipped when the
+// bucket is not this account's.
 func (c *cloudFrontResource) Delete(ctx context.Context, ref resource.Ref) error {
 	live, err := c.inner.Get(ctx, ref)
 	if err != nil {
