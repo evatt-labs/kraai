@@ -29,9 +29,9 @@ func findAction(t *testing.T, p *Plan, provider, typ string) Action {
 }
 
 // TestPlan_CapabilityExpandsToMultipleTypes pins that one Postgres binding,
-// with only "neon" configured as its vendor, must still produce both the
-// Neon branch and the Cloudflare Hyperdrive configuration fronting it —
-// the exact cross-provider case registrationsFor exists for.
+// with only "neon" configured as its vendor, still produces both the Neon
+// branch and the Cloudflare Hyperdrive configuration fronting it: one vendor
+// choice expanding to resources under more than one provider.
 func TestPlan_CapabilityExpandsToMultipleTypes(t *testing.T) {
 	f := newRegistryFixture(t)
 	m := f.oneServiceManifest()

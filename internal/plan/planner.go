@@ -15,16 +15,14 @@ import (
 )
 
 // defaultConcurrency bounds Get calls within one wave when the caller sets
-// no limit of its own. Modest on purpose: plan runs against live provider
-// APIs, and a first-time caller should not discover a sane limit by being
-// rate-limited.
+// no limit. Modest on purpose: a first-time caller should not discover a
+// sane limit by being rate-limited.
 const defaultConcurrency = 10
 
 // getter is the only capability Plan needs from a resource.Resource.
-//
 // Narrowing to it makes the package's read-only promise a compile-time
-// guarantee: reaching Create, Update or Delete from here would require an
-// explicit type assertion back to resource.Resource.
+// guarantee: reaching Create, Update or Delete would take an explicit type
+// assertion back to resource.Resource.
 type getter interface {
 	Get(ctx context.Context, ref resource.Ref) (*resource.State, error)
 }
@@ -39,12 +37,9 @@ type Planner struct {
 type Option func(*Planner)
 
 // WithConcurrency sets the maximum number of Get calls in flight at once
-// within a single wave.
-//
-// Non-positive values are ignored rather than rejected, since an Option
-// cannot return an error: errgroup.SetLimit(0) permits no goroutines at
-// all and a negative limit means unbounded, so neither is a limit a caller
-// can have meant.
+// within a single wave. Non-positive values are ignored: an Option cannot
+// return an error, and neither zero (no goroutines) nor negative (unbounded)
+// is a limit a caller can have meant.
 func WithConcurrency(n int) Option {
 	return func(p *Planner) {
 		if n > 0 {
@@ -69,15 +64,12 @@ type plannedItem struct {
 	ref  resource.Ref
 	spec resource.Spec
 	res  getter
-	// dependsOn carries the originating Registration.DependsOn through to
-	// computeWaves. Kept off Item because nothing downstream needs the raw
-	// keys once Wave has been computed from them.
+	// dependsOn carries the registration's DependsOn through to
+	// computeWaves.
 	dependsOn []string
-	// reads are the read edges computeWaves draws for this item: one per
-	// binding it reads wholesale (its scope), one per reference narrowed
-	// to the producer type it reads (Registration.ReadsReferences). Item's
+	// reads are the read edges computeWaves draws for this item. Item's
 	// ReadsBindings is the union of their bindings, which is what apply
-	// hands the item; the edges are finer than that on purpose.
+	// gets; the edges are finer than that on purpose.
 	reads []readEdge
 }
 
@@ -90,14 +82,13 @@ type readEdge struct {
 
 // Plan walks m's services and reports what would happen to every resource
 // type every declared binding expands to, without changing anything.
-//
-// environmentName is threaded through separately from m because
-// manifest.Environment carries no name of its own.
+// environmentName is separate from m because manifest.Environment carries
+// no name of its own.
 //
 // The returned error is non-nil only when the walk could not be built at
-// all — a configuration problem, such as a binding whose capability has no
-// configured provider. A live failure reading one resource's state is
-// reported as an ActionFailed entry in the returned Plan instead.
+// all, such as a binding whose capability has no configured provider. A
+// live failure reading one resource's state is an ActionFailed entry in the
+// returned Plan instead.
 func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentName string) (*Plan, error) {
 	if m == nil {
 		return nil, kerrors.Validation("plan: manifest is nil")
@@ -106,9 +97,8 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 		return nil, kerrors.Validation("plan: environment name must not be empty")
 	}
 
-	// An environment with no naming overlay, or an empty prefix, gets the
-	// zero-value Namer, whose output is byte-identical to the unprefixed
-	// naming helpers.
+	// No naming overlay, or an empty prefix, gets the zero-value Namer,
+	// whose output is byte-identical to the unprefixed naming helpers.
 	var prefix string
 	if m.Environment.Naming != nil {
 		prefix = m.Environment.Naming.Prefix
@@ -137,8 +127,8 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 		byWave[it.Wave] = append(byWave[it.Wave], it)
 	}
 
-	// Every wave runs regardless of whether an earlier one had failures, so
-	// one unreachable resource never hides the answer for every other one.
+	// Every wave runs whether or not an earlier one had failures, so one
+	// unreachable resource never hides the answer for every other one.
 	var actions []Action
 	for _, group := range byWave {
 		if len(group) == 0 {
@@ -147,10 +137,9 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 		actions = append(actions, p.getWave(ctx, group)...)
 	}
 
-	// A cancelled run is not a plan. Every Get honours ctx, so cancelling
-	// mid-walk would otherwise render as a wall of failures reading as
-	// "your infrastructure is unreachable" rather than "you pressed
-	// Ctrl-C", with no way to tell which entries are real.
+	// A cancelled run is not a plan: every Get honours ctx, so the result
+	// would be a wall of failures reading as "unreachable" rather than
+	// "you pressed Ctrl-C".
 	if err := ctx.Err(); err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "planning was cancelled")
 	}
@@ -158,10 +147,9 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 }
 
 // Expand returns every resource the manifest declares for environmentName,
-// in plan order, without reading any of them: what a plan would consider,
-// before it asks a provider what exists. For a caller that needs the set
-// of types a manifest reaches (the policy those types require) and has no
-// business, or no permission yet, touching the resources themselves.
+// in plan order, without reading any of them. For a caller that needs the
+// set of types a manifest reaches and has no business, or no permission
+// yet, touching the resources themselves.
 func (p *Planner) Expand(m *manifest.Manifest, environmentName string) ([]Item, error) {
 	if m == nil {
 		return nil, kerrors.Validation("plan: manifest is nil")
@@ -184,11 +172,8 @@ func (p *Planner) Expand(m *manifest.Manifest, environmentName string) ([]Item, 
 	return out, nil
 }
 
-// serviceDependsOn projects m.Services down to the one field computeWaves
-// needs: each service's DependsOn, keyed by service name.
-//
-// A plain map rather than the manifest types themselves, so graph.go stays
-// free of manifest vocabulary.
+// serviceDependsOn projects m.Services down to each service's DependsOn,
+// keyed by service name, so graph.go stays free of manifest vocabulary.
 func serviceDependsOn(m *manifest.Manifest) map[string][]string {
 	out := make(map[string][]string, len(m.Services))
 	for name, svc := range m.Services {
@@ -201,23 +186,17 @@ func serviceDependsOn(m *manifest.Manifest) map[string][]string {
 
 // expand walks every service's declared bindings in a deterministic order
 // and returns one plannedItem per resource type each binding expands to.
-// namer carries this environment's naming.prefix (Plan builds it once, from
-// m.Environment.Naming) so every name derived below applies it consistently.
 func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer naming.Namer) ([]plannedItem, error) {
 	var out []plannedItem
 
 	for _, svcKey := range sortedKeys(m.Services) {
 		svc := m.Services[svcKey]
 
-		// A service is itself a deployable unit, not only a set of bindings:
-		// nothing in the manifest declares "deploy this", so planning it
-		// from the service's own existence is what puts the deployed code
-		// in the plan at all.
-		//
-		// Only when a compute vendor is configured — a manifest with no
-		// compute capability describes resources something else deploys, and
-		// synthesising compute there would invent a binding its author never
-		// asked for.
+		// A service is itself a deployable unit: nothing in the manifest
+		// says "deploy this", so its own existence is what puts its code in
+		// the plan. Only when a compute vendor is configured, though; a
+		// manifest with no compute capability describes resources something
+		// else deploys.
 		if _, ok := m.Root.Providers.For(manifest.CapabilityCompute); ok {
 			items, err := p.expandCompute(m, environmentName, svcKey, svc, namer)
 			if err != nil {
@@ -226,16 +205,9 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer nam
 			out = append(out, items...)
 		}
 
-		// One loop over whatever capabilities the service declares, rather
-		// than one hand-written loop per capability: which capabilities exist
-		// is the providers' to declare, and a loop per capability here was
-		// the second place (after manifest.Service's fields) that a new one
-		// had to be taught about before a manifest could use it.
-		//
-		// Sorted, so a manifest's plan comes out in the same order on every
-		// run. Everything a binding carries beyond its name travels
-		// uninterpreted into Spec.Config — this package no more owns
-		// "driver" or "cidr" than internal/manifest does.
+		// One loop over whatever capabilities the service declares: which
+		// capabilities exist is the providers' to say. Everything a binding
+		// carries beyond its name travels uninterpreted into Spec.Config.
 		for _, capability := range sortedCapabilities(svc.Bindings) {
 			for _, entry := range svc.Bindings[capability] {
 				items, err := p.expandBinding(
@@ -252,29 +224,19 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer nam
 
 // expandCompute plans the service's own deployable unit.
 //
-// dir and Include travel in the config because they are the only things a
-// compute provider cannot derive from providers.compute.settings: where
-// this service's code lives, and its own escape hatch back into paths its
-// .gitignore excludes.
-//
-// The service's Compute block also decides which of the vendor's registered
-// types apply, which is why Resolve is called after the settings merge rather
-// than before it: a registration's conditions are evaluated against the
-// service's trigger and its merged settings, and handing Resolve a context
-// missing either would narrow on a value this function had not computed yet.
-// The settings in that context are the same mergedSettings built for
-// Spec.Config, so a condition sees exactly what the provider's Create call
-// will.
+// Resolve is called after the settings merge because a registration's
+// conditions are evaluated against the service's trigger and merged
+// settings; the context carries the same mergedSettings that go into
+// Spec.Config, so a condition sees exactly what the provider's Create will.
 func (p *Planner) expandCompute(
 	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service, namer naming.Namer,
 ) ([]plannedItem, error) {
 	// Present because expand only reaches here once Providers.For succeeded.
 	provider, _ := m.Root.Providers.For(manifest.CapabilityCompute)
 
-	// A service with no Compute block carries no trigger and no settings
-	// override: an empty trigger keeps every registered type
-	// (resource.RequiresTrigger), and mergedSettings reduces to the
-	// provider's own.
+	// A service with no Compute block has no trigger and no settings
+	// override: an empty trigger keeps every registered type, and
+	// mergedSettings reduces to the provider's own.
 	var trigger string
 	var svcSettings map[string]any
 	var handler, schedule string
@@ -288,11 +250,8 @@ func (p *Planner) expandCompute(
 	}
 	mergedSettings := manifest.MergeSettings(provider.Settings, svcSettings)
 
-	// A service's custom-domain routes decide two things: whether the
-	// resources that exist only to serve one apply at all (RequiresCustomDomain
-	// in the context), and what the service's own API is told about its
-	// front door (the route in Spec.Config, so a provider can stop serving its
-	// generated hostname once a custom one exists).
+	// Custom-domain routes decide whether the resources that serve one
+	// apply at all, and tell the service's own API about its front door.
 	customDomains := customDomainRoutes(m, svcKey)
 
 	regs, err := p.registry.Resolve(manifest.CapabilityCompute, resource.ApplicabilityContext{
@@ -334,19 +293,17 @@ func (p *Planner) expandCompute(
 		}
 		switch r.NameFrom {
 		case resource.NameFromEntry:
-			// A compute resolve has no binding entry to read a name from;
-			// this is a registration wired under the wrong capability, not
-			// a manifest problem, and it must not fall through to a derived
-			// name the registration said it does not have.
+			// A compute resolve has no entry to read a name from: this is a
+			// registration wired under the wrong capability, and it must not
+			// fall through to a derived name it said it does not have.
 			return nil, kerrors.Validation(
 				"%s is named from a binding entry's %q but is registered under compute, which has no entry",
 				r.Key(), r.NameKey)
 		case resource.NameFromRoute:
 			// One instance per custom-domain route, named by the hostname
-			// itself: the vendor addresses these by the domain string, and no
-			// name derived from the service would find one. Same binding
-			// group as the rest of the service's compute, so DependsOn on the
-			// API resolves and the route's own bindings are readable.
+			// itself. Same binding group as the rest of the service's
+			// compute, so DependsOn on the API resolves and the route's own
+			// bindings are readable.
 			for _, route := range customDomains {
 				var reads []readEdge
 				item.ReadsBindings, reads = readsFor(r, svcKey, svc, route)
@@ -374,11 +331,8 @@ func (p *Planner) expandCompute(
 				reads:     reads,
 			})
 		default:
-			// A NameStrategy this switch does not know about must not
-			// silently take NameFromBinding's shape — that shape's Ref.Name
-			// comes from the binding-derived `name` computed above, which
-			// may not even mean anything for a strategy this package has
-			// never seen.
+			// An unknown NameStrategy must not silently take
+			// NameFromBinding's shape.
 			return nil, kerrors.Validation("%s: unknown NameStrategy %v", r.Key(), r.NameFrom)
 		}
 	}
@@ -390,15 +344,11 @@ func (p *Planner) expandCompute(
 // granting its function a queue, the function receiving that queue's URL.
 //
 // Each entry carries the capability, the binding name, the vendor fulfilling
-// it, the derived name of the binding's resource (the same name expandBinding
-// plans it under, so a provider can build the resource's ARN locally without
-// waiting on it) and the entry's own config. Sorted by capability then
-// binding, so the plan is the same on every run.
-//
-// A compute resource cannot otherwise learn what its service binds: a
-// compute Spec carries the service's compute block, and what a binding
-// published arrives in Spec.Attributes only once the binding has been
-// applied, which is after plan has already compared the role.
+// it, the derived name of the binding's resource (so a provider can build an
+// ARN locally without waiting on it) and the entry's own config. Sorted by
+// capability then binding. What a binding published arrives in
+// Spec.Attributes only after it is applied, which is after plan has already
+// compared the role; this is how compute knows at plan time.
 func serviceBindings(
 	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service, namer naming.Namer,
 ) []any {
@@ -450,24 +400,20 @@ func routeConfigs(routes []manifest.Route) []any {
 	return out
 }
 
-// readsFor is what an item reads: its own binding, the producers its own
-// manifest entry references under the keys its registration declares
-// (manifest.Service.References × Registration.ReadsReferences), plus
-// whatever its registration's scope widens that to. The own binding is
-// always present because apply's secret and attribute indexes hand an
-// action exactly the bindings named here, and a type that reads what its
-// own binding published — an API mapping reading its API's id — would
-// otherwise see nothing.
+// readsFor is what an item reads: its own binding, the producers its entry
+// references under the keys its registration declares, plus whatever the
+// registration's scope widens that to. The own binding is always present
+// because apply hands an action exactly the bindings named here, and a type
+// reading what its own binding published would otherwise see nothing.
 //
-// The bindings are for apply; the edges are for the graph, and are finer.
-// A scope read is an edge from every producer in the binding. A reference
-// read is an edge from the one type the registration says it reads, in
-// the binding the entry names, and no other — a certificate runs after
-// the zone it validates in, not after the record set beside that zone.
-// See resource.Registration.ReadsReferences for the cycle that made it so.
+// The bindings are for apply; the edges are for the graph, and are finer. A
+// scope read is an edge from every producer in the binding. A reference read
+// is an edge from the one type the registration says it reads, in the
+// binding the entry names: a certificate runs after the zone it validates
+// in, not after the record set beside that zone.
 //
-// Sorted and deduplicated so a repeated Plan call is byte-for-byte
-// identical regardless of authoring order.
+// Sorted and deduplicated so a repeated Plan call is identical whatever the
+// authoring order.
 func readsFor(reg resource.Registration, own string, svc manifest.Service, route manifest.Route) ([]string, []readEdge) {
 	bindings := []string{own}
 	var edges []readEdge
@@ -490,8 +436,7 @@ func readsFor(reg resource.Registration, own string, svc manifest.Service, route
 		}
 	case resource.ReadsRouteBindings:
 		// Validated at load: a custom-domain route names a tls binding on
-		// its service. A route with no certificate is not a custom-domain
-		// route and never reaches here with this scope.
+		// its service.
 		if route.Certificate != "" {
 			wide(route.Certificate)
 		}
@@ -507,8 +452,7 @@ func readsFor(reg resource.Registration, own string, svc manifest.Service, route
 	return slices.Compact(bindings), slices.Compact(edges)
 }
 
-// sortedCapabilities returns bindings' capability names in ascending order,
-// so a manifest expands to the same plan order on every run.
+// sortedCapabilities returns bindings' capability names in ascending order.
 func sortedCapabilities(bindings manifest.Bindings) []string {
 	out := make([]string, 0, len(bindings))
 	for capability := range bindings {
@@ -521,15 +465,10 @@ func sortedCapabilities(bindings manifest.Bindings) []string {
 // importFor returns the adopted-resource reference a manifest declares for
 // one (service, capability, binding), or nil when it declares none.
 //
-// Every resource type a binding expands to shares it: a binding names one
-// real resource, and the several registrations it produces are facets of that
-// one thing rather than separate resources to adopt individually. A provider
-// whose type cannot be adopted says so itself — see each provider's own
-// lookup — rather than this package deciding which of them an import was
-// meant for.
-//
-// Validated at load (manifest.Loader.validateImports), so exactly one of ID
-// and Name is set by the time it reaches here.
+// Every resource type the binding expands to shares it: a binding names one
+// real resource, and its registrations are facets of that one thing. A
+// provider whose type cannot be adopted says so from its own lookup.
+// Validated at load, so exactly one of ID and Name is set.
 func importFor(m *manifest.Manifest, svcKey, capability, binding string) *resource.Import {
 	ref, ok := m.Environment.Resources[svcKey][capability][binding]
 	if !ok {
@@ -538,9 +477,8 @@ func importFor(m *manifest.Manifest, svcKey, capability, binding string) *resour
 	return &resource.Import{ID: ref.ID, Name: ref.Name}
 }
 
-// annotate names the manifest path a binding-expansion failure came from,
-// so a validation error points at the entry to fix rather than just the
-// underlying registry complaint.
+// annotate names the manifest path a binding-expansion failure came from, so
+// the error points at the entry to fix.
 func annotate(err error, svcKey, kind, binding string) error {
 	return kerrors.Wrap(err, kerrors.CodeValidation, "services.%s.%s.%s", svcKey, kind, binding)
 }
@@ -556,17 +494,11 @@ func (p *Planner) expandBinding(
 		return nil, kerrors.Validation("no provider is configured for capability %q", capability)
 	}
 
-	// Resolve takes the whole vendor set, not just this capability's, because
-	// a registration may depend on another: the Cloudflare Hyperdrive config
-	// a Neon database asks for applies only when compute is Cloudflare too,
-	// and answering that needs more than one entry.
-	//
-	// No Trigger and no Settings: a binding is not a compute block, and what
-	// invokes the service it belongs to is nobody's business here. Both are
-	// zero-valued rather than invented, which the conditions that read them
-	// treat as "this caller has no opinion" — see resource.RequiresTrigger.
-	// The entry itself is what a binding has to say, for a registration
-	// that applies only to an entry saying something in particular.
+	// Resolve takes the whole vendor set because a registration may depend
+	// on another capability's vendor. No Trigger and no Settings: a binding
+	// is not a compute block, and the conditions that read them treat the
+	// zero value as "this caller has no opinion". The entry itself is what
+	// a binding has to say.
 	regs, err := p.registry.Resolve(capability, resource.ApplicabilityContext{
 		Vendors: m.Root.Providers.Vendors(),
 		Binding: config,
@@ -577,20 +509,17 @@ func (p *Planner) expandBinding(
 
 	derived := namer.Resource(environmentName, svcKey, binding)
 
-	// An adopted resource has no identity kraai can derive, so the manifest's
-	// own reference travels on the Ref for a provider's lookup to use instead
-	// of the derived name. Absent for the overwhelmingly common case of a
-	// resource kraai creates itself.
+	// An adopted resource has no identity kraai can derive, so the
+	// manifest's reference travels on the Ref for the provider's lookup.
 	adopted := importFor(m, svcKey, capability, binding)
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
 		name := derived
 		if r.NameFrom == resource.NameFromEntry {
-			// The identity is the manifest's, not kraai's: a hosted zone is
-			// the zone name its entry declares. The vendor's schema decides
-			// whether the key is required; here it has to be present and a
-			// string, or the instance has no name at all.
+			// The identity is the manifest's: a hosted zone is the zone
+			// name its entry declares. The key has to be present and a
+			// string here, whatever the vendor's schema says about it.
 			value, _ := config[r.NameKey].(string)
 			if value == "" {
 				return nil, kerrors.Validation(
@@ -599,11 +528,9 @@ func (p *Planner) expandBinding(
 			}
 			name = value
 		}
-		// Set explicitly rather than left nil so it never falls through to a
-		// default inside apply: what an item may read is this package's
-		// decision, from the registration's own scope and references. A
-		// binding has no route, so the route scope reads nothing beyond the
-		// binding itself.
+		// Set explicitly rather than left nil so it never falls through to
+		// a default inside apply. A binding has no route, so the route
+		// scope reads nothing beyond the binding itself.
 		readsBindings, reads := readsFor(r, binding, m.Services[svcKey], manifest.Route{})
 		out = append(out, plannedItem{
 			Item: Item{
@@ -622,7 +549,7 @@ func (p *Planner) expandBinding(
 }
 
 // getWave runs Get for every item in one wave, bounded by p.concurrency,
-// and returns one Action per item in the same order items was given in.
+// and returns one Action per item in the same order.
 func (p *Planner) getWave(ctx context.Context, items []plannedItem) []Action {
 	actions := make([]Action, len(items))
 
@@ -631,12 +558,8 @@ func (p *Planner) getWave(ctx context.Context, items []plannedItem) []Action {
 	for i, it := range items {
 		g.Go(func() error {
 			actions[i] = decide(ctx, it)
-			// Deliberately always nil: a goroutine here must never cancel
-			// or skip its siblings just because one Get failed. That
-			// failure is already captured in actions[i] as ActionFailed;
-			// letting it propagate through the group would only matter if
-			// this errgroup used a derived, cancelable context, which it
-			// does not (see the package doc's "Partial failure" section).
+			// Always nil: one failed Get must never cancel or skip its
+			// siblings. The failure is already in actions[i].
 			return nil
 		})
 	}
@@ -649,15 +572,8 @@ func (p *Planner) getWave(ctx context.Context, items []plannedItem) []Action {
 func decide(ctx context.Context, it plannedItem) Action {
 	action := Action{Item: it.Item, Ref: it.ref, Spec: it.spec}
 
-	// SpecValidator, when the underlying resource implements it, runs
-	// first and unconditionally — before Get, and therefore regardless of
-	// whether the resource already exists. See SpecValidator's own doc
-	// comment (validate.go) for the bug this fixes: a check reachable only
-	// through Differ (below) never runs on a brand-new
-	// environment's first plan, where every action is ActionCreate.
-	//
-	// Same dynamic-type type assertion as Differ's, on the same
-	// getter-narrowed it.res — no new path to a mutating verb.
+	// Validation runs before Get, so it runs on a fresh environment too,
+	// where every action is a create and nothing below is reached.
 	if validator, ok := it.res.(SpecValidator); ok {
 		if err := validator.ValidateSpec(it.spec); err != nil {
 			action.Kind = ActionFailed
@@ -676,12 +592,9 @@ func decide(ctx context.Context, it plannedItem) Action {
 	action.Current = state
 
 	if state == nil {
-		// An import that does not resolve is a failure, never a create.
-		// "Adopt the resource I already have" and "make me a new one under a
-		// name I did not choose" are different requests, and a manifest that
-		// asked for the first must not silently get the second — a typo in an
-		// id would otherwise provision a duplicate alongside the resource it
-		// was meant to take over.
+		// An import that does not resolve is a failure, never a create: a
+		// typo in an id would otherwise provision a duplicate beside the
+		// resource it was meant to adopt.
 		if it.ref.Import != nil {
 			action.Kind = ActionFailed
 			action.Err = kerrors.Validation(
@@ -694,11 +607,8 @@ func decide(ctx context.Context, it plannedItem) Action {
 		return action
 	}
 
-	// A type assertion checks it.res's dynamic type, not its static
-	// interface (getter) — so this reaches Differ on the underlying
-	// resource.Resource without this package ever holding a value
-	// statically typed as resource.Resource itself. Differ has no mutating
-	// method to reach even if it did.
+	// The assertion checks it.res's dynamic type, so this reaches Differ
+	// on the underlying resource without holding a resource.Resource.
 	if differ, ok := it.res.(Differ); ok {
 		difference, dErr := differ.Diff(it.spec, state)
 		if dErr != nil {
@@ -715,11 +625,8 @@ func decide(ctx context.Context, it plannedItem) Action {
 			action.Kind = ActionUpdate
 			return action
 		case resource.Same:
-			// Falls through to ActionNoChange below, same as before this
-			// case existed — spelled out explicitly so a fourth
-			// resource.Difference value added later cannot silently take
-			// this path too; exhaustive forces this switch to be revisited
-			// instead.
+			// Spelled out so a new resource.Difference value cannot take
+			// this path silently; exhaustive forces a revisit.
 		}
 	}
 
@@ -736,9 +643,8 @@ func describeImport(imp *resource.Import) string {
 	return "name " + strconv.Quote(imp.Name)
 }
 
-// sortedKeys returns m's keys in ascending order, so iterating a manifest's
-// services map — Go gives no ordering guarantee over a map — produces the
-// same plan order on every run.
+// sortedKeys returns m's keys in ascending order, so a manifest's services
+// produce the same plan order on every run.
 func sortedKeys(m map[string]manifest.Service) []string {
 	out := make([]string, 0, len(m))
 	for k := range m {

@@ -5,11 +5,8 @@ import (
 	"strings"
 )
 
-// Render turns a Plan into plain, human-readable text.
-//
-// A free function rather than a method so a second renderer — JSON, a TUI —
-// can be added without touching Planner or Plan, and so no caller has to
-// recompute the walk to present it differently.
+// Render turns a Plan into plain, human-readable text. A free function so a
+// second renderer can be added without touching Planner or Plan.
 func Render(p *Plan) string {
 	if p == nil || len(p.Actions) == 0 {
 		return "no resources declared\n"
