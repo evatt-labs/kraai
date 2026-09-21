@@ -447,6 +447,7 @@ func TestRoleKeysDeclareTheirVendorType(t *testing.T) {
 		TypePermissionAPIGateway:                realTypeLambdaPermission,
 		TypePermissionEventsRule:                realTypeLambdaPermission,
 		TypeCacheSecurityGroup:                  TypeSecurityGroup,
+		TypeDatabaseSecurityGroup:               TypeSecurityGroup,
 		TypeS3Endpoint:                          TypeVPCEndpoint,
 		TypeDynamoDBEndpoint:                    TypeVPCEndpoint,
 		TypePrivateSubnet:                       TypeSubnet,

@@ -121,7 +121,7 @@ func Registrations(client *Client) []resource.Registration {
 	if client != nil {
 		region = client.Region()
 	}
-	return append(append(registerNetwork(client, region), registerKeyValue(client)...), []resource.Registration{
+	return append(append(append(registerNetwork(client, region), registerKeyValue(client)...), registerAurora(client)...), []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
 			Capability: manifest.CapabilityDNS,
@@ -270,7 +270,7 @@ func Registrations(client *Client) []resource.Registration {
 			// applies to the binding naming its driver. No DependsOn and
 			// no network: a DSQL cluster is reached over its public
 			// endpoint with an IAM token.
-			Applies: []resource.Applicability{bindingDriverIs(DriverPostgres)},
+			Applies: []resource.Applicability{bindingDriverIs(DriverPostgres), bindingEngineIs("", engineDSQL)},
 			// No name property exists on the type, so identity is kraai's
 			// tag, stamped at create. See dsql.go.
 			Lookup:   resource.LookupByTag,

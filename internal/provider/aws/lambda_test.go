@@ -807,3 +807,36 @@ func TestLambdaFunctionJoinsThePrivateSubnetWhenTheNetworkHasOne(t *testing.T) {
 		t.Fatalf("SubnetIds = %v, want both private subnets and neither public one", vpcConfig["SubnetIds"])
 	}
 }
+
+// An Aurora binding's URL carries a password, so it reaches the function
+// through the credential channel: the cluster's producer, resolved at the
+// moment the environment is built.
+func TestLambdaFunctionPublishesTheAuroraDatabaseURLAsASecret(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	sql := awsBinding("database", "SQL", "myenv-api-sql")
+	sql["config"] = map[string]any{"driver": DriverPostgres, "engine": engineAurora, "network": "NET"}
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(sql)
+	spec.Secrets = map[string]resource.Secret{
+		"SQL." + SecretConnectionURI: func(context.Context) (string, error) { return "postgres://postgres:x@h:5432/postgres", nil },
+	}
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	env := fc.createCalls[0]["Environment"].(map[string]any)["Variables"].(map[string]any)
+	if !reflect.DeepEqual(env, map[string]any{"SQL_DATABASE_URL": "postgres://postgres:x@h:5432/postgres"}) { //nolint:gosec // a fixture credential
+		t.Fatalf("Environment.Variables = %v, want SQL_DATABASE_URL from the credential", env)
+	}
+
+	spec.Secrets = nil
+	if _, err := fn.Create(context.Background(), spec); err == nil || !strings.Contains(err.Error(), SecretConnectionURI) {
+		t.Fatalf("Create without the credential: err = %v, want one naming it", err)
+	}
+}

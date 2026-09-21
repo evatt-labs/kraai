@@ -185,7 +185,7 @@ func TestDatabaseBindingSchemaAcceptsAPostgresEntry(t *testing.T) {
 	if err := databaseBindingSchema.Validate(map[string]any{"binding": "PG", "driver": "postgres", "engine": "dsql"}); err != nil {
 		t.Fatalf("an explicit dsql engine was rejected: %v", err)
 	}
-	if err := databaseBindingSchema.Validate(map[string]any{"binding": "PG", "driver": "postgres", "engine": "aurora"}); err == nil {
+	if err := databaseBindingSchema.Validate(map[string]any{"binding": "PG", "driver": "postgres", "engine": "mysql"}); err == nil {
 		t.Fatal("an engine this provider does not offer was accepted")
 	}
 }
@@ -212,5 +212,18 @@ func TestNetworkBindingSchemaAcceptsTwoZones(t *testing.T) {
 	base["azs"] = []any{"us-west-1a"}
 	if err := networkBindingSchema.Validate(base); err == nil {
 		t.Fatal("a network naming one zone was accepted")
+	}
+}
+
+func TestDatabaseBindingSchemaAcceptsAnAuroraEntryWithANetwork(t *testing.T) {
+	catalog, err := resource.NewCatalog(resource.FuncProvider{ProviderName: Provider, CapabilitiesFunc: Capabilities})
+	if err != nil {
+		t.Fatalf("NewCatalog: %v", err)
+	}
+	if got := catalog.References(manifest.CapabilityDatabase, Provider); !reflect.DeepEqual(got, []string{"network"}) {
+		t.Errorf("database references = %v, want [network]", got)
+	}
+	if err := databaseBindingSchema.Validate(map[string]any{"binding": "SQL", "driver": "postgres", "engine": "aurora", "network": "NET"}); err != nil {
+		t.Fatalf("an aurora entry was rejected: %v", err)
 	}
 }

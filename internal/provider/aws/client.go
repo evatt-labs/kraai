@@ -16,6 +16,7 @@ import (
 	cftypes "github.com/aws/aws-sdk-go-v2/service/cloudformation/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/smithy-go"
 
@@ -144,6 +145,13 @@ type stsAPI interface {
 	GetCallerIdentity(ctx context.Context, params *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error)
 }
 
+// secretsManagerAPI is the subset of *secretsmanager.Client this package
+// calls: GetSecretValue, to read the master credential RDS manages for an
+// Aurora cluster at the moment a function needs it.
+type secretsManagerAPI interface {
+	GetSecretValue(ctx context.Context, params *secretsmanager.GetSecretValueInput, optFns ...func(*secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error)
+}
+
 // Client is a thin Cloud Control + CloudFormation client.
 //
 // "Thin" here means its exported methods already speak this package's own
@@ -156,6 +164,7 @@ type Client struct {
 	cf  cloudFormationAPI
 	s3  s3API
 	sts stsAPI
+	sm  secretsManagerAPI
 
 	// region is the resolved AWS region every ARN this package constructs
 	// (see AccountID's doc comment) is built against. Set from the SDK
@@ -215,6 +224,11 @@ func WithSTSAPI(api stsAPI) Option {
 	return func(c *Client) { c.sts = api }
 }
 
+// WithSecretsManagerAPI substitutes the Secrets Manager client, for tests.
+func WithSecretsManagerAPI(api secretsManagerAPI) Option {
+	return func(c *Client) { c.sm = api }
+}
+
 // WithPollTimings overrides the backoff and overall timeout used to poll an
 // asynchronous operation's ProgressEvent to a terminal state. Tests use this
 // to exercise polling, timeout and cancellation behavior in milliseconds
@@ -266,6 +280,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		cf:               cloudformation.NewFromConfig(cfg),
 		s3:               s3.NewFromConfig(cfg),
 		sts:              sts.NewFromConfig(cfg),
+		sm:               secretsmanager.NewFromConfig(cfg),
 		region:           cfg.Region,
 		pollInitialDelay: defaultPollInitialDelay,
 		pollMaxDelay:     defaultPollMaxDelay,
@@ -1175,4 +1190,21 @@ func (c *Client) AccountID(ctx context.Context) (string, error) {
 	c.accountID = *out.Account
 	c.accountLoaded = true
 	return c.accountID, nil
+}
+
+// SecretValue returns the string value of the secret at arn.
+//
+// Only the value is returned, never logged or kept: this is the producer
+// behind an Aurora cluster's credential (resource.Secret), called at the
+// moment a function's environment is built and nowhere else.
+func (c *Client) SecretValue(ctx context.Context, arn string) (string, error) {
+	out, err := c.sm.GetSecretValue(ctx, &secretsmanager.GetSecretValueInput{SecretId: aws.String(arn)})
+	if err != nil {
+		// The error names the secret's ARN at most, never its value.
+		return "", kerrors.Wrap(err, kerrors.CodeUnexpected, "reading the secret at %s", arn)
+	}
+	if out.SecretString == nil || *out.SecretString == "" {
+		return "", kerrors.Validation("the secret at %s has no string value", arn)
+	}
+	return *out.SecretString, nil
 }

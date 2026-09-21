@@ -284,7 +284,8 @@ var databaseBindingSchema = resource.NewSchema("aws database binding", map[strin
 	"properties": map[string]any{
 		"binding":      map[string]any{"type": "string"},
 		"driver":       map[string]any{"type": "string", "enum": []any{DriverDynamoDB, DriverPostgres}},
-		"engine":       map[string]any{"type": "string", "enum": []any{engineDSQL}},
+		"engine":       map[string]any{"type": "string", "enum": []any{engineDSQL, engineAurora}},
+		"network":      map[string]any{"type": "string"},
 		"partitionKey": dynamoKeySchema,
 		"sortKey":      dynamoKeySchema,
 	},
