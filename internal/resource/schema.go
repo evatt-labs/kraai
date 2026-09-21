@@ -15,73 +15,46 @@ import (
 )
 
 // messagePrinter formats a jsonschema ErrorKind's LocalizedString. English
-// only — kraai has no localization story anywhere else in the tree, and
-// this exists only to satisfy the library's signature, not to add one.
+// only; it exists to satisfy the library's signature, not to localize.
 var messagePrinter = message.NewPrinter(language.English)
 
 // Schema is a structural JSON Schema (2020-12) that validates one shape of
-// data a manifest can carry for a capability: CapabilityDef.ProviderSettings
-// (a provider's `providers.<name>.settings` map) or CapabilityDef.Binding
-// (one entry of a service's `<name>[]` bindings).
+// data a manifest can carry for a capability: a provider's settings map
+// (CapabilityDef.ProviderSettings) or one binding entry
+// (CapabilityDef.Binding).
 //
-// JSON Schema rather than OpenAPI: OpenAPI 3.1 schemas are JSON Schema
-// 2020-12, so nothing is lost expressively, and kraai already consumes JSON
-// Schema elsewhere (the CloudFormation resource provider schemas fetched
-// for primaryIdentifier and createOnlyProperties).
-//
-// A provider package builds a Schema as Go data (map[string]any), not an
-// embedded .json file, so it lives next to the code whose settings it
-// describes and is covered by gofmt/go vet like everything else.
-//
-// Compilation and structural-schema validation happen at most once per
-// Schema value, memoized behind ensureCompiled's sync.Once — a provider
-// package builds each Schema as a package-level var, so "once" means once
-// per process, not once per manifest entry.
+// A provider package builds a Schema as Go data next to the code it
+// describes. It is compiled and structurally checked once per Schema value,
+// on first use or when a Catalog is built, whichever comes first.
 type Schema struct {
-	// label names what this schema validates, for its error messages —
-	// "aws compute settings", "neon database settings". Matches the prefix
-	// the retired internal/provider/aws/settings_validate.go used
-	// ("aws provider settings: ..."), generalized to any provider and
-	// capability rather than hand-written per package.
+	// label names what this schema validates in its error messages: "aws
+	// compute settings", "neon database settings".
 	label string
 	doc   map[string]any
 
 	once       sync.Once
 	compileErr error
 	compiled   *jsonschema.Schema
-	// properties are this schema's top-level property names, sorted —
-	// computed once alongside compiled, and reused by Validate for both the
-	// "recognized keys" list and the "did you mean" suggestion.
+	// properties are this schema's top-level property names, sorted, for
+	// the "recognized keys" list and the "did you mean" suggestion.
 	properties []string
 }
 
 // NewSchema wraps doc, a JSON Schema document expressed as Go data, as a
 // Schema labelled label for its error messages.
 //
-// doc is not compiled, and not checked for structural-schema validity,
-// until the first call to Validate or until a caller building a Catalog
-// (NewCatalog) forces it — see ensureCompiled's own doc comment for why
-// compilation is deferred rather than eager here specifically, and
-// Catalog.add for where "at registration" actually happens for a schema
-// reached through a CapabilityDef.
-//
-// doc must not be mutated after it is passed to NewSchema: Schema reads it
-// lazily, on first use, not at construction.
+// doc is read lazily, on first use, so it must not be mutated after this
+// call. It is not compiled or checked here; see ensureCompiled.
 func NewSchema(label string, doc map[string]any) *Schema {
 	return &Schema{label: label, doc: doc}
 }
 
-// ensureCompiled compiles and structurally validates s, memoizing the
-// result behind sync.Once so repeated calls (from Validate, and from every
-// Catalog.add that shares this Schema across capabilities) do the work
-// exactly once.
+// ensureCompiled compiles and structurally validates s exactly once.
 //
 // NewSchema returns no error, matching CapabilityDef's own no-error
-// construction. A compile failure is a bug in the provider package that
-// wrote the schema, not a runtime condition, so Catalog.add forces
-// compilation at the same point it already catches a duplicate capability
-// name or an empty Name — registration time, not first use — rather than
-// introducing a second, panic-based failure mode for schemas alone.
+// construction, so a compile failure surfaces here instead. Catalog.add
+// forces it at catalog construction, which makes a bad schema a registration
+// error rather than a failure on the first manifest that exercises it.
 func (s *Schema) ensureCompiled() error {
 	s.once.Do(func() {
 		s.compileErr = s.compileNow()
@@ -89,10 +62,9 @@ func (s *Schema) ensureCompiled() error {
 	return s.compileErr
 }
 
-// schemaResourceID is the URL AddResource registers doc under before
-// compiling it. Never dereferenced over the network — every Schema builds
-// its own jsonschema.Compiler, so this only has to be unique within that
-// one compiler instance, not globally.
+// schemaResourceID is the URL AddResource registers doc under. Never
+// dereferenced; every Schema builds its own compiler, so it only has to be
+// unique within one.
 const schemaResourceID = "mem://kraai/schema"
 
 func (s *Schema) compileNow() error {
@@ -115,12 +87,11 @@ func (s *Schema) compileNow() error {
 }
 
 // Validate reports whether data satisfies s, returning nil when it does.
+// Every error it returns names s.label.
 //
-// A nil data is treated as an empty object rather than JSON null: a
-// manifest entry that declares no settings at all (Spec.Config["settings"]
-// absent) is "nothing was said," not "null was said," and a schema with no
-// required properties must accept that the same way an empty YAML mapping
-// would.
+// nil data is an empty object, not JSON null: a manifest entry that declares
+// no settings said nothing, and a schema with no required properties must
+// accept that as it would an empty YAML mapping.
 func (s *Schema) Validate(data map[string]any) error {
 	if err := s.ensureCompiled(); err != nil {
 		return err
@@ -136,19 +107,13 @@ func (s *Schema) Validate(data map[string]any) error {
 
 	var verr *jsonschema.ValidationError
 	if !errors.As(err, &verr) {
-		// Not expected from this library's Validate, but handled rather
-		// than assumed away: a caller still gets a real error naming this
-		// schema, not a silently swallowed one.
+		// Not expected from this library's Validate, but the caller still
+		// gets an error naming this schema rather than a swallowed one.
 		return kerrors.Wrap(err, kerrors.CodeValidation, "%s", s.label)
 	}
 
-	// The unrecognized-key case gets the hand-crafted message this
-	// mechanism exists to generalize — see unrecognizedKeyError's own doc
-	// comment. Every other failure (wrong type, missing required, an enum
-	// value not in the allowed set) falls through to the library's own
-	// tree-formatted LocalizedError, still labelled, so it is never left
-	// unexplained — Validate never returns an error that does not name
-	// s.label.
+	// Unrecognized keys get the suggestion-bearing message; every other
+	// failure gets the library's own leaf messages, flattened.
 	if unknown := rootUnrecognizedKeys(verr); len(unknown) > 0 {
 		return s.unrecognizedKeyError(unknown)
 	}
@@ -156,18 +121,12 @@ func (s *Schema) Validate(data map[string]any) error {
 }
 
 // formatValidationFailures flattens verr's Causes tree into one
-// semicolon-joined line, one entry per leaf failure ("<path>: <message>",
-// "root" for the document itself) — a smaller, purpose-built alternative
-// to jsonschema.ValidationError's own Error(), which prefixes every
-// message with a "jsonschema validation failed with '<schema URL>'"
-// preamble that means nothing to a manifest author and duplicates the
-// label this function's caller already attaches.
+// semicolon-joined line of "<path>: <message>" leaf failures, "root" for the
+// document itself. The library's own Error() prefixes every message with a
+// schema URL preamble that means nothing to a manifest author.
 //
-// kind.Group and kind.Schema are jsonschema/v6's own wrapper kinds — a
-// Group has no message of its own, only Causes, and a Schema kind marks
-// "this whole sub-schema failed" one level above the specific keyword
-// that actually did; both are skipped so only the leaf, keyword-specific
-// failures a manifest author can act on are reported.
+// kind.Group and kind.Schema are wrapper kinds with no message of their own,
+// so only the keyword-specific failures an author can act on are reported.
 func formatValidationFailures(verr *jsonschema.ValidationError) string {
 	seen := map[string]bool{}
 	var lines []string
@@ -189,18 +148,16 @@ func formatValidationFailures(verr *jsonschema.ValidationError) string {
 	})
 	sort.Strings(lines)
 	if len(lines) == 0 {
-		// Defensive: every ValidationError this package has seen carries at
-		// least one non-Group, non-Schema cause. Falling back to the
-		// library's own formatting rather than an empty string keeps this
-		// unreachable-in-practice branch from ever hiding a real failure.
+		// Every ValidationError seen so far carries at least one leaf
+		// cause; fall back to the library's formatting rather than hide a
+		// failure behind an empty string.
 		return strings.TrimSpace(verr.Error())
 	}
 	return strings.Join(lines, "; ")
 }
 
 // walkValidationErrors calls visit for verr and, recursively, for every
-// entry in its Causes tree — the shape jsonschema/v6 builds one failed
-// Validate call into (see that package's ValidationError.Causes).
+// entry in its Causes tree.
 func walkValidationErrors(verr *jsonschema.ValidationError, visit func(*jsonschema.ValidationError)) {
 	visit(verr)
 	for _, cause := range verr.Causes {
@@ -209,18 +166,12 @@ func walkValidationErrors(verr *jsonschema.ValidationError, visit func(*jsonsche
 }
 
 // rootUnrecognizedKeys collects every property name an additionalProperties
-// violation reported at the root of the validated document — data's own
-// top-level keys, not a nested object's.
+// violation reported at the root of the validated document.
 //
-// Scoped to the root deliberately: every schema this workstream writes is a
-// flat property bag (a provider's settings block, or one binding entry),
-// so additionalProperties: false only ever appears at the top level, and
-// this package's own structural-schema check does not require otherwise.
-// A nested additionalProperties violation — were a future schema to add
-// one — still fails Validate, just through the generic LocalizedError path
-// below rather than this suggestion-bearing one, since a useful "did you
-// mean" needs the violating node's own property list, not the root
-// schema's.
+// Root only: every schema here is a flat property bag, so that is the only
+// place additionalProperties: false appears, and a useful "did you mean"
+// needs the violating node's own property list. A nested violation still
+// fails Validate, through the generic path.
 func rootUnrecognizedKeys(verr *jsonschema.ValidationError) []string {
 	var unknown []string
 	walkValidationErrors(verr, func(n *jsonschema.ValidationError) {
@@ -234,17 +185,13 @@ func rootUnrecognizedKeys(verr *jsonschema.ValidationError) []string {
 	return unknown
 }
 
-// unrecognizedKeyError builds the generic form of the message
-// settings_validate.go used to hand-write per provider:
+// unrecognizedKeyError names each unknown key, with the closest recognized
+// key as a suggestion where one is near enough, and lists every recognized
+// key:
 //
 //	aws provider settings: unrecognized key(s): reservedConcurency
 //	  (did you mean reservedConcurrency?) — recognized keys: architecture,
 //	  env, envSecrets, functionUrlAuthType, httpFrontDoor, layerArn, ...
-//
-// Generic here because it reads s.properties — this schema's own top-level
-// property names, computed once in compileNow from the same doc a provider
-// wrote for any capability of any provider — rather than a hand-assembled
-// union of key lists specific to one vendor's settings decoders.
 func (s *Schema) unrecognizedKeyError(unknown []string) error {
 	msgs := make([]string, len(unknown))
 	for i, key := range unknown {
@@ -263,18 +210,16 @@ func (s *Schema) unrecognizedKeyError(unknown []string) error {
 		s.label, strings.Join(msgs, ", "), recognized)
 }
 
-// hasProperty reports whether name is one of s's top-level properties.
-// Read from the document rather than the compiled schema so it can answer
-// before compilation, which is when Catalog.add asks.
+// hasProperty reports whether name is one of s's top-level properties. Read
+// from the document rather than the compiled schema so it can answer before
+// compilation, which is when Catalog.add asks.
 func (s *Schema) hasProperty(name string) bool {
 	props, _ := s.doc["properties"].(map[string]any)
 	_, ok := props[name]
 	return ok
 }
 
-// topLevelProperties returns doc's top-level "properties" key names,
-// sorted — deterministic across map iteration order, exactly as the
-// retired validateKnownSettings sorted allKnown before formatting it.
+// topLevelProperties returns doc's top-level "properties" key names, sorted.
 func topLevelProperties(doc map[string]any) []string {
 	props, _ := doc["properties"].(map[string]any)
 	names := make([]string, 0, len(props))
@@ -286,14 +231,8 @@ func topLevelProperties(doc map[string]any) []string {
 }
 
 // closestKey returns the entry in candidates within Levenshtein distance 2
-// of key, preferring the nearest; empty when nothing is close enough to be
-// a plausible typo suggestion rather than noise for a key that is simply
-// not supported at all.
-//
-// Moved here from internal/provider/aws/settings_validate.go verbatim
-// (algorithm unchanged) — this is the generalization the proposal names:
-// "the suggestion should now come for free everywhere," not a second,
-// per-provider copy.
+// of key, preferring the nearest; empty when nothing is close enough to be a
+// plausible typo rather than noise for a key that is simply unsupported.
 func closestKey(key string, candidates []string) string {
 	const maxSuggestDistance = 2
 	best := ""
@@ -311,11 +250,8 @@ func closestKey(key string, candidates []string) string {
 	return best
 }
 
-// levenshtein returns the edit distance between a and b (single-character
-// insert/delete/substitute), via the standard O(len(a)*len(b)) dynamic
-// program. Hand-rolled rather than a dependency, same reasoning as the
-// function this was copied from: it is the entire algorithm, used for one
-// purpose, and not worth a third-party import for.
+// levenshtein returns the edit distance between a and b. Hand-rolled: it is
+// the entire algorithm, used for one purpose.
 func levenshtein(a, b string) int {
 	ra, rb := []rune(a), []rune(b)
 	prev := make([]int, len(rb)+1)
@@ -347,22 +283,15 @@ func levenshtein(a, b string) int {
 	return prev[len(rb)]
 }
 
-// validateStructural enforces kraai's structural-schema constraint — every
-// schema node states its own "type", and the root schema declares neither
-// "oneOf" nor "anyOf" — a narrower subset of Kubernetes' own
-// structural-schema rule.
+// validateStructural enforces kraai's structural-schema rule, a narrower
+// subset of Kubernetes': every node states its own "type", and the root
+// declares neither "oneOf" nor "anyOf". A typed node can never validate a
+// value of ambiguous shape, and a root with one way to be valid is what makes
+// a single, deterministic "recognized keys" list possible. Nested
+// combinators are not rejected; nothing uses one.
 //
-// Every node typed means a schema can never validate a value whose shape
-// is ambiguous. No root oneOf/anyOf means the root document has exactly
-// one way to be valid, which is what makes a single, deterministic
-// "recognized keys" list — and therefore the unrecognized-key suggestion —
-// possible at all. Nested oneOf/anyOf are not rejected: no schema here
-// uses one, and rejecting a combinator nothing uses would be speculative
-// scope.
-//
-// Enforced here rather than by the jsonschema/v6 compiler itself: the
-// compiler accepts any valid JSON Schema, and structural is kraai's own,
-// stricter contract on top of that.
+// Enforced here because the jsonschema compiler accepts any valid JSON
+// Schema, and structural is kraai's stricter contract on top.
 func validateStructural(doc map[string]any) error {
 	if err := validateStructuralNode(doc, ""); err != nil {
 		return err
@@ -377,11 +306,9 @@ func validateStructural(doc map[string]any) error {
 	return nil
 }
 
-// validateStructuralNode requires node to declare "type", then recurses
-// into every nested schema node reachable from it: each entry of
-// "properties", "items" (an array's element schema), and
-// "additionalProperties" when it is itself a schema rather than a bare
-// true/false.
+// validateStructuralNode requires node to declare "type", then recurses into
+// every nested schema: each "properties" entry, "items", and
+// "additionalProperties" when it is a schema rather than a bare boolean.
 func validateStructuralNode(node map[string]any, path string) error {
 	if _, ok := node["type"]; !ok {
 		label := "the schema"

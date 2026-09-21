@@ -7,31 +7,27 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// Outputs carries what one phase produced into the next — a Hyperdrive
-// configuration needs the connection details of the database branch
-// provisioned before it; a Worker deploy needs the identifier of every
-// resource it binds to.
+// Outputs carries what one wave produced into the next: the connection
+// details of a database branch for the Hyperdrive configuration fronting it,
+// the identifier of every resource a Worker binds to.
 //
 // Attributes hold what is safe to keep: identifiers, names, hosts. A
-// credential is registered as a Secret instead — a function the consumer
-// calls at the moment it needs the value — so the credential exists only
-// inside the call that uses it. Nothing that is logged, serialised, or
-// included in an error has ever held one, because the struct never did.
+// credential is registered as a Secret instead, a function called at the
+// moment of use, so nothing logged, serialised or included in an error has
+// ever held one.
 //
-// Safe for concurrent use: within a phase, resources run in parallel and
-// all write here.
+// Safe for concurrent use: within a wave, resources run in parallel and all
+// write here.
 type Outputs struct {
 	mu      sync.RWMutex
 	states  map[string]*State
 	secrets map[string]Secret
 }
 
-// Secret produces a credential on demand.
-//
-// A function rather than a string so the value is not sitting in memory
-// between the phase that produced it and the one that needs it, and so it
-// cannot be picked up by anything walking the struct — a debug print, a JSON
-// encode, a panic dump.
+// Secret produces a credential on demand. A function rather than a string so
+// the value is not in memory between the wave that produced it and the one
+// that needs it, and cannot be picked up by anything walking the struct: a
+// debug print, a JSON encode, a panic dump.
 type Secret func(ctx context.Context) (string, error)
 
 // NewOutputs builds an empty Outputs.
@@ -79,19 +75,16 @@ func (o *Outputs) PutSecret(ref Ref, name string, secret Secret) {
 	o.secrets[outputKey(ref)+"#"+name] = secret
 }
 
-// Secret resolves a registered credential, calling its producer.
-//
-// The value is returned to the caller and kept nowhere else. Calling twice
-// calls the producer twice, deliberately: caching it here would put the
-// credential back in the struct this design exists to keep it out of.
+// Secret resolves a registered credential by calling its producer. Calling
+// twice calls the producer twice: caching would put the credential back in
+// the struct this design keeps it out of.
 func (o *Outputs) Secret(ctx context.Context, ref Ref, name string) (string, error) {
 	o.mu.RLock()
 	secret, ok := o.secrets[outputKey(ref)+"#"+name]
 	o.mu.RUnlock()
 
 	if !ok {
-		// Names the resource and the secret, never a value — there is no
-		// value here to leak, which is the point.
+		// Names the resource and the secret, never a value.
 		return "", kerrors.Validation("no %q credential was produced for %s", name, outputKey(ref))
 	}
 	return secret(ctx)

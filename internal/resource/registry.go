@@ -10,164 +10,71 @@ import (
 )
 
 // Registration is one resource type's entry in the registry.
+//
+// What the planner needs to know about a type is plain data here rather than
+// a method on Resource. The telemetry decorator wraps every Resource at
+// registration and has silently dropped optional interfaces before; it cannot
+// drop what it never wraps.
 type Registration struct {
 	// Provider and Type form the registry key: whose API this calls.
 	Provider string
 	Type     string
 	// Vendor is the manifest `vendor:` value that selects this registration.
-	// Empty means Provider, which is the common case.
-	//
-	// The two differ when fulfilling a capability takes resources from more
-	// than one API: choosing Neon for Postgres also requires a Cloudflare
-	// Hyperdrive configuration in front of it, whose Provider is
-	// "cloudflare" (that is whose API creates it) but whose Vendor is
-	// "neon" (choosing Neon is what asks for it).
+	// Empty means Provider. They differ when one vendor choice takes resources
+	// from more than one API: choosing Neon for Postgres also asks for a
+	// Cloudflare Hyperdrive configuration, whose Provider is "cloudflare" and
+	// whose Vendor is "neon".
 	Vendor string
 	// VendorType is the vendor's own name for what Type drives, when the two
-	// differ. Empty means they are the same, which is the common case.
-	//
-	// They differ when one vendor type plays more than one role. A provider
-	// may register a type only once under a given key, so a second role needs
-	// a second key — and the role is kraai's distinction, not the vendor's:
-	// AWS has one AWS::Lambda::Permission, while kraai has one per thing
-	// being authorized, each with its own dependencies and its own
-	// conditions. Type carries the role, VendorType carries what the vendor
-	// will actually be asked for.
-	//
-	// Declared rather than inferred. This divergence was expressed three
-	// separate times, in three files, by inventing a "::Role" suffix and
-	// explaining the convention from scratch each time, with the real type
-	// reachable only from inside the provider's own resource implementation —
-	// so nothing could check the two agreed, and a plan could not tell an
-	// operator which object to look for in a vendor console. RoleType builds
-	// the key, validate checks it, and internal/plan carries both through to
-	// its output.
+	// differ. Empty means they are the same. A vendor type that plays more
+	// than one role in kraai registers once per role, under a key RoleType
+	// builds, and this field carries what the vendor is actually asked for.
 	VendorType string
-	// Capability is what this type fulfils in a manifest — "postgres",
-	// "keyvalue", "objects", "queues", "compute". It is how a manifest entry
-	// that names no vendor reaches a vendor's implementation.
+	// Capability is what this type fulfils in a manifest: "postgres",
+	// "keyvalue", "objects", "queues", "compute".
 	Capability string
-	// DependsOn names other registrations, by Key() ("provider/type"), that
-	// an instance of this type needs to exist before it can be created.
-	// Resolved by internal/plan to a concrete instance within the same
-	// (service, binding) expansion group, never a whole-manifest type
-	// match. Replaces an earlier fixed-phase ordering model that ran out
-	// against
-	// a real deployment: two registrations sharing one phase had no
-	// ordering guarantee between them, which took a fresh `kraai apply`
-	// three runs to converge.
+	// DependsOn names registrations, by Key(), that an instance of this type
+	// needs to exist before it can be created. The planner resolves each to a
+	// concrete instance within the same (service, binding) expansion, never
+	// to every instance of that type in the manifest. A dependency whose own
+	// conditions filtered it out contributes no edge.
 	//
-	// A registration whose named dependency was itself filtered out by
-	// its own conditions contributes no edge for it: there is no node
-	// to point at, and that is correct — a Lambda::Permission gated to the
-	// API Gateway front door is only ever planned alongside the API
-	// Gateway registration it names, so the dependency always resolves
-	// when the dependent registration itself applies.
-	//
-	// Plain registration data rather than a Resource interface method:
-	// internal/resource/otel.go's decorator wraps every Resource at
-	// registration time and has already silently dropped three optional
-	// interfaces this way (see otel.go's HAZARD comment) — DependsOn can't
-	// fall into that trap because the decorator never wraps it.
-	//
-	// Distinct from manifest.Service's own `depends_on`, the narrower
-	// escape hatch for a real service-to-service ordering need no
-	// registration can see, since the registry has no way to infer it from
-	// types alone.
+	// Distinct from a service's manifest `depends_on`, which orders whole
+	// services for reasons no registration can see.
 	DependsOn []string
 	// Lookup is how instances are found.
 	Lookup LookupStrategy
 	// NameFrom is where an instance's derived name comes from. The zero
-	// value, NameFromBinding, is the common case: one instance per binding,
-	// named by the environment, service and binding.
-	//
-	// NameFromRoute is for a type whose identity in the vendor's own API is
-	// a hostname — an API Gateway domain name is addressed by the domain
-	// string itself, and no name kraai could derive from a service would find
-	// it. The planner emits one instance per custom-domain route, named by
-	// the route's pattern. A naming strategy on the registration rather than
-	// a type name the planner knows about, so internal/plan stays ignorant of
-	// which vendor types are hostname-shaped.
-	//
-	// NameFromEntry is the same idea for a binding: the instance's identity
-	// is a value the manifest entry supplies under NameKey — a hosted zone is
-	// "acme.example", not anything derived from an environment and a binding
-	// — and the lookup that finds it again compares against that value.
+	// value, NameFromBinding, is the common case.
 	NameFrom NameStrategy
-	// NameKey is, for NameFromEntry, the binding-entry key whose string
-	// value is the instance's name — "zone" for a hosted zone. Empty for
-	// every other strategy; validation rejects the two disagreeing.
+	// NameKey is, for NameFromEntry, the binding-entry key whose string value
+	// is the instance's name ("zone" for a hosted zone). Empty for every
+	// other strategy.
 	NameKey string
 	// Reads is which of its service's bindings an instance reads credentials
-	// and identifiers from. The zero value, ReadsOwnBinding, is the common
-	// case: a type reaches only what its own binding's resources publish.
-	//
-	// The planner turns this into plan.Item.ReadsBindings, and a declared
-	// read is an ordering edge (#119): an instance runs strictly after every
-	// producer in each binding it reads. So the scope is a latency claim as
-	// much as a data one — a type declared to read the whole service waits
-	// on every binding the service has, whether or not it touches them.
-	// Before this field every compute type was given the whole service, and
-	// an artifact bucket waited on a Postgres branch it had nothing to do
-	// with (#208).
-	//
-	// Registration data rather than a Resource interface method, for the
-	// same reason DependsOn is: the telemetry decorator cannot drop what it
-	// never wraps.
+	// and attributes from. A declared read is also an ordering edge: the
+	// instance runs after every producer in each binding it reads, so a
+	// wider scope costs waves whether or not the values are used.
 	Reads ReadScope
-	// ReadsReferences names what this type reads through its binding
-	// entry's references (CapabilityDef.References): for each, the entry
-	// key and the registration key of the type it reads from in the
-	// referenced binding — a certificate reads {zone,
-	// aws/AWS::Route53::HostedZone}, a record set {alias,
-	// aws/AWS::CloudFront::Distribution}. Each becomes a read edge from
-	// exactly that producer to this type's instances, and nothing else.
+	// ReadsReferences names what this type reads through its binding entry's
+	// references (CapabilityDef.References): the entry key, and the
+	// registration key of the type read from the referenced binding. Each is
+	// one read edge from exactly that producer. A type that declares nothing
+	// here reads none of its entry's references.
 	//
-	// Both halves are narrow on purpose. A binding's types do not all read
-	// what its entry names — a hosted zone reads nothing, the record set
-	// beside it reads the alias — and a referenced binding's types are not
-	// all what the reader needs: the certificate needs the zone, not the
-	// record set beside the zone that points at the distribution that
-	// presents the certificate. Ordering whole bindings behind whole
-	// bindings made that static site a cycle. A type that declares nothing
-	// here reads none of its entry's references; a reference nothing reads
-	// is validated by the loader and orders nothing.
+	// Narrow on both halves on purpose: ordering whole bindings behind whole
+	// bindings made a static site (zone, certificate, distribution, record
+	// set) a cycle.
 	ReadsReferences []ReferenceRead
 	// Applies restricts this registration to the manifests and services it
-	// is meaningful for. Empty means it always applies, which is the common
-	// case; several entries are ANDed.
-	//
-	// One field rather than the three predicates this replaced
-	// (When/Triggers/SelectedBy), because they were three shapes answering
-	// one question, implicitly ANDed across unrelated fields, each checked
-	// somewhere different. A fourth condition is now a constructor rather
-	// than a fourth field on the struct every provider sees, and conditions
-	// compose with And/Or/Not instead of only ever ANDing.
-	//
-	// Every entry is evaluated at one point, in Resolve, against a context
-	// carrying everything any condition can ask about. See
-	// ApplicabilityContext for why a per-service field is answerable there
-	// at all, and why a condition on one is satisfied rather than skipped
-	// when the caller has nothing to say.
+	// is meaningful for. Empty always applies; several entries are ANDed.
+	// Every entry is evaluated at one point, in Resolve.
 	Applies []Applicability
-	// Scope, if set, names the serialization domain this registration's
-	// mutating calls (Create, Update, Delete) must not overlap within.
-	// Derived from a Spec rather than fixed per registration, so two
-	// instances of the same type that scope to different values — a Neon
-	// branch in one project versus another — still run concurrently; only
-	// two operations resolving to the same string are serialized against
-	// each other, by ScopeLocker. Nil means unscoped, the common case:
-	// most provider APIs rate-limit by request count rather than
-	// serializing by scope: Neon returns 423 on concurrent branch creates in
-	// one project, which no amount of concurrency-limit tuning fixes because
-	// the constraint isn't scoped per-count at all.
-	//
-	// A Spec-derived function rather than a fixed field because the scoped
-	// value (a Neon project, say) comes from the manifest, known only once
-	// a Spec exists — the registration itself is built before any manifest
-	// is read. Registration data rather than a Resource interface method
-	// for the same decorator-dropping-interfaces reason DependsOn's own
-	// doc comment gives.
+	// Scope, if set, derives from a Spec the serialization domain within
+	// which this type's mutating calls must not overlap; ScopeLocker enforces
+	// it. Nil means unscoped. A function of the Spec rather than a fixed
+	// value so two instances scoped to different values, Neon branches in
+	// two projects, still run concurrently.
 	Scope func(spec Spec) string
 	// Resource implements the verbs.
 	Resource Resource
@@ -178,14 +85,15 @@ type NameStrategy int
 
 const (
 	// NameFromBinding names one instance per binding by environment, service
-	// and binding — internal/naming.Namer.Resource, or Namer.Service for
-	// compute.
+	// and binding, through internal/naming.
 	NameFromBinding NameStrategy = iota
-	// NameFromRoute names one instance per custom-domain route by the
-	// route's pattern, verbatim.
+	// NameFromRoute names one instance per custom-domain route by the route's
+	// pattern, verbatim: for a type whose identity in the vendor's API is a
+	// hostname.
 	NameFromRoute
 	// NameFromEntry names one instance per binding by the value its manifest
-	// entry carries under Registration.NameKey, verbatim.
+	// entry carries under Registration.NameKey, verbatim: a hosted zone is
+	// "acme.example", not anything derived.
 	NameFromEntry
 )
 
@@ -221,17 +129,16 @@ type ReadScope int
 
 const (
 	// ReadsOwnBinding reads what the instance's own binding publishes and
-	// nothing else — the zero value, and what every type that never names a
-	// sibling binding should leave in place.
+	// nothing else. The zero value.
 	ReadsOwnBinding ReadScope = iota
-	// ReadsServiceBindings reads every binding the service declares. For a
-	// type whose reads are decided by the manifest rather than by the type —
-	// a function whose envSecrets may name any binding's credential — this
-	// is the only honest scope, and it is the one that costs a wave.
+	// ReadsServiceBindings reads every binding the service declares: the
+	// only honest scope for a type whose reads the manifest decides, such as
+	// a function whose envSecrets may name any binding's credential. It costs
+	// a wave.
 	ReadsServiceBindings
-	// ReadsRouteBindings reads the bindings the instance's own route names:
-	// today, the tls binding whose certificate it presents. Only meaningful
-	// with NameFromRoute, since only a route-named instance has a route.
+	// ReadsRouteBindings reads the bindings the instance's own route names,
+	// today the tls binding whose certificate it presents. Only meaningful
+	// with NameFromRoute.
 	ReadsRouteBindings
 )
 
@@ -254,11 +161,10 @@ func (s ReadScope) Valid() bool {
 	return s == ReadsOwnBinding || s == ReadsServiceBindings || s == ReadsRouteBindings
 }
 
-// ScopeFor returns the serialization scope spec resolves to under this
-// registration's Scope function, or "" when the registration is unscoped
-// (Scope == nil) — "" is reserved to mean "no scope" throughout this
-// package and ScopeLocker, so a Scope function must never itself return
-// "" for a real scope it wants enforced.
+// ScopeFor returns the serialization scope spec resolves to, or "" when the
+// registration is unscoped. "" means "no scope" throughout this package and
+// ScopeLocker, so a Scope function must never return it for a scope it wants
+// enforced.
 func (r Registration) ScopeFor(spec Spec) string {
 	if r.Scope == nil {
 		return ""
@@ -267,47 +173,26 @@ func (r Registration) ScopeFor(spec Spec) string {
 }
 
 // ApplicabilityContext is everything a condition may ask about: the
-// manifest's vendor choices, and the one service the registrations are being
-// resolved for.
+// manifest's vendor choices and, when the caller has one, the service the
+// registrations are being resolved for.
 //
-// A struct rather than a parameter list because the three conditions this
-// replaced each took a different argument, which is what forced them to be
-// checked in three places. One context means one evaluation point.
-//
-// Trigger and Settings describe a service's compute block, which not every
-// caller has: a `queues:` binding is resolved for a service whose trigger is
-// nobody's business, and a service may declare no compute block at all. Both
-// are zero-valued rather than absent in those cases.
-//
-// What a condition makes of a zero value is the condition's own business,
-// and the two that read these do not agree — deliberately. RequiresTrigger
-// treats an absent trigger as satisfied, which is what lets a binding be
-// resolved at the same evaluation point as compute without a trigger
-// condition ever narrowing it. RequiresSettings does not, because two
-// registrations conditioned on the same setting are how a manifest picks
-// exactly one of them, and waving that through would let both apply at once.
-// See each one's own doc comment.
+// Trigger, Settings, CustomDomain and Binding are zero-valued when the caller
+// has no service or no entry, and each condition decides what a zero value
+// means. RequiresTrigger treats an absent trigger as satisfied; the others do
+// not. See each one for why.
 type ApplicabilityContext struct {
 	// Vendors maps each configured capability to the vendor fulfilling it.
-	//
-	// Keyed by capability rather than carrying the whole manifest so this
-	// package stays independent of internal/manifest, and so a condition is
-	// a pure function of a small map a test can write by hand.
 	Vendors map[string]string
-	// Trigger is what invokes the service being resolved for, "" when it
-	// declares no compute block or when the caller is resolving a binding
-	// rather than compute.
+	// Trigger is what invokes the service, "" when it declares no compute
+	// block or when a binding rather than compute is being resolved.
 	Trigger string
 	// Settings is the service's merged compute settings, nil for a caller
 	// with none.
 	Settings map[string]any
-	// CustomDomain reports whether the service being resolved for has a
-	// route declaring one. False for a caller with no service, and for a
-	// service whose routes are all default-hostname.
+	// CustomDomain reports whether the service has a route declaring one.
 	CustomDomain bool
-	// Binding is the manifest entry being resolved for, without its name —
-	// what the entry said beyond which binding it is. Nil for a caller
-	// resolving compute, which has no entry.
+	// Binding is the manifest entry being resolved for, without its name.
+	// Nil when resolving compute, which has no entry.
 	Binding map[string]any
 }
 
@@ -315,34 +200,23 @@ type ApplicabilityContext struct {
 type Applicability func(ApplicabilityContext) bool
 
 // RequiresCapabilityVendor is satisfied only when capability is fulfilled by
-// vendor.
-//
-// A companion resource can depend on a capability other than its own.
-// Cloudflare Hyperdrive is asked for by choosing Neon for a database, but it
-// is a Workers connection pooler — it belongs only when the compute side is
-// Workers too. Planning one for a Neon database served by an AWS Lambda is
-// not merely redundant: it demands a Cloudflare account that deployment has
-// no reason to hold, to create something nothing will ever connect through.
+// vendor. A companion resource can depend on a capability other than its
+// own: Cloudflare Hyperdrive is asked for by choosing Neon for a database,
+// but it is a Workers connection pooler and belongs only when compute is
+// Workers too.
 func RequiresCapabilityVendor(capability, vendor string) Applicability {
 	return func(ctx ApplicabilityContext) bool { return ctx.Vendors[capability] == vendor }
 }
 
-// RequiresTrigger is satisfied when the service declares one of triggers (a
-// manifest concept — "http", "schedule" — which this package never imports
-// manifest to name, so a caller passes the same string constants
-// internal/manifest exports).
+// RequiresTrigger is satisfied when the service declares one of triggers,
+// the strings internal/manifest exports ("http", "schedule"). A service that
+// declares no trigger satisfies it too, which is what lets a binding be
+// resolved at the same point as compute without a trigger condition ever
+// narrowing it.
 //
-// A service that declares no trigger satisfies this, rather than failing it.
-// That is what keeps a manifest with no per-service compute block planning
-// every registered type, exactly as it did before triggers existed, and what
-// keeps a non-compute binding — resolved with no trigger to speak of —
-// unaffected by a condition that was never about it.
-//
-// Calling it with no triggers narrows to services that declare none, which
-// is what the rule above says and almost certainly not what the caller meant.
-// It is not rejected: this constructor has no error channel, and the registry
-// cannot see inside the closure it returns to find out. A provider's own
-// "capabilities cover registrations" test is where that would be caught.
+// With no triggers it narrows to services that declare none, which is almost
+// certainly not what the caller meant. A provider's own "capabilities cover
+// registrations" test is where that is caught.
 func RequiresTrigger(triggers ...string) Applicability {
 	return func(ctx ApplicabilityContext) bool {
 		if ctx.Trigger == "" {
@@ -358,53 +232,30 @@ func RequiresTrigger(triggers ...string) Applicability {
 }
 
 // RequiresSettings is satisfied when the service's merged compute settings
-// satisfy want — for the case a trigger cannot express: two registrations
-// that both apply to the same trigger, where a manifest must choose exactly
-// one (an AWS Lambda function URL and an API Gateway HTTP API are both valid
-// front doors for an HTTP-triggered service).
+// satisfy want. It is for the choice a trigger cannot express: two
+// registrations that apply to the same trigger, of which a manifest must pick
+// exactly one (a Lambda function URL or an API Gateway HTTP API).
 //
-// want is consulted for every context, including one with nil settings —
-// deliberately unlike RequiresTrigger, which treats an absent trigger as
-// satisfied.
-//
-// The asymmetry is not an oversight. Two registrations conditioned on the
-// same setting are how a manifest picks exactly one of them, so a rule that
-// waved settings conditions through whenever the map was nil would make both
-// of a mutually exclusive pair apply at once — a service with two HTTP front
-// doors, which is the bug this condition exists to prevent, reintroduced by
-// the guard meant to make it safe. Satisfying a *trigger* condition by
-// default cannot do that: it widens what applies without ever making two
-// exclusive registrations apply together.
-//
-// So a settings condition is the one thing a caller with no settings must not
-// write. Nothing does: every registration conditioned on settings is a
-// compute registration, and internal/plan resolves compute with
+// want sees nil settings too, unlike RequiresTrigger's treatment of an absent
+// trigger. Waving a settings condition through on nil would make both of a
+// mutually exclusive pair apply at once, the bug this condition exists to
+// prevent. Nothing calls it without settings: every settings-conditioned
+// registration is compute, and the planner resolves compute with
 // manifest.MergeSettings' output, which is never nil.
 func RequiresSettings(want func(settings map[string]any) bool) Applicability {
 	return func(ctx ApplicabilityContext) bool { return want(ctx.Settings) }
 }
 
 // RequiresCustomDomain is satisfied when the service has a route declaring a
-// custom domain — the resources that exist only to serve one (a provider's
-// domain-name object, the mapping from it to the service's API) apply to no
-// other service.
-//
-// Unlike RequiresTrigger, an absent service does not satisfy this: a custom
-// domain is something a manifest asks for by name, and a caller resolving a
-// binding rather than compute has no route to have asked with. That is the
-// same reasoning as RequiresSettings, for the same reason — "nobody asked"
-// must not read as "everyone gets one".
+// custom domain. An absent service does not satisfy it: a custom domain is
+// asked for by name, and "nobody asked" must not read as "everyone gets one".
 func RequiresCustomDomain() Applicability {
 	return func(ctx ApplicabilityContext) bool { return ctx.CustomDomain }
 }
 
 // RequiresBindingKey is satisfied when the binding entry being resolved for
-// carries key — a record set that exists only to point a zone at something
-// applies only to a dns entry that names the something.
-//
-// Like RequiresCustomDomain, an absent entry does not satisfy this: the
-// key is something a manifest writes, and a caller with no entry wrote
-// nothing.
+// carries key. An absent entry does not satisfy it, for the same reason as
+// RequiresCustomDomain.
 func RequiresBindingKey(key string) Applicability {
 	return func(ctx ApplicabilityContext) bool {
 		_, ok := ctx.Binding[key]
@@ -412,9 +263,8 @@ func RequiresBindingKey(key string) Applicability {
 	}
 }
 
-// And is satisfied when every one of conditions is. Listing conditions in
-// Registration.Applies already ANDs them; this is for nesting one inside Or
-// or Not, where the implicit AND is out of reach.
+// And is satisfied when every one of conditions is. Registration.Applies
+// already ANDs its entries; this is for nesting inside Or or Not.
 func And(conditions ...Applicability) Applicability {
 	return func(ctx ApplicabilityContext) bool {
 		for _, c := range conditions {
@@ -427,7 +277,7 @@ func And(conditions ...Applicability) Applicability {
 }
 
 // Or is satisfied when any one of conditions is. No conditions is not
-// satisfied, which is Or's identity and the opposite of And's.
+// satisfied.
 func Or(conditions ...Applicability) Applicability {
 	return func(ctx ApplicabilityContext) bool {
 		for _, c := range conditions {
@@ -445,7 +295,7 @@ func Not(condition Applicability) Applicability {
 }
 
 // Matches reports whether every one of this registration's conditions holds
-// in ctx. No conditions always matches, the common case.
+// in ctx. No conditions always matches.
 func (r Registration) Matches(ctx ApplicabilityContext) bool {
 	for _, c := range r.Applies {
 		if !c(ctx) {
@@ -458,29 +308,21 @@ func (r Registration) Matches(ctx ApplicabilityContext) bool {
 // Key is the registry key, "provider/type".
 func (r Registration) Key() string { return r.Provider + "/" + r.Type }
 
-// roleSeparator joins a vendor type to the role a registration gives it.
-// "::" because every type this convention has been used for so far is a
-// CloudFormation type name, which already reads in "::"-separated segments,
-// so a role reads as one more segment rather than as a foreign marker.
+// roleSeparator joins a vendor type to the role a registration gives it. It
+// is "::" so a role reads as one more segment of a CloudFormation type name.
 const roleSeparator = "::"
 
 // RoleType builds a registry key for one role a vendor type plays:
 // "AWS::Lambda::Permission" plus role "APIGateway" is
-// "AWS::Lambda::Permission::APIGateway".
-//
-// A function rather than each provider concatenating its own, so the shape
-// validate checks is the shape this produces, and a reader who finds one of
-// these keys has somewhere to look up what it means.
+// "AWS::Lambda::Permission::APIGateway". Registration validation checks
+// exactly this shape.
 func RoleType(vendorType, role string) string {
 	return vendorType + roleSeparator + role
 }
 
 // VendorTypeName is the vendor's own name for what this registration drives:
-// VendorType when it declares one, Type otherwise.
-//
-// Every caller that wants to name the vendor's type should use this rather
-// than reading VendorType, so the empty-means-same rule is applied in one
-// place instead of at each use.
+// VendorType when it declares one, Type otherwise. Use it rather than reading
+// VendorType, so the empty-means-same rule lives in one place.
 func (r Registration) VendorTypeName() string {
 	if r.VendorType == "" {
 		return r.Type
@@ -497,21 +339,18 @@ func (r Registration) vendor() string {
 }
 
 // Registry maps provider/type to an implementation, and capability plus
-// vendor to the types that fulfil it.
-//
-// Plugin-provided and compiled-in types register identically, so nothing
-// downstream can tell them apart — and a plugin type is instrumented by the
-// same decorator as a built-in rather than being invisible to telemetry.
+// vendor to the types that fulfil it. Plugin-provided and compiled-in types
+// register identically and are wrapped by the same decorator, so nothing
+// downstream can tell them apart.
 type Registry struct {
 	mu sync.RWMutex
 	// byKey is provider/type -> registration.
 	byKey map[string]Registration
 	// byCapability is capability -> vendor -> registrations, in registration
 	// order. Keyed by vendor rather than provider so one manifest choice
-	// reaches every resource that choice implies — see Registration.Vendor.
+	// reaches every resource it implies.
 	byCapability map[string]map[string][]Registration
-	// decorate wraps every Resource at registration time, so no type can
-	// be added without instrumentation by forgetting a wrapper.
+	// decorate wraps every Resource at registration time.
 	decorate func(Registration) Resource
 }
 
@@ -539,12 +378,9 @@ func NewRegistry(opts ...Option) *Registry {
 
 // Register adds a resource type.
 //
-// Registering the same provider/type twice is an error rather than a silent
-// overwrite. A plugin shadowing a built-in is a real scenario — the plugin
-// runtime supports overriding deliberately — but that has to be an explicit
-// act at the point the registry is assembled, not a side effect of load
-// order, which would make behaviour depend on which plugin happened to be
-// listed first.
+// Registering the same provider/type twice is an error rather than an
+// overwrite. A plugin shadowing a built-in has to be an explicit act where
+// the registry is assembled, not a side effect of load order.
 func (r *Registry) Register(reg Registration) error {
 	if err := validate(reg); err != nil {
 		return err
@@ -622,12 +458,8 @@ func validate(reg Registration) error {
 			"resource registration %q declares VendorType equal to Type — leave it empty, "+
 				"which already means the two are the same", reg.Provider+"/"+reg.Type)
 	case reg.VendorType != "" && !strings.HasPrefix(reg.Type, reg.VendorType+roleSeparator):
-		// The convention the three hand-written "::Role" keys already
-		// followed, now checked. A key that does not extend its vendor type
-		// tells a reader of plan output nothing about how the two relate, and
-		// this is the check that was missing when the convention lived in
-		// three comments instead of one place — see RoleType, which builds
-		// exactly the shape this accepts.
+		// A role key is the vendor type plus a role, the shape RoleType
+		// builds, so plan output can say which vendor object a key means.
 		return kerrors.Validation(
 			"resource registration %q declares VendorType %q, which its Type does not extend — "+
 				"a role key must be %q plus %q and a role (see resource.RoleType)",
@@ -636,9 +468,6 @@ func validate(reg Registration) error {
 	return nil
 }
 
-// dependsOnSelf reports whether reg names its own key in DependsOn — a
-// trivial one-node cycle that internal/plan's graph would otherwise have to
-// detect at plan time, on every plan, for a mistake that is fully knowable
 // incompleteReferenceRead reports whether any ReferenceRead lacks a half.
 func incompleteReferenceRead(reg Registration) bool {
 	for _, r := range reg.ReadsReferences {
@@ -649,7 +478,8 @@ func incompleteReferenceRead(reg Registration) bool {
 	return false
 }
 
-// at registration time.
+// dependsOnSelf reports whether reg names its own key in DependsOn: a
+// one-node cycle, cheaper to reject here than to detect on every plan.
 func dependsOnSelf(reg Registration) bool {
 	key := reg.Key()
 	for _, dep := range reg.DependsOn {
@@ -669,26 +499,15 @@ func (r *Registry) Lookup(key string) (Registration, bool) {
 }
 
 // Resolve returns every registration a vendor choice implies for a
-// capability.
+// capability, in registration order, filtered by each one's Applies against
+// ctx. One (capability, vendor) pair may expand to resources from more than
+// one API: choosing Neon for Postgres yields a Neon branch and the Cloudflare
+// Hyperdrive configuration fronting it.
 //
-// A manifest entry names a capability and kraai.yaml names the vendor that
-// fulfils it. One such pair can expand to more than one resource, and those
-// resources need not come from the same API: choosing Neon for Postgres means
-// a Neon branch and the Cloudflare Hyperdrive configuration fronting it. Both
-// are returned, because both are what that one choice asked for.
-//
-// ctx carries the manifest's vendor choices and, when the caller has one, the
-// service being resolved for. It is the single point every Applicability is
-// evaluated at: a registration can therefore condition on a capability other
-// than its own, on the service's trigger, or on its compute settings, and all
-// three are answered here rather than in three places. See
-// ApplicabilityContext for what a caller with no service fills in.
-//
-// Returned in registration order, which is what makes expansion
-// deterministic; ordering between registrations is no longer this
-// function's concern (see Registration.DependsOn) — a caller that needs an
-// execution order builds a dependency graph from the returned set instead
-// of relying on the order Resolve happens to hand them back in.
+// ctx is the single point every Applicability is evaluated at; see
+// ApplicabilityContext for what a caller with no service fills in. The
+// returned order implies no execution order, which a caller builds from
+// DependsOn.
 func (r *Registry) Resolve(capability string, ctx ApplicabilityContext) ([]Registration, error) {
 	vendor := ctx.Vendors[capability]
 	if vendor == "" {
@@ -713,11 +532,9 @@ func (r *Registry) Resolve(capability string, ctx ApplicabilityContext) ([]Regis
 
 	out := make([]Registration, 0, len(regs))
 	for _, reg := range regs {
-		// A registration whose conditions are unmet is not an error on its
-		// own: the capability is still fulfilled, by fewer resources.
-		// Dropping it silently is correct precisely because the conditions
-		// describe when the resource is meaningful at all. Dropping *every*
-		// one of them is different, and is the error below.
+		// Unmet conditions drop a registration silently: the capability is
+		// still fulfilled, by fewer resources. Dropping every one of them is
+		// the error below.
 		if reg.Matches(ctx) {
 			out = append(out, reg)
 		}
@@ -730,8 +547,7 @@ func (r *Registry) Resolve(capability string, ctx ApplicabilityContext) ([]Regis
 	return out, nil
 }
 
-// All returns every registration, in key order, so a caller iterating the
-// registry gets a stable sequence.
+// All returns every registration, in key order.
 func (r *Registry) All() []Registration {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
