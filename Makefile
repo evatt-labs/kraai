@@ -8,7 +8,7 @@ SHELL := bash
 COVERAGE_FLOOR := 85
 COVERPROFILE := coverage.out
 
-.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples
+.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index
 
 check: build vet test coverage-floor lint fmt-check
 
@@ -63,3 +63,9 @@ plan-examples:
 		echo "==> plan $$name"; \
 		go run ./cmd/kraai plan kraai-example --dir "$${dir%/}"; \
 	done
+
+# Read-only: regenerates the embedded CloudFormation schema index from the
+# public registry. Raw schemas are cached under the user cache directory,
+# so a repeat run makes no DescribeType calls.
+schema-index:
+	go generate ./internal/provider/aws/cfschema
