@@ -1,11 +1,10 @@
 // Package resource is the contract every provisioned thing implements, and
 // the registry that maps a manifest entry to the code that fulfils it.
 //
-// It sits between a vendor-neutral manifest — a service declares
-// capabilities like "database" or "objects", never a specific product —
-// and the provider clients that know what those actually are. Everything
-// above this package reasons about resources; everything below reasons
-// about one cloud's API.
+// It sits between a vendor-neutral manifest, where a service declares
+// capabilities like "database" or "objects" and never a product, and the
+// provider clients that know what those are. Everything above this package
+// reasons about resources; everything below reasons about one cloud's API.
 //
 // Resources implement per-verb methods (Get/Create/Update/Delete) rather
 // than a single Ensure, so a plan can call Get without any mutating method
@@ -21,10 +20,9 @@ import (
 )
 
 // Ref identifies one resource instance without asserting that it exists.
-//
-// Derived, not stored. Name is computed from the environment, service key and
-// binding by internal/naming, so the same manifest always produces the same
-// Ref and no state file is needed to answer "which resource is this".
+// Name is derived from the environment, service and binding by
+// internal/naming, so the same manifest always produces the same Ref and no
+// state file is needed to answer "which resource is this".
 type Ref struct {
 	// Provider is the vendor fulfilling this resource, e.g. "cloudflare".
 	Provider string
@@ -33,8 +31,7 @@ type Ref struct {
 	// Name is the derived resource name.
 	Name string
 	// Import is non-nil for an adopted resource the manifest points at by id
-	// or name rather than one kraai created. Its identity cannot be
-	// derived, so it is carried explicitly.
+	// or name rather than one kraai created; its identity cannot be derived.
 	Import *Import
 }
 
@@ -42,10 +39,8 @@ type Ref struct {
 func (r Ref) Key() string { return r.Provider + "/" + r.Type }
 
 // Import is an explicit reference to a resource kraai did not create.
-//
-// Exactly one of ID or Name is set. A resource that already existed — created
-// by hand, or by something else entirely — has no derivable identity, and the
-// manifest is where that reference belongs rather than a separate state file.
+// Exactly one of ID or Name is set. The manifest is where the reference
+// belongs, rather than a state file.
 type Import struct {
 	ID   string
 	Name string
@@ -53,10 +48,8 @@ type Import struct {
 
 // Spec is the desired state for one resource, taken from the manifest.
 //
-// Config stays opaque here because this package must not know what a D1
-// database or a Neon branch is made of — each Resource decodes its own. The
-// alternative, a union of every provider's fields, would put every vendor's
-// vocabulary in the one package whose purpose is not having one.
+// Config is opaque here: each Resource decodes its own, so this package
+// never carries any vendor's vocabulary.
 type Spec struct {
 	// Binding is the name the service refers to this resource by.
 	Binding string
@@ -64,25 +57,18 @@ type Spec struct {
 	Name string
 	// Config is the type-specific desired state.
 	Config map[string]any
-	// Secrets are credential producers an earlier phase registered for this
+	// Secrets are credential producers an earlier wave registered for this
 	// resource, keyed by name. A function rather than a value, so the
-	// credential exists only inside the call that uses it — see Secret in
-	// outputs.go.
+	// credential exists only inside the call that uses it; see Secret.
 	Secrets map[string]Secret
 	// Attributes are the non-secret values resources in earlier waves
-	// published in their State.Attributes, keyed by the producing
-	// resource's Ref.Key() — the same "provider/type" spelling
-	// Registration.DependsOn uses to name it.
-	//
-	// The channel exists because a provider-assigned identifier cannot be
-	// derived the way a name can: a subnet needs its VPC's VpcId, and
-	// nothing in the manifest knows what AWS will call it. A resource that
-	// needs one declares the dependency, then reads the value back under
-	// the same key it declared.
+	// published in their State.Attributes, keyed by the producing resource's
+	// Ref.Key(), the same spelling DependsOn uses to name it. This is how a
+	// provider-assigned identifier that no name can derive, a VpcId, reaches
+	// the resource that needs it.
 	//
 	// Keys from the spec's own binding are bare; anything from another
-	// binding this action may read is prefixed "<binding>.", matching how
-	// Secrets are namespaced.
+	// binding this action may read is prefixed "<binding>.", as Secrets are.
 	Attributes map[string]map[string]any
 }
 
@@ -100,12 +86,11 @@ func (s Spec) Secret(ctx context.Context, name string) (string, error) {
 // Attribute returns a string value another resource published, where key is
 // that resource's Ref.Key() and name the attribute within it.
 //
-// Both halves fail loudly and separately: a missing key means the dependency
-// did not run, a missing name means it ran but published something else, and
-// the two call for different fixes. A non-string value is also an error —
-// every consumer of this so far wants an identifier, and silently formatting
-// a map or a number into one would produce a request AWS rejects far from
-// here.
+// A missing key means the dependency did not run; a missing name means it
+// ran but published something else. The two call for different fixes, so
+// they fail separately. A non-string value is also an error: every consumer
+// wants an identifier, and formatting a map or a number into one would
+// produce a request the provider rejects far from here.
 func (s Spec) Attribute(key, name string) (string, error) {
 	attrs, ok := s.Attributes[key]
 	if !ok {
@@ -134,12 +119,11 @@ func (s Spec) Attribute(key, name string) (string, error) {
 // State is what the provider actually holds for a resource.
 type State struct {
 	Ref Ref
-	// ID is the provider-assigned identifier, read fresh on every command.
-	// It is never persisted or treated as a source of truth: kraai keeps no
-	// state document, so a resource's existence and identity are always
-	// answered by a live lookup, never by trusting a prior run's value.
+	// ID is the provider-assigned identifier, read fresh on every command
+	// and never persisted: existence and identity are always answered by a
+	// live lookup.
 	ID string
-	// Attributes are the type-specific fields a later phase may need — a
+	// Attributes are the type-specific fields a later wave may need: a
 	// connection host, a bucket name, a namespace id.
 	Attributes map[string]any
 }
@@ -150,8 +134,7 @@ type State struct {
 type Resource interface {
 	// Get returns the resource's current state, or (nil, nil) when it does
 	// not exist. Absence is an answer, not a failure: a retried teardown
-	// must see "not there" as "already deleted, keep going," not as an
-	// error.
+	// must see "not there" as "already deleted, keep going".
 	Get(ctx context.Context, ref Ref) (*State, error)
 
 	// Create provisions the resource described by spec.
@@ -167,7 +150,7 @@ type Resource interface {
 }
 
 // LookupStrategy is how instances of a type are found, declared per type
-// rather than assumed globally: when measured against a real provider, the
+// rather than assumed globally: measured against a real provider, the
 // derivable-name assumption held for only four of nine types.
 type LookupStrategy string
 

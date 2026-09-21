@@ -14,14 +14,9 @@ import (
 // instrumentationName identifies this package's telemetry.
 const instrumentationName = "github.com/evatt-labs/kraai/internal/resource"
 
-// Instrument returns a decorator suitable for WithDecorator, wrapping every
-// verb in a span and a duration histogram.
-//
-// Applied at registration rather than at each call site, so a resource type
-// cannot be added without instrumentation by forgetting a wrapper.
-//
-// Passing nil for either provider uses the globals, which is what a real run
-// does; tests pass an SDK provider with an in-memory exporter.
+// Instrument returns a decorator for WithDecorator that wraps every verb in a
+// span and a duration histogram. Passing nil for either provider uses the
+// globals; tests pass an SDK provider with an in-memory exporter.
 func Instrument(tp trace.TracerProvider, mp metric.MeterProvider) func(Registration) Resource {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
@@ -33,17 +28,15 @@ func Instrument(tp trace.TracerProvider, mp metric.MeterProvider) func(Registrat
 	meter := mp.Meter(instrumentationName)
 
 	// One histogram for every verb of every type, distinguished by
-	// attributes rather than by instrument. A metrics backend can then slice
-	// by provider, type or verb without kraai deciding in advance which of
-	// those someone will want to group by.
+	// attributes, so a backend can slice by provider, type or verb.
 	duration, err := meter.Int64Histogram(
 		"kraai.resource.duration",
 		metric.WithDescription("Duration of a resource verb call."),
 		metric.WithUnit("ms"),
 	)
 	if err != nil {
-		// A metrics pipeline that will not build an instrument must not stop
-		// a deployment. Tracing and the operation itself are unaffected.
+		// A metrics pipeline that will not build an instrument must not
+		// stop a deployment.
 		duration = nil
 	}
 
@@ -73,10 +66,8 @@ type instrumented struct {
 // span's status from the result.
 //
 // The resource name is a span attribute but never a metric one: names are
-// per-environment and unbounded, so using them as a metric dimension would
-// produce a new time series per ephemeral environment and eventually
-// overwhelm whatever is storing them. A trace can carry it; a histogram
-// cannot.
+// per-environment and unbounded, and a new time series per ephemeral
+// environment would eventually overwhelm whatever stores them.
 func (i *instrumented) observe(ctx context.Context, verb, name string, fn func(context.Context) error) error {
 	attrs := append(append([]attribute.KeyValue{}, i.attrs...), attribute.String("kraai.verb", verb))
 
@@ -136,38 +127,24 @@ func (i *instrumented) Delete(ctx context.Context, ref Ref) error {
 	})
 }
 
-// The decorator forwards the optional interfaces a resource type may
-// implement, as well as the four required verbs.
+// The decorator also forwards every optional interface a resource type may
+// implement. In a real run nothing downstream holds an undecorated Resource,
+// so a type assertion for SecretProducer or Differ is really asking
+// *instrumented, and before these forwarders existed it always answered no:
+// plan could never emit a replace and apply's credential handoff resolved
+// nothing, both silently.
 //
-// This is not cosmetic. Instrument is applied to every registration by
-// internal/assemble, so in a real run nothing downstream ever holds an
-// undecorated Resource — it holds an *instrumented. Before these forwarding
-// methods existed, a caller asking "does this resource also implement
-// SecretProducer" was really asking *instrumented, which always answered
-// no even when the wrapped type implemented it. Two behaviours shipped
-// silently dead as a result: plan could never emit ActionReplace
-// (internal/plan's decide type-asserts Differ), and apply's
-// credential handoff resolved nothing (internal/apply type-asserts
-// SecretProducer). A third, plan.SpecValidator, was forwarded from the
-// start to avoid becoming a fourth instance of the same bug.
+// Forwarding unconditionally is safe because "not implemented" and
+// "implemented but answered false/nil" look identical to every caller. The
+// cost is that a type assertion against *instrumented proves nothing on its
+// own, which is what TestInstrumentedForwardsOptionalInterfaces exists for.
 //
-// Forwarding unconditionally, rather than a struct variant per combination
-// of implemented interfaces, is safe here because "not implemented" and
-// "implemented but answered false/nil" look identical to every caller: no
-// secrets, no immutable difference, no validation error. The cost is that
-// a type assertion against *instrumented no longer proves anything on its
-// own, which is why TestInstrumentedForwardsOptionalInterfaces in
-// otel_test.go exists.
-//
-// HAZARD: any optional interface added to this package in future MUST get
-// a forwarder here and a case in that test, or it will be silently dropped
-// in production exactly as the first two were. The test proves the
-// interfaces it knows about are forwarded; nothing mechanical can notice
-// one nobody told it about.
+// HAZARD: any optional interface added to this package MUST get a forwarder
+// here and a case in that test, or it will be silently dropped in
+// production. Nothing mechanical can notice one nobody told the test about.
 
 // Secrets forwards to the inner resource when it is a SecretProducer, and
-// otherwise reports that this resource produces no credentials — the same
-// answer a caller gets from a type that does not implement SecretProducer.
+// otherwise reports no credentials.
 func (i *instrumented) Secrets(state *State) map[string]Secret {
 	producer, ok := i.inner.(SecretProducer)
 	if !ok {
@@ -177,13 +154,8 @@ func (i *instrumented) Secrets(state *State) map[string]Secret {
 }
 
 // Diff forwards to the inner resource when it can answer, and otherwise
-// reports no difference — the same answer a caller gets from a type that
-// does not implement the interface.
-//
-// The interface is spelled out structurally rather than imported: it is
-// declared in internal/plan, which imports this package, so naming it here
-// would be an import cycle. Difference itself lives in this package for the
-// same reason.
+// reports no difference. The interface is spelled out structurally because
+// it is declared in internal/plan, which imports this package.
 func (i *instrumented) Diff(spec Spec, state *State) (Difference, error) {
 	differ, ok := i.inner.(interface {
 		Diff(Spec, *State) (Difference, error)
@@ -195,13 +167,8 @@ func (i *instrumented) Diff(spec Spec, state *State) (Difference, error) {
 }
 
 // ValidateSpec forwards to the inner resource when it can validate, and
-// otherwise reports no error — the same answer a caller gets from a type
-// that does not implement the interface.
-//
-// The interface is spelled out structurally rather than imported, for the
-// same import-cycle reason Diff's own doc comment gives:
-// plan.SpecValidator is declared in internal/plan, which imports this
-// package.
+// otherwise reports no error. Structural for the same reason as Diff:
+// plan.SpecValidator lives in internal/plan.
 func (i *instrumented) ValidateSpec(spec Spec) error {
 	validator, ok := i.inner.(interface {
 		ValidateSpec(Spec) error
