@@ -89,10 +89,11 @@ func Capabilities() []resource.CapabilityDef {
 		},
 		{
 			Name: manifest.CapabilityNetwork,
-			Summary: "Private VPC with a public subnet: internet gateway, route " +
-				"table, the default route making the subnet reachable, gateway " +
-				"endpoints routing S3 and DynamoDB inside the VPC, and, when the " +
-				"entry declares a private block, a private subnet with NAT egress.",
+			Summary: "Private VPC with a pair of public subnets across two zones: " +
+				"internet gateway, route table, the default route making them " +
+				"reachable, gateway endpoints routing S3 and DynamoDB inside the " +
+				"VPC, and, when the entry declares a private block, a pair of " +
+				"private subnets with NAT egress.",
 			// No ProviderSettings beyond the provider-level "region"
 			// DecodeSettings already checks: the address plan is per
 			// binding, not per provider, so it lives in Binding.

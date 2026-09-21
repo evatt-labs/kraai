@@ -249,20 +249,26 @@ func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
 	// a route to the internet through the NAT gateway. The public subnet
 	// otherwise, where the function reaches the VPC and its gateway
 	// endpoints and nothing beyond.
-	subnetType := TypeSubnet
-	if hasPrivateSubnet(network.Config) {
-		subnetType = TypePrivateSubnet
-	}
-	subnetID, err := spec.Attribute(network.attributeKey(spec, subnetType), "SubnetId")
-	if err != nil {
-		return nil, err
+	// Both subnets of the tier, one per zone: an interface in each keeps
+	// the function reachable to its zone-local resources when a zone is
+	// out.
+	var subnetIDs []any
+	for _, subnetKey := range tierSubnetKeys(hasPrivateSubnet(network.Config)) {
+		subnetID, err := spec.Attribute(network.Binding+"."+subnetKey, "SubnetId")
+		if network.Binding == spec.Binding {
+			subnetID, err = spec.Attribute(subnetKey, "SubnetId")
+		}
+		if err != nil {
+			return nil, err
+		}
+		subnetIDs = append(subnetIDs, subnetID)
 	}
 	groupID, err := spec.Attribute(network.attributeKey(spec, TypeVPC), "DefaultSecurityGroup")
 	if err != nil {
 		return nil, err
 	}
 	return map[string]any{
-		"SubnetIds":        []any{subnetID},
+		"SubnetIds":        subnetIDs,
 		"SecurityGroupIds": []any{groupID},
 	}, nil
 }

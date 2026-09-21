@@ -122,8 +122,11 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 			// Needs its security group's id, and the subnet of the network
 			// it is placed in; the network's own ordering (subnet after
 			// VPC) is the network binding's business.
-			DependsOn:       []string{securityGroupKey},
-			ReadsReferences: []resource.ReferenceRead{{Key: "network", Type: key(TypeSubnet)}},
+			DependsOn: []string{securityGroupKey},
+			ReadsReferences: []resource.ReferenceRead{
+				{Key: "network", Type: key(TypeSubnet)},
+				{Key: "network", Type: key(TypePublicSubnetB)},
+			},
 			// ServerlessCacheName is the primary identifier, settable at
 			// create and unique per account and region; a derived name is
 			// already the lowercase string ElastiCache stores it as.
@@ -142,9 +145,15 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 					if err != nil {
 						return spec, err
 					}
-					subnetID, err := referencedAttribute(spec, network, TypeSubnet, "SubnetId")
-					if err != nil {
-						return spec, err
+					// Both public subnets, one per zone, which is what
+					// ElastiCache asks of a serverless cache's subnets.
+					var subnetIDs []any
+					for _, subnetType := range []string{TypeSubnet, TypePublicSubnetB} {
+						subnetID, err := referencedAttribute(spec, network, subnetType, "SubnetId")
+						if err != nil {
+							return spec, err
+						}
+						subnetIDs = append(subnetIDs, subnetID)
 					}
 					groupID, err := spec.Attribute(securityGroupKey, "GroupId")
 					if err != nil {
@@ -155,7 +164,7 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 						"ServerlessCacheName": spec.Name,
 						"Engine":              engine,
 						"MajorEngineVersion":  engineMajorVersion[engine],
-						"SubnetIds":           []any{subnetID},
+						"SubnetIds":           subnetIDs,
 						"SecurityGroupIds":    []any{groupID},
 					}
 					return translated, nil

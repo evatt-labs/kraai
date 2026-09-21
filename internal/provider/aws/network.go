@@ -276,7 +276,11 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 		return resource.Registration{
 			Provider: Provider, Type: typeKey, VendorType: TypeVPCEndpoint,
 			Capability: manifest.CapabilityNetwork,
-			Lookup:     resource.LookupByTag, DependsOn: []string{vpcKey, routeTableKey},
+			Lookup:     resource.LookupByTag,
+			// The private route table too, when the binding has one: a
+			// dependency on a registration that does not apply contributes
+			// no edge, so a network without a private tier is unaffected.
+			DependsOn: []string{vpcKey, routeTableKey, key(TypePrivateRouteTable)},
 			Resource: translated(roleTaggedLookup(client, TypeVPCEndpoint, service),
 				func(spec resource.Spec) (resource.Spec, error) {
 					vpcID, err := spec.Attribute(vpcKey, "VpcId")
@@ -287,12 +291,20 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 					if err != nil {
 						return spec, err
 					}
+					tables := []any{routeTableID}
+					if hasPrivateSubnet(spec.Config) {
+						privateID, err := spec.Attribute(key(TypePrivateRouteTable), "RouteTableId")
+						if err != nil {
+							return spec, err
+						}
+						tables = append(tables, privateID)
+					}
 					translated := spec
 					translated.Config = map[string]any{
 						"VpcId":           vpcID,
 						"ServiceName":     gatewayServiceName(region, service),
 						"VpcEndpointType": "Gateway",
-						"RouteTableIds":   []any{routeTableID},
+						"RouteTableIds":   tables,
 					}
 					return translated, nil
 				},
@@ -300,7 +312,7 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 		}
 	}
 
-	return append(registerEgress(client), []resource.Registration{
+	return append(registerEgress(client, region), []resource.Registration{
 		gatewayEndpoint(TypeS3Endpoint, "s3"),
 		gatewayEndpoint(TypeDynamoDBEndpoint, "dynamodb"),
 		{
@@ -338,33 +350,8 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 				tagOnly,
 				nil),
 		},
-		{
-			Provider: Provider, Type: TypeSubnet, Capability: manifest.CapabilityNetwork,
-			Lookup: resource.LookupByTag, DependsOn: []string{vpcKey},
-			Resource: translated(taggedLookup(client, TypeSubnet),
-				func(spec resource.Spec) (resource.Spec, error) {
-					cidr, err := configString(spec, "subnet")
-					if err != nil {
-						return spec, err
-					}
-					vpcID, err := spec.Attribute(vpcKey, "VpcId")
-					if err != nil {
-						return spec, err
-					}
-					translated := spec
-					translated.Config = map[string]any{
-						"VpcId":               vpcID,
-						"CidrBlock":           cidr,
-						"MapPublicIpOnLaunch": true,
-					}
-					return translated, nil
-				},
-				map[string]func(resource.Spec) (string, error){
-					"CidrBlock": func(spec resource.Spec) (string, error) {
-						return configString(spec, "subnet")
-					},
-				}),
-		},
+		subnetRegistration(client, region, TypeSubnet, "", "subnet", 0, true, nil),
+		subnetRegistration(client, region, TypePublicSubnetB, publicBRole, "subnet", 1, true, nil),
 		{
 			Provider: Provider, Type: TypeRouteTable, Capability: manifest.CapabilityNetwork,
 			Lookup: resource.LookupByTag, DependsOn: []string{vpcKey},
@@ -438,38 +425,8 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 				},
 			},
 		},
-		{
-			Provider: Provider, Type: TypeSubnetRouteTableAssociation, Capability: manifest.CapabilityNetwork,
-			Lookup: resource.LookupByName, DependsOn: []string{subnetKey, routeTableKey},
-			Resource: &relationshipResource{
-				provider: Provider, typeName: TypeSubnetRouteTableAssociation, client: client,
-				// The only one of the three with an opaque id, so it cannot
-				// be computed from its endpoints — every association in the
-				// region is listed and matched on both of them instead.
-				identify: func(ctx context.Context, name string) (string, bool, error) {
-					subnetID, found, err := endpointID(ctx, client, TypeSubnet, name)
-					if err != nil || !found {
-						return "", false, err
-					}
-					routeTableID, found, err := endpointID(ctx, client, TypeRouteTable, name)
-					if err != nil || !found {
-						return "", false, err
-					}
-					return findAssociation(ctx, client, subnetID, routeTableID)
-				},
-				desired: func(spec resource.Spec) (map[string]any, error) {
-					subnetID, err := spec.Attribute(subnetKey, "SubnetId")
-					if err != nil {
-						return nil, err
-					}
-					routeTableID, err := spec.Attribute(routeTableKey, "RouteTableId")
-					if err != nil {
-						return nil, err
-					}
-					return map[string]any{"SubnetId": subnetID, "RouteTableId": routeTableID}, nil
-				},
-			},
-		},
+		associationRegistration(client, TypeSubnetRouteTableAssociation, subnetKey, "", routeTableKey, "", nil),
+		associationRegistration(client, TypePublicSubnetBRouteTableAssociation, key(TypePublicSubnetB), publicBRole, routeTableKey, "", nil),
 	}...)
 }
 

@@ -670,6 +670,7 @@ func TestLambdaFunctionPublishesTheCacheURL(t *testing.T) {
 	spec.Attributes = map[string]map[string]any{
 		"CACHE." + key(TypeElastiCacheServerlessCache): {"Endpoint": map[string]any{"Address": "c.cache.amazonaws.com", "Port": "6379"}},
 		"NET." + key(TypeSubnet):                       {"SubnetId": "subnet-1"},
+		"NET." + key(TypePublicSubnetB):                {"SubnetId": "subnet-2"},
 		"NET." + key(TypeVPC):                          {"DefaultSecurityGroup": "sg-default"},
 	}
 	if _, err := fn.Create(context.Background(), spec); err != nil {
@@ -696,13 +697,14 @@ func TestLambdaFunctionJoinsItsServiceNetwork(t *testing.T) {
 	spec := baseLambdaSpec(t, dir, nil)
 	spec.Config["bindings"] = bindingsConfig(awsBinding("network", "NET", "myenv-api-net"))
 	spec.Attributes = map[string]map[string]any{
-		"NET." + key(TypeSubnet): {"SubnetId": "subnet-1"},
-		"NET." + key(TypeVPC):    {"VpcId": "vpc-1", "DefaultSecurityGroup": "sg-default"},
+		"NET." + key(TypeSubnet):        {"SubnetId": "subnet-1"},
+		"NET." + key(TypePublicSubnetB): {"SubnetId": "subnet-2"},
+		"NET." + key(TypeVPC):           {"VpcId": "vpc-1", "DefaultSecurityGroup": "sg-default"},
 	}
 	if _, err := fn.Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	want := map[string]any{"SubnetIds": []any{"subnet-1"}, "SecurityGroupIds": []any{"sg-default"}}
+	want := map[string]any{"SubnetIds": []any{"subnet-1", "subnet-2"}, "SecurityGroupIds": []any{"sg-default"}}
 	if got := fc.createCalls[0]["VpcConfig"]; !reflect.DeepEqual(got, want) {
 		t.Fatalf("VpcConfig = %v, want %v", got, want)
 	}
@@ -792,15 +794,16 @@ func TestLambdaFunctionJoinsThePrivateSubnetWhenTheNetworkHasOne(t *testing.T) {
 	spec := baseLambdaSpec(t, dir, nil)
 	spec.Config["bindings"] = bindingsConfig(network)
 	spec.Attributes = map[string]map[string]any{
-		"NET." + key(TypeSubnet):        {"SubnetId": "subnet-public"},
-		"NET." + key(TypePrivateSubnet): {"SubnetId": "subnet-private"},
-		"NET." + key(TypeVPC):           {"DefaultSecurityGroup": "sg-default"},
+		"NET." + key(TypeSubnet):         {"SubnetId": "subnet-public"},
+		"NET." + key(TypePrivateSubnet):  {"SubnetId": "subnet-private-a"},
+		"NET." + key(TypePrivateSubnetB): {"SubnetId": "subnet-private-b"},
+		"NET." + key(TypeVPC):            {"DefaultSecurityGroup": "sg-default"},
 	}
 	if _, err := fn.Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 	vpcConfig := fc.createCalls[0]["VpcConfig"].(map[string]any)
-	if subnets, _ := vpcConfig["SubnetIds"].([]any); len(subnets) != 1 || subnets[0] != "subnet-private" {
-		t.Fatalf("SubnetIds = %v, want the private subnet", vpcConfig["SubnetIds"])
+	if subnets, _ := vpcConfig["SubnetIds"].([]any); len(subnets) != 2 || subnets[0] != "subnet-private-a" || subnets[1] != "subnet-private-b" {
+		t.Fatalf("SubnetIds = %v, want both private subnets and neither public one", vpcConfig["SubnetIds"])
 	}
 }
