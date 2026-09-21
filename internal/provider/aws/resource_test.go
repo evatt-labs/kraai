@@ -22,9 +22,13 @@ type fakeClient struct {
 	byIdentifier map[string]map[string]any
 	getErr       map[string]error
 	list         []string
-	listErr      error
-	getCalls     []string
-	listCalls    int
+	// listByType, when set for a type, answers ListResources for it instead
+	// of list: Cloud Control lists per type, and a test resolving two types
+	// through one fake needs each to see only its own identifiers.
+	listByType map[string][]string
+	listErr    error
+	getCalls   []string
+	listCalls  int
 	// listModels records the resourceModel passed to every ListResources
 	// call, in order, so a test can assert a parent-scoped type's request
 	// actually carried the right scope (or that a non-parent-scoped type's
@@ -78,11 +82,14 @@ func (f *fakeClient) GetResource(_ context.Context, _ string, identifier string)
 	return props, true, nil
 }
 
-func (f *fakeClient) ListResources(_ context.Context, _ string, resourceModel map[string]any) ([]string, error) {
+func (f *fakeClient) ListResources(_ context.Context, typeName string, resourceModel map[string]any) ([]string, error) {
 	f.listCalls++
 	f.listModels = append(f.listModels, resourceModel)
 	if f.listErr != nil {
 		return nil, f.listErr
+	}
+	if ids, ok := f.listByType[typeName]; ok {
+		return ids, nil
 	}
 	return f.list, nil
 }

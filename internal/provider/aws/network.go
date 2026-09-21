@@ -300,7 +300,7 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 		}
 	}
 
-	return []resource.Registration{
+	return append(registerEgress(client), []resource.Registration{
 		gatewayEndpoint(TypeS3Endpoint, "s3"),
 		gatewayEndpoint(TypeDynamoDBEndpoint, "dynamodb"),
 		{
@@ -470,7 +470,7 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 				},
 			},
 		},
-	}
+	}...)
 }
 
 // findAssociation returns the association joining subnetID to routeTableID.
