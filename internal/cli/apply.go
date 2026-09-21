@@ -46,7 +46,7 @@ func isRealTerminal(r io.Reader) bool {
 	return term.IsTerminal(int(f.Fd()))
 }
 
-func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobra.Command {
+func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler) *cobra.Command {
 	var (
 		dir         string
 		setArgs     []string
@@ -70,7 +70,7 @@ func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver) *cob
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runApply(
 				cmd, args[0], dir, setArgs, jsonOut, replaceFlag, confirmName,
-				assembler, resolve, isRealTerminal)
+				assembler, resolve, stores, isRealTerminal)
 		},
 	}
 
@@ -118,7 +118,7 @@ func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver) *cob
 // change to build.
 func runApply(
 	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut, allowReplace bool,
-	confirmName string, assembler RegistryAssembler, resolve ManifestResolver,
+	confirmName string, assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler,
 	interactive isInteractive,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
@@ -164,6 +164,14 @@ func runApply(
 
 	ctx := cmd.Context()
 
+	// The lock comes before the plan: a plan read under a lock another run
+	// is mutating against describes nothing.
+	store, release, err := guard(ctx, cmd.ErrOrStderr(), envName, m, stores)
+	if err != nil {
+		return err
+	}
+	defer release()
+
 	reg, err := assembler(ctx, m)
 	if err != nil {
 		return err
@@ -176,6 +184,11 @@ func runApply(
 
 	result, err := apply.New(reg, apply.WithAllowReplace(allowReplace)).Apply(ctx, p)
 	if err != nil {
+		return err
+	}
+	// Recorded whatever the outcome, failures included: a status that says
+	// the last apply failed is worth more than one that says nothing.
+	if err := recordStatus(ctx, store, envName, m, applySummaryLine(envName, countOutcomes(result))); err != nil {
 		return err
 	}
 

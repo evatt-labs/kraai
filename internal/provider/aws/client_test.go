@@ -1,8 +1,11 @@
 package aws
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -873,6 +876,27 @@ type fakeS3 struct {
 	// every call.
 	deletePolicyErr error
 	deletePolicyReq []*s3.DeleteBucketPolicyInput
+
+	// objects and buckets give the fake the object-store semantics the
+	// lock store relies on (lockstore.go): a conditional create refused
+	// when the key exists, a conditional delete refused when the ETag
+	// moved, and a bucket that must exist. Both are nil for the tests
+	// that only script PutObject through err and reqs above.
+	objects map[string]fakeObject
+	buckets map[string]bool
+	etags   int
+	// publicAccessBlocked records the buckets PutPublicAccessBlock ran on.
+	publicAccessBlocked []string
+}
+
+type fakeObject struct {
+	body []byte
+	etag string
+}
+
+// s3Error builds the generic API error S3 returns for code.
+func s3Error(code string) error {
+	return &smithy.GenericAPIError{Code: code, Message: code}
 }
 
 func (f *fakeS3) PutObject(_ context.Context, params *s3.PutObjectInput, _ ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
@@ -880,7 +904,58 @@ func (f *fakeS3) PutObject(_ context.Context, params *s3.PutObjectInput, _ ...fu
 	if f.err != nil {
 		return nil, f.err
 	}
-	return &s3.PutObjectOutput{}, nil
+	if f.objects == nil {
+		return &s3.PutObjectOutput{}, nil
+	}
+	key := aws.ToString(params.Bucket) + "/" + aws.ToString(params.Key)
+	if aws.ToString(params.IfNoneMatch) == "*" {
+		if _, exists := f.objects[key]; exists {
+			return nil, s3Error("PreconditionFailed")
+		}
+	}
+	body, _ := io.ReadAll(params.Body)
+	f.etags++
+	etag := fmt.Sprintf("\"etag-%d\"", f.etags)
+	f.objects[key] = fakeObject{body: body, etag: etag}
+	return &s3.PutObjectOutput{ETag: aws.String(etag)}, nil
+}
+
+func (f *fakeS3) GetObject(_ context.Context, params *s3.GetObjectInput, _ ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
+	object, ok := f.objects[aws.ToString(params.Bucket)+"/"+aws.ToString(params.Key)]
+	if !ok {
+		return nil, &s3types.NoSuchKey{}
+	}
+	return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewReader(object.body)), ETag: aws.String(object.etag)}, nil
+}
+
+func (f *fakeS3) DeleteObject(_ context.Context, params *s3.DeleteObjectInput, _ ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
+	key := aws.ToString(params.Bucket) + "/" + aws.ToString(params.Key)
+	object, ok := f.objects[key]
+	if ok && params.IfMatch != nil && aws.ToString(params.IfMatch) != object.etag {
+		return nil, s3Error("PreconditionFailed")
+	}
+	delete(f.objects, key)
+	return &s3.DeleteObjectOutput{}, nil
+}
+
+func (f *fakeS3) HeadBucket(_ context.Context, params *s3.HeadBucketInput, _ ...func(*s3.Options)) (*s3.HeadBucketOutput, error) {
+	if !f.buckets[aws.ToString(params.Bucket)] {
+		return nil, &s3types.NotFound{}
+	}
+	return &s3.HeadBucketOutput{}, nil
+}
+
+func (f *fakeS3) CreateBucket(_ context.Context, params *s3.CreateBucketInput, _ ...func(*s3.Options)) (*s3.CreateBucketOutput, error) {
+	if f.buckets == nil {
+		f.buckets = map[string]bool{}
+	}
+	f.buckets[aws.ToString(params.Bucket)] = true
+	return &s3.CreateBucketOutput{}, nil
+}
+
+func (f *fakeS3) PutPublicAccessBlock(_ context.Context, params *s3.PutPublicAccessBlockInput, _ ...func(*s3.Options)) (*s3.PutPublicAccessBlockOutput, error) {
+	f.publicAccessBlocked = append(f.publicAccessBlocked, aws.ToString(params.Bucket))
+	return &s3.PutPublicAccessBlockOutput{}, nil
 }
 
 func (f *fakeS3) ListObjectsV2(_ context.Context, params *s3.ListObjectsV2Input, _ ...func(*s3.Options)) (*s3.ListObjectsV2Output, error) {

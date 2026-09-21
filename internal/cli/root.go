@@ -67,8 +67,9 @@ func NewRootCommand() *cobra.Command {
 	root.AddCommand(newPluginsCommand(assemble.ResolveWithDeclarations))
 	root.AddCommand(newPlanCommand(assemble.Registry, assemble.ResolveWithDeclarations))
 	root.AddCommand(newIAMPolicyCommand(assemble.Registry, assemble.ResolveWithDeclarations, assemble.AWSPolicyActions))
-	root.AddCommand(newApplyCommand(assemble.Registry, assemble.ResolveWithDeclarations))
-	root.AddCommand(newDestroyCommand(assemble.Registry, assemble.ResolveWithDeclarations))
+	root.AddCommand(newApplyCommand(assemble.Registry, assemble.ResolveWithDeclarations, assemble.LockStore))
+	root.AddCommand(newDestroyCommand(assemble.Registry, assemble.ResolveWithDeclarations, assemble.LockStore))
+	root.AddCommand(newStatusCommand(assemble.ResolveWithDeclarations, assemble.LockStore))
 
 	return root
 }

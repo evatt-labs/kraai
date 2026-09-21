@@ -1,1 +1,4 @@
 kind: ephemeral
+# Expires three days after its last apply: kraai status shows the deadline
+# and kraai gc will reap what is past it.
+ttl: 72h

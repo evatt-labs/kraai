@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -128,4 +129,18 @@ func Require(keys ...string) (map[string]string, error) {
 			strings.Join(missing, ", "), FileName)
 	}
 	return values, nil
+}
+
+// Holder identifies the process taking an environment lock, for the lock
+// record another run reads when it finds the environment held: the GitHub
+// Actions run when there is one, otherwise the host and process.
+func Holder() string {
+	if run := os.Getenv("GITHUB_RUN_ID"); run != "" {
+		return "github-actions:" + run
+	}
+	host, err := os.Hostname()
+	if err != nil || host == "" {
+		host = "unknown-host"
+	}
+	return host + ":" + strconv.Itoa(os.Getpid())
 }

@@ -103,6 +103,15 @@ type cloudFormationAPI interface {
 // the operations Cloud Control cannot express.
 type s3API interface {
 	PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error)
+	// GetObject, DeleteObject, HeadBucket, CreateBucket and
+	// PutPublicAccessBlock serve the environment lock and status record
+	// (lockstore.go): a conditional create and delete on a lock object,
+	// and the one-time creation of the account's lock bucket.
+	GetObject(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error)
+	DeleteObject(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
+	HeadBucket(ctx context.Context, params *s3.HeadBucketInput, optFns ...func(*s3.Options)) (*s3.HeadBucketOutput, error)
+	CreateBucket(ctx context.Context, params *s3.CreateBucketInput, optFns ...func(*s3.Options)) (*s3.CreateBucketOutput, error)
+	PutPublicAccessBlock(ctx context.Context, params *s3.PutPublicAccessBlockInput, optFns ...func(*s3.Options)) (*s3.PutPublicAccessBlockOutput, error)
 	// ListObjectsV2 lists (up to 1000) current objects in a bucket per
 	// call — EmptyBucket's only listing primitive. This package never
 	// enables object versioning on a bucket it creates (artifactbucket.go's
