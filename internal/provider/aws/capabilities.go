@@ -69,7 +69,8 @@ func Capabilities() []resource.CapabilityDef {
 		{
 			Name: manifest.CapabilityDatabase,
 			Summary: "DynamoDB on-demand table keyed as the binding declares " +
-				"(driver: dynamodb), granted to the service's execution role.",
+				"(driver: dynamodb) or an Aurora DSQL cluster (driver: postgres), " +
+				"granted to the service's execution role.",
 			Binding: databaseBindingSchema,
 		},
 		{

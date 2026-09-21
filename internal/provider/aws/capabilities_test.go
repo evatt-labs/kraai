@@ -140,11 +140,10 @@ func TestDatabaseBindingSchema(t *testing.T) {
 		t.Fatalf("a valid binding entry was rejected: %v", err)
 	}
 	rejected := map[string]map[string]any{
-		"no driver":       {"binding": "DB", "partitionKey": map[string]any{"name": "pk"}},
-		"unknown driver":  {"binding": "DB", "driver": "postgres", "partitionKey": map[string]any{"name": "pk"}},
-		"no partitionKey": {"binding": "DB", "driver": "dynamodb"},
-		"bad key type":    {"binding": "DB", "driver": "dynamodb", "partitionKey": map[string]any{"name": "pk", "type": "X"}},
-		"unknown key":     {"binding": "DB", "driver": "dynamodb", "partitionKey": map[string]any{"name": "pk"}, "ttl": "x"},
+		"no driver":      {"binding": "DB", "partitionKey": map[string]any{"name": "pk"}},
+		"unknown driver": {"binding": "DB", "driver": "mysql", "partitionKey": map[string]any{"name": "pk"}},
+		"bad key type":   {"binding": "DB", "driver": "dynamodb", "partitionKey": map[string]any{"name": "pk", "type": "X"}},
+		"unknown key":    {"binding": "DB", "driver": "dynamodb", "partitionKey": map[string]any{"name": "pk"}, "ttl": "x"},
 	}
 	for label, entry := range rejected {
 		if err := databaseBindingSchema.Validate(entry); err == nil {
@@ -176,5 +175,17 @@ func TestKeyValueBindingSchemaAndReference(t *testing.T) {
 		if err := keyvalueBindingSchema.Validate(entry); err == nil {
 			t.Errorf("%s: %v was accepted", label, entry)
 		}
+	}
+}
+
+func TestDatabaseBindingSchemaAcceptsAPostgresEntry(t *testing.T) {
+	if err := databaseBindingSchema.Validate(map[string]any{"binding": "PG", "driver": "postgres"}); err != nil {
+		t.Fatalf("a bare postgres entry was rejected: %v", err)
+	}
+	if err := databaseBindingSchema.Validate(map[string]any{"binding": "PG", "driver": "postgres", "engine": "dsql"}); err != nil {
+		t.Fatalf("an explicit dsql engine was rejected: %v", err)
+	}
+	if err := databaseBindingSchema.Validate(map[string]any{"binding": "PG", "driver": "postgres", "engine": "aurora"}); err == nil {
+		t.Fatal("an engine this provider does not offer was accepted")
 	}
 }

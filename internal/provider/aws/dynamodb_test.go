@@ -136,8 +136,8 @@ func TestDynamoTableAppliesOnlyToItsDriver(t *testing.T) {
 		t.Fatalf("Resolve(driver dynamodb) = %v, %v; want exactly the table", regs, err)
 	}
 	if _, err := reg.Resolve(manifest.CapabilityDatabase, resource.ApplicabilityContext{
-		Vendors: vendors, Binding: map[string]any{"driver": "postgres"},
+		Vendors: vendors, Binding: map[string]any{"driver": "mysql"},
 	}); err == nil {
-		t.Fatal("Resolve(driver postgres) succeeded, want an error: no aws type speaks it yet")
+		t.Fatal("Resolve(driver mysql) succeeded, want an error: no aws type speaks it yet")
 	}
 }

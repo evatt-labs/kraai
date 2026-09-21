@@ -259,17 +259,22 @@ var dynamoKeySchema = map[string]any{
 //
 // driver is required here, unlike the other providers' database schemas,
 // because this provider does not have one engine to default to: DynamoDB
-// today, and the enum is where the next engine is added. A DynamoDB table
-// is keyed by the binding: a partition key, and optionally a sort key.
+// under dynamodb, Aurora DSQL under postgres, and the enum is where the
+// next is added. A DynamoDB table is keyed by the binding, a partition key
+// and optionally a sort key, which the table requires and the cluster
+// refuses (dynamodb.go, dsql.go): one entry shape serves both, so which
+// keys belong is each engine's to check. engine picks between products
+// behind one driver, dsql being the only postgres engine today.
 var databaseBindingSchema = resource.NewSchema("aws database binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
 		"binding":      map[string]any{"type": "string"},
-		"driver":       map[string]any{"type": "string", "enum": []any{DriverDynamoDB}},
+		"driver":       map[string]any{"type": "string", "enum": []any{DriverDynamoDB, DriverPostgres}},
+		"engine":       map[string]any{"type": "string", "enum": []any{engineDSQL}},
 		"partitionKey": dynamoKeySchema,
 		"sortKey":      dynamoKeySchema,
 	},
-	"required":             []any{"binding", "driver", "partitionKey"},
+	"required":             []any{"binding", "driver"},
 	"additionalProperties": false,
 })
 

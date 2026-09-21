@@ -318,14 +318,24 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 				return err
 			}
 		case manifest.CapabilityDatabase:
-			// Likewise the table's name. A database binding on another
-			// engine of this provider publishes something else, once one
-			// exists.
-			if driver, _ := b.Config["driver"].(string); driver != DriverDynamoDB {
-				continue
-			}
-			if err := set(prefix+"_TABLE_NAME", b.Name); err != nil {
-				return err
+			switch driver, _ := b.Config["driver"].(string); driver {
+			case DriverDynamoDB:
+				// Likewise the table's name.
+				if err := set(prefix+"_TABLE_NAME", b.Name); err != nil {
+					return err
+				}
+			case DriverPostgres:
+				// The cluster's endpoint is assigned at create and read
+				// from what the cluster published. The URL carries no
+				// password: the function signs an IAM token for the
+				// endpoint when it connects (dsql.go).
+				url, err := dsqlURL(spec, b.attributeKey(spec, TypeDSQLCluster))
+				if err != nil {
+					return err
+				}
+				if err := set(prefix+"_DATABASE_URL", url); err != nil {
+					return err
+				}
 			}
 		}
 	}
