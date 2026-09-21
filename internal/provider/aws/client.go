@@ -23,6 +23,7 @@ import (
 
 	"github.com/evatt-labs/kraai/internal/httpx"
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 )
 
 // maxListPages bounds a ListResources page walk against a NextToken that
@@ -555,84 +556,11 @@ func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string
 	return translateFailure("deleting", typeName, identifier, event)
 }
 
-// Schema is the subset of a CloudFormation resource-provider schema this
-// package decodes: what identity, replacement detection, list scoping and
-// the IAM policy need. The full schema runs to 116KB for a distribution.
-type Schema struct {
-	// PrimaryIdentifier is the property path (or paths, for a compound
-	// identifier) Cloud Control treats as this type's primary identifier.
-	PrimaryIdentifier []string `json:"primaryIdentifier"`
-	// CreateOnlyProperties are the properties that force a replacement
-	// rather than an in-place update.
-	CreateOnlyProperties []string `json:"createOnlyProperties"`
-	// WriteOnlyProperties are accepted on create and update but never
-	// returned by a read, such as a Lambda function's Code.
-	WriteOnlyProperties []string `json:"writeOnlyProperties"`
-	// Handlers lists this type's implemented verbs by name. Raw JSON
-	// because presence of a key is most of what this package asks: a type
-	// with no update handler omits "update" entirely.
-	Handlers map[string]json.RawMessage `json:"handlers"`
-	// Tagging carries the actions the type's tag handling needs, beside
-	// the per-verb handler permissions; both feed Permissions.
-	Tagging struct {
-		Permissions []string `json:"permissions"`
-	} `json:"tagging"`
-}
-
-// listHandler is the part of a schema's list handler this package reads:
-// the input model the handler requires.
-type listHandler struct {
-	HandlerSchema struct {
-		Required []string `json:"required"`
-		OneOf    []struct {
-			Required []string `json:"required"`
-		} `json:"oneOf"`
-	} `json:"handlerSchema"`
-}
-
-// ListRequirements returns the property sets a list call must supply, as
-// alternatives: satisfying any one is enough. Empty when the list handler
-// declares no input model. AWS::Lambda::Permission requires [FunctionName];
-// AWS::Route53::RecordSet declares a oneOf of [HostedZoneId] and
-// [HostedZoneName]. A required list beside a oneOf applies to every
-// alternative.
-func (s Schema) ListRequirements() [][]string {
-	raw, ok := s.Handlers["list"]
-	if !ok {
-		return nil
-	}
-	var handler listHandler
-	if err := json.Unmarshal(raw, &handler); err != nil {
-		// A list handler this package cannot read is one it cannot check;
-		// the call proceeds and Cloud Control's own error stands.
-		return nil
-	}
-	base := handler.HandlerSchema.Required
-	if len(handler.HandlerSchema.OneOf) == 0 {
-		if len(base) == 0 {
-			return nil
-		}
-		return [][]string{base}
-	}
-	alternatives := make([][]string, 0, len(handler.HandlerSchema.OneOf))
-	for _, alt := range handler.HandlerSchema.OneOf {
-		alternatives = append(alternatives, append(append([]string(nil), base...), alt.Required...))
-	}
-	return alternatives
-}
-
-// HasUpdateHandler reports whether this type's schema declares an update
-// handler. A type without one can only be replaced.
-func (s Schema) HasUpdateHandler() bool {
-	_, ok := s.Handlers["update"]
-	return ok
-}
-
 // DescribeType fetches and decodes typeName's CloudFormation resource
 // provider schema. Fetched on first use and cached per type per process by
 // resourceType.getSchema, never vendored: a schema does not change within
 // one invocation, and vendored files would need keeping in sync by hand.
-func (c *Client) DescribeType(ctx context.Context, typeName string) (Schema, error) {
+func (c *Client) DescribeType(ctx context.Context, typeName string) (cfschema.Facts, error) {
 	out, err := c.cf.DescribeType(ctx, &cloudformation.DescribeTypeInput{
 		Type:     cftypes.RegistryTypeResource,
 		TypeName: aws.String(typeName),
@@ -640,19 +568,22 @@ func (c *Client) DescribeType(ctx context.Context, typeName string) (Schema, err
 	if err != nil {
 		var notFound *cftypes.TypeNotFoundException
 		if errors.As(err, &notFound) {
-			return Schema{}, kerrors.Wrap(err, kerrors.CodeValidation, "no CloudFormation resource provider schema is registered for %q", typeName)
+			return cfschema.Facts{}, kerrors.Wrap(err, kerrors.CodeValidation, "no CloudFormation resource provider schema is registered for %q", typeName)
 		}
-		return Schema{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing type %s", typeName)
+		return cfschema.Facts{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing type %s", typeName)
 	}
 	if out.Schema == nil {
-		return Schema{}, kerrors.Validation("DescribeType for %s returned no schema", typeName)
+		return cfschema.Facts{}, kerrors.Validation("DescribeType for %s returned no schema", typeName)
 	}
 
-	var schema Schema
-	if err := json.Unmarshal([]byte(*out.Schema), &schema); err != nil {
-		return Schema{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding schema for %s", typeName)
+	doc, err := cfschema.Parse([]byte(*out.Schema))
+	if err != nil {
+		return cfschema.Facts{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding schema for %s", typeName)
 	}
-	return schema, nil
+	if doc.TypeName == "" {
+		doc.TypeName = typeName
+	}
+	return cfschema.Derive(doc), nil
 }
 
 // Region returns the AWS region this Client resolved at construction.
@@ -879,29 +810,6 @@ func (c *Client) SecretValue(ctx context.Context, arn string) (string, error) {
 		return "", kerrors.Validation("the secret at %s has no string value", arn)
 	}
 	return *out.SecretString, nil
-}
-
-// Permissions returns every IAM action this type's handlers and tag
-// handling declare, across all verbs, sorted and without duplicates. A verb
-// kraai never calls still contributes: the policy this feeds covers plan,
-// apply and destroy alike.
-func (s Schema) Permissions() []string {
-	set := map[string]bool{}
-	for _, raw := range s.Handlers {
-		var handler struct {
-			Permissions []string `json:"permissions"`
-		}
-		if err := json.Unmarshal(raw, &handler); err != nil {
-			continue
-		}
-		for _, action := range handler.Permissions {
-			set[action] = true
-		}
-	}
-	for _, action := range s.Tagging.Permissions {
-		set[action] = true
-	}
-	return sortedActions(set)
 }
 
 func sortedActions(set map[string]bool) []string {

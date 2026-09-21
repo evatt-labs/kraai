@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -65,7 +66,7 @@ type fakeClient struct {
 	deleteErr   error
 	deleteCalls []string
 
-	schema      Schema
+	schema      cfschema.Facts
 	schemaErr   error
 	schemaCalls int
 }
@@ -123,10 +124,10 @@ func (f *fakeClient) DeleteResource(_ context.Context, _ string, identifier stri
 	return f.deleteErr
 }
 
-func (f *fakeClient) DescribeType(context.Context, string) (Schema, error) {
+func (f *fakeClient) DescribeType(context.Context, string) (cfschema.Facts, error) {
 	f.schemaCalls++
 	if f.schemaErr != nil {
-		return Schema{}, f.schemaErr
+		return cfschema.Facts{}, f.schemaErr
 	}
 	return f.schema, nil
 }
@@ -354,7 +355,7 @@ func TestResourceTypeCreate(t *testing.T) {
 	t.Run("submits Config as desired state and returns the created identity", func(t *testing.T) {
 		fc := &fakeClient{
 			createID: "my-bucket", createProps: map[string]any{"BucketName": "my-bucket"},
-			schema: Schema{PrimaryIdentifier: []string{"/properties/BucketName"}},
+			schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/BucketName"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
@@ -423,7 +424,7 @@ func TestResourceTypeCreate(t *testing.T) {
 	t.Run("a CreateResource failure is reported, not swallowed", func(t *testing.T) {
 		fc := &fakeClient{
 			createErr: errors.New("throttled"),
-			schema:    Schema{PrimaryIdentifier: []string{"/properties/BucketName"}},
+			schema:    cfschema.Facts{PrimaryIdentifier: []string{"/properties/BucketName"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
@@ -456,7 +457,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		// case.
 		fc := &fakeClient{
 			createID: "my-bucket", createProps: map[string]any{"BucketName": "my-bucket"},
-			schema: Schema{PrimaryIdentifier: []string{"/properties/BucketName"}},
+			schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/BucketName"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
@@ -478,7 +479,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		// PrimaryIdentifier rather than assuming one fixed key.
 		fc := &fakeClient{
 			createID: "my-role",
-			schema:   Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+			schema:   cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeIAMRole, lookup: resource.LookupByName, client: fc}
 
@@ -498,7 +499,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		// deliberate choice rather than clobbering it with spec.Name.
 		fc := &fakeClient{
 			createID: "custom-name",
-			schema:   Schema{PrimaryIdentifier: []string{"/properties/BucketName"}},
+			schema:   cfschema.Facts{PrimaryIdentifier: []string{"/properties/BucketName"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
@@ -519,7 +520,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		// name" — see this method's own doc comment on why guessing one
 		// would just relocate the bug rather than close it.
 		fc := &fakeClient{
-			schema: Schema{PrimaryIdentifier: []string{"/properties/HostedZoneId", "/properties/Name", "/properties/Type"}},
+			schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/HostedZoneId", "/properties/Name", "/properties/Type"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeRoute53RecordSet, lookup: resource.LookupByName, client: fc}
 
@@ -541,7 +542,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		// takes (a genuinely unknown identifier, or a DescribeType response
 		// this package cannot interpret) — must refuse just as loudly as
 		// the compound case, not fall through to submitting Config as-is.
-		fc := &fakeClient{schema: Schema{}}
+		fc := &fakeClient{schema: cfschema.Facts{}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		_, err := r.Create(context.Background(), resource.Spec{Binding: "objects", Name: "my-bucket"})
@@ -608,7 +609,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 func TestResourceTypeUpdate(t *testing.T) {
 	t.Run("diffs current against desired and submits a patch", func(t *testing.T) {
 		fc := &fakeClient{
-			schema:       Schema{Handlers: map[string]json.RawMessage{"create": nil, "update": nil}},
+			schema:       cfschema.Facts{HasUpdate: true},
 			byIdentifier: map[string]map[string]any{"my-bucket": {"BucketName": "my-bucket", "VersioningConfiguration": map[string]any{"Status": "Suspended"}}},
 			updateProps:  map[string]any{"BucketName": "my-bucket", "VersioningConfiguration": map[string]any{"Status": "Enabled"}},
 		}
@@ -638,7 +639,7 @@ func TestResourceTypeUpdate(t *testing.T) {
 
 	t.Run("no schema update handler refuses with ErrImmutable rather than attempting the call", func(t *testing.T) {
 		fc := &fakeClient{
-			schema:       Schema{Handlers: map[string]json.RawMessage{"create": nil, "read": nil, "delete": nil}},
+			schema:       cfschema.Facts{},
 			byIdentifier: map[string]map[string]any{"my-cert": {"DomainName": "example.com"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeCertificateManagerCertificate, lookup: resource.LookupByName, client: fc}
@@ -654,7 +655,7 @@ func TestResourceTypeUpdate(t *testing.T) {
 
 	t.Run("no differing properties is a no-op that still returns fresh state", func(t *testing.T) {
 		fc := &fakeClient{
-			schema:       Schema{Handlers: map[string]json.RawMessage{"update": nil}},
+			schema:       cfschema.Facts{HasUpdate: true},
 			byIdentifier: map[string]map[string]any{"my-bucket": {"BucketName": "my-bucket"}},
 		}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
@@ -672,7 +673,7 @@ func TestResourceTypeUpdate(t *testing.T) {
 	})
 
 	t.Run("updating a resource that does not exist is a validation error", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{Handlers: map[string]json.RawMessage{"update": nil}}}
+		fc := &fakeClient{schema: cfschema.Facts{HasUpdate: true}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		_, err := r.Update(context.Background(), resource.Ref{Name: "missing"}, resource.Spec{Config: map[string]any{}})
@@ -693,7 +694,7 @@ func TestResourceTypeUpdate(t *testing.T) {
 
 	t.Run("byAttr resolves the candidate before fetching properties for the diff", func(t *testing.T) {
 		fc := &fakeClient{
-			schema: Schema{Handlers: map[string]json.RawMessage{"update": nil}},
+			schema: cfschema.Facts{HasUpdate: true},
 			list:   []string{"cand-1"},
 			byIdentifier: map[string]map[string]any{
 				"cand-1": {"Name": "target", "Comment": "old"},
@@ -774,7 +775,7 @@ func TestResourceTypeDelete(t *testing.T) {
 
 func TestResourceTypeDiff(t *testing.T) {
 	t.Run("a createOnlyProperty that difference is a replacement", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
+		fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		difference, err := r.Diff(
@@ -790,7 +791,7 @@ func TestResourceTypeDiff(t *testing.T) {
 	})
 
 	t.Run("a nested createOnlyProperty is compared at its own path", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/DistributionConfig/CallerReference"}}}
+		fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/DistributionConfig/CallerReference"}}}
 		r := &resourceType{provider: Provider, typeName: TypeCloudFrontDistribution, lookup: resource.LookupByAttr, client: fc}
 
 		difference, err := r.Diff(
@@ -806,7 +807,7 @@ func TestResourceTypeDiff(t *testing.T) {
 	})
 
 	t.Run("a matching createOnlyProperty is not a replacement", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
+		fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		difference, err := r.Diff(
@@ -825,7 +826,7 @@ func TestResourceTypeDiff(t *testing.T) {
 		// A property the manifest never mentions is never touched — the
 		// manifest is kraai's only source of truth — so its absence from
 		// Spec.Config must not itself trigger a replacement.
-		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
+		fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		difference, err := r.Diff(
@@ -841,7 +842,7 @@ func TestResourceTypeDiff(t *testing.T) {
 	})
 
 	t.Run("declared in the manifest but absent from current state is a replacement, not a silent match", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
+		fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		difference, err := r.Diff(
@@ -857,7 +858,7 @@ func TestResourceTypeDiff(t *testing.T) {
 	})
 
 	t.Run("no createOnlyProperties at all means never a replacement", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{}}
+		fc := &fakeClient{schema: cfschema.Facts{}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		difference, err := r.Diff(resource.Spec{Config: map[string]any{"Anything": "goes"}}, &resource.State{Attributes: map[string]any{}})
@@ -870,7 +871,7 @@ func TestResourceTypeDiff(t *testing.T) {
 	})
 
 	t.Run("the schema is fetched once and cached across calls", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/BucketName"}}}
+		fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/BucketName"}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc}
 
 		for range 3 {
@@ -1006,44 +1007,12 @@ func emptySchemaCF() *fakeCF {
 	return &fakeCF{out: &cloudformation.DescribeTypeOutput{Schema: aws.String("{}")}}
 }
 
-// listSchema is a Schema whose list handler declares the given input model,
-// as Cloud Control publishes it.
-func listSchema(handlerSchema string) Schema {
-	return Schema{Handlers: map[string]json.RawMessage{
-		"list": json.RawMessage(`{"handlerSchema": ` + handlerSchema + `}`),
-	}}
-}
-
-func TestSchemaListRequirements(t *testing.T) {
-	for _, tc := range []struct {
-		name   string
-		schema Schema
-		want   [][]string
-	}{
-		{"no list handler", Schema{}, nil},
-		{"a list handler with no input model", Schema{Handlers: map[string]json.RawMessage{"list": json.RawMessage(`{}`)}}, nil},
-		{"one required property (Lambda::Permission)", listSchema(`{"properties": {"FunctionName": {}}, "required": ["FunctionName"]}`),
-			[][]string{{"FunctionName"}}},
-		{"alternatives (Route53::RecordSet)", listSchema(`{"oneOf": [{"required": ["HostedZoneId"]}, {"required": ["HostedZoneName"]}]}`),
-			[][]string{{"HostedZoneId"}, {"HostedZoneName"}}},
-		{"a required beside alternatives applies to each", listSchema(`{"required": ["Region"], "oneOf": [{"required": ["A"]}, {"required": ["B"]}]}`),
-			[][]string{{"Region", "A"}, {"Region", "B"}}},
-		{"unreadable handler is unchecked", Schema{Handlers: map[string]json.RawMessage{"list": json.RawMessage(`"nope"`)}}, nil},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			if got := tc.schema.ListRequirements(); !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("ListRequirements() = %v, want %v", got, tc.want)
-			}
-		})
-	}
-}
-
 // The check that would have prevented the Lambda::Permission outage
 // (evatt-labs/kraai#132): a list request is held to what the type's own
 // schema says its list handler requires, before it is sent.
 func TestResourceTypeListScopeIsCheckedAgainstTheSchema(t *testing.T) {
-	permission := listSchema(`{"required": ["FunctionName"]}`)
-	record := listSchema(`{"oneOf": [{"required": ["HostedZoneId"]}, {"required": ["HostedZoneName"]}]}`)
+	permission := cfschema.Facts{ListScope: [][]string{{"FunctionName"}}}
+	record := cfschema.Facts{ListScope: [][]string{{"HostedZoneId"}, {"HostedZoneName"}}}
 
 	t.Run("no listScope on a type whose handler requires one is refused before the call", func(t *testing.T) {
 		fc := &fakeClient{schema: permission, list: []string{"perm1"}}
@@ -1101,7 +1070,7 @@ func TestResourceTypeListScopeIsCheckedAgainstTheSchema(t *testing.T) {
 	})
 
 	t.Run("a handler that requires nothing needs no scope", func(t *testing.T) {
-		fc := &fakeClient{schema: Schema{Handlers: map[string]json.RawMessage{"list": json.RawMessage(`{}`)}}, list: []string{}}
+		fc := &fakeClient{schema: cfschema.Facts{}, list: []string{}}
 		r := &resourceType{provider: Provider, typeName: TypeCloudFrontDistribution, lookup: resource.LookupByTag,
 			client: fc, match: arrayTagsMatch}
 

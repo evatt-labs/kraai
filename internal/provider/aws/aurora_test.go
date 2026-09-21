@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -89,7 +90,7 @@ func TestAuroraAppliesOnlyToItsEngine(t *testing.T) {
 // public pair otherwise, from what the network published.
 func TestAuroraSubnetGroupPrefersThePrivatePair(t *testing.T) {
 	fc := &fakeClient{createID: "env-svc-sql", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/DBSubnetGroupName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/DBSubnetGroupName"}}}
 	res := auroraResource(t, fc, nil, TypeRDSDBSubnetGroup)
 
 	public := map[string]map[string]any{
@@ -138,7 +139,7 @@ func TestAuroraValidateSpecRequiresANetworkAndRefusesDynamoDBKeys(t *testing.T) 
 // master password managed by Secrets Manager and deletion protection off.
 func TestAuroraClusterIsServerlessAndDeletable(t *testing.T) {
 	fc := &fakeClient{createID: "env-svc-sql", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/DBClusterIdentifier"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/DBClusterIdentifier"}}}
 	res := auroraResource(t, fc, nil, TypeRDSDBCluster)
 	attrs := map[string]map[string]any{
 		key(TypeDatabaseSecurityGroup): {"GroupId": "sg-db"},

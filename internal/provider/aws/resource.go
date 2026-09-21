@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -35,7 +36,7 @@ type ccAPI interface {
 	DeleteResource(ctx context.Context, typeName, identifier string) error
 	// DescribeType fetches and decodes typeName's CloudFormation resource
 	// provider schema.
-	DescribeType(ctx context.Context, typeName string) (Schema, error)
+	DescribeType(ctx context.Context, typeName string) (cfschema.Facts, error)
 }
 
 // ownsFunc reports whether a found instance is this account's and kraai's
@@ -108,13 +109,13 @@ type resourceType struct {
 	// and a bool rather than sync.Once so a transient DescribeType failure
 	// is not cached for the rest of the run.
 	schemaMu     sync.Mutex
-	schema       Schema
+	schema       cfschema.Facts
 	schemaLoaded bool
 }
 
 // getSchema returns this type's cached CloudFormation schema, fetching it
 // on first use. A failed fetch is not cached.
-func (r *resourceType) getSchema(ctx context.Context) (Schema, error) {
+func (r *resourceType) getSchema(ctx context.Context) (cfschema.Facts, error) {
 	r.schemaMu.Lock()
 	defer r.schemaMu.Unlock()
 	if r.schemaLoaded {
@@ -122,7 +123,7 @@ func (r *resourceType) getSchema(ctx context.Context) (Schema, error) {
 	}
 	schema, err := r.client.DescribeType(ctx, r.typeName)
 	if err != nil {
-		return Schema{}, err
+		return cfschema.Facts{}, err
 	}
 	r.schema = schema
 	r.schemaLoaded = true
@@ -253,7 +254,7 @@ func (r *resourceType) checkListScope(ctx context.Context, resourceModel map[str
 	if err != nil {
 		return err
 	}
-	alternatives := schema.ListRequirements()
+	alternatives := schema.ListScope
 	if len(alternatives) == 0 {
 		return nil
 	}
@@ -419,7 +420,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 	if err != nil {
 		return nil, err
 	}
-	if !schema.HasUpdateHandler() {
+	if !schema.HasUpdate {
 		return nil, kerrors.Wrap(resource.ErrImmutable, kerrors.CodeValidation,
 			"%s has no update handler; a differing property requires replacement, not an update", r.typeName)
 	}
@@ -542,7 +543,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 	}
 
 	createOnly := map[string]bool{}
-	for _, pointer := range schema.CreateOnlyProperties {
+	for _, pointer := range schema.CreateOnly {
 		path := schemaPropertyPath(pointer)
 		if len(path) == 0 {
 			continue
@@ -573,7 +574,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 	}
 
 	writeOnly := map[string]bool{}
-	for _, pointer := range schema.WriteOnlyProperties {
+	for _, pointer := range schema.WriteOnly {
 		writeOnly[pointer] = true
 	}
 
@@ -595,7 +596,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
 		if !reflect.DeepEqual(desiredNorm, currentNorm) {
-			if schema.HasUpdateHandler() {
+			if schema.HasUpdate {
 				return resource.Mutable, nil
 			}
 			return resource.Immutable, nil

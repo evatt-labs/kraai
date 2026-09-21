@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -40,7 +41,7 @@ func TestArtifactBucketResourceRewritesNameBothWays(t *testing.T) {
 		byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}},
 		createID:     realBucket,
 		createProps:  map[string]any{"BucketName": realBucket},
-		schema:       Schema{PrimaryIdentifier: []string{"/properties/BucketName"}},
+		schema:       cfschema.Facts{PrimaryIdentifier: []string{"/properties/BucketName"}},
 	}
 	fs3 := &fakeS3{listOut: []*s3.ListObjectsV2Output{{}}}
 	bucket := &artifactBucketResource{

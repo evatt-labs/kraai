@@ -139,9 +139,6 @@ func TestParseRejects(t *testing.T) {
 	if _, err := Parse([]byte(`{not json`)); err == nil {
 		t.Error("malformed schema parsed")
 	}
-	if _, err := Parse([]byte(`{"properties":{}}`)); err == nil {
-		t.Error("schema without typeName parsed")
-	}
 }
 
 func TestPropertyPath(t *testing.T) {

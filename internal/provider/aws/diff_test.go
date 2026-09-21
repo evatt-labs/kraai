@@ -1,22 +1,19 @@
 package aws
 
 import (
-	"encoding/json"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
 // diffFixture builds a resourceType with a fixed, pre-loaded schema so Diff
 // never reaches the network.
 func diffFixture(createOnly, writeOnly []string, updatable bool) *resourceType {
-	schema := Schema{
-		CreateOnlyProperties: createOnly,
-		WriteOnlyProperties:  writeOnly,
-		Handlers:             map[string]json.RawMessage{"create": {}, "read": {}, "delete": {}},
-	}
-	if updatable {
-		schema.Handlers["update"] = json.RawMessage("{}")
+	schema := cfschema.Facts{
+		CreateOnly: createOnly,
+		WriteOnly:  writeOnly,
+		HasUpdate:  updatable,
 	}
 	return &resourceType{
 		provider: Provider, typeName: "AWS::Test::Type", lookup: resource.LookupByName,

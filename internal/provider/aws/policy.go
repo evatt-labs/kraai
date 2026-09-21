@@ -57,7 +57,7 @@ func (c *Client) PolicyActions(ctx context.Context, vendorTypes []string) ([]str
 		if err != nil {
 			return nil, err
 		}
-		for _, action := range schema.Permissions() {
+		for _, action := range schema.Permissions {
 			set[action] = true
 		}
 		for _, action := range typeActions[typeName] {

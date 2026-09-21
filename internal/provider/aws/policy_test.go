@@ -26,7 +26,7 @@ func TestSchemaPermissionsUnionHandlersAndTagging(t *testing.T) {
 		t.Fatalf("DescribeType: %v", err)
 	}
 	want := []string{"ec2:CreateSubnet", "ec2:CreateTags", "ec2:DeleteSubnet", "ec2:DeleteTags", "ec2:DescribeSubnets"}
-	if got := schema.Permissions(); !reflect.DeepEqual(got, want) {
+	if got := schema.Permissions; !reflect.DeepEqual(got, want) {
 		t.Fatalf("Permissions = %v, want %v", got, want)
 	}
 }

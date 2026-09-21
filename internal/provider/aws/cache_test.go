@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -70,7 +71,7 @@ func TestCacheSecurityGroupFailsLoudlyWithoutTheVPC(t *testing.T) {
 // security group, on Valkey unless the binding says Redis OSS.
 func TestServerlessCacheCreateUsesItsGroupAndTheNetworkSubnet(t *testing.T) {
 	fc := &fakeClient{createID: "env-svc-cache", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/ServerlessCacheName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/ServerlessCacheName"}}}
 	res := keyValueResource(t, fc, TypeElastiCacheServerlessCache)
 
 	attrs := map[string]map[string]any{

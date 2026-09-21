@@ -2,13 +2,13 @@ package aws
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
 	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -159,7 +159,7 @@ func TestLambdaPermissionGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 		list:         []string{"perm1"},
 		byIdentifier: map[string]map[string]any{"perm1": {"FunctionName": "myenv-tick"}},
 		updateProps:  map[string]any{"FunctionName": "myenv-tick"},
-		schema:       Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage(`{}`)}},
+		schema:       cfschema.Facts{HasUpdate: true},
 	}
 	perm := newEventsRulePermissionForTest(fc, &fakeSTS{account: "123456789012"})
 
@@ -178,7 +178,7 @@ func TestLambdaPermissionGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 }
 
 func TestLambdaPermissionDiffNeverCallsSTS(t *testing.T) {
-	fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/FunctionName", "/properties/Principal"}}}
+	fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/FunctionName", "/properties/Principal"}}}
 	fsts := &fakeSTS{account: "123456789012"}
 	perm := newEventsRulePermissionForTest(fc, fsts)
 
