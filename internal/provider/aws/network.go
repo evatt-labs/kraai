@@ -201,6 +201,23 @@ func taggedLookup(client ccAPI, typeName string) *resourceType {
 	}
 }
 
+// roleTaggedLookup is taggedLookup for a type that registers under more
+// than one role in the same binding, two gateway endpoints say. Every
+// instance in the binding shares the derived name, so the tag value carries
+// the role too, or a lookup for one role would find whichever instance was
+// listed first.
+func roleTaggedLookup(client ccAPI, typeName, role string) *resourceType {
+	value := func(name string) string { return name + "/" + role }
+	return &resourceType{
+		provider: Provider,
+		typeName: typeName,
+		lookup:   resource.LookupByTag,
+		match:    func(properties map[string]any, name string) bool { return arrayTagsMatch(properties, value(name)) },
+		stampTag: func(desired map[string]any, name string) { arrayTagsStampTag(desired, value(name)) },
+		client:   client,
+	}
+}
+
 // endpointID resolves the provider id of the typeName instance carrying the
 // identity tag for name.
 //
@@ -252,14 +269,15 @@ func registerNetwork(client ccAPI, region string) []resource.Registration {
 	attachmentKey := key(TypeVPCGatewayAttachment)
 
 	// gatewayEndpoint registers one gateway endpoint on the network's route
-	// table. Found by tag: an endpoint's id is EC2's, and nothing the
-	// manifest says names it.
+	// table. Found by tag, since an endpoint's id is EC2's and nothing the
+	// manifest says names it, with the service in the tag value so the two
+	// endpoints in one binding stay distinguishable (roleTaggedLookup).
 	gatewayEndpoint := func(typeKey, service string) resource.Registration {
 		return resource.Registration{
 			Provider: Provider, Type: typeKey, VendorType: TypeVPCEndpoint,
 			Capability: manifest.CapabilityNetwork,
 			Lookup:     resource.LookupByTag, DependsOn: []string{vpcKey, routeTableKey},
-			Resource: translated(taggedLookup(client, TypeVPCEndpoint),
+			Resource: translated(roleTaggedLookup(client, TypeVPCEndpoint, service),
 				func(spec resource.Spec) (resource.Spec, error) {
 					vpcID, err := spec.Attribute(vpcKey, "VpcId")
 					if err != nil {

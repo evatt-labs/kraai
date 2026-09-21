@@ -301,3 +301,40 @@ func TestGatewayEndpointFailsLoudlyWithoutTheRouteTable(t *testing.T) {
 		t.Fatalf("Create without the route table: err = %v, want one naming it", err)
 	}
 }
+
+// Two endpoints in one binding share the derived name, so the tag value
+// carries the service: a lookup for the S3 endpoint must not settle on the
+// DynamoDB endpoint listed beside it, and each stamps its own value.
+func TestGatewayEndpointsAreDistinguishedByService(t *testing.T) {
+	client := &fakeClient{
+		list: []string{"vpce-dynamodb", "vpce-s3"},
+		byIdentifier: map[string]map[string]any{
+			"vpce-dynamodb": taggedProps("env-svc-NET/dynamodb", map[string]any{"ServiceName": "com.amazonaws.us-east-1.dynamodb"}),
+			"vpce-s3":       taggedProps("env-svc-NET/s3", map[string]any{"ServiceName": "com.amazonaws.us-east-1.s3"}),
+		},
+	}
+	s3 := networkResource(t, client, TypeS3Endpoint)
+	state, err := s3.Get(context.Background(), resource.Ref{Name: "env-svc-NET"})
+	if err != nil || state == nil || state.ID != "vpce-s3" {
+		t.Fatalf("S3 endpoint Get = %+v, %v; want vpce-s3, not the DynamoDB endpoint listed first", state, err)
+	}
+
+	untagged := networkResource(t, &fakeClient{
+		list:         []string{"vpce-dynamodb"},
+		byIdentifier: map[string]map[string]any{"vpce-dynamodb": taggedProps("env-svc-NET/dynamodb", nil)},
+	}, TypeS3Endpoint)
+	if state, err := untagged.Get(context.Background(), resource.Ref{Name: "env-svc-NET"}); err != nil || state != nil {
+		t.Fatalf("S3 endpoint Get with only the DynamoDB endpoint present = %+v, %v; want absent", state, err)
+	}
+
+	creating := &fakeClient{createID: "vpce-new", createProps: map[string]any{}}
+	spec := networkSpec("NET", nil, map[string]map[string]any{
+		key(TypeVPC): {"VpcId": "vpc-abc"}, key(TypeRouteTable): {"RouteTableId": "rtb-1"},
+	})
+	if _, err := networkResource(t, creating, TypeDynamoDBEndpoint).Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if !arrayTagsMatch(creating.createCalls[0], "env-svc-NET/dynamodb") {
+		t.Fatalf("desired state %v does not carry the service-qualified identity tag", creating.createCalls[0])
+	}
+}
