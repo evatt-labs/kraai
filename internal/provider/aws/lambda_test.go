@@ -517,6 +517,8 @@ func TestLambdaFunctionPublishesTheCacheURL(t *testing.T) {
 	spec.Config["bindings"] = bindingsConfig(cache, awsBinding("network", "NET", "myenv-api-net"))
 	spec.Attributes = map[string]map[string]any{
 		"CACHE." + key(TypeElastiCacheServerlessCache): {"Endpoint": map[string]any{"Address": "c.cache.amazonaws.com", "Port": "6379"}},
+		"NET." + key(TypeSubnet):                       {"SubnetId": "subnet-1"},
+		"NET." + key(TypeVPC):                          {"DefaultSecurityGroup": "sg-default"},
 	}
 	if _, err := fn.Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create: %v", err)
@@ -524,5 +526,74 @@ func TestLambdaFunctionPublishesTheCacheURL(t *testing.T) {
 	env := fc.createCalls[0]["Environment"].(map[string]any)["Variables"].(map[string]any)
 	if !reflect.DeepEqual(env, map[string]any{"CACHE_REDIS_URL": "rediss://c.cache.amazonaws.com:6379"}) {
 		t.Fatalf("Environment.Variables = %v, want CACHE_REDIS_URL only", env)
+	}
+}
+
+// A service declaring a network runs its function inside it: the binding's
+// subnet, and the VPC's default security group, both read from what the
+// network published.
+func TestLambdaFunctionJoinsItsServiceNetwork(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(awsBinding("network", "NET", "myenv-api-net"))
+	spec.Attributes = map[string]map[string]any{
+		"NET." + key(TypeSubnet): {"SubnetId": "subnet-1"},
+		"NET." + key(TypeVPC):    {"VpcId": "vpc-1", "DefaultSecurityGroup": "sg-default"},
+	}
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	want := map[string]any{"SubnetIds": []any{"subnet-1"}, "SecurityGroupIds": []any{"sg-default"}}
+	if got := fc.createCalls[0]["VpcConfig"]; !reflect.DeepEqual(got, want) {
+		t.Fatalf("VpcConfig = %v, want %v", got, want)
+	}
+}
+
+func TestLambdaFunctionOutsideANetworkHasNoVpcConfig(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(awsBinding("queues", "JOBS", "myenv-api-jobs"))
+	spec.Attributes = map[string]map[string]any{
+		"JOBS." + key(TypeSQSQueue): {"QueueUrl": "https://sqs/jobs", "Arn": "arn:jobs"},
+	}
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if _, present := fc.createCalls[0]["VpcConfig"]; present {
+		t.Fatalf("VpcConfig = %v, want absent: the service declares no network", fc.createCalls[0]["VpcConfig"])
+	}
+}
+
+// A function runs inside one VPC; two network bindings on the service is a
+// conflict named by both bindings, never one of them chosen quietly.
+func TestLambdaFunctionRefusesTwoNetworks(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(
+		awsBinding("network", "NET", "myenv-api-net"), awsBinding("network", "OTHER", "myenv-api-other"))
+	_, err := fn.Create(context.Background(), spec)
+	if err == nil || !strings.Contains(err.Error(), `"NET"`) || !strings.Contains(err.Error(), `"OTHER"`) {
+		t.Fatalf("Create with two networks: err = %v, want one naming both", err)
 	}
 }

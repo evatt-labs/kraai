@@ -312,3 +312,31 @@ func TestIAMRoleGrantsADynamoDBTableByItsDriver(t *testing.T) {
 		t.Fatalf("Resource = %v, want the table and its indexes", resources)
 	}
 }
+
+// A function inside a VPC manages its own network interfaces, which the
+// basic execution policy does not allow; the role gains the VPC access
+// policy exactly when the service declares a network.
+func TestIAMRoleAddsVPCAccessForANetworkBinding(t *testing.T) {
+	fc := &fakeClient{
+		createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+	}
+	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"})
+	role.resourceType.client = fc
+
+	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
+		"settings": map[string]any{"managedPolicyArns": []any{"arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"}},
+		"bindings": bindingsConfig(awsBinding("network", "NET", "myenv-api-net")),
+	}}
+	if _, err := role.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	arns := fc.createCalls[0]["ManagedPolicyArns"].([]any)
+	if len(arns) != 3 || arns[0] != awsLambdaBasicExecutionRoleArn ||
+		arns[1] != "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess" || arns[2] != awsLambdaVPCAccessExecutionRoleArn {
+		t.Fatalf("ManagedPolicyArns = %v, want basic, the settings-declared one, then VPC access", arns)
+	}
+	if _, present := fc.createCalls[0]["Policies"]; present {
+		t.Fatalf("Policies = %v, want absent: a network binding carries no grant of its own", fc.createCalls[0]["Policies"])
+	}
+}

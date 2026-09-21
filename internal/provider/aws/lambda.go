@@ -161,7 +161,70 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 	if lambdaSettings.ReservedConcurrentExecutions != nil {
 		translated.Config["ReservedConcurrentExecutions"] = *lambdaSettings.ReservedConcurrentExecutions
 	}
+
+	vpcConfig, err := vpcConfigFor(spec)
+	if err != nil {
+		return resource.Spec{}, err
+	}
+	if vpcConfig != nil {
+		translated.Config["VpcConfig"] = vpcConfig
+	}
 	return translated, nil
+}
+
+// serviceNetwork returns the one network binding this provider fulfils on
+// the service, or none. A function runs inside at most one VPC, so a second
+// network binding is refused by name rather than one of the two winning
+// quietly.
+func serviceNetwork(spec resource.Spec) (*serviceBinding, error) {
+	bindings, err := decodeServiceBindings(spec)
+	if err != nil {
+		return nil, err
+	}
+	var network *serviceBinding
+	for i := range bindings {
+		b := bindings[i]
+		if b.Capability != manifest.CapabilityNetwork || b.Vendor != Provider {
+			continue
+		}
+		if network != nil {
+			return nil, kerrors.Validation(
+				"binding %q: the service declares network bindings %q and %q, and a function runs inside one VPC",
+				spec.Binding, network.Binding, b.Binding)
+		}
+		network = &b
+	}
+	return network, nil
+}
+
+// vpcConfigFor places the function inside the service's network binding,
+// when it declares one: the binding's subnet, and the VPC's own default
+// security group, which allows every outbound connection and is what a
+// function needs. Nothing inside the VPC has to accept inbound from the
+// function; the cache's security group admits the VPC's address range.
+//
+// Read from what the VPC and subnet published, which this type has because
+// it reads every binding on its service (register.go). A function inside a
+// VPC reaches the internet only through a NAT gateway, which the network
+// binding does not yet provision (evatt-labs/kraai#244): a service that
+// declares a network reaches what is inside it and nothing else.
+func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
+	network, err := serviceNetwork(spec)
+	if err != nil || network == nil {
+		return nil, err
+	}
+	subnetID, err := spec.Attribute(network.attributeKey(spec, TypeSubnet), "SubnetId")
+	if err != nil {
+		return nil, err
+	}
+	groupID, err := spec.Attribute(network.attributeKey(spec, TypeVPC), "DefaultSecurityGroup")
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{
+		"SubnetIds":        []any{subnetID},
+		"SecurityGroupIds": []any{groupID},
+	}, nil
 }
 
 // resolveEnv builds the function's environment variables: settings.Env
@@ -242,8 +305,8 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 		case manifest.CapabilityKeyValue:
 			// The cache's endpoint only exists once created, so it is read
 			// from what the cache published. Reachable only from inside
-			// the cache's network, which the function does not yet run in
-			// (evatt-labs/kraai#237).
+			// the cache's network, which the service's own network binding
+			// places the function in (vpcConfigFor).
 			if driver, _ := b.Config["driver"].(string); driver != DriverRedis {
 				continue
 			}

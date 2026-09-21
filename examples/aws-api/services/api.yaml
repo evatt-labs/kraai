@@ -7,11 +7,10 @@ services:
       settings:
         memorySize: 256
         timeout: 10
-    # A private network the service's other resources could sit inside.
-    # kraai does not yet wire compute into a network binding's VPC (no
-    # Lambda VpcConfig is built from it — see ../README.md's note on this
-    # gap) so this binding is provisioned and torn down alongside the
-    # service without the function actually running inside it.
+    # The private network the function runs inside: its VpcConfig names
+    # this binding's subnet and the VPC's default security group, and its
+    # role gains VPC access. Inside the VPC the function reaches the cache
+    # and nothing outside it: no NAT gateway is built (see ../README.md).
     network:
       - { binding: NET, cidr: 10.90.0.0/16, subnet: 10.90.1.0/24 }
     # A standard SQS queue. The function receives JOBS_QUEUE_URL and
@@ -28,7 +27,6 @@ services:
         sortKey: { name: createdAt, type: N }
     # An ElastiCache Serverless cache (Valkey, redis protocol) inside NET,
     # behind a security group admitting the VPC. The function receives
-    # CACHE_REDIS_URL, but does not run inside NET yet (#237), so it cannot
-    # reach the cache until that lands.
+    # CACHE_REDIS_URL and, running inside NET, can reach it.
     keyvalue:
       - { binding: CACHE, driver: redis, network: NET }
