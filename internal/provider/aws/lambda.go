@@ -104,7 +104,7 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 	if err != nil {
 		return resource.Spec{}, err
 	}
-	if err := addBindingEnv(spec, env); err != nil {
+	if err := addBindingEnv(ctx, spec, env); err != nil {
 		return resource.Spec{}, err
 	}
 
@@ -306,7 +306,7 @@ func resolveEnv(ctx context.Context, spec resource.Spec, settings LambdaSettings
 // settings.envSecrets maps by hand (resolveEnv). A name the manifest already
 // chose for a variable is not overwritten: two sources for one variable is
 // a conflict to report, not to resolve quietly.
-func addBindingEnv(spec resource.Spec, env map[string]any) error {
+func addBindingEnv(ctx context.Context, spec resource.Spec, env map[string]any) error {
 	variables, err := bindingVariables(spec)
 	if err != nil {
 		return err
@@ -317,7 +317,7 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 				"binding %q: environment variable %q is set by settings and by a binding; rename one",
 				spec.Binding, v.name)
 		}
-		value, err := v.value(spec)
+		value, err := v.value(ctx, spec)
 		if err != nil {
 			return err
 		}
@@ -331,7 +331,7 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 // what the binding's resource published and so is resolved only at apply.
 type bindingVariable struct {
 	name  string
-	value func(spec resource.Spec) (any, error)
+	value func(ctx context.Context, spec resource.Spec) (any, error)
 }
 
 // bindingVariables lists the variables the service's AWS bindings give the
@@ -352,16 +352,16 @@ func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
 		case manifest.CapabilityQueues:
 			queueKey := b.attributeKey(spec, TypeSQSQueue)
 			out = append(out,
-				bindingVariable{name: prefix + "_QUEUE_URL", value: func(spec resource.Spec) (any, error) {
+				bindingVariable{name: prefix + "_QUEUE_URL", value: func(_ context.Context, spec resource.Spec) (any, error) {
 					return spec.Attribute(queueKey, "QueueUrl")
 				}},
-				bindingVariable{name: prefix + "_QUEUE_ARN", value: func(spec resource.Spec) (any, error) {
+				bindingVariable{name: prefix + "_QUEUE_ARN", value: func(_ context.Context, spec resource.Spec) (any, error) {
 					return spec.Attribute(queueKey, "Arn")
 				}})
 		case manifest.CapabilityObjects:
 			// The bucket's name is its identity, derived rather than
 			// published, so nothing has to be read back.
-			out = append(out, bindingVariable{name: prefix + "_BUCKET_NAME", value: func(resource.Spec) (any, error) {
+			out = append(out, bindingVariable{name: prefix + "_BUCKET_NAME", value: func(context.Context, resource.Spec) (any, error) {
 				return b.Name, nil
 			}})
 		case manifest.CapabilityKeyValue:
@@ -373,23 +373,34 @@ func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
 				continue
 			}
 			cacheKey := b.attributeKey(spec, TypeElastiCacheServerlessCache)
-			out = append(out, bindingVariable{name: prefix + "_REDIS_URL", value: func(spec resource.Spec) (any, error) {
+			out = append(out, bindingVariable{name: prefix + "_REDIS_URL", value: func(_ context.Context, spec resource.Spec) (any, error) {
 				return cacheURL(spec, cacheKey)
 			}})
 		case manifest.CapabilityDatabase:
 			switch driver, _ := b.Config["driver"].(string); driver {
 			case DriverDynamoDB:
 				// Likewise the table's name.
-				out = append(out, bindingVariable{name: prefix + "_TABLE_NAME", value: func(resource.Spec) (any, error) {
+				out = append(out, bindingVariable{name: prefix + "_TABLE_NAME", value: func(context.Context, resource.Spec) (any, error) {
 					return b.Name, nil
 				}})
 			case DriverPostgres:
-				// The cluster's endpoint is assigned at create and read
-				// from what the cluster published. The URL carries no
+				if engine, _ := b.Config["engine"].(string); engine == engineAurora {
+					// The cluster's URL carries its master password, so it
+					// is a credential: produced by the cluster (aurora.go)
+					// and resolved here at the moment of use, under the
+					// name apply namespaces another binding's secret by.
+					secretKey := b.Binding + "." + SecretConnectionURI
+					out = append(out, bindingVariable{name: prefix + "_DATABASE_URL", value: func(ctx context.Context, spec resource.Spec) (any, error) {
+						return spec.Secret(ctx, secretKey)
+					}})
+					continue
+				}
+				// The DSQL cluster's endpoint is assigned at create and
+				// read from what the cluster published. The URL carries no
 				// password: the function signs an IAM token for the
 				// endpoint when it connects (dsql.go).
 				clusterKey := b.attributeKey(spec, TypeDSQLCluster)
-				out = append(out, bindingVariable{name: prefix + "_DATABASE_URL", value: func(spec resource.Spec) (any, error) {
+				out = append(out, bindingVariable{name: prefix + "_DATABASE_URL", value: func(_ context.Context, spec resource.Spec) (any, error) {
 					return dsqlURL(spec, clusterKey)
 				}})
 			}

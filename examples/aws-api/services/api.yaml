@@ -31,6 +31,15 @@ services:
       # its execution role may connect as admin.
       - binding: PG
         driver: postgres
+      # An Aurora Serverless v2 PostgreSQL cluster inside NET, scaling to
+      # zero when idle, its master password managed by Secrets Manager. The
+      # function receives SQL_DATABASE_URL, password included, as a
+      # credential resolved when its environment is built. Minutes to
+      # create and delete.
+      - binding: SQL
+        driver: postgres
+        engine: aurora
+        network: NET
     # An ElastiCache Serverless cache (Valkey, redis protocol) inside NET,
     # behind a security group admitting the VPC. The function receives
     # CACHE_REDIS_URL and, running inside NET, can reach it.

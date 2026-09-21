@@ -69,9 +69,14 @@ func Capabilities() []resource.CapabilityDef {
 		{
 			Name: manifest.CapabilityDatabase,
 			Summary: "DynamoDB on-demand table keyed as the binding declares " +
-				"(driver: dynamodb) or an Aurora DSQL cluster (driver: postgres), " +
-				"granted to the service's execution role.",
+				"(driver: dynamodb), an Aurora DSQL cluster (driver: postgres) or an " +
+				"Aurora Serverless v2 cluster inside the network the entry names " +
+				"(driver: postgres, engine: aurora), granted to the service's " +
+				"execution role or handed to it as a credential.",
 			Binding: databaseBindingSchema,
+			// network names the network binding whose VPC holds an Aurora
+			// cluster; the other engines need none.
+			References: []string{"network"},
 		},
 		{
 			Name: manifest.CapabilityKeyValue,
