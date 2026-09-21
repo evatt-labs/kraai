@@ -378,7 +378,7 @@ lacks.
 
 | provider | compute | database | keyvalue | objects | queues | network | dns | tls | cdn | coverage |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|---|
-| **AWS** | ✅ | — | — | ✅ | — | ✅ | ◐ | ◐ | ◐ | ~50% |
+| **AWS** | ✅ | ◐ | ◐ | ✅ | ◐ | ✅ | ◐ | ◐ | ◐ | ~67% |
 | **Cloudflare** | — | ✅ | ✅ | ✅ | ✅ | — | — | — | — | 44% |
 | **Azure** | — | — | — | — | — | — | — | — | — | 0% |
 | **GCP** | — | — | — | — | — | — | — | — | — | 0% |
@@ -402,7 +402,13 @@ service. Adding an AWS resource type is a registry entry.
 Known gaps, each with a tracking issue. AWS `dns`, `tls` and `cdn` build a
 static site's zone, certificate, distribution and apex record, but have not
 yet been exercised against a live account
-([#117](https://github.com/evatt-labs/kraai/issues/117)).
+([#117](https://github.com/evatt-labs/kraai/issues/117)). AWS `database`
+(DynamoDB only, `driver: dynamodb`), `keyvalue` (ElastiCache Serverless,
+`driver: redis`) and `queues` (SQS) plan against a live account and have not
+been applied from CI ([#232](https://github.com/evatt-labs/kraai/issues/232));
+a function inside a `network` binding reaches the cache but not the public
+SQS and DynamoDB endpoints until the network gains egress
+([#244](https://github.com/evatt-labs/kraai/issues/244)).
 Cloudflare offers two compute products and kraai implements neither — Workers
 ([#135](https://github.com/evatt-labs/kraai/issues/135)) and Containers
 ([#138](https://github.com/evatt-labs/kraai/issues/138)). Azure and GCP have
