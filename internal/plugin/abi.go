@@ -6,19 +6,16 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// CurrentABIVersion is the ABI version this host implements. See doc.go for
-// the full contract. A plugin's exported kraai_abi_version() must equal
-// this exactly — no compatibility range is defined yet, and none should be
-// invented speculatively before a second version actually exists.
+// CurrentABIVersion is the ABI version this host implements. A plugin's
+// kraai_abi_version() must equal it exactly; no compatibility range exists
+// until a second version does.
 const CurrentABIVersion uint32 = 1
 
 // HostNamespace is the fixed WASM import module name a plugin imports
-// granted host capabilities from. It never changes across ABI versions
-// without an explicit, documented migration, since a plugin binary hard-
-// codes it.
+// granted host capabilities from. A plugin binary hard-codes it.
 const HostNamespace = "kraai_host"
 
-// Exported function names every plugin module must provide. See doc.go.
+// Exported function names every plugin module must provide.
 const (
 	funcABIVersion = "kraai_abi_version"
 	funcAlloc      = "kraai_alloc"
@@ -26,49 +23,37 @@ const (
 	exportMemory   = "memory"
 )
 
-// Status bytes prefixing a capability call's output payload (doc.go).
+// Status bytes prefixing a capability call's output payload.
 const (
-	// StatusOK marks a successful capability call; the remaining output
-	// bytes are the result payload.
+	// StatusOK marks a successful call; the remaining bytes are the result.
 	StatusOK byte = 0
-	// StatusError marks a failed capability call; the remaining output
-	// bytes are a UTF-8 error message.
+	// StatusError marks a failed call; the remaining bytes are a UTF-8
+	// error message.
 	StatusError byte = 1
 )
 
-// MaxTransferBytes bounds any single (ptr, len) region the host will ever
-// read from or write into guest memory, on either side of the ABI
-// boundary. It is checked before any host-side allocation driven by a
-// guest-supplied length, so a malicious or buggy plugin cannot force an
-// unbounded make([]byte, n) merely by returning a huge len. 64MiB
-// comfortably covers any provider schema kraai ships today (the largest,
-// CloudFront's, is 116KB) with headroom, without being large
-// enough to be a meaningful DoS lever on its own.
+// MaxTransferBytes bounds any single (ptr, len) region the host reads from
+// or writes into guest memory, checked before any allocation driven by a
+// guest-supplied length. 64MiB covers any provider schema kraai ships with
+// headroom, without being a DoS lever.
 const MaxTransferBytes = 64 << 20
 
-// pack combines a guest pointer and length into the single i64 a provision
-// or capability function returns, per the ABI's (ptr<<32 | len) encoding.
+// pack combines a guest pointer and length into the i64 a provision or
+// capability returns: ptr<<32 | len.
 func pack(ptr, length uint32) uint64 {
 	return uint64(ptr)<<32 | uint64(length)
 }
 
-// unpack reverses pack. The truncating uint32 conversions are the ABI's
-// wire format, not a bug: pack above only ever put a uint32's worth of
-// data in each half, and every ptr/length value unpack produces is still
-// range-checked against actual guest memory size by readRegion/
-// writeRegion before it's trusted for anything.
+// unpack reverses pack. The truncations are the wire format, and every
+// value produced is still range-checked by readRegion or writeRegion.
 func unpack(v uint64) (ptr, length uint32) {
 	return uint32(v >> 32), uint32(v) //nolint:gosec // see comment above
 }
 
-// readRegion copies length bytes at ptr out of mem, validating the region
-// before ever allocating anything host-side. Every value crossing the ABI
-// boundary is guest-controlled and therefore hostile input: length is
-// checked against MaxTransferBytes first (bounding the allocation below),
-// then ptr/ptr+length is checked against mem's actual size using uint64
-// arithmetic so a ptr near the uint32 max cannot wrap the sum back into a
-// small, spuriously-valid value. mem.Read's own ok result is still checked
-// as defense in depth even after those checks pass.
+// readRegion copies length bytes at ptr out of mem, validating first. Every
+// value crossing the ABI is guest-controlled: length is checked against
+// MaxTransferBytes before anything is allocated, then ptr+length against
+// mem's size in uint64 so a ptr near the uint32 max cannot wrap.
 func readRegion(mem api.Memory, ptr, length uint32) ([]byte, error) {
 	if length == 0 {
 		return nil, nil
@@ -101,10 +86,8 @@ func readRegion(mem api.Memory, ptr, length uint32) ([]byte, error) {
 	return out, nil
 }
 
-// writeRegion validates ptr against mem's actual size the same way as
-// readRegion, then writes data into it. Used when the host places its own
-// data (a capability call's input, or a host capability's response) into
-// memory a guest export claims to have allocated for it.
+// writeRegion validates ptr against mem's size the same way as readRegion,
+// then writes data into it.
 func writeRegion(mem api.Memory, ptr uint32, data []byte) error {
 	if len(data) == 0 {
 		return nil
@@ -132,9 +115,8 @@ func writeRegion(mem api.Memory, ptr uint32, data []byte) error {
 	return nil
 }
 
-// decodeEnvelope splits a capability output region into its status byte
-// and payload, per the ABI's envelope format (doc.go). An empty region is
-// always a contract violation — a real success carries at least the
+// decodeEnvelope splits an output region into its status byte and payload.
+// An empty region is a contract violation: a success carries at least the
 // status byte.
 func decodeEnvelope(region []byte) (status byte, payload []byte, err error) {
 	if len(region) == 0 {
