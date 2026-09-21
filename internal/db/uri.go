@@ -1,22 +1,3 @@
-// Package db is kraai's Postgres touchpoint: connecting to a provisioned
-// database, waiting for it to come up, and running the statements the
-// provisioning flow needs.
-//
-// # Why connection details never travel as arguments
-//
-// Every credential reaches psql through PG* environment variables, never a
-// positional argument. Two independent reasons, both found by testing rather
-// than assumed:
-//
-//  1. A command-line argument containing a live credential is readable by any
-//     other local process through /proc/<pid>/cmdline for the argument's whole
-//     lifetime. Another process's environment is not readable that way.
-//  2. A failing child process tends to get its full argv attached to the
-//     error, so a credential in argv escapes through error handling even when
-//     nothing ever logs it deliberately.
-//
-// The same reasoning is why Exec never returns the underlying error: see
-// psqlRunner.Exec.
 package db
 
 import (
@@ -57,23 +38,10 @@ type ConnectionInfo struct {
 	Extra url.Values
 }
 
-// ParseConnectionURI splits a Postgres connection URI into its parts.
-//
-// # Deliberate divergence from the JavaScript implementation
-//
-// Differential-tested against it across the URI shapes kraai produces: every
-// field matches on every case but one. For an IPv6 literal host, Node's
-// url.hostname keeps the URI's square brackets ("[2001:db8::1]") and this
-// returns the bare address ("2001:db8::1").
-//
-// Bare is what PGHOST needs: the brackets are URI syntax disambiguating the
-// port, not part of the address, and libpq reads PGHOST as a host directly.
-// Feeding it a bracketed value should therefore fail to resolve. UNVERIFIED
-// against a real libpq — no psql was available where this was written — and
-// unreachable in practice today, since the providers kraai provisions hand
-// back hostnames rather than address literals. Recorded here so the
-// divergence is a decision on the record rather than a silent difference
-// someone rediscovers from a connection failure.
+// ParseConnectionURI splits a Postgres connection URI into its parts. An
+// IPv6 literal host comes back bare, without the URI's square brackets,
+// which is what a driver wants; unverified against libpq, and unreachable
+// today since providers hand back hostnames.
 func ParseConnectionURI(uri string) (ConnectionInfo, error) {
 	parsed, err := url.Parse(uri)
 	if err != nil {

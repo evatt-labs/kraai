@@ -39,14 +39,8 @@ const (
 // error.
 var supportedVendors = []string{vendorAWS, vendorCloudflare, vendorNeon}
 
-// Credential environment variables, read only through internal/env —
-// .golangci.yml's forbidigo rule forbids os.Getenv anywhere but cmd/kraai
-// and internal/env itself, and names these two exact Cloudflare keys as
-// the reason internal/env exists.
-//
-// AWS needs no entry here: internal/provider/aws authenticates through the
-// AWS SDK's own default credential chain (environment, shared config, IMDS)
-// rather than a credential kraai reads itself.
+// Credential environment variables, read only through internal/env. AWS
+// needs none: its SDK's own credential chain authenticates.
 const (
 	envCloudflareAPIToken  = "CLOUDFLARE_API_TOKEN" //nolint:gosec // G101: an env var name, not a credential value
 	envCloudflareAccountID = "CLOUDFLARE_ACCOUNT_ID"
@@ -67,20 +61,11 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 	neonProvider, wantsNeon := vendors[vendorNeon]
 	awsProvider, wantsAWS := vendors[vendorAWS]
 
-	// A Cloudflare client is built only when a capability actually names the
-	// cloudflare vendor.
-	//
-	// Choosing Neon does not imply one. Neon's registrations include a
-	// Cloudflare Hyperdrive companion, but that companion is conditioned on
-	// the compute side also being Cloudflare — a Neon database serving an
-	// AWS Lambda connects directly over the Postgres wire and never routes
-	// through it. Requiring a Cloudflare token here regardless would refuse
-	// to plan an AWS application over credentials it has no reason to hold,
-	// for a resource that would never be created.
-	//
-	// The condition is not restated here: neonresource omits the companion
-	// when handed no client, so the rule lives in one place and this function
-	// only answers whether a client exists to hand over.
+	// A Cloudflare client only when a capability names the vendor. Choosing
+	// Neon does not imply one: its Hyperdrive companion applies only when
+	// compute is Cloudflare too, and neonresource omits it when handed no
+	// client, so requiring a token here would refuse an AWS application over
+	// credentials it has no reason to hold.
 	var cfClient *cloudflare.Client
 	if wantsCloudflare {
 		cfClient, err = cloudflareClient()
@@ -90,12 +75,8 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 	}
 
 	if wantsCloudflare {
-		// cfresource.Register can only fail on a duplicate provider/type
-		// key, and reg is freshly built with vendorsUsed guaranteeing this
-		// is the only call into it for cloudflare — unreachable via this
-		// function's own public API, so not forced into coverage here. The
-		// failure mode itself is exercised where it can actually happen:
-		// cfresource's own TestRegisterIsAllOrNothing.
+		// Register fails only on a duplicate key, unreachable on a fresh
+		// registry; each provider's own tests cover it.
 		if err := cfresource.Register(reg, cfClient); err != nil {
 			return nil, err
 		}
@@ -110,8 +91,6 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 		if err != nil {
 			return nil, err
 		}
-		// Same unreachable-by-construction shape as the cloudflare block
-		// above; see neonresource's own TestRegisterIsAllOrNothing.
 		if err := neonresource.Register(reg, neonClient, cfClient, settings); err != nil {
 			return nil, err
 		}
@@ -126,8 +105,6 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 		if err != nil {
 			return nil, err
 		}
-		// Same unreachable-by-construction shape as the cloudflare block
-		// above; see aws's own TestRegisterPropagatesADuplicateRegistrationError.
 		if err := aws.Register(reg, client); err != nil {
 			return nil, err
 		}
@@ -137,19 +114,11 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 }
 
 // vendorsUsed maps every vendor m's configured capabilities name to the
-// first capability's Provider that named it.
-//
-// Keyed by vendor rather than capability because each vendor package
-// registers its types in one bulk call from one client (cfresource.Register,
-// neonresource.Register, aws.Register all take exactly one client and, where
-// they take settings, exactly one settings value) — the same pairing
-// belongs to every capability that names that vendor, however many there
-// are. When two capabilities both choose aws — objects and compute both can
-// — only the first one's Settings decides the client's region, because
-// aws.Register bulk-wires objects and compute from that single client; the
-// manifest can express two different regions and the provider package has
-// no way to honour both. Worth a manifest lint some day; not something this
-// assembler can fix by construction.
+// first capability's Provider that named it. Keyed by vendor because each
+// vendor package registers its types in one call from one client. When two
+// capabilities both choose aws, only the first one's Settings decides the
+// client's region; the manifest can express two and the provider cannot
+// honour both.
 func vendorsUsed(m *manifest.Manifest) (map[string]*manifest.Provider, error) {
 	out := map[string]*manifest.Provider{}
 	for _, capability := range m.Root.Providers.Capabilities() {

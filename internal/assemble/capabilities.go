@@ -8,42 +8,19 @@ import (
 )
 
 // Declarations lists every provider package's client-free capability
-// declaration, in a fixed, explicit order — the "one well-known,
-// greppable place" a new provider's declaration is added to, rather than
-// each provider package registering itself as a side effect of its own
-// init() running. See resource.Catalog's own doc comment for the full
-// argument against init()-based registration; this var is where that
-// argument pays off: everything Capabilities resolves is visible by
-// reading this one list, in the order it is built.
-//
-// Kept beside Registry's own vendor wiring above, for the same reason
-// this package's doc comment gives for existing at all: mapping a
-// provider package's exports to kraai's own vocabulary is the seam that
-// sits above both internal/resource and internal/manifest, and nowhere
-// else in the tree does.
+// declaration, in a fixed order: the one place a new provider's declaration
+// is added, rather than each package registering itself from init.
 var Declarations = []resource.Provider{
 	resource.FuncProvider{ProviderName: aws.Provider, CapabilitiesFunc: aws.Capabilities},
 	resource.FuncProvider{ProviderName: cfresource.Provider, CapabilitiesFunc: cfresource.Capabilities},
 	resource.FuncProvider{ProviderName: neonresource.Provider, CapabilitiesFunc: neonresource.Capabilities},
 }
 
-// Capabilities builds the resolved capability catalog from every
-// provider's client-free declaration.
-//
-// Unlike Registry, this takes no context, no manifest, and reads no
-// credential: every provider package's Capabilities() function is pure
-// data, callable before a manifest is even parsed. That is what lets its
-// callers — `kraai capabilities`, and every command that loads a manifest,
-// which hands the result to manifest.NewLoader as the vocabulary
-// kraai.yaml's `providers:` keys are checked against — validate or display
-// the capability vocabulary without first knowing which vendors a manifest
-// even names.
-//
-// Returns an error only if two providers in Declarations disagree with
-// their own Capabilities() — a provider declaring the same capability name
-// twice, or an empty Name — which is a bug in this codebase, not a runtime
-// condition an operator can hit. See resource.NewCatalog's own doc
-// comment.
+// Capabilities builds the capability catalog from every provider's
+// client-free declaration. It takes no context, manifest or credential, so
+// a caller can validate or display the vocabulary before knowing which
+// vendors a manifest names. An error is a provider disagreeing with its own
+// declarations, a bug rather than a runtime condition.
 func Capabilities() (*resource.Catalog, error) {
 	return resource.NewCatalog(Declarations...)
 }
