@@ -11,8 +11,9 @@ import (
 // hyphen ("kraai-api-"). The trailing hyphen is required because
 // internal/naming applies a prefix by plain concatenation, with no separator
 // logic to disagree with what the author wrote. The charset matches
-// internal/naming's own, for the same DNS-safety reason. Owned here rather
-// than in internal/naming because that package imports this one.
+// internal/naming.s own, for the same DNS-safety reason. Validated here,
+// where every other manifest field is; internal/naming trusts the prefix it
+// is given.
 var prefixPattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*-$`)
 
 // maxPrefixLength bounds Naming.Prefix at the same ceiling as a persistent
