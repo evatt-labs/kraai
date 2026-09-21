@@ -35,6 +35,12 @@ var lambdaAssumeRolePolicy = map[string]any{
 // manifest author to remember.
 const awsLambdaBasicExecutionRoleArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
+// awsLambdaVPCAccessExecutionRoleArn is the AWS-managed policy a function
+// inside a VPC needs to create and delete its own network interfaces. Added
+// only when the service declares a network binding (lambda.go vpcConfigFor),
+// since it is the wiring that needs it, not the function.
+const awsLambdaVPCAccessExecutionRoleArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+
 // iamRoleResource provisions a service's Lambda execution role.
 //
 // Depended upon by TypeLambdaFunction's own registration (register.go) —
@@ -133,6 +139,13 @@ func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (re
 		}
 	}
 	policies := append([]string{awsLambdaBasicExecutionRoleArn}, extra...)
+	network, err := serviceNetwork(spec)
+	if err != nil {
+		return resource.Spec{}, err
+	}
+	if network != nil {
+		policies = append(policies, awsLambdaVPCAccessExecutionRoleArn)
+	}
 
 	translated := spec
 	translated.Config = map[string]any{

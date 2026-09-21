@@ -20,15 +20,19 @@ security group admitting it. The function receives the queue as
 `JOBS_QUEUE_URL` and `JOBS_QUEUE_ARN`, the table as `DB_TABLE_NAME` and the
 cache as `CACHE_REDIS_URL`; its execution role carries an inline policy
 granting it the queue and the table. The cache needs no grant, only network
-reach, which the function does not have yet (see below).
+reach, which the function has (see below).
 
-kraai does not wire the `network` binding into the Lambda function's own
-VPC config — there is no `VpcConfig` property in
-`internal/provider/aws/lambda.go`'s translate step. The two bindings are
-provisioned and torn down together because they are declared on the same
-service, not because the function actually runs inside the VPC. This
-manifest still declares both, because the goal is exercising every
-capability AWS claims, not a network topology that is wired up end to end.
+The function runs inside the `network` binding: its `VpcConfig` names the
+binding's subnet and the VPC's default security group, and its execution
+role gains `AWSLambdaVPCAccessExecutionRole`. That is what lets it reach the
+cache. It is also what cuts it off from everything else: the network builds
+one public subnet with an internet gateway, a Lambda network interface never
+gets a public IP, and no NAT gateway or VPC endpoint is built (#244), so
+from inside the VPC the function cannot reach the internet or the public
+SQS, DynamoDB and S3 endpoints. The queue and table bindings on this
+service are granted and named, not reachable, until #244 lands. The
+manifest declares all of them regardless, because its job is exercising
+every capability AWS claims, not a topology that works end to end.
 
 ```
 go run ./cmd/kraai plan kraai-example --dir examples/aws-api
