@@ -145,9 +145,11 @@ or a package `doc.go`, never in a function's doc comment.
 **Never cite decision numbers** (`D26`, `D13`) in source — they couple code
 to a document that moves. State the reason instead.
 
-Much of the existing tree violates this: 43% of non-test lines are comments
-and some doc blocks exceed 70 lines. It is being unwound. Do not imitate it,
-and do not treat its verbosity as the house style.
+The tree was brought to this convention in September 2026: about 28% of
+non-test lines are comments, and the longest doc block is the plugin ABI
+contract, which is a compatibility surface. Do not reintroduce the old
+verbosity, and do not cite an issue, PR or workstream in a comment; state
+the reason instead.
 
 Commits: conventional prefix, imperative, no filler, breaking changes use
 `feat!:`. **No AI attribution anywhere** — no generated-with lines, no

@@ -51,9 +51,9 @@ page](https://github.com/evatt-labs/kraai/wiki/Architecture) or a package's
 **Do not cite decision numbers in source.** `D26`, `D13` and friends couple
 code to an external document and rot when it changes. Say the thing instead.
 
-Existing code does not all follow this yet — 43% of non-test lines are
-comments, with doc blocks running to 70+ lines. That is being unwound; do not
-use it as the model.
+The tree follows this as of September 2026, at about 28% of non-test lines.
+The one long doc block left is the plugin ABI contract, which is a
+compatibility surface. Do not reintroduce the old verbosity.
 
 **A test that has never been seen to fail is not evidence.** For anything
 load-bearing, break the behaviour deliberately, watch the test fail, restore

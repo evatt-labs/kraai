@@ -51,14 +51,9 @@ var objectsBindingSchema = resource.NewSchema("objects binding", map[string]any{
 	"additionalProperties": false,
 })
 
-// queuesBindingSchema validates one entry of a service's `queues:` list: a
-// bare binding name.
-//
-// It used to accept a "consumer" flag saying the service processes the queue
-// rather than only producing to it. A consumer is a Worker, and kraai
-// implements no Cloudflare compute (evatt-labs/kraai#135), so the flag was
-// planned into a Spec nothing read — accepted, documented and inert. It
-// returns with the Worker that consumes.
+// queuesBindingSchema validates one entry of a service.s `queues:` list: a
+// bare binding name. A consumer flag returns with the Worker that consumes,
+// which kraai does not implement yet.
 var queuesBindingSchema = resource.NewSchema("queues binding", map[string]any{
 	"type":                 "object",
 	"properties":           map[string]any{"binding": map[string]any{"type": "string"}},
