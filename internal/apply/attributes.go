@@ -3,18 +3,14 @@ package apply
 import "sync"
 
 // attrIndex is the binding-scoped attribute handoff, the non-secret
-// counterpart to secretIndex. It holds what each successful action published
-// in its State.Attributes, so a resource in a later wave can read an
-// identifier its dependency was assigned.
+// counterpart to secretIndex: what each successful action published in its
+// State.Attributes, so a later wave can read an identifier its dependency
+// was assigned.
 //
 // Keyed by binding and then by the producing resource's Ref.Key(), rather
-// than flattened by attribute name the way secrets are: one binding expands
-// to many resources here, and several of them publish a "VpcId". Naming the
-// producer is what keeps those apart, and it costs a consumer nothing since
-// it already named the same producer in its DependsOn.
-//
-// Safe for concurrent use, for the same reason secretIndex is: actions
-// within a wave run in parallel.
+// than flattened by attribute name as secrets are: one binding expands to
+// many resources, and several of them publish a "VpcId". Safe for
+// concurrent use.
 type attrIndex struct {
 	mu        sync.RWMutex
 	byBinding map[bindingKey]map[string]map[string]any
@@ -25,11 +21,9 @@ func newAttrIndex() *attrIndex {
 }
 
 // put records what one resource published, replacing any earlier entry for
-// the same producer.
-//
-// The stored map is copied: State.Attributes belongs to the state that is
-// also handed to resource.Outputs, and two owners of one map is how a
-// consumer ends up seeing a value mutate mid-read.
+// the same producer. The map is copied: State.Attributes also belongs to the
+// state handed to resource.Outputs, and two owners of one map is how a
+// consumer sees a value mutate mid-read.
 func (a *attrIndex) put(key bindingKey, refKey string, attrs map[string]any) {
 	if len(attrs) == 0 {
 		return
@@ -49,12 +43,11 @@ func (a *attrIndex) put(key bindingKey, refKey string, attrs map[string]any) {
 	m[refKey] = copied
 }
 
-// forAction returns every attribute set an action may read, keyed the way
+// forAction returns every attribute set an action may read, keyed as
 // resource.Spec.Attributes documents: bare Ref.Key() for producers in the
 // action's own binding, "<binding>.<key>" for any other binding in reads.
-//
-// reads must already be resolved to its effective value, exactly as
-// secretIndex.forAction requires.
+// reads must already be its effective value, as secretIndex.forAction
+// requires.
 func (a *attrIndex) forAction(svcKey, ownBinding string, reads []string) map[string]map[string]any {
 	a.mu.RLock()
 	defer a.mu.RUnlock()

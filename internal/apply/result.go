@@ -8,28 +8,24 @@ import (
 )
 
 // Outcome is what actually happened to one resource during an Apply run:
-// the mutating analogue of plan.ActionKind.
-//
-// A distinct type rather than a reuse of plan.ActionKind, because an apply
-// additionally needs to say that a mutation failed — as opposed to the read
-// before it — and that an action never ran because an earlier wave failed.
+// the mutating analogue of plan.ActionKind. A distinct type because an
+// apply also has to say that a mutation failed, as opposed to the read
+// before it, and that an action never ran because an earlier wave failed.
 type Outcome int
 
 const (
 	// OutcomeCreated means Create succeeded.
 	OutcomeCreated Outcome = iota
-	// OutcomeUnchanged means the action was plan.ActionNoChange: no
-	// provider call was made, but its state and secrets were still
-	// recorded (see the package doc).
+	// OutcomeUnchanged means the action was plan.ActionNoChange: no provider
+	// call was made, but its state and secrets were still recorded.
 	OutcomeUnchanged
 	// OutcomeReplaced means Delete then Create both succeeded.
 	OutcomeReplaced
-	// OutcomeFailed means a mutating call failed, or the action itself
-	// could not be resolved to a registered resource. See Err.
+	// OutcomeFailed means a mutating call failed, or the action could not be
+	// resolved to a registered resource. See Err.
 	OutcomeFailed
-	// OutcomeSkipped means this action was never attempted, because an
-	// earlier wave had a failure and apply refuses to start a wave that
-	// depends on one that did not fully succeed.
+	// OutcomeSkipped means this action was never attempted because an
+	// earlier wave had a failure.
 	OutcomeSkipped
 	// OutcomeUpdated means Update succeeded: the resource was changed in
 	// place, never deleted. Appended so the existing outcomes keep their
@@ -60,8 +56,8 @@ func (o Outcome) String() string {
 // ActionResult is one plan.Action's outcome after Apply has run.
 type ActionResult struct {
 	plan.Item
-	// Ref is the resource identity this outcome is about, carried straight
-	// from the plan.Action it came from.
+	// Ref is the resource identity this outcome is about, carried from the
+	// plan.Action it came from.
 	Ref resource.Ref
 	// Outcome is what happened.
 	Outcome Outcome
@@ -75,11 +71,9 @@ type Result struct {
 	Results []ActionResult
 }
 
-// HasFailures reports whether any action failed.
-//
-// OutcomeSkipped is not a failure in its own right: a skipped action
-// recorded no error, it never ran because an earlier wave failed, and that
-// earlier failure is what this already reports.
+// HasFailures reports whether any action failed. OutcomeSkipped is not a
+// failure in its own right: the earlier failure that caused it is what this
+// already reports.
 func (r *Result) HasFailures() bool {
 	if r == nil {
 		return false
