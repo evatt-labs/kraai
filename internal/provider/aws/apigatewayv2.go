@@ -6,46 +6,14 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// apiGatewayProtocolType is the only ProtocolType this package ever
-// creates: kraai's own AWS compute target is a Lambda-backed HTTP API,
-// never the WebSocket protocol AWS::ApiGatewayV2::Api also supports.
+// apiGatewayProtocolType is the only ProtocolType this package creates.
 const apiGatewayProtocolType = "HTTP"
 
-// apiGatewayResource provisions a service's HTTP API Gateway, quick-created
-// with a Lambda integration.
-//
-// # Why this wrapper exists: the bare generic engine cannot create this type at all
-//
-// Before this fix, TypeAPIGatewayV2API was registered directly against
-// resourceType with no translate step (register.go, predating this
-// workstream's review). resourceType.Create submits Spec.Config verbatim as
-// Cloud Control's desired state; for a compute registration, Spec.Config is
-// expandCompute's generic shape — dir, settings, trigger, handler,
-// schedule — none of which are properties of AWS::ApiGatewayV2::Api at all.
-// Cloud Control validates a CreateResource call's properties against the
-// type's own schema, so every create for this type would have been
-// rejected outright: the default, unconfigured HTTP front door could not
-// be provisioned. Caught in PR #80's second review pass, alongside a
-// second, independent problem it also has to solve: even a successfully
-// created bare API routes nothing to any function, because nothing
-// connects the two.
-//
-// # Target quick-create, not separate Integration/Route/Stage registrations
-//
-// Verified against the live CloudFormation resource reference (not
-// assumed, the same standard this package already held itself to for
-// Lambda::Function's Code property): AWS::ApiGatewayV2::Api's Target
-// property is documented as "part of quick create" — "Quick create
-// produces an API with an integration, a default catch-all route, and a
-// default stage which is configured to automatically deploy changes...
-// For Lambda integrations, specify a function ARN. The type of the
-// integration will be ... AWS_PROXY." That is the entire routing story
-// this package needs, in one property, with no separate
-// AWS::ApiGatewayV2::Integration/Route/Stage registrations required — and
-// registering those three as their own Tier 2 types was explicitly
-// avoided rather than overlooked, since Target already covers kraai's one
-// use case (one Lambda behind one API, $default route, auto-deployed
-// stage) completely.
+// apiGatewayResource provisions a service's HTTP API, quick-created with a
+// Lambda integration. Target is CloudFormation's quick create: an
+// integration, a $default catch-all route and an auto-deploying stage in
+// one property, which is the whole routing story for one function behind
+// one API, so no separate Integration, Route or Stage types are registered.
 type apiGatewayResource struct {
 	*resourceType
 	client *Client
@@ -63,17 +31,9 @@ func newAPIGatewayResource(client *Client) *apiGatewayResource {
 	return a
 }
 
-// translate builds this API's real properties: Name and ProtocolType
-// (Name is settable and updatable in place, ProtocolType is fixed to
-// "HTTP" and is this type's sole createOnlyProperty per its own
-// CloudFormation reference), plus Target, the quick-create Lambda
-// integration ARN — which needs the account id (Client.AccountID, cached
-// after first use) the same way lambda.go's own Role property and
-// eventsrule.go's Target Arn already do, and for the identical reason: no
-// live lookup of the function itself, so this registration declares no
-// DependsOn on it (register.go) — Target's own construction never needed
-// the function to exist first, and the dependency graph records that
-// directly instead of leaving it implicit in same-wave co-location.
+// translate builds the API's properties: Name, ProtocolType (the sole
+// createOnly property), and Target, the function's locally built ARN, so
+// the registration needs no DependsOn on the function.
 func (a *apiGatewayResource) translate(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
 	account, err := a.client.AccountID(ctx)
 	if err != nil {
@@ -88,10 +48,8 @@ func (a *apiGatewayResource) translate(ctx context.Context, spec resource.Spec) 
 		"Target":       target,
 		// The generated execute-api hostname keeps serving unless told
 		// otherwise. With a custom domain declared it is a second, unlisted
-		// door — the exact thing kraai-api's manifest calls out as the
-		// boundary it wants — so it is closed when, and only when, a custom
-		// domain exists to be the only one.
-		//
+		// door, so it is closed when, and only when, a custom domain exists
+		// to be the only one.
 		"DisableExecuteApiEndpoint": hasCustomDomains(spec),
 	}
 	return translated, nil
@@ -106,10 +64,8 @@ func hasCustomDomains(spec resource.Spec) bool {
 
 // Diff compares the two properties kraai sets that a live API can differ
 // on. ProtocolType is createOnly and means replace. DisableExecuteApiEndpoint
-// is mutable, and its whole reason to exist is an API created before its
-// custom domain was declared — the engine reports it as an update, so the
-// generated hostname is closed on the next apply rather than staying open
-// until someone notices.
+// is mutable, and exists for an API created before its custom domain was
+// declared, so the generated hostname is closed on the next apply.
 func (a *apiGatewayResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	compared := spec
 	compared.Config = map[string]any{

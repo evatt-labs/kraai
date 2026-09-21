@@ -8,48 +8,22 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// artifactObjectKey derives the deterministic S3 key a service's packaged
-// artifact is stored under: {serviceName}/{sha256}.zip. Content-addressed
-// rather than a fixed "latest.zip"-style key so two applies of identical
-// source produce the identical key — the same object, no upload, no Code
-// diff — while any real code change produces a new key and, downstream, a
-// visible Lambda code update.
+// artifactObjectKey derives the S3 key a service's packaged artifact is
+// stored under: {serviceName}/{sha256}.zip. Content-addressed, so identical
+// source produces the same key and no upload, and any change a new key.
 func artifactObjectKey(serviceName, sha256Hex string) string {
 	return serviceName + "/" + sha256Hex + ".zip"
 }
 
 // lambdaFunctionResource provisions a service's Lambda function: packaging
 // its deployment artifact, uploading it to the per-service artifact bucket,
-// and wiring its execution role, environment and Web Adapter layer before
-// delegating to the generic Cloud Control engine.
+// and wiring its execution role, environment and layer before delegating to
+// the generic engine.
 //
-// # Why packaging lives in a wrapper, not the generic engine
-//
-// resourceType (resource.go) submits Spec.Config as Cloud Control's desired
-// state directly — correct for a binding capability's resources, where
-// internal/plan's expandBinding already builds a type-appropriate Config
-// per registration. expandCompute (out of scope, unchanged by this
-// workstream) builds one generic Config per service — {dir, settings,
-// trigger, handler, schedule} — shared across every Tier 1/2 compute
-// registration for that service, not a Lambda::Function property map. This
-// type (and every other Tier 2 type in this package) translates that
-// generic shape into its own real Cloud Control properties before
-// delegating; "no new engine work" (the brief's own scope line) means
-// resource.go's polling/patch/schema-diff mechanics stay untouched, not
-// that every registration can skip translation.
-//
-// # Why plan-time and apply-time packaging are split
-//
-// Building the deployment zip is pure local file I/O — safe to do during
-// `kraai plan`, which only ever calls Get and, where implemented,
-// Diff (internal/plan narrows every resource.Resource to a
-// getter, see that package's own doc). Uploading the built artifact to S3
-// is not safe there: `kraai plan` must never mutate anything, and
-// Diff's signature carries no context to run a network call
-// under cleanly regardless. So Diff here builds the artifact to hash it
-// and compares the hash against the one the last deploy recorded on the
-// function (see Diff), while the upload runs exclusively inside
-// Create/Update, which only `kraai apply` ever calls.
+// Packaging and upload are split: building the zip is local file I/O and
+// safe during a plan, where Diff hashes it to compare against the last
+// deploy; uploading is a mutation and happens only inside translate, which
+// only Create and Update reach.
 type lambdaFunctionResource struct {
 	*resourceType
 	client *Client
@@ -65,11 +39,8 @@ func newLambdaFunctionResource(client *Client) *lambdaFunctionResource {
 }
 
 // translate packages the service's artifact, uploads it, resolves its
-// execution role's ARN and its environment (literal and secret-sourced),
-// and builds the real AWS::Lambda::Function desired state. Every step here
-// either performs local I/O (packaging) or a network call this method's
-// ctx already carries — nothing here can run during `kraai plan`, only
-// `kraai apply`'s Create/Update.
+// execution role's ARN and its environment, and builds the real
+// AWS::Lambda::Function desired state. Reached only from Create and Update.
 func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
 	declared, err := declaredFunction(spec)
 	if err != nil {
@@ -90,14 +61,8 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 	if err != nil {
 		return resource.Spec{}, err
 	}
-	// The execution role's own real name is spec.Name — the same derived
-	// name every Tier 2 registration for this service shares (iamrole.go
-	// sets RoleName to exactly this) — so its ARN is constructed the same
-	// way eventsrule.go constructs the function's own: no live lookup. The
-	// role is now a real DependsOn ahead of this function (register.go), so
-	// a live lookup would be safe too; constructing it locally still avoids
-	// a needless extra API call for a value this package can already
-	// derive.
+	// The role's name is spec.Name, the derived name every compute
+	// registration for the service shares, so its ARN is built locally.
 	execRoleARN := roleARN(account, spec.Name)
 
 	env, err := resolveEnv(ctx, spec, declared.settings)
@@ -132,15 +97,12 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 }
 
 // artifactTagKey is the tag a function carries naming the SHA-256 of the
-// deployment package it runs. Code is write-only in Cloud Control, so
-// without this a plan could not tell a function running yesterday's source
-// from one running today's.
+// deployment package it runs.
 const artifactTagKey = "kraai:artifact-sha256"
 
 // declaredFunctionProperties is what the manifest says about a function
 // before anything is packaged, uploaded or resolved: the part of its
-// desired state a plan can compute with no attributes, no secrets and no
-// network.
+// desired state a plan can compute with no attributes, secrets or network.
 type declaredFunctionProperties struct {
 	dir      string
 	include  []string
@@ -169,12 +131,8 @@ func declaredFunction(spec resource.Spec) (declaredFunctionProperties, error) {
 		return declaredFunctionProperties{}, err
 	}
 
-	// include is set only when the service's manifest entry declares one
-	// (internal/plan's expandCompute omits an empty slice from Config
-	// entirely — see its own doc comment) so a plain type assertion, not a
-	// defensive multi-type read like settingStr's: this comes straight from
-	// manifest.Compute.Include, a typed []string field, never through a
-	// free-form settings map that could carry some other shape.
+	// A typed []string straight from manifest.Compute.Include, set only
+	// when the entry declares one.
 	include, _ := spec.Config["include"].([]string)
 
 	properties := map[string]any{
@@ -186,18 +144,11 @@ func declaredFunction(spec resource.Spec) (declaredFunctionProperties, error) {
 		"MemorySize":    lambdaSettings.MemorySize,
 		"Timeout":       lambdaSettings.Timeout,
 	}
-	// Layers is emitted only when one was configured. A directly-invoked
-	// function needs no layer, and sending Layers: [""] for it would be an
-	// invalid ARN that Cloud Control rejects outright.
+	// Layers only when configured: Layers: [""] is an invalid ARN.
 	if lambdaSettings.LayerArn != "" {
 		properties["Layers"] = []any{lambdaSettings.LayerArn}
 	}
-	// ReservedConcurrentExecutions is set only when the manifest actually
-	// declared one — nil means "no opinion," not zero, and the two must
-	// never collapse into the same desired-state shape. See
-	// LambdaSettings.ReservedConcurrentExecutions' own doc comment
-	// (compute_settings.go) for why, and for the live schema evidence that
-	// this is the correct Cloud Control property name.
+	// Only when declared: nil means no opinion, not zero.
 	if lambdaSettings.ReservedConcurrentExecutions != nil {
 		properties["ReservedConcurrentExecutions"] = *lambdaSettings.ReservedConcurrentExecutions
 	}
@@ -206,8 +157,7 @@ func declaredFunction(spec resource.Spec) (declaredFunctionProperties, error) {
 
 // serviceNetwork returns the one network binding this provider fulfils on
 // the service, or none. A function runs inside at most one VPC, so a second
-// network binding is refused by name rather than one of the two winning
-// quietly.
+// network binding is refused by name rather than one winning quietly.
 func serviceNetwork(spec resource.Spec) (*serviceBinding, error) {
 	bindings, err := decodeServiceBindings(spec)
 	if err != nil {
@@ -230,28 +180,18 @@ func serviceNetwork(spec resource.Spec) (*serviceBinding, error) {
 }
 
 // vpcConfigFor places the function inside the service's network binding,
-// when it declares one: the binding's subnet, and the VPC's own default
-// security group, which allows every outbound connection and is what a
-// function needs. Nothing inside the VPC has to accept inbound from the
-// function; the cache's security group admits the VPC's address range.
-//
-// Read from what the VPC and subnet published, which this type has because
-// it reads every binding on its service (register.go). A function inside a
-// VPC reaches the internet only through a NAT gateway, which the network
-// binding does not yet provision (evatt-labs/kraai#244): a service that
-// declares a network reaches what is inside it and nothing else.
+// when it declares one: both subnets of a tier, one per zone, and the VPC's
+// default security group, which allows every outbound connection. The
+// private tier when the network has one, since that is the tier with a NAT
+// route to the internet; the public tier otherwise, where the function
+// reaches the VPC and its gateway endpoints and nothing beyond. Read from
+// what the VPC and subnets published, which this type has because it reads
+// every binding on its service.
 func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
 	network, err := serviceNetwork(spec)
 	if err != nil || network == nil {
 		return nil, err
 	}
-	// The private subnet when the network has one: that is the subnet with
-	// a route to the internet through the NAT gateway. The public subnet
-	// otherwise, where the function reaches the VPC and its gateway
-	// endpoints and nothing beyond.
-	// Both subnets of the tier, one per zone: an interface in each keeps
-	// the function reachable to its zone-local resources when a zone is
-	// out.
 	var subnetIDs []any
 	for _, subnetKey := range tierSubnetKeys(hasPrivateSubnet(network.Config)) {
 		subnetID, err := spec.Attribute(network.Binding+"."+subnetKey, "SubnetId")
@@ -274,11 +214,8 @@ func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
 }
 
 // resolveEnv builds the function's environment variables: settings.Env
-// passed through verbatim, plus settings.EnvSecrets resolved through
-// spec.Secret at the point of use — the credential contract this package
-// is written against (see the compute_settings.go LambdaSettings.EnvSecrets
-// doc comment for the namespacing rule and why no binding name is ever
-// hardcoded here).
+// verbatim, plus settings.EnvSecrets resolved through spec.Secret at the
+// point of use.
 func resolveEnv(ctx context.Context, spec resource.Spec, settings LambdaSettings) (map[string]any, error) {
 	env := make(map[string]any, len(settings.Env)+len(settings.EnvSecrets))
 	for k, v := range settings.Env {
@@ -298,14 +235,9 @@ func resolveEnv(ctx context.Context, spec resource.Spec, settings LambdaSettings
 // addBindingEnv publishes what each of the service's AWS bindings resolved
 // to, so the function can reach it by its binding's name: a queues binding
 // JOBS becomes JOBS_QUEUE_URL and JOBS_QUEUE_ARN, an objects binding ASSETS
-// becomes ASSETS_BUCKET_NAME. Read from Spec.Attributes, which the applier
-// fills from what the binding's own resource published: this type reads
-// every binding on its service (register.go), so it always runs after them.
-//
-// A binding another vendor fulfils publishes a credential, which
-// settings.envSecrets maps by hand (resolveEnv). A name the manifest already
-// chose for a variable is not overwritten: two sources for one variable is
-// a conflict to report, not to resolve quietly.
+// becomes ASSETS_BUCKET_NAME. A binding another vendor fulfils publishes a
+// credential, which envSecrets maps by hand. A variable the manifest already
+// set is a conflict to report, not to resolve quietly.
 func addBindingEnv(ctx context.Context, spec resource.Spec, env map[string]any) error {
 	variables, err := bindingVariables(spec)
 	if err != nil {
@@ -360,15 +292,14 @@ func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
 				}})
 		case manifest.CapabilityObjects:
 			// The bucket's name is its identity, derived rather than
-			// published, so nothing has to be read back.
+			// published.
 			out = append(out, bindingVariable{name: prefix + "_BUCKET_NAME", value: func(context.Context, resource.Spec) (any, error) {
 				return b.Name, nil
 			}})
 		case manifest.CapabilityKeyValue:
-			// The cache's endpoint only exists once created, so it is read
-			// from what the cache published. Reachable only from inside
-			// the cache's network, which the service's own network binding
-			// places the function in (vpcConfigFor).
+			// The cache's endpoint exists only once created. Reachable only
+			// from inside the cache's network, which vpcConfigFor places the
+			// function in.
 			if driver, _ := b.Config["driver"].(string); driver != DriverRedis {
 				continue
 			}
@@ -379,26 +310,22 @@ func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
 		case manifest.CapabilityDatabase:
 			switch driver, _ := b.Config["driver"].(string); driver {
 			case DriverDynamoDB:
-				// Likewise the table's name.
 				out = append(out, bindingVariable{name: prefix + "_TABLE_NAME", value: func(context.Context, resource.Spec) (any, error) {
 					return b.Name, nil
 				}})
 			case DriverPostgres:
 				if engine, _ := b.Config["engine"].(string); engine == engineAurora {
 					// The cluster's URL carries its master password, so it
-					// is a credential: produced by the cluster (aurora.go)
-					// and resolved here at the moment of use, under the
-					// name apply namespaces another binding's secret by.
+					// is a credential, produced by aurora.go and resolved
+					// here at the moment of use.
 					secretKey := b.Binding + "." + SecretConnectionURI
 					out = append(out, bindingVariable{name: prefix + "_DATABASE_URL", value: func(ctx context.Context, spec resource.Spec) (any, error) {
 						return spec.Secret(ctx, secretKey)
 					}})
 					continue
 				}
-				// The DSQL cluster's endpoint is assigned at create and
-				// read from what the cluster published. The URL carries no
-				// password: the function signs an IAM token for the
-				// endpoint when it connects (dsql.go).
+				// The DSQL URL carries no password: the function signs an
+				// IAM token when it connects.
 				clusterKey := b.attributeKey(spec, TypeDSQLCluster)
 				out = append(out, bindingVariable{name: prefix + "_DATABASE_URL", value: func(_ context.Context, spec resource.Spec) (any, error) {
 					return dsqlURL(spec, clusterKey)
@@ -411,21 +338,12 @@ func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
 
 // Diff decides whether an existing function needs a redeploy from what a
 // plan can know: the manifest, the source on disk and the live function.
-// Nothing is uploaded and no secret or attribute is resolved, since a plan
-// has none of those to hand.
-//
-// Compared, in order: FunctionName, the one createOnly property, a
-// difference in which is a replace; the declared properties (handler,
-// runtime, architecture, sizing, layer, reserved concurrency) through the
-// generic comparison; the artifact, by hashing the source directory and
-// reading the hash the last deploy recorded in the function's tags; the
-// environment, where a literal variable must match its value and a
-// secret-sourced or binding-derived one must exist under its name; and
-// whether the function is inside a VPC, which follows from whether the
-// service declares a network.
-//
-// It used to compare only FunctionName, so a function was deployed once
-// and never again (evatt-labs/kraai#245).
+// Compared in order: the declared properties through the generic comparison
+// (FunctionName is createOnly, so a difference there is a replace); the
+// artifact, by hashing the source and reading the hash the last deploy
+// recorded in the tags; the environment, where a literal variable must
+// match and a secret or binding variable must exist; and whether the
+// function is inside a VPC.
 func (l *lambdaFunctionResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	if state == nil {
 		return resource.Same, nil
@@ -480,9 +398,8 @@ func tagValue(properties map[string]any, key string) string {
 
 // environmentMatches reports whether the live function's environment is the
 // one the spec would produce, as far as a plan can tell: every literal
-// variable carries its value, every secret-sourced or binding-derived
-// variable exists, and nothing else does. A secret's or a published
-// attribute's value cannot be compared here and is not.
+// variable carries its value, every secret or binding variable exists, and
+// nothing else does.
 func environmentMatches(spec resource.Spec, settings LambdaSettings, state *resource.State) (bool, error) {
 	environment, _ := state.Attributes["Environment"].(map[string]any)
 	live, _ := environment["Variables"].(map[string]any)
@@ -518,24 +435,17 @@ func environmentMatches(spec resource.Spec, settings LambdaSettings, state *reso
 }
 
 // insideVPC reports whether a live function is attached to a VPC. Lambda
-// reports a detached function either without VpcConfig or with one whose
-// subnet list is empty.
+// reports a detached function either without VpcConfig or with an empty
+// subnet list.
 func insideVPC(state *resource.State) bool {
 	vpcConfig, _ := state.Attributes["VpcConfig"].(map[string]any)
 	subnets, _ := vpcConfig["SubnetIds"].([]any)
 	return len(subnets) > 0
 }
 
-// ValidateSpec implements plan.SpecValidator: decodeLambdaSettings is pure
-// (no I/O) validation of the merged settings map — required
-// runtime/architecture/layerArn, reservedConcurrency's type and sign,
-// package's one accepted value, httpFrontDoor's two accepted values, and
-// the unknown-key check (validateKnownSettings, settings_validate.go) —
-// and this is where it runs unconditionally, before internal/plan's decide
-// ever calls Get. See plan.SpecValidator's own doc comment for why this
-// replaced hanging the same check off Diff, and for the real
-// `kraai plan` evidence (a typo'd reservedConcurrency, an invalid
-// httpFrontDoor) that Diff alone missed on a fresh environment.
+// ValidateSpec implements plan.SpecValidator with the pure validation of
+// the merged settings, so a typo or an invalid value fails a fresh
+// environment's first plan, where Diff is never reached.
 func (l *lambdaFunctionResource) ValidateSpec(spec resource.Spec) error {
 	settingsMap, _ := spec.Config["settings"].(map[string]any)
 	_, err := decodeLambdaSettings(settingsMap)

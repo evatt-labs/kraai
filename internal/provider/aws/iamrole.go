@@ -10,12 +10,9 @@ import (
 // TypeIAMRole is AWS::IAM::Role's Cloud Control TypeName.
 const TypeIAMRole = "AWS::IAM::Role"
 
-// lambdaAssumeRolePolicy is the fixed trust policy every Lambda execution
-// role this package creates carries: only the Lambda service itself may
-// assume it. Not manifest-configurable — a compute service's execution
-// role exists for exactly one purpose (letting its own function run as
-// it), and widening who can assume it is a security decision this package
-// does not hand to free-form settings.
+// lambdaAssumeRolePolicy is the fixed trust policy every execution role
+// carries: only the Lambda service may assume it. Not configurable;
+// widening who can assume it is a security decision, not a setting.
 var lambdaAssumeRolePolicy = map[string]any{
 	"Version": "2012-10-17",
 	"Statement": []any{
@@ -27,29 +24,17 @@ var lambdaAssumeRolePolicy = map[string]any{
 	},
 }
 
-// awsLambdaBasicExecutionRoleArn is the AWS-managed policy every Lambda
-// execution role gets unconditionally: permission to create its own
-// CloudWatch Logs log group and stream and write to it. Without it the
-// function still runs, but nothing it prints or logs is ever retrievable —
-// not a subtle gap, a silent one (Rule 20), so this is not left to a
-// manifest author to remember.
+// awsLambdaBasicExecutionRoleArn is the managed policy every execution role
+// gets: permission to write its own CloudWatch logs. Without it a function
+// runs but nothing it logs is ever retrievable.
 const awsLambdaBasicExecutionRoleArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
-// awsLambdaVPCAccessExecutionRoleArn is the AWS-managed policy a function
-// inside a VPC needs to create and delete its own network interfaces. Added
-// only when the service declares a network binding (lambda.go vpcConfigFor),
-// since it is the wiring that needs it, not the function.
+// awsLambdaVPCAccessExecutionRoleArn is the managed policy a function
+// inside a VPC needs to manage its network interfaces. Added only when the
+// service declares a network binding.
 const awsLambdaVPCAccessExecutionRoleArn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 
 // iamRoleResource provisions a service's Lambda execution role.
-//
-// Depended upon by TypeLambdaFunction's own registration (register.go) —
-// this type declares no DependsOn of its own, only functions as a
-// dependency for the function that assumes it. Previously ordered ahead of
-// the function by declaring PhaseStorage purely to run first, despite
-// being neither storage nor a category match; that phase-as-priority hack
-// is exactly what resource.Registration.DependsOn replaced (see its own
-// doc comment).
 type iamRoleResource struct {
 	*resourceType
 	client *Client
@@ -65,14 +50,12 @@ func newIAMRoleResource(client *Client) *iamRoleResource {
 }
 
 // bindingsPolicyName names the one inline policy carrying every grant the
-// service's bindings need. One policy, rewritten whole, rather than one per
-// binding: IAM::Role's Policies is a single list property, and a binding
-// removed from the manifest must take its grant with it.
+// service's bindings need. One policy, rewritten whole, so a binding
+// removed from the manifest takes its grant with it.
 const bindingsPolicyName = "kraai-bindings"
 
 // queueActions is what a function needs to produce to and consume from a
-// queue it binds. Not sqs:*: managing the queue is kraai's job, not the
-// function's.
+// queue it binds. Managing the queue stays kraai's.
 var queueActions = []any{
 	"sqs:SendMessage",
 	"sqs:ReceiveMessage",
@@ -83,8 +66,7 @@ var queueActions = []any{
 }
 
 // tableActions is what a function needs to read and write the items of a
-// table it binds, and to query any index on it. Table administration stays
-// kraai's.
+// table it binds and query its indexes. Table administration stays kraai's.
 var tableActions = []any{
 	"dynamodb:GetItem",
 	"dynamodb:BatchGetItem",
@@ -99,8 +81,8 @@ var tableActions = []any{
 }
 
 // clusterActions is what a function needs to open a connection to a DSQL
-// cluster: a token as the admin role DSQL manages, or as a database role
-// the admin has granted to the execution role.
+// cluster: a token as the admin role, or as a database role the admin has
+// granted to the execution role.
 var clusterActions = []any{
 	"dsql:DbConnectAdmin",
 	"dsql:DbConnect",
@@ -115,27 +97,13 @@ var bucketActions = []any{
 	"s3:ListBucket",
 }
 
-// translate builds this role's real IAM properties. The incoming spec's
-// Config carries expandCompute's generic compute shape (dir, settings,
-// trigger, handler, schedule, none of which are IAM::Role properties at
-// all) — this package's Tier 2 types each discard what does not apply to
-// them and build their own type's actual desired state instead of
-// forwarding Spec.Config through unchanged, unlike the generic resourceType
-// used directly for a binding capability's own types.
-//
-// Reads only managedPolicyArns out of the merged settings, deliberately not
-// the full decodeLambdaSettings: runtime/architecture/layerArn are required
-// there because a function cannot deploy without them, but a role has
-// nothing to do with any of the three — requiring them here would fail
-// every role's Create/Update on a missing Lambda-only setting this type
-// never uses.
-//
-// The grants for the service's bindings are built here too, from the
-// derived names internal/plan supplies, with ARNs constructed locally. That
-// keeps the role in the first wave, and keeps Diff honest: plan compares a
-// role before any binding has published an attribute, so a grant derived
-// from attributes would read as absent on every plan and be rewritten on
-// every apply.
+// translate builds this role's real IAM properties from the generic compute
+// shape. It reads only managedPolicyArns out of the merged settings, not the
+// full decodeLambdaSettings: a role has nothing to do with runtime or
+// architecture. The bindings' grants are built from derived names with
+// locally constructed ARNs, which keeps the role in the first wave and
+// keeps Diff honest: a grant derived from published attributes would read
+// as absent on every plan.
 func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
 	settingsMap, _ := spec.Config["settings"].(map[string]any)
 	var extra []string
@@ -166,8 +134,8 @@ func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (re
 	if err != nil {
 		return resource.Spec{}, err
 	}
-	// Emitted only when a binding needs a grant: an empty inline policy is
-	// not a no-op, IAM rejects a document with no statements.
+	// Only when a binding needs a grant: IAM rejects a policy document with
+	// no statements.
 	if len(statements) > 0 {
 		translated.Config["Policies"] = []any{map[string]any{
 			"PolicyName": bindingsPolicyName,
@@ -182,9 +150,9 @@ func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (re
 
 // bindingStatements builds one policy statement per binding this provider
 // fulfils and a function needs a grant for. A binding another vendor
-// fulfils is reached with a credential, not IAM, and contributes nothing.
-// The account id is resolved only once a grant actually needs it, so a
-// service with no such binding never calls STS.
+// fulfils is reached with a credential, not IAM. The account id is resolved
+// only once a grant needs it, so a service with no such binding never calls
+// STS.
 func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.Spec) ([]any, error) {
 	bindings, err := decodeServiceBindings(spec)
 	if err != nil {
@@ -220,10 +188,9 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 				}
 			}
 			if driver == DriverPostgres {
-				// The cluster's ARN carries an identifier DSQL assigns,
-				// unknown until it exists; the grant names every cluster
-				// and the condition narrows it to the one carrying this
-				// binding's identity tag.
+				// The cluster's ARN carries an identifier DSQL assigns, so
+				// the grant names every cluster and the condition narrows it
+				// to the one carrying this binding's identity tag.
 				statement = map[string]any{
 					"Effect":   "Allow",
 					"Action":   clusterActions,
@@ -241,8 +208,7 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 				"Resource": []any{table, table + "/index/*"},
 			}
 		case manifest.CapabilityObjects:
-			// The bucket for listing, its objects for everything else: S3
-			// scopes the two to different ARNs.
+			// The bucket for listing, its objects for everything else.
 			statement = map[string]any{
 				"Effect":   "Allow",
 				"Action":   bucketActions,
@@ -265,8 +231,3 @@ func toAnySlice(in []string) []any {
 	}
 	return out
 }
-
-// Diff implements plan.Differ structurally (see
-// resourceType.Diff's own doc comment on why this package
-// satisfies that interface without importing internal/plan).
-//
