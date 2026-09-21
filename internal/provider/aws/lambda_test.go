@@ -775,3 +775,32 @@ func TestLambdaFunctionPublishesTheDSQLDatabaseURL(t *testing.T) {
 		t.Fatalf("Environment.Variables = %v, want %v", env, want)
 	}
 }
+
+// A network with a private block puts the function in the private subnet,
+// the one with a route to the internet through the NAT gateway.
+func TestLambdaFunctionJoinsThePrivateSubnetWhenTheNetworkHasOne(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	network := awsBinding("network", "NET", "myenv-api-net")
+	network["config"] = map[string]any{"cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": "10.90.2.0/24"}
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(network)
+	spec.Attributes = map[string]map[string]any{
+		"NET." + key(TypeSubnet):        {"SubnetId": "subnet-public"},
+		"NET." + key(TypePrivateSubnet): {"SubnetId": "subnet-private"},
+		"NET." + key(TypeVPC):           {"DefaultSecurityGroup": "sg-default"},
+	}
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	vpcConfig := fc.createCalls[0]["VpcConfig"].(map[string]any)
+	if subnets, _ := vpcConfig["SubnetIds"].([]any); len(subnets) != 1 || subnets[0] != "subnet-private" {
+		t.Fatalf("SubnetIds = %v, want the private subnet", vpcConfig["SubnetIds"])
+	}
+}

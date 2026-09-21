@@ -252,8 +252,8 @@ func TestNetworkRegistrationsDeclareResolvableDependencies(t *testing.T) {
 			}
 		}
 	}
-	if len(regs) != 9 {
-		t.Fatalf("registerNetwork returned %d registrations, want 9", len(regs))
+	if len(regs) != 15 {
+		t.Fatalf("registerNetwork returned %d registrations, want 15", len(regs))
 	}
 }
 

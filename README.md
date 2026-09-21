@@ -407,8 +407,9 @@ yet been exercised against a live account
 `driver: redis`) and `queues` (SQS) plan against a live account and have not
 been applied from CI ([#232](https://github.com/evatt-labs/kraai/issues/232));
 a function inside a `network` binding reaches the cache, S3 and DynamoDB
-(the network carries gateway endpoints for both) but not SQS or DSQL until
-the network gains egress
+(the network carries gateway endpoints for both), and SQS, DSQL and the
+internet only when the binding declares a `private` block, which adds a NAT
+gateway billed by the hour
 ([#244](https://github.com/evatt-labs/kraai/issues/244)).
 Cloudflare offers two compute products and kraai implements neither — Workers
 ([#135](https://github.com/evatt-labs/kraai/issues/135)) and Containers

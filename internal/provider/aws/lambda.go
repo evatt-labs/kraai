@@ -245,7 +245,15 @@ func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
 	if err != nil || network == nil {
 		return nil, err
 	}
-	subnetID, err := spec.Attribute(network.attributeKey(spec, TypeSubnet), "SubnetId")
+	// The private subnet when the network has one: that is the subnet with
+	// a route to the internet through the NAT gateway. The public subnet
+	// otherwise, where the function reaches the VPC and its gateway
+	// endpoints and nothing beyond.
+	subnetType := TypeSubnet
+	if hasPrivateSubnet(network.Config) {
+		subnetType = TypePrivateSubnet
+	}
+	subnetID, err := spec.Attribute(network.attributeKey(spec, subnetType), "SubnetId")
 	if err != nil {
 		return nil, err
 	}

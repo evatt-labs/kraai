@@ -189,3 +189,16 @@ func TestDatabaseBindingSchemaAcceptsAPostgresEntry(t *testing.T) {
 		t.Fatal("an engine this provider does not offer was accepted")
 	}
 }
+
+func TestNetworkBindingSchemaAcceptsAPrivateBlock(t *testing.T) {
+	if err := networkBindingSchema.Validate(map[string]any{
+		"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": "10.90.2.0/24",
+	}); err != nil {
+		t.Fatalf("a network with a private block was rejected: %v", err)
+	}
+	if err := networkBindingSchema.Validate(map[string]any{
+		"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": true,
+	}); err == nil {
+		t.Fatal("a non-string private block was accepted")
+	}
+}

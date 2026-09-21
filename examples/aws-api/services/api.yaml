@@ -7,12 +7,13 @@ services:
       settings:
         memorySize: 256
         timeout: 10
-    # The private network the function runs inside: its VpcConfig names
-    # this binding's subnet and the VPC's default security group, and its
-    # role gains VPC access. Inside the VPC the function reaches the cache
-    # and nothing outside it: no NAT gateway is built (see ../README.md).
+    # The private network the function runs inside. The private block opts
+    # into egress: a private subnet with a NAT gateway in the public one,
+    # and the function placed in the private subnet, so it reaches the
+    # queue, the cluster and the internet. Billed by the hour while it
+    # exists (see ../README.md).
     network:
-      - { binding: NET, cidr: 10.90.0.0/16, subnet: 10.90.1.0/24 }
+      - { binding: NET, cidr: 10.90.0.0/16, subnet: 10.90.1.0/24, private: 10.90.2.0/24 }
     # A standard SQS queue. The function receives JOBS_QUEUE_URL and
     # JOBS_QUEUE_ARN, and its execution role is granted the queue.
     queues:

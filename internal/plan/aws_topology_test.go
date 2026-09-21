@@ -600,3 +600,50 @@ func TestPlan_AWSCacheOrdersAfterItsNetwork(t *testing.T) {
 		}
 	}
 }
+
+// TestPlan_AWSNetworkEgressOrdersTheFunctionBehindTheNAT pins the private
+// half of a network: the NAT gateway waits for the EIP, the public subnet
+// and the gateway attachment; the private route waits for the NAT and the
+// private table; the function, placed in the private subnet, waits for it.
+func TestPlan_AWSNetworkEgressOrdersTheFunctionBehindTheNAT(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := kraaiAPIManifest()
+	m.Root.Providers[manifest.CapabilityNetwork] = &manifest.Provider{Vendor: "aws"}
+	api := m.Services["api"]
+	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{
+		{"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": "10.90.2.0/24"},
+	}
+	m.Services["api"] = api
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	waves := map[string]int{}
+	for _, a := range p.Actions {
+		if a.ServiceKey == "api" {
+			waves[a.Type] = a.Wave
+		}
+	}
+	for _, c := range []struct{ earlier, later string }{
+		{awsprovider.TypeEIP, awsprovider.TypeNatGateway},
+		{awsprovider.TypeSubnet, awsprovider.TypeNatGateway},
+		{awsprovider.TypeVPCGatewayAttachment, awsprovider.TypeNatGateway},
+		{awsprovider.TypeNatGateway, awsprovider.TypePrivateRoute},
+		{awsprovider.TypePrivateRouteTable, awsprovider.TypePrivateRoute},
+		{awsprovider.TypePrivateSubnet, awsprovider.TypePrivateSubnetRouteTableAssociation},
+		{awsprovider.TypePrivateSubnet, awsprovider.TypeLambdaFunction},
+	} {
+		e, ok := waves[c.earlier]
+		if !ok {
+			t.Fatalf("%s was not planned (waves: %v)", c.earlier, waves)
+		}
+		l, ok := waves[c.later]
+		if !ok {
+			t.Fatalf("%s was not planned (waves: %v)", c.later, waves)
+		}
+		if e >= l {
+			t.Errorf("%s (wave %d) must come before %s (wave %d)", c.earlier, e, c.later, l)
+		}
+	}
+}
