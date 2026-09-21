@@ -16,16 +16,14 @@ const (
 	// change.
 	ActionNoChange
 	// ActionReplace means the resource exists but its desired spec differs
-	// on a field the registered type cannot reconcile with Update — see
-	// Differ in diff.go.
+	// on a field the registered type cannot reconcile with Update.
 	ActionReplace
 	// ActionFailed means Get itself failed: no outcome could be decided for
 	// this resource. See Action.Err.
 	ActionFailed
 	// ActionUpdate means the resource exists and its desired spec differs
-	// only in properties the registered type can change in place — see
-	// Differ. Appended rather than placed beside ActionReplace so the
-	// existing kinds keep their values.
+	// only in properties the registered type can change in place. Appended
+	// so the existing kinds keep their values.
 	ActionUpdate
 )
 
@@ -48,8 +46,7 @@ func (k ActionKind) String() string {
 }
 
 // Item identifies what a single Action is about, independent of any live
-// provider client — safe to render, log, or serialize on its own, unlike a
-// resource.Registration, which carries a live resource.Resource.
+// provider client, so it is safe to render, log or serialize on its own.
 type Item struct {
 	// ServiceKey and Binding locate this resource in the manifest.
 	ServiceKey string
@@ -62,33 +59,24 @@ type Item struct {
 	// types under more than one provider.
 	Provider string
 	Type     string
-	// VendorType is what the vendor itself calls what Type drives, which
-	// differs from Type only when one vendor type plays several roles — one
-	// AWS::Lambda::Permission is two registrations here, one per thing it
-	// authorizes. Always populated, equal to Type in the common case, so a
-	// reader never has to know which case they are looking at.
-	//
-	// Carried through to output because Type alone cannot be looked up: an
-	// operator reading "AWS::Lambda::Permission::APIGateway" finds nothing
-	// under that name in any AWS console, and the type they can find was
-	// previously reachable only from inside the provider package.
+	// VendorType is what the vendor itself calls what Type drives. Always
+	// populated, equal to Type unless one vendor type plays several roles,
+	// so a reader never has to know which case they are looking at. Carried
+	// to output because an operator can find "AWS::Lambda::Permission" in
+	// a console and "AWS::Lambda::Permission::APIGateway" nowhere.
 	VendorType string
 	// Wave is the zero-based execution wave this resource is provisioned
 	// in: the length of the longest chain of dependencies that must
-	// complete before it can start, computed once per Plan by graph.go.
-	// Everything in one wave runs concurrently; apply executes waves in
-	// ascending order, destroy in descending order.
+	// complete before it can start. Everything in one wave runs
+	// concurrently; apply executes waves in ascending order, destroy in
+	// descending order.
 	Wave int
 	// ReadsBindings names the bindings in this action's own service whose
-	// credentials it may read.
-	//
-	// A compute item's Binding is its service key, while a database
-	// binding's producer registers under that service's binding name, so
-	// apply's (ServiceKey, Binding)-keyed secret index would never connect
-	// the two without this. It lives on Item rather than being derived
-	// inside apply because apply must not import internal/manifest or
-	// branch on capability, and the planner already walks a service's
-	// declared bindings.
+	// credentials and attributes it may read. A compute item's Binding is
+	// its service key while a database binding's producer registers under
+	// the binding name, so apply's (ServiceKey, Binding)-keyed index would
+	// never connect the two without this. On Item because apply must not
+	// import internal/manifest or branch on capability.
 	ReadsBindings []string
 }
 
@@ -98,9 +86,8 @@ type Action struct {
 	// Ref is this resource's derived identity (internal/naming).
 	Ref resource.Ref
 	// Spec is the desired state a subsequent apply would create or replace
-	// this resource with. Its Secrets are always empty — a plan never
-	// resolves a live credential; apply wires those from resource.Outputs
-	// and resource.SecretProducer.
+	// this resource with. Its Secrets are always empty: a plan never
+	// resolves a live credential.
 	Spec resource.Spec
 	// Current is what Get found, or nil when the resource does not exist
 	// (ActionCreate) or Get failed (ActionFailed).

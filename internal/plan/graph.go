@@ -8,57 +8,32 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// groupKey identifies one expansion group: the (service, binding) pair a
-// single Registry.Resolve call's results share. expandCompute resolves one
-// group per service (Binding == ServiceKey there), expandBinding one group
-// per manifest binding.
+// groupKey identifies one expansion group: the (service, binding) pair one
+// Registry.Resolve call's results share. A DependsOn key resolves only
+// within its own item's group, never across the manifest: a service's
+// Lambda permission depends on that service's own function.
 //
-// A DependsOn key resolves only within its own item's group, never across
-// the whole manifest — a service's Lambda permission depends on that
-// service's own function, not on every function in the manifest.
-//
-// # A group is one binding; a relationship between bindings is a read
-//
-// Note what is deliberately absent from this key: the capability. Two
-// entries under different capabilities that share a binding name are
-// therefore one group. That is not how two bindings are meant to be
-// related, and no registration should count on it: a DependsOn that
-// reaches across capabilities resolves only when names happen to coincide
-// and silently contributes nothing otherwise, which was the trap
-// evatt-labs/kraai#197 closed. A CloudFront distribution (cdn) orders
-// behind the S3 bucket it fronts (objects) because its manifest entry
-// names that binding as its origin, and the planner turns the reference
-// into a read edge (readsFor) — whatever either binding is called.
+// The capability is deliberately absent, so a DependsOn across capabilities
+// resolves only when binding names happen to coincide and contributes
+// nothing otherwise. A relationship between two bindings is a read, declared
+// by the entry that names the other binding, whatever either is called.
 type groupKey struct {
 	serviceKey string
 	binding    string
 }
 
-// computeWaves assigns every item a Wave: the length of the longest chain
-// of dependencies that must finish first, so a node with no dependencies
-// gets wave 0 and every other node gets one more than the largest wave
-// among the things it depends on.
+// computeWaves assigns every item a Wave: the length of the longest chain of
+// dependencies that must finish first. Three kinds of edge go into one
+// graph: type edges from each item's DependsOn, resolved within its group;
+// read edges from each item's reads; and service edges from
+// serviceDependsOn, connecting every item of a service to every item of each
+// service it depends on. A dependency naming a type the group never planned
+// contributes no edge.
 //
-// Two kinds of edges go into the same graph:
-//
-//   - Type edges, from each item's own resource.Registration.DependsOn,
-//     resolved against the other items in its own group (see groupKey).
-//   - Service edges, from serviceDependsOn (manifest.Service.DependsOn,
-//     validated at load time), connecting every item of a named service to
-//     every item of each service it depends on.
-//
-// A dependency naming a type the group never planned contributes no edge:
-// a registration its own conditions filtered out, or supplied by
-// another provider, has no node to point at.
-//
-// It runs Kahn's algorithm in layers rather than one node at a time, so
-// the layer a node lands in depends only on the graph's shape and not on
-// visit order — wave assignment is deterministic for a given manifest
-// whatever the map iteration order upstream.
-//
-// A cycle stalls the sort rather than being detected separately; the error
-// then names every item left unresolved, which is the cycle plus anything
-// transitively behind it.
+// Kahn's algorithm runs in layers rather than one node at a time, so the
+// layer a node lands in depends only on the graph's shape and not on visit
+// order. A cycle stalls the sort; the error names every item left
+// unresolved, which is the cycle plus anything transitively behind it.
 func computeWaves(items []plannedItem, serviceDependsOn map[string][]string) ([]int, error) {
 	n := len(items)
 	waves := make([]int, n)
@@ -103,16 +78,15 @@ func computeWaves(items []plannedItem, serviceDependsOn map[string][]string) ([]
 
 // buildGraph resolves every edge computeWaves needs into an adjacency list
 // (adj[i] is every node that depends directly on i) and each node's
-// indegree (how many unresolved dependencies it still has).
+// indegree.
 func buildGraph(items []plannedItem, serviceDependsOn map[string][]string) (adj [][]int, indegree []int) {
 	n := len(items)
 	adj = make([][]int, n)
 	indegree = make([]int, n)
 
-	// byGroup resolves a DependsOn key to a concrete item index, scoped to
-	// the (service, binding) group that produced it — see groupKey's doc
-	// comment. byService resolves a manifest depends_on service name to
-	// every item that service expanded to.
+	// byGroup resolves a DependsOn key to an item index within its
+	// (service, binding) group; byService resolves a manifest depends_on
+	// service name to every item that service expanded to.
 	byGroup := make(map[groupKey]map[string]int, n)
 	byService := make(map[string][]int, n)
 	for i, it := range items {
@@ -143,23 +117,14 @@ func buildGraph(items []plannedItem, serviceDependsOn map[string][]string) (adj 
 		}
 	}
 
-	// Read edges: a consumer runs after every producer in each binding it
-	// reads. This is what makes a credential or attribute handoff safe to
-	// rely on. apply hands a consumer whatever its read bindings have
-	// published *so far*, and within one wave "so far" is a race — a
-	// consumer sharing a wave with its producer snapshots an empty index and
-	// fails at the provider, far from the cause. Declaring a read now means
-	// the graph orders it, so the pair can never share a wave.
-	//
-	// Only bindings other than the consumer's own: same-binding producers are
-	// ordered by DependsOn already, and a binding's items reading their own
-	// binding is the common case that must not become a self-edge.
-	//
-	// A read is either a whole binding (a scope: every producer in it) or
-	// one type in a binding (a reference: the producer the registration
-	// says it reads). A referenced type the binding never planned
-	// contributes no edge, as an unplanned DependsOn does not; the reader's
-	// own translate then fails naming what never published.
+	// A consumer runs after every producer in each binding it reads. apply
+	// hands a consumer what its read bindings have published so far, and
+	// within one wave "so far" is a race; the edge means the pair can never
+	// share a wave. Only bindings other than the consumer's own: same-binding
+	// producers are ordered by DependsOn already, and reading one's own
+	// binding must not become a self-edge. A referenced type the binding
+	// never planned contributes no edge; the reader's own translate then
+	// fails naming what never published.
 	for i, it := range items {
 		for _, read := range it.reads {
 			if read.binding == it.Binding {
