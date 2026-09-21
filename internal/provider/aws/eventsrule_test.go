@@ -2,9 +2,9 @@ package aws
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -23,7 +23,7 @@ func newEventsRuleResourceForTest(fc *fakeClient, sts *fakeSTS) *eventsRuleResou
 func TestEventsRuleCreateBuildsTheFunctionARN(t *testing.T) {
 	fc := &fakeClient{
 		createID: "rule1", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/Name"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/Name"}},
 	}
 	sts := &fakeSTS{account: "123456789012"}
 	rule := newEventsRuleResourceForTest(fc, sts)
@@ -73,7 +73,7 @@ func TestEventsRuleGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	fc := &fakeClient{
 		byIdentifier: map[string]map[string]any{"myenv-tick": {"Name": "myenv-tick"}},
 		updateProps:  map[string]any{"Name": "myenv-tick"},
-		schema:       Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage(`{}`)}},
+		schema:       cfschema.Facts{HasUpdate: true},
 	}
 	sts := &fakeSTS{account: "123456789012"}
 	rule := newEventsRuleResourceForTest(fc, sts)
@@ -100,7 +100,7 @@ func TestEventsRuleDiffNeverCallsSTS(t *testing.T) {
 	// own doc comment); resolving the account id is not needed to answer
 	// that, and must not happen during plan.
 	sts := &fakeSTS{account: "123456789012"}
-	fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/Name"}}}
+	fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/Name"}}}
 	rule := newEventsRuleResourceForTest(fc, sts)
 
 	spec := resource.Spec{Name: "myenv-tick", Binding: "myenv-tick", Config: map[string]any{"schedule": "rate(1 hour)"}}

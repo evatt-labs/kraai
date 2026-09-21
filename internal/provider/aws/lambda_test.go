@@ -2,13 +2,13 @@ package aws
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -52,7 +52,7 @@ func TestLambdaFunctionCreatePackagesUploadsAndWiresProperties(t *testing.T) {
 
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}},
 	}
 	fs3 := &fakeS3{}
 	fsts := &fakeSTS{account: "123456789012"}
@@ -119,7 +119,7 @@ func TestLambdaFunctionReservedConcurrentExecutions(t *testing.T) {
 		t.Helper()
 		fc := &fakeClient{
 			createID: "myenv-api", createProps: map[string]any{},
-			schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}},
+			schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}},
 		}
 		return newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"}), fc
 	}
@@ -185,7 +185,7 @@ func TestLambdaFunctionEnvLiteralsAndSecrets(t *testing.T) {
 
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}},
 	}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
@@ -331,9 +331,9 @@ func functionDiffFixture(t *testing.T) (*lambdaFunctionResource, string, *fakeST
 	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
-	fc := &fakeClient{schema: Schema{
-		CreateOnlyProperties: []string{"/properties/FunctionName"},
-		Handlers:             map[string]json.RawMessage{"update": json.RawMessage(`{}`)},
+	fc := &fakeClient{schema: cfschema.Facts{
+		CreateOnly: []string{"/properties/FunctionName"},
+		HasUpdate:  true,
 	}}
 	fsts := &fakeSTS{account: "123456789012"}
 	return newLambdaFunctionResourceForTest(fc, &fakeS3{}, fsts), dir, fsts
@@ -470,7 +470,7 @@ func TestLambdaFunctionCreateRecordsTheArtifactHash(t *testing.T) {
 		t.Fatalf("buildArtifact: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 	if _, err := fn.Create(context.Background(), baseLambdaSpec(t, dir, nil)); err != nil {
 		t.Fatalf("Create: %v", err)
@@ -489,7 +489,7 @@ func TestLambdaFunctionGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	fc := &fakeClient{
 		byIdentifier: map[string]map[string]any{"myenv-api": {"FunctionName": "myenv-api"}},
 		updateProps:  map[string]any{"FunctionName": "myenv-api"},
-		schema:       Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage(`{}`)}},
+		schema:       cfschema.Facts{HasUpdate: true},
 	}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
@@ -531,7 +531,7 @@ func TestLambdaFunctionCreateOmitsLayersWhenUnset(t *testing.T) {
 
 	fc := &fakeClient{
 		createID: "myenv-tick", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}},
 	}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
@@ -562,7 +562,7 @@ func TestLambdaFunctionPublishesBindingsToItsEnvironment(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	spec := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"LOG_LEVEL": "debug"}})
@@ -621,7 +621,7 @@ func TestLambdaFunctionRejectsABindingVariableTheSettingsAlsoSet(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	spec := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"ASSETS_BUCKET_NAME": "elsewhere"}})
@@ -638,7 +638,7 @@ func TestLambdaFunctionPublishesADynamoDBTableName(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	table := awsBinding("database", "DB", "myenv-api-db")
@@ -660,7 +660,7 @@ func TestLambdaFunctionPublishesTheCacheURL(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	cache := awsBinding("keyvalue", "CACHE", "myenv-api-cache")
@@ -691,7 +691,7 @@ func TestLambdaFunctionJoinsItsServiceNetwork(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	spec := baseLambdaSpec(t, dir, nil)
@@ -716,7 +716,7 @@ func TestLambdaFunctionOutsideANetworkHasNoVpcConfig(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	spec := baseLambdaSpec(t, dir, nil)
@@ -740,7 +740,7 @@ func TestLambdaFunctionRefusesTwoNetworks(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	spec := baseLambdaSpec(t, dir, nil)
@@ -758,7 +758,7 @@ func TestLambdaFunctionPublishesTheDSQLDatabaseURL(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	pg := awsBinding("database", "PG", "myenv-api-pg")
@@ -786,7 +786,7 @@ func TestLambdaFunctionJoinsThePrivateSubnetWhenTheNetworkHasOne(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	network := awsBinding("network", "NET", "myenv-api-net")
@@ -817,7 +817,7 @@ func TestLambdaFunctionPublishesTheAuroraDatabaseURLAsASecret(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	sql := awsBinding("database", "SQL", "myenv-api-sql")

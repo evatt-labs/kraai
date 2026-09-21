@@ -2,9 +2,9 @@ package aws
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -61,7 +61,7 @@ func TestLambdaURLGetUpdateDeleteDiff(t *testing.T) {
 		list:         []string{"url1"},
 		byIdentifier: map[string]map[string]any{"url1": {"TargetFunctionArn": "myenv-api"}},
 		updateProps:  map[string]any{"TargetFunctionArn": "myenv-api"},
-		schema:       Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage(`{}`)}},
+		schema:       cfschema.Facts{HasUpdate: true},
 	}
 	url := &lambdaURLResource{
 		inner: &resourceType{

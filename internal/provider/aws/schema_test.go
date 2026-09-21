@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"encoding/json"
 	"reflect"
 	"testing"
 )
@@ -71,28 +70,6 @@ func TestLookupPath(t *testing.T) {
 		_, ok := lookupPath(map[string]any{"x": 1}, nil)
 		if ok {
 			t.Fatal("expected ok=false for an empty path")
-		}
-	})
-}
-
-func TestSchemaHasUpdateHandler(t *testing.T) {
-	t.Run("present", func(t *testing.T) {
-		s := Schema{Handlers: map[string]json.RawMessage{"create": nil, "update": nil, "delete": nil}}
-		if !s.HasUpdateHandler() {
-			t.Fatal("expected HasUpdateHandler to report true")
-		}
-	})
-
-	t.Run("absent (IMMUTABLE provisioning: create/read/delete only)", func(t *testing.T) {
-		s := Schema{Handlers: map[string]json.RawMessage{"create": nil, "read": nil, "delete": nil}}
-		if s.HasUpdateHandler() {
-			t.Fatal("expected HasUpdateHandler to report false")
-		}
-	})
-
-	t.Run("no handlers decoded at all", func(t *testing.T) {
-		if (Schema{}).HasUpdateHandler() {
-			t.Fatal("expected HasUpdateHandler to report false for a zero-value Schema")
 		}
 	})
 }

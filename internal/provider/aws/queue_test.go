@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -56,9 +57,9 @@ func TestQueueGetMatchesOnQueueName(t *testing.T) {
 }
 
 func TestQueueDiffIsSameWhenTheNameMatches(t *testing.T) {
-	fc := &fakeClient{schema: Schema{
-		PrimaryIdentifier:    []string{"/properties/QueueUrl"},
-		CreateOnlyProperties: []string{"/properties/QueueName"},
+	fc := &fakeClient{schema: cfschema.Facts{
+		PrimaryIdentifier: []string{"/properties/QueueUrl"},
+		CreateOnly:        []string{"/properties/QueueName"},
 	}}
 	queue := newQueueResource(fc)
 

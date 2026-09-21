@@ -2,9 +2,9 @@ package aws
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -17,7 +17,7 @@ func newIAMRoleResourceForTest(fc *fakeClient) *iamRoleResource {
 func TestIAMRoleCreateAlwaysIncludesBasicExecutionPolicy(t *testing.T) {
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	role := newIAMRoleResourceForTest(fc)
 
@@ -53,7 +53,7 @@ func TestIAMRoleCreateAlwaysIncludesBasicExecutionPolicy(t *testing.T) {
 func TestIAMRoleCreateAppendsSettingsManagedPolicies(t *testing.T) {
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	role := newIAMRoleResourceForTest(fc)
 
@@ -81,7 +81,7 @@ func TestIAMRoleDoesNotRequireLambdaOnlySettings(t *testing.T) {
 	// not fail just because those Lambda-only settings are unset.
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	role := newIAMRoleResourceForTest(fc)
 
@@ -98,7 +98,7 @@ func TestIAMRoleUpdate(t *testing.T) {
 	fc := &fakeClient{
 		byIdentifier: map[string]map[string]any{"myenv-api": {"RoleName": "myenv-api"}},
 		updateProps:  map[string]any{"RoleName": "myenv-api"},
-		schema:       Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage(`{}`)}},
+		schema:       cfschema.Facts{HasUpdate: true},
 	}
 	role := newIAMRoleResourceForTest(fc)
 
@@ -167,7 +167,7 @@ func bindingsPolicy(t *testing.T, desired map[string]any) []any {
 func TestIAMRoleGrantsEachAWSBindingAndNothingElse(t *testing.T) {
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	fsts := &fakeSTS{account: "123456789012"}
 	role := newIAMRoleResource(&Client{sts: fsts, region: "us-east-1"})
@@ -220,7 +220,7 @@ func TestIAMRoleGrantsEachAWSBindingAndNothingElse(t *testing.T) {
 func TestIAMRoleWithoutGrantsEmitsNoPolicyAndNoSTSCall(t *testing.T) {
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	fsts := &fakeSTS{account: "123456789012"}
 	role := newIAMRoleResource(&Client{sts: fsts, region: "us-east-1"})
@@ -246,10 +246,10 @@ func TestIAMRoleWithoutGrantsEmitsNoPolicyAndNoSTSCall(t *testing.T) {
 // names the queue is unchanged, and one whose policy lacks a newly declared
 // queue is a mutable update — not a rewrite on every apply.
 func TestIAMRoleDiffSeesGrantsWithoutAttributes(t *testing.T) {
-	fc := &fakeClient{schema: Schema{
-		PrimaryIdentifier:    []string{"/properties/RoleName"},
-		CreateOnlyProperties: []string{"/properties/RoleName"},
-		Handlers:             map[string]json.RawMessage{"update": json.RawMessage(`{}`)},
+	fc := &fakeClient{schema: cfschema.Facts{
+		PrimaryIdentifier: []string{"/properties/RoleName"},
+		CreateOnly:        []string{"/properties/RoleName"},
+		HasUpdate:         true,
 	}}
 	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"})
 	role.resourceType.client = fc
@@ -286,7 +286,7 @@ func TestIAMRoleDiffSeesGrantsWithoutAttributes(t *testing.T) {
 func TestIAMRoleGrantsADynamoDBTableByItsDriver(t *testing.T) {
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "eu-west-1"})
 	role.resourceType.client = fc
@@ -319,7 +319,7 @@ func TestIAMRoleGrantsADynamoDBTableByItsDriver(t *testing.T) {
 func TestIAMRoleAddsVPCAccessForANetworkBinding(t *testing.T) {
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"})
 	role.resourceType.client = fc
@@ -347,7 +347,7 @@ func TestIAMRoleAddsVPCAccessForANetworkBinding(t *testing.T) {
 func TestIAMRoleGrantsADSQLClusterByItsTag(t *testing.T) {
 	fc := &fakeClient{
 		createID: "myenv-api", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
 	}
 	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "us-east-1"})
 	role.resourceType.client = fc

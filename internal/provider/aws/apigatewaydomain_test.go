@@ -1,10 +1,10 @@
 package aws
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -133,9 +133,9 @@ func TestAPIGatewayClosesExecuteAPIOnlyWithACustomDomain(t *testing.T) {
 func TestAPIGatewayClosesExecuteAPIOnAnExistingAPI(t *testing.T) {
 	r := newAPIGatewayResource(&Client{})
 	r.resourceType.client = &fakeClient{}
-	r.schema = Schema{
-		CreateOnlyProperties: []string{"/properties/ProtocolType"},
-		Handlers:             map[string]json.RawMessage{"create": {}, "read": {}, "update": {}, "delete": {}},
+	r.schema = cfschema.Facts{
+		CreateOnly: []string{"/properties/ProtocolType"},
+		HasUpdate:  true,
 	}
 	r.schemaLoaded = true
 	spec := resource.Spec{Name: "env-api", Config: map[string]any{

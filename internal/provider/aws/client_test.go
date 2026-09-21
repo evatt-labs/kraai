@@ -363,8 +363,8 @@ func TestClientDescribeType(t *testing.T) {
 		if len(schema.PrimaryIdentifier) != 1 || schema.PrimaryIdentifier[0] != "/properties/Id" {
 			t.Fatalf("PrimaryIdentifier = %v", schema.PrimaryIdentifier)
 		}
-		if len(schema.CreateOnlyProperties) != 1 {
-			t.Fatalf("CreateOnlyProperties = %v", schema.CreateOnlyProperties)
+		if len(schema.CreateOnly) != 1 {
+			t.Fatalf("CreateOnlyProperties = %v", schema.CreateOnly)
 		}
 	})
 

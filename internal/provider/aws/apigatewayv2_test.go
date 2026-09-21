@@ -2,9 +2,9 @@ package aws
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -91,7 +91,7 @@ func TestAPIGatewayGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 		list:         []string{"abc123"},
 		byIdentifier: map[string]map[string]any{"abc123": {"Tags": map[string]any{identityTagKey: "myenv-api"}}},
 		updateProps:  map[string]any{"Tags": map[string]any{identityTagKey: "myenv-api"}},
-		schema:       Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage(`{}`)}},
+		schema:       cfschema.Facts{HasUpdate: true},
 	}
 	api := newAPIGatewayResourceForTest(fc, &fakeSTS{account: "123456789012"})
 
@@ -110,7 +110,7 @@ func TestAPIGatewayGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 }
 
 func TestAPIGatewayDiffNeverCallsSTS(t *testing.T) {
-	fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/ProtocolType"}}}
+	fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/ProtocolType"}}}
 	fsts := &fakeSTS{account: "123456789012"}
 	api := newAPIGatewayResourceForTest(fc, fsts)
 

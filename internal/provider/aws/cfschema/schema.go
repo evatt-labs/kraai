@@ -42,9 +42,6 @@ func Parse(raw []byte) (Document, error) {
 	if err := json.Unmarshal(raw, &doc); err != nil {
 		return Document{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding resource provider schema")
 	}
-	if doc.TypeName == "" {
-		return Document{}, kerrors.Validation("resource provider schema declares no typeName")
-	}
 	return doc, nil
 }
 

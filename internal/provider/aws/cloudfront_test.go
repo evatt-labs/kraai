@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -390,7 +391,7 @@ func TestCloudFrontCreateFindsAnExistingOACInstead(t *testing.T) {
 // than failing or leaving the origin ungranted.
 func TestCloudFrontUpdateCreatesAnOACWhenTheDistributionHasNone(t *testing.T) {
 	h := newCloudFrontHarness()
-	h.cc.schema = Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage("{}")}}
+	h.cc.schema = cfschema.Facts{HasUpdate: true}
 	ref := resource.Ref{Provider: Provider, Type: TypeCloudFrontDistribution, Name: "env-site-EDGE"}
 	h.cc.list = []string{"E123"}
 	h.cc.byIdentifier = map[string]map[string]any{
@@ -446,7 +447,7 @@ func TestCloudFrontUpdateCreatesAnOACWhenTheDistributionHasNone(t *testing.T) {
 // before granting the new one.
 func TestCloudFrontUpdateMovesTheGrantWhenTheOriginBucketChanged(t *testing.T) {
 	h := newCloudFrontHarness()
-	h.cc.schema = Schema{Handlers: map[string]json.RawMessage{"update": json.RawMessage("{}")}}
+	h.cc.schema = cfschema.Facts{HasUpdate: true}
 	ref := resource.Ref{Provider: Provider, Type: TypeCloudFrontDistribution, Name: "env-site-EDGE"}
 	h.cc.list = []string{"E123"}
 	h.cc.byIdentifier = map[string]map[string]any{

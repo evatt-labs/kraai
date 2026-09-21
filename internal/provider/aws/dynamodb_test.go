@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -16,7 +17,7 @@ func tableSpec(config map[string]any) resource.Spec {
 
 func TestDynamoTableCreateIsOnDemandAndKeyedByTheBinding(t *testing.T) {
 	fc := &fakeClient{createID: "env-svc-db", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/TableName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/TableName"}}}
 	table := newDynamoTableResource(fc)
 
 	spec := tableSpec(map[string]any{
@@ -42,7 +43,7 @@ func TestDynamoTableCreateIsOnDemandAndKeyedByTheBinding(t *testing.T) {
 
 func TestDynamoTableWithoutASortKeyHasOneKeyElement(t *testing.T) {
 	fc := &fakeClient{createID: "env-svc-db", createProps: map[string]any{},
-		schema: Schema{PrimaryIdentifier: []string{"/properties/TableName"}}}
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/TableName"}}}
 	table := newDynamoTableResource(fc)
 
 	spec := tableSpec(map[string]any{"driver": DriverDynamoDB, "partitionKey": map[string]any{"name": "id"}})
@@ -82,10 +83,10 @@ func TestDynamoTableValidateSpecRejectsUnusableKeys(t *testing.T) {
 // order of its own: same keys in another order is no change, a different
 // key is a replace, and a billing change is an in-place update.
 func TestDynamoTableDiffTreatsTheKeySchemaAsImmutable(t *testing.T) {
-	fc := &fakeClient{schema: Schema{
-		PrimaryIdentifier:    []string{"/properties/TableName"},
-		CreateOnlyProperties: []string{"/properties/TableName"},
-		Handlers:             map[string]json.RawMessage{"update": json.RawMessage(`{}`)},
+	fc := &fakeClient{schema: cfschema.Facts{
+		PrimaryIdentifier: []string{"/properties/TableName"},
+		CreateOnly:        []string{"/properties/TableName"},
+		HasUpdate:         true,
 	}}
 	table := newDynamoTableResource(fc)
 	spec := tableSpec(map[string]any{
