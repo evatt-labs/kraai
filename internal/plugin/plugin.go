@@ -12,8 +12,8 @@ import (
 )
 
 // Plugin is one loaded, ABI-validated WASM module: its own private
-// wazero.Runtime (see doc.go), its compiled module, and a pool of
-// goroutine-safe instances ready for concurrent Invoke calls.
+// wazero.Runtime, its compiled module, and a pool of instances for
+// concurrent Invoke calls.
 type Plugin struct {
 	name     string
 	runtime  wazero.Runtime
@@ -21,25 +21,24 @@ type Plugin struct {
 	provides []Provision
 	pool     *pool
 	// instanceSeq names instances uniquely within p.runtime. It keeps
-	// counting past the initial pool fill because the pool re-instantiates
-	// on demand (see pool.get), and wazero rejects a module name already
-	// registered in the same runtime.
+	// counting past the initial fill because the pool re-instantiates on
+	// demand, and wazero rejects a module name already registered.
 	instanceSeq atomic.Uint64
 }
 
-// Name returns the plugin's configured name (Spec.Name).
+// Name returns the plugin's configured name.
 func (p *Plugin) Name() string {
 	return p.name
 }
 
-// Provides returns the plugin's declared provisions, for a caller (e.g. a
-// Registry) to register.
+// Provides returns the plugin's declared provisions, for a Registry to
+// register.
 func (p *Plugin) Provides() []Provision {
 	return p.provides
 }
 
 // Close releases every pooled instance, the compiled module, and the
-// plugin's private runtime (which also tears down its host module).
+// plugin's private runtime.
 func (p *Plugin) Close(ctx context.Context) error {
 	if p.pool != nil {
 		p.pool.closeAll(ctx)
@@ -48,11 +47,9 @@ func (p *Plugin) Close(ctx context.Context) error {
 }
 
 // validateABI instantiates one throwaway instance and checks it exports
-// everything the ABI requires (doc.go): kraai_abi_version at the expected
-// version, kraai_alloc, kraai_dealloc, an exported memory, and every
-// export named in p.provides, each with the provision signature. It fails
-// loudly and specifically — naming the missing or mismatched export —
-// rather than deferring the problem to the first real Invoke call.
+// everything the ABI requires, at the expected version, and every export
+// named in p.provides with the provision signature, naming what is missing
+// or mismatched rather than deferring to the first Invoke.
 func (p *Plugin) validateABI(ctx context.Context) error {
 	mod, err := p.instantiate(ctx, "validate")
 	if err != nil {
@@ -81,9 +78,7 @@ func (p *Plugin) validateABI(ctx context.Context) error {
 	if err != nil {
 		return kerrors.Wrap(err, kerrors.CodeUnexpected, "calling %s on plugin %q", funcABIVersion, p.name)
 	}
-	// results[0] is kraai_abi_version's declared i32 return zero-extended
-	// into a uint64 slot (wazero's calling convention); truncating back to
-	// uint32 recovers the exact value.
+	// The i32 return arrives zero-extended; the truncation is exact.
 	if got := uint32(results[0]); got != CurrentABIVersion { //nolint:gosec // see comment above
 		return kerrors.Validation("plugin %q built against ABI version %d, host implements %d", p.name, got, CurrentABIVersion)
 	}
@@ -99,8 +94,8 @@ func (p *Plugin) validateABI(ctx context.Context) error {
 	return nil
 }
 
-// requireFunc fails loudly if mod does not export name with exactly the
-// given parameter/result types.
+// requireFunc fails if mod does not export name with exactly the given
+// parameter and result types.
 func requireFunc(mod api.Module, name string, params, results []api.ValueType) error {
 	fn := mod.ExportedFunction(name)
 	if fn == nil {
@@ -132,8 +127,8 @@ func valueTypesEqual(a, b []api.ValueType) bool {
 	return true
 }
 
-// fillPool instantiates size goroutine-safe module instances from
-// p.compiled and hands them to a new pool.
+// fillPool instantiates size module instances from p.compiled and hands
+// them to a new pool.
 func (p *Plugin) fillPool(ctx context.Context, size int) error {
 	instances := make([]api.Module, 0, size)
 	for i := range size {
@@ -150,22 +145,17 @@ func (p *Plugin) fillPool(ctx context.Context, size int) error {
 	return nil
 }
 
-// newInstance creates one uniquely-named pool member. It is both the
+// newInstance creates one uniquely named pool member. It is both the
 // initial fill path and the pool's replacement factory.
 func (p *Plugin) newInstance(ctx context.Context) (api.Module, error) {
 	return p.instantiate(ctx, fmt.Sprintf("instance-%d", p.instanceSeq.Add(1)-1))
 }
 
-// instantiate creates one fresh instance of p.compiled, named uniquely
-// within p.runtime, started via _initialize rather than _start — Go's
-// wasip1 c-shared reactor mode requires this; calling with the default
-// _start entrypoint panics inside the guest runtime before any exported
-// function is reachable. No filesystem, environment, or stdio is wired:
-// wasi_snapshot_preview1 is registered on p.runtime (Host.Load) purely so
-// a WASI-dependent guest runtime (Go's included) initializes at all, but
-// with no preopens or config granted, every filesystem/env syscall a
-// guest attempts through it fails closed rather than reaching the host's
-// real filesystem or environment.
+// instantiate creates one fresh instance of p.compiled, started via
+// _initialize rather than _start, which Go's wasip1 reactor mode requires.
+// No filesystem, environment or stdio is wired: WASI is registered only so
+// a WASI-dependent guest runtime initializes, and every syscall a guest
+// attempts through it fails closed.
 func (p *Plugin) instantiate(ctx context.Context, suffix string) (api.Module, error) {
 	cfg := wazero.NewModuleConfig().
 		WithName(p.name + "#" + suffix).
@@ -173,27 +163,18 @@ func (p *Plugin) instantiate(ctx context.Context, suffix string) (api.Module, er
 	return p.runtime.InstantiateModule(ctx, p.compiled, cfg)
 }
 
-// Invoke calls the plugin's export implementing key (looked up in
-// p.provides), borrowing an instance from the pool for the call's
-// duration. input is written into a region the instance's own kraai_alloc
-// returns; the export's packed (ptr, len) result is read back, decoded as
-// an ABI envelope (doc.go), and the instance's kraai_dealloc is called on
-// both regions before it's returned to the pool — so a pooled instance
-// reused across many calls does not accumulate guest-side memory
-// unboundedly.
+// Invoke calls the plugin's export implementing key, borrowing a pooled
+// instance for the call. input is written into a region the instance's
+// kraai_alloc returns; the result is read back and decoded as an envelope;
+// and kraai_dealloc is called on both regions, so a reused instance does not
+// accumulate guest memory.
 //
-// Invoke blocks if every pooled instance is already in use — that is the
-// backpressure that keeps a plugin's concurrency bounded by its own pool
-// size, never unbounded goroutine-per-call fan-out.
-//
-// ctx bounds the whole call, not just the wait for a free instance: the
-// runtime is built with WithCloseOnContextDone (Host.Load), so a guest
-// that never returns is terminated when ctx is done and Invoke reports
-// wazero's sys.ExitError. Terminating a call closes the instance it ran
-// in; pool.get replaces a closed instance on the next borrow, so the
-// cost of a cancelled call is one re-instantiation and never a dead pool
-// slot. A caller that passes context.Background() here is choosing to let
-// a plugin hang forever — pass a deadline.
+// Invoke blocks if every pooled instance is in use: that is the
+// backpressure bounding a plugin's concurrency by its pool size. ctx bounds
+// the whole call, not just the wait: a guest that never returns is
+// terminated when ctx is done, at the cost of one re-instantiation. A
+// caller passing context.Background() is choosing to let a plugin hang
+// forever.
 func (p *Plugin) Invoke(ctx context.Context, key string, input []byte) ([]byte, error) {
 	export := ""
 	for _, prov := range p.provides {
@@ -217,22 +198,19 @@ func (p *Plugin) Invoke(ctx context.Context, key string, input []byte) ([]byte, 
 
 // callExport writes input into mod via its own kraai_alloc, calls export
 // with the resulting (ptr, len), decodes the returned envelope, and frees
-// both the input and output regions through kraai_dealloc.
+// both regions through kraai_dealloc.
 func callExport(ctx context.Context, mod api.Module, export string, input []byte) ([]byte, error) {
 	inPtr, err := placeInGuestMemory(ctx, mod, input)
 	if err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "writing input for plugin %q export %s", mod.Name(), export)
 	}
-	// placeInGuestMemory above already succeeded, which means writeRegion
-	// already validated len(input) <= MaxTransferBytes — this conversion
-	// never truncates a real value.
+	// placeInGuestMemory already validated len(input) <= MaxTransferBytes.
 	defer deallocQuietly(ctx, mod, inPtr, uint32(len(input))) //nolint:gosec // see comment above
 
 	fn := mod.ExportedFunction(export)
 	if fn == nil {
-		// validateABI already checked this at load time; a nil fn here
-		// would mean the module changed shape underneath a live Plugin,
-		// which should never happen but is checked rather than assumed.
+		// validateABI checked this at load; checked again rather than
+		// assumed.
 		return nil, kerrors.Validation("plugin %q no longer exports %s", mod.Name(), export)
 	}
 	results, err := fn.Call(ctx, uint64(inPtr), uint64(len(input)))
@@ -260,15 +238,9 @@ func callExport(ctx context.Context, mod api.Module, export string, input []byte
 	return payload, nil
 }
 
-// deallocQuietly calls kraai_dealloc, discarding failures: dealloc is a
-// hygiene best-effort (freeing memory a pooled instance will otherwise
-// reuse a lot of), not a correctness requirement — a plugin whose
-// kraai_dealloc misbehaves has already produced its real result, and
-// failing the whole call over a failed free would be a worse outcome than
-// leaking that one region. A pool member repeatedly failing to free is a
-// standing memory-growth pressure for whatever calls this many times, but
-// that's a symptom of a plugin bug, not something a stricter Invoke could
-// safely fail on without discarding otherwise-good results.
+// deallocQuietly calls kraai_dealloc, discarding failures: a plugin whose
+// dealloc misbehaves has already produced its result, and failing the call
+// over a failed free would be worse than leaking one region.
 func deallocQuietly(ctx context.Context, mod api.Module, ptr, length uint32) {
 	fn := mod.ExportedFunction(funcDealloc)
 	if fn == nil {

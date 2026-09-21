@@ -8,22 +8,18 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// BuiltinSource is the conventional Registry source name for a
-// compiled-in registration, used consistently so a Warning's Loser/Winner
-// field reads sensibly regardless of whether the other side is a plugin.
+// BuiltinSource is the conventional Registry source name for a compiled-in
+// registration, so a Warning reads sensibly whichever side is a plugin.
 const BuiltinSource = "builtin"
 
 // Handle is whatever a Registry key resolves to: something callable with
-// raw input bytes, returning a raw output payload or an error. A built-in
-// wraps a native Go function via HandleFunc; a plugin-backed registration
-// wraps one Plugin provision, built with NewPluginHandle.
+// raw input bytes. A built-in wraps a Go function via HandleFunc; a plugin
+// provision is wrapped by NewPluginHandle.
 type Handle interface {
 	Invoke(ctx context.Context, input []byte) ([]byte, error)
 }
 
-// HandleFunc adapts a plain function to Handle, for registering a
-// built-in that's just Go code — never loaded as a plugin, since built-ins
-// are compiled into the binary directly.
+// HandleFunc adapts a plain function to Handle, for a built-in.
 type HandleFunc func(ctx context.Context, input []byte) ([]byte, error)
 
 // Invoke implements Handle.
@@ -31,9 +27,7 @@ func (f HandleFunc) Invoke(ctx context.Context, input []byte) ([]byte, error) {
 	return f(ctx, input)
 }
 
-// pluginHandle adapts one provision of a loaded Plugin, identified by
-// key, to Handle. Unexported deliberately: a caller only ever needs the
-// Handle interface NewPluginHandle returns, never this concrete type.
+// pluginHandle adapts one provision of a loaded Plugin to Handle.
 type pluginHandle struct {
 	plugin *Plugin
 	key    string
@@ -50,27 +44,16 @@ func (h pluginHandle) Invoke(ctx context.Context, input []byte) ([]byte, error) 
 }
 
 // Warning records that registering Winner under Key overrode an existing
-// registration from Loser. It is returned/collected as structured data
-// (see Registry.Register, Registry.Warnings) rather than logged directly:
-// only cmd/kraai's centralized handler ever prints to stdout/stderr or
-// exits, and this package has no logger of its own to introduce — every
-// other package here is pure-function-testable by returning values, not
-// by capturing what it printed, and a registry
-// override is exactly the kind of thing a caller (eventually cmd/kraai)
-// needs to decide how to present, not something this package should
-// assume gets written to a terminal. Introducing log/slog behind an
-// interface was the other option on the table; returning data was chosen
-// to stay consistent with kerrors' own existing precedent (errors are
-// values, not side effects) rather than adding a second, parallel
-// mechanism for "things the user should see" alongside it.
+// registration from Loser. Returned as data rather than logged: this
+// package has no logger, only cmd/kraai prints, and a caller decides how to
+// present it.
 type Warning struct {
 	Key    string
 	Winner string
 	Loser  string
 }
 
-// String renders w for a caller that just wants a line of text to
-// present, without this package deciding where that text goes.
+// String renders w as one line of text.
 func (w Warning) String() string {
 	return fmt.Sprintf("%q overrides existing registration %q for key %q", w.Winner, w.Loser, w.Key)
 }
@@ -80,21 +63,12 @@ type registryEntry struct {
 	handle Handle
 }
 
-// Registry resolves a set of string keys to Handles, assembled from
-// built-ins plus a project's plugins:, in declared order. Each key holds
-// a stack of registrations in
-// registration order; the active one is always the top of the stack, so
-// removing the top registration (Deregister) uncovers whatever was
-// registered before it — a plugin overriding a built-in, then removed,
-// restores that built-in automatically, with no special-cased "is this a
-// built-in" branch anywhere in this type.
-//
-// This package places no constraint on what a key means — "provider/
-// cloudflare", "resource/aws/s3_bucket", "hook:pre-apply" are all just
-// strings as far as Registry is concerned. The meaning of a key, and how
-// many distinct keys a plugin registers under, is entirely its caller's
-// concern (see doc.go's "Middleware" section for how this doubles as the
-// composition primitive for hook-style plugins).
+// Registry resolves string keys to Handles, assembled from built-ins plus a
+// project's plugins in declared order. Each key holds a stack of
+// registrations; the active one is the top, so removing it uncovers what
+// was registered before, and a plugin overriding a built-in then removed
+// restores the built-in with no special case. This package places no
+// constraint on what a key means.
 type Registry struct {
 	mu       sync.Mutex
 	entries  map[string][]registryEntry
@@ -106,11 +80,9 @@ func NewRegistry() *Registry {
 	return &Registry{entries: make(map[string][]registryEntry)}
 }
 
-// Register adds handle under key, attributed to source (BuiltinSource for
-// a compiled-in registration, a plugin's Name otherwise). If key already
-// has an active registration, the new one becomes active and a Warning
-// naming both sides is recorded and returned; ok reports whether an
-// override occurred.
+// Register adds handle under key, attributed to source. If key already has
+// an active registration, the new one becomes active and a Warning naming
+// both sides is recorded and returned; ok reports whether that happened.
 func (r *Registry) Register(key, source string, handle Handle) (warning Warning, ok bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -127,8 +99,7 @@ func (r *Registry) Register(key, source string, handle Handle) (warning Warning,
 }
 
 // Deregister removes source's registration for key, uncovering whatever
-// registration (if any) preceded it. It returns an error if source has no
-// registration for key.
+// preceded it. It returns an error if source has no registration for key.
 func (r *Registry) Deregister(key, source string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -165,9 +136,7 @@ func (r *Registry) Lookup(key string) (Handle, bool) {
 	return stack[len(stack)-1].handle, true
 }
 
-// Warnings returns every override warning recorded so far, oldest first,
-// for a caller (eventually cmd/kraai's centralized handler) to present
-// however it chooses.
+// Warnings returns every override warning recorded so far, oldest first.
 func (r *Registry) Warnings() []Warning {
 	r.mu.Lock()
 	defer r.mu.Unlock()

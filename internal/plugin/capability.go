@@ -14,48 +14,34 @@ import (
 //go:generate go run go.uber.org/mock/mockgen -source=capability.go -destination=mock_capability_test.go -package=plugin
 
 // Capability is one host function a plugin may be granted permission to
-// import (doc.go: "a documented, minimal set of host functions a plugin
-// may import ... explicitly granted, never ambient"). Host wires a
-// Capability into a specific plugin's runtime only when that plugin's
-// Spec names it in Grants; a Capability this package knows about
-// but no loaded plugin was granted is never reachable by anything.
+// import. Host wires it into a plugin's runtime only when that plugin's Spec
+// names it in Grants.
 type Capability interface {
-	// Name is both the WASM import function name a plugin calls to reach
-	// this capability (under HostNamespace) and the identifier a
-	// Spec names in Grants to request it.
+	// Name is both the import function name a plugin calls, under
+	// HostNamespace, and the identifier a Spec names in Grants.
 	Name() string
-	// Invoke handles one call's raw input bytes (already read out of the
-	// calling plugin's memory) and returns the raw output payload. An
-	// error becomes StatusError plus the error's message in the envelope
-	// the plugin sees — so an implementation must treat its error strings
-	// as output to untrusted code, and keep credentials, internal
-	// hostnames, and wrapped transport detail out of them.
-	//
-	// Invoke should never panic for an ordinary failure (a bad request, a
-	// failed network call) — only Host's own plumbing panics, and only for
-	// a plugin-side ABI violation it cannot recover from safely.
+	// Invoke handles one call's raw input and returns the raw output. An
+	// error becomes StatusError plus its message in the envelope the plugin
+	// sees, so an implementation must keep credentials and internal detail
+	// out of its error strings. Invoke should never panic for an ordinary
+	// failure.
 	Invoke(ctx context.Context, input []byte) ([]byte, error)
 }
 
-// CapabilityHTTPFetch is HTTPCapability's Name(): the one host capability
-// this package ships as the documented example the Grants mechanism is
-// built around. A real deployment may register more via NewHost; this one
-// exists so the ABI contract has a concrete, testable capability rather
-// than only a hypothetical one in a comment.
+// CapabilityHTTPFetch is HTTPCapability's Name: the one host capability
+// this package ships, so the Grants mechanism has a concrete, testable
+// capability.
 const CapabilityHTTPFetch = "http_fetch"
 
-// HTTPDoer is the minimal HTTP interface HTTPCapability wraps — satisfied
-// by *http.Client as-is, so a real caller wires in its own shared,
-// rate-limit-tuned client, while tests inject a mock without touching the
-// network.
+// HTTPDoer is the minimal HTTP interface HTTPCapability wraps, satisfied by
+// *http.Client, so a caller wires in its own shared client and tests inject
+// a mock.
 type HTTPDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// httpFetchRequest is CapabilityHTTPFetch's own wire format: the ABI
-// envelope (abi.go) carries opaque bytes, and JSON is this capability's
-// own choice for what's inside them — a plugin author calling this
-// capability from Rust, TinyGo, or Go all just send this same JSON.
+// httpFetchRequest is CapabilityHTTPFetch's wire format inside the ABI
+// envelope, JSON so a plugin in any language sends the same thing.
 type httpFetchRequest struct {
 	Method  string            `json:"method"`
 	URL     string            `json:"url"`
@@ -70,21 +56,15 @@ type httpFetchResponse struct {
 	Body    []byte              `json:"body,omitempty"`
 }
 
-// HTTPCapability grants a plugin the ability to make outbound HTTP calls
-// through client. It is never reachable by a plugin unless that plugin's
-// Spec names CapabilityHTTPFetch in Grants.
+// HTTPCapability grants a plugin outbound HTTP calls through client.
 type HTTPCapability struct {
 	client HTTPDoer
 }
 
 // NewHTTPCapability builds an HTTPCapability that issues requests through
-// client. A nil client gets NewGuardedHTTPClient, so the default is a
-// client that cannot reach internal infrastructure.
-//
-// A caller supplying its own client owns that guarantee itself: see
-// NewGuardedHTTPClient on why an injected transport must compose
-// GuardedDialContext. This constructor cannot check it — an HTTPDoer is
-// an interface, and its dialing is entirely its own business.
+// client. A nil client gets NewGuardedHTTPClient, so the default cannot
+// reach internal infrastructure. A caller supplying its own client owns
+// that guarantee; see NewGuardedHTTPClient.
 func NewHTTPCapability(client HTTPDoer) *HTTPCapability {
 	if client == nil {
 		client = NewGuardedHTTPClient()
@@ -98,8 +78,7 @@ func (c *HTTPCapability) Name() string {
 }
 
 // Invoke implements Capability: decodes input as an httpFetchRequest,
-// performs it through c.client, and returns an httpFetchResponse, both
-// JSON-encoded.
+// performs it, and returns an httpFetchResponse, both JSON.
 func (c *HTTPCapability) Invoke(ctx context.Context, input []byte) ([]byte, error) {
 	var req httpFetchRequest
 	if err := json.Unmarshal(input, &req); err != nil {
@@ -108,11 +87,8 @@ func (c *HTTPCapability) Invoke(ctx context.Context, input []byte) ([]byte, erro
 	if req.Method == "" || req.URL == "" {
 		return nil, kerrors.Validation("%s request requires method and url", CapabilityHTTPFetch)
 	}
-	// Scheme is checked here rather than left to the transport because
-	// the transport is injectable: the dial-time egress guard covers
-	// where a request may go, and this covers what a plugin may ask the
-	// host to do at all. file:// and friends never reach a dialer, so
-	// nothing downstream would catch them.
+	// Checked here because the transport is injectable: the dial guard
+	// covers where a request may go, and file:// never reaches a dialer.
 	parsed, err := url.Parse(req.URL)
 	if err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "parsing %s url", CapabilityHTTPFetch)
@@ -135,12 +111,8 @@ func (c *HTTPCapability) Invoke(ctx context.Context, input []byte) ([]byte, erro
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	// Bounded the same way the ABI bounds any other guest-crossing
-	// region: a capability response re-enters guest memory through the
-	// same writeRegion path as everything else, so an unbounded remote
-	// response is exactly the DoS lever MaxTransferBytes exists to cut
-	// off, just arriving from the network side of the boundary instead
-	// of the plugin side.
+	// A response re-enters guest memory through writeRegion, so an
+	// unbounded remote body is the DoS lever MaxTransferBytes cuts off.
 	body, err := io.ReadAll(io.LimitReader(resp.Body, MaxTransferBytes+1))
 	if err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s response body", CapabilityHTTPFetch)
