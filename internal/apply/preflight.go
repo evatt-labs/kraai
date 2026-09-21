@@ -9,11 +9,9 @@ import (
 )
 
 // preflight walks the whole plan before Apply touches anything and refuses
-// the run outright on an unreadable resource, or on a replacement the
-// caller did not permit.
-//
-// Refusing before a single Create or Delete is what keeps a refusal cheap:
-// nothing has to be rolled back, because nothing happened.
+// the run on an unreadable resource, or on a replacement the caller did not
+// permit. Refusing before a single call keeps a refusal cheap: nothing has
+// to be rolled back.
 func preflight(p *plan.Plan, allowReplace bool) error {
 	var failed, blockedReplace []string
 
@@ -49,8 +47,8 @@ func preflight(p *plan.Plan, allowReplace bool) error {
 }
 
 // describeAction names one action the way an operator would look it up in
-// the manifest and the way they would look it up in the provider's own
-// console: service and binding, then provider/type and the derived name.
+// the manifest and in the provider's console: service and binding, then
+// provider/type and the derived name.
 func describeAction(a plan.Action) string {
 	return fmt.Sprintf("%s.%s (%s/%s %q)", a.ServiceKey, a.Binding, a.Provider, a.Type, a.Ref.Name)
 }

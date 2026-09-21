@@ -6,19 +6,16 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// bindingKey scopes a secret handoff to the manifest binding that produced
-// it, independent of the provider or type at either end. resource.Ref is
-// the wrong scope here: producer and consumer have different Refs by
-// design.
+// bindingKey scopes a handoff to the manifest binding that produced it,
+// independent of the provider or type at either end. resource.Ref is the
+// wrong scope: producer and consumer have different Refs by design.
 type bindingKey struct {
 	ServiceKey string
 	Binding    string
 }
 
-// secretIndex is the binding-scoped credential handoff apply owns
-// alongside resource.Outputs. Safe for concurrent use: actions within a
-// wave run in parallel, and a producer must be visible to a consumer in
-// the same or a later wave without either racing the other.
+// secretIndex is the binding-scoped credential handoff. Safe for concurrent
+// use: actions within a wave run in parallel.
 type secretIndex struct {
 	mu        sync.RWMutex
 	byBinding map[bindingKey]map[string]resource.Secret
@@ -42,23 +39,14 @@ func (s *secretIndex) put(key bindingKey, name string, secret resource.Secret) {
 }
 
 // forAction returns the union of every secret producer registered for
-// svcKey across reads, suitable for assigning straight to a resource.Spec's
-// Secrets field.
+// svcKey across reads, ready for a resource.Spec's Secrets field. Secrets
+// from ownBinding keep their bare names; secrets from any other binding
+// appear as "<binding>.<name>", so two sibling bindings each producing a
+// "connection_uri" cannot collide.
 //
-// reads must already be resolved to its effective value (see
-// effectiveReadsBindings): this does not itself fall back to ownBinding, so
-// an action with genuinely no readable bindings sees no secrets.
-//
-// Secrets from ownBinding keep their bare names, which is the case every
-// existing resource type relies on; secrets from any other binding appear
-// as "<binding>.<name>". Two sibling bindings each producing a
-// "connection_uri" therefore cannot collide, since at most one may claim
-// the bare name.
-//
-// The result is a fresh map, never a reference to the index's own storage:
-// a caller holding it on a long-lived Spec must not see it mutate when
-// another goroutine registers a secret for the same binding, nor be able to
-// corrupt the index by writing into what it got back.
+// reads must already be its effective value (effectiveReadsBindings); this
+// does not fall back to ownBinding. The result is a fresh map, never the
+// index's own storage.
 func (s *secretIndex) forAction(svcKey, ownBinding string, reads []string) map[string]resource.Secret {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

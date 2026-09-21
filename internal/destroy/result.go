@@ -8,23 +8,17 @@ import (
 )
 
 // Outcome is what actually happened to one resource during a Destroy run:
-// the deleting analogue of apply.Outcome.
-//
-// A narrower set than apply's. Destroy has no replace/no-change
-// distinction — every attempted action is deleted or failed to delete —
-// and no cross-wave skip, since a wave failure never stops a later wave
-// here. The one OutcomeSkipped it does report means what apply's never
-// does: the resource never existed, so nothing was attempted.
+// the deleting analogue of apply.Outcome. Narrower than apply's: every
+// attempted action is deleted or failed, and the one OutcomeSkipped means
+// the resource never existed, not that an earlier wave failed.
 type Outcome int
 
 const (
-	// OutcomeDeleted means Delete succeeded (including deleting a resource
-	// already gone, which resource.Resource.Delete's contract treats as
-	// success).
+	// OutcomeDeleted means Delete succeeded, including deleting a resource
+	// already gone, which Delete's contract treats as success.
 	OutcomeDeleted Outcome = iota
-	// OutcomeSkipped means this action was plan.ActionCreate — Get found
-	// nothing, so there was nothing to delete — and no Delete call was
-	// issued.
+	// OutcomeSkipped means this action was plan.ActionCreate: Get found
+	// nothing, so no Delete call was issued.
 	OutcomeSkipped
 	// OutcomeFailed means Delete itself failed, or the action could not be
 	// resolved to a registered resource type. See Err.
@@ -48,8 +42,8 @@ func (o Outcome) String() string {
 // ActionResult is one plan.Action's outcome after Destroy has run.
 type ActionResult struct {
 	plan.Item
-	// Ref is the resource identity this outcome is about, carried straight
-	// from the plan.Action it came from.
+	// Ref is the resource identity this outcome is about, carried from the
+	// plan.Action it came from.
 	Ref resource.Ref
 	// Outcome is what happened.
 	Outcome Outcome
@@ -58,16 +52,14 @@ type ActionResult struct {
 }
 
 // Result is the ordered outcome of destroying every action in a plan.Plan,
-// one ActionResult per plan.Action, in the order the plan carried them —
-// not the reverse order destroy actually ran them in.
+// one ActionResult per plan.Action, in the order the plan carried them, not
+// the reverse order destroy ran them in.
 type Result struct {
 	Results []ActionResult
 }
 
-// HasFailures reports whether any action failed to delete.
-//
-// OutcomeSkipped is not a failure: a skipped action was never attempted
-// because the resource never existed, which is success, not a gap.
+// HasFailures reports whether any action failed to delete. OutcomeSkipped is
+// not a failure: the resource never existed.
 func (r *Result) HasFailures() bool {
 	if r == nil {
 		return false

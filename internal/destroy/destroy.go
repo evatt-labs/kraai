@@ -11,8 +11,7 @@ import (
 )
 
 // defaultConcurrency bounds Delete calls within one wave when the caller
-// sets no limit of its own. Mirrors apply.defaultConcurrency, for the same
-// reason: goroutines are cheap, provider rate limits are not.
+// sets no limit. Mirrors apply.defaultConcurrency.
 const defaultConcurrency = 10
 
 // Destroyer executes teardown plans against a fixed registry.
@@ -24,9 +23,9 @@ type Destroyer struct {
 // Option configures a Destroyer.
 type Option func(*Destroyer)
 
-// WithConcurrency sets the maximum number of Delete calls in flight at
-// once within a single wave. Non-positive values are ignored, the same
-// contract as apply.WithConcurrency.
+// WithConcurrency sets the maximum number of Delete calls in flight at once
+// within a single wave. Non-positive values are ignored, the same contract
+// as apply.WithConcurrency.
 func WithConcurrency(n int) Option {
 	return func(d *Destroyer) {
 		if n > 0 {
@@ -45,16 +44,10 @@ func New(reg *resource.Registry, opts ...Option) *Destroyer {
 }
 
 // Destroy tears down every action in p: for each one it resolves the real
-// resource.Resource from the registry by Ref.Key() and calls Delete,
-// unless the plan reported the resource as never having existed
-// (plan.ActionCreate), in which case nothing is called at all.
-//
-// There is no pre-flight gate and no stopping at the first failed wave.
-// Both are deliberate, and both are the opposite of internal/apply — see
-// the package doc.
-//
-// A nil plan is a no-op returning an empty, non-nil Result, the same
-// contract apply.Apply gives.
+// resource.Resource from the registry by Ref.Key() and calls Delete, unless
+// the plan reported the resource as not existing (plan.ActionCreate). There
+// is no pre-flight gate and no stopping at the first failed wave; see the
+// package doc. A nil plan is a no-op returning an empty, non-nil Result.
 func (d *Destroyer) Destroy(ctx context.Context, p *plan.Plan) (*Result, error) {
 	if p == nil {
 		return &Result{}, nil
@@ -62,14 +55,11 @@ func (d *Destroyer) Destroy(ctx context.Context, p *plan.Plan) (*Result, error) 
 
 	results := make([]ActionResult, len(p.Actions))
 	byWave := indexByWave(p.Actions)
-	// One locker per run, mirroring apply.Apply. Teardown needs it for the
-	// same reason: two concurrent deletes against the same Neon project
-	// serialize against each other exactly as two creates do.
+	// One locker per run, as in apply.
 	locker := resource.NewScopeLocker()
 
-	// Teardown runs waves in reverse, and every wave runs regardless of
-	// whether an earlier one had failures — the central asymmetry with
-	// Apply, which stops at the first failed wave.
+	// Waves run in reverse, and every wave runs whether or not an earlier
+	// one had failures.
 	for wave := len(byWave) - 1; wave >= 0; wave-- {
 		idxs := byWave[wave]
 		if len(idxs) == 0 {
@@ -78,12 +68,8 @@ func (d *Destroyer) Destroy(ctx context.Context, p *plan.Plan) (*Result, error) 
 		d.runWave(ctx, p.Actions, idxs, results, locker)
 	}
 
-	// A cancelled run is not a completed destroy. Every entry already
-	// written reflects a real deletion, skip or failure, so nothing here is
-	// fabricated, but reporting success for a run the caller asked to stop
-	// would be wrong however accurate the partial Result is. Whatever was
-	// deleted stays deleted; it is simply not summarized as a normal result
-	// for this invocation.
+	// A cancelled run is not a completed destroy. Whatever was deleted stays
+	// deleted; it is not summarized as a normal result.
 	if err := ctx.Err(); err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "destroying was cancelled")
 	}
@@ -91,8 +77,8 @@ func (d *Destroyer) Destroy(ctx context.Context, p *plan.Plan) (*Result, error) 
 }
 
 // indexByWave groups action indices by wave, preserving each action's
-// original position in actions/results so per-action output stays aligned
-// however the input plan was ordered. Indexed directly by wave number.
+// position in actions/results so per-action output stays aligned however
+// the plan was ordered. Indexed directly by wave number.
 func indexByWave(actions []plan.Action) [][]int {
 	maxWave := 0
 	for _, a := range actions {
@@ -108,14 +94,10 @@ func indexByWave(actions []plan.Action) [][]int {
 }
 
 // runWave executes every action at idxs concurrently, bounded by
-// d.concurrency.
-//
-// Unlike apply's runWave, this reports nothing back about whether an
-// action failed: Destroy never gates a later wave on an earlier one's
-// outcome, so there is nothing for a return value to say. The errgroup
-// function still always returns nil, so one failure is recorded in results
-// rather than propagated through the group, which would cancel every
-// sibling still in flight in the same wave.
+// d.concurrency. Unlike apply's, it reports nothing back: Destroy never
+// gates a later wave on an earlier one. The errgroup function always
+// returns nil, so one failure is recorded rather than cancelling its
+// siblings.
 func (d *Destroyer) runWave(
 	ctx context.Context, actions []plan.Action, idxs []int, results []ActionResult,
 	locker *resource.ScopeLocker,
@@ -134,14 +116,11 @@ func (d *Destroyer) runWave(
 }
 
 // execute runs one action to completion and reports its outcome. It never
-// returns an error: every failure is captured in the returned
-// ActionResult, so a caller running many of these concurrently never has to
-// decide what an error here would mean for the siblings.
+// returns an error: every failure is captured in the ActionResult.
 func (d *Destroyer) execute(ctx context.Context, act plan.Action, locker *resource.ScopeLocker) ActionResult {
 	result := ActionResult{Item: act.Item, Ref: act.Ref}
 
-	// plan.ActionCreate means Get found nothing, so there is nothing to
-	// delete. Every other Kind is attempted below.
+	// Get found nothing, so there is nothing to delete.
 	if act.Kind == plan.ActionCreate {
 		result.Outcome = OutcomeSkipped
 		return result
@@ -156,14 +135,13 @@ func (d *Destroyer) execute(ctx context.Context, act plan.Action, locker *resour
 		return result
 	}
 
-	// plan.Action carries the same fields for both verbs, so Scope resolves
-	// here from the same Spec a Create for this Ref.Key() would have used.
+	// The same Spec a Create for this Ref.Key() would have used, so Scope
+	// resolves to the same value.
 	scope := reg.ScopeFor(act.Spec)
 
-	// plan.ActionFailed reaches here deliberately: Get could not read the
-	// resource's state, but Delete is idempotent by contract, so attempting
-	// it anyway is safe and can only make progress. This is the line the
-	// package doc's failure-semantics section exists to explain.
+	// plan.ActionFailed reaches here deliberately: Delete is idempotent, so
+	// attempting it on a resource Get could not read is safe and can only
+	// make progress.
 	err := locker.Do(scope, func() error { return reg.Resource.Delete(ctx, act.Ref) })
 	if err != nil {
 		result.Outcome = OutcomeFailed
