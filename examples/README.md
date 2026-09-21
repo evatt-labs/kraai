@@ -11,11 +11,12 @@ them is read-only and safe.
 
 ## aws-api
 
-`compute` + `network` + `queues`: an HTTP-triggered Lambda function behind
-an API Gateway HTTP API, alongside a private VPC (internet gateway, public
-subnet, route table) and a standard SQS queue. The function receives the
-queue as `JOBS_QUEUE_URL` and `JOBS_QUEUE_ARN`, and its execution role
-carries an inline policy granting it the queue.
+`compute` + `network` + `queues` + `database`: an HTTP-triggered Lambda
+function behind an API Gateway HTTP API, alongside a private VPC (internet
+gateway, public subnet, route table), a standard SQS queue and a DynamoDB
+on-demand table (`driver: dynamodb`). The function receives the queue as
+`JOBS_QUEUE_URL` and `JOBS_QUEUE_ARN` and the table as `DB_TABLE_NAME`,
+and its execution role carries an inline policy granting it both.
 
 kraai does not wire the `network` binding into the Lambda function's own
 VPC config — there is no `VpcConfig` property in

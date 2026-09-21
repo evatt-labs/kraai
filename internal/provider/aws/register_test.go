@@ -31,6 +31,7 @@ func TestRegisterWiresEveryType(t *testing.T) {
 		{Provider + "/" + TypeRoute53HostedZone, manifest.CapabilityDNS, nil, resource.LookupByAPI},
 		{Provider + "/" + TypeRoute53RecordSet, manifest.CapabilityDNS,
 			[]string{key(TypeRoute53HostedZone)}, resource.LookupByAttr},
+		{Provider + "/" + TypeDynamoDBTable, manifest.CapabilityDatabase, nil, resource.LookupByName},
 		{Provider + "/" + TypeSQSQueue, manifest.CapabilityQueues, nil, resource.LookupByAttr},
 		{Provider + "/" + TypeLambdaFunction, manifest.CapabilityCompute,
 			[]string{key(TypeArtifactBucket), key(TypeIAMRole)}, resource.LookupByName},

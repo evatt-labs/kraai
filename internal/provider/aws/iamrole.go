@@ -76,6 +76,22 @@ var queueActions = []any{
 	"sqs:ChangeMessageVisibility",
 }
 
+// tableActions is what a function needs to read and write the items of a
+// table it binds, and to query any index on it. Table administration stays
+// kraai's.
+var tableActions = []any{
+	"dynamodb:GetItem",
+	"dynamodb:BatchGetItem",
+	"dynamodb:Query",
+	"dynamodb:Scan",
+	"dynamodb:PutItem",
+	"dynamodb:UpdateItem",
+	"dynamodb:DeleteItem",
+	"dynamodb:BatchWriteItem",
+	"dynamodb:ConditionCheckItem",
+	"dynamodb:DescribeTable",
+}
+
 // bucketActions is what a function needs to read, write and enumerate the
 // objects in a bucket it binds. Bucket configuration stays kraai's.
 var bucketActions = []any{
@@ -171,6 +187,21 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 				"Effect":   "Allow",
 				"Action":   queueActions,
 				"Resource": queueARN(r.client.Region(), account, b.Name),
+			}
+		case manifest.CapabilityDatabase:
+			if driver, _ := b.Config["driver"].(string); driver != DriverDynamoDB {
+				continue
+			}
+			if account == "" {
+				if account, err = r.client.AccountID(ctx); err != nil {
+					return nil, err
+				}
+			}
+			table := tableARN(r.client.Region(), account, b.Name)
+			statement = map[string]any{
+				"Effect":   "Allow",
+				"Action":   tableActions,
+				"Resource": []any{table, table + "/index/*"},
 			}
 		case manifest.CapabilityObjects:
 			// The bucket for listing, its objects for everything else: S3

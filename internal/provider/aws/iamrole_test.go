@@ -279,3 +279,36 @@ func TestIAMRoleDiffSeesGrantsWithoutAttributes(t *testing.T) {
 		t.Fatalf("Diff(ungranted) = %v, %v; want Mutable", changed, err)
 	}
 }
+
+// A database binding on this provider is granted by its engine: a DynamoDB
+// table and its indexes, nothing for a driver this provider has no grant
+// for, nothing for another vendor's database.
+func TestIAMRoleGrantsADynamoDBTableByItsDriver(t *testing.T) {
+	fc := &fakeClient{
+		createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/RoleName"}},
+	}
+	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "eu-west-1"})
+	role.resourceType.client = fc
+
+	table := awsBinding("database", "DB", "myenv-api-db")
+	table["config"] = map[string]any{"driver": DriverDynamoDB, "partitionKey": map[string]any{"name": "pk"}}
+	other := awsBinding("database", "LEGACY", "myenv-api-legacy")
+	other["config"] = map[string]any{"driver": "postgres"}
+	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
+		"settings": map[string]any{},
+		"bindings": bindingsConfig(table, other),
+	}}
+	if _, err := role.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	statements := bindingsPolicy(t, fc.createCalls[0])
+	if len(statements) != 1 {
+		t.Fatalf("got %d statements, want 1: %v", len(statements), statements)
+	}
+	resources, _ := statements[0].(map[string]any)["Resource"].([]any)
+	if len(resources) != 2 || resources[0] != "arn:aws:dynamodb:eu-west-1:123456789012:table/myenv-api-db" ||
+		resources[1] != "arn:aws:dynamodb:eu-west-1:123456789012:table/myenv-api-db/index/*" {
+		t.Fatalf("Resource = %v, want the table and its indexes", resources)
+	}
+}

@@ -18,3 +18,11 @@ services:
     # JOBS_QUEUE_ARN, and its execution role is granted the queue.
     queues:
       - { binding: JOBS }
+    # A DynamoDB on-demand table keyed by pk, with createdAt as a numeric
+    # sort key. The function receives DB_TABLE_NAME, and its execution role
+    # is granted the table and its indexes.
+    databases:
+      - binding: DB
+        driver: dynamodb
+        partitionKey: { name: pk }
+        sortKey: { name: createdAt, type: N }

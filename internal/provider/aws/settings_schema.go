@@ -239,3 +239,36 @@ var queuesBindingSchema = resource.NewSchema("aws queues binding", map[string]an
 	"required":             []any{"binding"},
 	"additionalProperties": false,
 })
+
+// dynamoKeySchema is the shape of a table key in a database binding: the
+// attribute's name, and its DynamoDB scalar type (S, N or B), string when
+// unsaid.
+var dynamoKeySchema = map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"name": map[string]any{"type": "string"},
+		"type": map[string]any{"type": "string", "enum": []any{"S", "N", "B"}},
+	},
+	"required":             []any{"name"},
+	"additionalProperties": false,
+}
+
+// databaseBindingSchema validates one entry of a service's `databases:`
+// list for this provider: the driver selecting the engine, and that
+// engine's own keys.
+//
+// driver is required here, unlike the other providers' database schemas,
+// because this provider does not have one engine to default to: DynamoDB
+// today, and the enum is where the next engine is added. A DynamoDB table
+// is keyed by the binding: a partition key, and optionally a sort key.
+var databaseBindingSchema = resource.NewSchema("aws database binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding":      map[string]any{"type": "string"},
+		"driver":       map[string]any{"type": "string", "enum": []any{DriverDynamoDB}},
+		"partitionKey": dynamoKeySchema,
+		"sortKey":      dynamoKeySchema,
+	},
+	"required":             []any{"binding", "driver", "partitionKey"},
+	"additionalProperties": false,
+})

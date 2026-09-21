@@ -479,3 +479,25 @@ func TestLambdaFunctionRejectsABindingVariableTheSettingsAlsoSet(t *testing.T) {
 		t.Fatalf("Create with a colliding variable: err = %v, want one naming ASSETS_BUCKET_NAME", err)
 	}
 }
+
+func TestLambdaFunctionPublishesADynamoDBTableName(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+
+	table := awsBinding("database", "DB", "myenv-api-db")
+	table["config"] = map[string]any{"driver": DriverDynamoDB, "partitionKey": map[string]any{"name": "pk"}}
+	spec := baseLambdaSpec(t, dir, nil)
+	spec.Config["bindings"] = bindingsConfig(table)
+	if _, err := fn.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	env := fc.createCalls[0]["Environment"].(map[string]any)["Variables"].(map[string]any)
+	if !reflect.DeepEqual(env, map[string]any{"DB_TABLE_NAME": "myenv-api-db"}) {
+		t.Fatalf("Environment.Variables = %v, want DB_TABLE_NAME only", env)
+	}
+}

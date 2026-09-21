@@ -239,6 +239,16 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 			if err := set(prefix+"_BUCKET_NAME", b.Name); err != nil {
 				return err
 			}
+		case manifest.CapabilityDatabase:
+			// Likewise the table's name. A database binding on another
+			// engine of this provider publishes something else, once one
+			// exists.
+			if driver, _ := b.Config["driver"].(string); driver != DriverDynamoDB {
+				continue
+			}
+			if err := set(prefix+"_TABLE_NAME", b.Name); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
