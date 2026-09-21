@@ -67,6 +67,12 @@ func Capabilities() []resource.CapabilityDef {
 			ProviderSettings: computeSettingsSchema,
 		},
 		{
+			Name: manifest.CapabilityDatabase,
+			Summary: "DynamoDB on-demand table keyed as the binding declares " +
+				"(driver: dynamodb), granted to the service's execution role.",
+			Binding: databaseBindingSchema,
+		},
+		{
 			Name:    manifest.CapabilityQueues,
 			Summary: "SQS standard queue, granted to the service's execution role.",
 			Binding: queuesBindingSchema,

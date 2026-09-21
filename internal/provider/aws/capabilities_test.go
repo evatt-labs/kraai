@@ -129,3 +129,26 @@ func TestQueuesBindingSchema(t *testing.T) {
 		t.Fatal("expected an error for an unrecognized key: a queue's shape is not yet configurable")
 	}
 }
+
+func TestDatabaseBindingSchema(t *testing.T) {
+	valid := map[string]any{
+		"binding": "DB", "driver": "dynamodb",
+		"partitionKey": map[string]any{"name": "pk"},
+		"sortKey":      map[string]any{"name": "sk", "type": "N"},
+	}
+	if err := databaseBindingSchema.Validate(valid); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+	rejected := map[string]map[string]any{
+		"no driver":       {"binding": "DB", "partitionKey": map[string]any{"name": "pk"}},
+		"unknown driver":  {"binding": "DB", "driver": "postgres", "partitionKey": map[string]any{"name": "pk"}},
+		"no partitionKey": {"binding": "DB", "driver": "dynamodb"},
+		"bad key type":    {"binding": "DB", "driver": "dynamodb", "partitionKey": map[string]any{"name": "pk", "type": "X"}},
+		"unknown key":     {"binding": "DB", "driver": "dynamodb", "partitionKey": map[string]any{"name": "pk"}, "ttl": "x"},
+	}
+	for label, entry := range rejected {
+		if err := databaseBindingSchema.Validate(entry); err == nil {
+			t.Errorf("%s: %v was accepted", label, entry)
+		}
+	}
+}

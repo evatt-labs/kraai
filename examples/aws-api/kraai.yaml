@@ -15,3 +15,5 @@ providers:
     vendor: aws
   queues:
     vendor: aws
+  database:
+    vendor: aws

@@ -244,6 +244,19 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newRecordSetResource(client),
 		},
 		{
+			Provider: Provider, Type: TypeDynamoDBTable,
+			Capability: manifest.CapabilityDatabase,
+			// Only for a binding asking for this engine: a database on aws
+			// is whatever engine the binding's driver names, and this is
+			// the DynamoDB one. No DependsOn, for the same reasons as the
+			// queue below.
+			Applies: []resource.Applicability{bindingDriverIs(DriverDynamoDB)},
+			// TableName is settable at create, unique per account and
+			// region, and the type's primary identifier.
+			Lookup:   resource.LookupByName,
+			Resource: newDynamoTableResource(client),
+		},
+		{
 			Provider: Provider, Type: TypeSQSQueue,
 			Capability: manifest.CapabilityQueues,
 			// No DependsOn: a queue needs nothing first. The function that
