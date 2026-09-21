@@ -23,16 +23,9 @@ const (
 // loading a manifest needs: which capabilities exist, and what shape each
 // vendor's binding entries take. resource.Catalog satisfies it as written.
 //
-// An interface, and the narrowest one that answers those two questions,
-// because the vocabulary is assembled from the provider packages
-// (internal/assemble.Capabilities) and this package must never import one.
-// Handing it to the Loader keeps that dependency pointing one way, which is
-// the whole reason the catalog lives in internal/assemble.
-//
-// Note what does not appear here: no schema type, no CapabilityDef, no
-// provider type. ValidateBinding takes and returns only what this package
-// already has vocabulary for, so widening the catalog's own declarations
-// never widens this package's.
+// An interface, the narrowest that answers those questions, because the
+// vocabulary is assembled from the provider packages and this package must
+// never import one.
 type Vocabulary interface {
 	// Names returns every declared capability name, sorted.
 	Names() []string
@@ -62,11 +55,8 @@ type Loader struct {
 // engine, and validating the capabilities kraai.yaml names against
 // vocabulary.
 //
-// vocabulary is required. Load reports a nil one rather than skipping the
-// check: a capability vocabulary that silently does not apply is the
-// validation-that-only-runs-sometimes failure this codebase has shipped
-// before, and the whole point of taking it here is that no caller can
-// forget it.
+// vocabulary is required; Load reports a nil one rather than skipping the
+// check.
 func NewLoader(fsys FS, engine TemplateEngine, vocabulary Vocabulary) *Loader {
 	return &Loader{fs: fsys, template: engine, vocabulary: vocabulary}
 }
@@ -214,20 +204,14 @@ func (l *Loader) validateRoot(root *Root) error {
 	sort.Strings(written)
 
 	for _, capability := range written {
-		// The strictness a fixed struct of capability fields used to give for
-		// free, now sourced from what the registered providers actually
-		// declare. An unknown capability names an implementation that does
-		// not exist, so it can only ever fail to resolve; saying so here
-		// names the file and the key, and says what could have gone there.
+		// Every failure here is caught at load, naming the file and the key,
+		// rather than at plan time as a registry lookup with nothing pointing
+		// back at the line that caused it.
 		if !known[capability] {
 			return kerrors.Validation(
 				"%s: providers.%s: no registered provider declares capability %q — declared: %s",
 				rootFile, capability, capability, strings.Join(declared, ", "))
 		}
-		// A configured capability naming no vendor cannot resolve to
-		// anything. Caught here rather than when the registry is consulted,
-		// so the error names the file and the key instead of surfacing later
-		// as an unresolvable lookup with no obvious source.
 		provider, ok := root.Providers.For(capability)
 		if !ok {
 			continue
@@ -236,12 +220,8 @@ func (l *Loader) validateRoot(root *Root) error {
 			return kerrors.Validation(
 				"%s: providers.%s: vendor is required", rootFile, capability)
 		}
-		// Both halves of the pairing, not just each half on its own. The
-		// capability is declared and the vendor may well be a real one, and
-		// this is still unresolvable if that vendor does not fulfil this
-		// capability. Caught here, naming the file and the key, rather than
-		// surfacing at plan time as a registry lookup with nothing pointing
-		// back at the line that caused it.
+		// Both halves of the pairing: a real vendor that does not fulfil this
+		// capability is still unresolvable.
 		vendors := l.vocabulary.VendorsFor(capability)
 		if !contains(vendors, provider.Vendor) {
 			return kerrors.Validation(
@@ -416,10 +396,8 @@ func (l *Loader) loadEnvironment(envName string) (*Environment, error) {
 // one entry rather than a full translation table, and a capability a
 // provider adds needs no entry here at all.
 //
-// A compatibility shim with a known end: workstream 6 (evatt-labs/kraai#125)
-// is where binding keys break anyway, splitting `objects` into
-// objects/dns/tls/cdn, and `databases:` can be retired in the same change
-// that asks manifests to be edited for that.
+// A compatibility shim; `databases:` can be retired the next time binding
+// keys change incompatibly.
 var bindingKeyAliases = map[string]string{"databases": CapabilityDatabase}
 
 // normalizeBindingKeys rewrites each service's binding keys to the
@@ -495,19 +473,13 @@ func (l *Loader) validateServices(root *Root, services map[string]Service) error
 	return nil
 }
 
-// validateBindings checks one service's binding keys and entries.
-//
-// Entry shape is checked against the vendor configured for the capability,
-// not against every vendor that could fulfil it: a manifest binds one vendor
-// per capability, and validating against a vendor it did not choose would
-// report a shape it will never be held to. A capability with no vendor
-// configured is left alone here — internal/plan reports that, once, with the
-// binding it failed to expand.
-// validateBindings checks every binding entry of svc and returns the
-// references each entry makes to its siblings, keyed by binding name and
-// then by the entry key — what Service.References carries, resolved here
-// because this is the one place that has both the entries and the
-// vocabulary that says which keys are references.
+// validateBindings checks every binding entry of svc against the schema of
+// the vendor configured for its capability, and returns the references each
+// entry makes to its siblings, keyed by binding name and then by entry key:
+// what Service.References carries, resolved here because this is the one
+// place with both the entries and the vocabulary saying which keys are
+// references. A capability with no vendor configured is left alone; the
+// planner reports that once, with the binding it failed to expand.
 func (l *Loader) validateBindings(root *Root, name string, svc Service, known map[string]bool) (map[string]map[string]string, error) {
 	bindings := svc.Bindings
 	capabilities := make([]string, 0, len(bindings))
@@ -720,14 +692,8 @@ func validateEnvironment(path string, env *Environment) error {
 		}
 	}
 
-	// naming.prefix becomes a leading segment of every DNS-safe resource
-	// name this environment derives (internal/naming.Namer), so it gets
-	// the same known-field-wrong-value treatment every other field in
-	// this function does — see validatePrefix (naming.go) for the
-	// grammar and why it lives in this package rather than
-	// internal/naming. env.Naming is nil for the overwhelming majority of
-	// environments (no naming overlay configured at all), so this only
-	// runs the check when there is a prefix to check.
+	// naming.prefix becomes a leading segment of every derived name, so it
+	// is validated here like any other field; see validatePrefix.
 	if env.Naming != nil {
 		if err := validatePrefix(env.Naming.Prefix); err != nil {
 			return kerrors.Wrap(err, kerrors.CodeValidation,
