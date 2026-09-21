@@ -12,7 +12,7 @@ import (
 // networkResource returns the registered Resource for one network type.
 func networkResource(t *testing.T, client ccAPI, typeName string) resource.Resource {
 	t.Helper()
-	for _, r := range registerNetwork(client) {
+	for _, r := range registerNetwork(client, "us-east-1") {
 		if r.Type == typeName {
 			return r.Resource
 		}
@@ -240,7 +240,7 @@ func TestVPCCreateCarriesDNSSupportAndItsCIDR(t *testing.T) {
 // actually exists — a dependency naming nothing contributes no edge and
 // silently loses its ordering.
 func TestNetworkRegistrationsDeclareResolvableDependencies(t *testing.T) {
-	regs := registerNetwork(&fakeClient{})
+	regs := registerNetwork(&fakeClient{}, "us-east-1")
 	known := make(map[string]bool, len(regs))
 	for _, r := range regs {
 		known[r.Provider+"/"+r.Type] = true
@@ -252,7 +252,52 @@ func TestNetworkRegistrationsDeclareResolvableDependencies(t *testing.T) {
 			}
 		}
 	}
-	if len(regs) != 7 {
-		t.Fatalf("registerNetwork returned %d registrations, want 7", len(regs))
+	if len(regs) != 9 {
+		t.Fatalf("registerNetwork returned %d registrations, want 9", len(regs))
+	}
+}
+
+// A gateway endpoint routes one service's traffic inside the VPC: it names
+// the service per region, the VPC, and the route table it is attached to,
+// both read from what the network's own resources published.
+func TestGatewayEndpointsAttachToTheRouteTable(t *testing.T) {
+	for _, c := range []struct{ typeKey, service string }{
+		{TypeS3Endpoint, "s3"},
+		{TypeDynamoDBEndpoint, "dynamodb"},
+	} {
+		t.Run(c.service, func(t *testing.T) {
+			client := &fakeClient{createID: "vpce-1", createProps: map[string]any{"Id": "vpce-1"}}
+			res := networkResource(t, client, c.typeKey)
+
+			spec := networkSpec("NET", nil, map[string]map[string]any{
+				key(TypeVPC):        {"VpcId": "vpc-abc"},
+				key(TypeRouteTable): {"RouteTableId": "rtb-1"},
+			})
+			if _, err := res.Create(context.Background(), spec); err != nil {
+				t.Fatalf("Create: %v", err)
+			}
+			desired := client.createCalls[0]
+			if desired["ServiceName"] != "com.amazonaws.us-east-1."+c.service || desired["VpcEndpointType"] != "Gateway" {
+				t.Fatalf("desired = %v, want a gateway endpoint for %s in us-east-1", desired, c.service)
+			}
+			if desired["VpcId"] != "vpc-abc" {
+				t.Fatalf("VpcId = %v, want the VPC's id", desired["VpcId"])
+			}
+			if tables, _ := desired["RouteTableIds"].([]any); len(tables) != 1 || tables[0] != "rtb-1" {
+				t.Fatalf("RouteTableIds = %v, want the network's route table", desired["RouteTableIds"])
+			}
+			if _, tagged := desired["Tags"]; !tagged {
+				t.Fatal("the endpoint carries no identity tag, so it could never be found again")
+			}
+		})
+	}
+}
+
+func TestGatewayEndpointFailsLoudlyWithoutTheRouteTable(t *testing.T) {
+	res := networkResource(t, &fakeClient{}, TypeS3Endpoint)
+	spec := networkSpec("NET", nil, map[string]map[string]any{key(TypeVPC): {"VpcId": "vpc-abc"}})
+	_, err := res.Create(context.Background(), spec)
+	if err == nil || !strings.Contains(err.Error(), key(TypeRouteTable)) {
+		t.Fatalf("Create without the route table: err = %v, want one naming it", err)
 	}
 }

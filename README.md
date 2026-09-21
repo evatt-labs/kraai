@@ -406,8 +406,9 @@ yet been exercised against a live account
 (DynamoDB under `driver: dynamodb`, Aurora DSQL under `driver: postgres`), `keyvalue` (ElastiCache Serverless,
 `driver: redis`) and `queues` (SQS) plan against a live account and have not
 been applied from CI ([#232](https://github.com/evatt-labs/kraai/issues/232));
-a function inside a `network` binding reaches the cache but not the public
-SQS and DynamoDB endpoints until the network gains egress
+a function inside a `network` binding reaches the cache, S3 and DynamoDB
+(the network carries gateway endpoints for both) but not SQS or DSQL until
+the network gains egress
 ([#244](https://github.com/evatt-labs/kraai/issues/244)).
 Cloudflare offers two compute products and kraai implements neither — Workers
 ([#135](https://github.com/evatt-labs/kraai/issues/135)) and Containers

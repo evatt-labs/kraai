@@ -114,7 +114,14 @@ func Register(reg *resource.Registry, client *Client) error {
 // fix (e.g. DNS-validated certificates needing their own explicit ordering
 // hint, or a second RecordSet registration) to resolve.
 func Registrations(client *Client) []resource.Registration {
-	return append(append(registerNetwork(client), registerKeyValue(client)...), []resource.Registration{
+	// A nil client is what callers inspecting registrations without
+	// credentials pass; only the network's endpoint service names need
+	// the region, and those never reach a request without a client.
+	region := ""
+	if client != nil {
+		region = client.Region()
+	}
+	return append(append(registerNetwork(client, region), registerKeyValue(client)...), []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
 			Capability: manifest.CapabilityDNS,
