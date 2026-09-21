@@ -46,11 +46,10 @@ func artifactObjectKey(serviceName, sha256Hex string) string {
 // getter, see that package's own doc). Uploading the built artifact to S3
 // is not safe there: `kraai plan` must never mutate anything, and
 // Diff's signature carries no context to run a network call
-// under cleanly regardless. So Diff here (see its own doc
-// comment) never builds or uploads an artifact at all — it only ever
-// checks FunctionName, this type's sole createOnlyProperty — and the real
-// packaging-plus-upload sequence runs exclusively inside Create/Update,
-// which only `kraai apply` ever calls.
+// under cleanly regardless. So Diff here builds the artifact to hash it
+// and compares the hash against the one the last deploy recorded on the
+// function (see Diff), while the upload runs exclusively inside
+// Create/Update, which only `kraai apply` ever calls.
 type lambdaFunctionResource struct {
 	*resourceType
 	client *Client
@@ -72,30 +71,12 @@ func newLambdaFunctionResource(client *Client) *lambdaFunctionResource {
 // ctx already carries — nothing here can run during `kraai plan`, only
 // `kraai apply`'s Create/Update.
 func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
-	dir, _ := spec.Config["dir"].(string)
-	if dir == "" {
-		return resource.Spec{}, kerrors.Validation("binding %q declares no dir to package", spec.Binding)
-	}
-	handler, _ := spec.Config["handler"].(string)
-	if handler == "" {
-		return resource.Spec{}, kerrors.Validation("binding %q declares no compute.handler", spec.Binding)
-	}
-
-	settingsMap, _ := spec.Config["settings"].(map[string]any)
-	lambdaSettings, err := decodeLambdaSettings(settingsMap)
+	declared, err := declaredFunction(spec)
 	if err != nil {
 		return resource.Spec{}, err
 	}
 
-	// include is set only when the service's manifest entry declares one
-	// (internal/plan's expandCompute omits an empty slice from Config
-	// entirely — see its own doc comment) so a plain type assertion, not a
-	// defensive multi-type read like settingStr's: this comes straight from
-	// manifest.Compute.Include, a typed []string field, never through a
-	// free-form settings map that could carry some other shape.
-	include, _ := spec.Config["include"].([]string)
-
-	data, sha256Hex, err := buildArtifact(dir, include)
+	data, sha256Hex, err := buildArtifact(declared.dir, declared.include)
 	if err != nil {
 		return resource.Spec{}, err
 	}
@@ -119,7 +100,7 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 	// derive.
 	execRoleARN := roleARN(account, spec.Name)
 
-	env, err := resolveEnv(ctx, spec, lambdaSettings)
+	env, err := resolveEnv(ctx, spec, declared.settings)
 	if err != nil {
 		return resource.Spec{}, err
 	}
@@ -128,39 +109,17 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 	}
 
 	translated := spec
-	translated.Config = map[string]any{
-		"FunctionName": spec.Name,
-		"PackageType":  "Zip",
-		"Code": map[string]any{
-			"S3Bucket": bucket,
-			"S3Key":    key,
-		},
-		"Handler":       handler,
-		"Runtime":       lambdaSettings.Runtime,
-		"Architectures": []any{lambdaSettings.Architecture},
-		"MemorySize":    lambdaSettings.MemorySize,
-		"Timeout":       lambdaSettings.Timeout,
-		"Role":          execRoleARN,
-		"Environment": map[string]any{
-			"Variables": env,
-		},
+	translated.Config = declared.properties
+	translated.Config["Code"] = map[string]any{
+		"S3Bucket": bucket,
+		"S3Key":    key,
 	}
-	// Layers is emitted only when one was configured. A directly-invoked
-	// function needs no layer, and sending Layers: [""] for it would be an
-	// invalid ARN that Cloud Control rejects outright.
-	if lambdaSettings.LayerArn != "" {
-		translated.Config["Layers"] = []any{lambdaSettings.LayerArn}
-	}
-
-	// ReservedConcurrentExecutions is set only when the manifest actually
-	// declared one — nil means "no opinion," not zero, and the two must
-	// never collapse into the same desired-state shape. See
-	// LambdaSettings.ReservedConcurrentExecutions' own doc comment
-	// (compute_settings.go) for why, and for the live schema evidence that
-	// this is the correct Cloud Control property name.
-	if lambdaSettings.ReservedConcurrentExecutions != nil {
-		translated.Config["ReservedConcurrentExecutions"] = *lambdaSettings.ReservedConcurrentExecutions
-	}
+	translated.Config["Role"] = execRoleARN
+	translated.Config["Environment"] = map[string]any{"Variables": env}
+	// Code is write-only: a read never returns which artifact a function
+	// runs, so the artifact's hash is recorded where a read does return
+	// it, for Diff to compare against the source on the next plan.
+	translated.Config["Tags"] = []any{map[string]any{"Key": artifactTagKey, "Value": sha256Hex}}
 
 	vpcConfig, err := vpcConfigFor(spec)
 	if err != nil {
@@ -170,6 +129,79 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 		translated.Config["VpcConfig"] = vpcConfig
 	}
 	return translated, nil
+}
+
+// artifactTagKey is the tag a function carries naming the SHA-256 of the
+// deployment package it runs. Code is write-only in Cloud Control, so
+// without this a plan could not tell a function running yesterday's source
+// from one running today's.
+const artifactTagKey = "kraai:artifact-sha256"
+
+// declaredFunctionProperties is what the manifest says about a function
+// before anything is packaged, uploaded or resolved: the part of its
+// desired state a plan can compute with no attributes, no secrets and no
+// network.
+type declaredFunctionProperties struct {
+	dir      string
+	include  []string
+	settings LambdaSettings
+	// properties are the AWS::Lambda::Function properties that follow from
+	// the manifest alone: name, handler, runtime, architecture, sizing,
+	// layer and reserved concurrency.
+	properties map[string]any
+}
+
+// declaredFunction reads the manifest-declared part of a function out of
+// its spec, or fails naming what is missing.
+func declaredFunction(spec resource.Spec) (declaredFunctionProperties, error) {
+	dir, _ := spec.Config["dir"].(string)
+	if dir == "" {
+		return declaredFunctionProperties{}, kerrors.Validation("binding %q declares no dir to package", spec.Binding)
+	}
+	handler, _ := spec.Config["handler"].(string)
+	if handler == "" {
+		return declaredFunctionProperties{}, kerrors.Validation("binding %q declares no compute.handler", spec.Binding)
+	}
+
+	settingsMap, _ := spec.Config["settings"].(map[string]any)
+	lambdaSettings, err := decodeLambdaSettings(settingsMap)
+	if err != nil {
+		return declaredFunctionProperties{}, err
+	}
+
+	// include is set only when the service's manifest entry declares one
+	// (internal/plan's expandCompute omits an empty slice from Config
+	// entirely — see its own doc comment) so a plain type assertion, not a
+	// defensive multi-type read like settingStr's: this comes straight from
+	// manifest.Compute.Include, a typed []string field, never through a
+	// free-form settings map that could carry some other shape.
+	include, _ := spec.Config["include"].([]string)
+
+	properties := map[string]any{
+		"FunctionName":  spec.Name,
+		"PackageType":   "Zip",
+		"Handler":       handler,
+		"Runtime":       lambdaSettings.Runtime,
+		"Architectures": []any{lambdaSettings.Architecture},
+		"MemorySize":    lambdaSettings.MemorySize,
+		"Timeout":       lambdaSettings.Timeout,
+	}
+	// Layers is emitted only when one was configured. A directly-invoked
+	// function needs no layer, and sending Layers: [""] for it would be an
+	// invalid ARN that Cloud Control rejects outright.
+	if lambdaSettings.LayerArn != "" {
+		properties["Layers"] = []any{lambdaSettings.LayerArn}
+	}
+	// ReservedConcurrentExecutions is set only when the manifest actually
+	// declared one — nil means "no opinion," not zero, and the two must
+	// never collapse into the same desired-state shape. See
+	// LambdaSettings.ReservedConcurrentExecutions' own doc comment
+	// (compute_settings.go) for why, and for the live schema evidence that
+	// this is the correct Cloud Control property name.
+	if lambdaSettings.ReservedConcurrentExecutions != nil {
+		properties["ReservedConcurrentExecutions"] = *lambdaSettings.ReservedConcurrentExecutions
+	}
+	return declaredFunctionProperties{dir: dir, include: include, settings: lambdaSettings, properties: properties}, nil
 }
 
 // serviceNetwork returns the one network binding this provider fulfils on
@@ -261,19 +293,42 @@ func resolveEnv(ctx context.Context, spec resource.Spec, settings LambdaSettings
 // chose for a variable is not overwritten: two sources for one variable is
 // a conflict to report, not to resolve quietly.
 func addBindingEnv(spec resource.Spec, env map[string]any) error {
-	bindings, err := decodeServiceBindings(spec)
+	variables, err := bindingVariables(spec)
 	if err != nil {
 		return err
 	}
-	set := func(name string, value any) error {
-		if _, taken := env[name]; taken {
+	for _, v := range variables {
+		if _, taken := env[v.name]; taken {
 			return kerrors.Validation(
 				"binding %q: environment variable %q is set by settings and by a binding; rename one",
-				spec.Binding, name)
+				spec.Binding, v.name)
 		}
-		env[name] = value
-		return nil
+		value, err := v.value(spec)
+		if err != nil {
+			return err
+		}
+		env[v.name] = value
 	}
+	return nil
+}
+
+// bindingVariable is one environment variable a binding gives the function:
+// its name, known from the manifest alone, and its value, which may need
+// what the binding's resource published and so is resolved only at apply.
+type bindingVariable struct {
+	name  string
+	value func(spec resource.Spec) (any, error)
+}
+
+// bindingVariables lists the variables the service's AWS bindings give the
+// function. Names come from the binding and its capability, so a plan can
+// know which variables a function should carry without resolving any.
+func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
+	bindings, err := decodeServiceBindings(spec)
+	if err != nil {
+		return nil, err
+	}
+	var out []bindingVariable
 	for _, b := range bindings {
 		if b.Vendor != Provider {
 			continue
@@ -282,26 +337,19 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 		switch b.Capability {
 		case manifest.CapabilityQueues:
 			queueKey := b.attributeKey(spec, TypeSQSQueue)
-			url, err := spec.Attribute(queueKey, "QueueUrl")
-			if err != nil {
-				return err
-			}
-			arn, err := spec.Attribute(queueKey, "Arn")
-			if err != nil {
-				return err
-			}
-			if err := set(prefix+"_QUEUE_URL", url); err != nil {
-				return err
-			}
-			if err := set(prefix+"_QUEUE_ARN", arn); err != nil {
-				return err
-			}
+			out = append(out,
+				bindingVariable{name: prefix + "_QUEUE_URL", value: func(spec resource.Spec) (any, error) {
+					return spec.Attribute(queueKey, "QueueUrl")
+				}},
+				bindingVariable{name: prefix + "_QUEUE_ARN", value: func(spec resource.Spec) (any, error) {
+					return spec.Attribute(queueKey, "Arn")
+				}})
 		case manifest.CapabilityObjects:
 			// The bucket's name is its identity, derived rather than
 			// published, so nothing has to be read back.
-			if err := set(prefix+"_BUCKET_NAME", b.Name); err != nil {
-				return err
-			}
+			out = append(out, bindingVariable{name: prefix + "_BUCKET_NAME", value: func(resource.Spec) (any, error) {
+				return b.Name, nil
+			}})
 		case manifest.CapabilityKeyValue:
 			// The cache's endpoint only exists once created, so it is read
 			// from what the cache published. Reachable only from inside
@@ -310,58 +358,147 @@ func addBindingEnv(spec resource.Spec, env map[string]any) error {
 			if driver, _ := b.Config["driver"].(string); driver != DriverRedis {
 				continue
 			}
-			url, err := cacheURL(spec, b.attributeKey(spec, TypeElastiCacheServerlessCache))
-			if err != nil {
-				return err
-			}
-			if err := set(prefix+"_REDIS_URL", url); err != nil {
-				return err
-			}
+			cacheKey := b.attributeKey(spec, TypeElastiCacheServerlessCache)
+			out = append(out, bindingVariable{name: prefix + "_REDIS_URL", value: func(spec resource.Spec) (any, error) {
+				return cacheURL(spec, cacheKey)
+			}})
 		case manifest.CapabilityDatabase:
 			switch driver, _ := b.Config["driver"].(string); driver {
 			case DriverDynamoDB:
 				// Likewise the table's name.
-				if err := set(prefix+"_TABLE_NAME", b.Name); err != nil {
-					return err
-				}
+				out = append(out, bindingVariable{name: prefix + "_TABLE_NAME", value: func(resource.Spec) (any, error) {
+					return b.Name, nil
+				}})
 			case DriverPostgres:
 				// The cluster's endpoint is assigned at create and read
 				// from what the cluster published. The URL carries no
 				// password: the function signs an IAM token for the
 				// endpoint when it connects (dsql.go).
-				url, err := dsqlURL(spec, b.attributeKey(spec, TypeDSQLCluster))
-				if err != nil {
-					return err
-				}
-				if err := set(prefix+"_DATABASE_URL", url); err != nil {
-					return err
-				}
+				clusterKey := b.attributeKey(spec, TypeDSQLCluster)
+				out = append(out, bindingVariable{name: prefix + "_DATABASE_URL", value: func(spec resource.Spec) (any, error) {
+					return dsqlURL(spec, clusterKey)
+				}})
 			}
 		}
 	}
-	return nil
+	return out, nil
 }
 
-// Diff checks only FunctionName, this type's sole
-// createOnlyProperty (this package's own register.go: "FunctionName is
-// settable at create; CloudFormation marks it 'Update requires:
-// Replacement'"). See this type's own doc comment for
-// why the real translate — packaging, upload, secret resolution — never
-// runs here.
+// Diff decides whether an existing function needs a redeploy from what a
+// plan can know: the manifest, the source on disk and the live function.
+// Nothing is uploaded and no secret or attribute is resolved, since a plan
+// has none of those to hand.
 //
-// Settings validation used to live here too, on the reasoning that this
-// was "the one thing every compute service reaches unconditionally." That
-// reasoning was wrong: Diff only runs once internal/plan's
-// decide has already found an existing resource via Get, so it is never
-// reached on a fresh environment's first plan, where every resource is
-// ActionCreate — a typo'd or invalid setting reached nothing at all.
-// ValidateSpec (below) is the actual unconditional reach now, via
-// plan.SpecValidator; see its own doc comment for the fix and
-// plan.SpecValidator's for the full failure mode this replaced.
+// Compared, in order: FunctionName, the one createOnly property, a
+// difference in which is a replace; the declared properties (handler,
+// runtime, architecture, sizing, layer, reserved concurrency) through the
+// generic comparison; the artifact, by hashing the source directory and
+// reading the hash the last deploy recorded in the function's tags; the
+// environment, where a literal variable must match its value and a
+// secret-sourced or binding-derived one must exist under its name; and
+// whether the function is inside a VPC, which follows from whether the
+// service declares a network.
+//
+// It used to compare only FunctionName, so a function was deployed once
+// and never again (evatt-labs/kraai#245).
 func (l *lambdaFunctionResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
-	nameOnly := spec
-	nameOnly.Config = map[string]any{"FunctionName": spec.Name}
-	return l.compare(nameOnly, state)
+	if state == nil {
+		return resource.Same, nil
+	}
+	declared, err := declaredFunction(spec)
+	if err != nil {
+		return resource.Same, err
+	}
+	comparable := spec
+	comparable.Config = declared.properties
+	difference, err := l.compare(comparable, state)
+	if err != nil || difference != resource.Same {
+		return difference, err
+	}
+
+	_, sha256Hex, err := buildArtifact(declared.dir, declared.include)
+	if err != nil {
+		return resource.Same, err
+	}
+	if tagValue(state.Attributes, artifactTagKey) != sha256Hex {
+		return resource.Mutable, nil
+	}
+
+	same, err := environmentMatches(spec, declared.settings, state)
+	if err != nil || !same {
+		return resource.Mutable, err
+	}
+
+	network, err := serviceNetwork(spec)
+	if err != nil {
+		return resource.Same, err
+	}
+	if (network != nil) != insideVPC(state) {
+		return resource.Mutable, nil
+	}
+	return resource.Same, nil
+}
+
+// tagValue reads one tag's value out of a live state's array-shaped Tags,
+// empty when the tag is absent.
+func tagValue(properties map[string]any, key string) string {
+	tags, _ := properties["Tags"].([]any)
+	for _, t := range tags {
+		tag, _ := t.(map[string]any)
+		if k, _ := tag["Key"].(string); k == key {
+			value, _ := tag["Value"].(string)
+			return value
+		}
+	}
+	return ""
+}
+
+// environmentMatches reports whether the live function's environment is the
+// one the spec would produce, as far as a plan can tell: every literal
+// variable carries its value, every secret-sourced or binding-derived
+// variable exists, and nothing else does. A secret's or a published
+// attribute's value cannot be compared here and is not.
+func environmentMatches(spec resource.Spec, settings LambdaSettings, state *resource.State) (bool, error) {
+	environment, _ := state.Attributes["Environment"].(map[string]any)
+	live, _ := environment["Variables"].(map[string]any)
+
+	expected := make(map[string]bool, len(settings.Env)+len(settings.EnvSecrets))
+	for name, want := range settings.Env {
+		expected[name] = true
+		if got, _ := live[name].(string); got != want {
+			return false, nil
+		}
+	}
+	for name := range settings.EnvSecrets {
+		expected[name] = true
+	}
+	variables, err := bindingVariables(spec)
+	if err != nil {
+		return false, err
+	}
+	for _, v := range variables {
+		expected[v.name] = true
+	}
+	for name := range expected {
+		if _, present := live[name]; !present {
+			return false, nil
+		}
+	}
+	for name := range live {
+		if !expected[name] {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+// insideVPC reports whether a live function is attached to a VPC. Lambda
+// reports a detached function either without VpcConfig or with one whose
+// subnet list is empty.
+func insideVPC(state *resource.State) bool {
+	vpcConfig, _ := state.Attributes["VpcConfig"].(map[string]any)
+	subnets, _ := vpcConfig["SubnetIds"].([]any)
+	return len(subnets) > 0
 }
 
 // ValidateSpec implements plan.SpecValidator: decodeLambdaSettings is pure

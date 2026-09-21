@@ -301,30 +301,182 @@ func TestLambdaFunctionValidateSpec(t *testing.T) {
 	})
 }
 
-func TestLambdaFunctionDiffChecksOnlyFunctionName(t *testing.T) {
-	fc := &fakeClient{schema: Schema{CreateOnlyProperties: []string{"/properties/FunctionName"}}}
-	fsts := &fakeSTS{account: "123456789012"}
-	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, fsts)
-
-	// A spec whose dir does not even exist must still work: Diff
-	// never packages anything (see the type's own doc comment).
-	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
-		"dir": "/nonexistent/path",
-		"settings": map[string]any{
-			"runtime": "python3.13", "architecture": "arm64", "layerArn": "arn:aws:lambda:us-east-1:123456789012:layer:adapter:1",
-		},
-	}}
-	state := &resource.State{Attributes: map[string]any{"FunctionName": "myenv-api-old"}}
-
-	difference, err := fn.Diff(spec, state)
+// deployedFunction is a live function as Cloud Control reads it back after
+// a deploy of dir with the given settings: the declared properties, the
+// artifact hash tag, and an environment. Tests mutate one thing at a time
+// to show Diff notices exactly that thing.
+func deployedFunction(t *testing.T, dir string, env map[string]any) *resource.State {
+	t.Helper()
+	_, sha256Hex, err := buildArtifact(dir, nil)
 	if err != nil {
-		t.Fatalf("Diff: %v", err)
+		t.Fatalf("buildArtifact: %v", err)
 	}
-	if difference != resource.Immutable {
-		t.Fatal("expected a FunctionName difference to be detected")
+	return &resource.State{Attributes: map[string]any{
+		"FunctionName":  "myenv-api",
+		"PackageType":   "Zip",
+		"Handler":       "run.sh",
+		"Runtime":       "python3.13",
+		"Architectures": []any{"arm64"},
+		"MemorySize":    float64(defaultMemorySize),
+		"Timeout":       float64(defaultTimeout),
+		"Layers":        []any{"arn:aws:lambda:us-east-1:123456789012:layer:adapter:1"},
+		"Tags":          []any{map[string]any{"Key": artifactTagKey, "Value": sha256Hex}},
+		"Environment":   map[string]any{"Variables": env},
+	}}
+}
+
+func functionDiffFixture(t *testing.T) (*lambdaFunctionResource, string, *fakeSTS) {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	fc := &fakeClient{schema: Schema{
+		CreateOnlyProperties: []string{"/properties/FunctionName"},
+		Handlers:             map[string]json.RawMessage{"update": json.RawMessage(`{}`)},
+	}}
+	fsts := &fakeSTS{account: "123456789012"}
+	return newLambdaFunctionResourceForTest(fc, &fakeS3{}, fsts), dir, fsts
+}
+
+// An unchanged function is Same, and reaching that answer needs no S3, no
+// STS and no attributes: a plan has none of them.
+func TestLambdaFunctionDiffIsSameForAnUnchangedDeploy(t *testing.T) {
+	fn, dir, fsts := functionDiffFixture(t)
+	spec := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"LOG_LEVEL": "info"}})
+	live := deployedFunction(t, dir, map[string]any{"LOG_LEVEL": "info"})
+
+	d, err := fn.Diff(spec, live)
+	if err != nil || d != resource.Same {
+		t.Fatalf("Diff(unchanged) = %v, %v; want Same", d, err)
 	}
 	if fsts.calls != 0 {
-		t.Fatalf("STS called %d times during Diff, want 0 (no artifact packaging or role ARN needed to compare FunctionName)", fsts.calls)
+		t.Fatalf("STS called %d times during Diff, want 0", fsts.calls)
+	}
+}
+
+func TestLambdaFunctionDiffReportsARenameAsAReplace(t *testing.T) {
+	fn, dir, _ := functionDiffFixture(t)
+	spec := baseLambdaSpec(t, dir, nil)
+	live := deployedFunction(t, dir, nil)
+	live.Attributes["FunctionName"] = "myenv-api-old"
+	if d, err := fn.Diff(spec, live); err != nil || d != resource.Immutable {
+		t.Fatalf("Diff(renamed) = %v, %v; want Immutable", d, err)
+	}
+}
+
+// The source changing is the whole point of a second apply: the hash of the
+// directory no longer matches the hash the last deploy recorded.
+func TestLambdaFunctionDiffReportsChangedSource(t *testing.T) {
+	fn, dir, _ := functionDiffFixture(t)
+	spec := baseLambdaSpec(t, dir, nil)
+	live := deployedFunction(t, dir, nil)
+
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app v2\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	if d, err := fn.Diff(spec, live); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(source changed) = %v, %v; want Mutable", d, err)
+	}
+
+	// A function deployed before the hash was recorded has no tag at all,
+	// which must read as changed rather than as unknowable.
+	untagged := deployedFunction(t, dir, nil)
+	delete(untagged.Attributes, "Tags")
+	if d, err := fn.Diff(spec, untagged); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(no artifact tag) = %v, %v; want Mutable", d, err)
+	}
+}
+
+func TestLambdaFunctionDiffReportsAChangedSetting(t *testing.T) {
+	fn, dir, _ := functionDiffFixture(t)
+	spec := baseLambdaSpec(t, dir, map[string]any{"memorySize": 1024})
+	live := deployedFunction(t, dir, nil)
+	if d, err := fn.Diff(spec, live); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(memorySize changed) = %v, %v; want Mutable", d, err)
+	}
+}
+
+// A literal variable must carry its value; a binding-derived or
+// secret-sourced one must exist; a variable the manifest no longer sets
+// must be gone.
+func TestLambdaFunctionDiffReportsEnvironmentChanges(t *testing.T) {
+	fn, dir, _ := functionDiffFixture(t)
+
+	changed := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"LOG_LEVEL": "debug"}})
+	if d, err := fn.Diff(changed, deployedFunction(t, dir, map[string]any{"LOG_LEVEL": "info"})); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(literal changed) = %v, %v; want Mutable", d, err)
+	}
+
+	withQueue := baseLambdaSpec(t, dir, nil)
+	withQueue.Config["bindings"] = bindingsConfig(awsBinding("queues", "JOBS", "myenv-api-jobs"))
+	if d, err := fn.Diff(withQueue, deployedFunction(t, dir, nil)); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(queue binding added) = %v, %v; want Mutable", d, err)
+	}
+	granted := deployedFunction(t, dir, map[string]any{"JOBS_QUEUE_URL": "https://sqs/jobs", "JOBS_QUEUE_ARN": "arn:jobs"})
+	if d, err := fn.Diff(withQueue, granted); err != nil || d != resource.Same {
+		t.Fatalf("Diff(queue binding present) = %v, %v; want Same", d, err)
+	}
+
+	withSecret := baseLambdaSpec(t, dir, map[string]any{"envSecrets": map[string]any{"DATABASE_URL": "DB.connection_uri"}})
+	if d, err := fn.Diff(withSecret, deployedFunction(t, dir, nil)); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(secret variable missing) = %v, %v; want Mutable", d, err)
+	}
+	if d, err := fn.Diff(withSecret, deployedFunction(t, dir, map[string]any{"DATABASE_URL": "postgres://x"})); err != nil || d != resource.Same {
+		t.Fatalf("Diff(secret variable present) = %v, %v; want Same", d, err)
+	}
+
+	plain := baseLambdaSpec(t, dir, nil)
+	if d, err := fn.Diff(plain, deployedFunction(t, dir, map[string]any{"STALE": "x"})); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(variable removed from manifest) = %v, %v; want Mutable", d, err)
+	}
+}
+
+func TestLambdaFunctionDiffReportsJoiningOrLeavingANetwork(t *testing.T) {
+	fn, dir, _ := functionDiffFixture(t)
+
+	joined := baseLambdaSpec(t, dir, nil)
+	joined.Config["bindings"] = bindingsConfig(awsBinding("network", "NET", "myenv-api-net"))
+	outside := deployedFunction(t, dir, nil)
+	if d, err := fn.Diff(joined, outside); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(network declared, function outside) = %v, %v; want Mutable", d, err)
+	}
+	inside := deployedFunction(t, dir, nil)
+	inside.Attributes["VpcConfig"] = map[string]any{"SubnetIds": []any{"subnet-1"}, "SecurityGroupIds": []any{"sg-1"}}
+	if d, err := fn.Diff(joined, inside); err != nil || d != resource.Same {
+		t.Fatalf("Diff(network declared, function inside) = %v, %v; want Same", d, err)
+	}
+
+	left := baseLambdaSpec(t, dir, nil)
+	if d, err := fn.Diff(left, inside); err != nil || d != resource.Mutable {
+		t.Fatalf("Diff(network removed, function inside) = %v, %v; want Mutable", d, err)
+	}
+	detached := deployedFunction(t, dir, nil)
+	detached.Attributes["VpcConfig"] = map[string]any{"SubnetIds": []any{}, "SecurityGroupIds": []any{}}
+	if d, err := fn.Diff(left, detached); err != nil || d != resource.Same {
+		t.Fatalf("Diff(no network, empty VpcConfig) = %v, %v; want Same", d, err)
+	}
+}
+
+// Create records the artifact's hash on the function, which is what a later
+// Diff compares the source against.
+func TestLambdaFunctionCreateRecordsTheArtifactHash(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, sha256Hex, err := buildArtifact(dir, nil)
+	if err != nil {
+		t.Fatalf("buildArtifact: %v", err)
+	}
+	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
+		schema: Schema{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
+	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
+	if _, err := fn.Create(context.Background(), baseLambdaSpec(t, dir, nil)); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if got := tagValue(fc.createCalls[0], artifactTagKey); got != sha256Hex {
+		t.Fatalf("artifact tag = %q, want %q", got, sha256Hex)
 	}
 }
 
