@@ -3,6 +3,7 @@ package plan
 import (
 	"context"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -543,5 +544,59 @@ func TestPlan_AWSQueueOrdersBeforeTheFunctionNotTheRole(t *testing.T) {
 	if role.Wave != queue.Wave {
 		t.Errorf("role wave %d, queue wave %d — the role grants the queue by a locally built ARN and must not wait for it",
 			role.Wave, queue.Wave)
+	}
+}
+
+// TestPlan_AWSCacheOrdersAfterItsNetwork pins how a redis keyvalue binding
+// fits the graph through its network reference: the security group waits
+// for the VPC, the cache waits for the group and the subnet, and the
+// function, which receives the cache's URL, waits for the cache.
+func TestPlan_AWSCacheOrdersAfterItsNetwork(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := kraaiAPIManifest()
+	m.Root.Providers[manifest.CapabilityNetwork] = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityKeyValue] = &manifest.Provider{Vendor: "aws"}
+	api := m.Services["api"]
+	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{{"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24"}}
+	api.Bindings[manifest.CapabilityKeyValue] = []manifest.Binding{{"binding": "CACHE", "driver": "redis", "network": "NET"}}
+	api.References = map[string]map[string]string{"CACHE": {"network": "NET"}}
+	m.Services["api"] = api
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	waves := map[string]int{}
+	for _, a := range p.Actions {
+		if a.ServiceKey == "api" {
+			waves[a.Type] = a.Wave
+		}
+	}
+	// Declared reads, not just wave numbers: the subnet happens to share a
+	// wave with the security group, so the cache would land after it even
+	// with the read edge missing.
+	for _, typ := range []string{awsprovider.TypeCacheSecurityGroup, awsprovider.TypeElastiCacheServerlessCache} {
+		if reads := findServiceAction(t, p, "api", typ).ReadsBindings; !slices.Contains(reads, "NET") {
+			t.Errorf("%s reads %v, want the NET network binding it references", typ, reads)
+		}
+	}
+	for _, c := range []struct{ earlier, later string }{
+		{awsprovider.TypeVPC, awsprovider.TypeCacheSecurityGroup},
+		{awsprovider.TypeCacheSecurityGroup, awsprovider.TypeElastiCacheServerlessCache},
+		{awsprovider.TypeSubnet, awsprovider.TypeElastiCacheServerlessCache},
+		{awsprovider.TypeElastiCacheServerlessCache, awsprovider.TypeLambdaFunction},
+	} {
+		e, ok := waves[c.earlier]
+		if !ok {
+			t.Fatalf("%s was not planned (waves: %v)", c.earlier, waves)
+		}
+		l, ok := waves[c.later]
+		if !ok {
+			t.Fatalf("%s was not planned (waves: %v)", c.later, waves)
+		}
+		if e >= l {
+			t.Errorf("%s (wave %d) must come before %s (wave %d)", c.earlier, e, c.later, l)
+		}
 	}
 }

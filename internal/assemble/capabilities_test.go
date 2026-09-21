@@ -71,7 +71,7 @@ func TestCapabilitiesResolvesEachCapabilityToItsProviders(t *testing.T) {
 	}{
 		{manifest.CapabilityCompute, []string{vendorAWS}},
 		{manifest.CapabilityDatabase, []string{vendorAWS, vendorCloudflare, vendorNeon}},
-		{manifest.CapabilityKeyValue, []string{vendorCloudflare}},
+		{manifest.CapabilityKeyValue, []string{vendorAWS, vendorCloudflare}},
 		{manifest.CapabilityObjects, []string{vendorAWS, vendorCloudflare}},
 		{manifest.CapabilityQueues, []string{vendorAWS, vendorCloudflare}},
 	}

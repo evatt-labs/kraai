@@ -272,3 +272,23 @@ var databaseBindingSchema = resource.NewSchema("aws database binding", map[strin
 	"required":             []any{"binding", "driver", "partitionKey"},
 	"additionalProperties": false,
 })
+
+// keyvalueBindingSchema validates one entry of a service's `keyvalue:` list
+// for this provider: the driver selecting the store, the network binding
+// the store is placed in (a reference, see Capabilities), and the engine.
+//
+// driver is required for the same reason databaseBindingSchema requires
+// it. network is required because the one store offered, an ElastiCache
+// Serverless cache, exists only inside a VPC. engine picks between Valkey,
+// the default, and Redis OSS; both speak the redis driver.
+var keyvalueBindingSchema = resource.NewSchema("aws keyvalue binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding": map[string]any{"type": "string"},
+		"driver":  map[string]any{"type": "string", "enum": []any{DriverRedis}},
+		"network": map[string]any{"type": "string"},
+		"engine":  map[string]any{"type": "string", "enum": []any{engineValkey, engineRedisOSS}},
+	},
+	"required":             []any{"binding", "driver", "network"},
+	"additionalProperties": false,
+})

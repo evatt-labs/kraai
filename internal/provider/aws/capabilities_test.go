@@ -152,3 +152,29 @@ func TestDatabaseBindingSchema(t *testing.T) {
 		}
 	}
 }
+
+func TestKeyValueBindingSchemaAndReference(t *testing.T) {
+	catalog, err := resource.NewCatalog(resource.FuncProvider{ProviderName: Provider, CapabilitiesFunc: Capabilities})
+	if err != nil {
+		t.Fatalf("NewCatalog: %v", err)
+	}
+	if got := catalog.References(manifest.CapabilityKeyValue, Provider); !reflect.DeepEqual(got, []string{"network"}) {
+		t.Errorf("keyvalue references = %v, want [network]", got)
+	}
+	valid := map[string]any{"binding": "CACHE", "driver": "redis", "network": "NET", "engine": "valkey"}
+	if err := keyvalueBindingSchema.Validate(valid); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+	rejected := map[string]map[string]any{
+		"no driver":      {"binding": "CACHE", "network": "NET"},
+		"no network":     {"binding": "CACHE", "driver": "redis"},
+		"unknown driver": {"binding": "CACHE", "driver": "memcached", "network": "NET"},
+		"unknown engine": {"binding": "CACHE", "driver": "redis", "network": "NET", "engine": "memcached"},
+		"unknown key":    {"binding": "CACHE", "driver": "redis", "network": "NET", "size": "large"},
+	}
+	for label, entry := range rejected {
+		if err := keyvalueBindingSchema.Validate(entry); err == nil {
+			t.Errorf("%s: %v was accepted", label, entry)
+		}
+	}
+}
