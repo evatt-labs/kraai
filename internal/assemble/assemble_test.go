@@ -359,3 +359,33 @@ func TestRegistry_EmptyManifestProducesEmptyRegistry(t *testing.T) {
 		t.Fatalf("expected an empty registry, got %d registrations", len(reg.All()))
 	}
 }
+
+// A capability that names aws with no settings must not decide the client's
+// region by sorting first: `aws` sorts before `compute`, and a bare
+// `aws: {vendor: aws}` would otherwise drop the region compute declares.
+func TestVendorsUsedTakesSettingsFromACapabilityThatDeclaresThem(t *testing.T) {
+	m := manifestWith(manifest.Providers{
+		manifest.CapabilityAWS:     {Vendor: vendorAWS},
+		manifest.CapabilityCompute: {Vendor: vendorAWS, Settings: map[string]any{"region": "eu-west-1"}},
+		manifest.CapabilityQueues:  {Vendor: vendorAWS, Settings: map[string]any{"region": "us-west-2"}},
+	})
+	vendors, err := vendorsUsed(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := vendors[vendorAWS].Settings["region"]; got != "eu-west-1" {
+		t.Fatalf("aws settings came from region %v, want the first capability declaring settings (compute, eu-west-1)", got)
+	}
+
+	bare := manifestWith(manifest.Providers{
+		manifest.CapabilityAWS:    {Vendor: vendorAWS},
+		manifest.CapabilityQueues: {Vendor: vendorAWS},
+	})
+	vendors, err = vendorsUsed(bare)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if vendors[vendorAWS] == nil || len(vendors[vendorAWS].Settings) != 0 {
+		t.Fatalf("with no settings anywhere, aws = %+v", vendors[vendorAWS])
+	}
+}

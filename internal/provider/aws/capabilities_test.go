@@ -47,6 +47,9 @@ func TestCapabilitiesCoverEveryRegisteredCapability(t *testing.T) {
 				reg.Key(), reg.Capability)
 		}
 	}
+	if family := nativeFamily(&Client{}); !declared[family.Capability] {
+		t.Errorf("the native family uses capability %q, which Capabilities() does not declare", family.Capability)
+	}
 }
 
 // TestCapabilitiesAttachesComputeProviderSettingsSchema pins which schema

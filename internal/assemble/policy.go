@@ -25,7 +25,7 @@ func AWSPolicyActions(ctx context.Context, m *manifest.Manifest, vendorTypes []s
 	if err != nil {
 		return nil, err
 	}
-	client, err := aws.New(ctx, settings)
+	client, err := aws.New(ctx, settings, awsSchemaCache()...)
 	if err != nil {
 		return nil, err
 	}

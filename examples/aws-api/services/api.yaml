@@ -45,3 +45,15 @@ services:
     # CACHE_REDIS_URL and, running inside NET, can reach it.
     keyvalue:
       - { binding: CACHE, driver: redis, network: NET }
+    # Native AWS resources: any AWS-published CloudFormation type, with its
+    # own properties, validated against its schema at plan time. The log
+    # group is found by its name, the queue by kraai's tag.
+    aws:
+      - binding: LOGS
+        type: AWS::Logs::LogGroup
+        properties:
+          RetentionInDays: 14
+      - binding: DLQ
+        type: AWS::SQS::Queue
+        properties:
+          MessageRetentionPeriod: 1209600

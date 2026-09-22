@@ -12,6 +12,8 @@ package assemble
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/evatt-labs/kraai/internal/env"
@@ -101,7 +103,7 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 		if err != nil {
 			return nil, err
 		}
-		client, err := aws.New(ctx, settings)
+		client, err := aws.New(ctx, settings, awsSchemaCache()...)
 		if err != nil {
 			return nil, err
 		}
@@ -114,11 +116,13 @@ func Registry(ctx context.Context, m *manifest.Manifest) (*resource.Registry, er
 }
 
 // vendorsUsed maps every vendor m's configured capabilities name to the
-// first capability's Provider that named it. Keyed by vendor because each
-// vendor package registers its types in one call from one client. When two
-// capabilities both choose aws, only the first one's Settings decides the
-// client's region; the manifest can express two and the provider cannot
-// honour both.
+// Provider whose Settings build that vendor's client: the first capability,
+// in sorted order, that declares any settings, else the first to name the
+// vendor. Keyed by vendor because each vendor package registers its types in
+// one call from one client. A capability declaring none, such as a bare
+// `aws: {vendor: aws}`, never decides the client's region by sorting first;
+// two that declare different regions still resolve to the first, since the
+// provider cannot honour both.
 func vendorsUsed(m *manifest.Manifest) (map[string]*manifest.Provider, error) {
 	out := map[string]*manifest.Provider{}
 	for _, capability := range m.Root.Providers.Capabilities() {
@@ -137,11 +141,23 @@ func vendorsUsed(m *manifest.Manifest) (map[string]*manifest.Provider, error) {
 					"manifest may name the capability but cannot yet plan it",
 				capability, p.Vendor, strings.Join(supportedVendors, ", "))
 		}
-		if _, seen := out[p.Vendor]; !seen {
+		if chosen, seen := out[p.Vendor]; !seen || (len(chosen.Settings) == 0 && len(p.Settings) > 0) {
 			out[p.Vendor] = p
 		}
 	}
 	return out, nil
+}
+
+// awsSchemaCache keeps fetched CloudFormation schemas under the user's
+// cache directory between runs, where cfschema's generator keeps them too.
+// With no cache directory every run fetches, which is slower and no less
+// correct.
+func awsSchemaCache() []aws.Option {
+	base, err := os.UserCacheDir()
+	if err != nil {
+		return nil
+	}
+	return []aws.Option{aws.WithSchemaCache(filepath.Join(base, "kraai", "cfschema"), aws.DefaultSchemaCacheTTL)}
 }
 
 func isSupportedVendor(vendor string) bool {

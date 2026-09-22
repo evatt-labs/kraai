@@ -82,5 +82,11 @@ func Capabilities() []resource.CapabilityDef {
 			// The address plan is per binding, not per provider.
 			Binding: networkBindingSchema,
 		},
+		{
+			Name: manifest.CapabilityAWS,
+			Summary: "Any AWS-published CloudFormation resource type, created with its own " +
+				"properties and found again, replaced and validated from its own schema.",
+			Binding: nativeBindingSchema,
+		},
 	}
 }

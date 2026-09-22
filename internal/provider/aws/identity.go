@@ -149,7 +149,19 @@ func recordSetMatch(properties map[string]any, name string) bool {
 // plain mutable string with no documented uniqueness, so identity is the
 // tag, in this type's flat "Object of String" Tags shape.
 func apigatewayv2Match(properties map[string]any, name string) bool {
-	tags, ok := properties["Tags"].(map[string]any)
+	return mapTagsMatchIn(properties, "Tags", name)
+}
+
+// apigatewayv2StampTag sets an API's identity tag in the create call, in
+// the flat shape apigatewayv2Match reads.
+func apigatewayv2StampTag(desired map[string]any, name string) {
+	mapTagsStampTagIn(desired, "Tags", name)
+}
+
+// mapTagsMatchIn reports whether properties carries identityTagKey=name in
+// a string-map tag property.
+func mapTagsMatchIn(properties map[string]any, property, name string) bool {
+	tags, ok := properties[property].(map[string]any)
 	if !ok {
 		return false
 	}
@@ -157,13 +169,14 @@ func apigatewayv2Match(properties map[string]any, name string) bool {
 	return ok && value == name
 }
 
-// apigatewayv2StampTag sets an API's identity tag in the create call, in
-// the flat shape apigatewayv2Match reads.
-func apigatewayv2StampTag(desired map[string]any, name string) {
-	tags, ok := desired["Tags"].(map[string]any)
-	if !ok {
-		tags = map[string]any{}
+// mapTagsStampTagIn sets identityTagKey=name in a string-map tag property,
+// into a copy so the map the caller passed in is never written.
+func mapTagsStampTagIn(desired map[string]any, property, name string) {
+	existing, _ := desired[property].(map[string]any)
+	tags := make(map[string]any, len(existing)+1)
+	for k, v := range existing {
+		tags[k] = v
 	}
 	tags[identityTagKey] = name
-	desired["Tags"] = tags
+	desired[property] = tags
 }

@@ -216,7 +216,8 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 			}
 		default:
 			// dns, tls, cdn and network bindings carry no grant: a function
-			// reaches none of them at runtime.
+			// reaches none of them at runtime. A native aws binding carries
+			// none yet: no grant is derived from its type.
 			continue
 		}
 		statements = append(statements, statement)
