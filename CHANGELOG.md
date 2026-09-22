@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.6.7](https://github.com/evatt-labs/kraai/compare/v0.6.6...v0.6.7) (2026-09-22)
+
+
+### Features
+
+* **aws:** add cfschema package and generated schema index ([#274](https://github.com/evatt-labs/kraai/issues/274)) ([ca5f540](https://github.com/evatt-labs/kraai/commit/ca5f540866ac04aa6c51b5f99006d37bbeafe020))
+* **aws:** give a network internet egress through a NAT gateway when it declares a private block ([#250](https://github.com/evatt-labs/kraai/issues/250)) ([fb1aaf5](https://github.com/evatt-labs/kraai/commit/fb1aaf518e8911c09017d0db1dc92e85e5ccc8c6))
+* **aws:** give every network gateway endpoints for S3 and DynamoDB ([#249](https://github.com/evatt-labs/kraai/issues/249)) ([27c8d2b](https://github.com/evatt-labs/kraai/commit/27c8d2bfac0c870b9a0aca8aeed17d270181a22c))
+* **aws:** provision an Aurora DSQL cluster for database bindings declaring driver postgres ([#247](https://github.com/evatt-labs/kraai/issues/247)) ([c3273f8](https://github.com/evatt-labs/kraai/commit/c3273f86caa83d6a04d82776868fb0d6ebe2eaf2))
+* **aws:** provision an Aurora Serverless v2 cluster for postgres bindings declaring engine aurora ([#252](https://github.com/evatt-labs/kraai/issues/252)) ([ad3bb91](https://github.com/evatt-labs/kraai/commit/ad3bb918f1c45479ec8310ab136b247466e78c22))
+* **aws:** provision an ElastiCache Serverless cache for keyvalue bindings declaring driver redis ([#243](https://github.com/evatt-labs/kraai/issues/243)) ([78ce677](https://github.com/evatt-labs/kraai/commit/78ce67711e42c5dd653700586bc041d335fd5754))
+* **aws:** provision DynamoDB tables for database bindings declaring driver dynamodb ([#242](https://github.com/evatt-labs/kraai/issues/242)) ([bfa0c33](https://github.com/evatt-labs/kraai/commit/bfa0c331c9bdc85582967bbbcd98795a1fd3cf4a))
+* **aws:** provision SQS queues and grant a service's bindings to its function ([#240](https://github.com/evatt-labs/kraai/issues/240)) ([6ad2fcb](https://github.com/evatt-labs/kraai/commit/6ad2fcbf56edf11c405a7c5b05461244a0e95232))
+* **aws:** run the function inside the network binding its service declares ([#246](https://github.com/evatt-labs/kraai/issues/246)) ([ef258b9](https://github.com/evatt-labs/kraai/commit/ef258b92e64b45599f7610352e691c0a29512ee6))
+* **aws:** spread every network tier across two availability zones ([#251](https://github.com/evatt-labs/kraai/issues/251)) ([0f7c57c](https://github.com/evatt-labs/kraai/commit/0f7c57c45f0fdb22c919d894fba709d6a13f6fda))
+* **cli:** destroy elapsed ephemeral environments with kraai gc ([#256](https://github.com/evatt-labs/kraai/issues/256)) ([aa026c8](https://github.com/evatt-labs/kraai/commit/aa026c84f6d4090b06415524457cc003a1f3e99c))
+* **cli:** print the least-privilege IAM policy a manifest needs with kraai iam-policy ([#254](https://github.com/evatt-labs/kraai/issues/254)) ([8ffb4fd](https://github.com/evatt-labs/kraai/commit/8ffb4fd21f95d9d3e6e28ee22141951869a533d3))
+* lock an environment for apply and destroy, and record its status and TTL deadline ([#255](https://github.com/evatt-labs/kraai/issues/255)) ([50bc4fc](https://github.com/evatt-labs/kraai/commit/50bc4fc07282607ceed4a46cf453eb4174cbad36))
+
+
+### Bug Fixes
+
+* **aws:** redeploy an existing function when its source, settings, environment or network change ([#248](https://github.com/evatt-labs/kraai/issues/248)) ([ffb490f](https://github.com/evatt-labs/kraai/commit/ffb490f4d896de5bd6e076636cac2a9c38cf7d71))
+* **plan:** count an in-place update as a change ([#262](https://github.com/evatt-labs/kraai/issues/262)) ([d6c4e15](https://github.com/evatt-labs/kraai/commit/d6c4e152c98e0b6b065cdbc9b7ab8a6bb80d0e4b))
+
 ## [0.6.6](https://github.com/evatt-labs/kraai/compare/v0.6.5...v0.6.6) (2026-09-20)
 
 
