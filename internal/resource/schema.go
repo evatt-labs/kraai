@@ -2,6 +2,7 @@ package resource
 
 import (
 	"errors"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -31,6 +32,9 @@ type Schema struct {
 	// compute settings", "neon database settings".
 	label string
 	doc   map[string]any
+	// vendor marks a schema the vendor published rather than one kraai
+	// wrote; see NewVendorSchema.
+	vendor bool
 
 	once       sync.Once
 	compileErr error
@@ -48,6 +52,22 @@ type Schema struct {
 func NewSchema(label string, doc map[string]any) *Schema {
 	return &Schema{label: label, doc: doc}
 }
+
+// NewVendorSchema wraps a JSON Schema a vendor publishes, such as the
+// properties of a CloudFormation resource type, for validating a native
+// resource's properties with the same error messages as NewSchema.
+//
+// It is compiled as draft-07, the dialect CloudFormation schemas are
+// written in, and is not held to the structural rule, which no vendor
+// schema follows. A pattern Go's regexp cannot compile (a lookahead, a
+// backreference) is not checked here; the vendor still enforces it.
+func NewVendorSchema(label string, doc map[string]any) *Schema {
+	return &Schema{label: label, doc: doc, vendor: true}
+}
+
+// Compile compiles s now rather than on first use, so a caller building
+// schemas at run time can report a bad one where it was built.
+func (s *Schema) Compile() error { return s.ensureCompiled() }
 
 // ensureCompiled compiles and structurally validates s exactly once.
 //
@@ -68,11 +88,14 @@ func (s *Schema) ensureCompiled() error {
 const schemaResourceID = "mem://kraai/schema"
 
 func (s *Schema) compileNow() error {
-	if err := validateStructural(s.doc); err != nil {
+	c := jsonschema.NewCompiler()
+	if s.vendor {
+		c.DefaultDraft(jsonschema.Draft7)
+		c.UseRegexpEngine(lenientRegexp)
+	} else if err := validateStructural(s.doc); err != nil {
 		return kerrors.Wrap(err, kerrors.CodeValidation, "%s schema is not structural", s.label)
 	}
 
-	c := jsonschema.NewCompiler()
 	if err := c.AddResource(schemaResourceID, s.doc); err != nil {
 		return kerrors.Wrap(err, kerrors.CodeValidation, "%s schema is invalid JSON Schema", s.label)
 	}
@@ -363,3 +386,20 @@ func joinSchemaPath(path, name string) string {
 	}
 	return path + "." + name
 }
+
+// lenientRegexp compiles a vendor schema's pattern with Go's regexp, and
+// matches everything when that fails: the vendor's patterns are written for
+// an ECMA or Java engine, and one Go cannot compile must not make the whole
+// type unusable.
+func lenientRegexp(pattern string) (jsonschema.Regexp, error) {
+	if re, err := regexp.Compile(pattern); err == nil {
+		return re, nil
+	}
+	return unchecked(pattern), nil
+}
+
+// unchecked is a pattern Go's regexp cannot compile, accepted unmatched.
+type unchecked string
+
+func (u unchecked) String() string            { return string(u) }
+func (u unchecked) MatchString(_ string) bool { return true }

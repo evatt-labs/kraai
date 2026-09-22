@@ -86,6 +86,11 @@ const (
 	// sit inside. It fulfils no runtime request the service makes, but it is
 	// provisioned, ordered and torn down like any other binding.
 	CapabilityNetwork = "network"
+	// CapabilityAWS is a native AWS resource: any AWS-published
+	// CloudFormation type, with the vendor's own properties. Named for the
+	// vendor on purpose, because a native binding is not portable and does
+	// not pretend to be.
+	CapabilityAWS = "aws"
 )
 
 // Provider is one capability's vendor and that vendor's configuration.

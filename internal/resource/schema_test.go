@@ -256,3 +256,84 @@ func TestSchema_UnrecognizedKeyErrorRevertAndFail(t *testing.T) {
 		t.Fatalf("error message drifted from the captured baseline:\n got:  %s\n want: %s", got, want)
 	}
 }
+
+// A vendor's schema is not structural, resolves its own definitions, and
+// reports failures in the same shape as kraai's schemas.
+func TestVendorSchemaValidates(t *testing.T) {
+	s := NewVendorSchema("AWS::Test::Thing properties", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"Name":  map[string]any{"type": "string", "pattern": "^[a-z]+$"},
+			"Tags":  map[string]any{"type": "array", "items": map[string]any{"$ref": "#/definitions/Tag"}},
+			"Count": map[string]any{"type": "integer"},
+		},
+		"definitions": map[string]any{
+			"Tag": map[string]any{
+				"type":                 "object",
+				"properties":           map[string]any{"Key": map[string]any{"type": "string"}},
+				"required":             []any{"Key"},
+				"additionalProperties": false,
+			},
+		},
+		"additionalProperties": false,
+	})
+	if err := s.Compile(); err != nil {
+		t.Fatalf("Compile: %v", err)
+	}
+	if err := s.Validate(map[string]any{"Name": "ok", "Count": 3, "Tags": []any{map[string]any{"Key": "k"}}}); err != nil {
+		t.Fatalf("valid properties rejected: %v", err)
+	}
+	for data, want := range map[string]map[string]any{
+		"Name: ":                   {"Name": "UPPER"},
+		"Tags.0: missing property": {"Tags": []any{map[string]any{}}},
+		"Count: got string":        {"Count": "three"},
+		"(did you mean Count?)":    {"Cout": 3},
+	} {
+		err := s.Validate(want)
+		if err == nil || !strings.Contains(err.Error(), data) || !strings.Contains(err.Error(), "AWS::Test::Thing properties") {
+			t.Errorf("Validate(%v) = %v, want it to mention %q", want, err, data)
+		}
+	}
+}
+
+// CloudFormation writes its patterns for engines with lookaheads. One Go
+// cannot compile is not enforced, rather than making the type unusable; one
+// it can compile still is.
+func TestVendorSchemaSkipsPatternsGoCannotCompile(t *testing.T) {
+	s := NewVendorSchema("vendor", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"Lookahead": map[string]any{"type": "string", "pattern": `^(?!aws:).*$`},
+			"Plain":     map[string]any{"type": "string", "pattern": `^[0-9]+$`},
+		},
+	})
+	if err := s.Validate(map[string]any{"Lookahead": "aws:reserved"}); err != nil {
+		t.Errorf("an uncompilable pattern was enforced: %v", err)
+	}
+	if err := s.Validate(map[string]any{"Plain": "abc"}); err == nil {
+		t.Error("a compilable pattern was not enforced")
+	}
+	// The same pattern in a schema kraai writes is a compile error.
+	if err := NewSchema("kraai", map[string]any{
+		"type":       "object",
+		"properties": map[string]any{"Lookahead": map[string]any{"type": "string", "pattern": `^(?!aws:).*$`}},
+	}).Compile(); err == nil {
+		t.Error("NewSchema accepted a pattern Go cannot compile")
+	}
+}
+
+// CloudFormation schemas are draft-07, where a keyword beside $ref is
+// ignored. Under 2020-12 the same schema would reject values the vendor
+// accepts.
+func TestVendorSchemaIsDraft07(t *testing.T) {
+	s := NewVendorSchema("vendor", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"Name": map[string]any{"$ref": "#/definitions/Name", "maxLength": 1},
+		},
+		"definitions": map[string]any{"Name": map[string]any{"type": "string"}},
+	})
+	if err := s.Validate(map[string]any{"Name": "longer than one"}); err != nil {
+		t.Fatalf("a keyword beside $ref was applied: %v", err)
+	}
+}

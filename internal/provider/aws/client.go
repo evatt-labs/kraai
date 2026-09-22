@@ -142,6 +142,11 @@ type Client struct {
 	// a type and reads each instance) cost one request per resource rather
 	// than one per lookup. Forgotten per type on any mutation of it.
 	reads readCache
+
+	// schemaCacheDir, when set, holds fetched resource provider schemas on
+	// disk between runs, for schemaCacheTTL; see schemacache.go.
+	schemaCacheDir string
+	schemaCacheTTL time.Duration
 }
 
 // Option configures a Client.
@@ -558,25 +563,14 @@ func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string
 
 // DescribeType fetches and decodes typeName's CloudFormation resource
 // provider schema. Fetched on first use and cached per type per process by
-// resourceType.getSchema, never vendored: a schema does not change within
-// one invocation, and vendored files would need keeping in sync by hand.
+// resourceType.getSchema, and across runs by the on-disk schema cache when
+// one is configured.
 func (c *Client) DescribeType(ctx context.Context, typeName string) (cfschema.Facts, error) {
-	out, err := c.cf.DescribeType(ctx, &cloudformation.DescribeTypeInput{
-		Type:     cftypes.RegistryTypeResource,
-		TypeName: aws.String(typeName),
-	})
+	raw, err := c.schemaDocument(ctx, typeName)
 	if err != nil {
-		var notFound *cftypes.TypeNotFoundException
-		if errors.As(err, &notFound) {
-			return cfschema.Facts{}, kerrors.Wrap(err, kerrors.CodeValidation, "no CloudFormation resource provider schema is registered for %q", typeName)
-		}
-		return cfschema.Facts{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing type %s", typeName)
+		return cfschema.Facts{}, err
 	}
-	if out.Schema == nil {
-		return cfschema.Facts{}, kerrors.Validation("DescribeType for %s returned no schema", typeName)
-	}
-
-	doc, err := cfschema.Parse([]byte(*out.Schema))
+	doc, err := cfschema.Parse(raw)
 	if err != nil {
 		return cfschema.Facts{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding schema for %s", typeName)
 	}
@@ -584,6 +578,25 @@ func (c *Client) DescribeType(ctx context.Context, typeName string) (cfschema.Fa
 		doc.TypeName = typeName
 	}
 	return cfschema.Derive(doc), nil
+}
+
+// fetchSchema asks CloudFormation for typeName's schema document.
+func (c *Client) fetchSchema(ctx context.Context, typeName string) ([]byte, error) {
+	out, err := c.cf.DescribeType(ctx, &cloudformation.DescribeTypeInput{
+		Type:     cftypes.RegistryTypeResource,
+		TypeName: aws.String(typeName),
+	})
+	if err != nil {
+		var notFound *cftypes.TypeNotFoundException
+		if errors.As(err, &notFound) {
+			return nil, kerrors.Wrap(err, kerrors.CodeValidation, "no CloudFormation resource provider schema is registered for %q", typeName)
+		}
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing type %s", typeName)
+	}
+	if out.Schema == nil {
+		return nil, kerrors.Validation("DescribeType for %s returned no schema", typeName)
+	}
+	return []byte(*out.Schema), nil
 }
 
 // Region returns the AWS region this Client resolved at construction.

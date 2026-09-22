@@ -173,6 +173,26 @@ points at. The name must be a binding declared on the same service, and kraai
 orders the referencing resources after what they name. Two bindings that
 merely share a name are not related.
 
+A resource no capability covers is declared natively, in the vendor's own
+vocabulary, under a key named for the vendor and enabled in `kraai.yaml` with
+`aws: { vendor: aws }`:
+
+```yaml
+    aws:
+      - binding: LOGS
+        type: AWS::Logs::LogGroup
+        properties:
+          RetentionInDays: 14
+```
+
+Any AWS-published CloudFormation type whose instances can be found again from
+its schema alone qualifies: one whose identifier the author may set, or one
+that takes tags at create. `properties` is validated against the type's own
+schema at plan time, and kraai supplies the identity (the derived name, or
+its tag), so neither is written by hand. A native binding is not portable
+between vendors, and the service's function is not yet granted or told about
+it.
+
 ### Environments
 
 The overlay is what makes the same manifest a throwaway preview or production.
@@ -428,7 +448,9 @@ that deploys application code, the only one exercised end to end against live
 infrastructure, and the only one built on a uniform CRUD plane — the
 **Cloud Control API**, reaching 1,600+ resource types from fetched
 CloudFormation schemas rather than one hand-written implementation per
-service. Adding an AWS resource type is a registry entry.
+service. A manifest can declare any AWS-published type natively, with no
+registration at all (see [Services](#services)); a capability is a registry
+entry over the same engine.
 
 Known gaps, each with a tracking issue. AWS `dns`, `tls` and `cdn` build a
 static site's zone, certificate, distribution and apex record, but have not

@@ -100,3 +100,27 @@ type fragment struct {
 	PatternProperties    map[string]json.RawMessage `json:"patternProperties"`
 	AdditionalProperties json.RawMessage            `json:"additionalProperties"`
 }
+
+// PropertiesSchema builds, from a raw resource provider schema, a JSON
+// Schema document for the object a create request's desired state is: the
+// type's properties, their definitions, what is required, and the root
+// combinators some types use to make properties mutually exclusive. A key
+// the type does not define is rejected.
+func PropertiesSchema(raw []byte) (map[string]any, error) {
+	var doc map[string]any
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding resource provider schema")
+	}
+	properties, _ := doc["properties"].(map[string]any)
+	out := map[string]any{
+		"type":                 "object",
+		"properties":           properties,
+		"additionalProperties": false,
+	}
+	for _, key := range []string{"definitions", "required", "oneOf", "anyOf", "allOf", "dependencies"} {
+		if value, ok := doc[key]; ok {
+			out[key] = value
+		}
+	}
+	return out, nil
+}

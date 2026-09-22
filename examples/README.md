@@ -11,7 +11,7 @@ them is read-only and safe.
 
 ## aws-api
 
-`compute` + `network` + `queues` + `database` + `keyvalue`: an
+`compute` + `network` + `queues` + `database` + `keyvalue` + `aws`: an
 HTTP-triggered Lambda function behind an API Gateway HTTP API, alongside a
 private VPC (internet gateway, a pair of public subnets across two zones,
 route table, S3 and DynamoDB gateway endpoints, and a pair of private
@@ -30,7 +30,9 @@ and the cache as `CACHE_REDIS_URL`; its execution role carries an inline
 policy granting it the queue, the table and the DSQL cluster. The Aurora
 cluster and the cache need no grant, only network reach, which the
 function has (see below). The Aurora cluster scales to zero ACUs when idle
-and takes minutes to create and delete.
+and takes minutes to create and delete. Beside them, two native `aws`
+bindings: a CloudWatch log group with 14-day retention, found by its name,
+and a second SQS queue with 14-day message retention, found by kraai's tag.
 
 Every subnet tier is a pair: kraai halves the declared block and places one
 subnet in each of two availability zones (`<region>a` and `<region>b`

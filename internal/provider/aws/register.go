@@ -31,14 +31,15 @@ const TypeCloudFrontOriginAccessControl = "AWS::CloudFront::OriginAccessControl"
 // produces.
 func key(typeName string) string { return Provider + "/" + typeName }
 
-// Register adds every type in this package to reg.
+// Register adds every type in this package to reg, and the family that
+// addresses native types.
 func Register(reg *resource.Registry, client *Client) error {
 	for _, r := range Registrations(client) {
 		if err := reg.Register(r); err != nil {
 			return err
 		}
 	}
-	return nil
+	return reg.RegisterFamily(nativeFamily(client))
 }
 
 // Registrations returns this package's registrations, exported so a caller
