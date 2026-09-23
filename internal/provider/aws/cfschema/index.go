@@ -40,6 +40,9 @@ func loadIndex() (map[string]Facts, error) {
 	return index, errIndex
 }
 
+// DecodeIndex decodes an index in the format the generator writes.
+func DecodeIndex(data []byte) (map[string]Facts, error) { return decodeIndex(data) }
+
 func decodeIndex(data []byte) (map[string]Facts, error) {
 	zr, err := gzip.NewReader(bytes.NewReader(data))
 	if err != nil {
