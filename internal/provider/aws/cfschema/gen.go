@@ -42,6 +42,8 @@ func run() error {
 		cache   = flag.String("cache", "", "directory of raw schemas, one <Type>.json per type; defaults to the user cache directory")
 		region  = flag.String("region", "us-east-1", "region whose public registry to read")
 		workers = flag.Int("workers", 6, "concurrent DescribeType calls")
+		accept  = flag.Bool("accept-identity-changes", false,
+			"write the index even though it finds an already-indexed type differently")
 	)
 	flag.Parse()
 	if *cache == "" {
@@ -92,6 +94,24 @@ func run() error {
 	}
 	if err := g.Wait(); err != nil {
 		return err
+	}
+
+	// A regenerated index that finds an existing type differently can leave
+	// an environment an older kraai created unplannable and undestroyable,
+	// so it is a reviewed decision, never a side effect.
+	if previous, err := os.ReadFile(*out); err == nil {
+		prev, err := cfschema.DecodeIndex(previous)
+		if err != nil {
+			return fmt.Errorf("reading the current index %s: %w", *out, err)
+		}
+		if changes := cfschema.IdentityChanges(prev, index); len(changes) > 0 {
+			for _, change := range changes {
+				fmt.Fprintln(os.Stderr, "identity change:", change)
+			}
+			if !*accept {
+				return fmt.Errorf("%d indexed types would be found differently; review them, then rerun with -accept-identity-changes", len(changes))
+			}
+		}
 	}
 
 	var buf bytes.Buffer
