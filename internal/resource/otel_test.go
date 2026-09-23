@@ -285,6 +285,7 @@ type optionalResource struct {
 	differs     bool
 	diffErr     error
 	validateErr error
+	scope       string
 }
 
 func (o optionalResource) Secrets(*State) map[string]Secret { return o.secrets }
@@ -301,6 +302,8 @@ func (o optionalResource) Diff(Spec, *State) (Difference, error) {
 }
 
 func (o optionalResource) ValidateSpec(Spec) error { return o.validateErr }
+
+func (o optionalResource) Scope(Spec) (string, bool, error) { return o.scope, o.scope != "", nil }
 
 // plainResource implements only the four required verbs.
 type plainResource struct{ Resource }
@@ -346,6 +349,11 @@ func TestInstrumentedForwardsOptionalInterfaces(t *testing.T) {
 	}); !ok {
 		t.Error("decorated resource does not satisfy SpecValidator; add a forwarder in otel.go")
 	}
+	if _, ok := decorated.(interface {
+		Scope(Spec) (string, bool, error)
+	}); !ok {
+		t.Error("decorated resource does not satisfy Scoper; add a forwarder in otel.go")
+	}
 }
 
 // TestInstrumentedForwardsToInner proves the forwarders actually reach the
@@ -357,7 +365,7 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 		return "postgres://example", nil
 	}}
 	boom := errors.New("bad spec")
-	inner := optionalResource{secrets: want, differs: true, validateErr: boom}
+	inner := optionalResource{secrets: want, differs: true, validateErr: boom, scope: `{"ApiId":"a1"}`}
 	decorated := decorate(t, inner)
 
 	got := decorated.(SecretProducer).Secrets(&State{})
@@ -382,6 +390,26 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 		ValidateSpec(Spec) error
 	}).ValidateSpec(Spec{}); !errors.Is(err, boom) {
 		t.Errorf("ValidateSpec() error = %v, want the inner resource's %v", err, boom)
+	}
+
+	scope, known, err := decorated.(interface {
+		Scope(Spec) (string, bool, error)
+	}).Scope(Spec{})
+	if scope != `{"ApiId":"a1"}` || !known || err != nil {
+		t.Errorf("Scope() = %q, %v, %v; want the inner resource's scope", scope, known, err)
+	}
+}
+
+// A resource that lists under no parent answers, through the decorator,
+// that it needs no scope and that this is known: never "not known", which
+// would plan every such resource as a create without reading it.
+func TestInstrumentedScopeOnPlainResource(t *testing.T) {
+	decorated := decorate(t, plainResource{})
+	scope, known, err := decorated.(interface {
+		Scope(Spec) (string, bool, error)
+	}).Scope(Spec{})
+	if scope != "" || !known || err != nil {
+		t.Fatalf("Scope() on a plain resource = %q, %v, %v; want \"\", true, nil", scope, known, err)
 	}
 }
 

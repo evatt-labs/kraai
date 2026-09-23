@@ -735,6 +735,23 @@ func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex)
 		}
 	}
 
+	if scoper, ok := it.res.(Scoper); ok {
+		scope, known, err := scoper.Scope(evaluated)
+		if err != nil {
+			action.Kind = ActionFailed
+			action.Err = kerrors.Wrap(err, kerrors.CodeValidation,
+				"scoping %s/%s %q", it.Provider, it.Type, it.ref.Name)
+			return action
+		}
+		if !known && it.ref.Import == nil {
+			// Its parent has not been created yet, so neither has it.
+			action.Kind = ActionCreate
+			return action
+		}
+		it.ref.Scope = scope
+		action.Ref = it.ref
+	}
+
 	state, err := it.res.Get(ctx, it.ref)
 	if err != nil {
 		action.Kind = ActionFailed

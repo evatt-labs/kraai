@@ -191,3 +191,16 @@ func StartWave(ctx context.Context, phase string, wave, actions int) (context.Co
 		trace.WithAttributes(attribute.Int("kraai.wave", wave), attribute.Int("kraai.actions", actions)))
 	return ctx, func() { span.End() }
 }
+
+// Scope forwards to the inner resource when it lists under a parent, and
+// otherwise reports that no scope is needed. Structural for the same reason
+// as Diff: plan.Scoper lives in internal/plan.
+func (i *instrumented) Scope(spec Spec) (string, bool, error) {
+	scoper, ok := i.inner.(interface {
+		Scope(Spec) (string, bool, error)
+	})
+	if !ok {
+		return "", true, nil
+	}
+	return scoper.Scope(spec)
+}
