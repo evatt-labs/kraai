@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.6.9](https://github.com/evatt-labs/kraai/compare/v0.6.8...v0.6.9) (2026-09-23)
+
+
+### Features
+
+* **telemetry:** export spans and metrics over OTLP, add profiling flags ([#287](https://github.com/evatt-labs/kraai/issues/287)) ([77977cf](https://github.com/evatt-labs/kraai/commit/77977cf8aed091f9c4bbf4402bc1a271d0bb8467))
+
+
+### Bug Fixes
+
+* **dev:** keep a running observability stack and its data on observability-up ([#289](https://github.com/evatt-labs/kraai/issues/289)) ([5ebe07c](https://github.com/evatt-labs/kraai/commit/5ebe07c760a5e8073142880f114768ec96ff4968))
+
+
+### Performance Improvements
+
+* **aws:** join concurrent identical Cloud Control reads ([#290](https://github.com/evatt-labs/kraai/issues/290)) ([662ec80](https://github.com/evatt-labs/kraai/commit/662ec8009bc08e7a2c08030f05eaaa2d842940fa))
+
 ## [0.6.8](https://github.com/evatt-labs/kraai/compare/v0.6.7...v0.6.8) (2026-09-23)
 
 
