@@ -204,6 +204,25 @@ schema at plan time, and kraai supplies the identity (the derived name, or
 its tag), so neither is written by hand. A native binding is not portable
 between vendors.
 
+A type that can be neither named nor tagged, most child resources, is found
+by the values of properties the entry declares in `match`, under its parent
+when it has one:
+
+```yaml
+      - binding: ROUTE
+        type: AWS::ApiGatewayV2::Route
+        properties:
+          ApiId: ${API.ApiId}
+          RouteKey: GET /items
+        match: [RouteKey]
+```
+
+Two instances carrying those values is an error, never a guess. The values
+are the only identity such an instance has: changing one creates a new
+instance and leaves the old one unmanaged, destroy included, which the plan
+notes on every such entry. With no tag to prove otherwise, an existing
+instance carrying the values is managed as the entry's.
+
 The service's function receives every property a native instance publishes,
 `DLQ_ARN` and `DLQ_QUEUE_URL` for a queue bound as `DLQ`, and its name for a
 type the name identifies. It is granted nothing unless the entry says what:

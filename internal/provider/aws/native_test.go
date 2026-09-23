@@ -82,7 +82,8 @@ func TestNativeLookupFollowsTheSchemasIdentity(t *testing.T) {
 		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag, TagOnCreate: true, ListScope: [][]string{{"ApiId"}}}, want: resource.LookupByTag},
 		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag, TagOnCreate: true, ListScope: [][]string{{"Arn"}}, ReadOnly: []string{"/properties/Arn"}}, wantErr: "which it assigns itself"},
 		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag, TagOnCreate: true, ListScope: [][]string{{"Arn"}, {"Workspace"}}, ReadOnly: []string{"/properties/Arn"}}, want: resource.LookupByTag},
-		{facts: cfschema.Facts{Identity: cfschema.IdentityByAttr}, wantErr: "cannot be tagged"},
+		{facts: cfschema.Facts{Identity: cfschema.IdentityByAttr}, want: resource.LookupByAttr},
+		{facts: cfschema.Facts{Identity: cfschema.IdentityByAttr, ListScope: [][]string{{"Arn"}}, ReadOnly: []string{"/properties/Arn"}}, wantErr: "which it assigns itself"},
 		{facts: cfschema.Facts{Identity: cfschema.IdentityNone}, wantErr: "adopted by identifier"},
 		{facts: cfschema.Facts{Identity: "byGuess"}, wantErr: "unknown identity"},
 	}

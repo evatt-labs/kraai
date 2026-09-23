@@ -192,15 +192,26 @@ func StartWave(ctx context.Context, phase string, wave, actions int) (context.Co
 	return ctx, func() { span.End() }
 }
 
-// Scope forwards to the inner resource when it lists under a parent, and
-// otherwise reports that no scope is needed. Structural for the same reason
-// as Diff: plan.Scoper lives in internal/plan.
-func (i *instrumented) Scope(spec Spec) (string, bool, error) {
-	scoper, ok := i.inner.(interface {
-		Scope(Spec) (string, bool, error)
+// Locate forwards to the inner resource when it needs more than its name
+// to be found, and otherwise reports that nothing more is needed, and that
+// this is known. Structural for the same reason as Diff: plan.Locator lives
+// in internal/plan.
+func (i *instrumented) Locate(spec Spec) (string, string, bool, error) {
+	locator, ok := i.inner.(interface {
+		Locate(Spec) (string, string, bool, error)
 	})
 	if !ok {
-		return "", true, nil
+		return "", "", true, nil
 	}
-	return scoper.Scope(spec)
+	return locator.Locate(spec)
+}
+
+// Notes forwards to the inner resource when it has notes, and otherwise
+// reports none.
+func (i *instrumented) Notes(spec Spec) []string {
+	noter, ok := i.inner.(interface{ Notes(Spec) []string })
+	if !ok {
+		return nil
+	}
+	return noter.Notes(spec)
 }

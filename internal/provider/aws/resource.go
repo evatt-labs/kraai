@@ -234,6 +234,13 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 	if err != nil {
 		return "", nil, false, err
 	}
+	if ref.Match != "" {
+		return r.resolveDeclared(ctx, ref, candidates)
+	}
+	if r.match == nil {
+		return "", nil, false, kerrors.Validation(
+			"%s %q is found by declared match values, and none were given", r.typeName, name)
+	}
 	for _, candidate := range candidates {
 		props, ok, err := r.client.GetResource(ctx, r.typeName, candidate)
 		if err != nil {
@@ -609,4 +616,66 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		}
 	}
 	return resource.Same, nil
+}
+
+// resolveDeclared finds, among candidates, the one instance whose properties
+// carry every value ref.Match declares. Two is an error, never the first
+// of them: the manifest asserted these values pick out one instance, and an
+// instance picked at random could be someone else's.
+func (r *resourceType) resolveDeclared(ctx context.Context, ref resource.Ref, candidates []string) (string, map[string]any, bool, error) {
+	var want map[string]any
+	if err := json.Unmarshal([]byte(ref.Match), &want); err != nil {
+		return "", nil, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding the match values of %s %q", r.typeName, ref.Name)
+	}
+	var found []string
+	var foundProps map[string]any
+	for _, candidate := range candidates {
+		props, ok, err := r.client.GetResource(ctx, r.typeName, candidate)
+		if err != nil {
+			return "", nil, false, err
+		}
+		if !ok {
+			continue
+		}
+		matched, err := carries(props, want)
+		if err != nil {
+			return "", nil, false, err
+		}
+		if matched {
+			found = append(found, candidate)
+			foundProps = props
+		}
+	}
+	switch len(found) {
+	case 0:
+		return "", nil, false, nil
+	case 1:
+		return found[0], foundProps, true, nil
+	}
+	return "", nil, false, kerrors.Validation(
+		"%s %q: %d instances carry %s (%s); the match must pick out one",
+		r.typeName, ref.Name, len(found), ref.Match, strings.Join(found, ", "))
+}
+
+// carries reports whether properties hold every value in want, compared as
+// JSON values so a YAML integer equals the float a read returns.
+func carries(properties, want map[string]any) (bool, error) {
+	for name, value := range want {
+		got, ok := properties[name]
+		if !ok {
+			return false, nil
+		}
+		a, err := normalizeForCompare(value)
+		if err != nil {
+			return false, err
+		}
+		b, err := normalizeForCompare(got)
+		if err != nil {
+			return false, err
+		}
+		if !reflect.DeepEqual(a, b) {
+			return false, nil
+		}
+	}
+	return true, nil
 }

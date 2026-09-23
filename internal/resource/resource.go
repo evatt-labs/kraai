@@ -35,9 +35,13 @@ type Ref struct {
 	Import *Import
 	// Scope is, for a type listed under a parent, the list call's resource
 	// model naming that parent, as canonical JSON; empty for any other type.
-	// The planner fills it from the resource's own answer (plan.Scoper), so
+	// The planner fills it from the resource's own answer (plan.Locator), so
 	// Get, Update and Delete find the instance under the right parent.
 	Scope string
+	// Match is, for a type found by the values of properties the manifest
+	// declares, those values as canonical JSON; empty for any other type.
+	// Filled by the planner the same way as Scope.
+	Match string
 }
 
 // Key is the registry key for this Ref's type: "provider/type".

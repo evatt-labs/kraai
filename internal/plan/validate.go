@@ -14,13 +14,22 @@ type SpecValidator interface {
 	ValidateSpec(spec resource.Spec) error
 }
 
-// Scoper is implemented by a resource.Resource whose instances are listed
-// under a parent, which Get needs named. Optional. decide asks it before
-// Get, with the spec as plan resolved it: a known scope goes on the Ref, and
-// an unknown one, a parent that does not exist yet, means the resource
+// Locator is implemented by a resource.Resource that needs more than its
+// name to be found: the parent it is listed under, or the values of the
+// properties that pick it out. Optional. decide asks it before Get, with the
+// spec as plan resolved it: what is known goes on the Ref, and what is not
+// known, a parent or a value that does not exist yet, means the resource
 // cannot exist either and is planned for create without a read.
-type Scoper interface {
-	// Scope returns the list scope as canonical JSON, or "" when the type
-	// needs none, and whether it is known. It must not perform I/O.
-	Scope(spec resource.Spec) (scope string, known bool, err error)
+type Locator interface {
+	// Locate returns the list scope and the match values, each as
+	// canonical JSON or "" when not needed, and whether both are known. It
+	// must not perform I/O.
+	Locate(spec resource.Spec) (scope, match string, known bool, err error)
+}
+
+// Noter is implemented by a resource.Resource with something to tell the
+// author about an action beyond its outcome. Optional; its notes are
+// printed with the action.
+type Noter interface {
+	Notes(spec resource.Spec) []string
 }

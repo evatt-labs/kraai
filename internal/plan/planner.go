@@ -735,20 +735,25 @@ func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex)
 		}
 	}
 
-	if scoper, ok := it.res.(Scoper); ok {
-		scope, known, err := scoper.Scope(evaluated)
+	if noter, ok := it.res.(Noter); ok {
+		action.Notes = noter.Notes(evaluated)
+	}
+
+	if locator, ok := it.res.(Locator); ok {
+		scope, match, known, err := locator.Locate(evaluated)
 		if err != nil {
 			action.Kind = ActionFailed
 			action.Err = kerrors.Wrap(err, kerrors.CodeValidation,
-				"scoping %s/%s %q", it.Provider, it.Type, it.ref.Name)
+				"locating %s/%s %q", it.Provider, it.Type, it.ref.Name)
 			return action
 		}
 		if !known && it.ref.Import == nil {
-			// Its parent has not been created yet, so neither has it.
+			// What it would be found by does not exist yet, so neither
+			// does it.
 			action.Kind = ActionCreate
 			return action
 		}
-		it.ref.Scope = scope
+		it.ref.Scope, it.ref.Match = scope, match
 		action.Ref = it.ref
 	}
 

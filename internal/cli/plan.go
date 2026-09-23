@@ -239,6 +239,9 @@ func writePlanText(w io.Writer, envName string, p *plan.Plan) error {
 				_, _ = fmt.Fprintf(tw, "\t%v", a.Err)
 			}
 			_, _ = fmt.Fprintln(tw)
+			for _, note := range a.Notes {
+				_, _ = fmt.Fprintf(tw, "      note: %s\n", note)
+			}
 		}
 		// tw also only ever writes into b, so this can't fail either.
 		_ = tw.Flush()
@@ -375,11 +378,12 @@ type planActionJSON struct {
 	// equal to Type in the common case, so a consumer reads one field rather
 	// than branching on whether the two diverge — additive, so nothing keyed
 	// on "type" changes.
-	VendorType string `json:"vendor_type"`
-	Wave       int    `json:"wave"`
-	Name       string `json:"name"`
-	Kind       string `json:"kind"`
-	Error      string `json:"error,omitempty"`
+	VendorType string   `json:"vendor_type"`
+	Wave       int      `json:"wave"`
+	Name       string   `json:"name"`
+	Kind       string   `json:"kind"`
+	Error      string   `json:"error,omitempty"`
+	Notes      []string `json:"notes,omitempty"`
 }
 
 // toPlanDocument projects a *plan.Plan into the JSON-safe planDocument
@@ -413,6 +417,7 @@ func toPlanDocument(envName string, p *plan.Plan) planDocument {
 			Wave:       a.Wave,
 			Name:       a.Ref.Name,
 			Kind:       a.Kind.String(),
+			Notes:      a.Notes,
 		}
 		if a.Kind == plan.ActionFailed && a.Err != nil {
 			entry.Error = a.Err.Error()

@@ -819,3 +819,34 @@ func TestRunPlan_JSONOutput_UpdateOnlyHasChanges(t *testing.T) {
 		t.Errorf("Summary.HasChanges = false, want true for an update-only plan")
 	}
 }
+
+// A resource's notes print under its action, and are carried in the JSON
+// document; an action without notes carries none.
+func TestPlanNotesAreRendered(t *testing.T) {
+	p := twoWavePlan()
+	p.Actions[0].Notes = []string{"found by RouteKey: changing it leaves the old one unmanaged"}
+
+	var buf bytes.Buffer
+	if err := writePlanText(&buf, "env", p); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(buf.String(), "note: found by RouteKey: changing it leaves the old one unmanaged") {
+		t.Fatalf("text output = %q", buf.String())
+	}
+
+	buf.Reset()
+	if err := writePlanJSON(&buf, "env", p); err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		Actions []struct {
+			Notes []string `json:"notes"`
+		} `json:"actions"`
+	}
+	if err := json.Unmarshal(buf.Bytes(), &doc); err != nil {
+		t.Fatal(err)
+	}
+	if len(doc.Actions[0].Notes) != 1 || doc.Actions[1].Notes != nil {
+		t.Fatalf("JSON notes = %v, %v", doc.Actions[0].Notes, doc.Actions[1].Notes)
+	}
+}

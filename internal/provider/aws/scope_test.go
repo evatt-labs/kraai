@@ -44,7 +44,7 @@ func TestNativeScope(t *testing.T) {
 		"no parent named":        {spec: childSpec(map[string]any{"Other": "x"}, nil), wantError: "set ApiId or DomainName"},
 	} {
 		t.Run(name, func(t *testing.T) {
-			scope, known, err := child.Scope(c.spec)
+			scope, _, known, err := child.Locate(c.spec)
 			if c.wantError != "" {
 				if err == nil || !strings.Contains(err.Error(), c.wantError) {
 					t.Fatalf("Scope error = %v, want %q", err, c.wantError)
@@ -58,7 +58,7 @@ func TestNativeScope(t *testing.T) {
 	}
 
 	unscoped := newNativeResourceWith(&fakeClient{}, staticSchemas{"type": "object"}, cfschema.Facts{TypeName: "AWS::X::Y", Identity: cfschema.IdentityByName}, resource.LookupByName)
-	if scope, known, err := unscoped.Scope(nativeSpec("x", nil)); scope != "" || !known || err != nil {
+	if scope, _, known, err := unscoped.Locate(nativeSpec("x", nil)); scope != "" || !known || err != nil {
 		t.Fatalf("an unscoped type's Scope = %q, %v, %v", scope, known, err)
 	}
 }
