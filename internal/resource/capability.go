@@ -138,7 +138,7 @@ func (c *Catalog) add(p Provider) error {
 			// The entry's schema must accept a reference key, or every
 			// manifest that wrote it would be rejected before the reference
 			// was read.
-			if def.Binding == nil || !def.Binding.hasProperty(key) {
+			if def.Binding == nil || !def.Binding.HasProperty(key) {
 				return kerrors.Validation(
 					"provider %q capability %q: reference key %q is not a property of its binding schema",
 					p.Name(), def.Name, key)

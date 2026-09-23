@@ -3,6 +3,7 @@ package resource
 import (
 	"errors"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -116,6 +117,14 @@ func (s *Schema) compileNow() error {
 // no settings said nothing, and a schema with no required properties must
 // accept that as it would an empty YAML mapping.
 func (s *Schema) Validate(data map[string]any) error {
+	return s.ValidateIgnoring(data, nil)
+}
+
+// ValidateIgnoring is Validate with every failure at or below one of ignore's
+// instance paths dropped: for a value not known yet, such as a reference to
+// a resource that does not exist, whose placeholder must not be judged
+// against the schema.
+func (s *Schema) ValidateIgnoring(data map[string]any, ignore [][]string) error {
 	if err := s.ensureCompiled(); err != nil {
 		return err
 	}
@@ -140,7 +149,21 @@ func (s *Schema) Validate(data map[string]any) error {
 	if unknown := rootUnrecognizedKeys(verr); len(unknown) > 0 {
 		return s.unrecognizedKeyError(unknown)
 	}
-	return kerrors.Validation("%s: %s", s.label, formatValidationFailures(verr))
+	failures := formatValidationFailures(verr, ignore)
+	if failures == "" {
+		return nil
+	}
+	return kerrors.Validation("%s: %s", s.label, failures)
+}
+
+// ignored reports whether location is at or below one of ignore's paths.
+func ignored(location []string, ignore [][]string) bool {
+	for _, path := range ignore {
+		if len(location) >= len(path) && slices.Equal(location[:len(path)], path) {
+			return true
+		}
+	}
+	return false
 }
 
 // formatValidationFailures flattens verr's Causes tree into one
@@ -150,12 +173,15 @@ func (s *Schema) Validate(data map[string]any) error {
 //
 // kind.Group and kind.Schema are wrapper kinds with no message of their own,
 // so only the keyword-specific failures an author can act on are reported.
-func formatValidationFailures(verr *jsonschema.ValidationError) string {
+func formatValidationFailures(verr *jsonschema.ValidationError, ignore [][]string) string {
 	seen := map[string]bool{}
 	var lines []string
 	walkValidationErrors(verr, func(n *jsonschema.ValidationError) {
 		switch n.ErrorKind.(type) {
 		case *kind.Group, *kind.Schema:
+			return
+		}
+		if ignored(n.InstanceLocation, ignore) {
 			return
 		}
 		path := "root"
@@ -170,7 +196,7 @@ func formatValidationFailures(verr *jsonschema.ValidationError) string {
 		lines = append(lines, line)
 	})
 	sort.Strings(lines)
-	if len(lines) == 0 {
+	if len(lines) == 0 && len(ignore) == 0 {
 		// Every ValidationError seen so far carries at least one leaf
 		// cause; fall back to the library's formatting rather than hide a
 		// failure behind an empty string.
@@ -233,10 +259,10 @@ func (s *Schema) unrecognizedKeyError(unknown []string) error {
 		s.label, strings.Join(msgs, ", "), recognized)
 }
 
-// hasProperty reports whether name is one of s's top-level properties. Read
+// HasProperty reports whether name is one of s's top-level properties. Read
 // from the document rather than the compiled schema so it can answer before
 // compilation, which is when Catalog.add asks.
-func (s *Schema) hasProperty(name string) bool {
+func (s *Schema) HasProperty(name string) bool {
 	props, _ := s.doc["properties"].(map[string]any)
 	_, ok := props[name]
 	return ok

@@ -161,36 +161,6 @@ func TestApply_NoChangeStillPublishesAttributes(t *testing.T) {
 	}
 }
 
-// The index must not alias the state it was given: resource.Outputs holds
-// the same map, and a consumer reading it concurrently would otherwise be
-// exposed to whatever the producer's owner does next.
-func TestAttrIndex_CopiesTheAttributesItIsGiven(t *testing.T) {
-	idx := newAttrIndex()
-	source := map[string]any{"VpcId": "vpc-1"}
-	key := bindingKey{ServiceKey: "net", Binding: "NET"}
-
-	idx.put(key, "aws/AWS::EC2::VPC", source)
-	source["VpcId"] = "vpc-mutated"
-	delete(source, "VpcId")
-
-	out := idx.forAction("net", "NET", []string{"NET"})
-	if got := out["aws/AWS::EC2::VPC"]["VpcId"]; got != "vpc-1" {
-		t.Fatalf("VpcId = %v, want vpc-1 — the index aliased its caller's map", got)
-	}
-}
-
-func TestAttrIndex_EmptyAttributesRecordNothing(t *testing.T) {
-	idx := newAttrIndex()
-	key := bindingKey{ServiceKey: "net", Binding: "NET"}
-
-	idx.put(key, "aws/AWS::EC2::VPC", nil)
-	idx.put(key, "aws/AWS::EC2::Subnet", map[string]any{})
-
-	if out := idx.forAction("net", "NET", []string{"NET"}); len(out) != 0 {
-		t.Fatalf("forAction = %v, want nothing recorded for producers that published nothing", out)
-	}
-}
-
 func TestSpecAttribute_FailsSeparatelyForMissingKeyAndMissingName(t *testing.T) {
 	spec := resource.Spec{
 		Binding: "NET",

@@ -185,6 +185,15 @@ vocabulary, under a key named for the vendor and enabled in `kraai.yaml` with
           RetentionInDays: 14
 ```
 
+A property value can name what another binding on the service published:
+`${JOBS.QueueName}` is the `QueueName` of the one resource binding `JOBS`
+expands to, and a path reaches inside it (`${DB.Endpoint.Address}`). kraai
+orders the entry after that resource and fills the value in at apply; at plan,
+a value naming a resource that does not exist yet reads as a change. A value
+that is only a reference keeps the published value's type. `$${` writes a
+literal `${`; an IAM policy variable such as `${aws:username}` needs no escape,
+since a reference never contains a colon or a slash.
+
 Any AWS-published CloudFormation type whose instances can be found again from
 its schema alone qualifies: one whose identifier the author may set, or one
 that takes tags at create. `properties` is validated against the type's own

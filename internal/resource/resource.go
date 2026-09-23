@@ -70,6 +70,11 @@ type Spec struct {
 	// Keys from the spec's own binding are bare; anything from another
 	// binding this action may read is prefixed "<binding>.", as Secrets are.
 	Attributes map[string]map[string]any
+	// References maps each sibling binding the entry's own values name to
+	// the Ref.Key() of the one resource that binding expands to, so a value
+	// naming the binding reads exactly Attributes["<binding>.<key>"]. Set by
+	// the planner for a registration declaring EmbeddedReferences.
+	References map[string]string
 }
 
 // Secret resolves a named credential the applier supplied, or fails naming

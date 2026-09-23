@@ -29,7 +29,7 @@
 //
 // A producer and its consumer are expanded from the same manifest binding,
 // so they share Item.ServiceKey and Item.Binding even though their Refs
-// differ. secretIndex and attrIndex are keyed by that pair, populated after
+// differ. secretIndex and resource.AttributeIndex are keyed by that pair, populated after
 // every successful action (ActionNoChange included, so a second apply can
 // still wire a consumer from a resource that already existed) and consulted
 // before every action in a later wave. plan.Item.ReadsBindings says which

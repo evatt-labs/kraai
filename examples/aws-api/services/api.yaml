@@ -57,3 +57,18 @@ services:
         type: AWS::SQS::Queue
         properties:
           MessageRetentionPeriod: 1209600
+      # An alarm on the JOBS queue's backlog. ${JOBS.QueueName} is what the
+      # queue published, so the alarm is planned after it.
+      - binding: BACKLOG
+        type: AWS::CloudWatch::Alarm
+        properties:
+          Namespace: AWS/SQS
+          MetricName: ApproximateNumberOfMessagesVisible
+          Dimensions:
+            - Name: QueueName
+              Value: ${JOBS.QueueName}
+          Statistic: Maximum
+          Period: 300
+          EvaluationPeriods: 1
+          Threshold: 100
+          ComparisonOperator: GreaterThanThreshold
