@@ -300,6 +300,12 @@ plus the calls kraai makes beside them. It reads schemas, never resources, so
 are granted on every resource, since a schema publishes actions and not the
 identifiers the provider will assign.
 
+A native binding can declare any AWS type, an IAM user or a policy
+attached to another service's role included, so the role a pipeline runs
+kraai under is the boundary on what a manifest can create. For a manifest
+that changes in pull requests, compute that role's policy from the trusted
+branch, never from the pull request's own manifest.
+
 `plan` against a real account is safe and is the best way to see what kraai
 would do. `--detailed-exitcode` gives a script something to branch on without
 parsing the output: 0 when there is nothing to do, 2 when changes are present,

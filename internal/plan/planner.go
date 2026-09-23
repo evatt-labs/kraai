@@ -219,7 +219,38 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer nam
 			}
 		}
 	}
+	if err := checkNameCollisions(out); err != nil {
+		return nil, err
+	}
 	return out, nil
+}
+
+// checkNameCollisions refuses two bindings that derive the same name for the
+// same vendor type. Naming joins service and binding with a hyphen, so
+// service api with binding x-y and service api-x with binding y derive one
+// name, and nothing afterwards could tell which binding an instance
+// belongs to: both would read, update and delete the one resource. An
+// adopted resource is exempt, since its identity is the manifest's.
+func checkNameCollisions(items []plannedItem) error {
+	type identity struct{ provider, vendorType, name string }
+	seen := map[identity]plannedItem{}
+	for _, it := range items {
+		if it.ref.Import != nil {
+			continue
+		}
+		id := identity{it.Provider, it.VendorType, it.ref.Name}
+		prev, ok := seen[id]
+		if !ok {
+			seen[id] = it
+			continue
+		}
+		if prev.ServiceKey != it.ServiceKey || prev.Binding != it.Binding {
+			return kerrors.Validation(
+				"services.%s.%s and services.%s.%s both name a %s %q, and kraai could not tell them apart; rename one",
+				prev.ServiceKey, prev.Binding, it.ServiceKey, it.Binding, it.VendorType, it.ref.Name)
+		}
+	}
+	return nil
 }
 
 // expandCompute plans the service's own deployable unit.

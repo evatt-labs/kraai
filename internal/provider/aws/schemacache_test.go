@@ -76,6 +76,20 @@ func TestSchemaCacheRefetchesAStaleOrCorruptCopy(t *testing.T) {
 				t.Fatal(err)
 			}
 		},
+		"dated in the future": func(t *testing.T, path string) {
+			t.Helper()
+			future := time.Now().Add(10 * 365 * 24 * time.Hour)
+			if err := os.Chtimes(path, future, future); err != nil {
+				t.Fatal(err)
+			}
+		},
+		"another type's schema": func(t *testing.T, path string) {
+			t.Helper()
+			other := `{"typeName":"AWS::SNS::Topic","properties":{}}`
+			if err := os.WriteFile(path, []byte(other), 0o600); err != nil {
+				t.Fatal(err)
+			}
+		},
 		"corrupt": func(t *testing.T, path string) {
 			t.Helper()
 			if err := os.WriteFile(path, []byte(`{"typeName":`), 0o600); err != nil {
