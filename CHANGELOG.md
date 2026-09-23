@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.8](https://github.com/evatt-labs/kraai/compare/v0.6.7...v0.6.8) (2026-09-23)
+
+
+### Features
+
+* **aws:** plan any AWS-published type natively from its schema ([#281](https://github.com/evatt-labs/kraai/issues/281)) ([1b91b35](https://github.com/evatt-labs/kraai/commit/1b91b35d8a2960cf7c79a29a8588cf26bd9f660b))
+* **aws:** reference other bindings from native properties ([#286](https://github.com/evatt-labs/kraai/issues/286)) ([f4691c6](https://github.com/evatt-labs/kraai/commit/f4691c64ca886c706639e66700e816e4570d7b2e))
+
+
+### Bug Fixes
+
+* **aws:** require kraai's tag on native resources and refuse colliding names ([#284](https://github.com/evatt-labs/kraai/issues/284)) ([e48fccb](https://github.com/evatt-labs/kraai/commit/e48fccb0f12ccba24f64656ced5a3c807a1ceba2))
+* **manifest:** validate provider settings at load and refuse two AWS regions ([#285](https://github.com/evatt-labs/kraai/issues/285)) ([e7b73c9](https://github.com/evatt-labs/kraai/commit/e7b73c9591be74c56d97f4c197d74768862d53a9))
+
 ## [0.6.7](https://github.com/evatt-labs/kraai/compare/v0.6.6...v0.6.7) (2026-09-22)
 
 
