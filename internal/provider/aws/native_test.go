@@ -2,11 +2,16 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
+
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
@@ -72,8 +77,9 @@ func TestNativeLookupFollowsTheSchemasIdentity(t *testing.T) {
 		wantErr string
 	}{
 		{facts: cfschema.Facts{Identity: cfschema.IdentityByName}, want: resource.LookupByName},
-		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag}, want: resource.LookupByTag},
-		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag, ListScope: [][]string{{"ApiId"}}}, wantErr: "listed under a parent (ApiId)"},
+		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag, TagOnCreate: true}, want: resource.LookupByTag},
+		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag}, wantErr: "applies tags only after the instance exists"},
+		{facts: cfschema.Facts{Identity: cfschema.IdentityByTag, TagOnCreate: true, ListScope: [][]string{{"ApiId"}}}, wantErr: "listed under a parent (ApiId)"},
 		{facts: cfschema.Facts{Identity: cfschema.IdentityByAttr}, wantErr: "cannot be tagged"},
 		{facts: cfschema.Facts{Identity: cfschema.IdentityNone}, wantErr: "adopted by identifier"},
 		{facts: cfschema.Facts{Identity: "byGuess"}, wantErr: "unknown identity"},
@@ -189,8 +195,8 @@ func TestNativeValidateSpec(t *testing.T) {
 }
 
 // Create sends the entry's properties plus what kraai owns: the derived
-// name under a byName type's identifier, the identity tag beside the
-// author's own tags for a byTag type.
+// name under a byName type's identifier, and the identity tag beside the
+// author's own tags for every taggable type.
 func TestNativeCreateAddsTheIdentity(t *testing.T) {
 	t.Run("byName", func(t *testing.T) {
 		cc := &fakeClient{createID: "kraai-e-s-r"}
@@ -198,7 +204,10 @@ func TestNativeCreateAddsTheIdentity(t *testing.T) {
 		if _, err := role.Create(context.Background(), nativeSpec("kraai-e-s-r", map[string]any{"MaxSessionDuration": 3600})); err != nil {
 			t.Fatalf("Create: %v", err)
 		}
-		want := map[string]any{"MaxSessionDuration": 3600, "RoleName": "kraai-e-s-r"}
+		want := map[string]any{
+			"MaxSessionDuration": 3600, "RoleName": "kraai-e-s-r",
+			"Tags": []any{map[string]any{"Key": identityTagKey, "Value": "kraai-e-s-r"}},
+		}
 		if !reflect.DeepEqual(cc.createCalls[0], want) {
 			t.Fatalf("desired = %v, want %v", cc.createCalls[0], want)
 		}
@@ -345,17 +354,110 @@ func TestNativeUpdateKeepsTheIdentityTag(t *testing.T) {
 	}
 }
 
-// A native bucket gets the same ownership check as the curated one: a
-// bucket name is global, and Cloud Control reads a bucket any account owns.
+// A native bucket gets the curated bucket's account check, and kraai's tag
+// check on top: a bucket name is global, and Cloud Control reads a bucket
+// any account owns; this account owning it still does not mean kraai made it.
 func TestNativeBucketChecksOwnership(t *testing.T) {
-	family := nativeFamily(&Client{})
-	for vendorType, wantOwns := range map[string]bool{TypeS3Bucket: true, TypeSQSQueue: false} {
-		reg, err := family.Build(vendorType)
+	const name = "kraai-e-s-b"
+	ownedByAccount := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{Buckets: []s3types.Bucket{{Name: awssdk.String(name)}}}}}
+	notOurs := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}}
+	tagged := map[string]any{"Tags": []any{map[string]any{"Key": identityTagKey, "Value": name}}}
+
+	for label, c := range map[string]struct {
+		s3      *fakeS3
+		props   map[string]any
+		want    bool
+		wantErr bool
+	}{
+		"ours and tagged":            {s3: ownedByAccount, props: tagged, want: true},
+		"this account's, not tagged": {s3: ownedByAccount, props: map[string]any{}, wantErr: true},
+		"another account's, tagged":  {s3: notOurs, props: tagged},
+	} {
+		reg, err := nativeFamily(&Client{s3: c.s3}).Build(TypeS3Bucket)
 		if err != nil {
-			t.Fatalf("Build(%s): %v", vendorType, err)
+			t.Fatalf("Build: %v", err)
 		}
-		if got := reg.Resource.(*nativeResource).owns != nil; got != wantOwns {
-			t.Errorf("%s: ownership check = %v, want %v", vendorType, got, wantOwns)
+		got, err := reg.Resource.(*nativeResource).owns(context.Background(), name, c.props)
+		if got != c.want || (err != nil) != c.wantErr {
+			t.Errorf("%s: owns = %v, %v", label, got, err)
+		}
+	}
+
+	queue, err := nativeFamily(&Client{}).Build(TypeSQSQueue)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if queue.Resource.(*nativeResource).owns != nil {
+		t.Error("a byTag queue has an ownership check; its tag lookup already is one")
+	}
+}
+
+// A byName instance answering to the derived name is kraai's only when it
+// carries kraai's tag for that name. One that does not was made by someone
+// else: refused by Get, never deleted by Delete.
+func TestNativeByNameRequiresKraaisTag(t *testing.T) {
+	name := "kraai-e-s-r"
+	ref := resource.Ref{Provider: Provider, Type: resource.RoleType("AWS::IAM::Role", nativeRole), Name: name}
+	tagged := map[string]any{"RoleName": name, "Tags": []any{map[string]any{"Key": identityTagKey, "Value": name}}}
+
+	for label, c := range map[string]struct {
+		props   map[string]any
+		wantErr bool
+	}{
+		"tagged by kraai":       {props: tagged},
+		"untagged":              {props: map[string]any{"RoleName": name}, wantErr: true},
+		"tagged for other name": {props: map[string]any{"RoleName": name, "Tags": []any{map[string]any{"Key": identityTagKey, "Value": "x"}}}, wantErr: true},
+	} {
+		t.Run(label, func(t *testing.T) {
+			cc := &fakeClient{byIdentifier: map[string]map[string]any{name: c.props}}
+			role := newFixtureNative(t, "AWS::IAM::Role", cc)
+
+			state, err := role.Get(context.Background(), ref)
+			if c.wantErr {
+				if err == nil || !strings.Contains(err.Error(), "kraai did not create it") {
+					t.Fatalf("Get = %+v, %v; want a refusal", state, err)
+				}
+				if err := role.Delete(context.Background(), ref); err == nil || len(cc.deleteCalls) != 0 {
+					t.Fatalf("Delete = %v with %d delete calls; want a refusal and none", err, len(cc.deleteCalls))
+				}
+				return
+			}
+			if err != nil || state == nil || state.ID != name {
+				t.Fatalf("Get = %+v, %v", state, err)
+			}
+		})
+	}
+
+	// Adoption is the manifest asserting ownership by hand.
+	cc := &fakeClient{byIdentifier: map[string]map[string]any{"theirs": {"RoleName": "theirs"}}}
+	role := newFixtureNative(t, "AWS::IAM::Role", cc)
+	adopted := ref
+	adopted.Import = &resource.Import{Name: "theirs"}
+	if state, err := role.Get(context.Background(), adopted); err != nil || state == nil {
+		t.Fatalf("Get of an adopted role = %+v, %v", state, err)
+	}
+}
+
+// A native bucket must pass both the account check and kraai's tag: either
+// one alone would accept a bucket kraai did not create.
+func TestAllOwnedRequiresEveryCheck(t *testing.T) {
+	yes := func(context.Context, string, map[string]any) (bool, error) { return true, nil }
+	no := func(context.Context, string, map[string]any) (bool, error) { return false, nil }
+	boom := func(context.Context, string, map[string]any) (bool, error) { return false, errors.New("boom") }
+	for name, c := range map[string]struct {
+		checks []ownsFunc
+		want   bool
+		err    bool
+	}{
+		"all yes":          {checks: []ownsFunc{yes, nil, yes}, want: true},
+		"second says no":   {checks: []ownsFunc{yes, no}},
+		"first says no":    {checks: []ownsFunc{no, yes}},
+		"an error is kept": {checks: []ownsFunc{yes, boom}, err: true},
+		"nothing to check": {checks: []ownsFunc{nil}, want: true},
+	} {
+		got, err := allOwned(c.checks...)(context.Background(), "id", nil)
+		if got != c.want || (err != nil) != c.err {
+			t.Errorf("%s: = %v, %v", name, got, err)
 		}
 	}
 }

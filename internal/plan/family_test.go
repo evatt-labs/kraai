@@ -66,3 +66,47 @@ func TestPlan_FamilyEntryPlansItsOwnType(t *testing.T) {
 		t.Fatal("Get ran before validation")
 	}
 }
+
+// Naming joins service and binding with a hyphen, so two different bindings
+// can derive one name. For one vendor type that is one resource with two
+// owners, refused before anything is read.
+func TestPlan_RefusesTwoBindingsDerivingOneName(t *testing.T) {
+	reg := resource.NewRegistry()
+	must(t, reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::SQS::Queue", Capability: manifest.CapabilityQueues,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+	}))
+	must(t, reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::DynamoDB::Table", Capability: manifest.CapabilityDatabase,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+	}))
+	vendors := manifest.Providers{
+		manifest.CapabilityQueues:   {Vendor: "aws"},
+		manifest.CapabilityDatabase: {Vendor: "aws"},
+	}
+
+	colliding := &manifest.Manifest{
+		Root: manifest.Root{Providers: vendors},
+		Services: map[string]manifest.Service{
+			"api":   {Bindings: manifest.Bindings{manifest.CapabilityQueues: {{"binding": "x-y"}}}},
+			"api-x": {Bindings: manifest.Bindings{manifest.CapabilityQueues: {{"binding": "y"}}}},
+		},
+	}
+	_, err := New(reg).Plan(context.Background(), colliding, envName)
+	assertValidationError(t, err, "could not tell them apart")
+	if _, err := New(reg).Expand(colliding, envName); err == nil {
+		t.Fatal("Expand accepted the collision")
+	}
+
+	// The same name for two different vendor types is two resources.
+	distinct := &manifest.Manifest{
+		Root: manifest.Root{Providers: vendors},
+		Services: map[string]manifest.Service{
+			"api":   {Bindings: manifest.Bindings{manifest.CapabilityQueues: {{"binding": "x-y"}}}},
+			"api-x": {Bindings: manifest.Bindings{manifest.CapabilityDatabase: {{"binding": "y"}}}},
+		},
+	}
+	if _, err := New(reg).Plan(context.Background(), distinct, envName); err != nil {
+		t.Fatalf("Plan of one name across two types: %v", err)
+	}
+}

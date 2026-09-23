@@ -33,7 +33,7 @@ func WithSchemaCache(dir string, ttl time.Duration) Option {
 func (c *Client) schemaDocument(ctx context.Context, typeName string) ([]byte, error) {
 	path := c.schemaCachePath(typeName)
 	if path != "" {
-		if raw, ok := readFresh(path, c.schemaCacheTTL); ok {
+		if raw, ok := readFresh(path, typeName, c.schemaCacheTTL); ok {
 			return raw, nil
 		}
 	}
@@ -66,19 +66,25 @@ func (c *Client) schemaCachePath(typeName string) string {
 	return filepath.Join(c.schemaCacheDir, c.region, strings.ReplaceAll(typeName, "::", "--")+".json")
 }
 
-// readFresh returns path's contents when it exists, is younger than ttl and
-// decodes as a schema. Anything else is a miss, so a truncated or corrupt
-// file is fetched again and overwritten rather than trusted.
-func readFresh(path string, ttl time.Duration) ([]byte, bool) {
+// readFresh returns path's contents when it is younger than ttl and is
+// typeName's schema. Anything else is a miss, fetched again and
+// overwritten: a truncated or corrupt file, a file holding another type's
+// schema, and one dated in the future, which would otherwise stay fresh
+// forever.
+func readFresh(path, typeName string, ttl time.Duration) ([]byte, bool) {
 	info, err := os.Stat(path)
-	if err != nil || time.Since(info.ModTime()) >= ttl {
+	if err != nil {
+		return nil, false
+	}
+	if age := time.Since(info.ModTime()); age < 0 || age >= ttl {
 		return nil, false
 	}
 	raw, err := os.ReadFile(path) //nolint:gosec // G304: schemaCachePath admits only a validated type and region
 	if err != nil {
 		return nil, false
 	}
-	if _, err := cfschema.Parse(raw); err != nil {
+	doc, err := cfschema.Parse(raw)
+	if err != nil || doc.TypeName != typeName {
 		return nil, false
 	}
 	return raw, true

@@ -82,6 +82,13 @@ func nativeLookup(facts cfschema.Facts) (resource.LookupStrategy, error) {
 	case cfschema.IdentityByName:
 		return resource.LookupByName, nil
 	case cfschema.IdentityByTag:
+		if !facts.TagOnCreate {
+			// The vendor applies tags in a second step after create; a failure
+			// between the two leaves an instance nothing can find again.
+			return "", kerrors.Validation(
+				"%s applies tags only after the instance exists, so kraai cannot guarantee finding one it created",
+				facts.TypeName)
+		}
 		if len(facts.ListScope) > 0 {
 			// The instance is listed under a parent this entry cannot name
 			// until references between bindings exist.
@@ -139,16 +146,39 @@ func newNativeResource(client *Client, facts cfschema.Facts, lookup resource.Loo
 		// Bucket names are global, and Cloud Control reads a bucket any
 		// account owns: without this, another account's bucket of the
 		// derived name plans as this environment's own.
-		n.owns = bucketOwnedBy(client)
+		n.owns = allOwned(bucketOwnedBy(client), n.owns)
 	}
 	return n
 }
 
+// allOwned is owned only when every non-nil check says so, asked in order.
+func allOwned(checks ...ownsFunc) ownsFunc {
+	return func(ctx context.Context, identifier string, properties map[string]any) (bool, error) {
+		for _, check := range checks {
+			if check == nil {
+				continue
+			}
+			if owned, err := check(ctx, identifier, properties); err != nil || !owned {
+				return owned, err
+			}
+		}
+		return true, nil
+	}
+}
+
 func newNativeResourceWith(cc ccAPI, schemas propertySchemaSource, facts cfschema.Facts, lookup resource.LookupStrategy) *nativeResource {
 	rt := &resourceType{provider: Provider, typeName: facts.TypeName, lookup: lookup, client: cc}
-	if lookup == resource.LookupByTag {
-		rt.match = tagMatcher(facts.TagProperty, facts.TagShape)
+	if facts.TagShape != cfschema.TagShapeNone {
+		// Every taggable type carries kraai's tag, the byName ones too: the
+		// derived name alone does not prove kraai created what answers to it.
 		rt.stampTag = tagStamper(facts.TagProperty, facts.TagShape)
+		switch lookup {
+		case resource.LookupByTag:
+			rt.match = tagMatcher(facts.TagProperty, facts.TagShape)
+		case resource.LookupByName:
+			rt.owns = taggedByKraai(facts)
+		case resource.LookupByAPI, resource.LookupByAttr:
+		}
 	}
 	n := &nativeResource{resourceType: rt, facts: facts, schemas: schemas}
 	rt.translate = n.translate
@@ -317,6 +347,24 @@ func hasIdentityTag(properties map[string]any, facts cfschema.Facts) bool {
 	case cfschema.TagShapeNone:
 	}
 	return false
+}
+
+// taggedByKraai is a byName type's ownership check. The identifier is the
+// derived name, so an instance answering to it without kraai's tag for that
+// name was made by someone else, and is refused rather than reported
+// absent: absent would plan a create the vendor then refuses, and owned
+// would let apply and destroy act on it.
+func taggedByKraai(facts cfschema.Facts) ownsFunc {
+	match := tagMatcher(facts.TagProperty, facts.TagShape)
+	return func(_ context.Context, identifier string, properties map[string]any) (bool, error) {
+		if match(properties, identifier) {
+			return true, nil
+		}
+		return false, kerrors.Validation(
+			"%s %q exists but carries no %s tag naming it, so kraai did not create it; "+
+				"adopt it under the environment's resources: block or remove it",
+			facts.TypeName, identifier, identityTagKey)
+	}
 }
 
 // tagMatcher and tagStamper read and write the identity tag in the shape
