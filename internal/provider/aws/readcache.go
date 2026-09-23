@@ -3,6 +3,8 @@ package aws
 import (
 	"encoding/json"
 	"sync"
+
+	"golang.org/x/sync/singleflight"
 )
 
 // cloudControlMaxAttempts is how many times a Cloud Control call is tried
@@ -24,10 +26,21 @@ const cloudControlMaxAttempts = 8
 // a mutation always reaches Cloud Control. What is not covered is the
 // world changing underneath a running process by some other hand, which no
 // per-run cache could see and which a plan never promised to.
+//
+// Concurrent lookups of one type miss the cache together, since a wave
+// resolves them in parallel, so identical reads in flight are also joined:
+// one request is sent and every caller waiting on it shares its answer.
 type readCache struct {
 	mu    sync.Mutex
 	gets  map[readKey]readEntry
 	lists map[readKey][]string
+
+	flight singleflight.Group
+}
+
+// flightKey names one read for the in-flight group.
+func flightKey(verb, typeName, scope string) string {
+	return verb + "\x00" + typeName + "\x00" + scope
 }
 
 // readKey identifies one read: the type, and the identifier for a get or

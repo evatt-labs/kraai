@@ -237,6 +237,26 @@ func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (
 	if properties, found, hit := c.reads.get(typeName, identifier); hit {
 		return properties, found, nil
 	}
+	shared, err, _ := c.reads.flight.Do(flightKey("get", typeName, identifier), func() (any, error) {
+		return c.fetchResource(ctx, typeName, identifier)
+	})
+	if err != nil {
+		return nil, false, err
+	}
+	entry, _ := shared.(readEntry)
+	if !entry.found {
+		return nil, false, nil
+	}
+	// Decoded per caller: callers joined on one read must not share a map.
+	var properties map[string]any
+	if err := json.Unmarshal([]byte(entry.properties), &properties); err != nil {
+		return nil, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding properties for %s %q", typeName, identifier)
+	}
+	return properties, true, nil
+}
+
+// fetchResource sends one GetResource and remembers its answer.
+func (c *Client) fetchResource(ctx context.Context, typeName, identifier string) (readEntry, error) {
 	out, err := c.cc.GetResource(ctx, &cloudcontrol.GetResourceInput{
 		TypeName:   aws.String(typeName),
 		Identifier: aws.String(identifier),
@@ -245,20 +265,19 @@ func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (
 		var notFound *cctypes.ResourceNotFoundException
 		if errors.As(err, &notFound) {
 			c.reads.putGet(typeName, identifier, "", false)
-			return nil, false, nil
+			return readEntry{}, nil
 		}
-		return nil, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "getting %s %q", typeName, identifier)
+		return readEntry{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "getting %s %q", typeName, identifier)
 	}
 	if out.ResourceDescription == nil || out.ResourceDescription.Properties == nil {
-		return nil, false, kerrors.Validation("GetResource for %s %q returned no properties", typeName, identifier)
+		return readEntry{}, kerrors.Validation("GetResource for %s %q returned no properties", typeName, identifier)
 	}
-
-	var properties map[string]any
-	if err := json.Unmarshal([]byte(*out.ResourceDescription.Properties), &properties); err != nil {
-		return nil, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding properties for %s %q", typeName, identifier)
+	properties := *out.ResourceDescription.Properties
+	if !json.Valid([]byte(properties)) {
+		return readEntry{}, kerrors.Validation("GetResource for %s %q returned properties that are not JSON", typeName, identifier)
 	}
-	c.reads.putGet(typeName, identifier, *out.ResourceDescription.Properties, true)
-	return properties, true, nil
+	c.reads.putGet(typeName, identifier, properties, true)
+	return readEntry{properties: properties, found: true}, nil
 }
 
 // ListResources returns the primary identifier of every instance of
@@ -290,7 +309,18 @@ func (c *Client) ListResources(ctx context.Context, typeName string, resourceMod
 	if identifiers, hit := c.reads.list(typeName, model); hit {
 		return identifiers, nil
 	}
+	shared, err, _ := c.reads.flight.Do(flightKey("list", typeName, model), func() (any, error) {
+		return c.fetchList(ctx, typeName, model, modelJSON)
+	})
+	if err != nil {
+		return nil, err
+	}
+	identifiers, _ := shared.([]string)
+	return append([]string(nil), identifiers...), nil
+}
 
+// fetchList walks every page of one ListResources and remembers the answer.
+func (c *Client) fetchList(ctx context.Context, typeName, model string, modelJSON *string) ([]string, error) {
 	var identifiers []string
 	var nextToken *string
 
