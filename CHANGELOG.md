@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.11](https://github.com/evatt-labs/kraai/compare/v0.6.10...v0.6.11) (2026-09-23)
+
+
+### Features
+
+* **aws:** address native types listed under a parent ([#297](https://github.com/evatt-labs/kraai/issues/297)) ([6b6c7ab](https://github.com/evatt-labs/kraai/commit/6b6c7ab94a81b686f19dae6a690fcd3256ae2273))
+* **aws:** grant native bindings to the service's function ([#295](https://github.com/evatt-labs/kraai/issues/295)) ([04ebe63](https://github.com/evatt-labs/kraai/commit/04ebe63ceba81dfbca4e3be903c13cc6c8a050d8))
+
 ## [0.6.10](https://github.com/evatt-labs/kraai/compare/v0.6.9...v0.6.10) (2026-09-23)
 
 
