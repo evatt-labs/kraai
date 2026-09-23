@@ -78,14 +78,19 @@ schema-index:
 CONTAINER ?= podman
 OTEL_LGTM_IMAGE := docker.io/grafana/otel-lgtm@sha256:35da4355c58162b6f27ccbd43c6214d565bc29fc9b18baaf43b59202c354577b
 
+# Starts the stack, or leaves a running one and the data in it alone; only
+# observability-down removes it.
 observability-up:
-	$(CONTAINER) rm -f kraai-otel-lgtm >/dev/null 2>&1 || true
-	$(CONTAINER) run -d --name kraai-otel-lgtm \
-		-p 127.0.0.1:3000:3000 -p 127.0.0.1:4318:4318 \
-		-e GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer -e GF_USERS_VIEWERS_CAN_EDIT=true \
-		-v "$(CURDIR)/dev/observability/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/kraai.yaml:ro,Z" \
-		-v "$(CURDIR)/dev/observability/dashboards:/otel-lgtm/kraai-dashboards:ro,Z" \
-		$(OTEL_LGTM_IMAGE) >/dev/null
+	@if $(CONTAINER) container exists kraai-otel-lgtm 2>/dev/null || $(CONTAINER) inspect kraai-otel-lgtm >/dev/null 2>&1; then \
+		$(CONTAINER) start kraai-otel-lgtm >/dev/null; \
+	else \
+		$(CONTAINER) run -d --name kraai-otel-lgtm \
+			-p 127.0.0.1:3000:3000 -p 127.0.0.1:4318:4318 \
+			-e GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer -e GF_USERS_VIEWERS_CAN_EDIT=true \
+			-v "$(CURDIR)/dev/observability/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/kraai.yaml:ro,Z" \
+			-v "$(CURDIR)/dev/observability/dashboards:/otel-lgtm/kraai-dashboards:ro,Z" \
+			$(OTEL_LGTM_IMAGE) >/dev/null; \
+	fi
 	@echo "Grafana:  http://localhost:3000/d/kraai"
 	@echo "Export:   OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318 kraai plan <environment>"
 
