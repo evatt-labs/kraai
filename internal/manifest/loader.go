@@ -35,6 +35,10 @@ type Vocabulary interface {
 	// vendor fulfilling capability declared for it, returning nil when
 	// there is no such schema to check against.
 	ValidateBinding(capability, vendor string, entry map[string]any) error
+	// ValidateSettings checks a capability's `providers.<name>.settings`
+	// against the schema its vendor declared, returning nil when there is
+	// no such schema to check against.
+	ValidateSettings(capability, vendor string, settings map[string]any) error
 	// References returns the entry keys whose value names another binding
 	// on the same service, as the vendor fulfilling capability declared
 	// them. Empty when there are none.
@@ -227,6 +231,9 @@ func (l *Loader) validateRoot(root *Root) error {
 			return kerrors.Validation(
 				"%s: providers.%s.vendor: %q does not provide capability %q — %s",
 				rootFile, capability, provider.Vendor, capability, vendorsSuffix(vendors))
+		}
+		if err := l.vocabulary.ValidateSettings(capability, provider.Vendor, provider.Settings); err != nil {
+			return kerrors.Wrap(err, kerrors.CodeValidation, "%s: providers.%s.settings", rootFile, capability)
 		}
 	}
 	return nil

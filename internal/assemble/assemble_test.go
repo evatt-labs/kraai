@@ -367,14 +367,14 @@ func TestVendorsUsedTakesSettingsFromACapabilityThatDeclaresThem(t *testing.T) {
 	m := manifestWith(manifest.Providers{
 		manifest.CapabilityAWS:     {Vendor: vendorAWS},
 		manifest.CapabilityCompute: {Vendor: vendorAWS, Settings: map[string]any{"region": "eu-west-1"}},
-		manifest.CapabilityQueues:  {Vendor: vendorAWS, Settings: map[string]any{"region": "us-west-2"}},
+		manifest.CapabilityQueues:  {Vendor: vendorAWS, Settings: map[string]any{"region": "eu-west-1"}},
 	})
 	vendors, err := vendorsUsed(m)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if got := vendors[vendorAWS].Settings["region"]; got != "eu-west-1" {
-		t.Fatalf("aws settings came from region %v, want the first capability declaring settings (compute, eu-west-1)", got)
+		t.Fatalf("aws settings came from region %v, want compute's (eu-west-1), not the bare aws entry's", got)
 	}
 
 	bare := manifestWith(manifest.Providers{
@@ -387,5 +387,26 @@ func TestVendorsUsedTakesSettingsFromACapabilityThatDeclaresThem(t *testing.T) {
 	}
 	if vendors[vendorAWS] == nil || len(vendors[vendorAWS].Settings) != 0 {
 		t.Fatalf("with no settings anywhere, aws = %+v", vendors[vendorAWS])
+	}
+}
+
+func TestVendorsUsedRefusesTwoAWSRegions(t *testing.T) {
+	conflicting := manifestWith(manifest.Providers{
+		manifest.CapabilityAWS:     {Vendor: vendorAWS, Settings: map[string]any{"region": "us-west-2"}},
+		manifest.CapabilityCompute: {Vendor: vendorAWS, Settings: map[string]any{"region": "eu-west-1"}},
+	})
+	if _, err := vendorsUsed(conflicting); err == nil || !strings.Contains(err.Error(), "one client in one region") {
+		t.Fatalf("vendorsUsed = %v, want a refusal naming both regions", err)
+	}
+
+	agreeing := manifestWith(manifest.Providers{
+		manifest.CapabilityAWS:     {Vendor: vendorAWS, Settings: map[string]any{"region": "eu-west-1"}},
+		manifest.CapabilityCompute: {Vendor: vendorAWS, Settings: map[string]any{"region": "eu-west-1"}},
+		manifest.CapabilityQueues:  {Vendor: vendorAWS},
+		// Another vendor's region is its own.
+		manifest.CapabilityDatabase: {Vendor: vendorNeon, Settings: map[string]any{"region": "aws-us-east-2"}},
+	})
+	if _, err := vendorsUsed(agreeing); err != nil {
+		t.Fatalf("vendorsUsed of agreeing regions: %v", err)
 	}
 }

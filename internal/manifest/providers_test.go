@@ -3,6 +3,8 @@ package manifest
 import (
 	"strings"
 	"testing"
+
+	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
 // TestProvidersFor pins the capability lookup the planner uses, so it and the
@@ -52,6 +54,9 @@ type vocabulary struct {
 	// entry — enough to prove the loader consults the vendor's schema and
 	// reports what it says, without this package owning a schema.
 	bindingErr error
+	// settingsErr, when set, is what ValidateSettings returns, for the same
+	// reason.
+	settingsErr error
 	// references is what References returns per capability, for every
 	// vendor. Nil means no capability declares any.
 	references map[string][]string
@@ -74,6 +79,8 @@ func (v vocabulary) VendorsFor(capability string) []string {
 const anyVendor = "anyvendor"
 
 func (v vocabulary) ValidateBinding(string, string, map[string]any) error { return v.bindingErr }
+
+func (v vocabulary) ValidateSettings(string, string, map[string]any) error { return v.settingsErr }
 
 // loaderWith builds a Loader carrying only what validateRoot reads, so a
 // test of root validation needs no filesystem and no template engine.
@@ -360,5 +367,25 @@ func TestValidateRootSaysSoWhenNoProviderDeclaresTheCapability(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "no provider declares it") {
 		t.Errorf("error should say plainly that nobody provides it: %v", err)
+	}
+}
+
+// Provider settings are held to the schema their vendor declared, at load,
+// naming the key: before this, only compute's and neon's settings were
+// checked, and only when a resource that read them was planned.
+func TestValidateRootReportsTheSettingsSchemasVerdict(t *testing.T) {
+	sentinel := kerrors.Validation("aws provider settings: unrecognized key(s): regoin")
+	l := &Loader{vocabulary: vocabulary{names: []string{CapabilityQueues}, settingsErr: sentinel}}
+
+	err := l.validateRoot(&Root{Version: 1, Providers: Providers{
+		CapabilityQueues: {Vendor: "anyvendor", Settings: map[string]any{"regoin": "us-east-1"}},
+	}})
+	if err == nil {
+		t.Fatal("a settings schema failure was swallowed")
+	}
+	for _, want := range []string{"providers.queues.settings", "regoin"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error should mention %q: %v", want, err)
+		}
 	}
 }

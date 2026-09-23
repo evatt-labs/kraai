@@ -2,6 +2,7 @@ package aws
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -228,5 +229,30 @@ func TestDatabaseBindingSchemaAcceptsAnAuroraEntryWithANetwork(t *testing.T) {
 	}
 	if err := databaseBindingSchema.Validate(map[string]any{"binding": "SQL", "driver": "postgres", "engine": "aurora", "network": "NET"}); err != nil {
 		t.Fatalf("an aurora entry was rejected: %v", err)
+	}
+}
+
+// Every aws capability's settings are checked at load: compute against its
+// full vocabulary, every other one against the region alone, so a
+// misspelled key is an error rather than a setting that does nothing.
+func TestCapabilitiesValidateProviderSettings(t *testing.T) {
+	catalog, err := resource.NewCatalog(resource.FuncProvider{ProviderName: Provider, CapabilitiesFunc: Capabilities})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, def := range Capabilities() {
+		if err := catalog.ValidateSettings(def.Name, Provider, map[string]any{"region": "us-east-1"}); err != nil {
+			t.Errorf("%s: region rejected: %v", def.Name, err)
+		}
+		err := catalog.ValidateSettings(def.Name, Provider, map[string]any{"regoin": "us-east-1"})
+		if err == nil || !strings.Contains(err.Error(), "did you mean region?") {
+			t.Errorf("%s: misspelled region: %v", def.Name, err)
+		}
+		if def.Name == manifest.CapabilityCompute {
+			continue
+		}
+		if err := catalog.ValidateSettings(def.Name, Provider, map[string]any{"runtime": "python3.13"}); err == nil {
+			t.Errorf("%s accepted a compute setting it never reads", def.Name)
+		}
 	}
 }
