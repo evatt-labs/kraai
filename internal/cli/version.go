@@ -15,6 +15,9 @@ var (
 	date    = "unknown"
 )
 
+// Version is the version this binary was built as.
+func Version() string { return version }
+
 func newVersionCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",

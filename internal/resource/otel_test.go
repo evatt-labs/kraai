@@ -413,3 +413,28 @@ func TestInstrumentedOptionalsOnPlainResource(t *testing.T) {
 		t.Errorf("ValidateSpec() on a non-validator error = %v, want nil", err)
 	}
 }
+
+// A verb's duration spans a cached read to a forty-minute poll; the SDK's
+// default buckets end at ten seconds, above which every create reads the
+// same.
+func TestResourceDurationBucketsSpanFastAndSlowVerbs(t *testing.T) {
+	tl := newTelemetry()
+	inner := NewMockResource(gomock.NewController(t))
+	inner.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	r := NewRegistry(WithDecorator(tl.decor))
+	if err := r.Register(Registration{Provider: "aws", Type: "AWS::SQS::Queue", Capability: "queues", Lookup: LookupByName, Resource: inner}); err != nil {
+		t.Fatal(err)
+	}
+	entry, _ := r.Lookup("aws/AWS::SQS::Queue")
+	if _, err := entry.Resource.Get(t.Context(), Ref{Name: "q"}); err != nil {
+		t.Fatal(err)
+	}
+	h := tl.histogram(t)
+	if h == nil || len(h.DataPoints) == 0 {
+		t.Fatal("no duration recorded")
+	}
+	bounds := h.DataPoints[0].Bounds
+	if bounds[0] != 10 || bounds[len(bounds)-1] != 2400000 {
+		t.Fatalf("bounds = %v, want 10ms through 40 minutes", bounds)
+	}
+}

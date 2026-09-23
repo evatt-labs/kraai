@@ -33,6 +33,10 @@ func Instrument(tp trace.TracerProvider, mp metric.MeterProvider) func(Registrat
 		"kraai.resource.duration",
 		metric.WithDescription("Duration of a resource verb call."),
 		metric.WithUnit("ms"),
+		// From a cached read to the forty-minute poll timeout; the SDK's
+		// default buckets end at ten seconds.
+		metric.WithExplicitBucketBoundaries(10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000,
+			60000, 120000, 300000, 600000, 1200000, 2400000),
 	)
 	if err != nil {
 		// A metrics pipeline that will not build an instrument must not
@@ -177,4 +181,13 @@ func (i *instrumented) ValidateSpec(spec Spec) error {
 		return nil
 	}
 	return validator.ValidateSpec(spec)
+}
+
+// StartWave opens a span for one wave of phase ("plan", "apply",
+// "destroy"), so the resource spans its actions produce nest under the wave
+// that ran them. The returned function ends it.
+func StartWave(ctx context.Context, phase string, wave, actions int) (context.Context, func()) {
+	ctx, span := otel.Tracer(instrumentationName).Start(ctx, phase+".wave",
+		trace.WithAttributes(attribute.Int("kraai.wave", wave), attribute.Int("kraai.actions", actions)))
+	return ctx, func() { span.End() }
 }

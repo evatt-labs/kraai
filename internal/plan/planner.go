@@ -145,7 +145,9 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 		if len(group) == 0 {
 			continue
 		}
-		wave := p.getWave(ctx, group, attrs)
+		waveCtx, end := resource.StartWave(ctx, "plan", group[0].Wave, len(group))
+		wave := p.getWave(waveCtx, group, attrs)
+		end()
 		for _, a := range wave {
 			if a.Current == nil {
 				continue

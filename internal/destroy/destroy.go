@@ -65,7 +65,9 @@ func (d *Destroyer) Destroy(ctx context.Context, p *plan.Plan) (*Result, error) 
 		if len(idxs) == 0 {
 			continue
 		}
-		d.runWave(ctx, p.Actions, idxs, results, locker)
+		waveCtx, end := resource.StartWave(ctx, "destroy", wave, len(idxs))
+		d.runWave(waveCtx, p.Actions, idxs, results, locker)
+		end()
 	}
 
 	// A cancelled run is not a completed destroy. Whatever was deleted stays

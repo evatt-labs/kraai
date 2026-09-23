@@ -88,7 +88,10 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 			skipWave(p.Actions, idxs, results)
 			continue
 		}
-		if a.runWave(ctx, p.Actions, idxs, results, outputs, secrets, attrs, locker) {
+		waveCtx, end := resource.StartWave(ctx, "apply", wave, len(idxs))
+		stopped := a.runWave(waveCtx, p.Actions, idxs, results, outputs, secrets, attrs, locker)
+		end()
+		if stopped {
 			waveFailed = true
 		}
 	}

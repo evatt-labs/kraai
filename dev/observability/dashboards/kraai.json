@@ -1,0 +1,483 @@
+{
+  "uid": "kraai",
+  "title": "kraai",
+  "tags": [
+    "kraai"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "",
+  "editable": true,
+  "panels": [
+    {
+      "type": "row",
+      "title": "Commands",
+      "id": 1,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Runs",
+      "description": "Commands that exported telemetry in the time range.",
+      "id": 2,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "count(count by (service_instance_id) (last_over_time(kraai_command_duration_seconds_count[$__range])))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "__auto",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "type": "stat",
+      "title": "Failed runs",
+      "description": "Runs that exited non-zero.",
+      "id": 3,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "count(count by (service_instance_id) (last_over_time(kraai_command_duration_seconds_count{kraai_exit_code!=\"0\"}[$__range]))) or vector(0)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "__auto",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "type": "bargauge",
+      "title": "Command duration p95",
+      "description": "95th percentile wall time per command. Each kraai run is its own process and exports once, at exit, so every series here is read as its final value within the time range (last_over_time over the range) and summed across runs.",
+      "id": 4,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, kraai_command) (last_over_time(kraai_command_duration_seconds_bucket[$__range])))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{kraai_command}}",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic"
+      }
+    },
+    {
+      "type": "table",
+      "title": "Runs",
+      "description": "One row per run: command, exit code, wall time.",
+      "id": 5,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service_instance_id, kraai_command, kraai_exit_code, service_version) (last_over_time(kraai_command_duration_seconds_sum[$__range]))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "__auto",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value": "duration",
+              "service_instance_id": "run",
+              "kraai_command": "command",
+              "kraai_exit_code": "exit code",
+              "service_version": "version"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Resources",
+      "id": 6,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "panels": []
+    },
+    {
+      "type": "bargauge",
+      "title": "Time spent by resource type",
+      "description": "Total verb time per resource type, across runs: where a run's wall time goes. Each kraai run is its own process and exports once, at exit, so every series here is read as its final value within the time range (last_over_time over the range) and summed across runs.",
+      "id": 7,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sort_desc(sum by (kraai_resource_type) (last_over_time(kraai_resource_duration_milliseconds_sum[$__range])))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{kraai_resource_type}}",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient"
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "Verb latency p95 by type",
+      "description": "95th percentile of one verb call, by resource type and verb.",
+      "id": 8,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sort_desc(histogram_quantile(0.95, sum by (le, kraai_resource_type, kraai_verb) (last_over_time(kraai_resource_duration_milliseconds_bucket[$__range]))))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{kraai_resource_type}} {{kraai_verb}}",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient"
+      }
+    },
+    {
+      "type": "table",
+      "title": "Verb calls",
+      "description": "Calls and errors per resource type and verb.",
+      "id": 9,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (kraai_resource_type, kraai_verb, kraai_error) (last_over_time(kraai_resource_duration_milliseconds_count[$__range]))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "__auto",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value": "calls",
+              "kraai_resource_type": "type",
+              "kraai_verb": "verb",
+              "kraai_error": "error"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Provider requests",
+      "id": 10,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "panels": []
+    },
+    {
+      "type": "bargauge",
+      "title": "Requests by host and status",
+      "description": "Every provider HTTP request. A 400 from Cloud Control is usually its answer that a resource does not exist yet, which a plan of a new environment asks for every resource.",
+      "id": 11,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sort_desc(sum by (server_address, http_response_status_code) (last_over_time(http_client_request_duration_seconds_count{service_name=\"kraai\"}[$__range])))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{server_address}} {{http_response_status_code}}",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic"
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "Request latency p95 by host",
+      "description": "95th percentile of one provider request, by host.",
+      "id": 12,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, server_address) (last_over_time(http_client_request_duration_seconds_bucket{service_name=\"kraai\"}[$__range])))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{server_address}}",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic"
+      }
+    },
+    {
+      "type": "row",
+      "title": "Traces",
+      "id": 13,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "panels": []
+    },
+    {
+      "type": "table",
+      "title": "Recent runs",
+      "description": "One trace per run; open one to see its waves, resource verbs and provider requests.",
+      "id": 14,
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "tempo",
+            "uid": "tempo"
+          },
+          "queryType": "traceql",
+          "query": "{resource.service.name=\"kraai\" && nestedSetParent<0}",
+          "limit": 50,
+          "tableType": "traces"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  }
+}
