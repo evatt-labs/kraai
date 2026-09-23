@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.12](https://github.com/evatt-labs/kraai/compare/v0.6.11...v0.6.12) (2026-09-23)
+
+
+### Features
+
+* **aws:** find untaggable native types by declared match values ([#298](https://github.com/evatt-labs/kraai/issues/298)) ([ca1743d](https://github.com/evatt-labs/kraai/commit/ca1743d1b688d87a035a9fc98bab2af2abe989c7))
+
 ## [0.6.11](https://github.com/evatt-labs/kraai/compare/v0.6.10...v0.6.11) (2026-09-23)
 
 
