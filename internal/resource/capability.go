@@ -203,6 +203,22 @@ func (c *Catalog) ValidateBinding(capability, vendor string, entry map[string]an
 	return nil
 }
 
+// ValidateSettings checks a capability's provider settings against the
+// ProviderSettings schema the vendor fulfilling it declared, returning nil
+// when the vendor declares none, for the same reasons as ValidateBinding.
+func (c *Catalog) ValidateSettings(capability, vendor string, settings map[string]any) error {
+	for _, e := range c.byCapability[capability] {
+		if e.Provider != vendor {
+			continue
+		}
+		if e.Capability.ProviderSettings == nil {
+			return nil
+		}
+		return e.Capability.ProviderSettings.Validate(settings)
+	}
+	return nil
+}
+
 // References returns the binding-entry keys that name other bindings, as the
 // vendor fulfilling capability declared them, sorted. Empty when the vendor
 // declares none or declares no such capability.

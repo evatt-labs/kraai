@@ -45,6 +45,18 @@ var computeSettingsSchema = resource.NewSchema("aws compute settings", map[strin
 	"additionalProperties": false,
 })
 
+// regionSettingsSchema validates the settings of every aws capability but
+// compute: the region, which DecodeSettings reads to build the client, and
+// nothing else, so a misspelled key is an error rather than a setting that
+// silently does nothing.
+var regionSettingsSchema = resource.NewSchema("aws provider settings", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"region": map[string]any{"type": "string"},
+	},
+	"additionalProperties": false,
+})
+
 // objectsBindingSchema validates one entry of a service's `objects:` list:
 // a bare binding name.
 var objectsBindingSchema = resource.NewSchema("aws objects binding", map[string]any{

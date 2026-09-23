@@ -145,7 +145,39 @@ func vendorsUsed(m *manifest.Manifest) (map[string]*manifest.Provider, error) {
 			out[p.Vendor] = p
 		}
 	}
+	if err := oneAWSRegion(m); err != nil {
+		return nil, err
+	}
 	return out, nil
+}
+
+// oneAWSRegion refuses aws capabilities that name different regions. One
+// client serves every aws capability, so it can honour only one, and
+// picking either would provision part of the manifest somewhere the author
+// did not ask for.
+func oneAWSRegion(m *manifest.Manifest) error {
+	first, firstCapability := "", ""
+	for _, capability := range m.Root.Providers.Capabilities() {
+		p, _ := m.Root.Providers.For(capability)
+		if p.Vendor != vendorAWS {
+			continue
+		}
+		region, _ := p.Settings["region"].(string)
+		if region == "" {
+			continue
+		}
+		if first == "" {
+			first, firstCapability = region, capability
+			continue
+		}
+		if region != first {
+			return kerrors.Validation(
+				"providers.%s.settings.region is %q but providers.%s.settings.region is %q; "+
+					"every aws capability is served by one client in one region",
+				firstCapability, first, capability, region)
+		}
+	}
+	return nil
 }
 
 // awsSchemaCache keeps fetched CloudFormation schemas under the user's

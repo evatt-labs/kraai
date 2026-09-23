@@ -12,28 +12,32 @@ import (
 func Capabilities() []resource.CapabilityDef {
 	return []resource.CapabilityDef{
 		{
-			Name:    manifest.CapabilityObjects,
-			Summary: "S3 bucket.",
-			Binding: objectsBindingSchema,
+			Name:             manifest.CapabilityObjects,
+			Summary:          "S3 bucket.",
+			Binding:          objectsBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 		},
 		{
-			Name:    manifest.CapabilityDNS,
-			Summary: "Route 53 hosted zone and the record sets inside it.",
-			Binding: dnsBindingSchema,
+			Name:             manifest.CapabilityDNS,
+			Summary:          "Route 53 hosted zone and the record sets inside it.",
+			Binding:          dnsBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 			// alias names the cdn binding a record in this zone points at.
 			References: []string{"alias"},
 		},
 		{
-			Name:    manifest.CapabilityTLS,
-			Summary: "ACM certificate, validated through Route 53.",
-			Binding: tlsBindingSchema,
+			Name:             manifest.CapabilityTLS,
+			Summary:          "ACM certificate, validated through Route 53.",
+			Binding:          tlsBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 			// zone names the dns binding whose hosted zone validates it.
 			References: []string{"zone"},
 		},
 		{
-			Name:    manifest.CapabilityCDN,
-			Summary: "CloudFront distribution in front of an S3 origin.",
-			Binding: cdnBindingSchema,
+			Name:             manifest.CapabilityCDN,
+			Summary:          "CloudFront distribution in front of an S3 origin.",
+			Binding:          cdnBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 			// origin names the objects binding fronted, certificate the tls
 			// binding presented.
 			References: []string{"origin", "certificate"},
@@ -53,7 +57,8 @@ func Capabilities() []resource.CapabilityDef {
 				"Aurora Serverless v2 cluster inside the network the entry names " +
 				"(driver: postgres, engine: aurora), granted to the service's " +
 				"execution role or handed to it as a credential.",
-			Binding: databaseBindingSchema,
+			Binding:          databaseBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 			// network names the network binding whose VPC holds an Aurora
 			// cluster; the other engines need none.
 			References: []string{"network"},
@@ -63,14 +68,16 @@ func Capabilities() []resource.CapabilityDef {
 			Summary: "ElastiCache Serverless cache (driver: redis; Valkey or Redis OSS) " +
 				"inside the network binding the entry names, with a security group " +
 				"admitting that network.",
-			Binding: keyvalueBindingSchema,
+			Binding:          keyvalueBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 			// network names the network binding whose VPC holds the cache.
 			References: []string{"network"},
 		},
 		{
-			Name:    manifest.CapabilityQueues,
-			Summary: "SQS standard queue, granted to the service's execution role.",
-			Binding: queuesBindingSchema,
+			Name:             manifest.CapabilityQueues,
+			Summary:          "SQS standard queue, granted to the service's execution role.",
+			Binding:          queuesBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 		},
 		{
 			Name: manifest.CapabilityNetwork,
@@ -80,13 +87,15 @@ func Capabilities() []resource.CapabilityDef {
 				"VPC, and, when the entry declares a private block, a pair of " +
 				"private subnets with NAT egress.",
 			// The address plan is per binding, not per provider.
-			Binding: networkBindingSchema,
+			Binding:          networkBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 		},
 		{
 			Name: manifest.CapabilityAWS,
 			Summary: "Any AWS-published CloudFormation resource type, created with its own " +
 				"properties and found again, replaced and validated from its own schema.",
-			Binding: nativeBindingSchema,
+			Binding:          nativeBindingSchema,
+			ProviderSettings: regionSettingsSchema,
 		},
 	}
 }
