@@ -66,6 +66,13 @@ type Registration struct {
 	// bindings made a static site (zone, certificate, distribution, record
 	// set) a cycle.
 	ReadsReferences []ReferenceRead
+	// EmbeddedReferences, when set, returns the sibling bindings the entry's
+	// own values name, such as a native property "${DLQ.Arn}". Each must be
+	// a binding on the same service that expands to exactly one resource;
+	// the planner orders this type after it, lets it read what it published,
+	// records it in Spec.References, and hands this type what that resource
+	// reported at plan time too, so its Diff compares resolved values.
+	EmbeddedReferences func(config map[string]any) ([]string, error)
 	// Applies restricts this registration to the manifests and services it
 	// is meaningful for. Empty always applies; several entries are ANDed.
 	// Every entry is evaluated at one point, in Resolve.

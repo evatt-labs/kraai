@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"errors"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -67,9 +68,10 @@ func nativeFamily(client *Client) resource.Family {
 			}
 			return resource.Registration{
 				Provider: Provider, Type: resource.RoleType(vendorType, nativeRole), VendorType: vendorType,
-				Capability: manifest.CapabilityAWS,
-				Lookup:     lookup,
-				Resource:   newNativeResource(client, facts, lookup),
+				Capability:         manifest.CapabilityAWS,
+				Lookup:             lookup,
+				EmbeddedReferences: nativeReferences,
+				Resource:           newNativeResource(client, facts, lookup),
 			}, nil
 		},
 	}
@@ -189,17 +191,33 @@ func newNativeResourceWith(cc ccAPI, schemas propertySchemaSource, facts cfschem
 // sets the tag property itself, kraai's identity tag is added to it here,
 // not only at Create: an update replaces the whole property, and one
 // without the tag would leave the instance unfindable.
+//
+// References to other bindings are resolved strictly: this runs at Create
+// and Update, after every resource the entry names has been applied.
 func (n *nativeResource) translate(_ context.Context, spec resource.Spec) (resource.Spec, error) {
+	translated, _, err := n.translateWith(spec, true)
+	return translated, err
+}
+
+// translateWith is translate with references resolved strictly or, at plan
+// time, leniently: a value naming a resource that has not published yet is
+// left as written and reported in the resolution.
+func (n *nativeResource) translateWith(spec resource.Spec, strict bool) (resource.Spec, resolution, error) {
 	properties, err := nativeProperties(spec)
 	if err != nil {
-		return resource.Spec{}, err
+		return resource.Spec{}, resolution{}, err
 	}
+	res, err := resolveReferences(spec, properties, strict)
+	if err != nil {
+		return resource.Spec{}, resolution{}, err
+	}
+	properties = res.properties
 	if _, authored := properties[n.facts.TagProperty]; authored && n.stampTag != nil {
 		n.stampTag(properties, spec.Name)
 	}
 	translated := spec
 	translated.Config = properties
-	return translated, nil
+	return translated, res, nil
 }
 
 // nativeProperties returns a copy of the entry's properties, empty when it
@@ -224,11 +242,22 @@ func nativeProperties(spec resource.Spec) (map[string]any, error) {
 // caught on a fresh environment too: the create request is built as Create
 // would build it and validated against the type's own schema, after the
 // checks for what kraai owns and the vendor assigns.
+//
+// A value referencing a resource that does not exist yet is not judged
+// against the schema; the property it names on that resource's type is.
 func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
 	properties, err := nativeProperties(spec)
 	if err != nil {
 		return err
 	}
+	res, err := resolveReferences(spec, properties, false)
+	if err != nil {
+		return err
+	}
+	if err := n.checkReferencedProperties(spec, res.references); err != nil {
+		return err
+	}
+	properties = res.properties
 	if p := n.facts.IdentityProperty; n.lookup == resource.LookupByName && p != "" {
 		if _, set := properties[p]; set {
 			return kerrors.Validation(
@@ -264,7 +293,48 @@ func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
 	if err != nil {
 		return err
 	}
-	return validator.Validate(desired)
+	return validator.ValidateIgnoring(desired, res.unknown)
+}
+
+// checkReferencedProperties requires the first property each reference
+// names to be one the referenced resource's type defines, so a misspelled
+// attribute fails at plan even before the resource it names exists. A
+// reference to a resource that is not an AWS type is not checked here.
+func (n *nativeResource) checkReferencedProperties(spec resource.Spec, refs []reference) error {
+	if n.schemas == nil {
+		return nil
+	}
+	for _, ref := range refs {
+		vendorType, ok := awsVendorType(spec.References[ref.binding])
+		if !ok {
+			continue
+		}
+		target, err := n.schemas.PropertySchema(context.Background(), vendorType)
+		if err != nil {
+			return err
+		}
+		if !target.HasProperty(ref.path[0]) {
+			return kerrors.Validation(
+				"a value names %s.%s, but %s (%s) has no property %s",
+				ref.binding, strings.Join(ref.path, "."), ref.binding, vendorType, ref.path[0])
+		}
+	}
+	return nil
+}
+
+// awsVendorType is the CloudFormation type an aws registry key drives: the
+// key's first three "::" segments, which drops a role suffix such as
+// "::Native" or "::ArtifactBucket".
+func awsVendorType(refKey string) (string, bool) {
+	typ, ok := strings.CutPrefix(refKey, Provider+"/")
+	if !ok {
+		return "", false
+	}
+	segments := strings.Split(typ, "::")
+	if len(segments) < 3 || segments[0] != "AWS" {
+		return "", false
+	}
+	return strings.Join(segments[:3], "::"), true
 }
 
 // propertyValidator returns the type's cached validator, building it on
@@ -289,10 +359,27 @@ func (n *nativeResource) propertyValidator(ctx context.Context) (*resource.Schem
 // Diff is the engine's comparison with both sides' tags put in one order,
 // since Cloud Control does not return a tag list in the order it was
 // written. Tags the entry does not set are not compared.
+//
+// A property whose value references a resource that has not published yet
+// (one planned for create or replace) differs: the value it will resolve to
+// is not known, and a dependent must not keep pointing at a resource being
+// replaced. Replace when the property is create-only, update otherwise.
 func (n *nativeResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
-	spec, err := n.translated(context.Background(), spec)
+	spec, res, err := n.translateWith(spec, false)
 	if err != nil {
 		return resource.Same, err
+	}
+	if unknown := res.unknownProperties(); len(unknown) > 0 {
+		schema, err := n.getSchema(context.Background())
+		if err != nil {
+			return resource.Same, err
+		}
+		for _, property := range unknown {
+			if slices.Contains(schema.CreateOnly, "/properties/"+property) {
+				return resource.Immutable, nil
+			}
+		}
+		return resource.Mutable, nil
 	}
 	tagProperty := n.facts.TagProperty
 	if _, authored := spec.Config[tagProperty]; !authored || n.stampTag == nil {

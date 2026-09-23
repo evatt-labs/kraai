@@ -114,6 +114,12 @@ func TestNativeFamilyBuildsFromTheIndex(t *testing.T) {
 	if _, isNative := reg.Resource.(*nativeResource); !isNative {
 		t.Fatalf("Resource is %T", reg.Resource)
 	}
+	if reg.EmbeddedReferences == nil {
+		t.Fatal("a native registration does not report the bindings its properties name")
+	}
+	if names, err := reg.EmbeddedReferences(map[string]any{nativePropertiesKey: map[string]any{"P": "${DLQ.Arn}"}}); err != nil || len(names) != 1 || names[0] != "DLQ" {
+		t.Fatalf("EmbeddedReferences = %v, %v", names, err)
+	}
 
 	if _, err := family.Build("AWS::SQS::Queu"); err == nil || !strings.Contains(err.Error(), "not an AWS-published resource type") {
 		t.Errorf("Build of a misspelled type: %v", err)

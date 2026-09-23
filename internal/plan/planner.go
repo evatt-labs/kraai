@@ -5,6 +5,7 @@ import (
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 
 	"golang.org/x/sync/errgroup"
 
@@ -71,6 +72,10 @@ type plannedItem struct {
 	// ReadsBindings is the union of their bindings, which is what apply
 	// gets; the edges are finer than that on purpose.
 	reads []readEdge
+	// embedded are the sibling bindings the entry's own values name, from
+	// the registration's EmbeddedReferences; resolveEmbedded turns them into
+	// read edges and Spec.References.
+	embedded []string
 }
 
 // readEdge is one thing an item runs after: every producer in binding when
@@ -129,12 +134,36 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 
 	// Every wave runs whether or not an earlier one had failures, so one
 	// unreachable resource never hides the answer for every other one.
+	//
+	// What an existing resource reported is handed to a later wave's items
+	// that reference it, so their Diff compares resolved values. A producer
+	// that will be created or replaced publishes nothing here: its values
+	// are not known until apply.
+	attrs := resource.NewAttributeIndex()
 	var actions []Action
 	for _, group := range byWave {
 		if len(group) == 0 {
 			continue
 		}
-		actions = append(actions, p.getWave(ctx, group)...)
+		wave := p.getWave(ctx, group, attrs)
+		for _, a := range wave {
+			if a.Current == nil {
+				continue
+			}
+			switch a.Kind {
+			case ActionNoChange:
+				attrs.Put(a.ServiceKey, a.Binding, a.Ref.Key(), a.Current.Attributes)
+			case ActionUpdate:
+				pending := make(map[string]any, len(a.Current.Attributes)+1)
+				for k, v := range a.Current.Attributes {
+					pending[k] = v
+				}
+				pending[resource.PendingUpdateAttribute] = true
+				attrs.Put(a.ServiceKey, a.Binding, a.Ref.Key(), pending)
+			case ActionCreate, ActionReplace, ActionFailed:
+			}
+		}
+		actions = append(actions, wave...)
 	}
 
 	// A cancelled run is not a plan: every Get honours ctx, so the result
@@ -220,6 +249,9 @@ func (p *Planner) expand(m *manifest.Manifest, environmentName string, namer nam
 		}
 	}
 	if err := checkNameCollisions(out); err != nil {
+		return nil, err
+	}
+	if err := resolveEmbedded(out); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -563,6 +595,12 @@ func (p *Planner) expandBinding(
 		// a default inside apply. A binding has no route, so the route
 		// scope reads nothing beyond the binding itself.
 		readsBindings, reads := readsFor(r, binding, m.Services[svcKey], manifest.Route{})
+		var embedded []string
+		if r.EmbeddedReferences != nil {
+			if embedded, err = r.EmbeddedReferences(config); err != nil {
+				return nil, err
+			}
+		}
 		out = append(out, plannedItem{
 			Item: Item{
 				ServiceKey: svcKey, Binding: binding, Capability: capability,
@@ -574,21 +612,81 @@ func (p *Planner) expandBinding(
 			res:       r.Resource,
 			dependsOn: r.DependsOn,
 			reads:     reads,
+			embedded:  embedded,
 		})
 	}
 	return out, nil
 }
 
+// resolveEmbedded checks every binding an entry's own values name and wires
+// it in: a read edge from the one resource the binding expands to, the
+// binding added to what the item reads, and that resource's key recorded in
+// Spec.References so the value resolves to exactly it.
+//
+// The named binding must be another binding on the same service, and must
+// expand to exactly one resource: a value naming a binding of several
+// would otherwise resolve to whichever of them happened to publish.
+func resolveEmbedded(items []plannedItem) error {
+	byBinding := map[[2]string][]int{}
+	for i, it := range items {
+		if it.Capability == manifest.CapabilityCompute {
+			continue
+		}
+		key := [2]string{it.ServiceKey, it.Binding}
+		byBinding[key] = append(byBinding[key], i)
+	}
+	for i := range items {
+		it := &items[i]
+		for _, name := range it.embedded {
+			where := "services." + it.ServiceKey + "." + it.Capability + "." + it.Binding
+			if name == it.Binding {
+				return kerrors.Validation("%s: a value names this binding itself (%q)", where, name)
+			}
+			targets := byBinding[[2]string{it.ServiceKey, name}]
+			if len(targets) == 0 && name == it.ServiceKey {
+				return kerrors.Validation(
+					"%s: a value names %q, the service's own compute, which a binding cannot reference", where, name)
+			}
+			if len(targets) == 0 {
+				return kerrors.Validation(
+					"%s: a value names %q, which is not a binding on service %q; write $${ for a literal ${",
+					where, name, it.ServiceKey)
+			}
+			if len(targets) != 1 {
+				types := make([]string, 0, len(targets))
+				for _, t := range targets {
+					types = append(types, items[t].Type)
+				}
+				return kerrors.Validation(
+					"%s: a value names %q, which expands to %d resources (%s); a reference must name a binding with one",
+					where, name, len(targets), strings.Join(types, ", "))
+			}
+			target := items[targets[0]].ref.Key()
+			if it.spec.References == nil {
+				it.spec.References = map[string]string{}
+			}
+			it.spec.References[name] = target
+			it.reads = append(it.reads, readEdge{binding: name, typeKey: target})
+			it.ReadsBindings = append(it.ReadsBindings, name)
+		}
+		if len(it.embedded) > 0 {
+			sort.Strings(it.ReadsBindings)
+			it.ReadsBindings = slices.Compact(it.ReadsBindings)
+		}
+	}
+	return nil
+}
+
 // getWave runs Get for every item in one wave, bounded by p.concurrency,
 // and returns one Action per item in the same order.
-func (p *Planner) getWave(ctx context.Context, items []plannedItem) []Action {
+func (p *Planner) getWave(ctx context.Context, items []plannedItem, attrs *resource.AttributeIndex) []Action {
 	actions := make([]Action, len(items))
 
 	g := &errgroup.Group{}
 	g.SetLimit(p.concurrency)
 	for i, it := range items {
 		g.Go(func() error {
-			actions[i] = decide(ctx, it)
+			actions[i] = decide(ctx, it, attrs)
 			// Always nil: one failed Get must never cancel or skip its
 			// siblings. The failure is already in actions[i].
 			return nil
@@ -600,13 +698,21 @@ func (p *Planner) getWave(ctx context.Context, items []plannedItem) []Action {
 }
 
 // decide runs Get for one item and turns the result into an Action.
-func decide(ctx context.Context, it plannedItem) Action {
+func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex) Action {
 	action := Action{Item: it.Item, Ref: it.ref, Spec: it.spec}
+
+	// Only an item whose values reference another binding reads what that
+	// binding's resources reported; the plan's own Spec keeps no attributes,
+	// since apply hands it what apply produced.
+	evaluated := it.spec
+	if len(it.spec.References) > 0 {
+		evaluated.Attributes = attrs.ForAction(it.ServiceKey, it.Binding, it.ReadsBindings)
+	}
 
 	// Validation runs before Get, so it runs on a fresh environment too,
 	// where every action is a create and nothing below is reached.
 	if validator, ok := it.res.(SpecValidator); ok {
-		if err := validator.ValidateSpec(it.spec); err != nil {
+		if err := validator.ValidateSpec(evaluated); err != nil {
 			action.Kind = ActionFailed
 			action.Err = kerrors.Wrap(err, kerrors.CodeValidation,
 				"validating %s/%s %q", it.Provider, it.Type, it.ref.Name)
@@ -641,7 +747,7 @@ func decide(ctx context.Context, it plannedItem) Action {
 	// The assertion checks it.res's dynamic type, so this reaches Differ
 	// on the underlying resource without holding a resource.Resource.
 	if differ, ok := it.res.(Differ); ok {
-		difference, dErr := differ.Diff(it.spec, state)
+		difference, dErr := differ.Diff(evaluated, state)
 		if dErr != nil {
 			action.Kind = ActionFailed
 			action.Err = kerrors.Wrap(dErr, kerrors.CodeUnexpected,

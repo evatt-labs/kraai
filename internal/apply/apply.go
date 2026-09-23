@@ -72,7 +72,7 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 
 	outputs := resource.NewOutputs()
 	secrets := newSecretIndex()
-	attrs := newAttrIndex()
+	attrs := resource.NewAttributeIndex()
 	// One locker per run: it only has to hold across this call's own
 	// goroutines.
 	locker := resource.NewScopeLocker()
@@ -132,7 +132,7 @@ func skipWave(actions []plan.Action, idxs []int, results []ActionResult) {
 // sibling still in flight.
 func (a *Applier) runWave(
 	ctx context.Context, actions []plan.Action, idxs []int, results []ActionResult,
-	outputs *resource.Outputs, secrets *secretIndex, attrs *attrIndex,
+	outputs *resource.Outputs, secrets *secretIndex, attrs *resource.AttributeIndex,
 	locker *resource.ScopeLocker,
 ) bool {
 	g := &errgroup.Group{}
@@ -161,7 +161,7 @@ func (a *Applier) runWave(
 // returns an error: every failure is captured in the ActionResult.
 func (a *Applier) execute(
 	ctx context.Context, act plan.Action, outputs *resource.Outputs, secrets *secretIndex,
-	attrs *attrIndex,
+	attrs *resource.AttributeIndex,
 	locker *resource.ScopeLocker,
 ) ActionResult {
 	result := ActionResult{Item: act.Item, Ref: act.Ref}
@@ -182,7 +182,7 @@ func (a *Applier) execute(
 	// needs it anyway.
 	reads := effectiveReadsBindings(act)
 	spec.Secrets = secrets.forAction(act.ServiceKey, act.Binding, reads)
-	spec.Attributes = attrs.forAction(act.ServiceKey, act.Binding, reads)
+	spec.Attributes = attrs.ForAction(act.ServiceKey, act.Binding, reads)
 
 	state, outcome, err := a.mutate(ctx, act, reg, spec, locker)
 	if err != nil {
@@ -198,7 +198,7 @@ func (a *Applier) execute(
 	// consumer from a resource that already existed.
 	outputs.Put(state)
 	if state != nil {
-		attrs.put(key, act.Ref.Key(), state.Attributes)
+		attrs.Put(act.ServiceKey, act.Binding, act.Ref.Key(), state.Attributes)
 	}
 	if producer, ok := reg.Resource.(resource.SecretProducer); ok {
 		for name, secret := range producer.Secrets(state) {
