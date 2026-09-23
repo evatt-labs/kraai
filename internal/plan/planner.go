@@ -387,6 +387,15 @@ func (p *Planner) expandCompute(
 		case resource.NameFromBinding:
 			var reads []readEdge
 			item.ReadsBindings, reads = readsFor(r, svcKey, svc, manifest.Route{})
+			// A compute resource names bindings through the service's
+			// bindings its config lists, as an execution role names the
+			// native bindings it grants.
+			var embedded []string
+			if r.EmbeddedReferences != nil {
+				if embedded, err = r.EmbeddedReferences(config); err != nil {
+					return nil, err
+				}
+			}
 			out = append(out, plannedItem{
 				Item:      item,
 				ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
@@ -394,6 +403,7 @@ func (p *Planner) expandCompute(
 				res:       r.Resource,
 				dependsOn: r.DependsOn,
 				reads:     reads,
+				embedded:  embedded,
 			})
 		default:
 			// An unknown NameStrategy must not silently take
@@ -641,6 +651,9 @@ func resolveEmbedded(items []plannedItem) error {
 		it := &items[i]
 		for _, name := range it.embedded {
 			where := "services." + it.ServiceKey + "." + it.Capability + "." + it.Binding
+			if it.Capability == manifest.CapabilityCompute {
+				where = "services." + it.ServiceKey + ".compute (" + it.Type + ")"
+			}
 			if name == it.Binding {
 				return kerrors.Validation("%s: a value names this binding itself (%q)", where, name)
 			}

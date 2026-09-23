@@ -173,3 +173,45 @@ func TestPlan_ExistingProducerReachesTheDependentsDiff(t *testing.T) {
 		})
 	}
 }
+
+// A compute registration names bindings through the service's binding list
+// its config carries, as an execution role names what it grants: it is
+// ordered after that binding's resource and told which resource it is.
+func TestPlan_ComputeRegistrationReferencesABinding(t *testing.T) {
+	reg := resource.NewRegistry()
+	must(t, reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::SQS::Queue", Capability: manifest.CapabilityQueues,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+	}))
+	must(t, reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::IAM::Role", Capability: manifest.CapabilityCompute,
+		Lookup: resource.LookupByName, Resource: newFakeResource(),
+		EmbeddedReferences: func(config map[string]any) ([]string, error) {
+			bindings, _ := config["bindings"].([]any)
+			var out []string
+			for _, b := range bindings {
+				out = append(out, b.(map[string]any)["binding"].(string))
+			}
+			return out, nil
+		},
+	}))
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{
+			manifest.CapabilityQueues:  {Vendor: "aws"},
+			manifest.CapabilityCompute: {Vendor: "aws"},
+		}},
+		Services: map[string]manifest.Service{"api": {Bindings: manifest.Bindings{manifest.CapabilityQueues: {{"binding": "JOBS"}}}}},
+	}
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	queue := findAction(t, p, "aws", "AWS::SQS::Queue")
+	role := findAction(t, p, "aws", "AWS::IAM::Role")
+	if role.Wave <= queue.Wave {
+		t.Fatalf("role wave %d, queue wave %d", role.Wave, queue.Wave)
+	}
+	if !reflect.DeepEqual(role.Spec.References, map[string]string{"JOBS": "aws/AWS::SQS::Queue"}) {
+		t.Fatalf("References = %v", role.Spec.References)
+	}
+}

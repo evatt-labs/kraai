@@ -193,8 +193,11 @@ func Registrations(client *Client) []resource.Registration {
 			Provider: Provider, Type: TypeIAMRole,
 			Capability: manifest.CapabilityCompute,
 			// RoleName is settable at create and renaming is a replacement.
-			Lookup:   resource.LookupByName,
-			Resource: newIAMRoleResource(client),
+			Lookup: resource.LookupByName,
+			// A native binding's grant is scoped to its instance's ARN,
+			// which exists only once the instance does.
+			EmbeddedReferences: nativeGrantReferences,
+			Resource:           newIAMRoleResource(client),
 		},
 		{
 			Provider: Provider, Type: TypeLambdaURL,

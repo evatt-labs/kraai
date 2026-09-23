@@ -23,6 +23,7 @@ const nativeRole = "Native"
 const (
 	nativeTypeKey       = "type"
 	nativePropertiesKey = "properties"
+	nativeGrantKey      = "grant"
 )
 
 // nativeBindingSchema validates one entry of a service's `aws:` list: a
@@ -38,6 +39,13 @@ var nativeBindingSchema = resource.NewSchema("aws native binding", map[string]an
 			"pattern": `^AWS::[A-Za-z0-9]+::[A-Za-z0-9]+$`,
 		},
 		nativePropertiesKey: map[string]any{"type": "object"},
+		// IAM actions the service's function is granted on this instance.
+		// Not derived: a type's schema names what provisioning it needs,
+		// never what using it does.
+		nativeGrantKey: map[string]any{
+			"type":  "array",
+			"items": map[string]any{"type": "string", "pattern": `^[a-z0-9-]+:[A-Za-z0-9*]+$`},
+		},
 	},
 	"required":             []any{"binding", nativeTypeKey},
 	"additionalProperties": false,
@@ -249,6 +257,12 @@ func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
 	properties, err := nativeProperties(spec)
 	if err != nil {
 		return err
+	}
+	if _, grants := spec.Config[nativeGrantKey]; grants {
+		if _, ok := arnProperty(n.facts); !ok {
+			return kerrors.Validation(
+				"%s publishes no ARN to scope a grant to; it cannot be granted to the service's function", n.typeName)
+		}
 	}
 	res, err := resolveReferences(spec, properties, false)
 	if err != nil {
@@ -472,4 +486,44 @@ func tagStamper(property string, shape cfschema.TagShape) stampFunc {
 		return func(desired map[string]any, name string) { mapTagsStampTagIn(desired, property, name) }
 	}
 	return func(desired map[string]any, name string) { arrayTagsStampTagIn(desired, property, name) }
+}
+
+// arnProperty is the read-only property holding an instance's ARN: Arn, or
+// else the one read-only property whose name ends in Arn (TopicArn).
+func arnProperty(facts cfschema.Facts) (string, bool) {
+	var candidates []string
+	for _, pointer := range facts.ReadOnly {
+		path := schemaPropertyPath(pointer)
+		if len(path) != 1 {
+			continue
+		}
+		if path[0] == "Arn" {
+			return "Arn", true
+		}
+		if strings.HasSuffix(path[0], "Arn") {
+			candidates = append(candidates, path[0])
+		}
+	}
+	if len(candidates) == 1 {
+		return candidates[0], true
+	}
+	return "", false
+}
+
+// publishedProperties are what a native instance hands the service's
+// function as environment variables: its name, for a type the name
+// identifies, and every top-level property the vendor assigns. Known from
+// the schema alone, so a plan can tell which variables a function carries.
+func publishedProperties(facts cfschema.Facts) []string {
+	var out []string
+	if facts.Identity == cfschema.IdentityByName && facts.IdentityProperty != "" {
+		out = append(out, facts.IdentityProperty)
+	}
+	for _, pointer := range facts.ReadOnly {
+		if path := schemaPropertyPath(pointer); len(path) == 1 && !slices.Contains(out, path[0]) {
+			out = append(out, path[0])
+		}
+	}
+	sort.Strings(out)
+	return out
 }

@@ -57,6 +57,9 @@ services:
         type: AWS::SQS::Queue
         properties:
           MessageRetentionPeriod: 1209600
+        # The function may send to and read from it; it receives the queue's
+        # identifiers as DLQ_ARN and DLQ_QUEUE_URL.
+        grant: [sqs:SendMessage, sqs:ReceiveMessage, sqs:DeleteMessage]
       # An alarm on the JOBS queue's backlog. ${JOBS.QueueName} is what the
       # queue published, so the alarm is planned after it.
       - binding: BACKLOG
