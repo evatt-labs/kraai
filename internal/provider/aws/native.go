@@ -25,6 +25,7 @@ const (
 	nativeTypeKey       = "type"
 	nativePropertiesKey = "properties"
 	nativeGrantKey      = "grant"
+	nativeMatchKey      = "match"
 )
 
 // nativeBindingSchema validates one entry of a service's `aws:` list: a
@@ -46,6 +47,13 @@ var nativeBindingSchema = resource.NewSchema("aws native binding", map[string]an
 		nativeGrantKey: map[string]any{
 			"type":  "array",
 			"items": map[string]any{"type": "string", "pattern": `^[a-z0-9-]+:[A-Za-z0-9*]+$`},
+		},
+		// The properties whose values pick out this instance among those
+		// listed, for a type that can be neither named nor tagged.
+		nativeMatchKey: map[string]any{
+			"type":     "array",
+			"minItems": 1,
+			"items":    map[string]any{"type": "string"},
 		},
 	},
 	"required":             []any{"binding", nativeTypeKey},
@@ -111,9 +119,14 @@ func nativeLookup(facts cfschema.Facts) (resource.LookupStrategy, error) {
 		}
 		return resource.LookupByTag, nil
 	case cfschema.IdentityByAttr:
-		return "", kerrors.Validation(
-			"%s has a provider-assigned identifier and cannot be tagged, so kraai cannot find an "+
-				"instance again from its schema alone", facts.TypeName)
+		// Found among those listed by the entry's declared match values
+		// (nativeResource.Locate), under its parent when it has one.
+		if len(facts.ListScope) > 0 && !settableScope(facts) {
+			return "", kerrors.Validation(
+				"%s is listed by %s, which it assigns itself, so no entry can name where to find it",
+				facts.TypeName, joinScopes(facts.ListScope))
+		}
+		return resource.LookupByAttr, nil
 	case cfschema.IdentityNone:
 		return "", kerrors.Validation(
 			"%s cannot be listed or tagged, so an instance can only be adopted by identifier", facts.TypeName)
@@ -259,6 +272,9 @@ func nativeProperties(spec resource.Spec) (map[string]any, error) {
 func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
 	properties, err := nativeProperties(spec)
 	if err != nil {
+		return err
+	}
+	if err := n.validateMatch(spec, properties); err != nil {
 		return err
 	}
 	if _, grants := spec.Config[nativeGrantKey]; grants {
@@ -531,44 +547,98 @@ func publishedProperties(facts cfschema.Facts) []string {
 	return out
 }
 
-// Scope implements plan.Scoper for a type listed under a parent. The parent
-// is named by the entry's own properties, the ones the type's list handler
-// requires, usually by reference: ApiId: ${API.ApiId}. The first set of
-// properties the list handler accepts that the entry sets is used; one
-// naming a parent that has not published yet is not known.
-func (n *nativeResource) Scope(spec resource.Spec) (string, bool, error) {
-	if len(n.facts.ListScope) == 0 {
-		return "", true, nil
-	}
+// Locate implements plan.Locator: the parent a type is listed under, and
+// for an untaggable type the values of its declared match properties.
+//
+// The parent is named by the entry's own properties, the ones the type's
+// list handler requires, usually by reference: RestApiId: ${API.RestApiId}.
+// The first set the list handler accepts that the entry sets is used. A
+// value naming something that has not published yet is not known.
+func (n *nativeResource) Locate(spec resource.Spec) (string, string, bool, error) {
 	properties, err := nativeProperties(spec)
 	if err != nil {
-		return "", false, err
+		return "", "", false, err
 	}
 	res, err := resolveReferences(spec, properties, false)
 	if err != nil {
-		return "", false, err
+		return "", "", false, err
 	}
-	for _, required := range n.facts.ListScope {
-		if !allSet(properties, required) {
-			continue
+	unknown := res.unknownProperties()
+
+	scope := ""
+	if len(n.facts.ListScope) > 0 {
+		required, ok := firstSet(properties, n.facts.ListScope)
+		if !ok {
+			return "", "", false, kerrors.Validation(
+				"%s is listed under a parent: set %s in properties, usually by reference to the parent's binding",
+				n.typeName, joinScopes(n.facts.ListScope))
 		}
-		unknown := res.unknownProperties()
-		model := make(map[string]any, len(required))
-		for _, property := range required {
-			if slices.Contains(unknown, property) {
-				return "", false, nil
-			}
-			model[property] = res.properties[property]
+		if scope, ok = encodeKnown(res.properties, required, unknown); !ok {
+			return "", "", false, nil
 		}
-		encoded, err := json.Marshal(model)
-		if err != nil {
-			return "", false, kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding the list scope for %s", n.typeName)
-		}
-		return string(encoded), true, nil
 	}
-	return "", false, kerrors.Validation(
-		"%s is listed under a parent: set %s in properties, usually by reference to the parent's binding",
-		n.typeName, joinScopes(n.facts.ListScope))
+
+	match := ""
+	if keys := matchKeys(spec); len(keys) > 0 {
+		var ok bool
+		if match, ok = encodeKnown(res.properties, keys, unknown); !ok {
+			return "", "", false, nil
+		}
+	}
+	return scope, match, true, nil
+}
+
+// firstSet returns the first of alternatives whose every property the
+// entry sets.
+func firstSet(properties map[string]any, alternatives [][]string) ([]string, bool) {
+	for _, required := range alternatives {
+		if allSet(properties, required) {
+			return required, true
+		}
+	}
+	return nil, false
+}
+
+// encodeKnown returns names' resolved values as canonical JSON, or false
+// when any is not known yet.
+func encodeKnown(resolved map[string]any, names, unknown []string) (string, bool) {
+	model := make(map[string]any, len(names))
+	for _, name := range names {
+		if slices.Contains(unknown, name) {
+			return "", false
+		}
+		model[name] = resolved[name]
+	}
+	encoded, err := json.Marshal(model)
+	if err != nil {
+		return "", false
+	}
+	return string(encoded), true
+}
+
+// matchKeys returns the entry's declared match properties.
+func matchKeys(spec resource.Spec) []string {
+	raw, _ := spec.Config[nativeMatchKey].([]any)
+	keys := make([]string, 0, len(raw))
+	for _, k := range raw {
+		if s, ok := k.(string); ok {
+			keys = append(keys, s)
+		}
+	}
+	return keys
+}
+
+// Notes implements plan.Noter. An instance found by its match values is
+// found by nothing else: an edited value finds nothing, plans a new
+// instance, and leaves the old one unmanaged, whether or not the property
+// is create-only.
+func (n *nativeResource) Notes(spec resource.Spec) []string {
+	keys := matchKeys(spec)
+	if len(keys) == 0 {
+		return nil
+	}
+	return []string{"found by " + strings.Join(keys, ", ") + ": changing a value creates a new " +
+		n.typeName + " and leaves the old one unmanaged, destroy included"}
 }
 
 func allSet(properties map[string]any, names []string) bool {
@@ -596,4 +666,88 @@ func settableScope(facts cfschema.Facts) bool {
 		}
 	}
 	return false
+}
+
+// validateMatch holds an entry's declared match properties to what makes
+// them find one instance reliably. An untaggable type must declare them,
+// and no other may. Each must be a property the entry sets and a read
+// returns: a write-only one would never match, and every apply would create
+// another copy. A match value naming another binding may only name a
+// property that binding's update cannot change, so a value not known at
+// plan means a producer being created or replaced, whose new identifier
+// cannot match anything that exists.
+func (n *nativeResource) validateMatch(spec resource.Spec, properties map[string]any) error {
+	keys := matchKeys(spec)
+	if n.lookup != resource.LookupByAttr {
+		if len(keys) > 0 {
+			return kerrors.Validation("%s is found by its %s; match applies only to a type that can be neither named nor tagged",
+				n.typeName, map[resource.LookupStrategy]string{resource.LookupByName: "name", resource.LookupByTag: "tag"}[n.lookup])
+		}
+		return nil
+	}
+	if len(keys) == 0 {
+		return kerrors.Validation(
+			"%s can be neither named nor tagged: declare match, the properties whose values pick out this instance",
+			n.typeName)
+	}
+	for _, key := range keys {
+		pointer := "/properties/" + key
+		value, set := properties[key]
+		switch {
+		case !set:
+			return kerrors.Validation("match names %s, which properties does not set", key)
+		case slices.Contains(n.facts.ReadOnly, pointer):
+			return kerrors.Validation("match names %s, which %s assigns itself", key, n.typeName)
+		case slices.Contains(n.facts.WriteOnly, pointer):
+			return kerrors.Validation("match names %s, which a read of %s never returns, so it could never match", key, n.typeName)
+		}
+		var refs []reference
+		walkStrings(value, func(s string) {
+			for _, m := range referencePattern.FindAllStringSubmatch(s, -1) {
+				if m[1] != "" {
+					refs = append(refs, reference{binding: m[1], path: strings.Split(m[2], ".")})
+				}
+			}
+		})
+		for _, ref := range refs {
+			if producer, ok := spec.References[ref.binding]; ok && !unchangedByUpdate(producer, ref.path[0]) {
+				return kerrors.Validation(
+					"match %s names %s.%s, which an update of %s can change; name a property it cannot, such as its identifier",
+					key, ref.binding, strings.Join(ref.path, "."), ref.binding)
+			}
+		}
+	}
+	return nil
+}
+
+// Create is the engine's create, then a read of what was created checked
+// against the declared match values. A type whose read returns a match
+// property in another form would never be found again, and every later
+// apply would create another copy; failing here makes that one loud error.
+func (n *nativeResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
+	state, err := n.resourceType.Create(ctx, spec)
+	if err != nil || n.lookup != resource.LookupByAttr {
+		return state, err
+	}
+	properties, err := nativeProperties(spec)
+	if err != nil {
+		return state, err
+	}
+	res, err := resolveReferences(spec, properties, true)
+	if err != nil {
+		return state, err
+	}
+	for _, key := range matchKeys(spec) {
+		matched, err := carries(state.Attributes, map[string]any{key: res.properties[key]})
+		if err != nil {
+			return state, err
+		}
+		if !matched {
+			return state, kerrors.Validation(
+				"created %s %s, but it reads back %s as %v where the entry declared %v, so it could never be found again; "+
+					"choose match properties it returns as written",
+				n.typeName, state.ID, key, state.Attributes[key], res.properties[key])
+		}
+	}
+	return state, nil
 }

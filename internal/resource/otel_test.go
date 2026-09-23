@@ -286,6 +286,7 @@ type optionalResource struct {
 	diffErr     error
 	validateErr error
 	scope       string
+	notes       []string
 }
 
 func (o optionalResource) Secrets(*State) map[string]Secret { return o.secrets }
@@ -303,7 +304,11 @@ func (o optionalResource) Diff(Spec, *State) (Difference, error) {
 
 func (o optionalResource) ValidateSpec(Spec) error { return o.validateErr }
 
-func (o optionalResource) Scope(Spec) (string, bool, error) { return o.scope, o.scope != "", nil }
+func (o optionalResource) Locate(Spec) (string, string, bool, error) {
+	return o.scope, "", o.scope != "", nil
+}
+
+func (o optionalResource) Notes(Spec) []string { return o.notes }
 
 // plainResource implements only the four required verbs.
 type plainResource struct{ Resource }
@@ -350,9 +355,12 @@ func TestInstrumentedForwardsOptionalInterfaces(t *testing.T) {
 		t.Error("decorated resource does not satisfy SpecValidator; add a forwarder in otel.go")
 	}
 	if _, ok := decorated.(interface {
-		Scope(Spec) (string, bool, error)
+		Locate(Spec) (string, string, bool, error)
 	}); !ok {
-		t.Error("decorated resource does not satisfy Scoper; add a forwarder in otel.go")
+		t.Error("decorated resource does not satisfy Locator; add a forwarder in otel.go")
+	}
+	if _, ok := decorated.(interface{ Notes(Spec) []string }); !ok {
+		t.Error("decorated resource does not satisfy Noter; add a forwarder in otel.go")
 	}
 }
 
@@ -365,7 +373,7 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 		return "postgres://example", nil
 	}}
 	boom := errors.New("bad spec")
-	inner := optionalResource{secrets: want, differs: true, validateErr: boom, scope: `{"ApiId":"a1"}`}
+	inner := optionalResource{secrets: want, differs: true, validateErr: boom, scope: `{"ApiId":"a1"}`, notes: []string{"n"}}
 	decorated := decorate(t, inner)
 
 	got := decorated.(SecretProducer).Secrets(&State{})
@@ -392,24 +400,30 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 		t.Errorf("ValidateSpec() error = %v, want the inner resource's %v", err, boom)
 	}
 
-	scope, known, err := decorated.(interface {
-		Scope(Spec) (string, bool, error)
-	}).Scope(Spec{})
+	scope, _, known, err := decorated.(interface {
+		Locate(Spec) (string, string, bool, error)
+	}).Locate(Spec{})
 	if scope != `{"ApiId":"a1"}` || !known || err != nil {
-		t.Errorf("Scope() = %q, %v, %v; want the inner resource's scope", scope, known, err)
+		t.Errorf("Locate() = %q, %v, %v; want the inner resource's scope", scope, known, err)
+	}
+	if notes := decorated.(interface{ Notes(Spec) []string }).Notes(Spec{}); len(notes) != 1 || notes[0] != "n" {
+		t.Errorf("Notes() = %v, want the inner resource's", notes)
 	}
 }
 
 // A resource that lists under no parent answers, through the decorator,
 // that it needs no scope and that this is known: never "not known", which
 // would plan every such resource as a create without reading it.
-func TestInstrumentedScopeOnPlainResource(t *testing.T) {
+func TestInstrumentedLocateOnPlainResource(t *testing.T) {
 	decorated := decorate(t, plainResource{})
-	scope, known, err := decorated.(interface {
-		Scope(Spec) (string, bool, error)
-	}).Scope(Spec{})
-	if scope != "" || !known || err != nil {
-		t.Fatalf("Scope() on a plain resource = %q, %v, %v; want \"\", true, nil", scope, known, err)
+	scope, match, known, err := decorated.(interface {
+		Locate(Spec) (string, string, bool, error)
+	}).Locate(Spec{})
+	if scope != "" || match != "" || !known || err != nil {
+		t.Fatalf("Locate() on a plain resource = %q, %q, %v, %v; want nothing needed, known", scope, match, known, err)
+	}
+	if notes := decorated.(interface{ Notes(Spec) []string }).Notes(Spec{}); notes != nil {
+		t.Fatalf("Notes() on a plain resource = %v", notes)
 	}
 }
 

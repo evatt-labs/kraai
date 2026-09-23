@@ -226,7 +226,9 @@ type scopedResource struct {
 	refs  []resource.Ref
 }
 
-func (s *scopedResource) Scope(resource.Spec) (string, bool, error) { return s.scope, s.known, nil }
+func (s *scopedResource) Locate(resource.Spec) (string, string, bool, error) {
+	return s.scope, "", s.known, nil
+}
 
 func (s *scopedResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
 	s.mu.Lock()
@@ -277,5 +279,39 @@ func TestPlan_ScopedResourceIsReadUnderItsParent(t *testing.T) {
 				t.Fatalf("the plan's Ref has scope %q, want %q", got.Ref.Scope, c.scope)
 			}
 		})
+	}
+}
+
+// matchedResource locates by match values and has a note for the author.
+type matchedResource struct{ *fakeResource }
+
+func (matchedResource) Locate(resource.Spec) (string, string, bool, error) {
+	return "", `{"RouteKey":"GET /x"}`, true, nil
+}
+func (matchedResource) Notes(resource.Spec) []string { return []string{"found by RouteKey"} }
+
+// Match values go on the Ref beside the scope, and a resource's notes on
+// its action.
+func TestPlan_MatchAndNotesReachTheAction(t *testing.T) {
+	res := matchedResource{newFakeResource()}
+	reg := resource.NewRegistry()
+	must(t, reg.Register(resource.Registration{
+		Provider: "aws", Type: "AWS::X::Route", Capability: manifest.CapabilityQueues,
+		Lookup: resource.LookupByAttr, Resource: res,
+	}))
+	m := &manifest.Manifest{
+		Root:     manifest.Root{Providers: manifest.Providers{manifest.CapabilityQueues: {Vendor: "aws"}}},
+		Services: map[string]manifest.Service{"api": {Bindings: manifest.Bindings{manifest.CapabilityQueues: {{"binding": "R"}}}}},
+	}
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := findAction(t, p, "aws", "AWS::X::Route")
+	if got.Ref.Match != `{"RouteKey":"GET /x"}` {
+		t.Fatalf("Ref.Match = %q", got.Ref.Match)
+	}
+	if !reflect.DeepEqual(got.Notes, []string{"found by RouteKey"}) {
+		t.Fatalf("Notes = %v", got.Notes)
 	}
 }
