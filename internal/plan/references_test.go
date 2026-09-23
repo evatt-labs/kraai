@@ -215,3 +215,67 @@ func TestPlan_ComputeRegistrationReferencesABinding(t *testing.T) {
 		t.Fatalf("References = %v", role.Spec.References)
 	}
 }
+
+// scopedResource answers Scope from its fields and records the Refs Get
+// was asked about.
+type scopedResource struct {
+	*fakeResource
+	scope string
+	known bool
+	mu    sync.Mutex
+	refs  []resource.Ref
+}
+
+func (s *scopedResource) Scope(resource.Spec) (string, bool, error) { return s.scope, s.known, nil }
+
+func (s *scopedResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
+	s.mu.Lock()
+	s.refs = append(s.refs, ref)
+	s.mu.Unlock()
+	return s.fakeResource.Get(ctx, ref)
+}
+
+// A child's parent is named by its scope. Known, the scope goes on the Ref
+// Get reads and the plan records; not known, the parent does not exist
+// yet, so neither does the child, and it is planned for create unread.
+func TestPlan_ScopedResourceIsReadUnderItsParent(t *testing.T) {
+	for name, c := range map[string]struct {
+		scope    string
+		known    bool
+		wantGets int
+	}{
+		"parent exists":        {scope: `{"ApiId":"a1"}`, known: true, wantGets: 1},
+		"parent being created": {scope: "", known: false, wantGets: 0},
+		"no parent needed":     {scope: "", known: true, wantGets: 1},
+	} {
+		t.Run(name, func(t *testing.T) {
+			child := &scopedResource{fakeResource: newFakeResource(), scope: c.scope, known: c.known}
+			reg := resource.NewRegistry()
+			must(t, reg.Register(resource.Registration{
+				Provider: "aws", Type: "AWS::X::Child", Capability: manifest.CapabilityQueues,
+				Lookup: resource.LookupByTag, Resource: child,
+			}))
+			m := &manifest.Manifest{
+				Root:     manifest.Root{Providers: manifest.Providers{manifest.CapabilityQueues: {Vendor: "aws"}}},
+				Services: map[string]manifest.Service{"api": {Bindings: manifest.Bindings{manifest.CapabilityQueues: {{"binding": "C"}}}}},
+			}
+			p, err := New(reg).Plan(context.Background(), m, envName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := findAction(t, p, "aws", "AWS::X::Child")
+			if got.Kind != ActionCreate {
+				t.Fatalf("Kind = %v, want create", got.Kind)
+			}
+			if len(child.refs) != c.wantGets {
+				t.Fatalf("Get ran %d times, want %d", len(child.refs), c.wantGets)
+			}
+			if c.wantGets > 0 && child.refs[0].Scope != c.scope {
+				t.Fatalf("Get read scope %q, want %q", child.refs[0].Scope, c.scope)
+			}
+			if got.Ref.Scope != c.scope {
+				t.Fatalf("the plan's Ref has scope %q, want %q", got.Ref.Scope, c.scope)
+			}
+		})
+	}
+}

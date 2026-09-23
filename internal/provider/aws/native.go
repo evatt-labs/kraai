@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"slices"
 	"sort"
@@ -99,11 +100,13 @@ func nativeLookup(facts cfschema.Facts) (resource.LookupStrategy, error) {
 				"%s applies tags only after the instance exists, so kraai cannot guarantee finding one it created",
 				facts.TypeName)
 		}
-		if len(facts.ListScope) > 0 {
-			// The instance is listed under a parent this entry cannot name
-			// until references between bindings exist.
+		// A type listed under a parent is found under the parent its
+		// properties name (nativeResource.Scope), which they must be able
+		// to: a list handler asking for a property the vendor assigns
+		// cannot be satisfied by an entry.
+		if len(facts.ListScope) > 0 && !settableScope(facts) {
 			return "", kerrors.Validation(
-				"%s is listed under a parent (%s), which a native binding cannot name yet",
+				"%s is listed by %s, which it assigns itself, so no entry can name where to find it",
 				facts.TypeName, joinScopes(facts.ListScope))
 		}
 		return resource.LookupByTag, nil
@@ -526,4 +529,71 @@ func publishedProperties(facts cfschema.Facts) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// Scope implements plan.Scoper for a type listed under a parent. The parent
+// is named by the entry's own properties, the ones the type's list handler
+// requires, usually by reference: ApiId: ${API.ApiId}. The first set of
+// properties the list handler accepts that the entry sets is used; one
+// naming a parent that has not published yet is not known.
+func (n *nativeResource) Scope(spec resource.Spec) (string, bool, error) {
+	if len(n.facts.ListScope) == 0 {
+		return "", true, nil
+	}
+	properties, err := nativeProperties(spec)
+	if err != nil {
+		return "", false, err
+	}
+	res, err := resolveReferences(spec, properties, false)
+	if err != nil {
+		return "", false, err
+	}
+	for _, required := range n.facts.ListScope {
+		if !allSet(properties, required) {
+			continue
+		}
+		unknown := res.unknownProperties()
+		model := make(map[string]any, len(required))
+		for _, property := range required {
+			if slices.Contains(unknown, property) {
+				return "", false, nil
+			}
+			model[property] = res.properties[property]
+		}
+		encoded, err := json.Marshal(model)
+		if err != nil {
+			return "", false, kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding the list scope for %s", n.typeName)
+		}
+		return string(encoded), true, nil
+	}
+	return "", false, kerrors.Validation(
+		"%s is listed under a parent: set %s in properties, usually by reference to the parent's binding",
+		n.typeName, joinScopes(n.facts.ListScope))
+}
+
+func allSet(properties map[string]any, names []string) bool {
+	for _, name := range names {
+		if _, ok := properties[name]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// settableScope reports whether one of the list handler's alternatives
+// names only properties an entry may set.
+func settableScope(facts cfschema.Facts) bool {
+	for _, required := range facts.ListScope {
+		settable := true
+		for _, property := range required {
+			if slices.Contains(facts.ReadOnly, "/properties/"+property) {
+				settable = false
+				break
+			}
+		}
+		if settable {
+			return true
+		}
+	}
+	return false
 }

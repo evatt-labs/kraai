@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"encoding/json"
 	"reflect"
 	"sort"
 	"strings"
@@ -205,7 +206,12 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 	}
 
 	var resourceModel map[string]any
-	if r.listScope != nil {
+	if ref.Scope != "" {
+		// The planner resolved the parent this instance is listed under.
+		if err := json.Unmarshal([]byte(ref.Scope), &resourceModel); err != nil {
+			return "", nil, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding the list scope of %s %q", r.typeName, name)
+		}
+	} else if r.listScope != nil {
 		resourceModel, err = r.listScope(name)
 		if err != nil {
 			return "", nil, false, err

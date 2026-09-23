@@ -33,6 +33,11 @@ type Ref struct {
 	// Import is non-nil for an adopted resource the manifest points at by id
 	// or name rather than one kraai created; its identity cannot be derived.
 	Import *Import
+	// Scope is, for a type listed under a parent, the list call's resource
+	// model naming that parent, as canonical JSON; empty for any other type.
+	// The planner fills it from the resource's own answer (plan.Scoper), so
+	// Get, Update and Delete find the instance under the right parent.
+	Scope string
 }
 
 // Key is the registry key for this Ref's type: "provider/type".
