@@ -3,7 +3,9 @@ package aws
 import (
 	"context"
 
+	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -104,7 +106,24 @@ var bucketActions = []any{
 // locally constructed ARNs, which keeps the role in the first wave and
 // keeps Diff honest: a grant derived from published attributes would read
 // as absent on every plan.
+// translate builds the role, resolving every native grant's ARN strictly:
+// Create and Update run after each granted resource has been applied.
 func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (resource.Spec, error) {
+	return r.translateWith(ctx, spec, true)
+}
+
+// Diff compares the role as plan knows it. A native grant whose resource
+// has not been created yet has no ARN to compare, and makes the policy
+// differ: the role will change once it exists.
+func (r *iamRoleResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	translated, err := r.translateWith(context.Background(), spec, false)
+	if err != nil {
+		return resource.Same, err
+	}
+	return r.compare(translated, state)
+}
+
+func (r *iamRoleResource) translateWith(ctx context.Context, spec resource.Spec, strict bool) (resource.Spec, error) {
 	settingsMap, _ := spec.Config["settings"].(map[string]any)
 	var extra []string
 	if arns, ok := settingsMap["managedPolicyArns"].([]any); ok {
@@ -130,7 +149,7 @@ func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (re
 		"ManagedPolicyArns":        toAnySlice(policies),
 	}
 
-	statements, err := r.bindingStatements(ctx, spec)
+	statements, err := r.bindingStatements(ctx, spec, strict)
 	if err != nil {
 		return resource.Spec{}, err
 	}
@@ -153,7 +172,7 @@ func (r *iamRoleResource) translate(ctx context.Context, spec resource.Spec) (re
 // fulfils is reached with a credential, not IAM. The account id is resolved
 // only once a grant needs it, so a service with no such binding never calls
 // STS.
-func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.Spec) ([]any, error) {
+func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.Spec, strict bool) ([]any, error) {
 	bindings, err := decodeServiceBindings(spec)
 	if err != nil {
 		return nil, err
@@ -214,10 +233,19 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 				"Action":   bucketActions,
 				"Resource": []any{bucketARN(b.Name), bucketARN(b.Name) + "/*"},
 			}
+		case manifest.CapabilityAWS:
+			grant, ok := b.Config[nativeGrantKey].([]any)
+			if !ok || len(grant) == 0 {
+				continue
+			}
+			arn, err := nativeGrantResource(spec, b, strict)
+			if err != nil {
+				return nil, err
+			}
+			statement = map[string]any{"Effect": "Allow", "Action": grant, "Resource": arn}
 		default:
 			// dns, tls, cdn and network bindings carry no grant: a function
-			// reaches none of them at runtime. A native aws binding carries
-			// none yet: no grant is derived from its type.
+			// reaches none of them at runtime.
 			continue
 		}
 		statements = append(statements, statement)
@@ -231,4 +259,56 @@ func toAnySlice(in []string) []any {
 		out[i] = s
 	}
 	return out
+}
+
+// nativeGrantReferences names the native bindings the service's execution
+// role grants, from the bindings the compute config lists: the role's
+// resource.Registration.EmbeddedReferences, which orders the role after each
+// and hands it what each published.
+func nativeGrantReferences(config map[string]any) ([]string, error) {
+	bindings, err := decodeServiceBindings(resource.Spec{Config: config})
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, b := range bindings {
+		if b.Vendor != Provider || b.Capability != manifest.CapabilityAWS {
+			continue
+		}
+		if grant, ok := b.Config[nativeGrantKey].([]any); ok && len(grant) > 0 {
+			out = append(out, b.Binding)
+		}
+	}
+	return out, nil
+}
+
+// pendingGrantResource stands in for a granted instance's ARN at plan time,
+// before the instance exists. It never reaches IAM: Create and Update
+// resolve strictly.
+const pendingGrantResource = "pending:"
+
+// nativeGrantResource is the ARN a native binding's grant is scoped to, read
+// from what its instance published. Not known is an error at apply and a
+// placeholder at plan.
+func nativeGrantResource(spec resource.Spec, b serviceBinding, strict bool) (string, error) {
+	typeName, _ := b.Config[nativeTypeKey].(string)
+	facts, err := cfschema.Lookup(typeName)
+	if err != nil {
+		return "", err
+	}
+	property, ok := arnProperty(facts)
+	if !ok {
+		return "", kerrors.Validation("binding %q: %s publishes no ARN to scope a grant to", b.Binding, typeName)
+	}
+	producer, ok := spec.References[b.Binding]
+	if ok {
+		if arn, _ := spec.Attributes[b.Binding+"."+producer][property].(string); arn != "" {
+			return arn, nil
+		}
+	}
+	if strict {
+		return "", kerrors.Validation(
+			"binding %q: the execution role grants it, but its %s has not been published", b.Binding, property)
+	}
+	return pendingGrantResource + b.Binding, nil
 }

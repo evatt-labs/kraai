@@ -202,8 +202,14 @@ its schema alone qualifies: one whose identifier the author may set, or one
 that takes tags at create. `properties` is validated against the type's own
 schema at plan time, and kraai supplies the identity (the derived name, or
 its tag), so neither is written by hand. A native binding is not portable
-between vendors, and the service's function is not yet granted or told about
-it.
+between vendors.
+
+The service's function receives every property a native instance publishes,
+`DLQ_ARN` and `DLQ_QUEUE_URL` for a queue bound as `DLQ`, and its name for a
+type the name identifies. It is granted nothing unless the entry says what:
+`grant: [sqs:SendMessage, sqs:ReceiveMessage]` allows those actions on that
+instance's ARN alone. A schema names what provisioning a type needs, never
+what using it does, so kraai does not guess.
 
 ### Environments
 

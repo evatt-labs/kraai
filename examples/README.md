@@ -32,7 +32,8 @@ cluster and the cache need no grant, only network reach, which the
 function has (see below). The Aurora cluster scales to zero ACUs when idle
 and takes minutes to create and delete. Beside them, three native `aws`
 bindings: a CloudWatch log group with 14-day retention, found by its name,
-a second SQS queue with 14-day message retention, found by kraai's tag, and
+a second SQS queue with 14-day message retention, found by kraai's tag and
+granted to the function for send, receive and delete, and
 a CloudWatch alarm on the `JOBS` queue's backlog, whose dimension is the
 queue's name through `${JOBS.QueueName}`.
 

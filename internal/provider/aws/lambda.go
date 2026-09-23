@@ -2,9 +2,14 @@ package aws
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"unicode"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -280,6 +285,14 @@ func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
 			continue
 		}
 		prefix := b.envPrefix()
+		if b.Capability == manifest.CapabilityAWS {
+			variables, err := nativeVariables(spec, b, prefix)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, variables...)
+			continue
+		}
 		switch b.Capability {
 		case manifest.CapabilityQueues:
 			queueKey := b.attributeKey(spec, TypeSQSQueue)
@@ -450,4 +463,61 @@ func (l *lambdaFunctionResource) ValidateSpec(spec resource.Spec) error {
 	settingsMap, _ := spec.Config["settings"].(map[string]any)
 	_, err := decodeLambdaSettings(settingsMap)
 	return err
+}
+
+// nativeVariables are the environment variables a native binding gives the
+// function: <BINDING>_<PROPERTY> for each property the type publishes, its
+// name for a type the name identifies and every property the vendor
+// assigns. A string is passed as it is, a number or boolean formatted, and
+// anything else as JSON.
+func nativeVariables(spec resource.Spec, b serviceBinding, prefix string) ([]bindingVariable, error) {
+	typeName, _ := b.Config[nativeTypeKey].(string)
+	facts, err := cfschema.Lookup(typeName)
+	if err != nil {
+		return nil, err
+	}
+	attributes := b.attributeKey(spec, resource.RoleType(typeName, nativeRole))
+	var out []bindingVariable
+	for _, property := range publishedProperties(facts) {
+		out = append(out, bindingVariable{
+			name: prefix + "_" + envName(property),
+			value: func(_ context.Context, spec resource.Spec) (any, error) {
+				value, ok := spec.Attributes[attributes][property]
+				if !ok {
+					return nil, kerrors.Validation("binding %q: %s published no %s", spec.Binding, b.Binding, property)
+				}
+				switch v := value.(type) {
+				case string:
+					return v, nil
+				case bool, int, int64, float64:
+					return fmt.Sprint(v), nil
+				}
+				encoded, err := json.Marshal(value)
+				if err != nil {
+					return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding %s of %s", property, b.Binding)
+				}
+				return string(encoded), nil
+			},
+		})
+	}
+	return out, nil
+}
+
+// envName spells a property name as an environment variable name: a word
+// break before each capital that starts a word, acronyms kept whole, so
+// QueueUrl is QUEUE_URL and DBClusterArn is DB_CLUSTER_ARN.
+func envName(property string) string {
+	runes := []rune(property)
+	var sb strings.Builder
+	for i, r := range runes {
+		if i > 0 && unicode.IsUpper(r) {
+			prevLower := unicode.IsLower(runes[i-1]) || unicode.IsDigit(runes[i-1])
+			nextLower := i+1 < len(runes) && unicode.IsLower(runes[i+1])
+			if prevLower || (unicode.IsUpper(runes[i-1]) && nextLower) {
+				sb.WriteByte('_')
+			}
+		}
+		sb.WriteRune(unicode.ToUpper(r))
+	}
+	return sb.String()
 }
