@@ -1,10 +1,14 @@
 package telemetry_test
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"runtime"
 	"slices"
 	"sync"
@@ -31,7 +35,9 @@ type receiver struct {
 	metrics []string
 	// instances is every service.instance.id seen on a metric export.
 	instances map[string]bool
-	requests  int
+	// bounds is each histogram's first bucket boundary, by metric name.
+	bounds   map[string]float64
+	requests int
 }
 
 func (r *receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -64,6 +70,9 @@ func (r *receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				for _, sm := range rm.ScopeMetrics {
 					for _, m := range sm.Metrics {
 						r.metrics = append(r.metrics, m.Name)
+						if h := m.GetHistogram(); h != nil && len(h.DataPoints) > 0 && len(h.DataPoints[0].ExplicitBounds) > 0 {
+							r.bounds[m.Name] = h.DataPoints[0].ExplicitBounds[0]
+						}
 					}
 				}
 			}
@@ -114,12 +123,13 @@ func TestStartWithoutAnEndpointInstallsNothing(t *testing.T) {
 // that ran, and its duration, once shutdown flushes.
 func TestACommandIsExported(t *testing.T) {
 	restoreGlobals(t)
-	rec := &receiver{instances: map[string]bool{}}
+	rec := &receiver{instances: map[string]bool{}, bounds: map[string]float64{}}
 	srv := httptest.NewServer(rec)
 	defer srv.Close()
 
 	for range 2 {
-		shutdown, err := telemetry.Start(context.Background(), telemetry.Config{Endpoint: srv.URL, Version: "test"})
+		// A trailing slash is how an endpoint is often written.
+		shutdown, err := telemetry.Start(context.Background(), telemetry.Config{Endpoint: srv.URL + "/", Version: "test"})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -138,6 +148,11 @@ func TestACommandIsExported(t *testing.T) {
 	}
 	if !slices.Contains(rec.metrics, "kraai.command.duration") {
 		t.Fatalf("metrics = %v, want kraai.command.duration", rec.metrics)
+	}
+	// A command that takes milliseconds must land in a bucket that small;
+	// the SDK's default first boundary is 5, which reads it as 4.75s.
+	if got := rec.bounds["kraai.command.duration"]; got != 0.05 {
+		t.Fatalf("kraai.command.duration first bucket = %v, want 0.05", got)
 	}
 	// Two runs, two processes' worth of cumulative metrics: they must not
 	// read as one series.
@@ -183,7 +198,7 @@ func TestShutdownIsBoundedByItsContext(t *testing.T) {
 // make it, exports nothing.
 func TestAnEndpointSetAfterStartExportsNothing(t *testing.T) {
 	restoreGlobals(t)
-	rec := &receiver{instances: map[string]bool{}}
+	rec := &receiver{instances: map[string]bool{}, bounds: map[string]float64{}}
 	srv := httptest.NewServer(rec)
 	defer srv.Close()
 
@@ -202,5 +217,55 @@ func TestAnEndpointSetAfterStartExportsNothing(t *testing.T) {
 	defer rec.mu.Unlock()
 	if rec.requests != 0 {
 		t.Fatalf("%d requests reached an endpoint set after start", rec.requests)
+	}
+}
+
+// An unreachable endpoint must not write to stderr: the SDK's default
+// handler logs every failed export, which would fill a CI log. Shutdown
+// still reports that export failed.
+func TestAnUnreachableEndpointIsReportedOnceAndLogsNothing(t *testing.T) {
+	restoreGlobals(t)
+	t.Cleanup(func() { otel.SetErrorHandler(otel.ErrorHandlerFunc(func(error) {})) })
+	var logged bytes.Buffer
+	log.SetOutput(&logged)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	shutdown, err := telemetry.Start(context.Background(), telemetry.Config{Endpoint: "http://127.0.0.1:1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cli.Execute([]string{"version"}); err != nil {
+		t.Fatal(err)
+	}
+	// A failure the background exporter hit, as the SDK hands it over.
+	otel.Handle(errors.New("traces export: connection refused"))
+	otel.Handle(errors.New("traces export: connection refused, again"))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if err := shutdown(ctx); err == nil {
+		t.Fatal("shutdown reported success against an unreachable endpoint")
+	}
+	if logged.Len() != 0 {
+		t.Fatalf("export failures were logged: %q", logged.String())
+	}
+}
+
+// An export that failed in the background, while the final flush then
+// succeeded, is still reported: the run lost that data.
+func TestAnEarlierFailedExportIsReportedAtShutdown(t *testing.T) {
+	restoreGlobals(t)
+	t.Cleanup(func() { otel.SetErrorHandler(otel.ErrorHandlerFunc(func(error) {})) })
+	rec := &receiver{instances: map[string]bool{}, bounds: map[string]float64{}}
+	srv := httptest.NewServer(rec)
+	defer srv.Close()
+
+	shutdown, err := telemetry.Start(context.Background(), telemetry.Config{Endpoint: srv.URL})
+	if err != nil {
+		t.Fatal(err)
+	}
+	otel.Handle(errors.New("metrics export: 503"))
+	if err := shutdown(context.Background()); err == nil || err.Error() != "metrics export: 503" {
+		t.Fatalf("shutdown = %v, want the earlier failure", err)
 	}
 }

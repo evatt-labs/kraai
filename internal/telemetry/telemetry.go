@@ -13,6 +13,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"strings"
+	"sync"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -51,6 +53,7 @@ func Start(ctx context.Context, cfg Config) (Shutdown, error) {
 	if cfg.Endpoint == "" {
 		return func(context.Context) error { return nil }, nil
 	}
+	endpoint := strings.TrimRight(cfg.Endpoint, "/")
 
 	instance, err := instanceID()
 	if err != nil {
@@ -68,14 +71,21 @@ func Start(ctx context.Context, cfg Config) (Shutdown, error) {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "building the telemetry resource")
 	}
 
-	traceExporter, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(cfg.Endpoint+"/v1/traces"))
+	traceExporter, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(endpoint+"/v1/traces"))
 	if err != nil {
-		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "configuring trace export to %s", cfg.Endpoint)
+		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "configuring trace export to %s", endpoint)
 	}
-	metricExporter, err := otlpmetrichttp.New(ctx, otlpmetrichttp.WithEndpointURL(cfg.Endpoint+"/v1/metrics"))
+	metricExporter, err := otlpmetrichttp.New(ctx, otlpmetrichttp.WithEndpointURL(endpoint+"/v1/metrics"))
 	if err != nil {
-		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "configuring metric export to %s", cfg.Endpoint)
+		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "configuring metric export to %s", endpoint)
 	}
+
+	// The SDK reports a failed background export through the global error
+	// handler, which by default logs every one to stderr: an unreachable
+	// endpoint would fill a CI log. The first is kept for shutdown to
+	// report once, and the rest are dropped.
+	failures := &firstError{}
+	otel.SetErrorHandler(failures)
 
 	tracer := sdktrace.NewTracerProvider(sdktrace.WithBatcher(traceExporter), sdktrace.WithResource(res))
 	meter := sdkmetric.NewMeterProvider(
@@ -86,10 +96,38 @@ func Start(ctx context.Context, cfg Config) (Shutdown, error) {
 	otel.SetMeterProvider(meter)
 
 	return func(ctx context.Context) error {
-		// Both run whatever the other returns: a trace export that failed
-		// must not cost the run its metrics.
-		return errors.Join(tracer.Shutdown(ctx), meter.Shutdown(ctx))
+		// Concurrently, on the same deadline: a slow trace flush must not
+		// leave the metrics none of it.
+		var wg sync.WaitGroup
+		var traceErr, metricErr error
+		wg.Go(func() { traceErr = tracer.Shutdown(ctx) })
+		wg.Go(func() { metricErr = meter.Shutdown(ctx) })
+		wg.Wait()
+		if err := errors.Join(traceErr, metricErr); err != nil {
+			return err
+		}
+		return failures.get()
 	}, nil
+}
+
+// firstError is an otel.ErrorHandler keeping the first error it is given.
+type firstError struct {
+	mu  sync.Mutex
+	err error
+}
+
+func (f *firstError) Handle(err error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.err == nil {
+		f.err = err
+	}
+}
+
+func (f *firstError) get() error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.err
 }
 
 func instanceID() (string, error) {

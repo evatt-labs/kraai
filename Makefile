@@ -72,8 +72,9 @@ schema-index:
 
 # A local OpenTelemetry backend and the kraai dashboard: one grafana/otel-lgtm
 # container (collector, Prometheus, Tempo, Grafana), pinned by digest. Ports
-# are published on 127.0.0.1 only, since the image's Grafana grants
-# anonymous Admin. Works with docker too: make observability-up CONTAINER=docker.
+# are published on 127.0.0.1 only, and anonymous Grafana access is reduced
+# from the image's Admin to Viewer, which can still explore. Works with
+# docker too: make observability-up CONTAINER=docker.
 CONTAINER ?= podman
 OTEL_LGTM_IMAGE := docker.io/grafana/otel-lgtm@sha256:35da4355c58162b6f27ccbd43c6214d565bc29fc9b18baaf43b59202c354577b
 
@@ -81,6 +82,7 @@ observability-up:
 	$(CONTAINER) rm -f kraai-otel-lgtm >/dev/null 2>&1 || true
 	$(CONTAINER) run -d --name kraai-otel-lgtm \
 		-p 127.0.0.1:3000:3000 -p 127.0.0.1:4318:4318 \
+		-e GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer -e GF_USERS_VIEWERS_CAN_EDIT=true \
 		-v "$(CURDIR)/dev/observability/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/kraai.yaml:ro,Z" \
 		-v "$(CURDIR)/dev/observability/dashboards:/otel-lgtm/kraai-dashboards:ro,Z" \
 		$(OTEL_LGTM_IMAGE) >/dev/null

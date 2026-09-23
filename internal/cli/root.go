@@ -138,7 +138,10 @@ func Execute(args []string) error {
 // both bounded, where an error message would not be.
 func recordCommand(ctx context.Context, cmd *cobra.Command, err error, elapsed time.Duration) {
 	duration, herr := otel.Meter(instrumentationName).Float64Histogram("kraai.command.duration",
-		metric.WithDescription("Duration of one kraai command."), metric.WithUnit("s"))
+		metric.WithDescription("Duration of one kraai command."), metric.WithUnit("s"),
+		// From a command that reads nothing to an apply that waits out a
+		// CloudFront distribution; the SDK's default buckets start at 5.
+		metric.WithExplicitBucketBoundaries(0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 20, 30, 60, 120, 300, 600, 1200, 2400))
 	if herr != nil {
 		return
 	}

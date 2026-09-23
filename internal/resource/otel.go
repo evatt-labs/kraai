@@ -33,6 +33,10 @@ func Instrument(tp trace.TracerProvider, mp metric.MeterProvider) func(Registrat
 		"kraai.resource.duration",
 		metric.WithDescription("Duration of a resource verb call."),
 		metric.WithUnit("ms"),
+		// From a cached read to the forty-minute poll timeout; the SDK's
+		// default buckets end at ten seconds.
+		metric.WithExplicitBucketBoundaries(10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000,
+			60000, 120000, 300000, 600000, 1200000, 2400000),
 	)
 	if err != nil {
 		// A metrics pipeline that will not build an instrument must not
