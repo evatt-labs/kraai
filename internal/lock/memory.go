@@ -45,8 +45,22 @@ func (m *Memory) Held(environment string) bool {
 }
 
 type memoryLease struct {
-	store  *Memory
+	store *Memory
+	// record is guarded by store.mu: Renew replaces it while the run that
+	// holds the lease may be releasing it.
 	record Record
+}
+
+// Renew implements Lease.
+func (l *memoryLease) Renew(_ context.Context, lease time.Duration) error {
+	l.store.mu.Lock()
+	defer l.store.mu.Unlock()
+	if current, held := l.store.locks[l.record.Environment]; !held || current != l.record {
+		return ErrLost
+	}
+	l.record.ExpiresAt = l.store.Now().Add(lease)
+	l.store.locks[l.record.Environment] = l.record
+	return nil
 }
 
 // Release gives the lock back, but only if it is still this lease's: a

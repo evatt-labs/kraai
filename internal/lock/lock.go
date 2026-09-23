@@ -71,8 +71,15 @@ type Store interface {
 // Lease is a held lock. Release gives it back; a lease not released is
 // broken by the next acquirer once it expires.
 type Lease interface {
+	// Renew moves the lock's expiry to lease from now, but only while the
+	// lock is still this lease's. A lock broken, and perhaps retaken, by
+	// someone else is ErrLost; any other error may be transient.
+	Renew(ctx context.Context, lease time.Duration) error
 	Release(ctx context.Context) error
 }
+
+// ErrLost is what Renew returns once the lock is no longer the lease's.
+var ErrLost = errors.New("the environment lock was lost")
 
 // HeldError reports a lock another run holds. Its exit code is 3, the code
 // reserved for a held lock since before any lock existed.

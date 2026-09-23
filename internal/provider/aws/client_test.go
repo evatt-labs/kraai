@@ -833,6 +833,8 @@ func TestClientDeleteResource(t *testing.T) {
 type fakeS3 struct {
 	err  error
 	reqs []*s3.PutObjectInput
+	// putConflict answers every conditional PutObject with a 409.
+	putConflict bool
 
 	// listOut/listErr/listAt script ListObjectsV2 responses, one entry per
 	// call in order — the same sequential-page pattern fakeCC's
@@ -910,6 +912,20 @@ func (f *fakeS3) PutObject(_ context.Context, params *s3.PutObjectInput, _ ...fu
 	key := aws.ToString(params.Bucket) + "/" + aws.ToString(params.Key)
 	if aws.ToString(params.IfNoneMatch) == "*" {
 		if _, exists := f.objects[key]; exists {
+			return nil, s3Error("PreconditionFailed")
+		}
+	}
+	// If-Match as S3 documents it: 404 when the key is gone, 412 when its
+	// ETag differs, and a scripted 409 for a concurrent conflict.
+	if params.IfMatch != nil {
+		if f.putConflict {
+			return nil, s3Error("ConditionalRequestConflict")
+		}
+		object, exists := f.objects[key]
+		if !exists {
+			return nil, &s3types.NoSuchKey{}
+		}
+		if object.etag != aws.ToString(params.IfMatch) {
 			return nil, s3Error("PreconditionFailed")
 		}
 	}

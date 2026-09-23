@@ -153,7 +153,7 @@ func reap(
 	if dryRun {
 		return "would destroy", fmt.Sprintf("elapsed %s ago", time.Since(*status.ExpiresAt).Round(time.Minute)), nil
 	}
-	_, release, err := guard(ctx, stderr, envName, m, stores)
+	ctx, _, release, err := guard(ctx, stderr, envName, m, stores)
 	if err != nil {
 		if held, ok := lock.AsHeld(err); ok {
 			return "kept", "elapsed, but locked by " + held.Record.Holder, nil
@@ -162,7 +162,7 @@ func reap(
 	}
 	defer release()
 	result, err := destroyEnvironment(ctx, envName, m, assembler)
-	if err != nil {
+	if err := lockLost(ctx, envName, err); err != nil {
 		return "", "", err
 	}
 	counts := countDestroyOutcomes(result)

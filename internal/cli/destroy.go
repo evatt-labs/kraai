@@ -137,14 +137,14 @@ func runDestroy(
 
 	ctx := cmd.Context()
 
-	store, release, err := guard(ctx, cmd.ErrOrStderr(), envName, m, stores)
+	ctx, store, release, err := guard(ctx, cmd.ErrOrStderr(), envName, m, stores)
 	if err != nil {
 		return err
 	}
 	defer release()
 
 	result, err := destroyEnvironment(ctx, envName, m, assembler)
-	if err != nil {
+	if err := lockLost(ctx, envName, err); err != nil {
 		return err
 	}
 	// A clean destroy ends the environment, status record included. A
