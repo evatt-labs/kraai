@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.10](https://github.com/evatt-labs/kraai/compare/v0.6.9...v0.6.10) (2026-09-23)
+
+
+### Bug Fixes
+
+* **cfschema:** refuse a regenerated index that finds existing types differently ([#293](https://github.com/evatt-labs/kraai/issues/293)) ([af1c40d](https://github.com/evatt-labs/kraai/commit/af1c40df4ce6ff03ecd906b8723b65cc014027a4))
+* **lock:** renew the environment lock for as long as a run lasts ([#291](https://github.com/evatt-labs/kraai/issues/291)) ([a454ae5](https://github.com/evatt-labs/kraai/commit/a454ae519acf84b5ff6ba35f181e3ee68276f9bb))
+
 ## [0.6.9](https://github.com/evatt-labs/kraai/compare/v0.6.8...v0.6.9) (2026-09-23)
 
 
