@@ -9,17 +9,43 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/evatt-labs/kraai/internal/cli"
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/telemetry"
 )
 
+// telemetryFlushTimeout bounds how long exit waits on an unreachable
+// telemetry endpoint.
+const telemetryFlushTimeout = 5 * time.Second
+
 func main() {
+	// Before Execute, which may load a manifest's .env into the
+	// environment: the exporters read OTEL_EXPORTER_OTLP_* when built, and
+	// a manifest must not be able to redirect kraai's telemetry.
+	shutdown, terr := telemetry.Start(context.Background(), telemetry.Config{
+		Endpoint: os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
+		Version:  cli.Version(),
+	})
+	if terr != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "telemetry disabled: %v\n", terr)
+		shutdown = func(context.Context) error { return nil }
+	}
+
 	err := cli.Execute(os.Args[1:])
-	os.Exit(handle(err, cli.DebugRequested(), cli.ExitSignal(), os.Getenv, os.Stderr))
+	code := handle(err, cli.DebugRequested(), cli.ExitSignal(), os.Getenv, os.Stderr)
+
+	ctx, cancel := context.WithTimeout(context.Background(), telemetryFlushTimeout)
+	if ferr := shutdown(ctx); ferr != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "telemetry was not fully exported: %v\n", ferr)
+	}
+	cancel()
+	os.Exit(code)
 }
 
 // handle is main's pure, testable core: given the error Execute produced,

@@ -1,0 +1,7 @@
+apiVersion: 1
+
+providers:
+  - name: kraai
+    type: file
+    options:
+      path: /otel-lgtm/kraai-dashboards

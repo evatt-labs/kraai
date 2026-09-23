@@ -8,7 +8,7 @@ SHELL := bash
 COVERAGE_FLOOR := 85
 COVERPROFILE := coverage.out
 
-.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index
+.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index observability-up observability-down
 
 check: build vet test coverage-floor lint fmt-check
 
@@ -69,3 +69,23 @@ plan-examples:
 # so a repeat run makes no DescribeType calls.
 schema-index:
 	go generate ./internal/provider/aws/cfschema
+
+# A local OpenTelemetry backend and the kraai dashboard: one grafana/otel-lgtm
+# container (collector, Prometheus, Tempo, Grafana), pinned by digest. Ports
+# are published on 127.0.0.1 only, since the image's Grafana grants
+# anonymous Admin. Works with docker too: make observability-up CONTAINER=docker.
+CONTAINER ?= podman
+OTEL_LGTM_IMAGE := docker.io/grafana/otel-lgtm@sha256:35da4355c58162b6f27ccbd43c6214d565bc29fc9b18baaf43b59202c354577b
+
+observability-up:
+	$(CONTAINER) rm -f kraai-otel-lgtm >/dev/null 2>&1 || true
+	$(CONTAINER) run -d --name kraai-otel-lgtm \
+		-p 127.0.0.1:3000:3000 -p 127.0.0.1:4318:4318 \
+		-v "$(CURDIR)/dev/observability/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/kraai.yaml:ro,Z" \
+		-v "$(CURDIR)/dev/observability/dashboards:/otel-lgtm/kraai-dashboards:ro,Z" \
+		$(OTEL_LGTM_IMAGE) >/dev/null
+	@echo "Grafana:  http://localhost:3000/d/kraai"
+	@echo "Export:   OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318 kraai plan <environment>"
+
+observability-down:
+	$(CONTAINER) rm -f kraai-otel-lgtm

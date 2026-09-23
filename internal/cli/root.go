@@ -5,10 +5,22 @@
 package cli
 
 import (
+	"context"
+	"errors"
+	"time"
+
 	"github.com/spf13/cobra"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/metric"
 
 	"github.com/evatt-labs/kraai/internal/assemble"
+	"github.com/evatt-labs/kraai/internal/kerrors"
 )
+
+// instrumentationName identifies this package's telemetry.
+const instrumentationName = "github.com/evatt-labs/kraai/internal/cli"
 
 // debugFlag backs the root command's --debug persistent flag. It's a
 // package-level var (matching version.go's version/commit/date pattern)
@@ -60,6 +72,7 @@ func NewRootCommand() *cobra.Command {
 
 	root.PersistentFlags().BoolVar(&debugFlag, "debug", false,
 		"print full error stack traces (also settable via KRAAI_DEBUG=1)")
+	addProfileFlags(root)
 
 	root.AddCommand(newVersionCommand())
 	root.AddCommand(newEnvNameCommand())
@@ -96,8 +109,47 @@ func ExitSignal() int {
 // Execute runs the root command with the given args (typically os.Args[1:])
 // and returns the error the command produced, if any. cmd/kraai/main.go owns
 // turning that error into process output and an exit code.
+//
+// The whole command runs inside one span named for the command that ran,
+// so every resource and provider request it makes is one trace, and its
+// duration is recorded by command and exit code. Both are the
+// OpenTelemetry API's no-ops unless cmd/kraai installed an exporter.
 func Execute(args []string) error {
 	root := NewRootCommand()
 	root.SetArgs(args)
-	return root.Execute()
+
+	ctx, span := otel.Tracer(instrumentationName).Start(context.Background(), "kraai")
+	start := time.Now()
+	cmd, err := root.ExecuteContextC(ctx)
+	err = errors.Join(err, finishProfiles())
+	recordCommand(ctx, cmd, err, time.Since(start))
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "")
+	}
+	if cmd != nil {
+		span.SetName(cmd.CommandPath())
+	}
+	span.End()
+	return err
+}
+
+// recordCommand records one command's duration, by command and exit code:
+// both bounded, where an error message would not be.
+func recordCommand(ctx context.Context, cmd *cobra.Command, err error, elapsed time.Duration) {
+	duration, herr := otel.Meter(instrumentationName).Float64Histogram("kraai.command.duration",
+		metric.WithDescription("Duration of one kraai command."), metric.WithUnit("s"))
+	if herr != nil {
+		return
+	}
+	name := "kraai"
+	if cmd != nil {
+		name = cmd.CommandPath()
+	}
+	code := 0
+	if err != nil {
+		code = kerrors.ExitCode(err)
+	}
+	duration.Record(ctx, elapsed.Seconds(), metric.WithAttributes(
+		attribute.String("kraai.command", name), attribute.Int("kraai.exit_code", code)))
 }

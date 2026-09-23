@@ -386,6 +386,29 @@ An environment marked `protected: true` requires confirming its name before
 apply or destroy — interactively, or `--confirm-name` in CI. There is no
 bypass flag.
 
+### Telemetry and profiling
+
+kraai records a span for every command, plan, apply or destroy wave,
+resource verb and provider request, and the duration of each command and
+resource verb. Nothing is exported unless `OTEL_EXPORTER_OTLP_ENDPOINT`
+names an OTLP/HTTP endpoint, read once at start and never from a manifest's
+`.env`:
+
+```sh
+make observability-up        # Grafana on http://localhost:3000/d/kraai
+OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318 kraai plan dev
+make observability-down
+```
+
+Exported spans carry resource names, provider request URLs (an S3 object
+key included) and error messages, so point the endpoint only at a backend
+you would show those to. The standard `OTEL_EXPORTER_OTLP_*` variables, such
+as headers, apply as usual.
+
+`--cpuprofile`, `--memprofile` and `--exectrace` write a CPU profile, a heap
+profile taken at exit, and a Go execution trace of any command, for
+`go tool pprof -http=: <file>` and `go tool trace <file>`.
+
 ## In GitHub Actions
 
 kraai ships a composite action. It downloads the released binary, verifies it

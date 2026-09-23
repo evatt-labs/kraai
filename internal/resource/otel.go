@@ -178,3 +178,12 @@ func (i *instrumented) ValidateSpec(spec Spec) error {
 	}
 	return validator.ValidateSpec(spec)
 }
+
+// StartWave opens a span for one wave of phase ("plan", "apply",
+// "destroy"), so the resource spans its actions produce nest under the wave
+// that ran them. The returned function ends it.
+func StartWave(ctx context.Context, phase string, wave, actions int) (context.Context, func()) {
+	ctx, span := otel.Tracer(instrumentationName).Start(ctx, phase+".wave",
+		trace.WithAttributes(attribute.Int("kraai.wave", wave), attribute.Int("kraai.actions", actions)))
+	return ctx, func() { span.End() }
+}
