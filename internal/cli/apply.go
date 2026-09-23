@@ -166,7 +166,7 @@ func runApply(
 
 	// The lock comes before the plan: a plan read under a lock another run
 	// is mutating against describes nothing.
-	store, release, err := guard(ctx, cmd.ErrOrStderr(), envName, m, stores)
+	ctx, store, release, err := guard(ctx, cmd.ErrOrStderr(), envName, m, stores)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func runApply(
 	}
 
 	result, err := apply.New(reg, apply.WithAllowReplace(allowReplace)).Apply(ctx, p)
-	if err != nil {
+	if err := lockLost(ctx, envName, err); err != nil {
 		return err
 	}
 	// Recorded whatever the outcome, failures included: a status that says

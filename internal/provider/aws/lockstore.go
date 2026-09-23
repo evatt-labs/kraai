@@ -162,7 +162,7 @@ func (s *lockStore) Acquire(ctx context.Context, environment, holder string, lea
 			IfNoneMatch: aws.String("*"),
 		})
 		if err == nil {
-			return &s3Lease{store: s, bucket: bucket, key: key, etag: aws.ToString(out.ETag)}, nil
+			return &s3Lease{store: s, bucket: bucket, key: key, etag: aws.ToString(out.ETag), record: record}, nil
 		}
 		if !conditionFailed(err) {
 			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "acquiring the lock for %s", environment)
@@ -216,13 +216,53 @@ type s3Lease struct {
 	store  *lockStore
 	bucket string
 	key    string
+
+	// mu guards etag and record, which Renew replaces while the run
+	// holding the lease may be releasing it. Release must use the current
+	// etag: the one from Acquire no longer matches after a renewal.
+	mu     sync.Mutex
 	etag   string
+	record lock.Record
+}
+
+// Renew rewrites the lock with a later expiry, conditional on it still
+// being the object this lease last wrote. S3 answers 412 when the ETag no
+// longer matches, the lock broken and retaken, and 404 when it is gone,
+// broken and released: both are ErrLost. A 409 conflict or any other error
+// may be transient, and is left for the next renewal.
+func (l *s3Lease) Renew(ctx context.Context, lease time.Duration) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	record := l.record
+	record.ExpiresAt = l.store.now().Add(lease)
+	body, err := json.Marshal(record)
+	if err != nil {
+		return kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding the lock for %s", record.Environment)
+	}
+	out, err := l.store.client.s3.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(l.bucket),
+		Key:         aws.String(l.key),
+		Body:        bytes.NewReader(body),
+		ContentType: aws.String("application/json"),
+		IfMatch:     aws.String(l.etag),
+	})
+	if err != nil {
+		if s3ErrorCodeIs(err, "PreconditionFailed", "NoSuchKey", "NotFound") {
+			return lock.ErrLost
+		}
+		return kerrors.Wrap(err, kerrors.CodeUnexpected, "renewing the lock at %s", l.key)
+	}
+	l.etag = aws.ToString(out.ETag)
+	l.record = record
+	return nil
 }
 
 // Release deletes the lock, only if it is still the object this lease
 // created: a lock broken after this lease expired and retaken by another
 // run is theirs, and the refused delete is success here.
 func (l *s3Lease) Release(ctx context.Context) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	_, err := l.store.client.s3.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(l.bucket), Key: aws.String(l.key), IfMatch: aws.String(l.etag),
 	})

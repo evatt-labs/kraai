@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -114,4 +115,89 @@ func TestLockStoreReadNeverCreatesTheBucket(t *testing.T) {
 	if len(fs3.buckets) != 0 || len(fs3.publicAccessBlocked) != 0 {
 		t.Fatalf("a read created the bucket: buckets = %v", fs3.buckets)
 	}
+}
+
+// A renewal rewrites the lock with a later expiry, and the lease follows
+// the new ETag: releasing with the ETag from Acquire would fail its
+// condition and silently leave the lock behind.
+func TestLockStoreRenewal(t *testing.T) {
+	now := time.Date(2026, 9, 21, 10, 0, 0, 0, time.UTC)
+	store, fs3 := newLockStoreForTest(t, now)
+	ctx := context.Background()
+	lease, err := store.Acquire(ctx, "env", "run-1", time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	store.now = func() time.Time { return now.Add(50 * time.Minute) }
+	for range 2 {
+		if err := lease.Renew(ctx, time.Hour); err != nil {
+			t.Fatalf("Renew: %v", err)
+		}
+	}
+	record, _, found, err := store.readRecord(ctx, "kraai-lock-123456789012-eu-west-1", "locks/env.json")
+	if err != nil || !found {
+		t.Fatalf("readRecord: %v, %v", found, err)
+	}
+	if want := now.Add(110 * time.Minute); !record.ExpiresAt.Equal(want) || !record.AcquiredAt.Equal(now) || record.Holder != "run-1" {
+		t.Fatalf("renewed record = %+v, want expiry %v and the original holder and acquisition", record, want)
+	}
+
+	// Past the original expiry, within the renewed one: still held.
+	store.now = func() time.Time { return now.Add(90 * time.Minute) }
+	if _, err := store.Acquire(ctx, "env", "run-2", time.Hour); err == nil {
+		t.Fatal("a renewed lock was broken on its original expiry")
+	}
+	if err := lease.Release(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if len(fs3.objects) != 0 {
+		t.Fatalf("release after renewal left %v", fs3.objects)
+	}
+}
+
+// Renewing a lock that is no longer this lease's is ErrLost: replaced by
+// another run (412) or deleted (404). A 409 conflict is transient.
+func TestLockStoreRenewalReportsALostLock(t *testing.T) {
+	now := time.Date(2026, 9, 21, 10, 0, 0, 0, time.UTC)
+	ctx := context.Background()
+
+	t.Run("taken by another run", func(t *testing.T) {
+		store, _ := newLockStoreForTest(t, now)
+		first, err := store.Acquire(ctx, "env", "run-1", time.Hour)
+		if err != nil {
+			t.Fatal(err)
+		}
+		store.now = func() time.Time { return now.Add(2 * time.Hour) }
+		if _, err := store.Acquire(ctx, "env", "run-2", time.Hour); err != nil {
+			t.Fatal(err)
+		}
+		if err := first.Renew(ctx, time.Hour); !errors.Is(err, lock.ErrLost) {
+			t.Fatalf("Renew = %v, want ErrLost", err)
+		}
+	})
+	t.Run("deleted", func(t *testing.T) {
+		store, fs3 := newLockStoreForTest(t, now)
+		lease, err := store.Acquire(ctx, "env", "run-1", time.Hour)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for key := range fs3.objects {
+			delete(fs3.objects, key)
+		}
+		if err := lease.Renew(ctx, time.Hour); !errors.Is(err, lock.ErrLost) {
+			t.Fatalf("Renew = %v, want ErrLost", err)
+		}
+	})
+	t.Run("conflict", func(t *testing.T) {
+		store, fs3 := newLockStoreForTest(t, now)
+		lease, err := store.Acquire(ctx, "env", "run-1", time.Hour)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fs3.putConflict = true
+		if err := lease.Renew(ctx, time.Hour); err == nil || errors.Is(err, lock.ErrLost) {
+			t.Fatalf("Renew on a 409 = %v, want a transient error", err)
+		}
+	})
 }

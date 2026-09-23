@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/evatt-labs/kraai/internal/env"
+	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
 )
@@ -23,6 +24,11 @@ type LockStoreAssembler func(ctx context.Context, m *manifest.Manifest) (lock.St
 // enough that an environment is not stuck for a day after a crash.
 const leaseDuration = 2 * time.Hour
 
+// leaseRenewal is how often a held lease is renewed: often enough that
+// a renewal failing for a transient reason is retried several times
+// before the lease could expire.
+var leaseRenewal = leaseDuration / 4
+
 // guard takes the environment lock before a mutating command runs. It
 // returns the store for the status record the command writes afterwards,
 // nil when no provider can hold one, in which case it says so on stderr
@@ -30,25 +36,45 @@ const leaseDuration = 2 * time.Hour
 // nowhere to lock today, and refusing it would remove a command that
 // worked yesterday. A lock another run holds is a *kerrors.KError that
 // exits 3.
+//
+// The lease is renewed for as long as the run lasts, and the run must use
+// the returned context: it is cancelled when the lock can no longer be
+// vouched for, and lockLost then says why.
 func guard(
 	ctx context.Context, stderr io.Writer, envName string, m *manifest.Manifest, stores LockStoreAssembler,
-) (store lock.Store, release func(), err error) {
+) (guarded context.Context, store lock.Store, release func(), err error) {
 	store, err = stores(ctx, m)
 	if errors.Is(err, lock.ErrNoStore) {
 		_, _ = fmt.Fprintf(stderr, "warning: %v; proceeding without a lock on %q\n", err, envName)
-		return nil, func() {}, nil
+		return ctx, nil, func() {}, nil
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	lease, err := store.Acquire(ctx, envName, env.Holder(), leaseDuration)
 	if err != nil {
 		if held, ok := lock.AsHeld(err); ok {
-			return nil, nil, lock.Held(held)
+			return nil, nil, nil, lock.Held(held)
 		}
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return store, func() { _ = lease.Release(context.WithoutCancel(ctx)) }, nil
+	guarded, stop := lock.Keep(ctx, lease, leaseDuration, leaseRenewal)
+	return guarded, store, func() {
+		stop()
+		_ = lease.Release(context.WithoutCancel(ctx))
+	}, nil
+}
+
+// lockLost reports a run stopped because its lock could no longer be
+// renewed, in place of whatever the cancellation made the run return:
+// another run may have taken the environment, so nothing more, a status
+// record included, is written. It returns err unchanged otherwise.
+func lockLost(ctx context.Context, envName string, err error) error {
+	if cause := context.Cause(ctx); errors.Is(cause, lock.ErrLost) {
+		return kerrors.Wrap(cause, kerrors.CodeLockHeld,
+			"stopped: the lock on %q could not be renewed, so another run may be using the environment", envName)
+	}
+	return err
 }
 
 // recordStatus writes the environment's status after an apply: when it
