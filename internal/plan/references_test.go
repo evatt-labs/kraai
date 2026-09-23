@@ -11,6 +11,13 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
+// updatingQueue plans as an update of an existing resource.
+type updatingQueue struct{ *fakeResource }
+
+func (updatingQueue) Diff(resource.Spec, *resource.State) (resource.Difference, error) {
+	return resource.Mutable, nil
+}
+
 // recordingDiffer records the spec its Diff was handed.
 type recordingDiffer struct {
 	*fakeResource
@@ -127,18 +134,25 @@ func TestPlan_ExistingProducerReachesTheDependentsDiff(t *testing.T) {
 	alarmName := naming.ResourceName(envName, "api", "ALARM")
 
 	for name, c := range map[string]struct {
-		queueExists bool
-		want        map[string]map[string]any
+		queueExists, queueUpdates bool
+		want                      map[string]map[string]any
 	}{
 		"producer unchanged": {queueExists: true, want: map[string]map[string]any{
 			"JOBS.aws/AWS::SQS::Queue": {"Arn": "arn:jobs"},
 		}},
+		"producer updated": {queueExists: true, queueUpdates: true, want: map[string]map[string]any{
+			"JOBS.aws/AWS::SQS::Queue": {"Arn": "arn:jobs", resource.PendingUpdateAttribute: true},
+		}},
 		"producer created": {queueExists: false, want: nil},
 	} {
 		t.Run(name, func(t *testing.T) {
-			queue := newFakeResource()
+			fake := newFakeResource()
+			var queue resource.Resource = fake
+			if c.queueUpdates {
+				queue = updatingQueue{fake}
+			}
 			if c.queueExists {
-				queue.states[queueName] = &resource.State{Attributes: map[string]any{"Arn": "arn:jobs"}}
+				fake.states[queueName] = &resource.State{Attributes: map[string]any{"Arn": "arn:jobs"}}
 			}
 			alarm := &recordingDiffer{fakeResource: newFakeResource()}
 			alarm.states[alarmName] = &resource.State{Attributes: map[string]any{}}

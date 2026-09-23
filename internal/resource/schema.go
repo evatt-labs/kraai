@@ -176,12 +176,9 @@ func ignored(location []string, ignore [][]string) bool {
 func formatValidationFailures(verr *jsonschema.ValidationError, ignore [][]string) string {
 	seen := map[string]bool{}
 	var lines []string
-	walkValidationErrors(verr, func(n *jsonschema.ValidationError) {
+	walkUnignored(verr, ignore, func(n *jsonschema.ValidationError) {
 		switch n.ErrorKind.(type) {
 		case *kind.Group, *kind.Schema:
-			return
-		}
-		if ignored(n.InstanceLocation, ignore) {
 			return
 		}
 		path := "root"
@@ -203,6 +200,36 @@ func formatValidationFailures(verr *jsonschema.ValidationError, ignore [][]strin
 		return strings.TrimSpace(verr.Error())
 	}
 	return strings.Join(lines, "; ")
+}
+
+// walkUnignored is walkValidationErrors without what ignore covers: a
+// failure at or below an ignored path, and the whole of a oneOf or anyOf
+// failure above one, since which branch matches depends on the value that
+// is not known yet.
+func walkUnignored(verr *jsonschema.ValidationError, ignore [][]string, visit func(*jsonschema.ValidationError)) {
+	if ignored(verr.InstanceLocation, ignore) {
+		return
+	}
+	switch verr.ErrorKind.(type) {
+	case *kind.OneOf, *kind.AnyOf:
+		if aboveIgnored(verr.InstanceLocation, ignore) {
+			return
+		}
+	}
+	visit(verr)
+	for _, cause := range verr.Causes {
+		walkUnignored(cause, ignore, visit)
+	}
+}
+
+// aboveIgnored reports whether one of ignore's paths lies below location.
+func aboveIgnored(location []string, ignore [][]string) bool {
+	for _, path := range ignore {
+		if len(path) > len(location) && slices.Equal(path[:len(location)], location) {
+			return true
+		}
+	}
+	return false
 }
 
 // walkValidationErrors calls visit for verr and, recursively, for every

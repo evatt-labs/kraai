@@ -337,3 +337,27 @@ func TestVendorSchemaIsDraft07(t *testing.T) {
 		t.Fatalf("a keyword beside $ref was applied: %v", err)
 	}
 }
+
+// A value not known yet inside a combinator-constrained property must not
+// fail through the combinator, which reports at the parent's path.
+func TestValidateIgnoringInsideACombinator(t *testing.T) {
+	s := NewVendorSchema("vendor", map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"Target": map[string]any{
+				"type": "object",
+				"oneOf": []any{
+					map[string]any{"properties": map[string]any{"Arn": map[string]any{"type": "string", "pattern": "^arn:"}}, "required": []any{"Arn"}},
+					map[string]any{"properties": map[string]any{"Count": map[string]any{"type": "integer"}}, "required": []any{"Count"}},
+				},
+			},
+		},
+	})
+	pending := map[string]any{"Target": map[string]any{"Arn": "${Q.Arn}"}}
+	if err := s.ValidateIgnoring(pending, [][]string{{"Target", "Arn"}}); err != nil {
+		t.Fatalf("a pending value inside oneOf failed the plan: %v", err)
+	}
+	if err := s.ValidateIgnoring(map[string]any{"Target": map[string]any{"Arn": 5}}, nil); err == nil {
+		t.Fatal("a real failure inside oneOf was dropped")
+	}
+}

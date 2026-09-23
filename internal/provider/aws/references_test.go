@@ -235,3 +235,39 @@ func TestNativeCreateResolvesReferences(t *testing.T) {
 		t.Fatalf("Create with an unpublished reference: %v", err)
 	}
 }
+
+// A producer apply will update reports its values from before the update.
+// A reference to a property the update can change is not known; one to a
+// read-only or create-only property, which an update cannot change, is.
+func TestNativeDiffAgainstAnUpdatingProducer(t *testing.T) {
+	cc := &fakeClient{}
+	queue := newFixtureNative(t, TypeSQSQueue, cc)
+	cc.schema.HasUpdate = true
+	live := &resource.State{Attributes: map[string]any{
+		"Tags": []any{
+			map[string]any{"Key": "param", "Value": "old-value"},
+			map[string]any{"Key": identityTagKey, "Value": "q"},
+		},
+		"RedrivePolicy": map[string]any{"deadLetterTargetArn": "arn:param"},
+	}}
+	updating := map[string]map[string]any{"PARAM.aws/AWS::SSM::Parameter::Native": {
+		"Value": "old-value", "Arn": "arn:param", "Name": "p", resource.PendingUpdateAttribute: true,
+	}}
+	spec := func(properties map[string]any) resource.Spec {
+		return resource.Spec{
+			Binding: "Q", Name: "q",
+			Config:     map[string]any{nativePropertiesKey: properties},
+			References: map[string]string{"PARAM": "aws/AWS::SSM::Parameter::Native"},
+			Attributes: updating,
+		}
+	}
+
+	mutable := spec(map[string]any{"Tags": []any{map[string]any{"Key": "param", "Value": "${PARAM.Value}"}}})
+	if got, err := queue.Diff(mutable, live); err != nil || got != resource.Mutable {
+		t.Fatalf("a reference to a property the update may change: Diff = %v, %v; want Mutable", got, err)
+	}
+	stable := spec(map[string]any{"RedrivePolicy": map[string]any{"deadLetterTargetArn": "${PARAM.Arn}"}})
+	if got, err := queue.Diff(stable, live); err != nil || got != resource.Same {
+		t.Fatalf("a reference to a read-only property: Diff = %v, %v; want Same", got, err)
+	}
+}

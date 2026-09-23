@@ -147,8 +147,20 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 		}
 		wave := p.getWave(ctx, group, attrs)
 		for _, a := range wave {
-			if (a.Kind == ActionNoChange || a.Kind == ActionUpdate) && a.Current != nil {
+			if a.Current == nil {
+				continue
+			}
+			switch a.Kind {
+			case ActionNoChange:
 				attrs.Put(a.ServiceKey, a.Binding, a.Ref.Key(), a.Current.Attributes)
+			case ActionUpdate:
+				pending := make(map[string]any, len(a.Current.Attributes)+1)
+				for k, v := range a.Current.Attributes {
+					pending[k] = v
+				}
+				pending[resource.PendingUpdateAttribute] = true
+				attrs.Put(a.ServiceKey, a.Binding, a.Ref.Key(), pending)
+			case ActionCreate, ActionReplace, ActionFailed:
 			}
 		}
 		actions = append(actions, wave...)

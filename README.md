@@ -192,7 +192,10 @@ orders the entry after that resource and fills the value in at apply; at plan,
 a value naming a resource that does not exist yet reads as a change. A value
 that is only a reference keeps the published value's type. `$${` writes a
 literal `${`; an IAM policy variable such as `${aws:username}` needs no escape,
-since a reference never contains a colon or a slash.
+since a reference never contains a colon or a slash. Vendor templates that
+share the reference's shape, API Gateway's `${stageVariables.name}` or
+AppSync's `${ctx.args.id}`, need the escape: unescaped, kraai reports them as
+naming a binding that does not exist.
 
 Any AWS-published CloudFormation type whose instances can be found again from
 its schema alone qualifies: one whose identifier the author may set, or one

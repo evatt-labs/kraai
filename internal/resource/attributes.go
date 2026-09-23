@@ -17,6 +17,12 @@ type AttributeIndex struct {
 
 type attributeOwner struct{ service, binding string }
 
+// PendingUpdateAttribute is set to true among the attributes plan hands a
+// later wave for a producer that apply will update: every other attribute is
+// its value before the update, so one the update can change is not known
+// yet. Spelled so it can never collide with a vendor property.
+const PendingUpdateAttribute = "kraai.PendingUpdate"
+
 // NewAttributeIndex builds an empty index.
 func NewAttributeIndex() *AttributeIndex {
 	return &AttributeIndex{byBinding: map[attributeOwner]map[string]map[string]any{}}

@@ -2,11 +2,13 @@ package aws
 
 import (
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -210,6 +212,11 @@ func lookupReference(spec resource.Spec, ref reference) (any, bool, error) {
 	if !ok {
 		return nil, false, nil
 	}
+	if updating, _ := attrs[resource.PendingUpdateAttribute].(bool); updating && !unchangedByUpdate(producer, ref.path[0]) {
+		// What the producer reported is its value before an update that
+		// may change it.
+		return nil, false, nil
+	}
 	var value any = attrs
 	for _, segment := range ref.path {
 		m, ok := value.(map[string]any)
@@ -224,6 +231,23 @@ func lookupReference(spec resource.Spec, ref reference) (any, bool, error) {
 			"binding %q: %s published no %s", spec.Binding, ref.binding, strings.Join(ref.path, "."))
 	}
 	return value, true, nil
+}
+
+// unchangedByUpdate reports whether an update cannot change property on the
+// resource producer names: a create-only property, which differing would
+// replace, or a read-only one, which the provider assigns at create. Anything
+// else, or a type not in the index, may change.
+func unchangedByUpdate(producer, property string) bool {
+	vendorType, ok := awsVendorType(producer)
+	if !ok {
+		return false
+	}
+	facts, err := cfschema.Lookup(vendorType)
+	if err != nil {
+		return false
+	}
+	pointer := "/properties/" + property
+	return slices.Contains(facts.CreateOnly, pointer) || slices.Contains(facts.ReadOnly, pointer)
 }
 
 // referenceText is a referenced value as it appears inside a larger string.
