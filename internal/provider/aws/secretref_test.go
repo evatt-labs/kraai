@@ -366,6 +366,28 @@ func TestValidateSecretRefSchemeInEnvSecrets(t *testing.T) {
 		assertCode(t, err, kerrors.CodeValidation)
 	})
 
+	t.Run("aws-ssm version must be a number, not a parameter label", func(t *testing.T) {
+		settings := map[string]any{
+			"runtime": "python3.13", "architecture": "arm64",
+			"envSecrets": map[string]any{"X": "aws-ssm:///kraai/prod/x?version=prod"},
+		}
+		_, err := decodeLambdaSettings(settings)
+		if err == nil {
+			t.Fatal("decodeLambdaSettings error = nil, want a non-numeric-version error: a label would never match the marker, planning an Update forever")
+		}
+		assertCode(t, err, kerrors.CodeValidation)
+	})
+
+	t.Run("aws-ssm version as a number is accepted", func(t *testing.T) {
+		settings := map[string]any{
+			"runtime": "python3.13", "architecture": "arm64",
+			"envSecrets": map[string]any{"X": "aws-ssm:///kraai/prod/x?version=3"},
+		}
+		if _, err := decodeLambdaSettings(settings); err != nil {
+			t.Fatalf("decodeLambdaSettings: %v", err)
+		}
+	})
+
 	t.Run("a ref and a binding key coexist", func(t *testing.T) {
 		settings := map[string]any{
 			"runtime": "python3.13", "architecture": "arm64",

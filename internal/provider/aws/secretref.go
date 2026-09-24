@@ -77,6 +77,23 @@ func validateSecretRef(raw string) error {
 		return kerrors.Validation(
 			"secret reference %q: the path must be the secret's own name, not a full ARN", raw)
 	}
+	// SSM also accepts a parameter label ("name:prod") anywhere this
+	// package passes ref.Version through to GetParameter's Name, and a
+	// label moves between versions the same way a Secrets Manager staging
+	// label does. The version-diff marker treats any set ref.Version as an
+	// immutable pin, compared to the live marker with no call at all
+	// (expectedSecretVersion): a label given here would compare its own
+	// text against the numeric version the marker actually carries, never
+	// match, and plan an Update forever. Refusing a non-numeric ?version=
+	// keeps the pinned case actually pinned; a label is not supported
+	// until the version-diff check learns to resolve one the same
+	// metadata-only way it resolves a Secrets Manager stage.
+	if ref.Scheme == schemeSSM && ref.Version != "" {
+		if _, err := strconv.Atoi(ref.Version); err != nil {
+			return kerrors.Validation(
+				"secret reference %q: aws-ssm's ?version= must be a parameter version number, got %q", raw, ref.Version)
+		}
+	}
 	return nil
 }
 
