@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ssmtypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
+	"github.com/aws/smithy-go"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/resource"
@@ -88,6 +89,15 @@ func TestDecodeSecretEntrySpec(t *testing.T) {
 		spec := generateSpec("x", 32, "rot13")
 		if _, err := decodeSecretEntrySpec(spec); err == nil {
 			t.Fatal("an unknown encoding was accepted")
+		}
+	})
+
+	t.Run("bytes of the wrong type is refused", func(t *testing.T) {
+		spec := resource.Spec{Binding: "SECRETS", Config: map[string]any{
+			"entry": "x", "generate": map[string]any{"bytes": "32", "encoding": "hex"},
+		}}
+		if _, err := decodeSecretEntrySpec(spec); err == nil {
+			t.Fatal("a string bytes value was accepted")
 		}
 	})
 
@@ -209,6 +219,32 @@ func TestSecretParameterResource_Create_AlreadyExistsIsAValidationError(t *testi
 	}
 }
 
+func TestSecretParameterResource_Create_DecodeErrorPropagates(t *testing.T) {
+	f := &fakeSSM{}
+	r := newSecretParameterResource(&Client{ssm: f})
+	spec := resource.Spec{Binding: "SECRETS", Config: map[string]any{}} // no entry name
+	if _, err := r.Create(context.Background(), spec); err == nil {
+		t.Fatal("Create succeeded with no entry name, want an error")
+	}
+	if len(f.putParameterIn) != 0 {
+		t.Fatal("PutParameter was called despite the decode failing")
+	}
+}
+
+func TestSecretParameterResource_Create_UnexpectedErrorIsWrapped(t *testing.T) {
+	f := &fakeSSM{putParameterErr: errors.New("throttled")}
+	r := newSecretParameterResource(&Client{ssm: f})
+
+	_, err := r.Create(context.Background(), externalSpec("x"))
+	if err == nil {
+		t.Fatal("Create succeeded, want the throttled error")
+	}
+	var kerr *kerrors.KError
+	if !errors.As(err, &kerr) || kerr.Code() != kerrors.CodeUnexpected {
+		t.Errorf("error = %v, want a CodeUnexpected *KError", err)
+	}
+}
+
 // --- Get ---------------------------------------------------------------
 
 func TestSecretParameterResource_Get_NotFound(t *testing.T) {
@@ -285,6 +321,25 @@ func TestSecretParameterResource_Get_NeverDecrypts(t *testing.T) {
 	}
 	if len(f.inputs) != 0 {
 		t.Fatalf("Get called GetParameter %d times, want 0: plan must never read a value", len(f.inputs))
+	}
+}
+
+func TestSecretParameterResource_Get_DescribeParametersErrorPropagates(t *testing.T) {
+	f := &fakeSSM{describeParametersErr: errors.New("throttled")}
+	r := newSecretParameterResource(&Client{ssm: f})
+	if _, err := r.Get(context.Background(), resource.Ref{Name: "/dev/api/secrets/x"}); err == nil {
+		t.Fatal("Get succeeded, want the DescribeParameters error")
+	}
+}
+
+func TestSecretParameterResource_Get_ListTagsErrorPropagates(t *testing.T) {
+	f := &fakeSSM{
+		describeParameters: []ssmtypes.ParameterMetadata{{Type: ssmtypes.ParameterTypeSecureString}},
+		listTagsErr:        errors.New("throttled"),
+	}
+	r := newSecretParameterResource(&Client{ssm: f})
+	if _, err := r.Get(context.Background(), resource.Ref{Name: "/dev/api/secrets/x"}); err == nil {
+		t.Fatal("Get succeeded, want the ListTagsForResource error")
 	}
 }
 
@@ -391,6 +446,27 @@ func TestSecretParameterResource_Update_NeverWritesAValue(t *testing.T) {
 	}
 }
 
+func TestSecretParameterResource_Update_DecodeErrorPropagates(t *testing.T) {
+	f := &fakeSSM{}
+	r := newSecretParameterResource(&Client{ssm: f})
+	spec := resource.Spec{Binding: "SECRETS", Config: map[string]any{}} // no entry name
+	if _, err := r.Update(context.Background(), resource.Ref{Name: "/dev/api/secrets/x"}, spec); err == nil {
+		t.Fatal("Update succeeded with no entry name, want an error")
+	}
+	if len(f.addTagsIn) != 0 {
+		t.Fatal("AddTagsToResource was called despite the decode failing")
+	}
+}
+
+func TestSecretParameterResource_Update_AddTagsErrorPropagates(t *testing.T) {
+	f := &fakeSSM{addTagsErr: errors.New("throttled")}
+	r := newSecretParameterResource(&Client{ssm: f})
+	_, err := r.Update(context.Background(), resource.Ref{Name: "/dev/api/secrets/x"}, externalSpec("x"))
+	if err == nil {
+		t.Fatal("Update succeeded, want the AddTagsToResource error")
+	}
+}
+
 // --- Delete ------------------------------------------------------------
 
 func TestSecretParameterResource_Delete(t *testing.T) {
@@ -405,10 +481,25 @@ func TestSecretParameterResource_Delete(t *testing.T) {
 }
 
 func TestSecretParameterResource_Delete_AlreadyGoneIsSuccess(t *testing.T) {
-	f := &fakeSSM{deleteParameterErr: &ssmtypes.ParameterNotFound{}}
+	for label, err := range map[string]error{
+		"typed ParameterNotFound":         &ssmtypes.ParameterNotFound{},
+		"generic smithy error, same code": &smithy.GenericAPIError{Code: "ParameterNotFound"},
+	} {
+		t.Run(label, func(t *testing.T) {
+			f := &fakeSSM{deleteParameterErr: err}
+			r := newSecretParameterResource(&Client{ssm: f})
+			if err := r.Delete(context.Background(), resource.Ref{Name: "/dev/api/secrets/pepper_key"}); err != nil {
+				t.Fatalf("Delete over an already-gone parameter = %v, want nil", err)
+			}
+		})
+	}
+}
+
+func TestSecretParameterResource_Delete_UnexpectedErrorPropagates(t *testing.T) {
+	f := &fakeSSM{deleteParameterErr: errors.New("throttled")}
 	r := newSecretParameterResource(&Client{ssm: f})
-	if err := r.Delete(context.Background(), resource.Ref{Name: "/dev/api/secrets/pepper_key"}); err != nil {
-		t.Fatalf("Delete over an already-gone parameter = %v, want nil", err)
+	if err := r.Delete(context.Background(), resource.Ref{Name: "/dev/api/secrets/x"}); err == nil {
+		t.Fatal("Delete succeeded, want the throttled error")
 	}
 }
 
@@ -418,6 +509,14 @@ func TestSecretParameterResource_Secrets_NilState(t *testing.T) {
 	r := newSecretParameterResource(&Client{})
 	if got := r.Secrets(nil); got != nil {
 		t.Errorf("Secrets(nil) = %v, want nil", got)
+	}
+}
+
+func TestSecretParameterResource_Secrets_NoEntryAttribute(t *testing.T) {
+	r := newSecretParameterResource(&Client{})
+	state := &resource.State{Ref: resource.Ref{Name: "/dev/api/secrets/x"}, Attributes: map[string]any{}}
+	if got := r.Secrets(state); got != nil {
+		t.Errorf("Secrets(state with no Entry) = %v, want nil", got)
 	}
 }
 
@@ -461,6 +560,26 @@ func TestSecretParameterResource_Secrets_LazyAndKeyedByEntry(t *testing.T) {
 	}
 }
 
+func TestSecretParameterResource_Secrets_ProducerErrorPropagates(t *testing.T) {
+	f := &fakeSSM{err: errors.New("access denied")}
+	r := newSecretParameterResource(&Client{ssm: f})
+	state := &resource.State{Ref: resource.Ref{Name: "/dev/api/secrets/x"}, Attributes: map[string]any{"Entry": "x"}}
+	producer := r.Secrets(state)["x"]
+	if _, err := producer(context.Background()); err == nil {
+		t.Fatal("producer succeeded, want the GetParameter error")
+	}
+}
+
+func TestSecretParameterResource_Secrets_EmptyValueIsAnError(t *testing.T) {
+	f := &fakeSSM{value: ""}
+	r := newSecretParameterResource(&Client{ssm: f})
+	state := &resource.State{Ref: resource.Ref{Name: "/dev/api/secrets/x"}, Attributes: map[string]any{"Entry": "x"}}
+	producer := r.Secrets(state)["x"]
+	if _, err := producer(context.Background()); err == nil {
+		t.Fatal("producer succeeded with an empty value, want an error")
+	}
+}
+
 func keys(m map[string]resource.Secret) []string {
 	out := make([]string, 0, len(m))
 	for k := range m {
@@ -490,6 +609,25 @@ func TestClient_SetSecretParameter(t *testing.T) {
 	}
 	if len(put.Tags) != 0 {
 		t.Errorf("Tags = %+v, want none: PutParameter refuses Tags with Overwrite", put.Tags)
+	}
+}
+
+func TestClient_SetSecretParameter_DescribeParametersErrorPropagates(t *testing.T) {
+	f := &fakeSSM{describeParametersErr: errors.New("throttled")}
+	c := &Client{ssm: f}
+	if err := c.SetSecretParameter(context.Background(), "/dev/api/secrets/x", "value"); err == nil {
+		t.Fatal("SetSecretParameter succeeded, want the DescribeParameters error")
+	}
+}
+
+func TestClient_SetSecretParameter_PutParameterErrorPropagates(t *testing.T) {
+	f := &fakeSSM{
+		describeParameters: []ssmtypes.ParameterMetadata{{Type: ssmtypes.ParameterTypeSecureString}},
+		putParameterErr:    errors.New("throttled"),
+	}
+	c := &Client{ssm: f}
+	if err := c.SetSecretParameter(context.Background(), "/dev/api/secrets/x", "value"); err == nil {
+		t.Fatal("SetSecretParameter succeeded, want the PutParameter error")
 	}
 }
 
