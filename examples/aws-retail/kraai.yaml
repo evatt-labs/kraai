@@ -1,0 +1,9 @@
+version: 1
+
+# The AWS Retail Store Sample App (aws-containers/retail-store-sample-app),
+# ECS variant, declared entirely as native bindings. See ../README.md.
+providers:
+  aws:
+    vendor: aws
+    settings:
+      region: us-east-1

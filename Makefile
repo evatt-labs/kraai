@@ -60,8 +60,12 @@ plan-examples:
 			echo "skipping $$name: CLOUDFLARE_API_TOKEN is unset"; \
 			continue; \
 		fi; \
+		args=""; \
+		if [ "$$name" = "aws-retail" ]; then \
+			args="--set mq_password=$$(openssl rand -hex 12) --set opensearch_password=Aa1-$$(openssl rand -hex 10)"; \
+		fi; \
 		echo "==> plan $$name"; \
-		go run ./cmd/kraai plan kraai-example --dir "$${dir%/}"; \
+		go run ./cmd/kraai plan kraai-example --dir "$${dir%/}" $$args; \
 	done
 
 # Read-only: regenerates the embedded CloudFormation schema index from the

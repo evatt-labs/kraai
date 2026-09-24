@@ -1,0 +1,826 @@
+services:
+  # One kraai service holds the whole store. A reference reaches only a
+  # binding on its own service, and the five microservices share one
+  # network, cluster and namespace, so they cannot be five kraai services.
+  retail:
+    dir: .
+    aws:
+      # --- Network: three zones, public and private, one NAT gateway ------
+      - binding: VPC
+        type: AWS::EC2::VPC
+        properties:
+          CidrBlock: 10.92.0.0/16
+          EnableDnsHostnames: true
+          EnableDnsSupport: true
+      - binding: IGW
+        type: AWS::EC2::InternetGateway
+        properties: {}
+      - binding: IGW_ATTACH
+        type: AWS::EC2::VPCGatewayAttachment
+        properties:
+          VpcId: ${VPC.VpcId}
+          InternetGatewayId: ${IGW.InternetGatewayId}
+        match: [VpcId]
+      - binding: PUBLIC_A
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.92.0.0/24, AvailabilityZone: us-east-1a, MapPublicIpOnLaunch: true }
+      - binding: PUBLIC_B
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.92.1.0/24, AvailabilityZone: us-east-1b, MapPublicIpOnLaunch: true }
+      - binding: PUBLIC_C
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.92.2.0/24, AvailabilityZone: us-east-1c, MapPublicIpOnLaunch: true }
+      - binding: PRIVATE_A
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.92.10.0/24, AvailabilityZone: us-east-1a }
+      - binding: PRIVATE_B
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.92.11.0/24, AvailabilityZone: us-east-1b }
+      - binding: PRIVATE_C
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.92.12.0/24, AvailabilityZone: us-east-1c }
+      - binding: PUBLIC_RT
+        type: AWS::EC2::RouteTable
+        properties: { VpcId: "${VPC.VpcId}" }
+      - binding: PRIVATE_RT
+        type: AWS::EC2::RouteTable
+        properties: { VpcId: "${VPC.VpcId}" }
+      - binding: PUBLIC_DEFAULT
+        type: AWS::EC2::Route
+        properties:
+          RouteTableId: ${PUBLIC_RT.RouteTableId}
+          DestinationCidrBlock: 0.0.0.0/0
+          GatewayId: ${IGW.InternetGatewayId}
+        match: [DestinationCidrBlock]
+      - binding: NAT_IP
+        type: AWS::EC2::EIP
+        properties: { Domain: vpc }
+      - binding: NAT
+        type: AWS::EC2::NatGateway
+        properties:
+          SubnetId: ${PUBLIC_A.SubnetId}
+          AllocationId: ${NAT_IP.AllocationId}
+      - binding: PRIVATE_DEFAULT
+        type: AWS::EC2::Route
+        properties:
+          RouteTableId: ${PRIVATE_RT.RouteTableId}
+          DestinationCidrBlock: 0.0.0.0/0
+          NatGatewayId: ${NAT.NatGatewayId}
+        match: [DestinationCidrBlock]
+      - binding: PUBLIC_A_RT
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { RouteTableId: "${PUBLIC_RT.RouteTableId}", SubnetId: "${PUBLIC_A.SubnetId}" }
+        match: [SubnetId]
+      - binding: PUBLIC_B_RT
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { RouteTableId: "${PUBLIC_RT.RouteTableId}", SubnetId: "${PUBLIC_B.SubnetId}" }
+        match: [SubnetId]
+      - binding: PUBLIC_C_RT
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { RouteTableId: "${PUBLIC_RT.RouteTableId}", SubnetId: "${PUBLIC_C.SubnetId}" }
+        match: [SubnetId]
+      - binding: PRIVATE_A_RT
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { RouteTableId: "${PRIVATE_RT.RouteTableId}", SubnetId: "${PRIVATE_A.SubnetId}" }
+        match: [SubnetId]
+      - binding: PRIVATE_B_RT
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { RouteTableId: "${PRIVATE_RT.RouteTableId}", SubnetId: "${PRIVATE_B.SubnetId}" }
+        match: [SubnetId]
+      - binding: PRIVATE_C_RT
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { RouteTableId: "${PRIVATE_RT.RouteTableId}", SubnetId: "${PRIVATE_C.SubnetId}" }
+        match: [SubnetId]
+
+      # --- Shared: cluster, logs, service discovery, encryption -----------
+      - binding: CLUSTER
+        type: AWS::ECS::Cluster
+        properties:
+          ClusterSettings:
+            - { Name: containerInsights, Value: enabled }
+      - binding: TASK_LOGS
+        type: AWS::Logs::LogGroup
+        properties:
+          RetentionInDays: 14
+      - binding: NS
+        type: AWS::ServiceDiscovery::PrivateDnsNamespace
+        properties:
+          Name: retailstore.local
+          Description: Service discovery namespace
+          Vpc: ${VPC.VpcId}
+      - binding: CMK
+        type: AWS::KMS::Key
+        properties:
+          Description: retail store secrets
+          PendingWindowInDays: 7
+
+      # --- Cluster lifecycle events to CloudWatch Logs --------------------
+      - binding: EVENT_LOGS
+        type: AWS::Logs::LogGroup
+        properties:
+          RetentionInDays: 14
+      - binding: EVENTS
+        type: AWS::Events::Rule
+        properties:
+          Description: ECS lifecycle events for the retail cluster
+          EventPattern:
+            source: [aws.ecs]
+            detail:
+              clusterArn: ["${CLUSTER.Arn}"]
+          Targets:
+            - { Id: logs, Arn: "${EVENT_LOGS.Arn}" }
+      - binding: EVENTS_POLICY
+        type: AWS::Logs::ResourcePolicy
+        properties:
+          PolicyDocument: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Action":["logs:CreateLogStream","logs:PutLogEvents"],"Resource":"${EVENT_LOGS.Arn}"}]}'
+
+      # --- Front door: the UI's load balancer ------------------------------
+      - binding: ALB_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: UI load balancer
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0 }
+      - binding: ALB
+        type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        properties:
+          Type: application
+          Scheme: internet-facing
+          Subnets: ["${PUBLIC_A.SubnetId}", "${PUBLIC_B.SubnetId}", "${PUBLIC_C.SubnetId}"]
+          SecurityGroups: ["${ALB_SG.GroupId}"]
+      - binding: UI_TG
+        type: AWS::ElasticLoadBalancingV2::TargetGroup
+        properties:
+          VpcId: ${VPC.VpcId}
+          Protocol: HTTP
+          Port: 8080
+          TargetType: ip
+          HealthCheckPath: /actuator/health
+          HealthCheckIntervalSeconds: 30
+          HealthyThresholdCount: 2
+          UnhealthyThresholdCount: 3
+          TargetGroupAttributes:
+            - { Key: deregistration_delay.timeout_seconds, Value: "30" }
+      - binding: LISTENER
+        type: AWS::ElasticLoadBalancingV2::Listener
+        properties:
+          LoadBalancerArn: ${ALB.LoadBalancerArn}
+          Port: 80
+          Protocol: HTTP
+          DefaultActions:
+            - { Type: forward, TargetGroupArn: "${UI_TG.TargetGroupArn}" }
+
+      # --- Data: catalog (Aurora MySQL, OpenSearch) ------------------------
+      - binding: CATALOG_DB_SUBNETS
+        type: AWS::RDS::DBSubnetGroup
+        properties:
+          DBSubnetGroupDescription: catalog database
+          SubnetIds: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+      - binding: CATALOG_DB_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: catalog database
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 3306, ToPort: 3306, SourceSecurityGroupId: "${CATALOG_SG.GroupId}" }
+      - binding: CATALOG_DB_PARAMS
+        type: AWS::RDS::DBClusterParameterGroup
+        properties:
+          Description: catalog cluster parameters
+          Family: aurora-mysql8.0
+          Parameters: {}
+      - binding: CATALOG_DB
+        type: AWS::RDS::DBCluster
+        properties:
+          Engine: aurora-mysql
+          EngineVersion: 8.0.mysql_aurora.3.13.0
+          DatabaseName: catalog
+          MasterUsername: catalog
+          # RDS keeps the password in a Secrets Manager secret of its own;
+          # the catalog task reads it from there.
+          ManageMasterUserPassword: true
+          StorageEncrypted: true
+          DBSubnetGroupName: ${CATALOG_DB_SUBNETS.DBSubnetGroupName}
+          DBClusterParameterGroupName: ${CATALOG_DB_PARAMS.DBClusterParameterGroupName}
+          VpcSecurityGroupIds: ["${CATALOG_DB_SG.GroupId}"]
+      - binding: CATALOG_DB_ONE
+        type: AWS::RDS::DBInstance
+        properties:
+          DBClusterIdentifier: ${CATALOG_DB.DBClusterIdentifier}
+          Engine: aurora-mysql
+          DBInstanceClass: db.t3.medium
+      - binding: SEARCH_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: catalog search
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 443, ToPort: 443, SourceSecurityGroupId: "${CATALOG_SG.GroupId}" }
+      # The binding name is short on purpose: OpenSearch caps a domain name
+      # at 28 characters, and kraai derives it from environment, service
+      # and binding (#314).
+      - binding: SEARCH
+        type: AWS::OpenSearchService::Domain
+        properties:
+          EngineVersion: OpenSearch_3.3
+          ClusterConfig:
+            InstanceType: r8g.medium.search
+            InstanceCount: 1
+            ZoneAwarenessEnabled: false
+            DedicatedMasterEnabled: false
+          EBSOptions: { EBSEnabled: true, VolumeSize: 50, VolumeType: gp3 }
+          VPCOptions:
+            SubnetIds: ["${PRIVATE_A.SubnetId}"]
+            SecurityGroupIds: ["${SEARCH_SG.GroupId}"]
+          AdvancedSecurityOptions:
+            Enabled: true
+            InternalUserDatabaseEnabled: true
+            MasterUserOptions:
+              MasterUserName: admin
+              MasterUserPassword: "{{ opensearch_password }}"
+          EncryptionAtRestOptions: { Enabled: true }
+          NodeToNodeEncryptionOptions: { Enabled: true }
+          DomainEndpointOptions:
+            EnforceHTTPS: true
+            TLSSecurityPolicy: Policy-Min-TLS-1-2-2019-07
+          AccessPolicies:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { AWS: "*" }, Action: "es:*", Resource: "arn:aws:es:us-east-1:*:domain/*" }
+      - binding: SEARCH_SECRET
+        type: AWS::SecretsManager::Secret
+        properties:
+          Description: catalog search credentials
+          KmsKeyId: ${CMK.Arn}
+          SecretString: '{"username":"admin","password":"{{ opensearch_password }}"}'
+
+      # --- Data: carts (DynamoDB) ------------------------------------------
+      - binding: CARTS_TABLE
+        type: AWS::DynamoDB::Table
+        properties:
+          BillingMode: PAY_PER_REQUEST
+          AttributeDefinitions:
+            - { AttributeName: id, AttributeType: S }
+            - { AttributeName: customerId, AttributeType: S }
+          KeySchema:
+            - { AttributeName: id, KeyType: HASH }
+          GlobalSecondaryIndexes:
+            - IndexName: idx_global_customerId
+              KeySchema: [{ AttributeName: customerId, KeyType: HASH }]
+              Projection: { ProjectionType: ALL }
+
+      # --- Data: checkout (ElastiCache Redis) -------------------------------
+      - binding: REDIS_SUBNETS
+        type: AWS::ElastiCache::SubnetGroup
+        properties:
+          Description: checkout cache
+          SubnetIds: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+      - binding: REDIS_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: checkout cache
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 6379, ToPort: 6379, SourceSecurityGroupId: "${CHECKOUT_SG.GroupId}" }
+      - binding: REDIS
+        type: AWS::ElastiCache::ReplicationGroup
+        properties:
+          ReplicationGroupDescription: checkout cache
+          Engine: redis
+          CacheNodeType: cache.t3.micro
+          NumCacheClusters: 1
+          CacheSubnetGroupName: ${REDIS_SUBNETS.CacheSubnetGroupName}
+          SecurityGroupIds: ["${REDIS_SG.GroupId}"]
+          TransitEncryptionEnabled: false
+
+      # --- Data: orders (Aurora PostgreSQL, Amazon MQ) ---------------------
+      - binding: ORDERS_DB_SUBNETS
+        type: AWS::RDS::DBSubnetGroup
+        properties:
+          DBSubnetGroupDescription: orders database
+          SubnetIds: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+      - binding: ORDERS_DB_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: orders database
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 5432, ToPort: 5432, SourceSecurityGroupId: "${ORDERS_SG.GroupId}" }
+      - binding: ORDERS_DB_PARAMS
+        type: AWS::RDS::DBClusterParameterGroup
+        properties:
+          Description: orders cluster parameters
+          Family: aurora-postgresql15
+          Parameters: {}
+      - binding: ORDERS_DB
+        type: AWS::RDS::DBCluster
+        properties:
+          Engine: aurora-postgresql
+          EngineVersion: "15.18"
+          DatabaseName: orders
+          MasterUsername: orders
+          ManageMasterUserPassword: true
+          StorageEncrypted: true
+          DBSubnetGroupName: ${ORDERS_DB_SUBNETS.DBSubnetGroupName}
+          DBClusterParameterGroupName: ${ORDERS_DB_PARAMS.DBClusterParameterGroupName}
+          VpcSecurityGroupIds: ["${ORDERS_DB_SG.GroupId}"]
+      - binding: ORDERS_DB_ONE
+        type: AWS::RDS::DBInstance
+        properties:
+          DBClusterIdentifier: ${ORDERS_DB.DBClusterIdentifier}
+          Engine: aurora-postgresql
+          DBInstanceClass: db.t3.medium
+      - binding: MQ_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: orders broker
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 5671, ToPort: 5671, SourceSecurityGroupId: "${ORDERS_SG.GroupId}" }
+      # RabbitMQ takes its user's password as a plain property, and a native
+      # binding has no secret input, so it is a template value: pass it with
+      # --set from a secret store, never commit it.
+      - binding: MQ
+        type: AWS::AmazonMQ::Broker
+        properties:
+          BrokerName: retail-orders
+          EngineType: RABBITMQ
+          EngineVersion: "3.13"
+          HostInstanceType: mq.m5.large
+          DeploymentMode: SINGLE_INSTANCE
+          PubliclyAccessible: false
+          AutoMinorVersionUpgrade: true
+          SubnetIds: ["${PRIVATE_A.SubnetId}"]
+          SecurityGroups: ["${MQ_SG.GroupId}"]
+          Users:
+            - { Username: orders, Password: "{{ mq_password }}" }
+      - binding: MQ_SECRET
+        type: AWS::SecretsManager::Secret
+        properties:
+          Description: orders broker credentials
+          KmsKeyId: ${CMK.Arn}
+          SecretString: '{"username":"orders","password":"{{ mq_password }}"}'
+
+      # --- Microservices: roles, security groups, tasks, services ----------
+      # Each service gets an execution role (image pull, logs, the secrets
+      # its task reads), a task role (what the application calls), a
+      # security group, a task definition and a Fargate service on the
+      # shared cluster, reachable by the others through Service Connect.
+
+      # ui
+      - binding: UI_EXEC
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy]
+      - binding: UI_ROLE
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          Policies:
+            - PolicyName: task
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: [ssmmessages:CreateControlChannel, ssmmessages:CreateDataChannel, ssmmessages:OpenControlChannel, ssmmessages:OpenDataChannel]
+                    Resource: "*"
+      - binding: UI_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: ui tasks
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 8080, ToPort: 8080, CidrIp: 10.92.0.0/16 }
+      - binding: UI_TASK
+        type: AWS::ECS::TaskDefinition
+        properties:
+          RequiresCompatibilities: [FARGATE]
+          NetworkMode: awsvpc
+          Cpu: "1024"
+          Memory: "2048"
+          ExecutionRoleArn: ${UI_EXEC.Arn}
+          TaskRoleArn: ${UI_ROLE.Arn}
+          ContainerDefinitions:
+            - Name: ui
+              Image: public.ecr.aws/aws-containers/retail-store-sample-ui:1.6.2
+              Essential: true
+              PortMappings:
+                - { Name: ui, ContainerPort: 8080, HostPort: 8080, Protocol: tcp }
+              HealthCheck:
+                Command: [CMD-SHELL, "curl -f http://localhost:8080/actuator/health || exit 1"]
+                Interval: 10
+                StartPeriod: 60
+                Retries: 3
+                Timeout: 5
+              LogConfiguration:
+                LogDriver: awslogs
+                Options:
+                  awslogs-group: ${TASK_LOGS.LogGroupName}
+                  awslogs-region: us-east-1
+                  awslogs-stream-prefix: ui
+              Environment:
+                - { Name: RETAIL_UI_ENDPOINTS_CATALOG, Value: "http://catalog" }
+                - { Name: RETAIL_UI_ENDPOINTS_CARTS, Value: "http://carts" }
+                - { Name: RETAIL_UI_ENDPOINTS_CHECKOUT, Value: "http://checkout" }
+                - { Name: RETAIL_UI_ENDPOINTS_ORDERS, Value: "http://orders" }
+                - { Name: RETAIL_UI_SEARCH_ENABLED, Value: "true" }
+      - binding: UI_SVC
+        type: AWS::ECS::Service
+        properties:
+          Cluster: ${CLUSTER.Arn}
+          TaskDefinition: ${UI_TASK.TaskDefinitionArn}
+          DesiredCount: 1
+          LaunchType: FARGATE
+          EnableExecuteCommand: true
+          NetworkConfiguration:
+            AwsvpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups: ["${UI_SG.GroupId}"]
+              Subnets: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+          ServiceConnectConfiguration:
+            Enabled: true
+            Namespace: ${NS.Arn}
+            Services:
+              - PortName: ui
+                DiscoveryName: ui
+                ClientAliases: [{ DnsName: ui, Port: 80 }]
+          LoadBalancers:
+            - { ContainerName: ui, ContainerPort: 8080, TargetGroupArn: "${UI_TG.TargetGroupArn}" }
+          # ECS refuses a target group no listener forwards to yet, and a
+          # binding is ordered only by what it references, so this tag is
+          # what places the service after the listener.
+          Tags:
+            - { Key: "retail:listener", Value: "${LISTENER.ListenerArn}" }
+
+      # catalog
+      - binding: CATALOG_EXEC
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy]
+          Policies:
+            - PolicyName: secrets
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: [secretsmanager:GetSecretValue, kms:Decrypt]
+                    Resource: ["${CATALOG_DB.MasterUserSecret.SecretArn}", "${SEARCH_SECRET.Id}", "${CMK.Arn}"]
+      - binding: CATALOG_ROLE
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          Policies:
+            - PolicyName: task
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: [ssmmessages:CreateControlChannel, ssmmessages:CreateDataChannel, ssmmessages:OpenControlChannel, ssmmessages:OpenDataChannel]
+                    Resource: "*"
+      - binding: CATALOG_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: catalog tasks
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 8080, ToPort: 8080, CidrIp: 10.92.0.0/16 }
+      - binding: CATALOG_TASK
+        type: AWS::ECS::TaskDefinition
+        properties:
+          RequiresCompatibilities: [FARGATE]
+          NetworkMode: awsvpc
+          Cpu: "1024"
+          Memory: "2048"
+          ExecutionRoleArn: ${CATALOG_EXEC.Arn}
+          TaskRoleArn: ${CATALOG_ROLE.Arn}
+          ContainerDefinitions:
+            - Name: catalog
+              Image: public.ecr.aws/aws-containers/retail-store-sample-catalog:1.6.2
+              Essential: true
+              PortMappings:
+                - { Name: catalog, ContainerPort: 8080, HostPort: 8080, Protocol: tcp }
+              HealthCheck:
+                Command: [CMD-SHELL, "curl -f http://localhost:8080/health || exit 1"]
+                Interval: 10
+                StartPeriod: 60
+                Retries: 3
+                Timeout: 5
+              LogConfiguration:
+                LogDriver: awslogs
+                Options:
+                  awslogs-group: ${TASK_LOGS.LogGroupName}
+                  awslogs-region: us-east-1
+                  awslogs-stream-prefix: catalog
+              Environment:
+                - { Name: RETAIL_CATALOG_PERSISTENCE_PROVIDER, Value: "mysql" }
+                - { Name: RETAIL_CATALOG_PERSISTENCE_DB_NAME, Value: "catalog" }
+                - { Name: RETAIL_CATALOG_PERSISTENCE_ENDPOINT, Value: "${CATALOG_DB.Endpoint.Address}:3306" }
+                - { Name: RETAIL_CATALOG_SEARCH_ENABLED, Value: "true" }
+                - { Name: RETAIL_CATALOG_SEARCH_OS_INDEX, Value: "products" }
+                - { Name: RETAIL_CATALOG_SEARCH_OS_ENDPOINT, Value: "https://${SEARCH.DomainEndpoint}" }
+              Secrets:
+                - { Name: RETAIL_CATALOG_PERSISTENCE_USER, ValueFrom: "${CATALOG_DB.MasterUserSecret.SecretArn}:username::" }
+                - { Name: RETAIL_CATALOG_PERSISTENCE_PASSWORD, ValueFrom: "${CATALOG_DB.MasterUserSecret.SecretArn}:password::" }
+                - { Name: RETAIL_CATALOG_SEARCH_OS_USERNAME, ValueFrom: "${SEARCH_SECRET.Id}:username::" }
+                - { Name: RETAIL_CATALOG_SEARCH_OS_PASSWORD, ValueFrom: "${SEARCH_SECRET.Id}:password::" }
+      - binding: CATALOG_SVC
+        type: AWS::ECS::Service
+        properties:
+          Cluster: ${CLUSTER.Arn}
+          TaskDefinition: ${CATALOG_TASK.TaskDefinitionArn}
+          DesiredCount: 1
+          LaunchType: FARGATE
+          EnableExecuteCommand: true
+          NetworkConfiguration:
+            AwsvpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups: ["${CATALOG_SG.GroupId}"]
+              Subnets: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+          ServiceConnectConfiguration:
+            Enabled: true
+            Namespace: ${NS.Arn}
+            Services:
+              - PortName: catalog
+                DiscoveryName: catalog
+                ClientAliases: [{ DnsName: catalog, Port: 80 }]
+
+      # carts
+      - binding: CARTS_EXEC
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy]
+      - binding: CARTS_ROLE
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          Policies:
+            - PolicyName: task
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: [ssmmessages:CreateControlChannel, ssmmessages:CreateDataChannel, ssmmessages:OpenControlChannel, ssmmessages:OpenDataChannel]
+                    Resource: "*"
+                  - Effect: Allow
+                    Action: "dynamodb:*"
+                    Resource: ["${CARTS_TABLE.Arn}", "${CARTS_TABLE.Arn}/index/*"]
+      - binding: CARTS_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: carts tasks
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 8080, ToPort: 8080, CidrIp: 10.92.0.0/16 }
+      - binding: CARTS_TASK
+        type: AWS::ECS::TaskDefinition
+        properties:
+          RequiresCompatibilities: [FARGATE]
+          NetworkMode: awsvpc
+          Cpu: "1024"
+          Memory: "2048"
+          ExecutionRoleArn: ${CARTS_EXEC.Arn}
+          TaskRoleArn: ${CARTS_ROLE.Arn}
+          ContainerDefinitions:
+            - Name: carts
+              Image: public.ecr.aws/aws-containers/retail-store-sample-cart:1.6.2
+              Essential: true
+              PortMappings:
+                - { Name: carts, ContainerPort: 8080, HostPort: 8080, Protocol: tcp }
+              HealthCheck:
+                Command: [CMD-SHELL, "curl -f http://localhost:8080/actuator/health || exit 1"]
+                Interval: 10
+                StartPeriod: 60
+                Retries: 3
+                Timeout: 5
+              LogConfiguration:
+                LogDriver: awslogs
+                Options:
+                  awslogs-group: ${TASK_LOGS.LogGroupName}
+                  awslogs-region: us-east-1
+                  awslogs-stream-prefix: carts
+              Environment:
+                - { Name: RETAIL_CART_PERSISTENCE_PROVIDER, Value: "dynamodb" }
+                - { Name: RETAIL_CART_PERSISTENCE_DYNAMODB_TABLE_NAME, Value: "${CARTS_TABLE.TableName}" }
+      - binding: CARTS_SVC
+        type: AWS::ECS::Service
+        properties:
+          Cluster: ${CLUSTER.Arn}
+          TaskDefinition: ${CARTS_TASK.TaskDefinitionArn}
+          DesiredCount: 1
+          LaunchType: FARGATE
+          EnableExecuteCommand: true
+          NetworkConfiguration:
+            AwsvpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups: ["${CARTS_SG.GroupId}"]
+              Subnets: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+          ServiceConnectConfiguration:
+            Enabled: true
+            Namespace: ${NS.Arn}
+            Services:
+              - PortName: carts
+                DiscoveryName: carts
+                ClientAliases: [{ DnsName: carts, Port: 80 }]
+
+      # checkout
+      - binding: CHECKOUT_EXEC
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy]
+      - binding: CHECKOUT_ROLE
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          Policies:
+            - PolicyName: task
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: [ssmmessages:CreateControlChannel, ssmmessages:CreateDataChannel, ssmmessages:OpenControlChannel, ssmmessages:OpenDataChannel]
+                    Resource: "*"
+      - binding: CHECKOUT_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: checkout tasks
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 8080, ToPort: 8080, CidrIp: 10.92.0.0/16 }
+      - binding: CHECKOUT_TASK
+        type: AWS::ECS::TaskDefinition
+        properties:
+          RequiresCompatibilities: [FARGATE]
+          NetworkMode: awsvpc
+          Cpu: "1024"
+          Memory: "2048"
+          ExecutionRoleArn: ${CHECKOUT_EXEC.Arn}
+          TaskRoleArn: ${CHECKOUT_ROLE.Arn}
+          ContainerDefinitions:
+            - Name: checkout
+              Image: public.ecr.aws/aws-containers/retail-store-sample-checkout:1.6.2
+              Essential: true
+              PortMappings:
+                - { Name: checkout, ContainerPort: 8080, HostPort: 8080, Protocol: tcp }
+              HealthCheck:
+                Command: [CMD-SHELL, "curl -f http://localhost:8080/health || exit 1"]
+                Interval: 10
+                StartPeriod: 60
+                Retries: 3
+                Timeout: 5
+              LogConfiguration:
+                LogDriver: awslogs
+                Options:
+                  awslogs-group: ${TASK_LOGS.LogGroupName}
+                  awslogs-region: us-east-1
+                  awslogs-stream-prefix: checkout
+              Environment:
+                - { Name: RETAIL_CHECKOUT_PERSISTENCE_PROVIDER, Value: "redis" }
+                - { Name: RETAIL_CHECKOUT_PERSISTENCE_REDIS_URL, Value: "redis://${REDIS.PrimaryEndPoint.Address}:${REDIS.PrimaryEndPoint.Port}" }
+                - { Name: RETAIL_CHECKOUT_ENDPOINTS_ORDERS, Value: "http://orders" }
+      - binding: CHECKOUT_SVC
+        type: AWS::ECS::Service
+        properties:
+          Cluster: ${CLUSTER.Arn}
+          TaskDefinition: ${CHECKOUT_TASK.TaskDefinitionArn}
+          DesiredCount: 1
+          LaunchType: FARGATE
+          EnableExecuteCommand: true
+          NetworkConfiguration:
+            AwsvpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups: ["${CHECKOUT_SG.GroupId}"]
+              Subnets: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+          ServiceConnectConfiguration:
+            Enabled: true
+            Namespace: ${NS.Arn}
+            Services:
+              - PortName: checkout
+                DiscoveryName: checkout
+                ClientAliases: [{ DnsName: checkout, Port: 80 }]
+
+      # orders
+      - binding: ORDERS_EXEC
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          ManagedPolicyArns: [arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy]
+          Policies:
+            - PolicyName: secrets
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: [secretsmanager:GetSecretValue, kms:Decrypt]
+                    Resource: ["${ORDERS_DB.MasterUserSecret.SecretArn}", "${MQ_SECRET.Id}", "${CMK.Arn}"]
+      - binding: ORDERS_ROLE
+        type: AWS::IAM::Role
+        properties:
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Principal: { Service: ecs-tasks.amazonaws.com }, Action: "sts:AssumeRole" }
+          Policies:
+            - PolicyName: task
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action: [ssmmessages:CreateControlChannel, ssmmessages:CreateDataChannel, ssmmessages:OpenControlChannel, ssmmessages:OpenDataChannel]
+                    Resource: "*"
+      - binding: ORDERS_SG
+        type: AWS::EC2::SecurityGroup
+        properties:
+          GroupDescription: orders tasks
+          VpcId: ${VPC.VpcId}
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 8080, ToPort: 8080, CidrIp: 10.92.0.0/16 }
+      - binding: ORDERS_TASK
+        type: AWS::ECS::TaskDefinition
+        properties:
+          RequiresCompatibilities: [FARGATE]
+          NetworkMode: awsvpc
+          Cpu: "1024"
+          Memory: "2048"
+          ExecutionRoleArn: ${ORDERS_EXEC.Arn}
+          TaskRoleArn: ${ORDERS_ROLE.Arn}
+          ContainerDefinitions:
+            - Name: orders
+              Image: public.ecr.aws/aws-containers/retail-store-sample-orders:1.6.2
+              Essential: true
+              PortMappings:
+                - { Name: orders, ContainerPort: 8080, HostPort: 8080, Protocol: tcp }
+              HealthCheck:
+                Command: [CMD-SHELL, "curl -f http://localhost:8080/actuator/health || exit 1"]
+                Interval: 10
+                StartPeriod: 60
+                Retries: 3
+                Timeout: 5
+              LogConfiguration:
+                LogDriver: awslogs
+                Options:
+                  awslogs-group: ${TASK_LOGS.LogGroupName}
+                  awslogs-region: us-east-1
+                  awslogs-stream-prefix: orders
+              Environment:
+                - { Name: RETAIL_ORDERS_MESSAGING_PROVIDER, Value: "rabbitmq" }
+                - { Name: RETAIL_ORDERS_MESSAGING_RABBITMQ_ADDRESSES, Value: "amqps://${MQ.Id}.mq.us-east-1.on.aws:5671" }
+                - { Name: RETAIL_ORDERS_PERSISTENCE_PROVIDER, Value: "postgres" }
+                - { Name: RETAIL_ORDERS_PERSISTENCE_NAME, Value: "orders" }
+                - { Name: RETAIL_ORDERS_PERSISTENCE_ENDPOINT, Value: "${ORDERS_DB.Endpoint.Address}:5432" }
+              Secrets:
+                - { Name: RETAIL_ORDERS_MESSAGING_RABBITMQ_USERNAME, ValueFrom: "${MQ_SECRET.Id}:username::" }
+                - { Name: RETAIL_ORDERS_MESSAGING_RABBITMQ_PASSWORD, ValueFrom: "${MQ_SECRET.Id}:password::" }
+                - { Name: RETAIL_ORDERS_PERSISTENCE_USERNAME, ValueFrom: "${ORDERS_DB.MasterUserSecret.SecretArn}:username::" }
+                - { Name: RETAIL_ORDERS_PERSISTENCE_PASSWORD, ValueFrom: "${ORDERS_DB.MasterUserSecret.SecretArn}:password::" }
+      - binding: ORDERS_SVC
+        type: AWS::ECS::Service
+        properties:
+          Cluster: ${CLUSTER.Arn}
+          TaskDefinition: ${ORDERS_TASK.TaskDefinitionArn}
+          DesiredCount: 1
+          LaunchType: FARGATE
+          EnableExecuteCommand: true
+          NetworkConfiguration:
+            AwsvpcConfiguration:
+              AssignPublicIp: DISABLED
+              SecurityGroups: ["${ORDERS_SG.GroupId}"]
+              Subnets: ["${PRIVATE_A.SubnetId}", "${PRIVATE_B.SubnetId}", "${PRIVATE_C.SubnetId}"]
+          ServiceConnectConfiguration:
+            Enabled: true
+            Namespace: ${NS.Arn}
+            Services:
+              - PortName: orders
+                DiscoveryName: orders
+                ClientAliases: [{ DnsName: orders, Port: 80 }]

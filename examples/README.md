@@ -60,6 +60,54 @@ job is exercising every capability AWS claims.
 go run ./cmd/kraai plan kraai-example --dir examples/aws-api
 ```
 
+## aws-retail
+
+The [AWS Retail Store Sample App](https://github.com/aws-containers/retail-store-sample-app),
+ECS variant, as one manifest of 77 native `aws` bindings: a three-zone VPC
+with public and private subnets and one NAT gateway, an ECS cluster with
+five Fargate services (ui, catalog, carts, checkout, orders) reaching each
+other through Service Connect, the UI behind an application load balancer,
+Aurora MySQL and OpenSearch for the catalog, DynamoDB for carts, ElastiCache
+Redis for checkout, Aurora PostgreSQL and Amazon MQ (RabbitMQ) for orders,
+per-service execution and task roles, security groups admitting each store
+from its service alone, a KMS key, and ECS lifecycle events routed to
+CloudWatch Logs. The resources follow the reference's own Terraform; the
+images are the published `1.6.2`.
+
+It is written this way because of three things kraai cannot yet do, each a
+reason the manifest is larger than the capability model intends:
+
+- A `${...}` reference reaches only a binding on its own service, so the
+  five microservices, which share a network, cluster and namespace, are one
+  kraai service (#315).
+- A reference must name a binding that expands to one resource. The curated
+  `network`, Aurora and cache capabilities expand to many, so native ECS
+  bindings cannot be placed in them, and the whole stack is native (#315).
+- A binding is ordered only by what it references. ECS refuses a target
+  group that no listener forwards to yet, so the UI service carries a tag
+  whose value is the listener's ARN purely to order it after the listener
+  (#316).
+
+The RabbitMQ broker takes its password as a plain property, and a native
+binding has no secret input, so it and the OpenSearch master password are
+template values (`services/retail.yaml.j2`, #304). Nothing is committed; supply
+both from a secret store:
+
+```
+go run ./cmd/kraai plan kraai-example --dir examples/aws-retail \
+  --set mq_password=... --set opensearch_password=...
+```
+
+`make plan-examples` passes throwaway random values, which a plan never
+sends anywhere. The OpenSearch binding is named `SEARCH` because a domain
+name is capped at 28 characters and kraai derives it from the environment,
+service and binding (#314); under a longer environment name it cannot be
+planned.
+
+Applying it would bill for a NAT gateway, two Aurora instances, an
+OpenSearch domain, an MQ broker, a cache node and five Fargate tasks by the
+hour.
+
 ## aws-static-site
 
 `objects` + `dns` + `tls` + `cdn`: an S3 bucket, a Route 53 hosted zone for
