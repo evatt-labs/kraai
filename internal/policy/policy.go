@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
@@ -78,39 +79,56 @@ func capabilities() *ast.Capabilities {
 }
 
 // Load reads every policy in the manifest's policies directory and at each
-// of extra, a file or a directory of .rego files, and compiles the two
-// groups separately; a gate denies what either denies. None at all is an
-// empty Set. A policy that does not parse or compile, calls a forbidden
-// builtin, declares a package kraai does not evaluate, or belongs to a
-// group with no deny rule fails the load: a policy that silently never ran
-// would read as one that passed.
-func Load(fsys manifest.FS, extra []string) (*Set, error) {
-	sources := map[string]string{}
-	names, err := fsys.Glob(ManifestDir + "/*.rego")
-	if err != nil {
-		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "listing %s", ManifestDir)
+// of extra, a file or a directory of .rego files, plus each of sets, a
+// subdirectory of that name under policies/ or under an extra directory. It
+// compiles the manifest's and extra's policies separately; a gate denies
+// what either denies. None at all is an empty Set. A set found nowhere, a
+// policy that does not parse or compile, calls a forbidden builtin,
+// declares a package kraai does not evaluate, or belongs to a group with no
+// deny rule fails the load: a policy that silently never ran would read as
+// one that passed.
+func Load(fsys manifest.FS, extra, sets []string) (*Set, error) {
+	for _, name := range sets {
+		// Joined onto extra directories, which are read outside the
+		// manifest root; the manifest loader checks this too.
+		if !manifest.PolicySetPattern.MatchString(name) {
+			return nil, kerrors.Validation("policy set %q must match %s", name, manifest.PolicySetPattern)
+		}
 	}
-	for _, name := range names {
-		// A parse error quotes the offending source, so a policy symlinked
-		// to another file in the manifest directory, such as its .env,
-		// would print that file into a pull request's CI log.
-		info, err := fsys.Lstat(name)
+	found := map[string]bool{}
+	sources := map[string]string{}
+	if _, err := readManifest(fsys, ManifestDir, sources); err != nil {
+		return nil, err
+	}
+	for _, name := range sets {
+		dir := ManifestDir + "/" + name
+		info, err := fsys.Lstat(dir)
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
 		if err != nil {
-			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s", name)
+			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s", dir)
 		}
-		if !info.Mode().IsRegular() {
-			return nil, kerrors.Validation("policy %s is not a regular file; a symlink is refused", name)
+		if !info.IsDir() {
+			return nil, kerrors.Validation("policy set %s is not a directory; a symlink is refused", dir)
 		}
-		raw, err := fsys.ReadFile(name)
+		n, err := readManifest(fsys, dir, sources)
 		if err != nil {
-			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s", name)
+			return nil, err
 		}
-		sources[name] = string(raw)
+		found[name] = found[name] || n > 0
 	}
 	extraSources := map[string]string{}
 	for _, path := range extra {
-		if err := readExtra(path, extraSources); err != nil {
+		if err := readExtra(path, sets, extraSources, found); err != nil {
 			return nil, err
+		}
+	}
+	for _, name := range sets {
+		if !found[name] {
+			return nil, kerrors.Validation(
+				"the environment names policy set %q, but neither %s/%s nor any --policy directory holds a policy for it",
+				name, ManifestDir, name)
 		}
 	}
 
@@ -173,18 +191,59 @@ func compile(sources map[string]string) (unit, error) {
 	return unit{compiler: compiler, gates: gates}, nil
 }
 
-// readExtra adds the policy at path, or every .rego file directly in it.
-func readExtra(path string, sources map[string]string) error {
+// readManifest adds every .rego file directly in dir, a directory in the
+// manifest, and reports how many there were.
+func readManifest(fsys manifest.FS, dir string, sources map[string]string) (int, error) {
+	names, err := fsys.Glob(dir + "/*.rego")
+	if err != nil {
+		return 0, kerrors.Wrap(err, kerrors.CodeUnexpected, "listing %s", dir)
+	}
+	for _, name := range names {
+		// A parse error quotes the offending source, so a policy symlinked
+		// to another file in the manifest directory, such as its .env,
+		// would print that file into a pull request's CI log.
+		info, err := fsys.Lstat(name)
+		if err != nil {
+			return 0, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s", name)
+		}
+		if !info.Mode().IsRegular() {
+			return 0, kerrors.Validation("policy %s is not a regular file; a symlink is refused", name)
+		}
+		raw, err := fsys.ReadFile(name)
+		if err != nil {
+			return 0, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s", name)
+		}
+		sources[name] = string(raw)
+	}
+	return len(names), nil
+}
+
+// readExtra adds the policy at path, or every .rego file directly in it and
+// in its subdirectory for each of sets, marking the sets it found.
+func readExtra(path string, sets []string, sources map[string]string, found map[string]bool) error {
 	info, err := os.Stat(path)
 	if err != nil {
 		return kerrors.Wrap(err, kerrors.CodeValidation, "reading policy %s", path)
 	}
-	files := []string{path}
-	if info.IsDir() {
-		if files, err = filepath.Glob(filepath.Join(path, "*.rego")); err != nil {
-			return kerrors.Wrap(err, kerrors.CodeValidation, "listing policies in %s", path)
-		}
+	if !info.IsDir() {
+		return readFiles([]string{path}, sources)
 	}
+	files, err := filepath.Glob(filepath.Join(path, "*.rego"))
+	if err != nil {
+		return kerrors.Wrap(err, kerrors.CodeValidation, "listing policies in %s", path)
+	}
+	for _, name := range sets {
+		matched, err := filepath.Glob(filepath.Join(path, name, "*.rego"))
+		if err != nil {
+			return kerrors.Wrap(err, kerrors.CodeValidation, "listing policies in %s", filepath.Join(path, name))
+		}
+		found[name] = found[name] || len(matched) > 0
+		files = append(files, matched...)
+	}
+	return readFiles(files, sources)
+}
+
+func readFiles(files []string, sources map[string]string) error {
 	for _, file := range files {
 		raw, err := os.ReadFile(file) //nolint:gosec // G304: a path the operator named on the command line
 		if err != nil {

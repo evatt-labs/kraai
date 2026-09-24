@@ -272,8 +272,12 @@ type Environment struct {
 	// as a Go duration ("72h"). Apply records the absolute deadline in the
 	// environment's status; kraai gc reaps what is past it. Refused on a
 	// persistent environment.
-	TTL       string                     `yaml:"ttl,omitempty"`
-	Protected bool                       `yaml:"protected,omitempty"`
+	TTL       string `yaml:"ttl,omitempty"`
+	Protected bool   `yaml:"protected,omitempty"`
+	// Policies names the policy sets every run against this environment
+	// must pass, each a directory of that name under policies/ or under a
+	// --policy directory.
+	Policies  []string                   `yaml:"policies,omitempty"`
 	Naming    *Naming                    `yaml:"naming,omitempty"`
 	Routes    map[string][]Route         `yaml:"routes,omitempty"`
 	Resources map[string]ResourceImports `yaml:"resources,omitempty"`

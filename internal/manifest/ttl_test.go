@@ -41,3 +41,36 @@ func TestEnvironmentTTL(t *testing.T) {
 		})
 	}
 }
+
+// A policy set name becomes a directory joined onto --policy paths read
+// outside the manifest root, so anything but one plain segment is refused.
+func TestEnvironmentPolicySets(t *testing.T) {
+	cases := map[string]struct {
+		sets    []string
+		wantErr string
+	}{
+		"none":             {},
+		"two":              {sets: []string{"production", "pci_scope-2"}},
+		"a parent segment": {sets: []string{".."}, wantErr: "must match"},
+		"a traversal":      {sets: []string{"../../etc"}, wantErr: "must match"},
+		"a separator":      {sets: []string{"prod/extra"}, wantErr: "must match"},
+		"an absolute path": {sets: []string{"/etc"}, wantErr: "must match"},
+		"empty":            {sets: []string{""}, wantErr: "must match"},
+		"uppercase":        {sets: []string{"Production"}, wantErr: "must match"},
+		"named twice":      {sets: []string{"production", "production"}, wantErr: "named twice"},
+	}
+	for label, c := range cases {
+		t.Run(label, func(t *testing.T) {
+			err := validateEnvironment("environments/x.yaml", &Environment{Kind: EnvironmentKindPersistent, Policies: c.sets})
+			if c.wantErr == "" {
+				if err != nil {
+					t.Fatalf("validateEnvironment: %v", err)
+				}
+				return
+			}
+			if err == nil || !strings.Contains(err.Error(), c.wantErr) {
+				t.Fatalf("err = %v, want one containing %q", err, c.wantErr)
+			}
+		})
+	}
+}

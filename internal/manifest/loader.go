@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -682,6 +683,9 @@ func sortedKeysOf[V any](m map[string]V) []string {
 	return out
 }
 
+// PolicySetPattern is what an environment's policy set may be called.
+var PolicySetPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9_-]*$`)
+
 func validateEnvironment(path string, env *Environment) error {
 	switch env.Kind {
 	case EnvironmentKindEphemeral, EnvironmentKindPersistent:
@@ -697,6 +701,19 @@ func validateEnvironment(path string, env *Environment) error {
 		if err != nil || ttl <= 0 {
 			return kerrors.Validation("%s: ttl: must be a positive duration such as 72h, got %q", path, env.TTL)
 		}
+	}
+
+	seen := map[string]bool{}
+	for _, name := range env.Policies {
+		// A set name is joined onto --policy directories, which are read
+		// outside the manifest root, so it must be one path segment.
+		if !PolicySetPattern.MatchString(name) {
+			return kerrors.Validation("%s: policies: %q must match %s", path, name, PolicySetPattern)
+		}
+		if seen[name] {
+			return kerrors.Validation("%s: policies: %q is named twice", path, name)
+		}
+		seen[name] = true
 	}
 
 	// naming.prefix becomes a leading segment of every derived name, so it

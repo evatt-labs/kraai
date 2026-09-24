@@ -159,7 +159,7 @@ func runPlan(
 
 	// Loaded before anything reads the cloud, so a policy that does not
 	// compile fails the command in a second rather than after a full plan.
-	policies, err := policy.Load(fsys, policyPaths)
+	policies, err := policy.Load(fsys, policyPaths, m.Environment.Policies)
 	if err != nil {
 		return err
 	}

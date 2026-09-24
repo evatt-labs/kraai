@@ -77,10 +77,6 @@ func runGC(
 	if err != nil {
 		return err
 	}
-	policies, err := policy.Load(fsys, policyPaths)
-	if err != nil {
-		return err
-	}
 	ctx := cmd.Context()
 	if len(names) == 0 {
 		_, err := io.WriteString(cmd.OutOrStdout(), "no environments declared\n")
@@ -112,6 +108,9 @@ func runGC(
 				return err
 			}
 		}
+		// Per environment, since each overlay may name its own sets, and
+		// only for one about to be destroyed.
+		policies := func() (*policy.Set, error) { return policy.Load(fsys, policyPaths, m.Environment.Policies) }
 		verdict.Action, verdict.Detail, err = reap(ctx, cmd.ErrOrStderr(), envName, m, store, dryRun, assembler, stores, policies)
 		_ = resolved.Close(ctx)
 		if err != nil {
@@ -134,7 +133,7 @@ func runGC(
 // and did not finish cleanly.
 func reap(
 	ctx context.Context, stderr io.Writer, envName string, m *manifest.Manifest, store lock.Store, dryRun bool,
-	assembler RegistryAssembler, stores LockStoreAssembler, policies *policy.Set,
+	assembler RegistryAssembler, stores LockStoreAssembler, loadPolicies func() (*policy.Set, error),
 ) (action, detail string, err error) {
 	// The invariant this command exists to hold: a persistent environment
 	// is never reaped, whatever its record says.
@@ -156,6 +155,10 @@ func reap(
 	}
 	if m.Environment.Protected {
 		return "kept", "elapsed, but protected; destroy it by name with --confirm-name", nil
+	}
+	policies, err := loadPolicies()
+	if err != nil {
+		return "", "", err
 	}
 	if dryRun {
 		return "would destroy", fmt.Sprintf("elapsed %s ago", time.Since(*status.ExpiresAt).Round(time.Minute)), nil
