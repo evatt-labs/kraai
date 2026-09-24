@@ -1,0 +1,76 @@
+{
+  "types": [
+    {
+      "type": "AWS::AppConfig::DeploymentStrategy",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-24",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 4,
+      "compared": [
+        "DeploymentDurationInMinutes",
+        "Description",
+        "FinalBakeTimeInMinutes",
+        "GrowthFactor",
+        "GrowthType",
+        "Id",
+        "Name",
+        "ReplicateTo"
+      ]
+    },
+    {
+      "type": "AWS::AppRunner::AutoScalingConfiguration",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-24",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "AutoScalingConfigurationArn",
+        "AutoScalingConfigurationName",
+        "AutoScalingConfigurationRevision",
+        "Latest",
+        "MaxConcurrency",
+        "MaxSize",
+        "MinSize"
+      ]
+    },
+    {
+      "type": "AWS::Bedrock::IntelligentPromptRouter",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-24",
+      "region": "us-east-1",
+      "outcome": "oracle-unavailable",
+      "instances": 0,
+      "compared": [],
+      "note": "Cloud Control could not read any listed instance"
+    },
+    {
+      "type": "AWS::CodeDeploy::DeploymentConfig",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-24",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 17,
+      "compared": [
+        "ComputePlatform",
+        "DeploymentConfigName",
+        "MinimumHealthyHosts",
+        "TrafficRoutingConfig"
+      ]
+    },
+    {
+      "type": "AWS::XRay::Group",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-24",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "GroupARN",
+        "GroupName",
+        "InsightsConfiguration"
+      ]
+    }
+  ]
+}

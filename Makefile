@@ -8,7 +8,7 @@ SHELL := bash
 COVERAGE_FLOOR := 85
 COVERPROFILE := coverage.out
 
-.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract observability-up observability-down
+.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract direct-parity observability-up observability-down
 
 check: build vet test coverage-floor lint fmt-check
 
@@ -79,6 +79,12 @@ schema-index:
 # name, and rewrites the checked-in subset. Pass COMMIT=<sha> to move the pin.
 direct-extract:
 	cd internal/provider/aws/direct && go run extract.go $(if $(COMMIT),-commit $(COMMIT))
+
+# Read-only, needs AWS credentials: reads each direct type's live instances
+# both directly and through Cloud Control and compares them. UPDATE=1
+# rewrites the recorded evidence from a passing run.
+direct-parity:
+	go test -tags integration ./internal/provider/aws/direct -run TestReadParity -count=1 -v $(if $(UPDATE),-args -update-evidence)
 
 # A local OpenTelemetry backend and the kraai dashboard: one grafana/otel-lgtm
 # container (collector, Prometheus, Tempo, Grafana), pinned by digest. Ports
