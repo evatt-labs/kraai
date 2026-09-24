@@ -514,6 +514,10 @@ The result is posted as one comment per (command, environment), edited in
 place rather than appended, so a branch pushed to twenty times carries one
 current result instead of twenty stale ones.
 
+`plan` runs with `--detailed-exitcode`, so a plan its policies deny, or one
+with resources it could not read, fails the check; changes present do not.
+A denial heads the comment "denied by policy" rather than "failed".
+
 **The action refuses to run on `pull_request_target`.** That trigger exposes
 the base repository's secrets to code from the pull request's own branch, and
 kraai executes manifests, templates and hooks from that branch. There is no
