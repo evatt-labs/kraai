@@ -260,7 +260,13 @@ name for the secret. Two backends resolve today:
   or `StringList` ignores the flag). `?version=<n>` selects a parameter
   version through SSM's own `name:version` syntax. A parameter's ARN is
   per-parameter, not per-version, so `?version=` narrows which value is
-  read without changing the `iam-policy` grant's `Resource`.
+  read without changing the `iam-policy` grant's `Resource`. It must be a
+  version number: SSM also accepts a parameter *label* in the same
+  position, but a label moves between versions the way a Secrets Manager
+  staging label does, and the version marker (above) treats any
+  `?version=` as an immutable pin — a label there would never match and
+  would plan an `Update` on every `plan`. A reference using one fails
+  validation instead.
 - `aws-secretsmanager` — a Secrets Manager secret, read with
   `GetSecretValue`. `?version=<stage>` selects a version stage
   (`AWSCURRENT` by default); `?versionId=<id>` selects a specific version by
