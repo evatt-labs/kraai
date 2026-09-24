@@ -493,6 +493,42 @@ func TestRapid_ResolveEnvNeverLeaksSecretValueOnFailure(t *testing.T) {
 	})
 }
 
+// TestRapid_ResolveEnvNeverLeaksBindingSecretValueOnFailure is
+// TestRapid_ResolveEnvNeverLeaksSecretValueOnFailure's sibling for the
+// binding-key path (evatt-labs/kraai#331): a secrets binding's entry has
+// no URI scheme at all, so it resolves through spec.Secret rather than
+// client.resolveSecretRef — the same path a generated or `kraai secret
+// set` value takes on its way into a function's environment. The property
+// is identical: a value already resolved and sitting in env must never
+// appear in a sibling entry's failure text.
+func TestRapid_ResolveEnvNeverLeaksBindingSecretValueOnFailure(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		secretValue := string(rapid.SliceOfN(rapid.Byte(), 16, 64).Draw(t, "secret"))
+
+		client := &Client{}
+		settings := LambdaSettings{
+			EnvSecrets: map[string]string{
+				"A_OK":      "SECRETS.pepper_key",
+				"Z_MISSING": "SECRETS.not_registered",
+			},
+		}
+		spec := resource.Spec{
+			Binding: "SVC",
+			Secrets: map[string]resource.Secret{
+				"SECRETS.pepper_key": func(context.Context) (string, error) { return secretValue, nil },
+			},
+		}
+
+		_, err := resolveEnv(context.Background(), client, spec, settings)
+		if err == nil {
+			t.Fatal("resolveEnv error = nil, want a failure resolving the unregistered entry")
+		}
+		if strings.Contains(err.Error(), secretValue) {
+			t.Fatalf("resolveEnv error leaked the resolved secret value: %q", err.Error())
+		}
+	})
+}
+
 // assertCode fails t unless err carries want as its kerrors.Code.
 func assertCode(t *testing.T, err error, want kerrors.Code) {
 	t.Helper()
