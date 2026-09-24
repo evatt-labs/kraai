@@ -2,3 +2,16 @@ type: AWS::AppConfig::DeploymentStrategy
 read:
   model: appconfig/service/2019-10-09/appconfig-2019-10-09.json
   operation: GetDeploymentStrategy
+  identifier:
+    Id: DeploymentStrategyId
+properties:
+  DeploymentDurationInMinutes: DeploymentDurationInMinutes
+  Description: Description
+  FinalBakeTimeInMinutes: FinalBakeTimeInMinutes
+  GrowthFactor: GrowthFactor
+  GrowthType: GrowthType
+  Id: Id
+  Name: Name
+  ReplicateTo: ReplicateTo
+skip:
+  Tags: tags are not in this operation's response; the service returns them from its separate tagging API

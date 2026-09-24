@@ -2,3 +2,27 @@ type: AWS::Bedrock::IntelligentPromptRouter
 read:
   model: bedrock/service/2023-04-20/bedrock-2023-04-20.json
   operation: GetPromptRouter
+  identifier:
+    PromptRouterArn: promptRouterArn
+properties:
+  CreatedAt: createdAt
+  Description: description
+  FallbackModel:
+    member: fallbackModel
+    properties:
+      ModelArn: modelArn
+  Models:
+    member: models
+    properties:
+      ModelArn: modelArn
+  PromptRouterArn: promptRouterArn
+  PromptRouterName: promptRouterName
+  RoutingCriteria:
+    member: routingCriteria
+    properties:
+      ResponseQualityDifference: responseQualityDifference
+  Status: status
+  Type: type
+  UpdatedAt: updatedAt
+skip:
+  Tags: tags are not in this operation's response; the service returns them from its separate tagging API
