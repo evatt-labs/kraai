@@ -74,10 +74,12 @@ type fakeClient struct {
 	tagged      map[string][]string
 	taggedErr   error
 	taggedCalls int
+	taggedTypes []string
 }
 
-func (f *fakeClient) TaggedResources(_ context.Context, name string) ([]string, error) {
+func (f *fakeClient) TaggedResources(_ context.Context, name, tagType string) ([]string, error) {
 	f.taggedCalls++
+	f.taggedTypes = append(f.taggedTypes, tagType)
 	if f.taggedErr != nil {
 		return nil, f.taggedErr
 	}
