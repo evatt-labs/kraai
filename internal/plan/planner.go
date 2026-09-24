@@ -357,7 +357,7 @@ func (p *Planner) expandCompute(
 			Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
 		}
 		switch r.NameFrom {
-		case resource.NameFromEntry:
+		case resource.NameFromEntry, resource.NameFromEntries:
 			// A compute resolve has no entry to read a name from: this is a
 			// registration wired under the wrong capability, and it must not
 			// fall through to a derived name it said it does not have.
@@ -436,14 +436,44 @@ func serviceBindings(
 		entries := append([]manifest.Binding(nil), svc.Bindings[capability]...)
 		sort.SliceStable(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
 		for _, entry := range entries {
-			out = append(out, map[string]any{
+			desc := map[string]any{
 				"capability": capability,
 				"binding":    entry.Name(),
 				"vendor":     vendor,
 				"name":       namer.Resource(environmentName, svcKey, entry.Name()),
 				"config":     entry.Config(),
-			})
+			}
+			// A secrets binding expands to one resource per entry, each with
+			// its own derived name (see expandEntries); a native grant
+			// scoped to exactly those entries needs those names, which the
+			// binding's single "name" above is not. Computed here, once,
+			// with the environment and namer already in scope, rather than
+			// re-derived wherever a grant is built.
+			if capability == manifest.CapabilitySecrets {
+				if names := secretsEntryNames(environmentName, svcKey, entry, namer); len(names) > 0 {
+					desc["entryNames"] = names
+				}
+			}
+			out = append(out, desc)
 		}
+	}
+	return out
+}
+
+// secretsEntryNames returns the derived name of every entry a secrets
+// binding declares, keyed by entry: the same expandEntries would derive for
+// each of that binding's resources. A malformed `entries` value returns
+// nil rather than an error; expandBinding is what validates the manifest,
+// and a compute config that cannot describe a broken binding's grants is
+// not this function's failure to report.
+func secretsEntryNames(environmentName, svcKey string, entry manifest.Binding, namer naming.Namer) map[string]string {
+	raw, ok := entry.Config()["entries"].(map[string]any)
+	if !ok {
+		return nil
+	}
+	out := make(map[string]string, len(raw))
+	for name := range raw {
+		out[name] = namer.Entry(environmentName, svcKey, entry.Name(), name)
 	}
 	return out
 }
@@ -590,6 +620,20 @@ func (p *Planner) expandBinding(
 
 	out := make([]plannedItem, 0, len(regs))
 	for _, r := range regs {
+		if r.NameFrom == resource.NameFromEntries {
+			if adopted != nil {
+				return nil, kerrors.Validation(
+					"services.%s.%s.%s: this binding expands to more than one resource, "+
+						"so it cannot be adopted as a single imported resource",
+					svcKey, capability, binding)
+			}
+			items, err := p.expandEntries(m, environmentName, svcKey, binding, capability, config, r, namer)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, items...)
+			continue
+		}
 		name := derived
 		if r.NameFrom == resource.NameFromEntry {
 			// The identity is the manifest's: a hosted zone is the zone
@@ -625,6 +669,73 @@ func (p *Planner) expandBinding(
 			dependsOn: r.DependsOn,
 			reads:     reads,
 			embedded:  embedded,
+		})
+	}
+	return out, nil
+}
+
+// expandEntries expands one NameFromEntries registration into one
+// plannedItem per key of the map config carries under r.NameKey: a secrets
+// binding's single `entries:` map becomes one resource per named secret,
+// each with its own derived name (internal/naming's Namer.Entry) and its
+// own entry's config, rather than the one name and one Spec.Config every
+// other NameStrategy produces for a binding.
+//
+// Every item shares the binding's own name (Item.Binding, ReadsBindings):
+// apply's secretIndex and attribute index are keyed by (service, binding),
+// so a consumer reading "SECRETS" sees every entry a "SECRETS" binding
+// expanded to, however many there are.
+func (p *Planner) expandEntries(
+	m *manifest.Manifest, environmentName, svcKey, binding, capability string, config map[string]any,
+	r resource.Registration, namer naming.Namer,
+) ([]plannedItem, error) {
+	raw, ok := config[r.NameKey]
+	if !ok {
+		return nil, kerrors.Validation(
+			"services.%s.%s.%s: %s is named from the entry's %q, which is missing",
+			svcKey, capability, binding, r.Type, r.NameKey)
+	}
+	entries, ok := raw.(map[string]any)
+	if !ok || len(entries) == 0 {
+		return nil, kerrors.Validation(
+			"services.%s.%s.%s: %s is named from the entry's %q, which must be a non-empty map",
+			svcKey, capability, binding, r.Type, r.NameKey)
+	}
+
+	entryNames := make([]string, 0, len(entries))
+	for entry := range entries {
+		entryNames = append(entryNames, entry)
+	}
+	sort.Strings(entryNames)
+
+	readsBindings, reads := readsFor(r, binding, m.Services[svcKey], manifest.Route{})
+
+	out := make([]plannedItem, 0, len(entryNames))
+	for _, entry := range entryNames {
+		entryConfig, ok := entries[entry].(map[string]any)
+		if !ok {
+			return nil, kerrors.Validation(
+				"services.%s.%s.%s.%s: entry must be a map, got %T",
+				svcKey, capability, binding, entry, entries[entry])
+		}
+		name := namer.Entry(environmentName, svcKey, binding, entry)
+		spec := make(map[string]any, len(entryConfig)+1)
+		for k, v := range entryConfig {
+			spec[k] = v
+		}
+		spec["entry"] = entry
+
+		out = append(out, plannedItem{
+			Item: Item{
+				ServiceKey: svcKey, Binding: binding, Capability: capability,
+				Provider: r.Provider, Type: r.Type, VendorType: r.VendorTypeName(),
+				ReadsBindings: readsBindings,
+			},
+			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name},
+			spec:      resource.Spec{Binding: binding, Name: name, Config: spec},
+			res:       r.Resource,
+			dependsOn: r.DependsOn,
+			reads:     reads,
 		})
 	}
 	return out, nil

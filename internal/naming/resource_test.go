@@ -321,6 +321,60 @@ func TestNamer_TruncationBoundaryStripsHyphenExactlyAtCut(t *testing.T) {
 	}
 }
 
+// TestNamer_Entry pins Entry's shape: a hierarchical path, prefix glued
+// directly to the environment as Resource and Service do, binding and entry
+// slugged.
+func TestNamer_Entry(t *testing.T) {
+	cases := []struct {
+		name, prefix, env, svc, binding, entry, want string
+	}{
+		{
+			name: "no prefix", prefix: "", env: "dev", svc: "api", binding: "SECRETS", entry: "pepper_key",
+			want: "/dev/api/secrets/pepper-key",
+		},
+		{
+			name: "prefix glues to the environment", prefix: "acme-", env: "prod", svc: "api", binding: "SECRETS", entry: "github_client_secret",
+			want: "/acme-prod/api/secrets/github-client-secret",
+		},
+		{
+			name: "binding and entry are slugged, env and service are not", prefix: "", env: "Dev_1", svc: "API", binding: "My Secrets", entry: "MY_KEY",
+			want: "/Dev_1/API/my-secrets/my-key",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := NewNamer(c.prefix).Entry(c.env, c.svc, c.binding, c.entry)
+			if got != c.want {
+				t.Errorf("Entry(%q, %q, %q, %q) = %q, want %q", c.env, c.svc, c.binding, c.entry, got, c.want)
+			}
+		})
+	}
+}
+
+// TestNamer_Entry_NotTruncated documents that Entry, unlike Resource and
+// Service, is never cut to 63 bytes: SSM's own ceiling is far higher, and a
+// hierarchical path truncated blind risks two different entries colliding
+// at the cut.
+func TestNamer_Entry_NotTruncated(t *testing.T) {
+	long := NewNamer("").Entry("dev", "api", strings.Repeat("A", 80), strings.Repeat("B", 80))
+	if len(long) <= 63 {
+		t.Fatalf("len(%q) = %d, want > 63 to exercise the no-truncation path", long, len(long))
+	}
+}
+
+// TestNamer_Entry_DistinctFromResource documents why Entry cannot reuse
+// Resource plus a fourth segment: two different (binding, entry) pairs that
+// would collide if Resource's already-truncated output were reused as a
+// prefix must not collide here.
+func TestNamer_Entry_DistinctFromResource(t *testing.T) {
+	namer := NewNamer("")
+	a := namer.Entry("dev", "api", "SECRETS", "one")
+	b := namer.Entry("dev", "api", "SECRETS", "two")
+	if a == b {
+		t.Fatalf("Entry(%q) and Entry(%q) collided: %q", "one", "two", a)
+	}
+}
+
 // TestRapid_Namer_BoundedAndStable is TestRapid_ResourceName_BoundedAndStable's
 // counterpart with a valid, realistic prefix applied: Namer.Resource stays
 // <=63 bytes and deterministic regardless of prefix, and — since a valid
