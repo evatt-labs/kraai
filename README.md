@@ -1,15 +1,19 @@
 # kraai
 
-**Environments as a first-class abstraction over cloud providers.**
+**Multi-provider infrastructure as code, driven by a manifest, with no state
+file.**
 
-A manifest declares an environment. `kraai apply` makes it real. `kraai
-destroy` removes it. Ephemeral per-PR environments and persistent
-dev/qa/staging/prod environments are the same abstraction with different
-policy — not different mechanisms.
+One manifest declares infrastructure, and the code it runs, across AWS,
+Cloudflare and Neon. A service asks for what it needs in vendor-neutral terms
+(a database, a queue, a network) and `kraai.yaml` names the vendor that
+provides each. Where no capability fits, the manifest names the vendor's own
+resource: 1,577 of the 1,643 AWS-published resource types in kraai's schema
+index, validated against AWS's schema at plan time. `kraai plan` answers every question with a live
+lookup, `kraai apply` makes the manifest real, and `kraai destroy` removes it.
+The manifest is the only source of truth.
 
-kraai provisions infrastructure *and* deploys application code, which is the
-gap it exists to fill: Terraform and Terragrunt provision but do not deploy;
-tools that deploy do not provision.
+kraai provisions infrastructure *and* deploys application code: Terraform
+provisions but does not deploy, and tools that deploy do not provision.
 
 > **Status: early, and honest about it.** `plan`, `apply` and `destroy` work
 > and have deployed a real FastAPI service to AWS Lambda behind API Gateway,
@@ -348,7 +352,10 @@ what using it does, so kraai does not guess.
 
 ### Environments
 
-The overlay is what makes the same manifest a throwaway preview or production.
+A manifest is applied to a named environment. Ephemeral per-PR environments
+and persistent dev, qa, staging and production environments are the same
+abstraction with different policy, not different mechanisms. The overlay is
+what makes the same manifest a throwaway preview or production.
 
 ```yaml
 # environments/production.yaml
