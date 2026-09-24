@@ -1,0 +1,99 @@
+package direct
+
+import (
+	"encoding/json"
+	"os"
+	"reflect"
+	"regexp"
+	"strings"
+	"testing"
+)
+
+func TestCompare(t *testing.T) {
+	cases := map[string]struct {
+		typeName   string
+		cc, direct string
+		want       []string
+	}{
+		"identical": {"AWS::CodeDeploy::DeploymentConfig",
+			`{"ComputePlatform":"Server","MinimumHealthyHosts":{"Type":"HOST_COUNT","Value":1}}`,
+			`{"ComputePlatform":"Server","MinimumHealthyHosts":{"Type":"HOST_COUNT","Value":1}}`, nil},
+		"numbers by value": {"AWS::AppConfig::DeploymentStrategy", `{"GrowthFactor":100}`, `{"GrowthFactor":100.0}`, nil},
+		"a different number": {"AWS::AppConfig::DeploymentStrategy", `{"GrowthFactor":100}`, `{"GrowthFactor":100.5}`,
+			[]string{"GrowthFactor"}},
+		"a skipped property": {"AWS::XRay::Group", `{"GroupName":"Default","Tags":[]}`, `{"GroupName":"Default"}`, nil},
+		"a property only Cloud Control has": {"AWS::XRay::Group", `{"GroupName":"Default","FilterExpression":"x"}`, `{"GroupName":"Default"}`,
+			[]string{"FilterExpression"}},
+		"a property only the direct read has": {"AWS::XRay::Group", `{"GroupName":"Default"}`, `{"GroupName":"Default","FilterExpression":"x"}`,
+			[]string{"FilterExpression"}},
+		"a nested difference": {"AWS::CodeDeploy::DeploymentConfig",
+			`{"MinimumHealthyHosts":{"Type":"HOST_COUNT","Value":1}}`, `{"MinimumHealthyHosts":{"Type":"FLEET_PERCENT","Value":1}}`,
+			[]string{"MinimumHealthyHosts.Type"}},
+		"a list element": {"AWS::Bedrock::IntelligentPromptRouter",
+			`{"Models":[{"ModelArn":"a"},{"ModelArn":"b"}]}`, `{"Models":[{"ModelArn":"a"},{"ModelArn":"c"}]}`,
+			[]string{"Models[1].ModelArn"}},
+		"a list of another length": {"AWS::Bedrock::IntelligentPromptRouter",
+			`{"Models":[{"ModelArn":"a"}]}`, `{"Models":[{"ModelArn":"a"},{"ModelArn":"b"}]}`, []string{"Models"}},
+		"a string that looks like a number": {"AWS::XRay::Group", `{"GroupName":"1"}`, `{"GroupName":1}`, []string{"GroupName"}},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			// Decoded as each side decodes: the SDK's plain Unmarshal for
+			// Cloud Control, UseNumber for the direct client, which keeps
+			// 100.0 as it was written.
+			var cc, direct map[string]any
+			if err := json.Unmarshal([]byte(c.cc), &cc); err != nil {
+				t.Fatal(err)
+			}
+			dec := json.NewDecoder(strings.NewReader(c.direct))
+			dec.UseNumber()
+			if err := dec.Decode(&direct); err != nil {
+				t.Fatal(err)
+			}
+			diffs, err := Compare(c.typeName, cc, direct)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, d := range diffs {
+				got = append(got, d.Property)
+			}
+			if !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("differences = %v, want %v", got, c.want)
+			}
+		})
+	}
+	if _, err := Compare("AWS::Nope::Thing", nil, nil); err == nil {
+		t.Fatal("a type with no override was compared")
+	}
+}
+
+// The repository is public: recorded evidence names types, properties and
+// outcomes, never an account, an ARN or a value.
+func TestEvidenceCarriesNothingFromTheAccount(t *testing.T) {
+	raw, err := os.ReadFile("evidence/parity.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, leak := range []*regexp.Regexp{regexp.MustCompile(`\b\d{12}\b`), regexp.MustCompile(`arn:aws`)} {
+		if leak.Match(raw) {
+			t.Fatalf("evidence/parity.json matches %s", leak)
+		}
+	}
+	var evidence Evidence
+	if err := json.Unmarshal(raw, &evidence); err != nil {
+		t.Fatal(err)
+	}
+	lock, err := LoadLock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range evidence.Types {
+		if _, ok := readers[e.Type]; !ok {
+			t.Errorf("evidence for %s, which has no reader", e.Type)
+		}
+		if e.SmithyCommit != lock.SmithyCommit {
+			t.Errorf("evidence for %s was taken at %s; the lock is at %s", e.Type, e.SmithyCommit, lock.SmithyCommit)
+		}
+	}
+}
