@@ -35,6 +35,9 @@ func Generate() ([]byte, error) {
 				if id.Name != "" {
 					fmt.Fprintf(&b, ", Name: %q", id.Name)
 				}
+				if id.JSONName != "" {
+					fmt.Fprintf(&b, ", JSONName: %q", id.JSONName)
+				}
 				b.WriteString("},\n")
 			}
 			b.WriteString("},\n")
