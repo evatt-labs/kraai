@@ -7,7 +7,7 @@ One manifest declares infrastructure, and the code it runs, across AWS,
 Cloudflare and Neon. A service asks for what it needs in vendor-neutral terms
 (a database, a queue, a network) and `kraai.yaml` names the vendor that
 provides each. Where no capability fits, the manifest names the vendor's own
-resource: 1,576 of the 1,643 AWS-published resource types in kraai's schema
+resource: 1,577 of the 1,643 AWS-published resource types in kraai's schema
 index, validated against AWS's schema at plan time. `kraai plan` answers every question with a live
 lookup, `kraai apply` makes the manifest real, and `kraai destroy` removes it.
 The manifest is the only source of truth.

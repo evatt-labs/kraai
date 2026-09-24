@@ -26,6 +26,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/httpx"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 )
 
 // maxListPages bounds a ListResources page walk against a NextToken that
@@ -142,6 +143,10 @@ type Client struct {
 
 	tagging taggingAPI
 
+	// direct reads and lists through each service's own API, sharing the
+	// SDK's instrumented transport and credentials.
+	direct *direct.Client
+
 	// region is the SDK's resolved region, which every ARN this package
 	// builds is against. Taken from the loaded config rather than
 	// Settings.Region, which may be empty and deferred to the SDK's chain.
@@ -226,9 +231,10 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 	// transport under the SDK's retry and credential layers. Adaptive
 	// retries with a longer budget, because Cloud Control throttles a
 	// plan's burst of reads well before three standard attempts are spent.
+	httpClient := httpx.NewClient(60*time.Second, nil, nil)
 	cfg, err := awsconfig.LoadDefaultConfig(ctx,
 		awsconfig.WithRegion(settings.Region),
-		awsconfig.WithHTTPClient(httpx.NewClient(60*time.Second, nil, nil)),
+		awsconfig.WithHTTPClient(httpClient),
 		awsconfig.WithRetryMode(aws.RetryModeAdaptive),
 		awsconfig.WithRetryMaxAttempts(cloudControlMaxAttempts),
 	)
@@ -245,6 +251,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		sm:               secretsmanager.NewFromConfig(cfg),
 		ssm:              ssm.NewFromConfig(cfg),
 		tagging:          resourcegroupstaggingapi.NewFromConfig(cfg),
+		direct:           &direct.Client{HTTP: httpClient, Credentials: cfg.Credentials, Region: cfg.Region},
 		region:           cfg.Region,
 		pollInitialDelay: defaultPollInitialDelay,
 		pollMaxDelay:     defaultPollMaxDelay,

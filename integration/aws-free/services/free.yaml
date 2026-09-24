@@ -48,3 +48,17 @@ services:
           Memory: "512"
           ContainerDefinitions:
             - { Name: noop, Image: public.ecr.aws/docker/library/busybox:stable, Essential: true }
+
+      # A prompt router costs nothing to create or keep: Bedrock bills per
+      # request routed through it, and nothing is. Cloud Control's list
+      # omits routers created in the account, so kraai lists them through
+      # Bedrock itself. Foundation model ARNs carry no account.
+      - binding: ROUTER
+        type: AWS::Bedrock::IntelligentPromptRouter
+        properties:
+          PromptRouterName: kraai-integration-router
+          Models:
+            - { ModelArn: "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-lite-v1:0" }
+            - { ModelArn: "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0" }
+          FallbackModel: { ModelArn: "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0" }
+          RoutingCriteria: { ResponseQualityDifference: 0 }

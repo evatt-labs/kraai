@@ -471,15 +471,23 @@ func TestAllOwnedRequiresEveryCheck(t *testing.T) {
 	}
 }
 
-// A type whose list omits the instances created in the account is refused
-// by name: kraai would create another on every apply.
-func TestAnUnlistedTypeIsRefused(t *testing.T) {
+// A type whose Cloud Control list omits the instances created in the
+// account is refused unless it is listed through its own service: without
+// one, kraai would create another on every apply.
+func TestAnUnlistedTypeNeedsADirectList(t *testing.T) {
 	facts, err := cfschema.Lookup("AWS::Bedrock::IntelligentPromptRouter")
 	if err != nil {
 		t.Fatal(err)
 	}
+	if _, err := nativeLookup(facts); err != nil {
+		t.Fatalf("with a direct list, nativeLookup = %v", err)
+	}
+
+	saved := hasDirectList
+	hasDirectList = func(string) bool { return false }
+	t.Cleanup(func() { hasDirectList = saved })
 	if _, err := nativeLookup(facts); err == nil || !strings.Contains(err.Error(), "never one created in the account") {
-		t.Fatalf("nativeLookup = %v, want the refusal", err)
+		t.Fatalf("without a direct list, nativeLookup = %v, want the refusal", err)
 	}
 	// The schema alone would have accepted it.
 	facts.TypeName = "AWS::Example::Listed"
