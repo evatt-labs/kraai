@@ -26,3 +26,10 @@ properties:
   UpdatedAt: updatedAt
 skip:
   Tags: tags are not in this operation's response; the service returns them from its separate tagging API
+list:
+  operation: ListPromptRouters
+  item: promptRouterArn
+  # The type filter defaults to Bedrock's own default routers; a router
+  # created in the account is listed only as custom.
+  input:
+    type: custom

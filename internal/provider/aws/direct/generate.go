@@ -46,10 +46,40 @@ func Generate() ([]byte, error) {
 			fmt.Fprintf(&b, "Response: %#v,\n", r.Response)
 		}
 		fields(&b, r.Fields)
+		if l := r.List; l != nil {
+			b.WriteString("List: &Lister{\n")
+			field(&b, "Operation", l.Operation)
+			field(&b, "Target", l.Target)
+			field(&b, "Method", l.Method)
+			field(&b, "URI", l.URI)
+			if len(l.Input) > 0 {
+				b.WriteString("Input: []Binding{\n")
+				for _, in := range l.Input {
+					binding(&b, in)
+				}
+				b.WriteString("},\n")
+			}
+			b.WriteString("Token: ")
+			binding(&b, l.Token)
+			fmt.Fprintf(&b, "NextToken: %#v,\nItems: %#v,\n", l.NextToken, l.Items)
+			field(&b, "Item", l.Item)
+			field(&b, "Property", l.Property)
+			b.WriteString("},\n")
+		}
 		b.WriteString("},\n")
 	}
 	b.WriteString("}\n")
 	return format.Source(b.Bytes())
+}
+
+func binding(b *bytes.Buffer, in Binding) {
+	fmt.Fprintf(b, "Binding{Member: %q, Location: %q", in.Member, in.Location)
+	for _, f := range []struct{ name, value string }{{"Property", in.Property}, {"Name", in.Name}, {"JSONName", in.JSONName}, {"Value", in.Value}} {
+		if f.value != "" {
+			fmt.Fprintf(b, ", %s: %q", f.name, f.value)
+		}
+	}
+	b.WriteString("},\n")
 }
 
 func field(b *bytes.Buffer, name, value string) {

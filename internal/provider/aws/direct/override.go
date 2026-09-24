@@ -14,6 +14,8 @@ type Override struct {
 	// Type is the CloudFormation type name, such as AWS::XRay::Group.
 	Type string `yaml:"type"`
 	Read Read   `yaml:"read"`
+	// List, when set, names the operation that lists every instance.
+	List *List `yaml:"list,omitempty"`
 	// Properties maps each readable CloudFormation property to where the
 	// response carries it.
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
@@ -34,6 +36,19 @@ type Read struct {
 	// Response is the dotted member path from the operation's output to
 	// the structure holding the resource; empty when the output is it.
 	Response string `yaml:"response,omitempty"`
+}
+
+// List names the operation that lists every instance of a type, for a type
+// whose Cloud Control list is known to omit some. Pagination is read from
+// the operation's paginated trait, never written here.
+type List struct {
+	Operation string `yaml:"operation"`
+	// Item is the member of each listed item carrying the primary
+	// identifier; it must be the member the read binds it to.
+	Item string `yaml:"item"`
+	// Input fixes input members to a value on every call, such as a filter
+	// that would otherwise default to excluding what kraai created.
+	Input map[string]string `yaml:"input,omitempty"`
 }
 
 // Mapping is where one property's value is in the response: a member of
