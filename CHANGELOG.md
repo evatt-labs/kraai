@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.17](https://github.com/evatt-labs/kraai/compare/v0.6.16...v0.6.17) (2026-09-24)
+
+
+### Features
+
+* **aws:** compile reviewed read overrides into a generated reader table ([#332](https://github.com/evatt-labs/kraai/issues/332)) ([be9430b](https://github.com/evatt-labs/kraai/commit/be9430b5ff69d2dfc722aa23bc508a4627fe8d9d))
+* **aws:** lock a Smithy and CloudFormation subset for direct reads ([#329](https://github.com/evatt-labs/kraai/issues/329)) ([2694df7](https://github.com/evatt-labs/kraai/commit/2694df72679a15a9c60a1a295d4209d8915beb1f))
+* **aws:** prove direct reads against Cloud Control on live instances ([#334](https://github.com/evatt-labs/kraai/issues/334)) ([d589356](https://github.com/evatt-labs/kraai/commit/d5893562c2c62075c70df2011ae978644f9f4031))
+* **aws:** read resources through their own APIs from the reader table ([#333](https://github.com/evatt-labs/kraai/issues/333)) ([5f20935](https://github.com/evatt-labs/kraai/commit/5f20935b1cc51893e377e5755cbb1e719897748e))
+* secrets capability with generated or external values on SSM Parameter Store ([#335](https://github.com/evatt-labs/kraai/issues/335)) ([bbf6b42](https://github.com/evatt-labs/kraai/commit/bbf6b423a758ac9d3444b3c530e122fb0e238efa))
+
 ## [0.6.16](https://github.com/evatt-labs/kraai/compare/v0.6.15...v0.6.16) (2026-09-24)
 
 
