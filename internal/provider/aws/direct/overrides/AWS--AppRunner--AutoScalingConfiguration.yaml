@@ -1,0 +1,4 @@
+type: AWS::AppRunner::AutoScalingConfiguration
+read:
+  model: apprunner/service/2020-05-15/apprunner-2020-05-15.json
+  operation: DescribeAutoScalingConfiguration

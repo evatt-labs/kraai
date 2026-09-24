@@ -1,0 +1,4 @@
+type: AWS::XRay::Group
+read:
+  model: xray/service/2016-04-12/xray-2016-04-12.json
+  operation: GetGroup

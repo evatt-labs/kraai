@@ -8,7 +8,7 @@ SHELL := bash
 COVERAGE_FLOOR := 85
 COVERPROFILE := coverage.out
 
-.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index observability-up observability-down
+.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract observability-up observability-down
 
 check: build vet test coverage-floor lint fmt-check
 
@@ -73,6 +73,12 @@ plan-examples:
 # so a repeat run makes no DescribeType calls.
 schema-index:
 	go generate ./internal/provider/aws/cfschema
+
+# Needs the network and AWS credentials: fetches, at the commit lock.json
+# pins, the Smithy models and CloudFormation schemas the direct overrides
+# name, and rewrites the checked-in subset. Pass COMMIT=<sha> to move the pin.
+direct-extract:
+	cd internal/provider/aws/direct && go run extract.go $(if $(COMMIT),-commit $(COMMIT))
 
 # A local OpenTelemetry backend and the kraai dashboard: one grafana/otel-lgtm
 # container (collector, Prometheus, Tempo, Grafana), pinned by digest. Ports
