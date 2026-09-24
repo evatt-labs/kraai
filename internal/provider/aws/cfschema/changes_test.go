@@ -58,3 +58,39 @@ func TestTheEmbeddedIndexHasNoChangesAgainstItself(t *testing.T) {
 		t.Fatalf("changes = %v", got[:min(3, len(got))])
 	}
 }
+
+func TestRecordLegacy(t *testing.T) {
+	tagged := Facts{TypeName: "AWS::X::Y", Identity: IdentityByTag, TagProperty: "Tags", TagShape: TagShapeArray, TagOnCreate: true}
+	named := Facts{TypeName: "AWS::X::Y", Identity: IdentityByName, IdentityProperty: "Name"}
+	other := Facts{TypeName: "AWS::X::Z", Identity: IdentityByName, IdentityProperty: "Name"}
+
+	// A changed identity is recorded; an unchanged type is not.
+	got := RecordLegacy(nil, map[string]Facts{"AWS::X::Y": named, "AWS::X::Z": other}, map[string]Facts{"AWS::X::Y": tagged, "AWS::X::Z": other})
+	if !reflect.DeepEqual(got, map[string][]Facts{"AWS::X::Y": {named}}) {
+		t.Fatalf("after one change = %v", got)
+	}
+	// Recording the same change again adds nothing.
+	if again := RecordLegacy(got, map[string]Facts{"AWS::X::Y": named}, map[string]Facts{"AWS::X::Y": tagged}); !reflect.DeepEqual(again, got) {
+		t.Fatalf("recorded twice = %v", again)
+	}
+	// A later change puts the newer earlier identity first.
+	matched := tagged
+	matched.TagOnCreate = false
+	later := RecordLegacy(got, map[string]Facts{"AWS::X::Y": tagged}, map[string]Facts{"AWS::X::Y": matched})
+	if !reflect.DeepEqual(later["AWS::X::Y"], []Facts{tagged, named}) {
+		t.Fatalf("after a second change = %v", later["AWS::X::Y"])
+	}
+	// A dropped type is recorded, and the input is not written.
+	dropped := RecordLegacy(got, map[string]Facts{"AWS::X::Z": other}, map[string]Facts{})
+	if !reflect.DeepEqual(dropped["AWS::X::Z"], []Facts{other}) || len(got) != 1 {
+		t.Fatalf("dropped = %v, input = %v", dropped, got)
+	}
+}
+
+// The record ships empty; nothing has had an identity change accepted.
+func TestTheShippedLegacyRecordIsEmpty(t *testing.T) {
+	previous, err := Previous("AWS::SQS::Queue")
+	if err != nil || previous != nil {
+		t.Fatalf("Previous = %v, %v", previous, err)
+	}
+}
