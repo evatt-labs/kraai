@@ -173,6 +173,19 @@ func (i *instrumented) Diff(spec Spec, state *State) (Difference, error) {
 	return differ.Diff(spec, state)
 }
 
+// DiffLive forwards to the inner resource when it can answer with a call of
+// its own, and otherwise reports no difference. Structural for the same
+// reason as Diff: plan.LiveDiffer lives in internal/plan.
+func (i *instrumented) DiffLive(ctx context.Context, spec Spec, state *State) (Difference, error) {
+	differ, ok := i.inner.(interface {
+		DiffLive(context.Context, Spec, *State) (Difference, error)
+	})
+	if !ok {
+		return Same, nil
+	}
+	return differ.DiffLive(ctx, spec, state)
+}
+
 // ValidateSpec forwards to the inner resource when it can validate, and
 // otherwise reports no error. Structural for the same reason as Diff:
 // plan.SpecValidator lives in internal/plan.

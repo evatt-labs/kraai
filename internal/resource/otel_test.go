@@ -286,6 +286,8 @@ type optionalResource struct {
 	secrets     map[string]Secret
 	differs     bool
 	diffErr     error
+	differsLive bool
+	diffLiveErr error
 	validateErr error
 	scope       string
 	notes       []string
@@ -302,6 +304,16 @@ func (o optionalResource) Diff(Spec, *State) (Difference, error) {
 		return Same, o.diffErr
 	}
 	if o.differs {
+		return Immutable, nil
+	}
+	return Same, nil
+}
+
+func (o optionalResource) DiffLive(context.Context, Spec, *State) (Difference, error) {
+	if o.diffLiveErr != nil {
+		return Same, o.diffLiveErr
+	}
+	if o.differsLive {
 		return Immutable, nil
 	}
 	return Same, nil
@@ -361,6 +373,11 @@ func TestInstrumentedForwardsOptionalInterfaces(t *testing.T) {
 		t.Error("decorated resource does not satisfy Differ; add a forwarder in otel.go")
 	}
 	if _, ok := decorated.(interface {
+		DiffLive(context.Context, Spec, *State) (Difference, error)
+	}); !ok {
+		t.Error("decorated resource does not satisfy LiveDiffer; add a forwarder in otel.go")
+	}
+	if _, ok := decorated.(interface {
 		ValidateSpec(Spec) error
 	}); !ok {
 		t.Error("decorated resource does not satisfy SpecValidator; add a forwarder in otel.go")
@@ -390,7 +407,7 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 	wantRefs := []secretref.Ref{{Scheme: "aws-ssm", Path: "/a/b"}}
 	wantSecret := Secret(func(context.Context) (string, error) { return "shh", nil })
 	inner := optionalResource{
-		secrets: want, differs: true, validateErr: boom, scope: `{"ApiId":"a1"}`, notes: []string{"n"},
+		secrets: want, differs: true, differsLive: true, validateErr: boom, scope: `{"ApiId":"a1"}`, notes: []string{"n"},
 		secretRefs: wantRefs, resolved: wantSecret,
 	}
 	decorated := decorate(t, inner)
@@ -411,6 +428,16 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 	}
 	if difference != Immutable {
 		t.Errorf("Diff() = %v, want the inner resource's Immutable", difference)
+	}
+
+	liveDifference, err := decorated.(interface {
+		DiffLive(context.Context, Spec, *State) (Difference, error)
+	}).DiffLive(context.Background(), Spec{}, &State{})
+	if err != nil {
+		t.Fatalf("DiffLive() error = %v", err)
+	}
+	if liveDifference != Immutable {
+		t.Errorf("DiffLive() = %v, want the inner resource's Immutable", liveDifference)
 	}
 
 	if err := decorated.(interface {

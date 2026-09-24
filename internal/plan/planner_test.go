@@ -160,6 +160,53 @@ func TestPlan_ImmutableDiffPlansAsReplace(t *testing.T) {
 	}
 }
 
+// TestPlan_LiveDifferTakesPrecedenceOverDiffer proves decide calls
+// LiveDiffer.DiffLive, with a live ctx, and never falls through to
+// Differ.Diff, for a type implementing both — the ordering #336's marker
+// check depends on: a type could plausibly keep Diff for something else
+// and add DiffLive only for its secret-backed variables, and decide must
+// still run exactly one of the two, not both.
+func TestPlan_LiveDifferTakesPrecedenceOverDiffer(t *testing.T) {
+	f := newRegistryFixture(t)
+	live := &fakeLiveDiffer{
+		fakeResource: f.r2,
+		diffLive: func(ctx context.Context, _ resource.Spec, _ *resource.State) (resource.Difference, error) {
+			if ctx == nil {
+				t.Error("DiffLive received a nil context")
+			}
+			return resource.Mutable, nil
+		},
+	}
+	reg := resource.NewRegistry()
+	must(t, reg.Register(resource.Registration{
+		Provider: "cloudflare", Type: "r2_bucket", Capability: manifest.CapabilityObjects,
+		Lookup: resource.LookupByName, Resource: live,
+	}))
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
+		Services: map[string]manifest.Service{
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
+		},
+	}
+	name := naming.ResourceName(envName, "api", "UPLOADS")
+	live.states[name] = &resource.State{Ref: resource.Ref{Provider: "cloudflare", Type: "r2_bucket", Name: name}, ID: "bucket-1"}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	got := findAction(t, p, "cloudflare", "r2_bucket")
+	if got.Kind != ActionUpdate {
+		t.Fatalf("Kind = %v, want ActionUpdate", got.Kind)
+	}
+	if live.diffLiveCalls != 1 {
+		t.Errorf("DiffLive calls = %d, want 1", live.diffLiveCalls)
+	}
+	if live.diffCalls != 0 {
+		t.Errorf("Diff calls = %d, want 0: LiveDiffer must take precedence", live.diffCalls)
+	}
+}
+
 // TestPlan_ImmutableDiffErrorPlansAsFailed covers Diff itself
 // failing.
 func TestPlan_ImmutableDiffErrorPlansAsFailed(t *testing.T) {
