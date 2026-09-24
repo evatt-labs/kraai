@@ -199,8 +199,10 @@ next apply, even when nothing else about the function changed.** Alongside
 every secret-backed `envSecrets` variable, `apply` writes a second,
 non-secret environment variable — its *version marker*,
 `KRAAI_SECRET_VERSION_<VAR>` — carrying the store's own version for that
-value at the moment it was resolved (SSM's `Version`, from the same
-`GetParameter` call that read the value, so no second call). `plan`
+value at the moment it was resolved: SSM's `Version`, read through
+`DescribeParameters` just before the value itself is resolved (a URI
+reference, below, takes its version from the same call that returned its
+value instead, so it costs no second call). `plan`
 compares the live marker to the store's current version through a
 metadata-only call — SSM `DescribeParameters` — that never decrypts
 anything; a mismatch, or a marker that is missing entirely (a function
