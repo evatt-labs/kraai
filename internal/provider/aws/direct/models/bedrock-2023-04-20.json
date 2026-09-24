@@ -16,6 +16,9 @@
       "operations": [
         {
           "target": "com.amazonaws.bedrock#GetPromptRouter"
+        },
+        {
+          "target": "com.amazonaws.bedrock#ListPromptRouters"
         }
       ],
       "traits": {
@@ -968,9 +971,108 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.bedrock#ListPromptRouters": {
+      "errors": [
+        {
+          "target": "com.amazonaws.bedrock#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.bedrock#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.bedrock#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.bedrock#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.bedrock#ListPromptRoutersRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.bedrock#ListPromptRoutersResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/prompt-routers"
+        },
+        "smithy.api#paginated": {
+          "inputToken": "nextToken",
+          "items": "promptRouterSummaries",
+          "outputToken": "nextToken",
+          "pageSize": "maxResults"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.bedrock#ListPromptRoutersRequest": {
+      "members": {
+        "maxResults": {
+          "target": "com.amazonaws.bedrock#MaxResults",
+          "traits": {
+            "smithy.api#httpQuery": "maxResults"
+          }
+        },
+        "nextToken": {
+          "target": "com.amazonaws.bedrock#PaginationToken",
+          "traits": {
+            "smithy.api#httpQuery": "nextToken"
+          }
+        },
+        "type": {
+          "target": "com.amazonaws.bedrock#PromptRouterType",
+          "traits": {
+            "smithy.api#default": "default",
+            "smithy.api#httpQuery": "type"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrock#ListPromptRoutersResponse": {
+      "members": {
+        "nextToken": {
+          "target": "com.amazonaws.bedrock#PaginationToken",
+          "traits": {}
+        },
+        "promptRouterSummaries": {
+          "target": "com.amazonaws.bedrock#PromptRouterSummaries",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrock#MaxResults": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
     "com.amazonaws.bedrock#NonBlankString": {
       "traits": {
         "smithy.api#pattern": "^[\\s\\S]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrock#PaginationToken": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^\\S*$"
       },
       "type": "string"
     },
@@ -1015,6 +1117,72 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.bedrock#PromptRouterSummaries": {
+      "member": {
+        "target": "com.amazonaws.bedrock#PromptRouterSummary"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.bedrock#PromptRouterSummary": {
+      "members": {
+        "createdAt": {
+          "target": "com.amazonaws.bedrock#Timestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.bedrock#PromptRouterDescription",
+          "traits": {}
+        },
+        "fallbackModel": {
+          "target": "com.amazonaws.bedrock#PromptRouterTargetModel",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "models": {
+          "target": "com.amazonaws.bedrock#PromptRouterTargetModels",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "promptRouterArn": {
+          "target": "com.amazonaws.bedrock#PromptRouterArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "promptRouterName": {
+          "target": "com.amazonaws.bedrock#PromptRouterName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "routingCriteria": {
+          "target": "com.amazonaws.bedrock#RoutingCriteria",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.bedrock#PromptRouterStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "type": {
+          "target": "com.amazonaws.bedrock#PromptRouterType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "updatedAt": {
+          "target": "com.amazonaws.bedrock#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.bedrock#PromptRouterTargetModel": {
       "members": {

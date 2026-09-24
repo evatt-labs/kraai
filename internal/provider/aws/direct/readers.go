@@ -78,6 +78,19 @@ var readers = map[string]Reader{
 			{Property: "Type", Member: "type", Kind: "scalar"},
 			{Property: "UpdatedAt", Member: "updatedAt", Kind: "timestamp"},
 		},
+		List: &Lister{
+			Operation: "ListPromptRouters",
+			Method:    "GET",
+			URI:       "/prompt-routers",
+			Input: []Binding{
+				Binding{Member: "type", Location: "query", Name: "type", Value: "custom"},
+			},
+			Token:     Binding{Member: "nextToken", Location: "query", Name: "nextToken"},
+			NextToken: []string{"nextToken"},
+			Items:     []string{"promptRouterSummaries"},
+			Item:      "promptRouterArn",
+			Property:  "PromptRouterArn",
+		},
 	},
 	"AWS::CodeDeploy::DeploymentConfig": {
 		Type:           "AWS::CodeDeploy::DeploymentConfig",

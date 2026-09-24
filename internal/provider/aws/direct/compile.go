@@ -24,6 +24,27 @@ type Reader struct {
 	// Response is the member path from the output to the resource.
 	Response []string
 	Fields   []Field
+	// List lists every instance, when the type's override names a list.
+	List *Lister
+}
+
+// Lister is a compiled list operation.
+type Lister struct {
+	Operation string
+	// Target is the X-Amz-Target header of an awsJson protocol.
+	Target string
+	// Method and URI are the HTTP binding of a restJson1 operation.
+	Method, URI string
+	// Input is every fixed input, each with its Value.
+	Input []Binding
+	// Token places the page token in a request.
+	Token Binding
+	// NextToken and Items are wire paths in the output: the next page's
+	// token, and the list of items.
+	NextToken, Items []string
+	// Item is the wire member of each item carrying Property, the primary
+	// identifier.
+	Item, Property string
 }
 
 // Binding places one primary identifier property in the request.
@@ -36,6 +57,8 @@ type Binding struct {
 	Name string
 	// JSONName is the member's jsonName trait, when it has one.
 	JSONName string
+	// Value is a fixed input's value.
+	Value string
 }
 
 // Field reads one property from the response.
@@ -234,6 +257,10 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	}
 	r.Fields = compileFields(&model, &schema, readable, resource, o.Properties, o.Skip, "", fail)
 
+	if o.List != nil {
+		r.List = compileList(&model, &r, o, service, namespace, fail)
+	}
+
 	// The awsJson specifications say nothing of jsonName, so a member
 	// carrying one could be named either way on the wire; refuse rather
 	// than read nothing.
@@ -253,6 +280,13 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			}
 		}
 		walk(r.Fields)
+		if r.List != nil {
+			for _, b := range append(append([]Binding{}, r.List.Input...), r.List.Token) {
+				if b.JSONName != "" {
+					fail("list input member %s has a jsonName, which %s is not known to honour", b.Member, r.Protocol)
+				}
+			}
+		}
 	}
 	return r, errs
 }

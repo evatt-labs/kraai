@@ -49,7 +49,109 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if !ok {
 		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
-	req, err := c.request(ctx, r, identifier)
+	values := make([]Binding, 0, len(r.Identifier))
+	for _, b := range r.Identifier {
+		value, ok := identifier[b.Property]
+		if !ok {
+			return nil, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
+		}
+		b.Value = value
+		values = append(values, b)
+	}
+	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
+	if err != nil {
+		return nil, err
+	}
+	for _, step := range r.Response {
+		obj, _ := out.(map[string]any)
+		out = obj[r.wire(step, "")]
+	}
+	obj, ok := out.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("the %s response has no resource at %s", typeName, strings.Join(r.Response, "."))
+	}
+	return r.translate(obj, r.Fields), nil
+}
+
+// maxListPages bounds one List. A list longer than this is an error, never
+// a truncation: an instance on a page not read would be taken for absent.
+const maxListPages = 1000
+
+// HasList reports whether typeName has a direct list.
+func HasList(typeName string) bool {
+	r, ok := readers[typeName]
+	return ok && r.List != nil
+}
+
+// List returns the primary identifier of every instance of typeName, across
+// every page. It fails rather than return a list it cannot vouch is
+// complete: an item without its identifier, a page token repeated, or more
+// pages than maxListPages.
+func (c *Client) List(ctx context.Context, typeName string) ([]string, error) {
+	r, ok := readers[typeName]
+	if !ok || r.List == nil {
+		return nil, fmt.Errorf("%s has no direct list", typeName)
+	}
+	l := r.List
+	var ids []string
+	seen := map[string]bool{}
+	token := ""
+	for range maxListPages {
+		values := append([]Binding{}, l.Input...)
+		if token != "" {
+			t := l.Token
+			t.Value = token
+			values = append(values, t)
+		}
+		out, err := c.call(ctx, r, l.Method, l.URI, l.Target, values)
+		if err != nil {
+			return nil, err
+		}
+		items, present := at(out, l.Items)
+		list, isList := items.([]any)
+		if present && items != nil && !isList {
+			return nil, fmt.Errorf("the %s list response carries %s, but not as a list", typeName, strings.Join(l.Items, "."))
+		}
+		for _, item := range list {
+			obj, _ := item.(map[string]any)
+			id, _ := obj[l.Item].(string)
+			if id == "" {
+				return nil, fmt.Errorf("the %s list returned an item without its %s", typeName, l.Item)
+			}
+			ids = append(ids, id)
+		}
+		next, _ := at(out, l.NextToken)
+		token, _ = next.(string)
+		if token == "" {
+			return ids, nil
+		}
+		if seen[token] {
+			return nil, fmt.Errorf("the %s list returned page token %q twice", typeName, token)
+		}
+		seen[token] = true
+	}
+	return nil, fmt.Errorf("the %s list ran past %d pages", typeName, maxListPages)
+}
+
+// at walks path through nested objects; present reports whether it got to
+// the end.
+func at(v any, path []string) (value any, present bool) {
+	for _, step := range path {
+		obj, ok := v.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		if v, ok = obj[step]; !ok {
+			return nil, false
+		}
+	}
+	return v, true
+}
+
+// call sends one signed request for an operation, placing each value by its
+// binding, and returns the decoded JSON response.
+func (c *Client) call(ctx context.Context, r Reader, method, uri, target string, values []Binding) (any, error) {
+	req, err := c.request(ctx, r, method, uri, target, values)
 	if err != nil {
 		return nil, err
 	}
@@ -65,53 +167,42 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return nil, apiError(resp, body)
 	}
-
 	var out any
 	dec := json.NewDecoder(bytes.NewReader(body))
 	dec.UseNumber()
 	if err := dec.Decode(&out); err != nil {
-		return nil, fmt.Errorf("decoding the %s response: %w", typeName, err)
+		return nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
 	}
-	for _, step := range r.Response {
-		obj, _ := out.(map[string]any)
-		out = obj[r.wire(step, "")]
-	}
-	obj, ok := out.(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("the %s response has no resource at %s", typeName, strings.Join(r.Response, "."))
-	}
-	return r.translate(obj, r.Fields), nil
+	return out, nil
 }
 
-func (c *Client) request(ctx context.Context, r Reader, identifier map[string]string) (*http.Request, error) {
+func (c *Client) request(ctx context.Context, r Reader, method, uri, target string, values []Binding) (*http.Request, error) {
 	base := fmt.Sprintf("https://%s.%s.amazonaws.com", r.EndpointPrefix, c.Region)
 	if c.Endpoint != nil {
 		base = c.Endpoint(r.EndpointPrefix, c.Region)
 	}
 	body := map[string]any{}
-	method, path, query, headers := http.MethodPost, "/", url.Values{}, http.Header{}
+	path, query, headers := "/", url.Values{}, http.Header{}
 	if r.Protocol == "restJson1" {
-		method, path = r.Method, r.URI
+		path = uri
+	} else {
+		method = http.MethodPost
 	}
-	for _, b := range r.Identifier {
-		value, ok := identifier[b.Property]
-		if !ok {
-			return nil, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
-		}
+	for _, b := range values {
 		switch b.Location {
 		case "label":
 			greedy := "{" + b.Member + "+}"
 			if strings.Contains(path, greedy) {
-				path = strings.Replace(path, greedy, escapeLabel(value, true), 1)
+				path = strings.Replace(path, greedy, escapeLabel(b.Value, true), 1)
 			} else {
-				path = strings.Replace(path, "{"+b.Member+"}", escapeLabel(value, false), 1)
+				path = strings.Replace(path, "{"+b.Member+"}", escapeLabel(b.Value, false), 1)
 			}
 		case "query":
-			query.Set(b.Name, value)
+			query.Set(b.Name, b.Value)
 		case "header":
-			headers.Set(b.Name, value)
+			headers.Set(b.Name, b.Value)
 		default:
-			body[r.wire(b.Member, b.JSONName)] = value
+			body[r.wire(b.Member, b.JSONName)] = b.Value
 		}
 	}
 	// The URI may carry a literal query string of its own.
@@ -147,10 +238,10 @@ func (c *Client) request(ctx context.Context, r Reader, identifier map[string]st
 	switch r.Protocol {
 	case "awsJson1_0":
 		req.Header.Set("Content-Type", "application/x-amz-json-1.0")
-		req.Header.Set("X-Amz-Target", r.Target)
+		req.Header.Set("X-Amz-Target", target)
 	case "awsJson1_1":
 		req.Header.Set("Content-Type", "application/x-amz-json-1.1")
-		req.Header.Set("X-Amz-Target", r.Target)
+		req.Header.Set("X-Amz-Target", target)
 	default:
 		if payload != nil {
 			req.Header.Set("Content-Type", "application/json")

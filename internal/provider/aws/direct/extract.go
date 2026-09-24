@@ -39,6 +39,9 @@ type override struct {
 		Model     string `yaml:"model"`
 		Operation string `yaml:"operation"`
 	} `yaml:"read"`
+	List *struct {
+		Operation string `yaml:"operation"`
+	} `yaml:"list"`
 }
 
 type lockedFile struct {
@@ -86,6 +89,9 @@ func run() error {
 	ops := map[string][]string{}
 	for _, o := range overrides {
 		ops[o.Read.Model] = append(ops[o.Read.Model], o.Read.Operation)
+		if o.List != nil {
+			ops[o.Read.Model] = append(ops[o.Read.Model], o.List.Operation)
+		}
 	}
 
 	out := lock{SmithyCommit: *commit, Models: map[string]lockedFile{}, Schemas: map[string]lockedFile{}}

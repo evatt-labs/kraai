@@ -14,7 +14,7 @@
     "bedrock/service/2023-04-20/bedrock-2023-04-20.json": {
       "file": "models/bedrock-2023-04-20.json",
       "sourceSha256": "31e8c7eb23e9e87e564c4e1ad8f7f07a65fd0e3f15ce60f799872e4236744c8d",
-      "subsetSha256": "a44d1a08414d4046520ed569938e3cfd2943e4bc63be4c193ff850062aa999e4"
+      "subsetSha256": "e536436bcb1bc4d6372201a5405d284428799e5108cafbcee89d84b921c8055e"
     },
     "codedeploy/service/2014-10-06/codedeploy-2014-10-06.json": {
       "file": "models/codedeploy-2014-10-06.json",
