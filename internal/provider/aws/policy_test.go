@@ -2,12 +2,15 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+
+	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
 // A schema's permissions are every handler's actions and the tagging
@@ -77,6 +80,82 @@ func TestClientPolicyActionsGrantsSecretsManagerForAurora(t *testing.T) {
 	}
 	if !contains(actions, "secretsmanager:GetSecretValue") {
 		t.Fatalf("policy for an Aurora cluster lacks the credential read: %v", actions)
+	}
+}
+
+func TestSecretRefPolicyStatements(t *testing.T) {
+	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
+
+	grants, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{
+		mustParse(t, "aws-ssm:///kraai/prod/x"),
+		mustParse(t, "aws-secretsmanager://kraai/prod/y"),
+		mustParse(t, "aws-ssm:///kraai/prod/x"), // duplicate, must not double the grant
+	})
+	if err != nil {
+		t.Fatalf("SecretRefPolicyStatements: %v", err)
+	}
+	want := []SecretRefGrant{
+		{Action: "secretsmanager:GetSecretValue", Resource: "arn:aws:secretsmanager:us-east-1:111111111111:secret:kraai/prod/y-*"},
+		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/kraai/prod/x"},
+	}
+	if !reflect.DeepEqual(grants, want) {
+		t.Fatalf("SecretRefPolicyStatements = %+v, want %+v", grants, want)
+	}
+}
+
+func TestSecretRefPolicyStatements_TwoRefsSameAction(t *testing.T) {
+	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
+
+	grants, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{
+		mustParse(t, "aws-ssm:///b"),
+		mustParse(t, "aws-ssm:///a"),
+	})
+	if err != nil {
+		t.Fatalf("SecretRefPolicyStatements: %v", err)
+	}
+	want := []SecretRefGrant{
+		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/a"},
+		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/b"},
+	}
+	if !reflect.DeepEqual(grants, want) {
+		t.Fatalf("SecretRefPolicyStatements = %+v, want %+v (sorted by resource within one action)", grants, want)
+	}
+}
+
+func TestSecretRefPolicyStatements_AccountIDError(t *testing.T) {
+	boom := errors.New("STS denied")
+	c := &Client{sts: &fakeSTS{err: boom}}
+
+	_, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{mustParse(t, "aws-ssm:///a")})
+	if err == nil || !strings.Contains(err.Error(), "STS denied") {
+		t.Fatalf("err = %v, want it to wrap the AccountID failure", err)
+	}
+}
+
+func TestSecretRefPolicyStatements_UnknownScheme(t *testing.T) {
+	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
+	_, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{{Scheme: "vault", Path: "x"}})
+	if err == nil {
+		t.Fatal("SecretRefPolicyStatements error = nil, want an unknown-scheme error")
+	}
+}
+
+func TestSecretRefGrant_UnknownScheme(t *testing.T) {
+	_, err := secretRefGrant(secretref.Ref{Scheme: "vault", Path: "x"}, "us-east-1", "111111111111")
+	if err == nil {
+		t.Fatal("secretRefGrant error = nil, want an unknown-scheme error")
+	}
+}
+
+func TestSecretRefPolicyStatements_Empty(t *testing.T) {
+	sts := &fakeSTS{}
+	c := &Client{sts: sts}
+	grants, err := c.SecretRefPolicyStatements(context.Background(), nil)
+	if err != nil || grants != nil {
+		t.Fatalf("SecretRefPolicyStatements(nil) = %v, %v, want nil, nil", grants, err)
+	}
+	if sts.calls != 0 {
+		t.Errorf("STS was called %d times for zero refs, want zero calls", sts.calls)
 	}
 }
 

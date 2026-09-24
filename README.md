@@ -162,6 +162,53 @@ produces — here, the Neon branch's connection URI. The value is fetched at the
 moment it is used and is never written to the manifest, the artifact, a log or
 an error.
 
+#### Secret references
+
+A value with a URI scheme in the same `envSecrets` slot is a secret
+reference instead of a binding key: it names a location in an external
+secret store, not a value.
+
+```yaml
+        envSecrets:
+          DATABASE_URL: DB.connection_uri
+          GITHUB_CLIENT_SECRET: aws-ssm:///kraai/prod/github_client_secret
+          PEPPER_KEYS: aws-secretsmanager://kraai/prod/pepper_keys?version=AWSCURRENT
+```
+
+The scheme selects the backend; the rest of the value is that backend's own
+name for the secret. Two backends resolve today:
+
+- `aws-ssm` — an SSM Parameter Store parameter, read with `GetParameter` and
+  decryption always requested (a `SecureString` decrypts; a plain `String`
+  or `StringList` ignores the flag). `?version=<n>` selects a parameter
+  version through SSM's own `name:version` syntax.
+- `aws-secretsmanager` — a Secrets Manager secret, read with
+  `GetSecretValue`. `?version=<stage>` selects a version stage
+  (`AWSCURRENT` by default); `?versionId=<id>` selects a specific version by
+  its opaque id instead. Setting both is a validation error.
+
+Azure Key Vault, GCP Secret Manager, OpenBao, Infisical and SOPS files are
+not resolved yet; a reference to one of those schemes fails to validate
+today.
+
+kraai resolves every reference once, up front, at the start of `apply` —
+before any resource is created, updated or deleted — using the operator's
+own AWS credentials (the same default credential chain every other AWS call
+here uses). A missing or inaccessible reference fails the whole run before
+anything is touched, and the failure names the reference, never the value.
+`kraai plan` never resolves a reference and makes no call toward a secret
+store: only `apply` does. The resolved value exists only for the moment
+`apply` builds the function's environment; it is never written to the
+manifest, a plan, a log, telemetry, or any error message.
+
+`kraai iam-policy` grants exactly what a manifest's references need:
+`ssm:GetParameter` scoped to each `aws-ssm` reference's own parameter ARN,
+`secretsmanager:GetSecretValue` scoped to each `aws-secretsmanager`
+reference's own secret ARN — never `*`. A `SecureString` parameter
+encrypted under a customer-managed KMS key needs `kms:Decrypt` on that key
+too, added by hand: kraai has no way to learn the key's ARN without a call
+this command does not make.
+
 The packaging step honours `.gitignore`, so build output and virtualenvs stay
 out of the artifact. `include:` re-adds what the artifact genuinely needs.
 `.env` and `.git` are excluded unconditionally and cannot be re-added.

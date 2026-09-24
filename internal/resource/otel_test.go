@@ -12,6 +12,8 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.uber.org/mock/gomock"
+
+	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
 // telemetry wires an in-memory span recorder and metric reader, so the
@@ -287,6 +289,9 @@ type optionalResource struct {
 	validateErr error
 	scope       string
 	notes       []string
+	secretRefs  []secretref.Ref
+	resolved    Secret
+	resolveErr  error
 }
 
 func (o optionalResource) Secrets(*State) map[string]Secret { return o.secrets }
@@ -309,6 +314,12 @@ func (o optionalResource) Locate(Spec) (string, string, bool, error) {
 }
 
 func (o optionalResource) Notes(Spec) []string { return o.notes }
+
+func (o optionalResource) SecretRefs(Spec) ([]secretref.Ref, error) { return o.secretRefs, nil }
+
+func (o optionalResource) ResolveSecretRef(context.Context, secretref.Ref) (Secret, error) {
+	return o.resolved, o.resolveErr
+}
 
 // plainResource implements only the four required verbs.
 type plainResource struct{ Resource }
@@ -362,6 +373,9 @@ func TestInstrumentedForwardsOptionalInterfaces(t *testing.T) {
 	if _, ok := decorated.(interface{ Notes(Spec) []string }); !ok {
 		t.Error("decorated resource does not satisfy Noter; add a forwarder in otel.go")
 	}
+	if _, ok := decorated.(SecretRefResolver); !ok {
+		t.Error("decorated resource does not satisfy SecretRefResolver; add a forwarder in otel.go")
+	}
 }
 
 // TestInstrumentedForwardsToInner proves the forwarders actually reach the
@@ -373,7 +387,12 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 		return "postgres://example", nil
 	}}
 	boom := errors.New("bad spec")
-	inner := optionalResource{secrets: want, differs: true, validateErr: boom, scope: `{"ApiId":"a1"}`, notes: []string{"n"}}
+	wantRefs := []secretref.Ref{{Scheme: "aws-ssm", Path: "/a/b"}}
+	wantSecret := Secret(func(context.Context) (string, error) { return "shh", nil })
+	inner := optionalResource{
+		secrets: want, differs: true, validateErr: boom, scope: `{"ApiId":"a1"}`, notes: []string{"n"},
+		secretRefs: wantRefs, resolved: wantSecret,
+	}
 	decorated := decorate(t, inner)
 
 	got := decorated.(SecretProducer).Secrets(&State{})
@@ -408,6 +427,22 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 	}
 	if notes := decorated.(interface{ Notes(Spec) []string }).Notes(Spec{}); len(notes) != 1 || notes[0] != "n" {
 		t.Errorf("Notes() = %v, want the inner resource's", notes)
+	}
+
+	refs, err := decorated.(SecretRefResolver).SecretRefs(Spec{})
+	if err != nil {
+		t.Fatalf("SecretRefs() error = %v", err)
+	}
+	if len(refs) != 1 || refs[0] != wantRefs[0] {
+		t.Errorf("SecretRefs() = %v, want %v", refs, wantRefs)
+	}
+	producer, err := decorated.(SecretRefResolver).ResolveSecretRef(context.Background(), wantRefs[0])
+	if err != nil {
+		t.Fatalf("ResolveSecretRef() error = %v", err)
+	}
+	value, err := producer(context.Background())
+	if err != nil || value != "shh" {
+		t.Errorf("ResolveSecretRef() producer = (%q, %v), want (\"shh\", nil)", value, err)
 	}
 }
 
@@ -453,6 +488,13 @@ func TestInstrumentedOptionalsOnPlainResource(t *testing.T) {
 		ValidateSpec(Spec) error
 	}).ValidateSpec(Spec{}); err != nil {
 		t.Errorf("ValidateSpec() on a non-validator error = %v, want nil", err)
+	}
+
+	if refs, err := decorated.(SecretRefResolver).SecretRefs(Spec{}); refs != nil || err != nil {
+		t.Errorf("SecretRefs() on a non-resolver = (%v, %v), want (nil, nil)", refs, err)
+	}
+	if _, err := decorated.(SecretRefResolver).ResolveSecretRef(context.Background(), secretref.Ref{}); err == nil {
+		t.Error("ResolveSecretRef() on a non-resolver error = nil, want an error")
 	}
 }
 

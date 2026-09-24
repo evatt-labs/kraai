@@ -13,6 +13,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/naming"
 	"github.com/evatt-labs/kraai/internal/plan"
+	"github.com/evatt-labs/kraai/internal/provider/aws"
 )
 
 // PolicyActions returns the IAM actions the given AWS vendor types need,
@@ -20,7 +21,14 @@ import (
 // ask. assemble.AWSPolicyActions in production; a fake in tests.
 type PolicyActions func(ctx context.Context, m *manifest.Manifest, vendorTypes []string) ([]string, error)
 
-func newIAMPolicyCommand(assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions) *cobra.Command {
+// SecretRefStatements returns one scoped IAM grant per secret reference the
+// manifest's envSecrets declares. assemble.AWSSecretRefPolicyStatements in
+// production; a fake in tests. Returns (nil, nil) for a manifest with none.
+type SecretRefStatements func(ctx context.Context, m *manifest.Manifest) ([]aws.SecretRefGrant, error)
+
+func newIAMPolicyCommand(
+	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions, secretRefs SecretRefStatements,
+) *cobra.Command {
 	var (
 		dir     string
 		setArgs []string
@@ -41,7 +49,7 @@ func newIAMPolicyCommand(assembler RegistryAssembler, resolve ManifestResolver, 
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runIAMPolicy(cmd, args[0], dir, setArgs, assembler, resolve, actions)
+			return runIAMPolicy(cmd, args[0], dir, setArgs, assembler, resolve, actions, secretRefs)
 		},
 	}
 
@@ -54,7 +62,7 @@ func newIAMPolicyCommand(assembler RegistryAssembler, resolve ManifestResolver, 
 
 func runIAMPolicy(
 	cmd *cobra.Command, envName, dir string, setArgs []string,
-	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions,
+	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions, secretRefs SecretRefStatements,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
 		return kerrors.Validation(
@@ -93,7 +101,11 @@ func runIAMPolicy(
 	if err != nil {
 		return err
 	}
-	return writePolicy(cmd.OutOrStdout(), granted)
+	grants, err := secretRefs(ctx, m)
+	if err != nil {
+		return err
+	}
+	return writePolicy(cmd.OutOrStdout(), granted, grants)
 }
 
 // awsVendorTypes returns the distinct vendor types of the AWS resources
@@ -127,14 +139,49 @@ type policyDocument struct {
 type policyStatement struct {
 	Effect   string   `json:"Effect"`
 	Action   []string `json:"Action"`
-	Resource string   `json:"Resource"`
+	Resource []string `json:"Resource"`
 }
 
-func writePolicy(w io.Writer, actions []string) error {
+// writePolicy renders one statement granting every action in actions on
+// every resource ("*", as PolicyActions documents it must be), plus one
+// statement per distinct action among grants, each scoped to exactly the
+// resource ARNs a secret reference needs — never "*": unlike a
+// provider-assigned identifier, a reference names its own resource in the
+// manifest, so kraai can scope it precisely.
+func writePolicy(w io.Writer, actions []string, grants []aws.SecretRefGrant) error {
+	statements := []policyStatement{{Effect: "Allow", Action: actions, Resource: []string{"*"}}}
+	statements = append(statements, secretRefStatements(grants)...)
+
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	return enc.Encode(policyDocument{
-		Version:   "2012-10-17",
-		Statement: []policyStatement{{Effect: "Allow", Action: actions, Resource: "*"}},
-	})
+	return enc.Encode(policyDocument{Version: "2012-10-17", Statement: statements})
+}
+
+// secretRefStatements groups grants by action into one statement per
+// action, each listing every distinct resource ARN that action was granted
+// on, sorted for a stable, diffable policy document.
+func secretRefStatements(grants []aws.SecretRefGrant) []policyStatement {
+	byAction := map[string]map[string]bool{}
+	var actions []string
+	for _, g := range grants {
+		resources, ok := byAction[g.Action]
+		if !ok {
+			resources = map[string]bool{}
+			byAction[g.Action] = resources
+			actions = append(actions, g.Action)
+		}
+		resources[g.Resource] = true
+	}
+	sort.Strings(actions)
+
+	statements := make([]policyStatement, 0, len(actions))
+	for _, action := range actions {
+		resources := make([]string, 0, len(byAction[action]))
+		for r := range byAction[action] {
+			resources = append(resources, r)
+		}
+		sort.Strings(resources)
+		statements = append(statements, policyStatement{Effect: "Allow", Action: []string{action}, Resource: resources})
+	}
+	return statements
 }

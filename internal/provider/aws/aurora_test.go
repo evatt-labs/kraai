@@ -47,10 +47,15 @@ type fakeSecretsManager struct {
 	value string
 	err   error
 	arns  []string
+	// inputs captures every call's full input, so a test can assert on
+	// VersionStage or VersionId, not just SecretId. secretref_test.go uses
+	// this; aurora_test.go's own cases only ever check arns.
+	inputs []*secretsmanager.GetSecretValueInput
 }
 
 func (f *fakeSecretsManager) GetSecretValue(_ context.Context, params *secretsmanager.GetSecretValueInput, _ ...func(*secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error) {
 	f.arns = append(f.arns, aws.ToString(params.SecretId))
+	f.inputs = append(f.inputs, params)
 	if f.err != nil {
 		return nil, f.err
 	}
