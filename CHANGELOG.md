@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.15](https://github.com/evatt-labs/kraai/compare/v0.6.14...v0.6.15) (2026-09-24)
+
+
+### Features
+
+* let an environment name the policy sets it must pass ([#312](https://github.com/evatt-labs/kraai/issues/312)) ([3bba481](https://github.com/evatt-labs/kraai/commit/3bba4814a84ddaac76239a1a338a64795770cae1))
+
 ## [0.6.14](https://github.com/evatt-labs/kraai/compare/v0.6.13...v0.6.14) (2026-09-24)
 
 
