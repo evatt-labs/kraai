@@ -95,6 +95,16 @@ earn. One intermittent failure here was a real defect where the assertion was
 right and the code was wrong; loosening it would have preserved a degradation
 in operator-facing errors.
 
+**Check prior art before hand-rolling.** Before building a primitive a
+library plausibly covers (parsing, retries, rate limiting, auth, crypto,
+SSRF/egress guards, and so on), research the maintained options: release
+and commit recency, security advisory history, license, transitive footprint,
+and platform fit. Use one unless none fits, and write down why. No HashiCorp
+products. A library that bypasses one of kraai's own safety layers, for
+example an HTTP fetch outside the shared egress guard, is disqualified no
+matter how good it is otherwise. Present real choices as options with
+evidence rather than picking silently.
+
 ## Scope and honesty
 
 **Stay inside the task.** Other agents frequently work in this repo
