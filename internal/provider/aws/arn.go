@@ -1,6 +1,9 @@
 package aws
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // The ARN shapes this package constructs locally, one pure format per
 // resource shape. Every caller resolves Client.AccountID first, which is
@@ -46,4 +49,14 @@ func distributionARN(account, id string) string {
 
 func bucketARN(name string) string {
 	return "arn:aws:s3:::" + name
+}
+
+// ssmParameterARN builds an SSM parameter's ARN from its name, exactly as
+// secretRefGrant did before this was pulled out for secrets.go to share:
+// an SSM parameter ARN is always hierarchical under "parameter/", never
+// "parameter" bare, so TrimPrefix then re-add exactly one "/" gives a
+// non-hierarchical name ("plain-name") one and a hierarchical name
+// ("/kraai/prod/x", which already carries one) does not get a second.
+func ssmParameterARN(region, account, name string) string {
+	return fmt.Sprintf("arn:aws:ssm:%s:%s:parameter/%s", region, account, strings.TrimPrefix(name, "/"))
 }

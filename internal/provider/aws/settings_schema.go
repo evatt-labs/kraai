@@ -194,6 +194,52 @@ var databaseBindingSchema = resource.NewSchema("aws database binding", map[strin
 	"additionalProperties": false,
 })
 
+// secretEntrySchema validates one value of a secrets binding's `entries`
+// map: exactly one of generate or source is required by ValidateSpec, not
+// here — a structural schema has no top-level combinator to express it, and
+// this node is not the document root, so the restriction does not strictly
+// apply, but decodeLambdaSettings' sibling checks (aurora, dsql) already
+// established the convention of a cross-field rule living in Go, and a
+// nested oneOf's error message would be worse than the one ValidateSpec
+// writes by hand.
+var secretEntrySchema = map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"generate": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"bytes":    map[string]any{"type": "integer", "minimum": secretGenerateBytesMin, "maximum": secretGenerateBytesMax},
+				"encoding": map[string]any{"type": "string", "enum": []any{secretEncodingBase64, secretEncodingHex}},
+			},
+			"required":             []any{"bytes", "encoding"},
+			"additionalProperties": false,
+		},
+		"source": map[string]any{"type": "string", "enum": []any{secretSourceExternal}},
+	},
+	"additionalProperties": false,
+}
+
+// secretsBindingSchema validates one entry of a service's `secrets:` list:
+// the store selecting the provider, required because this capability
+// defaults to none, and the named secrets it declares. Entry names are
+// constrained to what an environment variable name (and `kraai secret set`'s
+// BINDING.entry argument) can carry unambiguously.
+var secretsBindingSchema = resource.NewSchema("aws secrets binding", map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"binding":  map[string]any{"type": "string"},
+		"provider": map[string]any{"type": "string", "enum": []any{SecretsProviderSSM}},
+		"entries": map[string]any{
+			"type":                 "object",
+			"minProperties":        1,
+			"propertyNames":        map[string]any{"type": "string", "pattern": secretEntryNamePattern},
+			"additionalProperties": secretEntrySchema,
+		},
+	},
+	"required":             []any{"binding", "provider", "entries"},
+	"additionalProperties": false,
+})
+
 // keyvalueBindingSchema validates one entry of a service's `keyvalue:` list:
 // the driver, the network binding the store is placed in (a reference,
 // required because an ElastiCache Serverless cache exists only inside a

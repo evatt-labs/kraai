@@ -134,6 +134,61 @@ func TestQueuesBindingSchema(t *testing.T) {
 	}
 }
 
+func TestSecretsBindingSchema(t *testing.T) {
+	valid := map[string]any{
+		"binding": "SECRETS", "provider": "aws-ssm",
+		"entries": map[string]any{
+			"pepper_key":           map[string]any{"generate": map[string]any{"bytes": 32, "encoding": "base64"}},
+			"github_client_secret": map[string]any{"source": "external"},
+		},
+	}
+	if err := secretsBindingSchema.Validate(valid); err != nil {
+		t.Fatalf("a valid binding entry was rejected: %v", err)
+	}
+
+	rejected := map[string]map[string]any{
+		"no binding": {"provider": "aws-ssm", "entries": map[string]any{"x": map[string]any{"source": "external"}}},
+		"no provider": {
+			"binding": "SECRETS", "entries": map[string]any{"x": map[string]any{"source": "external"}},
+		},
+		"unknown provider": {
+			"binding": "SECRETS", "provider": "aws-secretsmanager",
+			"entries": map[string]any{"x": map[string]any{"source": "external"}},
+		},
+		"no entries":    {"binding": "SECRETS", "provider": "aws-ssm"},
+		"empty entries": {"binding": "SECRETS", "provider": "aws-ssm", "entries": map[string]any{}},
+		"unrecognized entry name": {
+			"binding": "SECRETS", "provider": "aws-ssm",
+			"entries": map[string]any{"1-not-an-identifier": map[string]any{"source": "external"}},
+		},
+		"unknown source value": {
+			"binding": "SECRETS", "provider": "aws-ssm",
+			"entries": map[string]any{"x": map[string]any{"source": "vault"}},
+		},
+		"generate bytes too small": {
+			"binding": "SECRETS", "provider": "aws-ssm",
+			"entries": map[string]any{"x": map[string]any{"generate": map[string]any{"bytes": 8, "encoding": "hex"}}},
+		},
+		"generate bytes too large": {
+			"binding": "SECRETS", "provider": "aws-ssm",
+			"entries": map[string]any{"x": map[string]any{"generate": map[string]any{"bytes": 4096, "encoding": "hex"}}},
+		},
+		"unknown encoding": {
+			"binding": "SECRETS", "provider": "aws-ssm",
+			"entries": map[string]any{"x": map[string]any{"generate": map[string]any{"bytes": 32, "encoding": "rot13"}}},
+		},
+		"unrecognized entry key": {
+			"binding": "SECRETS", "provider": "aws-ssm",
+			"entries": map[string]any{"x": map[string]any{"source": "external", "description": "nope"}},
+		},
+	}
+	for label, entry := range rejected {
+		if err := secretsBindingSchema.Validate(entry); err == nil {
+			t.Errorf("%s: %v was accepted", label, entry)
+		}
+	}
+}
+
 func TestDatabaseBindingSchema(t *testing.T) {
 	valid := map[string]any{
 		"binding": "DB", "driver": "dynamodb",

@@ -423,6 +423,15 @@ func drivenTypeName(t *testing.T, res resource.Resource) string {
 // maps to nothing.
 func TestVendorTypeMatchesTheTypeEachRegistrationDrives(t *testing.T) {
 	for _, r := range Registrations(&Client{}) {
+		if r.Type == TypeSecretParameter {
+			// The one registration with no resourceType at all: a
+			// SecureString parameter cannot be created through Cloud
+			// Control, so secretParameterResource calls the SSM API
+			// directly and drivenTypeName's reflection has nothing to find.
+			// VendorTypeName is still asserted, just not by this mechanism —
+			// see TestSecretParameterVendorType in secrets_test.go.
+			continue
+		}
 		t.Run(r.Type, func(t *testing.T) {
 			driven := drivenTypeName(t, r.Resource)
 			if got := r.VendorTypeName(); got != driven {
@@ -458,6 +467,7 @@ func TestRoleKeysDeclareTheirVendorType(t *testing.T) {
 		TypePrivateSubnetB:                      TypeSubnet,
 		TypePublicSubnetBRouteTableAssociation:  TypeSubnetRouteTableAssociation,
 		TypePrivateSubnetBRouteTableAssociation: TypeSubnetRouteTableAssociation,
+		TypeSecretParameter:                     TypeSSMParameter,
 	}
 	for key, vendorType := range want {
 		reg, ok := byType[key]

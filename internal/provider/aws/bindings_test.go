@@ -31,6 +31,37 @@ func TestDecodeServiceBindings(t *testing.T) {
 	}
 }
 
+// TestDecodeServiceBindingsCarriesEntryNames pins that EntryNames survives
+// the round trip internal/plan's serviceBindings and this package's own
+// decode make: a map[string]string, asserted as its real Go type rather
+// than the map[string]any every other manifest-sourced key needs, because
+// nothing puts it through YAML or JSON on the way here. Broken once already:
+// the first cut of this decode asserted map[string]any, which silently
+// dropped EntryNames on every real plan (fields["entryNames"] is always a
+// map[string]string in production) while this exact test, run with the
+// wrong assertion, still passed because it never round-tripped the real
+// type.
+func TestDecodeServiceBindingsCarriesEntryNames(t *testing.T) {
+	spec := resource.Spec{Binding: "api", Config: map[string]any{"bindings": []any{
+		map[string]any{
+			"capability": "secrets", "binding": "SECRETS", "vendor": "aws", "name": "env-api-secrets",
+			"config":     map[string]any{},
+			"entryNames": map[string]string{"pepper_key": "/env/api/secrets/pepper-key"},
+		},
+	}}}
+
+	got, err := decodeServiceBindings(spec)
+	if err != nil {
+		t.Fatalf("decodeServiceBindings: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("decoded = %+v", got)
+	}
+	if name := got[0].EntryNames["pepper_key"]; name != "/env/api/secrets/pepper-key" {
+		t.Fatalf("EntryNames[pepper_key] = %q, want the derived name; EntryNames = %+v", name, got[0].EntryNames)
+	}
+}
+
 func TestDecodeServiceBindingsAbsentMeansNone(t *testing.T) {
 	got, err := decodeServiceBindings(resource.Spec{Config: map[string]any{}})
 	if err != nil || got != nil {

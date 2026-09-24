@@ -289,6 +289,22 @@ func Registrations(client *Client) []resource.Registration {
 			Resource: newAPIMappingResource(client),
 		},
 		{
+			Provider: Provider, Type: TypeSecretParameter, VendorType: TypeSSMParameter,
+			Capability: manifest.CapabilitySecrets,
+			// One resource per entry, not per binding: a secrets binding's
+			// `entries:` map is author-chosen in both count and name, so
+			// adding or removing an entry must add or remove exactly one
+			// resource rather than replace the binding's one. See
+			// internal/plan's expandEntries.
+			NameFrom: resource.NameFromEntries,
+			NameKey:  "entries",
+			Applies:  []resource.Applicability{bindingSecretsProviderIs(SecretsProviderSSM)},
+			// The derived name is SSM's own identifier; no lookup step
+			// beyond reading it directly. See secrets.go.
+			Lookup:   resource.LookupByName,
+			Resource: newSecretParameterResource(client),
+		},
+		{
 			Provider: Provider, Type: TypePermissionAPIGateway, VendorType: realTypeLambdaPermission,
 			Capability: manifest.CapabilityCompute,
 			// Needs its function and the API it authorizes: apiGatewaySourceARN

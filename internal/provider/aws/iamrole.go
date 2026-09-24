@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"sort"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -233,6 +234,24 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 				"Action":   bucketActions,
 				"Resource": []any{bucketARN(b.Name), bucketARN(b.Name) + "/*"},
 			}
+		case manifest.CapabilitySecrets:
+			if len(b.EntryNames) == 0 {
+				continue
+			}
+			if account == "" {
+				if account, err = r.client.AccountID(ctx); err != nil {
+					return nil, err
+				}
+			}
+			// GetParameter only: the execution role reads an entry's value
+			// at the moment envSecrets resolves it, and never creates,
+			// updates or deletes a parameter — that stays the operator's,
+			// through `kraai apply` and `kraai secret set`.
+			statement = map[string]any{
+				"Effect":   "Allow",
+				"Action":   []any{"ssm:GetParameter"},
+				"Resource": secretParameterARNs(r.client.Region(), account, b.EntryNames),
+			}
 		case manifest.CapabilityAWS:
 			grant, ok := b.Config[nativeGrantKey].([]any)
 			if !ok || len(grant) == 0 {
@@ -251,6 +270,22 @@ func (r *iamRoleResource) bindingStatements(ctx context.Context, spec resource.S
 		statements = append(statements, statement)
 	}
 	return statements, nil
+}
+
+// secretParameterARNs builds the ARN of every entry in names, sorted by
+// entry so the execution role's policy document is deterministic across
+// plans however Go's map iteration orders the binding's entries.
+func secretParameterARNs(region, account string, names map[string]string) []any {
+	entries := make([]string, 0, len(names))
+	for entry := range names {
+		entries = append(entries, entry)
+	}
+	sort.Strings(entries)
+	out := make([]any, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, ssmParameterARN(region, account, names[entry]))
+	}
+	return out
 }
 
 func toAnySlice(in []string) []any {

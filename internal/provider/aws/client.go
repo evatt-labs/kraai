@@ -113,9 +113,19 @@ type secretsManagerAPI interface {
 
 // ssmAPI is the subset of *ssm.Client this package calls: GetParameter, to
 // resolve an aws-ssm secret reference, always with decryption so a
-// SecureString parameter's plaintext is what a caller gets.
+// SecureString parameter's plaintext is what a caller gets, and the calls
+// secrets.go uses to manage a secrets binding's own parameters without ever
+// reading or writing a value outside Create: DescribeParameters and
+// ListTagsForResource for identity and metadata, PutParameter to create,
+// AddTagsToResource to reconcile a tag in place, and DeleteParameter to tear
+// down.
 type ssmAPI interface {
 	GetParameter(ctx context.Context, params *ssm.GetParameterInput, optFns ...func(*ssm.Options)) (*ssm.GetParameterOutput, error)
+	DescribeParameters(ctx context.Context, params *ssm.DescribeParametersInput, optFns ...func(*ssm.Options)) (*ssm.DescribeParametersOutput, error)
+	ListTagsForResource(ctx context.Context, params *ssm.ListTagsForResourceInput, optFns ...func(*ssm.Options)) (*ssm.ListTagsForResourceOutput, error)
+	PutParameter(ctx context.Context, params *ssm.PutParameterInput, optFns ...func(*ssm.Options)) (*ssm.PutParameterOutput, error)
+	AddTagsToResource(ctx context.Context, params *ssm.AddTagsToResourceInput, optFns ...func(*ssm.Options)) (*ssm.AddTagsToResourceOutput, error)
+	DeleteParameter(ctx context.Context, params *ssm.DeleteParameterInput, optFns ...func(*ssm.Options)) (*ssm.DeleteParameterOutput, error)
 }
 
 // Client is a thin Cloud Control and CloudFormation client whose exported
