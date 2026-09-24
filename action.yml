@@ -43,6 +43,13 @@ inputs:
       unprotected environments.
     required: false
     default: ""
+  policy:
+    description: >-
+      Rego policy files or directories, one per line, evaluated beside the
+      manifest's policies/. Point these at a checkout the pull request cannot
+      change.
+    required: false
+    default: ""
   comment:
     description: "Post a sticky comment on the pull request with the result."
     required: false
@@ -174,6 +181,7 @@ runs:
         DIR: ${{ inputs.dir }}
         REPLACE: ${{ inputs.replace }}
         CONFIRM_NAME: ${{ inputs.confirm-name }}
+        POLICY: ${{ inputs.policy }}
       run: |
         # Deliberately no -e: the argument builders below are `[ ... ] && ...`
         # chains that return non-zero whenever the condition is simply false,
@@ -188,6 +196,9 @@ runs:
         args=("$COMMAND" "$ENVIRONMENT" --dir "$DIR")
         [ "$COMMAND" = "apply" ] && [ "$REPLACE" = "true" ] && args+=(--replace)
         [ "$COMMAND" = "destroy" ] && [ -n "$CONFIRM_NAME" ] && args+=(--confirm-name "$CONFIRM_NAME")
+        while IFS= read -r path; do
+          [ -n "$path" ] && args+=(--policy "$path")
+        done <<< "$POLICY"
 
         # The exit code is captured rather than allowed to end the step, so
         # the sticky comment still reports a failed plan. The step fails

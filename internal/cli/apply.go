@@ -19,6 +19,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/naming"
 	"github.com/evatt-labs/kraai/internal/plan"
+	"github.com/evatt-labs/kraai/internal/policy"
 )
 
 // isInteractive reports whether r is a real terminal a human is typing
@@ -50,6 +51,7 @@ func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver, stor
 	var (
 		dir         string
 		setArgs     []string
+		policyPaths []string
 		jsonOut     bool
 		replaceFlag bool
 		confirmName string
@@ -69,12 +71,13 @@ func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver, stor
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runApply(
-				cmd, args[0], dir, setArgs, jsonOut, replaceFlag, confirmName,
+				cmd, args[0], dir, setArgs, policyPaths, jsonOut, replaceFlag, confirmName,
 				assembler, resolve, stores, isRealTerminal)
 		},
 	}
 
 	cmd.Flags().StringVar(&dir, "dir", ".", "manifest root directory")
+	cmd.Flags().StringArrayVar(&policyPaths, "policy", nil, policyFlagUsage)
 	cmd.Flags().StringArrayVar(&setArgs, "set", nil,
 		"override a manifest value (key=value); may be repeated")
 	cmd.Flags().BoolVar(&jsonOut, "json", false,
@@ -117,7 +120,7 @@ func newApplyCommand(assembler RegistryAssembler, resolve ManifestResolver, stor
 // the same kind of new signal runPlan's doc names as a gap for a later
 // change to build.
 func runApply(
-	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut, allowReplace bool,
+	cmd *cobra.Command, envName, dir string, setArgs, policyPaths []string, jsonOut, allowReplace bool,
 	confirmName string, assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler,
 	interactive isInteractive,
 ) error {
@@ -153,6 +156,11 @@ func runApply(
 	defer func() { _ = resolved.Close(cmd.Context()) }()
 	m := resolved.Manifest
 
+	policies, err := policy.Load(fsys, policyPaths)
+	if err != nil {
+		return err
+	}
+
 	// The protected-environment gate runs before the registry is even
 	// assembled: a protected environment that fails confirmation should
 	// never cause kraai to authenticate against a live provider, let alone
@@ -180,6 +188,16 @@ func runApply(
 	p, err := plan.New(reg).Plan(ctx, m, envName)
 	if err != nil {
 		return err
+	}
+
+	// Judged on the plan this run will carry out, not one computed before
+	// the lock, and refused before its first mutation.
+	denials, err := judge(ctx, policies, policy.GatePlan, envName, m, p)
+	if err != nil {
+		return err
+	}
+	if len(denials) > 0 {
+		return policy.Denied(policy.GatePlan, denials)
 	}
 
 	result, err := apply.New(reg, apply.WithAllowReplace(allowReplace)).Apply(ctx, p)

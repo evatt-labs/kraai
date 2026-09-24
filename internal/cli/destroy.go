@@ -17,12 +17,14 @@ import (
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/naming"
 	"github.com/evatt-labs/kraai/internal/plan"
+	"github.com/evatt-labs/kraai/internal/policy"
 )
 
 func newDestroyCommand(assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler) *cobra.Command {
 	var (
 		dir         string
 		setArgs     []string
+		policyPaths []string
 		jsonOut     bool
 		confirmName string
 	)
@@ -43,12 +45,13 @@ func newDestroyCommand(assembler RegistryAssembler, resolve ManifestResolver, st
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDestroy(
-				cmd, args[0], dir, setArgs, jsonOut, confirmName,
+				cmd, args[0], dir, setArgs, policyPaths, jsonOut, confirmName,
 				assembler, resolve, stores, isRealTerminal)
 		},
 	}
 
 	cmd.Flags().StringVar(&dir, "dir", ".", "manifest root directory")
+	cmd.Flags().StringArrayVar(&policyPaths, "policy", nil, policyFlagUsage)
 	cmd.Flags().StringArrayVar(&setArgs, "set", nil,
 		"override a manifest value (key=value); may be repeated")
 	cmd.Flags().BoolVar(&jsonOut, "json", false,
@@ -90,7 +93,7 @@ func newDestroyCommand(assembler RegistryAssembler, resolve ManifestResolver, st
 // error if anything in it failed, rather than a bespoke non-error
 // reporting channel.
 func runDestroy(
-	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
+	cmd *cobra.Command, envName, dir string, setArgs, policyPaths []string, jsonOut bool,
 	confirmName string, assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler,
 	interactive isInteractive,
 ) error {
@@ -126,6 +129,11 @@ func runDestroy(
 	defer func() { _ = resolved.Close(cmd.Context()) }()
 	m := resolved.Manifest
 
+	policies, err := policy.Load(fsys, policyPaths)
+	if err != nil {
+		return err
+	}
+
 	// The protected-environment gate runs before the registry is even
 	// assembled: a protected environment that fails confirmation should
 	// never cause kraai to authenticate against a live provider, let alone
@@ -143,7 +151,7 @@ func runDestroy(
 	}
 	defer release()
 
-	result, err := destroyEnvironment(ctx, envName, m, assembler)
+	result, err := destroyEnvironment(ctx, envName, m, assembler, policies)
 	if err := lockLost(ctx, envName, err); err != nil {
 		return err
 	}
@@ -353,10 +361,11 @@ func writeDestroyJSON(w io.Writer, envName string, result *destroy.Result) error
 	return err
 }
 
-// destroyEnvironment plans the environment and tears it down: what destroy
-// does once the manifest is loaded and the lock held, shared with gc.
+// destroyEnvironment plans the environment and tears it down, unless its
+// destroy policies deny it: what destroy does once the manifest is loaded
+// and the lock held, shared with gc.
 func destroyEnvironment(
-	ctx context.Context, envName string, m *manifest.Manifest, assembler RegistryAssembler,
+	ctx context.Context, envName string, m *manifest.Manifest, assembler RegistryAssembler, policies *policy.Set,
 ) (*destroy.Result, error) {
 	reg, err := assembler(ctx, m)
 	if err != nil {
@@ -365,6 +374,13 @@ func destroyEnvironment(
 	p, err := plan.New(reg).Plan(ctx, m, envName)
 	if err != nil {
 		return nil, err
+	}
+	denials, err := judge(ctx, policies, policy.GateDestroy, envName, m, p)
+	if err != nil {
+		return nil, err
+	}
+	if len(denials) > 0 {
+		return nil, policy.Denied(policy.GateDestroy, denials)
 	}
 	return destroy.New(reg).Destroy(ctx, p)
 }

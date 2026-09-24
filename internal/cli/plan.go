@@ -17,6 +17,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/naming"
 	"github.com/evatt-labs/kraai/internal/plan"
+	"github.com/evatt-labs/kraai/internal/policy"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -49,9 +50,10 @@ type ManifestResolver func(
 
 func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobra.Command {
 	var (
-		dir     string
-		setArgs []string
-		jsonOut bool
+		dir         string
+		setArgs     []string
+		policyPaths []string
+		jsonOut     bool
 
 		detailedExitCode bool
 	)
@@ -66,11 +68,12 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPlan(cmd, args[0], dir, setArgs, jsonOut, detailedExitCode, assembler, resolve)
+			return runPlan(cmd, args[0], dir, setArgs, policyPaths, jsonOut, detailedExitCode, assembler, resolve)
 		},
 	}
 
 	cmd.Flags().StringVar(&dir, "dir", ".", "manifest root directory")
+	cmd.Flags().StringArrayVar(&policyPaths, "policy", nil, policyFlagUsage)
 	cmd.Flags().StringArrayVar(&setArgs, "set", nil,
 		"override a manifest value (key=value); may be repeated")
 	cmd.Flags().BoolVar(&jsonOut, "json", false,
@@ -105,7 +108,7 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 // print like one, and because the kerrors table's own 2 already means
 // CodeValidation.
 func runPlan(
-	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut, detailedExitCode bool,
+	cmd *cobra.Command, envName, dir string, setArgs, policyPaths []string, jsonOut, detailedExitCode bool,
 	assembler RegistryAssembler, resolve ManifestResolver,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
@@ -154,6 +157,13 @@ func runPlan(
 	defer func() { _ = resolved.Close(cmd.Context()) }()
 	m := resolved.Manifest
 
+	// Loaded before anything reads the cloud, so a policy that does not
+	// compile fails the command in a second rather than after a full plan.
+	policies, err := policy.Load(fsys, policyPaths)
+	if err != nil {
+		return err
+	}
+
 	ctx := cmd.Context()
 
 	reg, err := assembler(ctx, m)
@@ -166,9 +176,16 @@ func runPlan(
 		return err
 	}
 
+	denials, err := judge(ctx, policies, policy.GatePlan, envName, m, result)
+	if err != nil {
+		return err
+	}
+
+	// A denial is 1, not 2: a script that applies on 2 must not apply a
+	// plan its policies refuse.
 	if detailedExitCode {
 		switch {
-		case result.HasFailures():
+		case result.HasFailures() || len(denials) > 0:
 			signalExit(planExitFailed)
 		case result.HasChanges():
 			signalExit(planExitChanges)
@@ -176,9 +193,22 @@ func runPlan(
 	}
 
 	if jsonOut {
-		return writePlanJSON(cmd.OutOrStdout(), envName, result)
+		return writePlanJSON(cmd.OutOrStdout(), envName, result, denials)
 	}
-	return writePlanText(cmd.OutOrStdout(), envName, result)
+	if err := writePlanText(cmd.OutOrStdout(), envName, result); err != nil {
+		return err
+	}
+	return writeDenials(cmd.OutOrStdout(), denials)
+}
+
+// writeDenials prints what the plan's policies refused, after the plan
+// they refused it on.
+func writeDenials(w io.Writer, denials []string) error {
+	if len(denials) == 0 {
+		return nil
+	}
+	_, err := fmt.Fprintf(w, "\npolicy denied the plan; apply will refuse it:\n  - %s\n", strings.Join(denials, "\n  - "))
+	return err
 }
 
 // The --detailed-exitcode convention, matching Terraform's: 0 is nothing to
@@ -347,6 +377,9 @@ type planDocument struct {
 	Environment string           `json:"environment"`
 	Summary     planSummaryJSON  `json:"summary"`
 	Actions     []planActionJSON `json:"actions"`
+	// PolicyDenials is every message the plan policies denied it with;
+	// absent when none did. Additive: apply refuses a plan that has any.
+	PolicyDenials []string `json:"policy_denials,omitempty"`
 }
 
 // planSummaryJSON is planDocument's counts-and-flags block, mirroring
@@ -439,8 +472,10 @@ func toPlanDocument(envName string, p *plan.Plan) planDocument {
 // so checking it would be a defensive branch with no genuine failure path
 // to exercise. w.Write, by contrast, is a real external I/O call and is
 // this function's one actual, testable failure path.
-func writePlanJSON(w io.Writer, envName string, result *plan.Plan) error {
-	data, _ := json.MarshalIndent(toPlanDocument(envName, result), "", "  ")
+func writePlanJSON(w io.Writer, envName string, result *plan.Plan, denials []string) error {
+	doc := toPlanDocument(envName, result)
+	doc.PolicyDenials = denials
+	data, _ := json.MarshalIndent(doc, "", "  ")
 	data = append(data, '\n')
 
 	_, err := w.Write(data)

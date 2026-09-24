@@ -17,13 +17,15 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/policy"
 )
 
 func newGCCommand(assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler) *cobra.Command {
 	var (
-		dir     string
-		setArgs []string
-		dryRun  bool
+		dir         string
+		setArgs     []string
+		policyPaths []string
+		dryRun      bool
 	)
 
 	cmd := &cobra.Command{
@@ -39,11 +41,12 @@ func newGCCommand(assembler RegistryAssembler, resolve ManifestResolver, stores 
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runGC(cmd, dir, setArgs, dryRun, assembler, resolve, stores)
+			return runGC(cmd, dir, setArgs, policyPaths, dryRun, assembler, resolve, stores)
 		},
 	}
 
 	cmd.Flags().StringVar(&dir, "dir", ".", "manifest root directory")
+	cmd.Flags().StringArrayVar(&policyPaths, "policy", nil, policyFlagUsage)
 	cmd.Flags().StringArrayVar(&setArgs, "set", nil,
 		"override a manifest value (key=value); may be repeated")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false,
@@ -60,7 +63,7 @@ type gcVerdict struct {
 }
 
 func runGC(
-	cmd *cobra.Command, dir string, setArgs []string, dryRun bool,
+	cmd *cobra.Command, dir string, setArgs, policyPaths []string, dryRun bool,
 	assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler,
 ) error {
 	fsys, err := manifest.NewFS(dir)
@@ -71,6 +74,10 @@ func runGC(
 		return err
 	}
 	names, err := environmentNames(fsys)
+	if err != nil {
+		return err
+	}
+	policies, err := policy.Load(fsys, policyPaths)
 	if err != nil {
 		return err
 	}
@@ -105,7 +112,7 @@ func runGC(
 				return err
 			}
 		}
-		verdict.Action, verdict.Detail, err = reap(ctx, cmd.ErrOrStderr(), envName, m, store, dryRun, assembler, stores)
+		verdict.Action, verdict.Detail, err = reap(ctx, cmd.ErrOrStderr(), envName, m, store, dryRun, assembler, stores, policies)
 		_ = resolved.Close(ctx)
 		if err != nil {
 			verdict.Action, verdict.Detail = "failed", err.Error()
@@ -127,7 +134,7 @@ func runGC(
 // and did not finish cleanly.
 func reap(
 	ctx context.Context, stderr io.Writer, envName string, m *manifest.Manifest, store lock.Store, dryRun bool,
-	assembler RegistryAssembler, stores LockStoreAssembler,
+	assembler RegistryAssembler, stores LockStoreAssembler, policies *policy.Set,
 ) (action, detail string, err error) {
 	// The invariant this command exists to hold: a persistent environment
 	// is never reaped, whatever its record says.
@@ -161,7 +168,7 @@ func reap(
 		return "", "", err
 	}
 	defer release()
-	result, err := destroyEnvironment(ctx, envName, m, assembler)
+	result, err := destroyEnvironment(ctx, envName, m, assembler, policies)
 	if err := lockLost(ctx, envName, err); err != nil {
 		return "", "", err
 	}
