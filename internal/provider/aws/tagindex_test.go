@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -37,22 +38,59 @@ func taskDefinitions(tagged []string, taggedErr error) *fakeClient {
 func taskDefinitionType(fc *fakeClient) *resourceType {
 	return &resourceType{
 		provider: Provider, typeName: typeECSTaskDefinition, lookup: resource.LookupByTag, client: fc,
-		match: arrayTagsMatch,
+		match: arrayTagsMatch, matchIsTag: true,
 	}
 }
 
-// A read-only lookup of an indexed type reads only the listed candidates
-// the index reports, and finds the same instance the walk would.
+// A read-only lookup of an indexed type reads only what the index reports,
+// never lists the type, and finds the same instance the walk would. A
+// deregistered revision the index still returns reads as not found.
 func TestAReadOnlyLookupReadsOnlyIndexedCandidates(t *testing.T) {
-	fc := taskDefinitions([]string{tdGone, tdWanted}, nil)
+	fc := taskDefinitions([]string{tdWanted, tdGone}, nil)
 	id, _, found, err := taskDefinitionType(fc).resolve(resource.WithReadOnly(context.Background()),
 		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
 	if err != nil || !found || id != tdWanted {
 		t.Fatalf("resolve = %q, %v, %v", id, found, err)
 	}
-	// Neither the unlisted, deregistered revision nor the untagged one.
-	if !reflect.DeepEqual(fc.getCalls, []string{tdWanted}) {
-		t.Fatalf("read %v, want only %s", fc.getCalls, tdWanted)
+	if fc.listCalls != 0 {
+		t.Fatalf("listed the type %d times", fc.listCalls)
+	}
+	// Sorted, so tdGone (":0") is read before tdWanted (":1") and skipped.
+	if !reflect.DeepEqual(fc.getCalls, []string{tdGone, tdWanted}) {
+		t.Fatalf("read %v", fc.getCalls)
+	}
+	if !reflect.DeepEqual(fc.taggedTypes, []string{"ecs:task-definition"}) {
+		t.Fatalf("queried the index for %v", fc.taggedTypes)
+	}
+}
+
+// Two instances carrying the name resolve the same way whatever order the
+// index returns them in.
+func TestIndexedCandidatesAreReadInAStableOrder(t *testing.T) {
+	second := "arn:aws:ecs:us-east-1:123456789012:task-definition/env-app-task:2"
+	for _, order := range [][]string{{tdWanted, second}, {second, tdWanted}} {
+		fc := taskDefinitions(order, nil)
+		fc.byIdentifier[second] = fc.byIdentifier[tdWanted]
+		id, _, _, err := taskDefinitionType(fc).resolve(resource.WithReadOnly(context.Background()),
+			resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
+		if err != nil || id != tdWanted {
+			t.Fatalf("index order %v resolved %q, %v", order, id, err)
+		}
+	}
+}
+
+// A type whose match compares more than the identity tag walks: the index
+// answers only the tag.
+func TestAMatchThatIsNotTheTagWalks(t *testing.T) {
+	fc := taskDefinitions([]string{tdWanted}, nil)
+	r := taskDefinitionType(fc)
+	r.matchIsTag = false
+	if _, _, found, err := r.resolve(resource.WithReadOnly(context.Background()),
+		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"}); err != nil || !found {
+		t.Fatalf("resolve = %v, %v", found, err)
+	}
+	if fc.taggedCalls != 0 || fc.listCalls != 1 {
+		t.Fatalf("index queried %d times, listed %d", fc.taggedCalls, fc.listCalls)
 	}
 }
 
@@ -98,16 +136,16 @@ func TestAnUnreadableIndexFallsBackToTheWalk(t *testing.T) {
 	}
 }
 
-// A miss the index reports reads nothing.
+// A miss the index reports lists nothing and reads only what it returned.
 func TestAnIndexedMissReadsNothing(t *testing.T) {
-	fc := taskDefinitions([]string{tdGone}, nil)
+	fc := taskDefinitions(nil, nil)
 	_, _, found, err := taskDefinitionType(fc).resolve(resource.WithReadOnly(context.Background()),
 		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
 	if err != nil || found {
 		t.Fatalf("resolve = %v, %v, want a miss", found, err)
 	}
-	if len(fc.getCalls) != 0 {
-		t.Fatalf("read %v on a miss the index answered", fc.getCalls)
+	if len(fc.getCalls) != 0 || fc.listCalls != 0 {
+		t.Fatalf("read %v and listed %d times on a miss the index answered", fc.getCalls, fc.listCalls)
 	}
 }
 
@@ -135,13 +173,16 @@ func (p *pagedTagging) GetResources(_ context.Context, in *resourcegroupstagging
 // Every page is read, and the query filters on kraai's identity tag.
 func TestTaggedResourcesReadsEveryPage(t *testing.T) {
 	tagging := &pagedTagging{pages: [][]string{{tdWanted}, {tdGone}}}
-	arns, err := (&Client{tagging: tagging}).TaggedResources(context.Background(), "env-app-task")
+	arns, err := (&Client{tagging: tagging}).TaggedResources(context.Background(), "env-app-task", "ecs:task-definition")
 	if err != nil || !slices.Equal(arns, []string{tdWanted, tdGone}) {
 		t.Fatalf("TaggedResources = %v, %v", arns, err)
 	}
 	filter := tagging.calls[0].TagFilters[0]
 	if *filter.Key != identityTagKey || !slices.Equal(filter.Values, []string{"env-app-task"}) {
 		t.Fatalf("filter = %s=%v", *filter.Key, filter.Values)
+	}
+	if !slices.Equal(tagging.calls[0].ResourceTypeFilters, []string{"ecs:task-definition"}) {
+		t.Fatalf("type filter = %v", tagging.calls[0].ResourceTypeFilters)
 	}
 	if tagging.calls[1].PaginationToken == nil || *tagging.calls[1].PaginationToken != "next" {
 		t.Fatal("the second page was not requested with the first page's token")
@@ -152,5 +193,22 @@ func TestTaggedResourcesReadsEveryPage(t *testing.T) {
 func TestPolicyNamesTheTaggingAPIForTaskDefinitions(t *testing.T) {
 	if !slices.Contains(typeActions[typeECSTaskDefinition], "tag:GetResources") {
 		t.Fatalf("typeActions[%s] = %v", typeECSTaskDefinition, typeActions[typeECSTaskDefinition])
+	}
+}
+
+// A native type found by tag declares that its match is the tag alone, so
+// plan can use the index for it; one found by name has no match to index.
+func TestNativeTagLookupsAreIndexable(t *testing.T) {
+	byTag := newNativeResourceWith(&fakeClient{}, nil, cfschema.Facts{
+		TypeName: typeECSTaskDefinition, TagProperty: "Tags", TagShape: cfschema.TagShapeArray,
+	}, resource.LookupByTag)
+	if !byTag.matchIsTag {
+		t.Fatal("a native type found by tag does not mark its match as the tag")
+	}
+	byName := newNativeResourceWith(&fakeClient{}, nil, cfschema.Facts{
+		TypeName: "AWS::Logs::LogGroup", TagProperty: "Tags", TagShape: cfschema.TagShapeArray,
+	}, resource.LookupByName)
+	if byName.matchIsTag {
+		t.Fatal("a native type found by name marks a match it does not have")
 	}
 }

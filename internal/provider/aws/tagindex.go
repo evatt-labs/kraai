@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"sort"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
@@ -13,13 +14,18 @@ import (
 
 const typeECSTaskDefinition = "AWS::ECS::TaskDefinition"
 
-// indexedTypes are the types a read-only lookup narrows through the
-// Resource Groups Tagging API instead of reading every instance. Each has a
-// Cloud Control identifier that is the ARN the tagging API returns, and was
-// checked against a real account: Cloud Control lists exactly the ACTIVE
-// task definitions, while the tagging API also returns deregistered ones,
-// which the intersection drops.
-var indexedTypes = map[string]bool{typeECSTaskDefinition: true}
+// indexedTypes maps each type a read-only lookup finds through the
+// Resource Groups Tagging API to that API's name for it. Each has a Cloud
+// Control identifier that is the ARN the tagging API returns, and was
+// checked against a real account: every instance the index omits carried
+// no tags, and each ARN it returned was found by GetResource. A task
+// definition revision that has been deregistered keeps its tags and its
+// place in the index, and GetResource reports it not found.
+var indexedTypes = map[string]string{
+	typeECSTaskDefinition:                      "ecs:task-definition",
+	"AWS::ElasticLoadBalancingV2::TargetGroup": "elasticloadbalancing:targetgroup",
+	TypeEventsRule:                             "events:rule",
+}
 
 // taggingAPI is the subset of *resourcegroupstaggingapi.Client this package
 // calls.
@@ -27,19 +33,21 @@ type taggingAPI interface {
 	GetResources(ctx context.Context, params *resourcegroupstaggingapi.GetResourcesInput, optFns ...func(*resourcegroupstaggingapi.Options)) (*resourcegroupstaggingapi.GetResourcesOutput, error)
 }
 
-// TaggedResources returns the ARN of every resource in the region carrying
-// kraai's identity tag with value name, of any type. The tagging API is
-// eventually consistent and may miss a resource created moments ago.
-func (c *Client) TaggedResources(ctx context.Context, name string) ([]string, error) {
+// TaggedResources returns the ARN of every resource of tagType (the tagging
+// API's name for a type, such as ecs:task-definition) carrying kraai's
+// identity tag with value name. The tagging API is eventually consistent
+// and may miss a resource created moments ago.
+func (c *Client) TaggedResources(ctx context.Context, name, tagType string) ([]string, error) {
 	var arns []string
 	var token *string
 	for range maxListPages {
 		out, err := c.tagging.GetResources(ctx, &resourcegroupstaggingapi.GetResourcesInput{
-			TagFilters:      []tagtypes.TagFilter{{Key: aws.String(identityTagKey), Values: []string{name}}},
-			PaginationToken: token,
+			TagFilters:          []tagtypes.TagFilter{{Key: aws.String(identityTagKey), Values: []string{name}}},
+			ResourceTypeFilters: []string{tagType},
+			PaginationToken:     token,
 		})
 		if err != nil {
-			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "finding resources tagged %s=%s", identityTagKey, name)
+			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "finding %s resources tagged %s=%s", tagType, identityTagKey, name)
 		}
 		for _, mapping := range out.ResourceTagMappingList {
 			if mapping.ResourceARN != nil {
@@ -51,31 +59,23 @@ func (c *Client) TaggedResources(ctx context.Context, name string) ([]string, er
 		}
 		token = out.PaginationToken
 	}
-	return nil, kerrors.New("finding resources tagged %s=%s: more than %d pages", identityTagKey, name, maxListPages)
+	return nil, kerrors.New("finding %s resources tagged %s=%s: more than %d pages", tagType, identityTagKey, name, maxListPages)
 }
 
-// narrow keeps, in list order, the candidates the tagging API reports
-// carrying name, when ctx is read-only and the type is indexed; otherwise,
-// or if the index cannot be read, it keeps them all. The index only ever
-// removes candidates, so what survives is still confirmed by a read.
-func (r *resourceType) narrow(ctx context.Context, name string, candidates []string) []string {
-	if !resource.ReadOnly(ctx) || !indexedTypes[r.typeName] {
-		return candidates
+// indexed returns the candidates the tagging API reports carrying name, in
+// place of listing the type, when ctx is read-only, the type is indexed and
+// its match is the identity tag alone. ok is false otherwise, or if the
+// index cannot be read, and the caller walks the listed instances instead.
+func (r *resourceType) indexed(ctx context.Context, name string) (candidates []string, ok bool) {
+	tagType, indexed := indexedTypes[r.typeName]
+	if !resource.ReadOnly(ctx) || !indexed || !r.matchIsTag {
+		return nil, false
 	}
-	arns, err := r.client.TaggedResources(ctx, name)
+	arns, err := r.client.TaggedResources(ctx, name, tagType)
 	if err != nil {
-		// Slower, never wrong: the walk reads every candidate.
-		return candidates
+		// Slower, never wrong: the walk reads every listed instance.
+		return nil, false
 	}
-	tagged := make(map[string]bool, len(arns))
-	for _, arn := range arns {
-		tagged[arn] = true
-	}
-	var kept []string
-	for _, candidate := range candidates {
-		if tagged[candidate] {
-			kept = append(kept, candidate)
-		}
-	}
-	return kept
+	sort.Strings(arns)
+	return arns, true
 }

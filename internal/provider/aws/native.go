@@ -226,6 +226,7 @@ func newNativeResourceWith(cc ccAPI, schemas propertySchemaSource, facts cfschem
 		switch lookup {
 		case resource.LookupByTag:
 			rt.match = tagMatcher(facts.TagProperty, facts.TagShape)
+			rt.matchIsTag = true
 		case resource.LookupByName:
 			rt.owns = taggedByKraai(facts)
 		case resource.LookupByAPI, resource.LookupByAttr:

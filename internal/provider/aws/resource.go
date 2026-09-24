@@ -38,9 +38,9 @@ type ccAPI interface {
 	// DescribeType fetches and decodes typeName's CloudFormation resource
 	// provider schema.
 	DescribeType(ctx context.Context, typeName string) (cfschema.Facts, error)
-	// TaggedResources returns the ARN of every resource carrying kraai's
-	// identity tag with value name; see Client.TaggedResources.
-	TaggedResources(ctx context.Context, name string) ([]string, error)
+	// TaggedResources returns the ARN of every resource of tagType carrying
+	// kraai's identity tag with value name; see Client.TaggedResources.
+	TaggedResources(ctx context.Context, name, tagType string) ([]string, error)
 }
 
 // ownsFunc reports whether a found instance is this account's and kraai's
@@ -87,6 +87,9 @@ type resourceType struct {
 	// match is nil for LookupByName, where ref.Name is the primary
 	// identifier. Required for every other strategy.
 	match matchFunc
+	// matchIsTag is set when match compares kraai's identity tag and
+	// nothing else, so the tagging API answers the same question.
+	matchIsTag bool
 
 	// stampTag writes this type's identity tag into the CreateResource
 	// desired state. Required for LookupByTag; also set by a type found
@@ -229,6 +232,12 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 		}
 	}
 
+	if resourceModel == nil && ref.Match == "" {
+		if candidates, ok := r.indexed(ctx, name); ok {
+			return r.firstMatch(ctx, name, candidates)
+		}
+	}
+
 	if err := r.checkListScope(ctx, resourceModel); err != nil {
 		return "", nil, false, err
 	}
@@ -244,7 +253,13 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 		return "", nil, false, kerrors.Validation(
 			"%s %q is found by declared match values, and none were given", r.typeName, name)
 	}
-	for _, candidate := range r.narrow(ctx, name, candidates) {
+	return r.firstMatch(ctx, name, candidates)
+}
+
+// firstMatch reads candidates in order and returns the first that match
+// reports is name.
+func (r *resourceType) firstMatch(ctx context.Context, name string, candidates []string) (string, map[string]any, bool, error) {
+	for _, candidate := range candidates {
 		props, ok, err := r.client.GetResource(ctx, r.typeName, candidate)
 		if err != nil {
 			return "", nil, false, err
