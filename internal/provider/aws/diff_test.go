@@ -123,3 +123,62 @@ func TestDiffDerivesTheAnswerFromTheSchema(t *testing.T) {
 		})
 	}
 }
+
+// The vendor's nested defaults are not differences: the rule that a
+// property kraai never set is the vendor's holds at every depth. A task
+// definition read back with a score of defaults filled into its container
+// planned as a replace on every run.
+func TestDiffIgnoresNestedVendorDefaults(t *testing.T) {
+	container := map[string]any{"Name": "noop", "Image": "busybox:stable", "Essential": true}
+	readBack := map[string]any{
+		"Name": "noop", "Image": "busybox:stable", "Essential": true,
+		"Cpu": 0, "Environment": []any{}, "PortMappings": []any{}, "DockerLabels": map[string]any{},
+	}
+	cases := []struct {
+		name       string
+		createOnly []string
+		updatable  bool
+		desired    map[string]any
+		current    map[string]any
+		want       resource.Difference
+	}{
+		{"a createOnly list read back with defaults filled in", []string{"/properties/ContainerDefinitions"}, false,
+			map[string]any{"ContainerDefinitions": []any{container}},
+			map[string]any{"ContainerDefinitions": []any{readBack}}, resource.Same},
+		{"a value inside it changed", []string{"/properties/ContainerDefinitions"}, false,
+			map[string]any{"ContainerDefinitions": []any{map[string]any{"Name": "noop", "Image": "busybox:1.36"}}},
+			map[string]any{"ContainerDefinitions": []any{readBack}}, resource.Immutable},
+		{"an element added", []string{"/properties/ContainerDefinitions"}, false,
+			map[string]any{"ContainerDefinitions": []any{container, container}},
+			map[string]any{"ContainerDefinitions": []any{readBack}}, resource.Immutable},
+		{"an element removed", []string{"/properties/ContainerDefinitions"}, false,
+			map[string]any{"ContainerDefinitions": []any{container}},
+			map[string]any{"ContainerDefinitions": []any{readBack, readBack}}, resource.Immutable},
+		{"a mutable nested value changed", nil, true,
+			map[string]any{"Config": map[string]any{"Retention": 7}},
+			map[string]any{"Config": map[string]any{"Retention": 14, "Tier": "standard"}}, resource.Mutable},
+		{"a mutable nested object read back with defaults", nil, true,
+			map[string]any{"Config": map[string]any{"Retention": 7}},
+			map[string]any{"Config": map[string]any{"Retention": 7, "Tier": "standard"}}, resource.Same},
+		{"a scalar where an object was set", nil, true,
+			map[string]any{"Config": map[string]any{"Retention": 7}},
+			map[string]any{"Config": "7"}, resource.Mutable},
+		// The documented tradeoff: a nested key the vendor does not return
+		// cannot be told from one it dropped, so it is not compared. The
+		// rule can miss an update, never invent one.
+		{"a nested key the vendor does not return", nil, true,
+			map[string]any{"Config": map[string]any{"Retention": 7, "Secret": "x"}},
+			map[string]any{"Config": map[string]any{"Retention": 7}}, resource.Same},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := diffFixture(c.createOnly, nil, c.updatable).Diff(specWith(c.desired), stateWith(c.current))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got != c.want {
+				t.Fatalf("Diff = %v, want %v", got, c.want)
+			}
+		})
+	}
+}
