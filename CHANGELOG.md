@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.16](https://github.com/evatt-labs/kraai/compare/v0.6.15...v0.6.16) (2026-09-24)
+
+
+### Features
+
+* resolve secret references from AWS SSM and Secrets Manager ([#326](https://github.com/evatt-labs/kraai/issues/326)) ([39f8561](https://github.com/evatt-labs/kraai/commit/39f856100b935eed45c2d3637ff0041b08ea0484))
+
+
+### Performance Improvements
+
+* **aws:** index EC2 network types, verified with a live integration fixture ([#324](https://github.com/evatt-labs/kraai/issues/324)) ([7b71093](https://github.com/evatt-labs/kraai/commit/7b71093267913200cad1965e57bde260edbab69d))
+* **aws:** narrow plan's tag lookups through the tagging API ([#320](https://github.com/evatt-labs/kraai/issues/320)) ([51eeb8f](https://github.com/evatt-labs/kraai/commit/51eeb8f7c4aa6a9d685006dc7405c84480bc1a60))
+* **aws:** skip listing an indexed type in plan ([#322](https://github.com/evatt-labs/kraai/issues/322)) ([198faa7](https://github.com/evatt-labs/kraai/commit/198faa79bb9530227f58f2debe249b179ab69585))
+
 ## [0.6.15](https://github.com/evatt-labs/kraai/compare/v0.6.14...v0.6.15) (2026-09-24)
 
 
