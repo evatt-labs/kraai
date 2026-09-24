@@ -173,17 +173,26 @@ func (i *instrumented) Diff(spec Spec, state *State) (Difference, error) {
 	return differ.Diff(spec, state)
 }
 
-// DiffLive forwards to the inner resource when it can answer with a call of
-// its own, and otherwise reports no difference. Structural for the same
-// reason as Diff: plan.LiveDiffer lives in internal/plan.
+// DiffLive forwards to the inner resource when it implements a live
+// comparison, and otherwise falls back to Diff — never straight to Same.
+//
+// *instrumented always satisfies plan.LiveDiffer, this method itself being
+// the reason, and decide asserts LiveDiffer before Differ (see
+// plan.LiveDiffer's doc comment). Left answering Same for an inner type
+// that only implements Diff, this forwarder would silently disable that
+// type's whole comparison in every real run — decorated is the only way
+// anything reaches decide — which is worse than the interface not existing
+// at all: the API Gateway default-endpoint regression Differ's own doc
+// comment cites, but for every type at once instead of one. Falling back
+// to Diff keeps decide's preference meaningful only for a type that
+// actually opted into a live comparison.
 func (i *instrumented) DiffLive(ctx context.Context, spec Spec, state *State) (Difference, error) {
-	differ, ok := i.inner.(interface {
+	if live, ok := i.inner.(interface {
 		DiffLive(context.Context, Spec, *State) (Difference, error)
-	})
-	if !ok {
-		return Same, nil
+	}); ok {
+		return live.DiffLive(ctx, spec, state)
 	}
-	return differ.DiffLive(ctx, spec, state)
+	return i.Diff(spec, state)
 }
 
 // ValidateSpec forwards to the inner resource when it can validate, and

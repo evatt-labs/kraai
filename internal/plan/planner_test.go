@@ -160,6 +160,52 @@ func TestPlan_ImmutableDiffPlansAsReplace(t *testing.T) {
 	}
 }
 
+// TestPlan_DecoratedDifferOnlyResourceStillReportsReplace runs
+// TestPlan_ImmutableDiffPlansAsReplace's exact scenario through a registry
+// decorated the way internal/assemble builds the real one
+// (resource.WithDecorator(resource.Instrument(nil, nil))), for a resource
+// type that implements only Differ, never LiveDiffer — every registered
+// type except this PR's Lambda change.
+//
+// decide asserts LiveDiffer before Differ (plan.LiveDiffer's doc comment),
+// and every decorated resource satisfies LiveDiffer structurally, since
+// *instrumented itself implements it to forward to a real one when present.
+// A decorator that answered Same for a Diff-only inner, rather than falling
+// back to Diff, would make this test plan ActionNoChange instead of
+// ActionReplace — the exact regression this test exists to catch, which no
+// other test in this package can: every other Differ test here registers
+// against an undecorated resource.NewRegistry(), the one difference that
+// matters, because nothing but the real registry wiring reaches
+// *instrumented at all.
+func TestPlan_DecoratedDifferOnlyResourceStillReportsReplace(t *testing.T) {
+	differ := &fakeDiffer{
+		fakeResource: newFakeResource(),
+		diff:         func(resource.Spec, *resource.State) (resource.Difference, error) { return resource.Immutable, nil },
+	}
+	reg := resource.NewRegistry(resource.WithDecorator(resource.Instrument(nil, nil)))
+	must(t, reg.Register(resource.Registration{
+		Provider: "cloudflare", Type: "r2_bucket", Capability: manifest.CapabilityObjects,
+		Lookup: resource.LookupByName, Resource: differ,
+	}))
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
+		Services: map[string]manifest.Service{
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
+		},
+	}
+	name := naming.ResourceName(envName, "api", "UPLOADS")
+	differ.states[name] = &resource.State{Ref: resource.Ref{Provider: "cloudflare", Type: "r2_bucket", Name: name}, ID: "bucket-1"}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	got := findAction(t, p, "cloudflare", "r2_bucket")
+	if got.Kind != ActionReplace {
+		t.Fatalf("Kind = %v, want ActionReplace: a decorated Differ-only resource must still report its real difference", got.Kind)
+	}
+}
+
 // TestPlan_LiveDifferTakesPrecedenceOverDiffer proves decide calls
 // LiveDiffer.DiffLive, with a live ctx, and never falls through to
 // Differ.Diff, for a type implementing both — the ordering #336's marker
