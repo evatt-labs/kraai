@@ -545,8 +545,8 @@ func (r *resourceType) Delete(ctx context.Context, ref resource.Ref) error {
 // Diff compares spec to the live state three ways, from the vendor's own
 // schema, implementing plan.Differ structurally.
 //
-// Only properties spec.Config sets are compared: a property kraai never
-// wrote is the vendor's to default. A createOnly property that differs, or
+// Only properties spec.Config sets are compared, at every depth: a property
+// or nested key kraai never wrote is the vendor's to default. A createOnly property that differs, or
 // is absent from the live state, is Immutable. Any other differing property
 // is Mutable when the type has an update handler and Immutable when it does
 // not. A writeOnly property is never compared, since a read never returns
@@ -608,7 +608,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
 
-		if !reflect.DeepEqual(desiredNorm, currentNorm) {
+		if !covers(desiredNorm, currentNorm) {
 			return resource.Immutable, nil
 		}
 	}
@@ -635,7 +635,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		if err != nil {
 			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
-		if !reflect.DeepEqual(desiredNorm, currentNorm) {
+		if !covers(desiredNorm, currentNorm) {
 			if schema.HasUpdate {
 				return resource.Mutable, nil
 			}
@@ -643,6 +643,39 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		}
 	}
 	return resource.Same, nil
+}
+
+// covers reports whether current carries everything desired sets, applying
+// compare's top-level rule at every depth: a key only current has is the
+// vendor's default, and a key current does not return is not compared.
+// Arrays compare element by element and must be the same length.
+func covers(desired, current any) bool {
+	switch d := desired.(type) {
+	case map[string]any:
+		c, ok := current.(map[string]any)
+		if !ok {
+			return false
+		}
+		for k, dv := range d {
+			if cv, ok := c[k]; ok && !covers(dv, cv) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		c, ok := current.([]any)
+		if !ok || len(c) != len(d) {
+			return false
+		}
+		for i := range d {
+			if !covers(d[i], c[i]) {
+				return false
+			}
+		}
+		return true
+	default:
+		return reflect.DeepEqual(desired, current)
+	}
 }
 
 // resolveDeclared finds, among candidates, the one instance whose properties
