@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.18](https://github.com/evatt-labs/kraai/compare/v0.6.17...v0.6.18) (2026-09-24)
+
+
+### Features
+
+* **aws:** find Bedrock prompt routers through Bedrock's own list ([#343](https://github.com/evatt-labs/kraai/issues/343)) ([9f82635](https://github.com/evatt-labs/kraai/commit/9f82635b4425db13410c1ce4dbd0e3a0ab2d40ca))
+* **aws:** list resources through their own APIs ([#342](https://github.com/evatt-labs/kraai/issues/342)) ([f2d9fa3](https://github.com/evatt-labs/kraai/commit/f2d9fa38a459632a8724f09657e3e32af46b7c49))
+
+
+### Bug Fixes
+
+* **aws:** refuse Bedrock prompt routers, which Cloud Control cannot list ([#340](https://github.com/evatt-labs/kraai/issues/340)) ([6dbd444](https://github.com/evatt-labs/kraai/commit/6dbd444b9cc1e03d6c1c750613898bbff4a11313))
+
 ## [0.6.17](https://github.com/evatt-labs/kraai/compare/v0.6.16...v0.6.17) (2026-09-24)
 
 
