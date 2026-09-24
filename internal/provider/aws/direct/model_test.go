@@ -75,3 +75,10 @@ func TestVerifyCatches(t *testing.T) {
 		})
 	}
 }
+
+// withSkip adds a skip entry to one override file.
+func withSkip(m fstest.MapFS, file, property, reason string) fstest.MapFS {
+	f := m["overrides/"+file]
+	m["overrides/"+file] = &fstest.MapFile{Data: []byte(strings.Replace(string(f.Data), "skip:\n", "skip:\n  "+property+": "+reason+"\n", 1))}
+	return m
+}

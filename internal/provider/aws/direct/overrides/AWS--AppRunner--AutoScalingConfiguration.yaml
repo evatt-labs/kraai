@@ -2,3 +2,16 @@ type: AWS::AppRunner::AutoScalingConfiguration
 read:
   model: apprunner/service/2020-05-15/apprunner-2020-05-15.json
   operation: DescribeAutoScalingConfiguration
+  identifier:
+    AutoScalingConfigurationArn: AutoScalingConfigurationArn
+  response: AutoScalingConfiguration
+properties:
+  AutoScalingConfigurationArn: AutoScalingConfigurationArn
+  AutoScalingConfigurationName: AutoScalingConfigurationName
+  AutoScalingConfigurationRevision: AutoScalingConfigurationRevision
+  Latest: Latest
+  MaxConcurrency: MaxConcurrency
+  MaxSize: MaxSize
+  MinSize: MinSize
+skip:
+  Tags: tags are not in this operation's response; the service returns them from its separate tagging API

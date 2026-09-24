@@ -1,0 +1,100 @@
+package direct
+
+import (
+	"bytes"
+	"os"
+	"strings"
+	"testing"
+	"testing/fstest"
+)
+
+// readers.go is exactly what the checked-in inputs generate.
+func TestReadersAreGenerated(t *testing.T) {
+	want, err := Generate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile("readers.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatal("readers.go is not what the overrides generate; run go generate ./internal/provider/aws/direct")
+	}
+	if len(Readers()) != len(readers) || len(readers) == 0 {
+		t.Fatalf("Readers() = %d, readers = %d", len(Readers()), len(readers))
+	}
+}
+
+// The compiled readers carry what each protocol needs to address the call.
+func TestCompiledReadersAddressTheirCall(t *testing.T) {
+	cases := map[string]struct{ protocol, target, method, uri, location string }{
+		"AWS::AppConfig::DeploymentStrategy":       {"restJson1", "", "GET", "/deploymentstrategies/{DeploymentStrategyId}", "label"},
+		"AWS::XRay::Group":                         {"restJson1", "", "POST", "/GetGroup", "body"},
+		"AWS::CodeDeploy::DeploymentConfig":        {"awsJson1_1", "CodeDeploy_20141006.GetDeploymentConfig", "", "", "body"},
+		"AWS::AppRunner::AutoScalingConfiguration": {"awsJson1_0", "AppRunner.DescribeAutoScalingConfiguration", "", "", "body"},
+	}
+	for typeName, c := range cases {
+		r := readers[typeName]
+		if r.Protocol != c.protocol || r.Target != c.target || r.Method != c.method || r.URI != c.uri ||
+			len(r.Identifier) != 1 || r.Identifier[0].Location != c.location {
+			t.Errorf("%s = %+v", typeName, r)
+		}
+	}
+}
+
+// edit replaces old with new in one override file of a copy of the inputs.
+func edit(t *testing.T, file, old, replacement string) fstest.MapFS {
+	t.Helper()
+	m := copyFS(t)
+	f := m["overrides/"+file]
+	if !strings.Contains(string(f.Data), old) {
+		t.Fatalf("%s does not contain %q", file, old)
+	}
+	m["overrides/"+file] = &fstest.MapFile{Data: []byte(strings.Replace(string(f.Data), old, replacement, 1))}
+	return m
+}
+
+func TestCompileRefuses(t *testing.T) {
+	const xray, codedeploy = "AWS--XRay--Group.yaml", "AWS--CodeDeploy--DeploymentConfig.yaml"
+	cases := map[string]struct {
+		files fstest.MapFS
+		want  string
+	}{
+		"an unmapped property": {edit(t, xray, "  FilterExpression: FilterExpression\n", ""),
+			"FilterExpression is neither mapped nor skipped"},
+		"a member the response lacks": {edit(t, xray, "FilterExpression: FilterExpression", "FilterExpression: Filter"),
+			"maps to Filter, which com.amazonaws.xray#Group does not have"},
+		"a type that does not fit": {edit(t, xray, "GroupName: GroupName", "GroupName: InsightsConfiguration"),
+			"GroupName is [string] in the schema, but InsightsConfiguration is structure"},
+		"a skip nobody reviewed": {edit(t, xray, "Tags: tags are not", "Tags: TODO tags are not"),
+			"Tags is skipped without a reviewed reason"},
+		"a skip for a property the response carries": {withSkip(edit(t, xray,
+			"  FilterExpression: FilterExpression\n", ""), xray, "FilterExpression", "not needed"),
+			"FilterExpression is skipped, but member FilterExpression carries it"},
+		"a property both mapped and skipped": {withSkip(copyFS(t), xray, "GroupName", "no reason"),
+			"GroupName is both mapped and skipped"},
+		"a property the schema lacks": {edit(t, xray, "  GroupName: GroupName\n", "  GroupName: GroupName\n  Colour: GroupName\n"),
+			"Colour is mapped, but the schema has no such readable property"},
+		"an identifier that is not the primary identifier": {edit(t, xray, "    GroupARN: GroupARN\n", "    GroupName: GroupName\n"),
+			"identifier binds GroupName, which is not the primary identifier"},
+		"a required input member left unbound": {edit(t, codedeploy, "    DeploymentConfigName: deploymentConfigName\n  response", "  response"),
+			"the input requires deploymentConfigName, which the identifier does not bind"},
+		"a response path that goes nowhere": {edit(t, xray, "response: Group", "response: Groups"),
+			"response path Groups"},
+		"a structure with no nested mapping": {edit(t, codedeploy,
+			"  MinimumHealthyHosts:\n    member: minimumHealthyHosts\n    properties:\n      Type: type\n      Value: value\n",
+			"  MinimumHealthyHosts: minimumHealthyHosts\n"),
+			"MinimumHealthyHosts.Type is neither mapped nor skipped"},
+		"a nested property left out": {edit(t, codedeploy, "      Type: type\n      Value: value\n  TrafficRoutingConfig", "      Type: type\n  TrafficRoutingConfig"),
+			"MinimumHealthyHosts.Value is neither mapped nor skipped"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, err := compileAll(c.files)
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
+			}
+		})
+	}
+}

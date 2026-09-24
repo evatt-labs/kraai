@@ -2,3 +2,38 @@ type: AWS::CodeDeploy::DeploymentConfig
 read:
   model: codedeploy/service/2014-10-06/codedeploy-2014-10-06.json
   operation: GetDeploymentConfig
+  identifier:
+    DeploymentConfigName: deploymentConfigName
+  response: deploymentConfigInfo
+properties:
+  ComputePlatform: computePlatform
+  DeploymentConfigName: deploymentConfigName
+  MinimumHealthyHosts:
+    member: minimumHealthyHosts
+    properties:
+      Type: type
+      Value: value
+  TrafficRoutingConfig:
+    member: trafficRoutingConfig
+    properties:
+      TimeBasedCanary:
+        member: timeBasedCanary
+        properties:
+          CanaryInterval: canaryInterval
+          CanaryPercentage: canaryPercentage
+      TimeBasedLinear:
+        member: timeBasedLinear
+        properties:
+          LinearInterval: linearInterval
+          LinearPercentage: linearPercentage
+      Type: type
+  ZonalConfig:
+    member: zonalConfig
+    properties:
+      FirstZoneMonitorDurationInSeconds: firstZoneMonitorDurationInSeconds
+      MinimumHealthyHostsPerZone:
+        member: minimumHealthyHostsPerZone
+        properties:
+          Type: type
+          Value: value
+      MonitorDurationInSeconds: monitorDurationInSeconds

@@ -2,3 +2,17 @@ type: AWS::XRay::Group
 read:
   model: xray/service/2016-04-12/xray-2016-04-12.json
   operation: GetGroup
+  identifier:
+    GroupARN: GroupARN
+  response: Group
+properties:
+  FilterExpression: FilterExpression
+  GroupARN: GroupARN
+  GroupName: GroupName
+  InsightsConfiguration:
+    member: InsightsConfiguration
+    properties:
+      InsightsEnabled: InsightsEnabled
+      NotificationsEnabled: NotificationsEnabled
+skip:
+  Tags: tags are not in this operation's response; the service returns them from its separate tagging API

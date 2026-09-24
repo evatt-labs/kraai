@@ -15,27 +15,10 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-//go:generate go run extract.go
+//go:generate go run generate_main.go
 
 //go:embed lock.json models/*.json schemas/*.json overrides/*.yaml
 var files embed.FS
-
-// Override describes how one CloudFormation type is read through its
-// service's own API.
-type Override struct {
-	// Type is the CloudFormation type name, such as AWS::XRay::Group.
-	Type string `yaml:"type"`
-	Read Read   `yaml:"read"`
-}
-
-// Read names the operation that reads one instance.
-type Read struct {
-	// Model is the model file's path under models/ in
-	// github.com/aws/api-models-aws.
-	Model string `yaml:"model"`
-	// Operation is the operation's name within that model.
-	Operation string `yaml:"operation"`
-}
 
 // Lock records where the checked-in subset came from and what it hashed to,
 // so a subset edited by hand, or regenerated from other inputs, is caught.
