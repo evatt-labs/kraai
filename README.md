@@ -162,11 +162,61 @@ produces — here, the Neon branch's connection URI. The value is fetched at the
 moment it is used and is never written to the manifest, the artifact, a log or
 an error.
 
+#### Declared secrets
+
+A `secrets:` binding declares that a secret exists, rather than pointing at
+one an operator manages elsewhere: kraai names it, creates it once, and
+never treats its value as desired state.
+
+```yaml
+services:
+  api:
+    secrets:
+      - binding: SECRETS
+        provider: aws-ssm
+        entries:
+          pepper_key:            { generate: { bytes: 32, encoding: base64 } }
+          github_client_secret:  { source: external }
+    compute:
+      settings:
+        envSecrets:
+          PEPPER_KEYS: SECRETS.pepper_key
+          GITHUB_CLIENT_SECRET: SECRETS.github_client_secret
+```
+
+Each entry is either `generate`, a value kraai produces with a CSPRNG at
+create time and never stores or reads back (`bytes`, 16-1024, and
+`encoding`, `base64` or `hex`), or `source: external`, which `apply` creates
+with a random placeholder until the operator sets the real value with
+`kraai secret set <environment> SECRETS.github_client_secret` (reads the
+value from stdin, or prompts on a terminal with echo off; never an
+argument, never logged). Either way, `plan` never reads a value and no
+later `apply` ever overwrites one — the entry's existence is what kraai
+reconciles, not its contents.
+
+The only store today is `aws-ssm`: one SSM Parameter Store `SecureString`
+per entry, named from the environment, service, binding and entry
+(CloudFormation and Cloud Control cannot create a `SecureString`, so kraai
+calls the SSM API directly for this one capability). `SECRETS.pepper_key`
+in `envSecrets` resolves through the same binding-output path
+`DB.connection_uri` uses, lazily, at the moment a function's environment is
+built. The function's execution role is granted `ssm:GetParameter` scoped
+to exactly the entries it reads; `kraai iam-policy` grants the operator
+`ssm:PutParameter`, `GetParameter`, `DeleteParameter` and
+`AddTagsToResource` scoped to the same entries, plus an unscoped
+`ssm:DescribeParameters` (SSM's own API takes no parameter name to scope
+that action to).
+
+`aws-secretsmanager` as a second store, importing a pre-existing parameter,
+and a per-entry KMS key are not supported yet.
+
 #### Secret references
 
 A value with a URI scheme in the same `envSecrets` slot is a secret
 reference instead of a binding key: it names a location in an external
-secret store, not a value.
+secret store, not a value. Prefer a declared secret (above) for anything
+kraai itself should own the lifecycle of; a reference is for a secret
+another system already manages.
 
 ```yaml
         envSecrets:
@@ -375,6 +425,7 @@ kraai plugins --env <name>     # load the manifest's plugins and show what they 
 kraai iam-policy <environment> # the least-privilege IAM policy the manifest needs
 kraai status <environment>     # last apply, by whom, and when the environment expires
 kraai gc [--dry-run]           # destroy the ephemeral environments whose ttl has elapsed
+kraai secret set <environment> <BINDING>.<entry>  # set a source: external declared secret's value
 ```
 
 `gc` reads every environment the manifest directory declares and destroys
@@ -601,18 +652,18 @@ input that turns the refusal off.
 
 ## Providers
 
-kraai defines nine capabilities. Coverage below is how many of them **kraai
+kraai defines ten capabilities. Coverage below is how many of them **kraai
 implements** for each provider. It says nothing about what the provider itself
 offers — every one of these clouds offers far more than kraai reaches, and an
 empty cell is work kraai has not done rather than a capability the provider
 lacks.
 
-| provider | compute | database | keyvalue | objects | queues | network | dns | tls | cdn | coverage |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|---|
-| **AWS** | ✅ | ◐ | ◐ | ✅ | ◐ | ✅ | ◐ | ◐ | ◐ | ~67% |
-| **Cloudflare** | — | ✅ | ✅ | ✅ | ✅ | — | — | — | — | 44% |
-| **Azure** | — | — | — | — | — | — | — | — | — | 0% |
-| **GCP** | — | — | — | — | — | — | — | — | — | 0% |
+| provider | compute | database | keyvalue | objects | queues | network | dns | tls | cdn | secrets | coverage |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|---|
+| **AWS** | ✅ | ◐ | ◐ | ✅ | ◐ | ✅ | ◐ | ◐ | ◐ | ✅ | ~70% |
+| **Cloudflare** | — | ✅ | ✅ | ✅ | ✅ | — | — | — | — | — | 40% |
+| **Azure** | — | — | — | — | — | — | — | — | — | — | 0% |
+| **GCP** | — | — | — | — | — | — | — | — | — | — | 0% |
 
 ✅ implemented by kraai · ◐ partial · — not implemented by kraai
 
@@ -643,7 +694,9 @@ a function inside a `network` binding reaches the cache, S3 and DynamoDB
 (the network carries gateway endpoints for both), and SQS, DSQL and the
 internet only when the binding declares a `private` block, which adds a NAT
 gateway billed by the hour
-([#244](https://github.com/evatt-labs/kraai/issues/244)).
+([#244](https://github.com/evatt-labs/kraai/issues/244)). AWS `secrets`
+(SSM Parameter Store `SecureString` parameters) plans against a live
+account and has not been applied from CI either.
 Cloudflare offers two compute products and kraai implements neither — Workers
 ([#135](https://github.com/evatt-labs/kraai/issues/135)) and Containers
 ([#138](https://github.com/evatt-labs/kraai/issues/138)). Azure and GCP have
