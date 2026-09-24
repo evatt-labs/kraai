@@ -1,0 +1,9 @@
+version: 1
+
+# Applied and destroyed by integration runs; see ../README.md. Every
+# resource here costs nothing while it exists.
+providers:
+  aws:
+    vendor: aws
+    settings:
+      region: us-east-1

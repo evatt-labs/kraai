@@ -1,0 +1,50 @@
+services:
+  free:
+    dir: .
+    aws:
+      # Network: the EC2 types a plan finds by tag.
+      - binding: VPC
+        type: AWS::EC2::VPC
+        properties: { CidrBlock: 10.94.0.0/16 }
+      - binding: IGW
+        type: AWS::EC2::InternetGateway
+        properties: {}
+      - binding: IGW_ATTACH
+        type: AWS::EC2::VPCGatewayAttachment
+        properties: { VpcId: "${VPC.VpcId}", InternetGatewayId: "${IGW.InternetGatewayId}" }
+        match: [VpcId]
+      - binding: SUBNET_A
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.94.0.0/24, AvailabilityZone: us-east-1a }
+      - binding: SUBNET_B
+        type: AWS::EC2::Subnet
+        properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.94.1.0/24, AvailabilityZone: us-east-1b }
+      - binding: RT
+        type: AWS::EC2::RouteTable
+        properties: { VpcId: "${VPC.VpcId}" }
+      - binding: SG
+        type: AWS::EC2::SecurityGroup
+        properties: { GroupDescription: kraai integration, VpcId: "${VPC.VpcId}" }
+
+      # Types whose identifier is their ARN. A target group with no load
+      # balancer is free.
+      - binding: TG
+        type: AWS::ElasticLoadBalancingV2::TargetGroup
+        properties: { VpcId: "${VPC.VpcId}", Protocol: HTTP, Port: 8080, TargetType: ip }
+      - binding: RULE
+        type: AWS::Events::Rule
+        # Cloud Control's handler fails with a null pointer when Name is
+        # omitted, although the schema makes it optional.
+        properties:
+          Name: kraai-integration-rule
+          State: DISABLED
+          ScheduleExpression: rate(1 day)
+      - binding: TASK
+        type: AWS::ECS::TaskDefinition
+        properties:
+          RequiresCompatibilities: [FARGATE]
+          NetworkMode: awsvpc
+          Cpu: "256"
+          Memory: "512"
+          ContainerDefinitions:
+            - { Name: noop, Image: public.ecr.aws/docker/library/busybox:stable, Essential: true }

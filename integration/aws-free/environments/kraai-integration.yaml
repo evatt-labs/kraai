@@ -1,0 +1,3 @@
+kind: ephemeral
+# A run that fails before destroying is reaped by kraai gc.
+ttl: 2h

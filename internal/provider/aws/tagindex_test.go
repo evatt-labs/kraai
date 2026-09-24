@@ -112,7 +112,7 @@ func TestAMutatingLookupNeverTrustsTheIndex(t *testing.T) {
 func TestAnUnindexedTypeWalks(t *testing.T) {
 	fc := taskDefinitions(nil, nil)
 	r := taskDefinitionType(fc)
-	r.typeName = "AWS::EC2::SecurityGroup"
+	r.typeName = "AWS::KMS::Key"
 	if _, _, found, err := r.resolve(resource.WithReadOnly(context.Background()),
 		resource.Ref{Provider: Provider, Type: r.typeName, Name: "env-app-task"}); err != nil || !found {
 		t.Fatalf("resolve = %v, %v", found, err)
@@ -210,5 +210,29 @@ func TestNativeTagLookupsAreIndexable(t *testing.T) {
 	}, resource.LookupByName)
 	if byName.matchIsTag {
 		t.Fatal("a native type found by name marks a match it does not have")
+	}
+}
+
+// An EC2 type's identifier is the id its ARN ends with, the form Cloud
+// Control's GetResource takes.
+func TestAnEC2IdentifierIsReadFromItsARN(t *testing.T) {
+	arn := "arn:aws:ec2:us-east-1:123456789012:subnet/subnet-0abc"
+	fc := &fakeClient{
+		byIdentifier: map[string]map[string]any{
+			"subnet-0abc": {"Tags": []any{map[string]any{"Key": identityTagKey, "Value": "env-net-a"}}},
+		},
+		tagged: map[string][]string{"env-net-a": {arn}},
+	}
+	r := &resourceType{
+		provider: Provider, typeName: "AWS::EC2::Subnet", lookup: resource.LookupByTag, client: fc,
+		match: arrayTagsMatch, matchIsTag: true,
+	}
+	id, _, found, err := r.resolve(resource.WithReadOnly(context.Background()),
+		resource.Ref{Provider: Provider, Type: "AWS::EC2::Subnet", Name: "env-net-a"})
+	if err != nil || !found || id != "subnet-0abc" {
+		t.Fatalf("resolve = %q, %v, %v", id, found, err)
+	}
+	if !slices.Equal(fc.taggedTypes, []string{"ec2:subnet"}) || fc.listCalls != 0 {
+		t.Fatalf("index queried for %v, listed %d times", fc.taggedTypes, fc.listCalls)
 	}
 }
