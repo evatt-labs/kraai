@@ -1,0 +1,57 @@
+{
+  "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+  "models": {
+    "appconfig/service/2019-10-09/appconfig-2019-10-09.json": {
+      "file": "models/appconfig-2019-10-09.json",
+      "sourceSha256": "ae80951fcaa00840d0b273ee198998789aafb452cd34107599fb48590c9428e3",
+      "subsetSha256": "fd6bffd0476064abffd271009eb23853bd75c61db45c4118b27fca4fe5be498c"
+    },
+    "apprunner/service/2020-05-15/apprunner-2020-05-15.json": {
+      "file": "models/apprunner-2020-05-15.json",
+      "sourceSha256": "322b9b69806ead20132e77fa5080ec9f0564183a3a42daf9246777a2421488f2",
+      "subsetSha256": "bd62025913af13fe207939a0ff585d14dd77f7065f874fce0d9718f79d8bafad"
+    },
+    "bedrock/service/2023-04-20/bedrock-2023-04-20.json": {
+      "file": "models/bedrock-2023-04-20.json",
+      "sourceSha256": "31e8c7eb23e9e87e564c4e1ad8f7f07a65fd0e3f15ce60f799872e4236744c8d",
+      "subsetSha256": "a44d1a08414d4046520ed569938e3cfd2943e4bc63be4c193ff850062aa999e4"
+    },
+    "codedeploy/service/2014-10-06/codedeploy-2014-10-06.json": {
+      "file": "models/codedeploy-2014-10-06.json",
+      "sourceSha256": "e270383d2bb6dd822f4f617cbf2dc32112beb5c766b5b345cbfd253ff1af6e4a",
+      "subsetSha256": "b379e066497ed8af47ef9ad00b828da8ffb7491a9a1da66f0affd1a7051471e9"
+    },
+    "xray/service/2016-04-12/xray-2016-04-12.json": {
+      "file": "models/xray-2016-04-12.json",
+      "sourceSha256": "ab1a0cfc7a244eb934542d67949631b6b353d1165e263e8cd2dcaff84c9f554c",
+      "subsetSha256": "3a720b56b3dc97c96cb01c4028ec727603731d476b333beaa1f628fb680a041a"
+    }
+  },
+  "schemas": {
+    "AWS::AppConfig::DeploymentStrategy": {
+      "file": "schemas/AWS--AppConfig--DeploymentStrategy.json",
+      "sourceSha256": "40e5e783ec5c982e3330f6d87ed18abe28d224e1815f1b458a3bbd70f6268741",
+      "subsetSha256": "aaaccfc5488e94c9a3abb02777fb1198b08db11aee79eb587404e71ff9a71b17"
+    },
+    "AWS::AppRunner::AutoScalingConfiguration": {
+      "file": "schemas/AWS--AppRunner--AutoScalingConfiguration.json",
+      "sourceSha256": "9fd9a3ec64ff272b9f35086fbc28827cca21c40a2235930f21670e0a23cc5b4d",
+      "subsetSha256": "03bd82501aff17a3e487a3720fd4ac77e5a9b06cffa0c30e1272e0a8dcf4335e"
+    },
+    "AWS::Bedrock::IntelligentPromptRouter": {
+      "file": "schemas/AWS--Bedrock--IntelligentPromptRouter.json",
+      "sourceSha256": "e7547213ae907c0b8d3a65d245f6ca1cadadd1a780f755fa68c6c63db8f0cc79",
+      "subsetSha256": "7591576fea0429984fe286ce6b34a6773c7052e4537d5d9b6e3e912e9fca3e6a"
+    },
+    "AWS::CodeDeploy::DeploymentConfig": {
+      "file": "schemas/AWS--CodeDeploy--DeploymentConfig.json",
+      "sourceSha256": "1558b45944010952a8dc76874c42bd96ffb99f750292e3dade34ab7a03ab33bb",
+      "subsetSha256": "3fd56969264aecf8dbcc5ff4da608e4b12ab1bb9cb95ae74b73436f0aeb8a662"
+    },
+    "AWS::XRay::Group": {
+      "file": "schemas/AWS--XRay--Group.json",
+      "sourceSha256": "b4c3a4aa27402f9b016afcfd1c6a8636f2831eb230a0fa6306af91755d637ec1",
+      "subsetSha256": "3c9ed00e036ec84c8cd71e3788e01ec76e3fc75e142f7bae52f4e9bf7eee28df"
+    }
+  }
+}

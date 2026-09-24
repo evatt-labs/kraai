@@ -1,0 +1,1289 @@
+{
+  "shapes": {
+    "com.amazonaws.xray#AWSXRay": {
+      "operations": [
+        {
+          "target": "com.amazonaws.xray#GetGroup"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "xray",
+          "cloudFormationName": "XRay",
+          "cloudTrailEventSource": "xray.amazonaws.com",
+          "endpointPrefix": "xray",
+          "sdkId": "XRay"
+        },
+        "aws.auth#sigv4": {
+          "name": "xray"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS X-Ray",
+        "smithy.rules#endpointBdd": {
+          "conditions": [
+            {
+              "argv": [
+                {
+                  "ref": "Endpoint"
+                }
+              ],
+              "fn": "isSet"
+            },
+            {
+              "argv": [
+                {
+                  "ref": "Region"
+                }
+              ],
+              "fn": "isSet"
+            },
+            {
+              "argv": [
+                {
+                  "ref": "Region"
+                }
+              ],
+              "assign": "PartitionResult",
+              "fn": "aws.partition"
+            },
+            {
+              "argv": [
+                {
+                  "ref": "UseFIPS"
+                },
+                true
+              ],
+              "fn": "booleanEquals"
+            },
+            {
+              "argv": [
+                {
+                  "ref": "UseDualStack"
+                },
+                true
+              ],
+              "fn": "booleanEquals"
+            },
+            {
+              "argv": [
+                {
+                  "argv": [
+                    {
+                      "ref": "PartitionResult"
+                    },
+                    "supportsDualStack"
+                  ],
+                  "fn": "getAttr"
+                },
+                true
+              ],
+              "fn": "booleanEquals"
+            },
+            {
+              "argv": [
+                {
+                  "argv": [
+                    {
+                      "ref": "PartitionResult"
+                    },
+                    "supportsFIPS"
+                  ],
+                  "fn": "getAttr"
+                },
+                true
+              ],
+              "fn": "booleanEquals"
+            }
+          ],
+          "nodeCount": 13,
+          "nodes": "/////wAAAAH/////AAAAAAAAAAwAAAADAAAAAQAAAAQF9eELAAAAAgAAAAUF9eELAAAAAwAAAAgAAAAGAAAABAAAAAcF9eEKAAAABQX14QgF9eEJAAAABAAAAAoAAAAJAAAABgX14QYF9eEHAAAABQAAAAsF9eEFAAAABgX14QQF9eEFAAAAAwX14QEAAAANAAAABAX14QIF9eED",
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "results": [
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+              "type": "error"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+              "type": "error"
+            },
+            {
+              "conditions": [],
+              "endpoint": {
+                "headers": {},
+                "properties": {},
+                "url": {
+                  "ref": "Endpoint"
+                }
+              },
+              "type": "endpoint"
+            },
+            {
+              "conditions": [],
+              "endpoint": {
+                "headers": {},
+                "properties": {},
+                "url": "https://xray-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+              },
+              "type": "endpoint"
+            },
+            {
+              "conditions": [],
+              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+              "type": "error"
+            },
+            {
+              "conditions": [],
+              "endpoint": {
+                "headers": {},
+                "properties": {},
+                "url": "https://xray-fips.{Region}.{PartitionResult#dnsSuffix}"
+              },
+              "type": "endpoint"
+            },
+            {
+              "conditions": [],
+              "error": "FIPS is enabled but this partition does not support FIPS",
+              "type": "error"
+            },
+            {
+              "conditions": [],
+              "endpoint": {
+                "headers": {},
+                "properties": {},
+                "url": "https://xray.{Region}.{PartitionResult#dualStackDnsSuffix}"
+              },
+              "type": "endpoint"
+            },
+            {
+              "conditions": [],
+              "error": "DualStack is enabled but this partition does not support DualStack",
+              "type": "error"
+            },
+            {
+              "conditions": [],
+              "endpoint": {
+                "headers": {},
+                "properties": {},
+                "url": "https://xray.{Region}.{PartitionResult#dnsSuffix}"
+              },
+              "type": "endpoint"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "root": 2,
+          "version": "1.1"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://xray-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://xray-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://xray.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://xray.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        },
+        "smithy.rules#endpointTests": {
+          "testCases": [
+            {
+              "documentation": "For region af-south-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.af-south-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "af-south-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-east-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-east-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-east-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-northeast-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-northeast-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-northeast-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-northeast-2 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-northeast-2.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-northeast-2",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-northeast-3 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-northeast-3.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-northeast-3",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-south-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-south-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-south-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-southeast-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-southeast-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-southeast-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-southeast-2 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-southeast-2.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-southeast-2",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ap-southeast-3 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ap-southeast-3.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ap-southeast-3",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region ca-central-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.ca-central-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "ca-central-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region eu-central-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.eu-central-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "eu-central-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region eu-north-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.eu-north-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "eu-north-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region eu-south-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.eu-south-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "eu-south-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region eu-west-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.eu-west-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "eu-west-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region eu-west-2 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.eu-west-2.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "eu-west-2",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region eu-west-3 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.eu-west-3.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "eu-west-3",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region me-south-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.me-south-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "me-south-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region sa-east-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.sa-east-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "sa-east-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-east-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-east-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-east-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-east-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-east-2 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-east-2.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-east-2",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-east-2 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-east-2.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-east-2",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-west-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-west-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-west-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-west-1 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-west-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-west-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-west-2 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-west-2.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-west-2",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-west-2 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-west-2.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-west-2",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with FIPS enabled and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-east-1",
+                "UseDualStack": true,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-east-1 with FIPS disabled and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-east-1",
+                "UseDualStack": true,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-north-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region cn-northwest-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.cn-northwest-1.amazonaws.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-northwest-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with FIPS enabled and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.cn-north-1.api.amazonwebservices.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-north-1",
+                "UseDualStack": true,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.cn-north-1.amazonaws.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-north-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region cn-north-1 with FIPS disabled and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.cn-north-1.api.amazonwebservices.com.cn"
+                }
+              },
+              "params": {
+                "Region": "cn-north-1",
+                "UseDualStack": true,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-gov-east-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-gov-east-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-gov-east-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-gov-east-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-gov-west-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-gov-west-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-gov-west-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-gov-west-1 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-gov-west-1.amazonaws.com"
+                }
+              },
+              "params": {
+                "Region": "us-gov-west-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-gov-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-gov-east-1",
+                "UseDualStack": true,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack enabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-gov-east-1.api.aws"
+                }
+              },
+              "params": {
+                "Region": "us-gov-east-1",
+                "UseDualStack": true,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-iso-east-1 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-iso-east-1.c2s.ic.gov"
+                }
+              },
+              "params": {
+                "Region": "us-iso-east-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-iso-east-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-iso-east-1.c2s.ic.gov"
+                }
+              },
+              "params": {
+                "Region": "us-iso-east-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For region us-isob-east-1 with FIPS enabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray-fips.us-isob-east-1.sc2s.sgov.gov"
+                }
+              },
+              "params": {
+                "Region": "us-isob-east-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For region us-isob-east-1 with FIPS disabled and DualStack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://xray.us-isob-east-1.sc2s.sgov.gov"
+                }
+              },
+              "params": {
+                "Region": "us-isob-east-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For custom endpoint with region set and fips disabled and dualstack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://example.com"
+                }
+              },
+              "params": {
+                "Endpoint": "https://example.com",
+                "Region": "us-east-1",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For custom endpoint with region not set and fips disabled and dualstack disabled",
+              "expect": {
+                "endpoint": {
+                  "url": "https://example.com"
+                }
+              },
+              "params": {
+                "Endpoint": "https://example.com",
+                "UseDualStack": false,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "For custom endpoint with fips enabled and dualstack disabled",
+              "expect": {
+                "error": "Invalid Configuration: FIPS and custom endpoint are not supported"
+              },
+              "params": {
+                "Endpoint": "https://example.com",
+                "Region": "us-east-1",
+                "UseDualStack": false,
+                "UseFIPS": true
+              }
+            },
+            {
+              "documentation": "For custom endpoint with fips disabled and dualstack enabled",
+              "expect": {
+                "error": "Invalid Configuration: Dualstack and custom endpoint are not supported"
+              },
+              "params": {
+                "Endpoint": "https://example.com",
+                "Region": "us-east-1",
+                "UseDualStack": true,
+                "UseFIPS": false
+              }
+            },
+            {
+              "documentation": "Missing region",
+              "expect": {
+                "error": "Invalid Configuration: Missing Region"
+              }
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2016-04-12"
+    },
+    "com.amazonaws.xray#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.xray#GetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.xray#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.xray#ThrottledException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.xray#GetGroupRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.xray#GetGroupResult"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "POST",
+          "uri": "/GetGroup"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.xray#GetGroupRequest": {
+      "members": {
+        "GroupARN": {
+          "target": "com.amazonaws.xray#GroupARN",
+          "traits": {}
+        },
+        "GroupName": {
+          "target": "com.amazonaws.xray#GroupName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#GetGroupResult": {
+      "members": {
+        "Group": {
+          "target": "com.amazonaws.xray#Group",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#Group": {
+      "members": {
+        "FilterExpression": {
+          "target": "com.amazonaws.xray#String",
+          "traits": {}
+        },
+        "GroupARN": {
+          "target": "com.amazonaws.xray#String",
+          "traits": {}
+        },
+        "GroupName": {
+          "target": "com.amazonaws.xray#String",
+          "traits": {}
+        },
+        "InsightsConfiguration": {
+          "target": "com.amazonaws.xray#InsightsConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.xray#GroupARN": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 400,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.xray#GroupName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.xray#InsightsConfiguration": {
+      "members": {
+        "InsightsEnabled": {
+          "target": "com.amazonaws.xray#NullableBoolean",
+          "traits": {}
+        },
+        "NotificationsEnabled": {
+          "target": "com.amazonaws.xray#NullableBoolean",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.xray#InvalidRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#NullableBoolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.xray#String": {
+      "type": "string"
+    },
+    "com.amazonaws.xray#ThrottledException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}
