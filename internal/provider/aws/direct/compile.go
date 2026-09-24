@@ -34,6 +34,8 @@ type Binding struct {
 	Location string
 	// Name is the query parameter or header name, when Location is one.
 	Name string
+	// JSONName is the member's jsonName trait, when it has one.
+	JSONName string
 }
 
 // Field reads one property from the response.
@@ -181,6 +183,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		}
 		bound[member] = true
 		b := Binding{Property: property, Member: member, Location: "body"}
+		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &b.JSONName)
 		if r.Protocol == "restJson1" {
 			switch {
 			case m.Traits["smithy.api#httpLabel"] != nil:
@@ -230,6 +233,27 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		}
 	}
 	r.Fields = compileFields(&model, &schema, readable, resource, o.Properties, o.Skip, "", fail)
+
+	// The awsJson specifications say nothing of jsonName, so a member
+	// carrying one could be named either way on the wire; refuse rather
+	// than read nothing.
+	if r.Protocol != "restJson1" {
+		for _, b := range r.Identifier {
+			if b.JSONName != "" {
+				fail("identifier member %s has a jsonName, which %s is not known to honour", b.Member, r.Protocol)
+			}
+		}
+		var walk func([]Field)
+		walk = func(fs []Field) {
+			for _, f := range fs {
+				if f.JSONName != "" {
+					fail("%s maps to %s, which has a jsonName %s is not known to honour", f.Property, f.Member, r.Protocol)
+				}
+				walk(f.Fields)
+			}
+		}
+		walk(r.Fields)
+	}
 	return r, errs
 }
 
