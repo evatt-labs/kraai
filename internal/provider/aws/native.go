@@ -79,16 +79,33 @@ func nativeFamily(client *Client) resource.Family {
 				}
 				return resource.Registration{}, err
 			}
-			lookup, err := nativeLookup(facts)
+			previous, err := previousIdentities(vendorType)
 			if err != nil {
 				return resource.Registration{}, err
 			}
+			var legacy []*nativeResource
+			for _, earlier := range previous {
+				if lookup, ok := legacyLookup(earlier); ok {
+					legacy = append(legacy, newNativeResource(client, earlier, lookup))
+				}
+			}
+			lookup, refusal := nativeLookup(facts)
+			if refusal != nil {
+				if len(legacy) == 0 {
+					return resource.Registration{}, refusal
+				}
+				// Not manageable now, but what an older kraai created is
+				// still found, and destroyed, through its earlier identity.
+				lookup = legacy[0].lookup
+			}
+			res := newNativeResource(client, facts, lookup)
+			res.legacy, res.refused = legacy, refusal
 			return resource.Registration{
 				Provider: Provider, Type: resource.RoleType(vendorType, nativeRole), VendorType: vendorType,
 				Capability:         manifest.CapabilityAWS,
 				Lookup:             lookup,
 				EmbeddedReferences: nativeReferences,
-				Resource:           newNativeResource(client, facts, lookup),
+				Resource:           res,
 			}, nil
 		},
 	}
@@ -159,6 +176,14 @@ type nativeResource struct {
 	// build is not cached.
 	validatorMu sync.Mutex
 	validator   *resource.Schema
+
+	// legacy are the identities earlier indexes found this type by, still
+	// searched, so what an older kraai created is not stranded.
+	legacy []*nativeResource
+	// refused is why the current index no longer manages this type, when
+	// only its legacy identities remain: nothing is created or updated, and
+	// what exists is found only to be destroyed.
+	refused error
 }
 
 func newNativeResource(client *Client, facts cfschema.Facts, lookup resource.LookupStrategy) *nativeResource {
@@ -270,6 +295,9 @@ func nativeProperties(spec resource.Spec) (map[string]any, error) {
 // A value referencing a resource that does not exist yet is not judged
 // against the schema; the property it names on that resource's type is.
 func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
+	if n.refused != nil {
+		return n.refusal()
+	}
 	properties, err := nativeProperties(spec)
 	if err != nil {
 		return err
@@ -725,6 +753,9 @@ func (n *nativeResource) validateMatch(spec resource.Spec, properties map[string
 // property in another form would never be found again, and every later
 // apply would create another copy; failing here makes that one loud error.
 func (n *nativeResource) Create(ctx context.Context, spec resource.Spec) (*resource.State, error) {
+	if n.refused != nil {
+		return nil, n.refusal()
+	}
 	state, err := n.resourceType.Create(ctx, spec)
 	if err != nil || n.lookup != resource.LookupByAttr {
 		return state, err
@@ -751,3 +782,110 @@ func (n *nativeResource) Create(ctx context.Context, spec resource.Spec) (*resou
 	}
 	return state, nil
 }
+
+// legacyLookup is how an earlier identity is searched, when it can be:
+// by name, or by a tag that needs no parent. A scoped or matched identity
+// needs values a failed plan cannot give destroy, so it is not searched.
+func legacyLookup(earlier cfschema.Facts) (resource.LookupStrategy, bool) {
+	if len(earlier.ListScope) > 0 {
+		return "", false
+	}
+	lookup, err := nativeLookup(earlier)
+	if err != nil || lookup == resource.LookupByAttr {
+		return "", false
+	}
+	return lookup, true
+}
+
+func (n *nativeResource) refusal() error {
+	return kerrors.Wrap(n.refused, kerrors.CodeValidation,
+		"%s is no longer manageable by this kraai; destroy still removes one created earlier, through the identity it was created with",
+		n.typeName)
+}
+
+// identities are the ways an instance is searched for: the current one
+// unless refused, then each earlier one.
+func (n *nativeResource) identities() []*nativeResource {
+	out := make([]*nativeResource, 0, 1+len(n.legacy))
+	if n.refused == nil {
+		out = append(out, n)
+	}
+	return append(out, n.legacy...)
+}
+
+// find searches every identity. Two identities each finding an instance is
+// an error naming both: one entry cannot be two instances, and managing
+// either silently would leave the other unaccounted for.
+func (n *nativeResource) find(ctx context.Context, ref resource.Ref) (*nativeResource, *resource.State, error) {
+	var which *nativeResource
+	var found *resource.State
+	for _, identity := range n.identities() {
+		state, err := identity.resourceType.Get(ctx, ref)
+		if err != nil {
+			return nil, nil, err
+		}
+		if state == nil {
+			continue
+		}
+		if found != nil {
+			return nil, nil, kerrors.Validation(
+				"%s %q is found as both %s and %s, one by its current identity and one by an earlier one; destroy removes both",
+				n.typeName, ref.Name, found.ID, state.ID)
+		}
+		which, found = identity, state
+	}
+	return which, found, nil
+}
+
+// Get implements resource.Resource across every identity.
+func (n *nativeResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
+	_, state, err := n.find(ctx, ref)
+	return state, err
+}
+
+// Update updates the instance through the identity that finds it.
+func (n *nativeResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
+	if n.refused != nil {
+		return nil, n.refusal()
+	}
+	which, state, err := n.find(ctx, ref)
+	if err != nil {
+		return nil, err
+	}
+	if state == nil {
+		return nil, kerrors.Validation("cannot update %s %q: it does not currently exist", n.typeName, ref.Name)
+	}
+	return which.resourceType.Update(ctx, ref, spec)
+}
+
+// Delete removes the instance under every identity that finds one:
+// everything the entry created, under whichever index created it.
+//
+// The current identity is skipped when the Ref lacks what it needs to
+// search, the match values or the parent a failed plan never resolved, and
+// an earlier identity remains: an entry that never located an instance
+// that way cannot have created one that way.
+func (n *nativeResource) Delete(ctx context.Context, ref resource.Ref) error {
+	var errs []error
+	for _, identity := range n.identities() {
+		if identity == n && len(n.legacy) > 0 && !n.canSearch(ref) {
+			continue
+		}
+		errs = append(errs, identity.resourceType.Delete(ctx, ref))
+	}
+	return errors.Join(errs...)
+}
+
+// canSearch reports whether ref carries what this identity needs to find
+// an instance: its match values, and its parent when it has one.
+func (n *nativeResource) canSearch(ref resource.Ref) bool {
+	if n.lookup == resource.LookupByAttr && ref.Match == "" {
+		return false
+	}
+	return len(n.facts.ListScope) == 0 || ref.Scope != ""
+}
+
+// previousIdentities reads the legacy identity record; a test substitutes
+// its own, since the record ships empty until an identity change is
+// accepted.
+var previousIdentities = cfschema.Previous

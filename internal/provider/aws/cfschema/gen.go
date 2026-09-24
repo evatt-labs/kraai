@@ -111,6 +111,11 @@ func run() error {
 			if !*accept {
 				return fmt.Errorf("%d indexed types would be found differently; review them, then rerun with -accept-identity-changes", len(changes))
 			}
+			// What each changed type was found by is kept, so kraai can
+			// still find, and destroy, what an older binary created.
+			if err := recordLegacy(filepath.Join(filepath.Dir(*out), "legacy.json.gz"), prev, index); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -186,4 +191,32 @@ func schemaFor(ctx context.Context, cf *cloudformation.Client, cache, name strin
 		return nil, err
 	}
 	return raw, nil
+}
+
+// recordLegacy adds prev's facts for every changed or dropped type to the
+// legacy record at path.
+func recordLegacy(path string, prev, next map[string]cfschema.Facts) error {
+	current := map[string][]cfschema.Facts{}
+	if raw, err := os.ReadFile(path); err == nil {
+		if current, err = cfschema.DecodeLegacy(raw); err != nil {
+			return fmt.Errorf("reading %s: %w", path, err)
+		}
+	}
+	merged := cfschema.RecordLegacy(current, prev, next)
+	var buf bytes.Buffer
+	zw, err := gzip.NewWriterLevel(&buf, gzip.BestCompression)
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(zw).Encode(merged); err != nil {
+		return err
+	}
+	if err := zw.Close(); err != nil {
+		return err
+	}
+	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
+	fmt.Fprintf(os.Stderr, "recorded earlier identities in %s\n", path)
+	return nil
 }

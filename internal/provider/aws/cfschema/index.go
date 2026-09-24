@@ -85,3 +85,44 @@ func Types() ([]string, error) {
 	sort.Strings(out)
 	return out, nil
 }
+
+// legacyData records, per type, the identities earlier indexes found it by,
+// newest first, written by the generator when a change is accepted.
+//
+//go:embed legacy.json.gz
+var legacyData []byte
+
+var (
+	legacyOnce sync.Once
+	legacy     map[string][]Facts
+	errLegacy  error
+)
+
+// Previous returns the identities earlier indexes found typeName by,
+// newest first; empty for a type whose identity never changed.
+func Previous(typeName string) ([]Facts, error) {
+	legacyOnce.Do(func() {
+		legacy, errLegacy = DecodeLegacy(legacyData)
+	})
+	if errLegacy != nil {
+		return nil, errLegacy
+	}
+	return legacy[typeName], nil
+}
+
+// DecodeLegacy decodes a legacy record in the format the generator writes.
+func DecodeLegacy(data []byte) (map[string][]Facts, error) {
+	zr, err := gzip.NewReader(bytes.NewReader(data))
+	if err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "opening the legacy identity record")
+	}
+	raw, err := io.ReadAll(zr)
+	if err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading the legacy identity record")
+	}
+	var out map[string][]Facts
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding the legacy identity record")
+	}
+	return out, nil
+}
