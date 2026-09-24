@@ -307,3 +307,43 @@ deny contains msg if {
 		})
 	}
 }
+
+// An overlay naming a set gates every run against that environment, and
+// only that one.
+func TestAnEnvironmentsPolicySetGatesIt(t *testing.T) {
+	dir := writeFixture(t, map[string]string{
+		"kraai.yaml": "version: 1\n\nproviders:\n  keyvalue:\n    vendor: fake\n",
+		"services/services.yaml": "services:\n  api:\n    dir: .\n    keyvalue:\n" +
+			"      - binding: CACHE\n",
+		"environments/" + testEnvName + ".yaml":      "kind: ephemeral\npolicies: [strict]\n",
+		"environments/other-otter-badger-10009.yaml": "kind: ephemeral\n",
+		"policies/strict/no_creates.rego":            noCreates,
+	})
+	r := &countingResource{}
+	_, err := execApplyWith(t, countingAssembler(t, r), memoryStores(lock.NewMemory()), []string{testEnvName, "--dir", dir})
+	_ = requireCode(t, err, kerrors.CodeValidation)
+	if r.createCalls != 0 {
+		t.Fatalf("createCalls = %d, want zero", r.createCalls)
+	}
+	if out, err := execApplyWith(t, countingAssembler(t, r), memoryStores(lock.NewMemory()),
+		[]string{"other-otter-badger-10009", "--dir", dir}); err != nil {
+		t.Fatalf("an environment naming no set was gated: %v\n%s", err, out)
+	}
+}
+
+// gc loads an environment's sets only when it is about to destroy it, so a
+// set it cannot find does not fail the sweep over one it keeps.
+func TestGCLoadsPolicySetsOnlyToReap(t *testing.T) {
+	dir := gcFixture(t)
+	if err := os.WriteFile(filepath.Join(dir, "environments", "keeper.yaml"),
+		[]byte("kind: persistent\npolicies: [production]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	out, err := execGC(t, keyValueAssembler(t, &fakeGetter{}), memoryStores(gcStore(t)), []string{"--dir", dir})
+	if err != nil {
+		t.Fatalf("gc: %v\n%s", err, out)
+	}
+	if !strings.Contains(out, "keeper") || strings.Contains(out, "policy set") {
+		t.Fatalf("output = %s", out)
+	}
+}

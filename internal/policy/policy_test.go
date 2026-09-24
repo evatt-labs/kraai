@@ -12,23 +12,33 @@ import (
 	"github.com/evatt-labs/kraai/internal/manifest"
 )
 
-// manifestWith writes each policy under the manifest's policies directory.
+// manifestWith writes each policy, a slash-separated path, under the
+// manifest's policies directory.
 func manifestWith(t *testing.T, policies map[string]string) manifest.FS {
+	t.Helper()
+	fsys, err := manifest.NewFS(manifestDir(t, policies))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return fsys
+}
+
+func manifestDir(t *testing.T, policies map[string]string) string {
 	t.Helper()
 	dir := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(dir, ManifestDir), 0o750); err != nil {
 		t.Fatal(err)
 	}
 	for name, source := range policies {
-		if err := os.WriteFile(filepath.Join(dir, ManifestDir, name), []byte(source), 0o600); err != nil {
+		path := filepath.Join(dir, ManifestDir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(source), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	fsys, err := manifest.NewFS(dir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return fsys
+	return dir
 }
 
 const noNAT = `package kraai.plan
@@ -50,7 +60,7 @@ var planInput = map[string]any{
 }
 
 func TestNoPoliciesDenyNothing(t *testing.T) {
-	set, err := Load(manifestWith(t, nil), nil)
+	set, err := Load(manifestWith(t, nil), nil, nil)
 	if err != nil || !set.Empty() {
 		t.Fatalf("Load = %+v, %v", set, err)
 	}
@@ -60,7 +70,7 @@ func TestNoPoliciesDenyNothing(t *testing.T) {
 }
 
 func TestPlanPolicyDenies(t *testing.T) {
-	set, err := Load(manifestWith(t, map[string]string{"nat.rego": noNAT}), nil)
+	set, err := Load(manifestWith(t, map[string]string{"nat.rego": noNAT}), nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +102,7 @@ func TestHelpersNonStringMessagesAndExtraPaths(t *testing.T) {
 	if err := os.WriteFile(file, []byte(destroy), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	set, err := Load(manifestWith(t, nil), []string{extraDir, file})
+	set, err := Load(manifestWith(t, nil), []string{extraDir, file}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +116,7 @@ func TestHelpersNonStringMessagesAndExtraPaths(t *testing.T) {
 // strings before arrays, which is not the order of their encodings.
 func TestDenialsAreSortedAsPrinted(t *testing.T) {
 	policy := "package kraai.plan\n\ndeny contains \"a\"\n\ndeny contains [\"x\"]\n"
-	set, err := Load(manifestWith(t, map[string]string{"mixed.rego": policy}), nil)
+	set, err := Load(manifestWith(t, map[string]string{"mixed.rego": policy}), nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +135,7 @@ func TestForbiddenBuiltinsRefuseToLoad(t *testing.T) {
 		"net.lookup_ip_addr": `r := net.lookup_ip_addr("evil.example")`,
 	} {
 		policy := "package kraai.plan\n\ndeny contains \"x\" if {\n\t" + body + "\n\tr\n}\n"
-		_, err := Load(manifestWith(t, map[string]string{"leak.rego": policy}), nil)
+		_, err := Load(manifestWith(t, map[string]string{"leak.rego": policy}), nil, nil)
 		if err == nil || !strings.Contains(err.Error(), name) {
 			t.Errorf("%s: Load = %v, want a refusal naming it", name, err)
 		}
@@ -143,7 +153,7 @@ func TestAPolicyThatWouldNeverRunFailsToLoad(t *testing.T) {
 		"a syntax error":        {"package kraai.plan\n\ndeny contains msg if {\n", "parsing policy"},
 		"an undefined function": {"package kraai.plan\n\ndeny contains \"x\" if not_a_builtin(1)\n", "not_a_builtin"},
 	} {
-		_, err := Load(manifestWith(t, map[string]string{"p.rego": c.source}), nil)
+		_, err := Load(manifestWith(t, map[string]string{"p.rego": c.source}), nil, nil)
 		if err == nil || !strings.Contains(err.Error(), c.want) {
 			t.Errorf("%s: Load = %v, want %q", name, err, c.want)
 		}
@@ -157,7 +167,7 @@ func TestEvaluationIsBounded(t *testing.T) {
 	t.Cleanup(func() { evalTimeout = saved })
 
 	slow := "package kraai.plan\n\ndeny contains \"x\" if {\n\tsome i in numbers.range(1, 100000000)\n\ti < 0\n}\n"
-	set, err := Load(manifestWith(t, map[string]string{"slow.rego": slow}), nil)
+	set, err := Load(manifestWith(t, map[string]string{"slow.rego": slow}), nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -180,7 +190,7 @@ func TestBothGroupsDeny(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifestSrc := "package kraai.plan\n\ndeny contains \"shared\"\n\ndeny contains \"from policies/\"\n"
-	set, err := Load(manifestWith(t, map[string]string{"m.rego": manifestSrc}), []string{extra})
+	set, err := Load(manifestWith(t, map[string]string{"m.rego": manifestSrc}), []string{extra}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,8 +217,127 @@ func TestASymlinkedPolicyIsRefusedUnread(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = Load(fsys, nil)
+	_, err = Load(fsys, nil, nil)
 	if err == nil || !strings.Contains(err.Error(), "not a regular file") || strings.Contains(err.Error(), "canary") {
 		t.Fatalf("Load = %v, want a refusal that does not quote the target", err)
+	}
+}
+
+// denyAll denies every plan with msg.
+func denyAll(msg string) string {
+	return "package kraai.plan\n\ndeny contains \"" + msg + "\"\n"
+}
+
+// trustedDir writes files, relative paths to sources, under a fresh
+// directory standing in for a --policy checkout.
+func trustedDir(t *testing.T, files map[string]string) string {
+	t.Helper()
+	dir := t.TempDir()
+	for name, source := range files {
+		path := filepath.Join(dir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(source), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return dir
+}
+
+// A set named by the environment is read from policies/<name>/ and from
+// <dir>/<name>/ under each --policy directory; one not named is not read.
+func TestPolicySets(t *testing.T) {
+	cases := map[string]struct {
+		manifest map[string]string
+		trusted  map[string]string
+		sets     []string
+		want     []string
+		wantErr  string
+	}{
+		"in the manifest": {
+			manifest: map[string]string{"production/p.rego": denyAll("manifest production"), "staging/s.rego": denyAll("staging")},
+			sets:     []string{"production"},
+			want:     []string{"manifest production"},
+		},
+		"under --policy": {
+			trusted: map[string]string{"production/p.rego": denyAll("trusted production"), "staging/s.rego": denyAll("staging")},
+			sets:    []string{"production"},
+			want:    []string{"trusted production"},
+		},
+		"in both": {
+			manifest: map[string]string{"production/p.rego": denyAll("manifest production")},
+			trusted:  map[string]string{"production/p.rego": denyAll("trusted production")},
+			sets:     []string{"production"},
+			want:     []string{"manifest production", "trusted production"},
+		},
+		"not named": {
+			manifest: map[string]string{"top.rego": denyAll("top"), "production/p.rego": denyAll("manifest production")},
+			want:     []string{"top"},
+		},
+		"found nowhere": {
+			manifest: map[string]string{"top.rego": denyAll("top")},
+			sets:     []string{"production"},
+			wantErr:  `names policy set "production"`,
+		},
+		"not under --policy either": {
+			trusted: map[string]string{"x.rego": denyAll("x"), "staging/s.rego": denyAll("staging")},
+			sets:    []string{"production"},
+			wantErr: `names policy set "production"`,
+		},
+		"a directory with no policy": {
+			manifest: map[string]string{"production/README": "nothing here"},
+			sets:     []string{"production"},
+			wantErr:  `names policy set "production"`,
+		},
+		"a traversal": {
+			trusted: map[string]string{"x.rego": denyAll("x")},
+			sets:    []string{".."},
+			wantErr: "must match",
+		},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			var extra []string
+			if c.trusted != nil {
+				extra = []string{trustedDir(t, c.trusted)}
+			}
+			set, err := Load(manifestWith(t, c.manifest), extra, c.sets)
+			if c.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), c.wantErr) {
+					t.Fatalf("Load = %v, want %q", err, c.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			denials, err := set.Evaluate(context.Background(), GatePlan, map[string]any{})
+			if err != nil || !reflect.DeepEqual(denials, c.want) {
+				t.Fatalf("Evaluate = %q, %v, want %q", denials, err, c.want)
+			}
+		})
+	}
+}
+
+// A set directory symlinked elsewhere in the manifest is refused, as a
+// symlinked policy file is.
+func TestASymlinkedSetIsRefused(t *testing.T) {
+	root := manifestDir(t, nil)
+	if err := os.MkdirAll(filepath.Join(root, "elsewhere"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "elsewhere", "p.rego"), []byte(denyAll("x")), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("../elsewhere", filepath.Join(root, ManifestDir, "production")); err != nil {
+		t.Fatal(err)
+	}
+	fsys, err := manifest.NewFS(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(fsys, nil, []string{"production"}); err == nil || !strings.Contains(err.Error(), "not a directory") {
+		t.Fatalf("Load = %v, want the symlink refused", err)
 	}
 }

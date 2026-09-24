@@ -238,6 +238,7 @@ The overlay is what makes the same manifest a throwaway preview or production.
 # environments/production.yaml
 kind: persistent
 protected: true                    # apply and destroy require confirming the name
+policies: [production]             # policy sets every run must pass; see Policies
 naming:
   prefix: "acme-shop-"             # avoids collisions in a shared account
 routes:
@@ -443,6 +444,14 @@ Under `kraai.destroy` the actions are still the apply plan's, so `kind:
 create` means the resource does not exist and will not be deleted. The shape
 of `config` varies by type; `deny contains json.marshal(input)` prints the
 whole input to see it.
+
+An environment can name policy sets its runs must pass, `policies:
+[production]` on its overlay. A set is a directory: `policies/production/`
+in the manifest and `production/` under each `--policy` directory, each read
+into the group it belongs to. A set found in neither place fails the load,
+and a set no environment names is never read. This keeps production's rules
+from depending on every caller remembering a flag; it does not hold against
+a pull request, which can edit the overlay too.
 
 Helpers go under `kraai.lib.*`; any other package, a `deny` that is not a set,
 or no `deny` at all fails the load, because a policy that never ran reads as

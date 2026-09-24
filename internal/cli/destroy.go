@@ -129,7 +129,7 @@ func runDestroy(
 	defer func() { _ = resolved.Close(cmd.Context()) }()
 	m := resolved.Manifest
 
-	policies, err := policy.Load(fsys, policyPaths)
+	policies, err := policy.Load(fsys, policyPaths, m.Environment.Policies)
 	if err != nil {
 		return err
 	}
