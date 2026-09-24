@@ -194,6 +194,17 @@ argument, never logged). Either way, `plan` never reads a value and no
 later `apply` ever overwrites one — the entry's existence is what kraai
 reconciles, not its contents.
 
+**A changed secret value does not by itself reach a consuming function.**
+`apply` diffs a function's environment by whether each `envSecrets` variable
+is declared, not by the value it currently resolves to — plan never reads a
+value, so it has nothing to compare. Running `kraai secret set` after a
+function has already been deployed writes the new value to the parameter,
+but the function keeps whatever it last read until some other change to it
+triggers a redeploy (an unrelated setting, a new artifact, and so on). The
+same gap applies to a URI-scheme secret reference (`aws-ssm://…`) in
+`envSecrets`, since it is diffed the same way. (tracked in a follow-up
+issue)
+
 The only store today is `aws-ssm`: one SSM Parameter Store `SecureString`
 per entry, named from the environment, service, binding and entry
 (CloudFormation and Cloud Control cannot create a `SecureString`, so kraai
