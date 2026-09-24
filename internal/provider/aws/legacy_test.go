@@ -156,3 +156,23 @@ func TestFamilyBuildsARefusedTypeOnlyThroughAnEligibleEarlierIdentity(t *testing
 		t.Fatalf("Build with only a scoped earlier identity = %v, want the refusal", err)
 	}
 }
+
+// Now matched, earlier named: a destroy whose plan failed, before the entry
+// declared match, has no match values. The current identity cannot have
+// created anything for it and is skipped; the earlier one deletes. Without
+// an earlier identity the missing values are still an error.
+func TestDeleteSkipsACurrentIdentityThatCannotSearch(t *testing.T) {
+	nowMatched := cfschema.Facts{TypeName: "AWS::Test::Thing", Identity: cfschema.IdentityByAttr}
+	cc := &fakeClient{schema: nowMatched, byIdentifier: map[string]map[string]any{legacyName: {"Name": legacyName}}}
+	res := newNativeResourceWith(cc, staticSchemas{"type": "object"}, nowMatched, resource.LookupByAttr)
+	res.legacy = []*nativeResource{newNativeResourceWith(cc, staticSchemas{"type": "object"}, wasNamed, resource.LookupByName)}
+
+	if err := res.Delete(context.Background(), legacyRef()); err != nil || len(cc.deleteCalls) != 1 || cc.deleteCalls[0] != legacyName {
+		t.Fatalf("Delete = %v, calls %v; want the earlier identity's delete alone", err, cc.deleteCalls)
+	}
+
+	alone := newNativeResourceWith(&fakeClient{schema: nowMatched}, staticSchemas{"type": "object"}, nowMatched, resource.LookupByAttr)
+	if err := alone.Delete(context.Background(), legacyRef()); err == nil || !strings.Contains(err.Error(), "none were given") {
+		t.Fatalf("Delete with no earlier identity = %v, want the missing values reported", err)
+	}
+}

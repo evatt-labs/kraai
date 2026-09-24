@@ -860,12 +860,29 @@ func (n *nativeResource) Update(ctx context.Context, ref resource.Ref, spec reso
 
 // Delete removes the instance under every identity that finds one:
 // everything the entry created, under whichever index created it.
+//
+// The current identity is skipped when the Ref lacks what it needs to
+// search, the match values or the parent a failed plan never resolved, and
+// an earlier identity remains: an entry that never located an instance
+// that way cannot have created one that way.
 func (n *nativeResource) Delete(ctx context.Context, ref resource.Ref) error {
 	var errs []error
 	for _, identity := range n.identities() {
+		if identity == n && len(n.legacy) > 0 && !n.canSearch(ref) {
+			continue
+		}
 		errs = append(errs, identity.resourceType.Delete(ctx, ref))
 	}
 	return errors.Join(errs...)
+}
+
+// canSearch reports whether ref carries what this identity needs to find
+// an instance: its match values, and its parent when it has one.
+func (n *nativeResource) canSearch(ref resource.Ref) bool {
+	if n.lookup == resource.LookupByAttr && ref.Match == "" {
+		return false
+	}
+	return len(n.facts.ListScope) == 0 || ref.Scope != ""
 }
 
 // previousIdentities reads the legacy identity record; a test substitutes
