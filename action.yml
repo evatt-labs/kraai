@@ -194,6 +194,10 @@ runs:
         esac
 
         args=("$COMMAND" "$ENVIRONMENT" --dir "$DIR")
+        # --detailed-exitcode makes a plan its policies deny, or one with
+        # resources it could not read, exit 1 instead of passing the check.
+        # Its 2 means changes are present, which for a preview is success.
+        [ "$COMMAND" = "plan" ] && args+=(--detailed-exitcode)
         [ "$COMMAND" = "apply" ] && [ "$REPLACE" = "true" ] && args+=(--replace)
         [ "$COMMAND" = "destroy" ] && [ -n "$CONFIRM_NAME" ] && args+=(--confirm-name "$CONFIRM_NAME")
         while IFS= read -r path; do
@@ -208,6 +212,10 @@ runs:
         kraai "${args[@]}" 2>&1 | tee "$output_file"
         status=${PIPESTATUS[0]}
         set -e
+        [ "$COMMAND" = "plan" ] && [ "$status" = "2" ] && status=0
+
+        denied=false
+        grep -qE '^policy denied the (plan|destroy)' "$output_file" && denied=true
 
         {
           echo "result<<KRAAI_EOF"
@@ -216,6 +224,7 @@ runs:
           echo "status=$status"
         } >> "$GITHUB_OUTPUT"
         echo "status=$status" >> "$GITHUB_ENV"
+        echo "denied=$denied" >> "$GITHUB_ENV"
         exit 0
 
     # One comment per (environment, command), edited in place rather than
@@ -233,7 +242,13 @@ runs:
       run: |
         set -euo pipefail
         marker="<!-- kraai:$COMMAND:$ENVIRONMENT -->"
-        if [ "${status:-0}" = "0" ]; then heading="kraai $COMMAND succeeded"; else heading="kraai $COMMAND failed"; fi
+        if [ "${status:-0}" = "0" ]; then
+          heading="kraai $COMMAND succeeded"
+        elif [ "${denied:-false}" = "true" ]; then
+          heading="kraai $COMMAND denied by policy"
+        else
+          heading="kraai $COMMAND failed"
+        fi
 
         body="$(printf '%s\n### %s\n\n`%s`\n\n```\n%s\n```\n' \
           "$marker" "$heading" "$ENVIRONMENT" "$RESULT")"
