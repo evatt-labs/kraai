@@ -26,8 +26,14 @@ type PolicyActions func(ctx context.Context, m *manifest.Manifest, vendorTypes [
 // production; a fake in tests. Returns (nil, nil) for a manifest with none.
 type SecretRefStatements func(ctx context.Context, m *manifest.Manifest) ([]aws.SecretRefGrant, error)
 
+// SecretsStatements returns one scoped IAM grant per action a secrets
+// binding's own parameters need. assemble.AWSSecretsPolicyStatements in
+// production; a fake in tests. Returns (nil, nil) for a manifest with none.
+type SecretsStatements func(ctx context.Context, m *manifest.Manifest, environmentName string) ([]aws.SecretRefGrant, error)
+
 func newIAMPolicyCommand(
-	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions, secretRefs SecretRefStatements,
+	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions,
+	secretRefs SecretRefStatements, secrets SecretsStatements,
 ) *cobra.Command {
 	var (
 		dir     string
@@ -49,7 +55,7 @@ func newIAMPolicyCommand(
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runIAMPolicy(cmd, args[0], dir, setArgs, assembler, resolve, actions, secretRefs)
+			return runIAMPolicy(cmd, args[0], dir, setArgs, assembler, resolve, actions, secretRefs, secrets)
 		},
 	}
 
@@ -62,7 +68,8 @@ func newIAMPolicyCommand(
 
 func runIAMPolicy(
 	cmd *cobra.Command, envName, dir string, setArgs []string,
-	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions, secretRefs SecretRefStatements,
+	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions,
+	secretRefs SecretRefStatements, secrets SecretsStatements,
 ) error {
 	if !naming.IsValidEnvironmentReference(envName) {
 		return kerrors.Validation(
@@ -105,16 +112,27 @@ func runIAMPolicy(
 	if err != nil {
 		return err
 	}
-	return writePolicy(cmd.OutOrStdout(), granted, grants)
+	secretsGrants, err := secrets(ctx, m, envName)
+	if err != nil {
+		return err
+	}
+	return writePolicy(cmd.OutOrStdout(), granted, append(grants, secretsGrants...))
 }
 
 // awsVendorTypes returns the distinct vendor types of the AWS resources
 // among items, sorted: what the provider will actually be asked for, which
 // is the type whose schema publishes the permissions.
+//
+// A secrets binding's parameters are excluded: PolicyActions grants "*" on
+// every vendor type it is asked about, but a secrets entry's name is the
+// manifest's own, the same reason a secret reference is scoped instead of
+// asked for through this path (see writePolicy) — granting it here would
+// widen every entry's ssm:GetParameter etc. to every parameter in the
+// account.
 func awsVendorTypes(items []plan.Item) []string {
 	set := map[string]bool{}
 	for _, it := range items {
-		if it.Provider != "aws" {
+		if it.Provider != "aws" || it.Capability == manifest.CapabilitySecrets {
 			continue
 		}
 		typeName := it.VendorType

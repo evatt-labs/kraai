@@ -75,6 +75,20 @@ func (n Namer) Service(environmentName, serviceKey string) string {
 	return truncate(n.prefix + environmentName + "-" + slugify(serviceKey))
 }
 
+// Entry builds the name kraai provisions for one entry of a secrets
+// binding: a hierarchical SSM parameter path,
+// /{prefix}{environmentName}/{serviceKey}/{slug(binding)}/{slug(entry)}.
+// Hierarchical because that is SSM's own idiom, and because a fourth
+// naming segment collapsed into Resource's hyphen-joined single segment
+// would be indistinguishable from a binding or entry name that happens to
+// contain a hyphen. Not run through the 63-byte truncate Resource and
+// Service use: that bound is the S3/R2 bucket-name constraint this type
+// does not share, SSM's own name ceiling is 2048 bytes, and truncating a
+// hierarchical path risks two different entries colliding at the cut.
+func (n Namer) Entry(environmentName, serviceKey, binding, entry string) string {
+	return "/" + n.prefix + environmentName + "/" + serviceKey + "/" + slugify(binding) + "/" + slugify(entry)
+}
+
 // ResourceName builds the name kraai provisions for one binding with no
 // prefix, byte-for-byte the JavaScript CLI's resourceName. Only binding is
 // slugged; environmentName and serviceKey are interpolated raw, because

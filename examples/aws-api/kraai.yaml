@@ -21,3 +21,5 @@ providers:
     vendor: aws
   aws:
     vendor: aws
+  secrets:
+    vendor: aws

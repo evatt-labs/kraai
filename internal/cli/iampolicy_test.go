@@ -12,6 +12,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/assemble"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/plan"
 	"github.com/evatt-labs/kraai/internal/provider/aws"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
@@ -20,6 +21,13 @@ import (
 // to say about secret references: no aws-ssm or aws-secretsmanager ref in
 // the fixture, so the real implementation would also answer (nil, nil).
 func noSecretRefs(context.Context, *manifest.Manifest) ([]aws.SecretRefGrant, error) {
+	return nil, nil
+}
+
+// noSecrets is the SecretsStatements a test uses when its fixture declares
+// no secrets binding, so the real implementation would also answer
+// (nil, nil).
+func noSecrets(context.Context, *manifest.Manifest, string) ([]aws.SecretRefGrant, error) {
 	return nil, nil
 }
 
@@ -76,7 +84,7 @@ func execIAMPolicy(
 	if secretRefs == nil {
 		secretRefs = noSecretRefs
 	}
-	cmd := newIAMPolicyCommand(assembler, resolve, actions, secretRefs)
+	cmd := newIAMPolicyCommand(assembler, resolve, actions, secretRefs, noSecrets)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -173,6 +181,86 @@ func TestRunIAMPolicy_SecretRefGrantsAppendScopedStatements(t *testing.T) {
 	}
 }
 
+// execIAMPolicySecrets is execIAMPolicy with an injectable SecretsStatements,
+// for the tests below that need to control it rather than accept its
+// default no-op.
+func execIAMPolicySecrets(
+	t *testing.T, assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions,
+	secrets SecretsStatements, args []string,
+) (string, error) {
+	t.Helper()
+	cmd := newIAMPolicyCommand(assembler, resolve, actions, noSecretRefs, secrets)
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&out)
+	cmd.SetArgs(args)
+	err := cmd.Execute()
+	return out.String(), err
+}
+
+// TestRunIAMPolicy_SecretsGrantsAppendScopedStatements is
+// TestRunIAMPolicy_SecretRefGrantsAppendScopedStatements' counterpart for a
+// secrets binding's own parameters: its grants land in the same policy,
+// scoped, alongside the unscoped "*" statement and any secret-ref grants.
+// It also proves the environment name reaches SecretsStatements, which
+// SecretRefStatements has no equivalent of — a secrets binding's derived
+// name depends on it.
+func TestRunIAMPolicy_SecretsGrantsAppendScopedStatements(t *testing.T) {
+	dir := awsFixture(t)
+	actions := func(context.Context, *manifest.Manifest, []string) ([]string, error) {
+		return []string{"cloudcontrol:GetResource"}, nil
+	}
+	var gotEnv string
+	secrets := func(_ context.Context, _ *manifest.Manifest, environmentName string) ([]aws.SecretRefGrant, error) {
+		gotEnv = environmentName
+		return []aws.SecretRefGrant{
+			{Action: "ssm:PutParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/dev/api/secrets/x"},
+			{Action: "ssm:DescribeParameters", Resource: "*"},
+		}, nil
+	}
+	out, err := execIAMPolicySecrets(t, awsAssembler(t), awsFixtureResolver, actions, secrets, []string{testEnvName, "--dir", dir})
+	if err != nil {
+		t.Fatalf("iam-policy: %v\n%s", err, out)
+	}
+	if gotEnv != testEnvName {
+		t.Errorf("SecretsStatements was called with environment %q, want %q", gotEnv, testEnvName)
+	}
+
+	var doc struct {
+		Statement []struct {
+			Action   []string
+			Resource []string
+		}
+	}
+	if err := json.Unmarshal([]byte(out), &doc); err != nil {
+		t.Fatalf("output is not a policy document: %v\n%q", err, out)
+	}
+	found := map[string][]string{}
+	for _, s := range doc.Statement {
+		found[s.Action[0]] = s.Resource
+	}
+	if r := found["ssm:PutParameter"]; !reflect.DeepEqual(r, []string{"arn:aws:ssm:us-east-1:111111111111:parameter/dev/api/secrets/x"}) {
+		t.Errorf("ssm:PutParameter Resource = %v", r)
+	}
+	if r := found["ssm:DescribeParameters"]; !reflect.DeepEqual(r, []string{"*"}) {
+		t.Errorf("ssm:DescribeParameters Resource = %v", r)
+	}
+}
+
+func TestRunIAMPolicy_SecretsStatementsErrorPropagates(t *testing.T) {
+	dir := awsFixture(t)
+	actions := func(context.Context, *manifest.Manifest, []string) ([]string, error) {
+		return []string{"cloudcontrol:GetResource"}, nil
+	}
+	secrets := func(context.Context, *manifest.Manifest, string) ([]aws.SecretRefGrant, error) {
+		return nil, errors.New("SecretsPolicyStatements: access denied")
+	}
+	_, err := execIAMPolicySecrets(t, awsAssembler(t), awsFixtureResolver, actions, secrets, []string{testEnvName, "--dir", dir})
+	if err == nil || !strings.Contains(err.Error(), "access denied") {
+		t.Fatalf("err = %v, want the secrets error", err)
+	}
+}
+
 func TestRunIAMPolicy_SecretRefStatementsErrorPropagates(t *testing.T) {
 	dir := awsFixture(t)
 	actions := func(context.Context, *manifest.Manifest, []string) ([]string, error) {
@@ -210,6 +298,21 @@ func TestRunIAMPolicy_ActionsErrorPropagates(t *testing.T) {
 	_, err := execIAMPolicy(t, awsAssembler(t), awsFixtureResolver, actions, nil, []string{testEnvName, "--dir", dir})
 	if err == nil || !strings.Contains(err.Error(), "DescribeType denied") {
 		t.Fatalf("err = %v, want the actions error", err)
+	}
+}
+
+// TestAWSVendorTypes_ExcludesSecretsCapability is why
+// TestRunIAMPolicy_SecretsGrantsAppendScopedStatements' scoped grant is the
+// only way a secrets binding's actions reach the policy: PolicyActions'
+// own "*" statement must never see the vendor type at all.
+func TestAWSVendorTypes_ExcludesSecretsCapability(t *testing.T) {
+	items := []plan.Item{
+		{Provider: "aws", Type: "AWS::Lambda::Function", VendorType: "AWS::Lambda::Function", Capability: manifest.CapabilityCompute},
+		{Provider: "aws", Type: "AWS::SSM::Parameter::Secret", VendorType: "AWS::SSM::Parameter", Capability: manifest.CapabilitySecrets},
+	}
+	got := awsVendorTypes(items)
+	if !reflect.DeepEqual(got, []string{"AWS::Lambda::Function"}) {
+		t.Fatalf("awsVendorTypes = %v, want only the compute type", got)
 	}
 }
 

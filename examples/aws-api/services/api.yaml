@@ -7,6 +7,22 @@ services:
       settings:
         memorySize: 256
         timeout: 10
+        envSecrets:
+          PEPPER_KEY: SECRETS.pepper_key
+          GITHUB_CLIENT_SECRET: SECRETS.github_client_secret
+    # An SSM Parameter Store SecureString per entry: pepper_key generated
+    # client-side with a CSPRNG at create time, github_client_secret
+    # created with a random placeholder until an operator runs
+    # `kraai secret set kraai-example SECRETS.github_client_secret`. Neither
+    # value is ever read at plan time or written again after create; the
+    # function reads each lazily, at the moment its environment is built,
+    # through envSecrets above.
+    secrets:
+      - binding: SECRETS
+        provider: aws-ssm
+        entries:
+          pepper_key: { generate: { bytes: 32, encoding: base64 } }
+          github_client_secret: { source: external }
     # The private network the function runs inside. The private block opts
     # into egress: a private subnet with a NAT gateway in the public one,
     # and the function placed in the private subnet, so it reaches the

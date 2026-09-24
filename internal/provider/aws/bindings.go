@@ -18,6 +18,12 @@ type serviceBinding struct {
 	Vendor     string
 	Name       string
 	Config     map[string]any
+	// EntryNames is, for a secrets binding, the derived parameter name of
+	// each entry it declares, keyed by entry. Empty for every other
+	// capability: internal/plan's serviceBindings only computes it for
+	// manifest.CapabilitySecrets, whose one binding expands to one resource
+	// per entry rather than the one Name above every other capability gets.
+	EntryNames map[string]string
 }
 
 // decodeServiceBindings reads the service's bindings out of a compute spec.
@@ -51,6 +57,13 @@ func decodeServiceBindings(spec resource.Spec) ([]serviceBinding, error) {
 			return nil, kerrors.Validation(
 				"binding %q: compute config bindings[%d] lacks a capability, binding or name: %v",
 				spec.Binding, i, fields)
+		}
+		// internal/plan's serviceBindings sets this in-process, as a Go
+		// map[string]string, never through YAML or JSON — unlike every
+		// other key here, so it is asserted as its real type rather than
+		// the map[string]any decode a manifest value would need.
+		if names, ok := fields["entryNames"].(map[string]string); ok {
+			b.EntryNames = names
 		}
 		out = append(out, b)
 	}

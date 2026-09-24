@@ -1,6 +1,7 @@
 package assemble
 
 import (
+	"context"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -85,4 +86,64 @@ func TestComputeSecretRefs(t *testing.T) {
 			t.Fatal("computeSecretRefs error = nil, want a malformed-reference error")
 		}
 	})
+}
+
+// secretsEntryNames is pure — no live client — so it is tested directly
+// here, the same reasoning as TestComputeSecretRefs.
+func TestSecretsEntryNames(t *testing.T) {
+	t.Run("derives one name per entry, sorted and deduplicated", func(t *testing.T) {
+		m := &manifest.Manifest{
+			Services: map[string]manifest.Service{
+				"api": {Bindings: manifest.Bindings{
+					manifest.CapabilitySecrets: {{
+						"binding": "SECRETS", "provider": "aws-ssm",
+						"entries": map[string]any{
+							"pepper_key":           map[string]any{"generate": map[string]any{"bytes": 32, "encoding": "base64"}},
+							"github_client_secret": map[string]any{"source": "external"},
+						},
+					}},
+				}},
+			},
+		}
+		names := secretsEntryNames(m, "dev")
+		if len(names) != 2 {
+			t.Fatalf("secretsEntryNames = %v, want 2 names", names)
+		}
+		if names[0] >= names[1] {
+			t.Errorf("names = %v, want sorted", names)
+		}
+	})
+
+	t.Run("a non-aws-ssm provider contributes nothing", func(t *testing.T) {
+		m := &manifest.Manifest{
+			Services: map[string]manifest.Service{
+				"api": {Bindings: manifest.Bindings{
+					manifest.CapabilitySecrets: {{
+						"binding": "SECRETS", "provider": "aws-secretsmanager",
+						"entries": map[string]any{"x": map[string]any{"source": "external"}},
+					}},
+				}},
+			},
+		}
+		if names := secretsEntryNames(m, "dev"); names != nil {
+			t.Fatalf("secretsEntryNames = %v, want nil", names)
+		}
+	})
+
+	t.Run("no secrets bindings returns nil", func(t *testing.T) {
+		m := &manifest.Manifest{Services: map[string]manifest.Service{"api": {}}}
+		if names := secretsEntryNames(m, "dev"); names != nil {
+			t.Fatalf("secretsEntryNames = %v, want nil", names)
+		}
+	})
+}
+
+// AWSSecretsPolicyStatements' short-circuit for a manifest with no secrets
+// bindings needs no live client, so it is tested directly here.
+func TestAWSSecretsPolicyStatements_NoSecretsBindings(t *testing.T) {
+	m := &manifest.Manifest{Services: map[string]manifest.Service{"api": {}}}
+	grants, err := AWSSecretsPolicyStatements(context.Background(), m, "dev")
+	if err != nil || grants != nil {
+		t.Fatalf("AWSSecretsPolicyStatements = %v, %v, want nil, nil", grants, err)
+	}
 }

@@ -130,6 +130,63 @@ func (c *Client) SecretRefPolicyStatements(ctx context.Context, refs []secretref
 	return grants, nil
 }
 
+// secretsParameterActions is what an operator needs on each SSM parameter a
+// secrets binding owns: everything the resource type's own Get, Create,
+// Update and Delete call. Scoped per entry, unlike PolicyActions' "*",
+// because a secrets binding's entries are named by the manifest exactly as
+// a secret reference is (see SecretRefPolicyStatements) — there is no
+// provider-assigned identifier to wait for.
+var secretsParameterActions = []string{
+	"ssm:AddTagsToResource",
+	"ssm:DeleteParameter",
+	"ssm:GetParameter",
+	"ssm:PutParameter",
+}
+
+// SecretsPolicyStatements returns one SecretRefGrant per action in
+// secretsParameterActions for every name in names, plus one unscoped grant
+// for ssm:DescribeParameters, sorted and without duplicates.
+//
+// DescribeParameters has no per-parameter resource element to scope to —
+// unlike GetParameter, PutParameter, DeleteParameter and AddTagsToResource,
+// its API takes no parameter name at all, only an account-wide filter — so
+// it is granted on "*" rather than left out of a policy that would
+// otherwise be unusable.
+func (c *Client) SecretsPolicyStatements(ctx context.Context, names []string) ([]SecretRefGrant, error) {
+	if len(names) == 0 {
+		return nil, nil
+	}
+	account, err := c.AccountID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	seen := map[SecretRefGrant]bool{}
+	var grants []SecretRefGrant
+	add := func(g SecretRefGrant) {
+		if seen[g] {
+			return
+		}
+		seen[g] = true
+		grants = append(grants, g)
+	}
+	for _, name := range names {
+		arn := ssmParameterARN(c.region, account, name)
+		for _, action := range secretsParameterActions {
+			add(SecretRefGrant{Action: action, Resource: arn})
+		}
+	}
+	add(SecretRefGrant{Action: "ssm:DescribeParameters", Resource: "*"})
+
+	sort.Slice(grants, func(i, j int) bool {
+		if grants[i].Action != grants[j].Action {
+			return grants[i].Action < grants[j].Action
+		}
+		return grants[i].Resource < grants[j].Resource
+	})
+	return grants, nil
+}
+
 // secretRefGrant builds ref's own SecretRefGrant.
 //
 // An unknown scheme is unreachable in normal operation: every caller
@@ -147,16 +204,7 @@ func secretRefGrant(ref secretref.Ref, region, account string) (SecretRefGrant, 
 	}
 	switch ref.Scheme {
 	case schemeSSM:
-		// SSM parameter ARNs are always hierarchical under "parameter/",
-		// never "parameter" bare: TrimPrefix then re-add exactly one "/"
-		// so a non-hierarchical name ("plain-name", no leading slash, a
-		// name SSM itself accepts) gets one and a hierarchical name
-		// ("/kraai/prod/x", already carrying one from the reference's
-		// triple slash) does not get a second.
-		return SecretRefGrant{
-			Action:   "ssm:GetParameter",
-			Resource: fmt.Sprintf("arn:aws:ssm:%s:%s:parameter/%s", region, account, strings.TrimPrefix(ref.Path, "/")),
-		}, nil
+		return SecretRefGrant{Action: "ssm:GetParameter", Resource: ssmParameterARN(region, account, ref.Path)}, nil
 	case schemeSecretsManager:
 		return SecretRefGrant{
 			Action:   "secretsmanager:GetSecretValue",

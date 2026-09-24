@@ -91,6 +91,10 @@ const (
 	// vendor on purpose, because a native binding is not portable and does
 	// not pretend to be.
 	CapabilityAWS = "aws"
+	// CapabilitySecrets is a store of named secret values: kraai creates
+	// each entry once and never treats its value as desired state, so no
+	// later apply reads or overwrites it.
+	CapabilitySecrets = "secrets"
 )
 
 // Provider is one capability's vendor and that vendor's configuration.

@@ -102,6 +102,13 @@ const (
 	// entry carries under Registration.NameKey, verbatim: a hosted zone is
 	// "acme.example", not anything derived.
 	NameFromEntry
+	// NameFromEntries names one instance per key of the map its manifest
+	// entry carries under Registration.NameKey, rather than one instance
+	// per binding: a secrets binding's `entries:` map declares an arbitrary,
+	// author-chosen number of secrets, and each is its own resource with its
+	// own identity, so a binding removing or adding an entry must never look
+	// like a replace of the whole binding's one resource.
+	NameFromEntries
 )
 
 // String implements fmt.Stringer for readable validation errors.
@@ -113,6 +120,8 @@ func (s NameStrategy) String() string {
 		return "route"
 	case NameFromEntry:
 		return "entry"
+	case NameFromEntries:
+		return "entries"
 	default:
 		return "NameStrategy(" + strconv.Itoa(int(s)) + ")"
 	}
@@ -120,7 +129,7 @@ func (s NameStrategy) String() string {
 
 // Valid reports whether s is a declared strategy.
 func (s NameStrategy) Valid() bool {
-	return s == NameFromBinding || s == NameFromRoute || s == NameFromEntry
+	return s == NameFromBinding || s == NameFromRoute || s == NameFromEntry || s == NameFromEntries
 }
 
 // ReferenceRead is one reference a type reads: the entry key that names the
@@ -447,11 +456,11 @@ func validate(reg Registration) error {
 		return kerrors.Validation(
 			"resource registration %q declares unknown name strategy %s",
 			reg.Provider+"/"+reg.Type, reg.NameFrom)
-	case reg.NameFrom == NameFromEntry && reg.NameKey == "":
+	case (reg.NameFrom == NameFromEntry || reg.NameFrom == NameFromEntries) && reg.NameKey == "":
 		return kerrors.Validation(
 			"resource registration %q is named from its entry but declares no NameKey to read the name from",
 			reg.Provider+"/"+reg.Type)
-	case reg.NameFrom != NameFromEntry && reg.NameKey != "":
+	case reg.NameFrom != NameFromEntry && reg.NameFrom != NameFromEntries && reg.NameKey != "":
 		return kerrors.Validation(
 			"resource registration %q declares NameKey %q but is named from its %s, which never reads it",
 			reg.Provider+"/"+reg.Type, reg.NameKey, reg.NameFrom)

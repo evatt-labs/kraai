@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
@@ -310,6 +311,80 @@ func TestIAMRoleGrantsADynamoDBTableByItsDriver(t *testing.T) {
 	if len(resources) != 2 || resources[0] != "arn:aws:dynamodb:eu-west-1:123456789012:table/myenv-api-db" ||
 		resources[1] != "arn:aws:dynamodb:eu-west-1:123456789012:table/myenv-api-db/index/*" {
 		t.Fatalf("Resource = %v, want the table and its indexes", resources)
+	}
+}
+
+// TestIAMRoleGrantsSecretsScopedToEntryARNs is the #295 mechanism extended
+// to secrets: the execution role gets ssm:GetParameter, and only that
+// action, scoped to exactly the two entries' derived ARNs — never the
+// binding's own derived name (which is not an ARN any parameter carries)
+// and never "*".
+func TestIAMRoleGrantsSecretsScopedToEntryARNs(t *testing.T) {
+	fc := &fakeClient{
+		createID: "myenv-api", createProps: map[string]any{},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
+	}
+	role := newIAMRoleResource(&Client{sts: &fakeSTS{account: "123456789012"}, region: "eu-west-1"})
+	role.resourceType.client = fc
+
+	secrets := awsBinding("secrets", "SECRETS", "myenv-api-secrets")
+	//nolint:gosec // G101: derived parameter names, not credential values
+	secrets["entryNames"] = map[string]string{
+		"pepper_key":           "/myenv/api/secrets/pepper-key",
+		"github_client_secret": "/myenv/api/secrets/github-client-secret",
+	}
+	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
+		"settings": map[string]any{},
+		"bindings": bindingsConfig(secrets),
+	}}
+	if _, err := role.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	statements := bindingsPolicy(t, fc.createCalls[0])
+	if len(statements) != 1 {
+		t.Fatalf("got %d statements, want 1: %v", len(statements), statements)
+	}
+	statement := statements[0].(map[string]any)
+	actions, _ := statement["Action"].([]any)
+	if len(actions) != 1 || actions[0] != "ssm:GetParameter" {
+		t.Fatalf("Action = %v, want exactly [ssm:GetParameter]", actions)
+	}
+	resources, _ := statement["Resource"].([]any)
+	want := []any{
+		"arn:aws:ssm:eu-west-1:123456789012:parameter/myenv/api/secrets/github-client-secret",
+		"arn:aws:ssm:eu-west-1:123456789012:parameter/myenv/api/secrets/pepper-key",
+	}
+	if !reflect.DeepEqual(resources, want) {
+		t.Fatalf("Resource = %v, want %v", resources, want)
+	}
+}
+
+// A secrets binding with no entryNames (a plan built before internal/plan's
+// serviceBindings ran, or a future capability reusing this switch's shape)
+// must not grant an unscoped statement; it is simply skipped, the same as
+// a binding with no grant at all.
+func TestIAMRoleSecretsWithNoEntryNamesGrantsNothing(t *testing.T) {
+	fc := &fakeClient{
+		createID: "myenv-api", createProps: map[string]any{},
+		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/RoleName"}},
+	}
+	sts := &fakeSTS{account: "123456789012"}
+	role := newIAMRoleResource(&Client{sts: sts, region: "eu-west-1"})
+	role.resourceType.client = fc
+
+	spec := resource.Spec{Name: "myenv-api", Config: map[string]any{
+		"settings": map[string]any{},
+		"bindings": bindingsConfig(awsBinding("secrets", "SECRETS", "myenv-api-secrets")),
+	}}
+	if _, err := role.Create(context.Background(), spec); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if statements := bindingsPolicy(t, fc.createCalls[0]); len(statements) != 0 {
+		t.Fatalf("statements = %v, want none", statements)
+	}
+	if sts.calls != 0 {
+		t.Fatalf("STS was called for a binding with nothing to grant")
 	}
 }
 

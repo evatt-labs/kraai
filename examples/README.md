@@ -11,7 +11,7 @@ them is read-only and safe.
 
 ## aws-api
 
-`compute` + `network` + `queues` + `database` + `keyvalue` + `aws`: an
+`compute` + `network` + `queues` + `database` + `keyvalue` + `aws` + `secrets`: an
 HTTP-triggered Lambda function behind an API Gateway HTTP API, alongside a
 private VPC (internet gateway, a pair of public subnets across two zones,
 route table, S3 and DynamoDB gateway endpoints, and a pair of private
@@ -19,15 +19,20 @@ subnets with NAT egress), a standard SQS
 queue, a DynamoDB on-demand table (`driver: dynamodb`), an Aurora DSQL
 cluster (`driver: postgres`), an Aurora Serverless v2 PostgreSQL cluster
 (`driver: postgres`, `engine: aurora`) placed in the VPC's subnets behind a
-security group admitting it, and an ElastiCache Serverless cache
-(`driver: redis`, Valkey) placed likewise. The function receives the queue
+security group admitting it, an ElastiCache Serverless cache
+(`driver: redis`, Valkey) placed likewise, and two SSM Parameter Store
+`SecureString` parameters (`pepper_key`, generated client-side;
+`github_client_secret`, a placeholder until `kraai secret set` writes it).
+The function receives the queue
 as `JOBS_QUEUE_URL` and `JOBS_QUEUE_ARN`, the table as `DB_TABLE_NAME`, the
 DSQL cluster as `PG_DATABASE_URL` (no password: the function signs an IAM
 token for the endpoint when it connects), the Aurora cluster as
 `SQL_DATABASE_URL` (password included, read from the Secrets Manager secret
-RDS manages at the moment the environment is built, never held in state)
-and the cache as `CACHE_REDIS_URL`; its execution role carries an inline
-policy granting it the queue, the table and the DSQL cluster. The Aurora
+RDS manages at the moment the environment is built, never held in state),
+the cache as `CACHE_REDIS_URL`, and the two secrets as `PEPPER_KEY` and
+`GITHUB_CLIENT_SECRET` through `envSecrets`; its execution role carries an
+inline policy granting it the queue, the table, the DSQL cluster and
+`ssm:GetParameter` on the two secrets' own ARNs. The Aurora
 cluster and the cache need no grant, only network reach, which the
 function has (see below). The Aurora cluster scales to zero ACUs when idle
 and takes minutes to create and delete. Beside them, three native `aws`

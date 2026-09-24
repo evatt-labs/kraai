@@ -20,11 +20,32 @@ import (
 
 // fakeSSM is a hand-rolled ssmAPI, matching this package's convention of
 // small fakes over the AWS SDK's own small interfaces (see fakeSTS,
-// fakeSecretsManager).
+// fakeSecretsManager). Shared by secretref_test.go and secrets_test.go:
+// every call this package makes against SSM records its input, so a test
+// can assert not just what a verb returned but exactly which calls it made
+// — the shape the never-write-value-on-update and plan-never-decrypts
+// invariants need to be provable rather than merely plausible.
 type fakeSSM struct {
 	value  string
 	err    error
 	inputs []*ssm.GetParameterInput
+
+	describeParameters    []ssmtypes.ParameterMetadata
+	describeParametersErr error
+	describeParametersIn  []*ssm.DescribeParametersInput
+
+	tags                []ssmtypes.Tag
+	listTagsErr         error
+	listTagsForResource []*ssm.ListTagsForResourceInput
+
+	putParameterErr error
+	putParameterIn  []*ssm.PutParameterInput
+
+	addTagsErr error
+	addTagsIn  []*ssm.AddTagsToResourceInput
+
+	deleteParameterErr error
+	deleteParameterIn  []*ssm.DeleteParameterInput
 }
 
 func (f *fakeSSM) GetParameter(_ context.Context, params *ssm.GetParameterInput, _ ...func(*ssm.Options)) (*ssm.GetParameterOutput, error) {
@@ -33,6 +54,56 @@ func (f *fakeSSM) GetParameter(_ context.Context, params *ssm.GetParameterInput,
 		return nil, f.err
 	}
 	return &ssm.GetParameterOutput{Parameter: &ssmtypes.Parameter{Value: aws.String(f.value)}}, nil
+}
+
+func (f *fakeSSM) DescribeParameters(
+	_ context.Context, params *ssm.DescribeParametersInput, _ ...func(*ssm.Options),
+) (*ssm.DescribeParametersOutput, error) {
+	f.describeParametersIn = append(f.describeParametersIn, params)
+	if f.describeParametersErr != nil {
+		return nil, f.describeParametersErr
+	}
+	return &ssm.DescribeParametersOutput{Parameters: f.describeParameters}, nil
+}
+
+func (f *fakeSSM) ListTagsForResource(
+	_ context.Context, params *ssm.ListTagsForResourceInput, _ ...func(*ssm.Options),
+) (*ssm.ListTagsForResourceOutput, error) {
+	f.listTagsForResource = append(f.listTagsForResource, params)
+	if f.listTagsErr != nil {
+		return nil, f.listTagsErr
+	}
+	return &ssm.ListTagsForResourceOutput{TagList: f.tags}, nil
+}
+
+func (f *fakeSSM) PutParameter(
+	_ context.Context, params *ssm.PutParameterInput, _ ...func(*ssm.Options),
+) (*ssm.PutParameterOutput, error) {
+	f.putParameterIn = append(f.putParameterIn, params)
+	if f.putParameterErr != nil {
+		return nil, f.putParameterErr
+	}
+	return &ssm.PutParameterOutput{}, nil
+}
+
+func (f *fakeSSM) AddTagsToResource(
+	_ context.Context, params *ssm.AddTagsToResourceInput, _ ...func(*ssm.Options),
+) (*ssm.AddTagsToResourceOutput, error) {
+	f.addTagsIn = append(f.addTagsIn, params)
+	if f.addTagsErr != nil {
+		return nil, f.addTagsErr
+	}
+	return &ssm.AddTagsToResourceOutput{}, nil
+}
+
+func (f *fakeSSM) DeleteParameter(
+	_ context.Context, params *ssm.DeleteParameterInput, _ ...func(*ssm.Options),
+) (*ssm.DeleteParameterOutput, error) {
+	f.deleteParameterIn = append(f.deleteParameterIn, params)
+	if f.deleteParameterErr != nil {
+		return nil, f.deleteParameterErr
+	}
+	return &ssm.DeleteParameterOutput{}, nil
 }
 
 func mustParse(t *testing.T, raw string) secretref.Ref {
@@ -415,6 +486,42 @@ func TestRapid_ResolveEnvNeverLeaksSecretValueOnFailure(t *testing.T) {
 		_, err := resolveEnv(context.Background(), client, spec, settings)
 		if err == nil {
 			t.Fatal("resolveEnv error = nil, want a failure resolving the unregistered binding key")
+		}
+		if strings.Contains(err.Error(), secretValue) {
+			t.Fatalf("resolveEnv error leaked the resolved secret value: %q", err.Error())
+		}
+	})
+}
+
+// TestRapid_ResolveEnvNeverLeaksBindingSecretValueOnFailure is
+// TestRapid_ResolveEnvNeverLeaksSecretValueOnFailure's sibling for the
+// binding-key path (evatt-labs/kraai#331): a secrets binding's entry has
+// no URI scheme at all, so it resolves through spec.Secret rather than
+// client.resolveSecretRef — the same path a generated or `kraai secret
+// set` value takes on its way into a function's environment. The property
+// is identical: a value already resolved and sitting in env must never
+// appear in a sibling entry's failure text.
+func TestRapid_ResolveEnvNeverLeaksBindingSecretValueOnFailure(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		secretValue := string(rapid.SliceOfN(rapid.Byte(), 16, 64).Draw(t, "secret"))
+
+		client := &Client{}
+		settings := LambdaSettings{
+			EnvSecrets: map[string]string{
+				"A_OK":      "SECRETS.pepper_key",
+				"Z_MISSING": "SECRETS.not_registered",
+			},
+		}
+		spec := resource.Spec{
+			Binding: "SVC",
+			Secrets: map[string]resource.Secret{
+				"SECRETS.pepper_key": func(context.Context) (string, error) { return secretValue, nil },
+			},
+		}
+
+		_, err := resolveEnv(context.Background(), client, spec, settings)
+		if err == nil {
+			t.Fatal("resolveEnv error = nil, want a failure resolving the unregistered entry")
 		}
 		if strings.Contains(err.Error(), secretValue) {
 			t.Fatalf("resolveEnv error leaked the resolved secret value: %q", err.Error())
