@@ -40,10 +40,19 @@
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-24",
       "region": "us-east-1",
-      "outcome": "oracle-unavailable",
-      "instances": 0,
-      "compared": [],
-      "note": "Cloud Control could not read any listed instance"
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "CreatedAt",
+        "FallbackModel",
+        "Models",
+        "PromptRouterArn",
+        "PromptRouterName",
+        "RoutingCriteria",
+        "Status",
+        "Type",
+        "UpdatedAt"
+      ]
     },
     {
       "type": "AWS::CodeDeploy::DeploymentConfig",
