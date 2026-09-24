@@ -165,7 +165,7 @@ func TestPlan_ImmutableDiffPlansAsReplace(t *testing.T) {
 // decorated the way internal/assemble builds the real one
 // (resource.WithDecorator(resource.Instrument(nil, nil))), for a resource
 // type that implements only Differ, never LiveDiffer — every registered
-// type except this PR's Lambda change.
+// type except the one that added LiveDiffer.
 //
 // decide asserts LiveDiffer before Differ (plan.LiveDiffer's doc comment),
 // and every decorated resource satisfies LiveDiffer structurally, since
@@ -208,10 +208,10 @@ func TestPlan_DecoratedDifferOnlyResourceStillReportsReplace(t *testing.T) {
 
 // TestPlan_LiveDifferTakesPrecedenceOverDiffer proves decide calls
 // LiveDiffer.DiffLive, with a live ctx, and never falls through to
-// Differ.Diff, for a type implementing both — the ordering #336's marker
-// check depends on: a type could plausibly keep Diff for something else
-// and add DiffLive only for its secret-backed variables, and decide must
-// still run exactly one of the two, not both.
+// Differ.Diff, for a type implementing both: a type could plausibly keep
+// Diff for something else and add DiffLive only for a comparison that
+// needs its own call, and decide must still run exactly one of the two,
+// not both.
 func TestPlan_LiveDifferTakesPrecedenceOverDiffer(t *testing.T) {
 	f := newRegistryFixture(t)
 	live := &fakeLiveDiffer{
@@ -250,6 +250,48 @@ func TestPlan_LiveDifferTakesPrecedenceOverDiffer(t *testing.T) {
 	}
 	if live.diffCalls != 0 {
 		t.Errorf("Diff calls = %d, want 0: LiveDiffer must take precedence", live.diffCalls)
+	}
+}
+
+// TestPlan_DecoratedLiveDifferStillReachesDiffLive is
+// TestPlan_LiveDifferTakesPrecedenceOverDiffer's decorated-registry
+// counterpart, the same pairing TestPlan_DecoratedDifferOnlyResourceStillReportsReplace
+// is to TestPlan_ImmutableDiffPlansAsReplace: a wrong fallback direction in
+// *instrumented.DiffLive (falling back to Diff even when the inner type has
+// its own DiffLive) would silently skip a live comparison in every real
+// run without either undecorated test noticing. fakeLiveDiffer.Diff panics,
+// so a wrong fallback fails loudly here instead of just returning Same.
+func TestPlan_DecoratedLiveDifferStillReachesDiffLive(t *testing.T) {
+	live := &fakeLiveDiffer{
+		fakeResource: newFakeResource(),
+		diffLive: func(context.Context, resource.Spec, *resource.State) (resource.Difference, error) {
+			return resource.Mutable, nil
+		},
+	}
+	reg := resource.NewRegistry(resource.WithDecorator(resource.Instrument(nil, nil)))
+	must(t, reg.Register(resource.Registration{
+		Provider: "cloudflare", Type: "r2_bucket", Capability: manifest.CapabilityObjects,
+		Lookup: resource.LookupByName, Resource: live,
+	}))
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
+		Services: map[string]manifest.Service{
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
+		},
+	}
+	name := naming.ResourceName(envName, "api", "UPLOADS")
+	live.states[name] = &resource.State{Ref: resource.Ref{Provider: "cloudflare", Type: "r2_bucket", Name: name}, ID: "bucket-1"}
+
+	p, err := New(reg).Plan(context.Background(), m, envName)
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	got := findAction(t, p, "cloudflare", "r2_bucket")
+	if got.Kind != ActionUpdate {
+		t.Fatalf("Kind = %v, want ActionUpdate", got.Kind)
+	}
+	if live.diffLiveCalls != 1 {
+		t.Errorf("DiffLive calls = %d, want 1", live.diffLiveCalls)
 	}
 }
 

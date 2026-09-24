@@ -33,9 +33,10 @@ func versionDiffFixture(t *testing.T, ssm ssmAPI, sm secretsManagerAPI) (*lambda
 	return l, dir
 }
 
-// TestDiffLive_SecretRotationDetected proves the whole point of #336: a
-// live marker that no longer matches the store's current version plans an
-// Update, so the next apply redeploys the function with the rotated value.
+// TestDiffLive_SecretRotationDetected proves the version-diff feature's
+// whole point: a live marker that no longer matches the store's current
+// version plans an Update, so the next apply redeploys the function with
+// the rotated value.
 func TestDiffLive_SecretRotationDetected(t *testing.T) {
 	fn, dir := versionDiffFixture(t, &fakeSSM{describeParameters: []ssmtypes.ParameterMetadata{{Version: 2}}}, nil)
 	spec := baseLambdaSpec(t, dir, map[string]any{"envSecrets": map[string]any{"API_KEY": "aws-ssm:///kraai/prod/api_key"}})
@@ -201,10 +202,10 @@ func TestResolveEnv_WritesValueAndMarkerTogether(t *testing.T) {
 	})
 }
 
-// TestRapid_ResolveEnvMarkerNeverLeaksSecretValue extends #326/#335's
-// redaction property (TestRapid_ResolveEnvNeverLeaksSecretValueOnFailure and
-// its binding-key sibling) to this feature's marker. Two properties, over
-// the same random secret value and a random store version:
+// TestRapid_ResolveEnvMarkerNeverLeaksSecretValue extends this package's
+// existing redaction property (TestRapid_ResolveEnvNeverLeaksSecretValueOnFailure
+// and its binding-key sibling) to this feature's marker. Two properties,
+// over the same random secret value and a random store version:
 //
 //  1. A successful resolve's marker is allowed to be anything — a version
 //     number is not secret — but the value it stands beside is written only

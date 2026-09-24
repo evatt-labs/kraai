@@ -174,24 +174,17 @@ func (i *instrumented) Diff(spec Spec, state *State) (Difference, error) {
 }
 
 // DiffLive forwards to the inner resource when it implements a live
-// comparison, and otherwise falls back to Diff — never straight to Same.
-//
-// *instrumented always satisfies plan.LiveDiffer, this method itself being
-// the reason, and decide asserts LiveDiffer before Differ (see
-// plan.LiveDiffer's doc comment). Left answering Same for an inner type
-// that only implements Diff, this forwarder would silently disable that
-// type's whole comparison in every real run — decorated is the only way
-// anything reaches decide — which is worse than the interface not existing
-// at all: the API Gateway default-endpoint regression Differ's own doc
-// comment cites, but for every type at once instead of one. Falling back
-// to Diff keeps decide's preference meaningful only for a type that
-// actually opted into a live comparison.
+// comparison, and otherwise falls back to Diff.
 func (i *instrumented) DiffLive(ctx context.Context, spec Spec, state *State) (Difference, error) {
 	if live, ok := i.inner.(interface {
 		DiffLive(context.Context, Spec, *State) (Difference, error)
 	}); ok {
 		return live.DiffLive(ctx, spec, state)
 	}
+	// *instrumented always satisfies plan.LiveDiffer (this method is why),
+	// and decide asserts LiveDiffer before Differ, so falling back to Same
+	// here instead of Diff would silently disable comparison for every
+	// type that never opted into a live one.
 	return i.Diff(spec, state)
 }
 
