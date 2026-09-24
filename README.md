@@ -411,6 +411,44 @@ An environment marked `protected: true` requires confirming its name before
 apply or destroy — interactively, or `--confirm-name` in CI. There is no
 bypass flag.
 
+### Policies
+
+A manifest can refuse its own changes. Every `policies/*.rego` file under the
+manifest directory, plus any `--policy <file-or-dir>`, is evaluated against
+what kraai is about to do:
+
+```rego
+# policies/network.rego
+package kraai.plan
+
+deny contains msg if {
+	some a in input.actions
+	a.vendor_type == "AWS::EC2::NatGateway"
+	input.overlay.kind == "ephemeral"
+	msg := sprintf("%s.%s: an ephemeral environment may not carry a NAT gateway", [a.service_key, a.binding])
+}
+```
+
+| gate | package | on a denial |
+|---|---|---|
+| `plan` | `kraai.plan` | prints the messages; exits `1` under `--detailed-exitcode`, else `0` |
+| `apply` | `kraai.plan` | refuses before its first mutation, exits `2` |
+| `destroy`, `gc` | `kraai.destroy` | refuses before the first delete, exits `2` |
+
+`input` is the document `kraai plan --json` prints, with each action's
+`config` added, plus `manifest.providers`, `manifest.services` and `overlay`,
+the environment file. Manifest values are left out, since `--set` is where
+credentials go. A `${BINDING.Attr}` reference reaches the policy unresolved.
+Helpers go under `kraai.lib.*`; any other package, a `deny` that is not a set,
+or no `deny` at all fails the load, because a policy that never ran reads as
+one that passed.
+
+Policies run in OPA with no network, no DNS and no `opa.runtime`, and each
+evaluation is cut off after 30 seconds. **`policies/` in the manifest
+directory can be edited by the pull request it gates.** To hold an untrusted
+change to a policy, keep it outside the change: check out the base branch
+separately and pass it with `--policy`.
+
 ### Telemetry and profiling
 
 kraai records a span for every command, plan, apply or destroy wave,
@@ -482,6 +520,7 @@ input that turns the refusal off.
 | `version` | kraai version; defaults to the action's own ref |
 | `replace` | allow `apply` to replace resources it cannot update |
 | `confirm-name` | passed to `destroy`; safe to set unconditionally |
+| `policy` | Rego files or directories passed as `--policy`, one per line |
 | `comment` | post the sticky comment, default `true` |
 
 

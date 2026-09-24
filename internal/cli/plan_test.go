@@ -574,7 +574,7 @@ func TestWritePlanText_WriterFailurePropagates(t *testing.T) {
 }
 
 func TestWritePlanJSON_WriterFailurePropagates(t *testing.T) {
-	err := writePlanJSON(failingWriter{}, "env", nil)
+	err := writePlanJSON(failingWriter{}, "env", nil, nil)
 	if err == nil {
 		t.Fatalf("writePlanJSON with a failing writer = nil error, want one")
 	}
@@ -835,7 +835,7 @@ func TestPlanNotesAreRendered(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err := writePlanJSON(&buf, "env", p); err != nil {
+	if err := writePlanJSON(&buf, "env", p, nil); err != nil {
 		t.Fatal(err)
 	}
 	var doc struct {
