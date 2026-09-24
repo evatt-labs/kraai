@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.14](https://github.com/evatt-labs/kraai/compare/v0.6.13...v0.6.14) (2026-09-24)
+
+
+### Features
+
+* gate plan, apply and destroy on Rego policies ([#308](https://github.com/evatt-labs/kraai/issues/308)) ([2cd6795](https://github.com/evatt-labs/kraai/commit/2cd67955d6474f7bd4961edecbaf8f2dca70e6d9))
+
+
+### Bug Fixes
+
+* **action:** fail a plan its policies deny ([#310](https://github.com/evatt-labs/kraai/issues/310)) ([b919e25](https://github.com/evatt-labs/kraai/commit/b919e25dd0048ed25e560d86abd4e79573560160))
+
 ## [0.6.13](https://github.com/evatt-labs/kraai/compare/v0.6.12...v0.6.13) (2026-09-24)
 
 
