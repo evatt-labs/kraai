@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -106,23 +107,33 @@ func (c *Client) resolveSSMParameter(ref secretref.Ref) (resource.Secret, error)
 		return nil, kerrors.Validation(
 			"secret reference %s: aws-ssm has no versionId selector; use ?version=<parameter version number>", ref.String())
 	}
+	return func(ctx context.Context) (string, error) {
+		value, _, err := c.resolveVersionedSSMParameter(ctx, ref)
+		return value, err
+	}, nil
+}
+
+// resolveVersionedSSMParameter is resolveSSMParameter's own call, plus the
+// parameter's own version from the same GetParameter response: the version
+// of the exact bytes returned, with no separate call and no race a second
+// one could introduce. Shared by the ordinary producer above (which drops
+// the version) and resolveEnvSecret's marker path (which needs it).
+func (c *Client) resolveVersionedSSMParameter(ctx context.Context, ref secretref.Ref) (value, version string, err error) {
 	name := ref.Path
 	if ref.Version != "" {
 		name = name + ":" + ref.Version
 	}
-	return func(ctx context.Context) (string, error) {
-		out, err := c.ssm.GetParameter(ctx, &ssm.GetParameterInput{
-			Name:           aws.String(name),
-			WithDecryption: aws.Bool(true),
-		})
-		if err != nil {
-			return "", translateSecretRefError(ref, err)
-		}
-		if out.Parameter == nil || out.Parameter.Value == nil || *out.Parameter.Value == "" {
-			return "", kerrors.Validation("secret reference %s: SSM parameter has no value", ref.String())
-		}
-		return *out.Parameter.Value, nil
-	}, nil
+	out, err := c.ssm.GetParameter(ctx, &ssm.GetParameterInput{
+		Name:           aws.String(name),
+		WithDecryption: aws.Bool(true),
+	})
+	if err != nil {
+		return "", "", translateSecretRefError(ref, err)
+	}
+	if out.Parameter == nil || out.Parameter.Value == nil || *out.Parameter.Value == "" {
+		return "", "", kerrors.Validation("secret reference %s: SSM parameter has no value", ref.String())
+	}
+	return *out.Parameter.Value, strconv.FormatInt(out.Parameter.Version, 10), nil
 }
 
 // resolveSecretsManagerSecret builds the producer for an aws-secretsmanager
@@ -136,6 +147,19 @@ func (c *Client) resolveSecretsManagerSecret(ref secretref.Ref) (resource.Secret
 		return nil, kerrors.Validation(
 			"secret reference %s: version and versionId both selected a version; set exactly one", ref.String())
 	}
+	return func(ctx context.Context) (string, error) {
+		value, _, err := c.resolveVersionedSecretsManagerSecret(ctx, ref)
+		return value, err
+	}, nil
+}
+
+// resolveVersionedSecretsManagerSecret is resolveSecretsManagerSecret's own
+// call, plus the exact version id GetSecretValue served: the id of the
+// version behind the bytes returned, whether ref pinned it directly
+// (VersionId) or by a staging label — Secrets Manager reports which id a
+// label resolved to in every response, so this needs no separate call
+// either. Shared the same way resolveVersionedSSMParameter is.
+func (c *Client) resolveVersionedSecretsManagerSecret(ctx context.Context, ref secretref.Ref) (value, version string, err error) {
 	input := &secretsmanager.GetSecretValueInput{SecretId: aws.String(ref.Path)}
 	switch {
 	case ref.VersionID != "":
@@ -145,16 +169,14 @@ func (c *Client) resolveSecretsManagerSecret(ref secretref.Ref) (resource.Secret
 	default:
 		input.VersionStage = aws.String("AWSCURRENT")
 	}
-	return func(ctx context.Context) (string, error) {
-		out, err := c.sm.GetSecretValue(ctx, input)
-		if err != nil {
-			return "", translateSecretRefError(ref, err)
-		}
-		if out.SecretString == nil || *out.SecretString == "" {
-			return "", kerrors.Validation("secret reference %s: secret has no string value", ref.String())
-		}
-		return *out.SecretString, nil
-	}, nil
+	out, err := c.sm.GetSecretValue(ctx, input)
+	if err != nil {
+		return "", "", translateSecretRefError(ref, err)
+	}
+	if out.SecretString == nil || *out.SecretString == "" {
+		return "", "", kerrors.Validation("secret reference %s: secret has no string value", ref.String())
+	}
+	return *out.SecretString, aws.ToString(out.VersionId), nil
 }
 
 // translateSecretRefError maps a failed resolve call onto a kerrors bucket,

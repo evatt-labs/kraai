@@ -106,9 +106,13 @@ type stsAPI interface {
 
 // secretsManagerAPI is the subset of *secretsmanager.Client this package
 // calls: GetSecretValue, to read the credential RDS manages for an Aurora
-// cluster at the moment a function needs it.
+// cluster or an aws-secretsmanager reference at the moment a function needs
+// it, and DescribeSecret, to read which version currently carries a staging
+// label without decrypting anything — the metadata-only call
+// environmentMatches and resolveEnvSecret's marker both use.
 type secretsManagerAPI interface {
 	GetSecretValue(ctx context.Context, params *secretsmanager.GetSecretValueInput, optFns ...func(*secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error)
+	DescribeSecret(ctx context.Context, params *secretsmanager.DescribeSecretInput, optFns ...func(*secretsmanager.Options)) (*secretsmanager.DescribeSecretOutput, error)
 }
 
 // ssmAPI is the subset of *ssm.Client this package calls: GetParameter, to

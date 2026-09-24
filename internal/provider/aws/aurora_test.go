@@ -44,13 +44,21 @@ func auroraSpec(config map[string]any, attrs map[string]map[string]any) resource
 }
 
 type fakeSecretsManager struct {
-	value string
-	err   error
-	arns  []string
+	value     string
+	versionID string
+	err       error
+	arns      []string
 	// inputs captures every call's full input, so a test can assert on
 	// VersionStage or VersionId, not just SecretId. secretref_test.go uses
 	// this; aurora_test.go's own cases only ever check arns.
 	inputs []*secretsmanager.GetSecretValueInput
+
+	// describeSecret is secretversion_test.go's own fixture: DescribeSecret
+	// is never called from aurora.go, so its zero value (no stages, no
+	// error) is inert for every test in this file.
+	describeSecretStages map[string][]string
+	describeSecretErr    error
+	describeSecretIn     []*secretsmanager.DescribeSecretInput
 }
 
 func (f *fakeSecretsManager) GetSecretValue(_ context.Context, params *secretsmanager.GetSecretValueInput, _ ...func(*secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error) {
@@ -59,7 +67,21 @@ func (f *fakeSecretsManager) GetSecretValue(_ context.Context, params *secretsma
 	if f.err != nil {
 		return nil, f.err
 	}
-	return &secretsmanager.GetSecretValueOutput{SecretString: aws.String(f.value)}, nil
+	var versionID *string
+	if f.versionID != "" {
+		versionID = aws.String(f.versionID)
+	}
+	return &secretsmanager.GetSecretValueOutput{SecretString: aws.String(f.value), VersionId: versionID}, nil
+}
+
+func (f *fakeSecretsManager) DescribeSecret(
+	_ context.Context, params *secretsmanager.DescribeSecretInput, _ ...func(*secretsmanager.Options),
+) (*secretsmanager.DescribeSecretOutput, error) {
+	f.describeSecretIn = append(f.describeSecretIn, params)
+	if f.describeSecretErr != nil {
+		return nil, f.describeSecretErr
+	}
+	return &secretsmanager.DescribeSecretOutput{VersionIdsToStages: f.describeSecretStages}, nil
 }
 
 // The four Aurora types apply to a postgres binding asking for the aurora

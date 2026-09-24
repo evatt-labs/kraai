@@ -95,7 +95,9 @@ func TestSecretRefPolicyStatements(t *testing.T) {
 		t.Fatalf("SecretRefPolicyStatements: %v", err)
 	}
 	want := []SecretRefGrant{
+		{Action: "secretsmanager:DescribeSecret", Resource: "arn:aws:secretsmanager:us-east-1:111111111111:secret:kraai/prod/y-*"},
 		{Action: "secretsmanager:GetSecretValue", Resource: "arn:aws:secretsmanager:us-east-1:111111111111:secret:kraai/prod/y-*"},
+		{Action: "ssm:DescribeParameters", Resource: "*"},
 		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/kraai/prod/x"},
 	}
 	if !reflect.DeepEqual(grants, want) {
@@ -128,12 +130,12 @@ func TestSecretRefGrant_SSMPathShapes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			grant, err := secretRefGrant(tt.ref, "us-east-1", "111111111111")
+			grants, err := secretRefGrant(tt.ref, "us-east-1", "111111111111")
 			if err != nil {
 				t.Fatalf("secretRefGrant: %v", err)
 			}
-			if grant.Resource != tt.want {
-				t.Errorf("Resource = %q, want %q", grant.Resource, tt.want)
+			if grants[0].Resource != tt.want {
+				t.Errorf("Resource = %q, want %q", grants[0].Resource, tt.want)
 			}
 		})
 	}
@@ -167,11 +169,12 @@ func TestSecretRefPolicyStatements_TwoRefsSameAction(t *testing.T) {
 		t.Fatalf("SecretRefPolicyStatements: %v", err)
 	}
 	want := []SecretRefGrant{
+		{Action: "ssm:DescribeParameters", Resource: "*"},
 		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/a"},
 		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/b"},
 	}
 	if !reflect.DeepEqual(grants, want) {
-		t.Fatalf("SecretRefPolicyStatements = %+v, want %+v (sorted by resource within one action)", grants, want)
+		t.Fatalf("SecretRefPolicyStatements = %+v, want %+v (sorted by resource within one action; ssm:DescribeParameters deduplicated across both refs)", grants, want)
 	}
 }
 

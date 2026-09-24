@@ -14,6 +14,7 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/resource"
 	"github.com/evatt-labs/kraai/internal/secretref"
 )
@@ -26,9 +27,10 @@ import (
 // — the shape the never-write-value-on-update and plan-never-decrypts
 // invariants need to be provable rather than merely plausible.
 type fakeSSM struct {
-	value  string
-	err    error
-	inputs []*ssm.GetParameterInput
+	value   string
+	version int64
+	err     error
+	inputs  []*ssm.GetParameterInput
 
 	describeParameters    []ssmtypes.ParameterMetadata
 	describeParametersErr error
@@ -53,7 +55,7 @@ func (f *fakeSSM) GetParameter(_ context.Context, params *ssm.GetParameterInput,
 	if f.err != nil {
 		return nil, f.err
 	}
-	return &ssm.GetParameterOutput{Parameter: &ssmtypes.Parameter{Value: aws.String(f.value)}}, nil
+	return &ssm.GetParameterOutput{Parameter: &ssmtypes.Parameter{Value: aws.String(f.value), Version: f.version}}, nil
 }
 
 func (f *fakeSSM) DescribeParameters(
@@ -395,16 +397,64 @@ func TestCodeOf(t *testing.T) {
 
 func TestResolveEnvSecret(t *testing.T) {
 	t.Run("malformed reference", func(t *testing.T) {
-		_, err := resolveEnvSecret(context.Background(), &Client{}, resource.Spec{}, "aws-ssm://")
+		_, _, err := resolveEnvSecret(context.Background(), &Client{}, resource.Spec{}, "aws-ssm://")
 		if err == nil {
 			t.Fatal("resolveEnvSecret error = nil, want a malformed-reference error")
 		}
 	})
 
 	t.Run("unknown scheme", func(t *testing.T) {
-		_, err := resolveEnvSecret(context.Background(), &Client{}, resource.Spec{}, "vault://kraai/prod/x")
+		_, _, err := resolveEnvSecret(context.Background(), &Client{}, resource.Spec{}, "vault://kraai/prod/x")
 		if err == nil {
 			t.Fatal("resolveEnvSecret error = nil, want an unknown-scheme error")
+		}
+	})
+
+	t.Run("binding key outside this feature's scope carries no version", func(t *testing.T) {
+		spec := resource.Spec{
+			Binding: "SVC",
+			Secrets: map[string]resource.Secret{
+				"DB.connection_uri": func(context.Context) (string, error) { return "postgres://x", nil },
+			},
+		}
+		value, version, err := resolveEnvSecret(context.Background(), &Client{}, spec, "DB.connection_uri")
+		if err != nil {
+			t.Fatalf("resolveEnvSecret: %v", err)
+		}
+		if value != "postgres://x" || version != "" {
+			t.Errorf("resolveEnvSecret = (%q, %q), want (\"postgres://x\", \"\")", value, version)
+		}
+	})
+
+	t.Run("SECRETS entry carries the store's version", func(t *testing.T) {
+		f := &fakeSSM{
+			value:              "s3cr3t",
+			describeParameters: []ssmtypes.ParameterMetadata{{Version: 7}},
+		}
+		client := &Client{ssm: f}
+		secretsBinding := awsBinding(manifest.CapabilitySecrets, "SECRETS", "myenv-api-secrets")
+		secretsBinding["entryNames"] = map[string]string{"pepper_key": "/dev/api/secrets/pepper_key"}
+		spec := resource.Spec{
+			Binding: "API",
+			Config: map[string]any{
+				"bindings": bindingsConfig(secretsBinding),
+			},
+			Secrets: map[string]resource.Secret{
+				"SECRETS.pepper_key": func(context.Context) (string, error) { return "s3cr3t", nil },
+			},
+		}
+		value, version, err := resolveEnvSecret(context.Background(), client, spec, "SECRETS.pepper_key")
+		if err != nil {
+			t.Fatalf("resolveEnvSecret: %v", err)
+		}
+		if value != "s3cr3t" || version != "7" {
+			t.Errorf("resolveEnvSecret = (%q, %q), want (\"s3cr3t\", \"7\")", value, version)
+		}
+		if len(f.describeParametersIn) != 1 {
+			t.Fatalf("DescribeParameters called %d times, want 1", len(f.describeParametersIn))
+		}
+		if len(f.inputs) != 0 {
+			t.Errorf("GetParameter called %d times, want 0: the version must not decrypt", len(f.inputs))
 		}
 	})
 }
