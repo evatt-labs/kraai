@@ -3,7 +3,9 @@ package aws
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"unicode"
 
@@ -11,6 +13,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
+	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
 // artifactObjectKey derives the S3 key a service's packaged artifact is
@@ -70,7 +73,7 @@ func (l *lambdaFunctionResource) translate(ctx context.Context, spec resource.Sp
 	// registration for the service shares, so its ARN is built locally.
 	execRoleARN := roleARN(account, spec.Name)
 
-	env, err := resolveEnv(ctx, spec, declared.settings)
+	env, err := resolveEnv(ctx, l.client, spec, declared.settings)
 	if err != nil {
 		return resource.Spec{}, err
 	}
@@ -219,22 +222,69 @@ func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
 }
 
 // resolveEnv builds the function's environment variables: settings.Env
-// verbatim, plus settings.EnvSecrets resolved through spec.Secret at the
-// point of use.
-func resolveEnv(ctx context.Context, spec resource.Spec, settings LambdaSettings) (map[string]any, error) {
+// verbatim, plus settings.EnvSecrets resolved at the point of use — through
+// client's own backends for a secret reference, through spec.Secret for a
+// binding key, exactly as every envSecrets entry resolved before references
+// existed.
+//
+// Resolved in sorted order by environment variable name, rather than Go's
+// randomized map order, so a manifest with more than one entry behaves the
+// same on every run: which one fails first, and which ones were already
+// fetched before it did, is otherwise not reproducible.
+func resolveEnv(ctx context.Context, client *Client, spec resource.Spec, settings LambdaSettings) (map[string]any, error) {
 	env := make(map[string]any, len(settings.Env)+len(settings.EnvSecrets))
 	for k, v := range settings.Env {
 		env[k] = v
 	}
-	for envVar, secretKey := range settings.EnvSecrets {
-		value, err := spec.Secret(ctx, secretKey)
+
+	envVars := make([]string, 0, len(settings.EnvSecrets))
+	for envVar := range settings.EnvSecrets {
+		envVars = append(envVars, envVar)
+	}
+	sort.Strings(envVars)
+
+	for _, envVar := range envVars {
+		value, err := resolveEnvSecret(ctx, client, spec, settings.EnvSecrets[envVar])
 		if err != nil {
-			return nil, kerrors.Wrap(err, kerrors.CodeValidation,
-				"resolving %q for environment variable %q", secretKey, envVar)
+			return nil, kerrors.Wrap(err, codeOf(err), "environment variable %q", envVar)
 		}
 		env[envVar] = value
 	}
 	return env, nil
+}
+
+// codeOf returns err's kerrors.Code, or CodeUnexpected when it carries
+// none, so adding context to a secret reference failure never downgrades a
+// transient one (CodeUnexpected: throttled, network) into a validation one.
+func codeOf(err error) kerrors.Code {
+	var kerr *kerrors.KError
+	if errors.As(err, &kerr) {
+		return kerr.Code()
+	}
+	return kerrors.CodeUnexpected
+}
+
+// resolveEnvSecret resolves one envSecrets value. A value with a scheme is
+// a secret reference, resolved through client; any other value is a
+// binding key, resolved through spec.Secret as before references existed.
+// The returned error, wrapped by resolveEnv with only the environment
+// variable's name, keeps whatever kerrors.Code the failure already carries:
+// a missing reference is a validation error, but a throttled or otherwise
+// failed provider call is not, and neither this function nor its caller
+// should downgrade the second into the first.
+func resolveEnvSecret(ctx context.Context, client *Client, spec resource.Spec, raw string) (string, error) {
+	ref, isRef, err := secretref.Parse(raw)
+	if err != nil {
+		return "", err
+	}
+	if !isRef {
+		return spec.Secret(ctx, raw)
+	}
+	producer, err := client.resolveSecretRef(ref)
+	if err != nil {
+		return "", err
+	}
+	return producer(ctx)
 }
 
 // addBindingEnv publishes what each of the service's AWS bindings resolved
@@ -463,6 +513,48 @@ func (l *lambdaFunctionResource) ValidateSpec(spec resource.Spec) error {
 	settingsMap, _ := spec.Config["settings"].(map[string]any)
 	_, err := decodeLambdaSettings(settingsMap)
 	return err
+}
+
+// SecretRefs implements resource.SecretRefResolver: every secret reference
+// this function's envSecrets declares, sorted by environment variable name
+// for a deterministic order. A binding key such as "DB.connection_uri" is
+// not a reference and is not returned.
+func (l *lambdaFunctionResource) SecretRefs(spec resource.Spec) ([]secretref.Ref, error) {
+	settingsMap, _ := spec.Config["settings"].(map[string]any)
+	settings, err := decodeLambdaSettings(settingsMap)
+	if err != nil {
+		return nil, err
+	}
+	envVars := make([]string, 0, len(settings.EnvSecrets))
+	for envVar := range settings.EnvSecrets {
+		envVars = append(envVars, envVar)
+	}
+	sort.Strings(envVars)
+
+	// The error return here is unreachable in normal operation:
+	// decodeLambdaSettings above already ran validateSecretRef over every
+	// value in settings.EnvSecrets, which itself calls secretref.Parse
+	// first, so decode would have already failed on anything this second
+	// parse could reject. Kept anyway as defense in depth against the two
+	// checks drifting apart, the same reasoning resolveSecretRef's own
+	// default case documents.
+	var refs []secretref.Ref
+	for _, envVar := range envVars {
+		ref, isRef, err := secretref.Parse(settings.EnvSecrets[envVar])
+		if err != nil {
+			return nil, err
+		}
+		if isRef {
+			refs = append(refs, ref)
+		}
+	}
+	return refs, nil
+}
+
+// ResolveSecretRef implements resource.SecretRefResolver, dispatching to
+// this function's own client.
+func (l *lambdaFunctionResource) ResolveSecretRef(_ context.Context, ref secretref.Ref) (resource.Secret, error) {
+	return l.client.resolveSecretRef(ref)
 }
 
 // nativeVariables are the environment variables a native binding gives the

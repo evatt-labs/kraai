@@ -105,6 +105,15 @@ func decodeLambdaSettings(settings map[string]any) (LambdaSettings, error) {
 		EnvSecrets:                   settingStrMap(settings, "envSecrets"),
 		ReservedConcurrentExecutions: reservedConcurrency,
 	}
+	// Checked here so a typo'd scheme fails ValidateSpec on a fresh
+	// environment's first plan, the same guarantee runtime and architecture
+	// already get, rather than surfacing only once translate tries to
+	// resolve it.
+	for envVar, raw := range s.EnvSecrets {
+		if err := validateSecretRef(raw); err != nil {
+			return LambdaSettings{}, kerrors.Wrap(err, kerrors.CodeValidation, "envSecrets.%s", envVar)
+		}
+	}
 	if arns, ok := settings["managedPolicyArns"].([]any); ok {
 		for _, a := range arns {
 			if str, ok := a.(string); ok && str != "" {

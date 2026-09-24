@@ -19,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/smithy-go"
 
@@ -110,6 +111,13 @@ type secretsManagerAPI interface {
 	GetSecretValue(ctx context.Context, params *secretsmanager.GetSecretValueInput, optFns ...func(*secretsmanager.Options)) (*secretsmanager.GetSecretValueOutput, error)
 }
 
+// ssmAPI is the subset of *ssm.Client this package calls: GetParameter, to
+// resolve an aws-ssm secret reference, always with decryption so a
+// SecureString parameter's plaintext is what a caller gets.
+type ssmAPI interface {
+	GetParameter(ctx context.Context, params *ssm.GetParameterInput, optFns ...func(*ssm.Options)) (*ssm.GetParameterOutput, error)
+}
+
 // Client is a thin Cloud Control and CloudFormation client whose exported
 // methods speak this package's vocabulary (a decoded properties map, an
 // identifier list) rather than the SDK's, so *Client satisfies ccAPI and
@@ -120,6 +128,7 @@ type Client struct {
 	s3  s3API
 	sts stsAPI
 	sm  secretsManagerAPI
+	ssm ssmAPI
 
 	tagging taggingAPI
 
@@ -181,6 +190,12 @@ func WithSecretsManagerAPI(api secretsManagerAPI) Option {
 	return func(c *Client) { c.sm = api }
 }
 
+// WithSSMAPI substitutes the Systems Manager Parameter Store client, for
+// tests.
+func WithSSMAPI(api ssmAPI) Option {
+	return func(c *Client) { c.ssm = api }
+}
+
 // WithPollTimings overrides the backoff and overall timeout used to poll an
 // asynchronous operation to a terminal state, so tests can exercise polling
 // in milliseconds.
@@ -218,6 +233,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		s3:               s3.NewFromConfig(cfg),
 		sts:              sts.NewFromConfig(cfg),
 		sm:               secretsmanager.NewFromConfig(cfg),
+		ssm:              ssm.NewFromConfig(cfg),
 		tagging:          resourcegroupstaggingapi.NewFromConfig(cfg),
 		region:           cfg.Region,
 		pollInitialDelay: defaultPollInitialDelay,

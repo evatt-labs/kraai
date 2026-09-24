@@ -9,6 +9,9 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
 // instrumentationName identifies this package's telemetry.
@@ -214,4 +217,27 @@ func (i *instrumented) Notes(spec Spec) []string {
 		return nil
 	}
 	return noter.Notes(spec)
+}
+
+// SecretRefs forwards to the inner resource when it is a SecretRefResolver,
+// and otherwise reports no references.
+func (i *instrumented) SecretRefs(spec Spec) ([]secretref.Ref, error) {
+	resolver, ok := i.inner.(SecretRefResolver)
+	if !ok {
+		return nil, nil
+	}
+	return resolver.SecretRefs(spec)
+}
+
+// ResolveSecretRef forwards to the inner resource when it is a
+// SecretRefResolver. Unlike this file's other forwarders it has no answer
+// to invent when the inner resource is not one: a caller only reaches this
+// for a ref SecretRefs itself returned, which a non-resolver never does, so
+// this path exists for defense in depth, not a real "not implemented" case.
+func (i *instrumented) ResolveSecretRef(ctx context.Context, ref secretref.Ref) (Secret, error) {
+	resolver, ok := i.inner.(SecretRefResolver)
+	if !ok {
+		return nil, kerrors.Validation("this resource type does not resolve secret references")
+	}
+	return resolver.ResolveSecretRef(ctx, ref)
 }

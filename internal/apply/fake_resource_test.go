@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/evatt-labs/kraai/internal/resource"
+	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
 // fakeResource is a hand-written stand-in for a real provider adapter,
@@ -122,4 +123,37 @@ type fakeSecretResource struct {
 
 func (f *fakeSecretResource) Secrets(state *resource.State) map[string]resource.Secret {
 	return f.secretsFn(state)
+}
+
+// fakeSecretRefResource wraps a fakeResource to also implement
+// resource.SecretRefResolver, mirroring fakeSecretResource above: an
+// optional interface a fake should not be forced to have an opinion on.
+type fakeSecretRefResource struct {
+	*fakeResource
+	refs []secretref.Ref
+	// refsErr, when set, is what SecretRefs itself returns, before any
+	// resolution is attempted.
+	refsErr error
+	// resolve, when set, builds the producer for a ref; the default
+	// returns resolveErr from every producer, so a test that only cares
+	// about the resolve-time failure need not set this.
+	resolve func(ref secretref.Ref) (resource.Secret, error)
+	// resolveCalls counts calls to ResolveSecretRef, so a test can prove a
+	// ref already resolved is not resolved again within one apply.
+	resolveCalls int32
+}
+
+func (f *fakeSecretRefResource) SecretRefs(resource.Spec) ([]secretref.Ref, error) {
+	if f.refsErr != nil {
+		return nil, f.refsErr
+	}
+	return f.refs, nil
+}
+
+func (f *fakeSecretRefResource) ResolveSecretRef(_ context.Context, ref secretref.Ref) (resource.Secret, error) {
+	atomic.AddInt32(&f.resolveCalls, 1)
+	if f.resolve != nil {
+		return f.resolve(ref)
+	}
+	return func(context.Context) (string, error) { return "", nil }, nil
 }

@@ -57,13 +57,17 @@ func New(reg *resource.Registry, opts ...Option) *Applier {
 // from the registry by Ref.Key() and calls the verb the action's Kind
 // implies. A nil plan is a no-op returning an empty, non-nil Result.
 //
-// The pre-flight gate runs first. If it refuses, Apply returns (nil, err):
-// nothing was executed for a Result to describe.
+// The pre-flight gate runs first, then every secret reference the plan's
+// actions declare is resolved once (resolveSecretRefs). If either refuses,
+// Apply returns (nil, err): nothing was executed for a Result to describe.
 func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 	if p == nil {
 		return &Result{}, nil
 	}
 	if err := preflight(p, a.allowReplace); err != nil {
+		return nil, err
+	}
+	if err := a.resolveSecretRefs(ctx, p); err != nil {
 		return nil, err
 	}
 

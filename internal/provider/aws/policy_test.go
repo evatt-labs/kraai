@@ -2,12 +2,15 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+
+	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
 // A schema's permissions are every handler's actions and the tagging
@@ -77,6 +80,135 @@ func TestClientPolicyActionsGrantsSecretsManagerForAurora(t *testing.T) {
 	}
 	if !contains(actions, "secretsmanager:GetSecretValue") {
 		t.Fatalf("policy for an Aurora cluster lacks the credential read: %v", actions)
+	}
+}
+
+func TestSecretRefPolicyStatements(t *testing.T) {
+	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
+
+	grants, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{
+		mustParse(t, "aws-ssm:///kraai/prod/x"),
+		mustParse(t, "aws-secretsmanager://kraai/prod/y"),
+		mustParse(t, "aws-ssm:///kraai/prod/x"), // duplicate, must not double the grant
+	})
+	if err != nil {
+		t.Fatalf("SecretRefPolicyStatements: %v", err)
+	}
+	want := []SecretRefGrant{
+		{Action: "secretsmanager:GetSecretValue", Resource: "arn:aws:secretsmanager:us-east-1:111111111111:secret:kraai/prod/y-*"},
+		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/kraai/prod/x"},
+	}
+	if !reflect.DeepEqual(grants, want) {
+		t.Fatalf("SecretRefPolicyStatements = %+v, want %+v", grants, want)
+	}
+}
+
+// TestSecretRefGrant_SSMPathShapes covers both legal SSM parameter name
+// shapes: hierarchical (leading "/", from a triple-slash reference) and
+// plain (no leading "/", from a double-slash reference) — SSM accepts
+// both. secretRefGrant must join "parameter" and the path with exactly one
+// "/" either way; the double-slash shape once produced "parameterplain",
+// an ARN with no valid resource type/id separator.
+func TestSecretRefGrant_SSMPathShapes(t *testing.T) {
+	tests := []struct {
+		name string
+		ref  secretref.Ref
+		want string
+	}{
+		{
+			name: "hierarchical name keeps its leading slash",
+			ref:  secretref.Ref{Scheme: schemeSSM, Path: "/kraai/prod/x"},
+			want: "arn:aws:ssm:us-east-1:111111111111:parameter/kraai/prod/x",
+		},
+		{
+			name: "plain name gets exactly one slash",
+			ref:  secretref.Ref{Scheme: schemeSSM, Path: "plain-name"},
+			want: "arn:aws:ssm:us-east-1:111111111111:parameter/plain-name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			grant, err := secretRefGrant(tt.ref, "us-east-1", "111111111111")
+			if err != nil {
+				t.Fatalf("secretRefGrant: %v", err)
+			}
+			if grant.Resource != tt.want {
+				t.Errorf("Resource = %q, want %q", grant.Resource, tt.want)
+			}
+		})
+	}
+}
+
+// TestSecretRefGrant_RejectsFullARN proves a path that is already an ARN
+// is refused rather than embedded into a second, invalid one: an ARN's
+// "resource" component cannot itself contain "arn:...:parameter<path>" or
+// "secret:<path>-*" and still identify the original resource, so silently
+// accepting one would emit a policy statement that authorizes nothing.
+func TestSecretRefGrant_RejectsFullARN(t *testing.T) {
+	tests := []secretref.Ref{
+		{Scheme: schemeSSM, Path: "arn:aws:ssm:us-east-1:111111111111:parameter/x"},
+		{Scheme: schemeSecretsManager, Path: "arn:aws:secretsmanager:us-east-1:111111111111:secret:x-abcdef"},
+	}
+	for _, ref := range tests {
+		if _, err := secretRefGrant(ref, "us-east-1", "111111111111"); err == nil {
+			t.Errorf("secretRefGrant(%+v) error = nil, want a validation error rejecting an ARN as the path", ref)
+		}
+	}
+}
+
+func TestSecretRefPolicyStatements_TwoRefsSameAction(t *testing.T) {
+	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
+
+	grants, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{
+		mustParse(t, "aws-ssm:///b"),
+		mustParse(t, "aws-ssm:///a"),
+	})
+	if err != nil {
+		t.Fatalf("SecretRefPolicyStatements: %v", err)
+	}
+	want := []SecretRefGrant{
+		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/a"},
+		{Action: "ssm:GetParameter", Resource: "arn:aws:ssm:us-east-1:111111111111:parameter/b"},
+	}
+	if !reflect.DeepEqual(grants, want) {
+		t.Fatalf("SecretRefPolicyStatements = %+v, want %+v (sorted by resource within one action)", grants, want)
+	}
+}
+
+func TestSecretRefPolicyStatements_AccountIDError(t *testing.T) {
+	boom := errors.New("STS denied")
+	c := &Client{sts: &fakeSTS{err: boom}}
+
+	_, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{mustParse(t, "aws-ssm:///a")})
+	if err == nil || !strings.Contains(err.Error(), "STS denied") {
+		t.Fatalf("err = %v, want it to wrap the AccountID failure", err)
+	}
+}
+
+func TestSecretRefPolicyStatements_UnknownScheme(t *testing.T) {
+	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
+	_, err := c.SecretRefPolicyStatements(context.Background(), []secretref.Ref{{Scheme: "vault", Path: "x"}})
+	if err == nil {
+		t.Fatal("SecretRefPolicyStatements error = nil, want an unknown-scheme error")
+	}
+}
+
+func TestSecretRefGrant_UnknownScheme(t *testing.T) {
+	_, err := secretRefGrant(secretref.Ref{Scheme: "vault", Path: "x"}, "us-east-1", "111111111111")
+	if err == nil {
+		t.Fatal("secretRefGrant error = nil, want an unknown-scheme error")
+	}
+}
+
+func TestSecretRefPolicyStatements_Empty(t *testing.T) {
+	sts := &fakeSTS{}
+	c := &Client{sts: sts}
+	grants, err := c.SecretRefPolicyStatements(context.Background(), nil)
+	if err != nil || grants != nil {
+		t.Fatalf("SecretRefPolicyStatements(nil) = %v, %v, want nil, nil", grants, err)
+	}
+	if sts.calls != 0 {
+		t.Errorf("STS was called %d times for zero refs, want zero calls", sts.calls)
 	}
 }
 
