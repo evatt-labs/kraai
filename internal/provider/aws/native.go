@@ -111,9 +111,21 @@ func nativeFamily(client *Client) resource.Family {
 	}
 }
 
+// unlisted are the types whose Cloud Control list handler omits instances
+// created in the account, found by listing live accounts; the schema cannot
+// say so. kraai would never find one it created, so every apply would add
+// another and destroy would leave it behind.
+var unlisted = map[string]string{
+	// The handler lists only the default routers Bedrock provides.
+	"AWS::Bedrock::IntelligentPromptRouter": "Cloud Control lists only the default routers Bedrock provides, never one created in the account",
+}
+
 // nativeLookup maps a type's schema-derived identity onto a lookup
 // strategy, refusing the types a schema alone cannot find again.
 func nativeLookup(facts cfschema.Facts) (resource.LookupStrategy, error) {
+	if reason, ok := unlisted[facts.TypeName]; ok {
+		return "", kerrors.Validation("%s cannot be managed: %s, so kraai could not find one it created", facts.TypeName, reason)
+	}
 	switch facts.Identity {
 	case cfschema.IdentityByName:
 		return resource.LookupByName, nil

@@ -470,3 +470,20 @@ func TestAllOwnedRequiresEveryCheck(t *testing.T) {
 		}
 	}
 }
+
+// A type whose list omits the instances created in the account is refused
+// by name: kraai would create another on every apply.
+func TestAnUnlistedTypeIsRefused(t *testing.T) {
+	facts, err := cfschema.Lookup("AWS::Bedrock::IntelligentPromptRouter")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := nativeLookup(facts); err == nil || !strings.Contains(err.Error(), "never one created in the account") {
+		t.Fatalf("nativeLookup = %v, want the refusal", err)
+	}
+	// The schema alone would have accepted it.
+	facts.TypeName = "AWS::Example::Listed"
+	if _, err := nativeLookup(facts); err != nil {
+		t.Fatalf("the same facts under another type were refused: %v", err)
+	}
+}
