@@ -532,8 +532,8 @@ func (l *lambdaFunctionResource) SecretRefs(spec resource.Spec) ([]secretref.Ref
 	sort.Strings(envVars)
 
 	// The error return here is unreachable in normal operation:
-	// decodeLambdaSettings above already ran validateSecretRefScheme over
-	// every value in settings.EnvSecrets, which itself calls secretref.Parse
+	// decodeLambdaSettings above already ran validateSecretRef over every
+	// value in settings.EnvSecrets, which itself calls secretref.Parse
 	// first, so decode would have already failed on anything this second
 	// parse could reject. Kept anyway as defense in depth against the two
 	// checks drifting apart, the same reasoning resolveSecretRef's own

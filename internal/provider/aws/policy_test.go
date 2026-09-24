@@ -103,6 +103,59 @@ func TestSecretRefPolicyStatements(t *testing.T) {
 	}
 }
 
+// TestSecretRefGrant_SSMPathShapes covers both legal SSM parameter name
+// shapes: hierarchical (leading "/", from a triple-slash reference) and
+// plain (no leading "/", from a double-slash reference) — SSM accepts
+// both. secretRefGrant must join "parameter" and the path with exactly one
+// "/" either way; the double-slash shape once produced "parameterplain",
+// an ARN with no valid resource type/id separator.
+func TestSecretRefGrant_SSMPathShapes(t *testing.T) {
+	tests := []struct {
+		name string
+		ref  secretref.Ref
+		want string
+	}{
+		{
+			name: "hierarchical name keeps its leading slash",
+			ref:  secretref.Ref{Scheme: schemeSSM, Path: "/kraai/prod/x"},
+			want: "arn:aws:ssm:us-east-1:111111111111:parameter/kraai/prod/x",
+		},
+		{
+			name: "plain name gets exactly one slash",
+			ref:  secretref.Ref{Scheme: schemeSSM, Path: "plain-name"},
+			want: "arn:aws:ssm:us-east-1:111111111111:parameter/plain-name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			grant, err := secretRefGrant(tt.ref, "us-east-1", "111111111111")
+			if err != nil {
+				t.Fatalf("secretRefGrant: %v", err)
+			}
+			if grant.Resource != tt.want {
+				t.Errorf("Resource = %q, want %q", grant.Resource, tt.want)
+			}
+		})
+	}
+}
+
+// TestSecretRefGrant_RejectsFullARN proves a path that is already an ARN
+// is refused rather than embedded into a second, invalid one: an ARN's
+// "resource" component cannot itself contain "arn:...:parameter<path>" or
+// "secret:<path>-*" and still identify the original resource, so silently
+// accepting one would emit a policy statement that authorizes nothing.
+func TestSecretRefGrant_RejectsFullARN(t *testing.T) {
+	tests := []secretref.Ref{
+		{Scheme: schemeSSM, Path: "arn:aws:ssm:us-east-1:111111111111:parameter/x"},
+		{Scheme: schemeSecretsManager, Path: "arn:aws:secretsmanager:us-east-1:111111111111:secret:x-abcdef"},
+	}
+	for _, ref := range tests {
+		if _, err := secretRefGrant(ref, "us-east-1", "111111111111"); err == nil {
+			t.Errorf("secretRefGrant(%+v) error = nil, want a validation error rejecting an ARN as the path", ref)
+		}
+	}
+}
+
 func TestSecretRefPolicyStatements_TwoRefsSameAction(t *testing.T) {
 	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
 

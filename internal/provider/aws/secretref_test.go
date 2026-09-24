@@ -281,6 +281,18 @@ func TestValidateSecretRefSchemeInEnvSecrets(t *testing.T) {
 		}
 	})
 
+	t.Run("a path that is already an ARN fails ValidateSpec", func(t *testing.T) {
+		settings := map[string]any{
+			"runtime": "python3.13", "architecture": "arm64",
+			"envSecrets": map[string]any{"X": "aws-ssm://arn:aws:ssm:us-east-1:111111111111:parameter/x"},
+		}
+		_, err := decodeLambdaSettings(settings)
+		if err == nil {
+			t.Fatal("decodeLambdaSettings error = nil, want an ARN-as-path error")
+		}
+		assertCode(t, err, kerrors.CodeValidation)
+	})
+
 	t.Run("a ref and a binding key coexist", func(t *testing.T) {
 		settings := map[string]any{
 			"runtime": "python3.13", "architecture": "arm64",

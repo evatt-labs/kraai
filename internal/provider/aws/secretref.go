@@ -17,8 +17,8 @@ import (
 	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
-// The schemes this package resolves, sorted, for validateSecretRefScheme's
-// error message and for dispatch in resolveSecretRef.
+// The schemes this package resolves, sorted, for validateSecretRef's error
+// message and for dispatch in resolveSecretRef.
 const (
 	schemeSSM            = "aws-ssm"
 	schemeSecretsManager = "aws-secretsmanager"
@@ -30,12 +30,29 @@ const (
 // unknown scheme is used.
 var secretRefSchemes = []string{schemeSecretsManager, schemeSSM}
 
-// validateSecretRefScheme checks that raw, when it names a secret reference
-// rather than a binding key, uses a scheme this package resolves. It parses
-// but never resolves: called from decodeLambdaSettings, so it runs during
+// validateSecretRef checks that raw, when it names a secret reference
+// rather than a binding key, uses a scheme this package resolves and a path
+// this package can safely turn into an IAM resource ARN. It parses but
+// never resolves: called from decodeLambdaSettings, so it runs during
 // ValidateSpec on every plan, including a fresh environment with no
 // resource yet to read and no live credential exercised.
-func validateSecretRefScheme(raw string) error {
+//
+// assemble.computeSecretRefs, the iam-policy path, cannot call this
+// directly (it is unexported here) and validates only through
+// secretref.Parse; secretRefGrant carries its own identical "arn:" check
+// for that path, so both routes to an ARN refuse the same shape.
+//
+// A path starting with "arn:" is refused rather than accepted: both
+// GetParameter's Name and GetSecretValue's SecretId accept a full ARN, so
+// resolving one would work, but secretRefGrant builds a *new* ARN by
+// prefixing ref.Path with this scheme's own ARN pattern
+// ("arn:aws:ssm:...:parameter" + path). Given an ARN as the path, that
+// produces a second, nested and invalid ARN — a policy statement that
+// authorizes nothing, so an apply following that policy fails with
+// AccessDenied. Refusing it here keeps the reference's own shape (a name
+// kraai turns into an ARN) the only shape this scheme accepts, rather than
+// silently emitting a policy that cannot do what it claims to.
+func validateSecretRef(raw string) error {
 	ref, isRef, err := secretref.Parse(raw)
 	if err != nil {
 		return err
@@ -43,20 +60,29 @@ func validateSecretRefScheme(raw string) error {
 	if !isRef {
 		return nil
 	}
+	known := false
 	for _, s := range secretRefSchemes {
 		if s == ref.Scheme {
-			return nil
+			known = true
+			break
 		}
 	}
-	return kerrors.Validation(
-		"unknown secret reference scheme %q in %q; registered schemes: %s",
-		ref.Scheme, raw, strings.Join(secretRefSchemes, ", "))
+	if !known {
+		return kerrors.Validation(
+			"unknown secret reference scheme %q in %q; registered schemes: %s",
+			ref.Scheme, raw, strings.Join(secretRefSchemes, ", "))
+	}
+	if strings.HasPrefix(ref.Path, "arn:") {
+		return kerrors.Validation(
+			"secret reference %q: the path must be the secret's own name, not a full ARN", raw)
+	}
+	return nil
 }
 
 // resolveSecretRef dispatches ref to the backend its scheme names, building
 // a producer but making no call: the network happens only when the
 // returned Secret is invoked. Unreachable with an unknown scheme in normal
-// operation, since validateSecretRefScheme already refused it at plan time;
+// operation, since validateSecretRef already refused it at plan time;
 // kept as defense in depth against the two checks drifting apart.
 func (c *Client) resolveSecretRef(ref secretref.Ref) (resource.Secret, error) {
 	switch ref.Scheme {

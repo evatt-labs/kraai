@@ -110,7 +110,7 @@ func decodeLambdaSettings(settings map[string]any) (LambdaSettings, error) {
 	// already get, rather than surfacing only once translate tries to
 	// resolve it.
 	for envVar, raw := range s.EnvSecrets {
-		if err := validateSecretRefScheme(raw); err != nil {
+		if err := validateSecretRef(raw); err != nil {
 			return LambdaSettings{}, kerrors.Wrap(err, kerrors.CodeValidation, "envSecrets.%s", envVar)
 		}
 	}

@@ -181,11 +181,19 @@ name for the secret. Two backends resolve today:
 - `aws-ssm` — an SSM Parameter Store parameter, read with `GetParameter` and
   decryption always requested (a `SecureString` decrypts; a plain `String`
   or `StringList` ignores the flag). `?version=<n>` selects a parameter
-  version through SSM's own `name:version` syntax.
+  version through SSM's own `name:version` syntax. A parameter's ARN is
+  per-parameter, not per-version, so `?version=` narrows which value is
+  read without changing the `iam-policy` grant's `Resource`.
 - `aws-secretsmanager` — a Secrets Manager secret, read with
   `GetSecretValue`. `?version=<stage>` selects a version stage
   (`AWSCURRENT` by default); `?versionId=<id>` selects a specific version by
   its opaque id instead. Setting both is a validation error.
+
+The path is the secret's own name, never a full ARN, even though
+`GetParameter` and `GetSecretValue` would both accept one: kraai turns the
+name into an ARN for `iam-policy`'s scoped grant, and a path that is
+already an ARN would be embedded into a second, invalid one. A reference
+whose path starts with `arn:` fails validation.
 
 Azure Key Vault, GCP Secret Manager, OpenBao, Infisical and SOPS files are
 not resolved yet; a reference to one of those schemes fails to validate

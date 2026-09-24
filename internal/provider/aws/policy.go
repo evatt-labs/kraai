@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/secretref"
@@ -129,16 +130,32 @@ func (c *Client) SecretRefPolicyStatements(ctx context.Context, refs []secretref
 	return grants, nil
 }
 
-// secretRefGrant builds ref's own SecretRefGrant. Unreachable with an
-// unknown scheme in normal operation: the caller (assemble.
-// AWSSecretRefPolicyStatements) only ever collects refs whose scheme
-// already passed validateSecretRefScheme during manifest validation.
+// secretRefGrant builds ref's own SecretRefGrant.
+//
+// An unknown scheme is unreachable in normal operation: every caller
+// (decodeLambdaSettings, assemble.computeSecretRefs) parses a reference
+// through validateSecretRef before this is ever called. The "arn:" check
+// below is not similarly redundant: assemble.computeSecretRefs, the
+// iam-policy path, cannot call validateSecretRef — it is unexported in
+// this package — so it parses with secretref.Parse alone and this is the
+// first and only place that catches a path already shaped like an ARN
+// before it is embedded in a second, invalid one.
 func secretRefGrant(ref secretref.Ref, region, account string) (SecretRefGrant, error) {
+	if strings.HasPrefix(ref.Path, "arn:") {
+		return SecretRefGrant{}, kerrors.Validation(
+			"secret reference %s: the path must be the secret's own name, not a full ARN", ref.String())
+	}
 	switch ref.Scheme {
 	case schemeSSM:
+		// SSM parameter ARNs are always hierarchical under "parameter/",
+		// never "parameter" bare: TrimPrefix then re-add exactly one "/"
+		// so a non-hierarchical name ("plain-name", no leading slash, a
+		// name SSM itself accepts) gets one and a hierarchical name
+		// ("/kraai/prod/x", already carrying one from the reference's
+		// triple slash) does not get a second.
 		return SecretRefGrant{
 			Action:   "ssm:GetParameter",
-			Resource: fmt.Sprintf("arn:aws:ssm:%s:%s:parameter%s", region, account, ref.Path),
+			Resource: fmt.Sprintf("arn:aws:ssm:%s:%s:parameter/%s", region, account, strings.TrimPrefix(ref.Path, "/")),
 		}, nil
 	case schemeSecretsManager:
 		return SecretRefGrant{
