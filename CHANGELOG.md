@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.13](https://github.com/evatt-labs/kraai/compare/v0.6.12...v0.6.13) (2026-09-24)
+
+
+### Features
+
+* **aws:** find native instances through identities earlier indexes used ([#301](https://github.com/evatt-labs/kraai/issues/301)) ([09eedce](https://github.com/evatt-labs/kraai/commit/09eedceba75f04efb83abcd8d52a7a171448601c))
+
 ## [0.6.12](https://github.com/evatt-labs/kraai/compare/v0.6.11...v0.6.12) (2026-09-23)
 
 
