@@ -69,6 +69,19 @@ type fakeClient struct {
 	schema      cfschema.Facts
 	schemaErr   error
 	schemaCalls int
+
+	// tagged answers TaggedResources by tag value; taggedErr fails it.
+	tagged      map[string][]string
+	taggedErr   error
+	taggedCalls int
+}
+
+func (f *fakeClient) TaggedResources(_ context.Context, name string) ([]string, error) {
+	f.taggedCalls++
+	if f.taggedErr != nil {
+		return nil, f.taggedErr
+	}
+	return f.tagged[name], nil
 }
 
 func (f *fakeClient) GetResource(_ context.Context, _ string, identifier string) (map[string]any, bool, error) {

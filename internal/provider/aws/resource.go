@@ -38,6 +38,9 @@ type ccAPI interface {
 	// DescribeType fetches and decodes typeName's CloudFormation resource
 	// provider schema.
 	DescribeType(ctx context.Context, typeName string) (cfschema.Facts, error)
+	// TaggedResources returns the ARN of every resource carrying kraai's
+	// identity tag with value name; see Client.TaggedResources.
+	TaggedResources(ctx context.Context, name string) ([]string, error)
 }
 
 // ownsFunc reports whether a found instance is this account's and kraai's
@@ -241,7 +244,7 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 		return "", nil, false, kerrors.Validation(
 			"%s %q is found by declared match values, and none were given", r.typeName, name)
 	}
-	for _, candidate := range candidates {
+	for _, candidate := range r.narrow(ctx, name, candidates) {
 		props, ok, err := r.client.GetResource(ctx, r.typeName, candidate)
 		if err != nil {
 			return "", nil, false, err

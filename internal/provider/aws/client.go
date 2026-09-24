@@ -15,6 +15,7 @@ import (
 	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	cftypes "github.com/aws/aws-sdk-go-v2/service/cloudformation/types"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
@@ -120,6 +121,8 @@ type Client struct {
 	sts stsAPI
 	sm  secretsManagerAPI
 
+	tagging taggingAPI
+
 	// region is the SDK's resolved region, which every ARN this package
 	// builds is against. Taken from the loaded config rather than
 	// Settings.Region, which may be empty and deferred to the SDK's chain.
@@ -215,6 +218,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		s3:               s3.NewFromConfig(cfg),
 		sts:              sts.NewFromConfig(cfg),
 		sm:               secretsmanager.NewFromConfig(cfg),
+		tagging:          resourcegroupstaggingapi.NewFromConfig(cfg),
 		region:           cfg.Region,
 		pollInitialDelay: defaultPollInitialDelay,
 		pollMaxDelay:     defaultPollMaxDelay,

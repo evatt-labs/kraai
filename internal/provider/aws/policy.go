@@ -29,6 +29,8 @@ var typeActions = map[string][]string{
 	TypeLambdaFunction: {"s3:PutObject"},
 	TypeS3Bucket:       {"s3:ListAllMyBuckets"},
 	TypeRDSDBCluster:   {"secretsmanager:GetSecretValue"},
+	// A plan finds a task definition through the tagging API.
+	typeECSTaskDefinition: {"tag:GetResources"},
 }
 
 // PolicyActions returns, sorted and without duplicates, every IAM action a

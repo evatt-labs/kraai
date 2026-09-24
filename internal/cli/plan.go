@@ -171,7 +171,9 @@ func runPlan(
 		return err
 	}
 
-	result, err := plan.New(reg).Plan(ctx, m, envName)
+	// Plan never mutates, so its lookups may use indexes that can lag a
+	// recent change; apply re-plans under the lock without this.
+	result, err := plan.New(reg).Plan(resource.WithReadOnly(ctx), m, envName)
 	if err != nil {
 		return err
 	}
