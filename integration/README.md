@@ -11,8 +11,9 @@ unless the session sets `KRAAI_ALLOW_MUTATE=1`.
 
 Only resources that cost nothing while they exist: a VPC with an internet
 gateway, two subnets, a route table and a security group, plus a target
-group with no load balancer, a disabled EventBridge rule and an ECS task
-definition. Together they cover every type a plan may find through the
+group with no load balancer, a disabled EventBridge rule, an ECS task
+definition and a Bedrock prompt router, billed only per request routed
+through it. Together they cover every type a plan may find through the
 Resource Groups Tagging API, and the EC2 types that are candidates for it.
 
 ```

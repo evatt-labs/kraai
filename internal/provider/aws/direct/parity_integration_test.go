@@ -41,13 +41,28 @@ func TestReadParity(t *testing.T) {
 	var evidence Evidence
 	for _, r := range Readers() {
 		e := TypeEvidence{Type: r.Type, SmithyCommit: lock.SmithyCommit, Date: time.Now().UTC().Format("2006-01-02"), Region: region}
-		listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(r.Type), MaxResults: aws.Int32(perType)})
-		if err != nil {
-			t.Fatalf("%s: listing: %v", r.Type, err)
+		// A type with a direct list is listed through it: Cloud Control's
+		// list omits its instances. Cloud Control still reads each one.
+		var ids []string
+		if HasList(r.Type) {
+			if ids, err = client.List(ctx, r.Type); err != nil {
+				t.Fatalf("%s: listing directly: %v", r.Type, err)
+			}
+		} else {
+			listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(r.Type), MaxResults: aws.Int32(perType)})
+			if err != nil {
+				t.Fatalf("%s: listing: %v", r.Type, err)
+			}
+			for _, d := range listed.ResourceDescriptions {
+				ids = append(ids, aws.ToString(d.Identifier))
+			}
+		}
+		if len(ids) > perType {
+			ids = ids[:perType]
 		}
 		compared, differing, unreadable := map[string]bool{}, map[string]bool{}, 0
-		for _, d := range listed.ResourceDescriptions {
-			got, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(r.Type), Identifier: d.Identifier})
+		for _, id := range ids {
+			got, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(r.Type), Identifier: aws.String(id)})
 			if err != nil {
 				unreadable++
 				continue
@@ -56,7 +71,7 @@ func TestReadParity(t *testing.T) {
 			if err := json.Unmarshal([]byte(aws.ToString(got.ResourceDescription.Properties)), &viaCC); err != nil {
 				t.Fatal(err)
 			}
-			direct, err := client.Read(ctx, r.Type, map[string]string{r.Identifier[0].Property: aws.ToString(d.Identifier)})
+			direct, err := client.Read(ctx, r.Type, map[string]string{r.Identifier[0].Property: id})
 			if err != nil {
 				t.Errorf("%s: direct read failed: %v", r.Type, err)
 				continue

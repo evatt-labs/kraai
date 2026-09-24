@@ -12,6 +12,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -120,10 +121,14 @@ var unlisted = map[string]string{
 	"AWS::Bedrock::IntelligentPromptRouter": "Cloud Control lists only the default routers Bedrock provides, never one created in the account",
 }
 
+// hasDirectList reports whether a type is listed through its own service,
+// which lifts its unlisted refusal.
+var hasDirectList = direct.HasList
+
 // nativeLookup maps a type's schema-derived identity onto a lookup
 // strategy, refusing the types a schema alone cannot find again.
 func nativeLookup(facts cfschema.Facts) (resource.LookupStrategy, error) {
-	if reason, ok := unlisted[facts.TypeName]; ok {
+	if reason, ok := unlisted[facts.TypeName]; ok && !hasDirectList(facts.TypeName) {
 		return "", kerrors.Validation("%s cannot be managed: %s, so kraai could not find one it created", facts.TypeName, reason)
 	}
 	switch facts.Identity {
@@ -205,6 +210,9 @@ func newNativeResource(client *Client, facts cfschema.Facts, lookup resource.Loo
 		cc, schemas = client, client
 	}
 	n := newNativeResourceWith(cc, schemas, facts, lookup)
+	if client != nil && client.direct != nil && direct.HasList(facts.TypeName) {
+		n.lister = func(ctx context.Context) ([]string, error) { return client.direct.List(ctx, facts.TypeName) }
+	}
 	if facts.TypeName == TypeS3Bucket && client != nil {
 		// Bucket names are global, and Cloud Control reads a bucket any
 		// account owns: without this, another account's bucket of the
