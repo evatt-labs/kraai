@@ -439,15 +439,22 @@ deny contains msg if {
 `config` added, plus `manifest.providers`, `manifest.services` and `overlay`,
 the environment file. Manifest values are left out, since `--set` is where
 credentials go. A `${BINDING.Attr}` reference reaches the policy unresolved.
+Under `kraai.destroy` the actions are still the apply plan's, so `kind:
+create` means the resource does not exist and will not be deleted. The shape
+of `config` varies by type; `deny contains json.marshal(input)` prints the
+whole input to see it.
+
 Helpers go under `kraai.lib.*`; any other package, a `deny` that is not a set,
 or no `deny` at all fails the load, because a policy that never ran reads as
 one that passed.
 
 Policies run in OPA with no network, no DNS and no `opa.runtime`, and each
-evaluation is cut off after 30 seconds. **`policies/` in the manifest
-directory can be edited by the pull request it gates.** To hold an untrusted
-change to a policy, keep it outside the change: check out the base branch
-separately and pass it with `--policy`.
+evaluation is cut off after 30 seconds. A symlink in `policies/` is refused.
+**`policies/` in the manifest directory can be edited by the pull request it
+gates.** To hold an untrusted change to a policy, keep it outside the change:
+check out the base branch separately and pass it with `--policy`. The two are
+compiled apart, so nothing in `policies/` can extend a helper or a rule the
+`--policy` set relies on; a denial from either refuses the run.
 
 ### Telemetry and profiling
 

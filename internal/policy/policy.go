@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -45,13 +46,21 @@ var forbiddenBuiltins = []string{"http.send", "net.lookup_ip_addr", "opa.runtime
 
 // Set is the loaded, compiled policies, or none.
 type Set struct {
+	// units are compiled apart so that none can define rules in another's
+	// namespace: the manifest's policies arrive with the change they judge,
+	// and must not be able to extend a helper or a set the --policy ones
+	// rely on.
+	units []unit
+}
+
+type unit struct {
 	compiler *ast.Compiler
 	// gates are those with a deny rule defined.
 	gates map[Gate]bool
 }
 
 // Empty reports whether no policy was loaded.
-func (s *Set) Empty() bool { return s == nil || s.compiler == nil }
+func (s *Set) Empty() bool { return s == nil || len(s.units) == 0 }
 
 // capabilities is this OPA version's, less the forbidden builtins, with no
 // network host allowed.
@@ -69,11 +78,12 @@ func capabilities() *ast.Capabilities {
 }
 
 // Load reads every policy in the manifest's policies directory and at each
-// of extra, a file or a directory of .rego files, and compiles them. None
-// at all is an empty Set. A policy that does not parse or compile, calls a
-// forbidden builtin, declares a package kraai does not evaluate, or leaves
-// both gates without a deny rule fails the load: a policy that silently
-// never ran would read as one that passed.
+// of extra, a file or a directory of .rego files, and compiles the two
+// groups separately; a gate denies what either denies. None at all is an
+// empty Set. A policy that does not parse or compile, calls a forbidden
+// builtin, declares a package kraai does not evaluate, or belongs to a
+// group with no deny rule fails the load: a policy that silently never ran
+// would read as one that passed.
 func Load(fsys manifest.FS, extra []string) (*Set, error) {
 	sources := map[string]string{}
 	names, err := fsys.Glob(ManifestDir + "/*.rego")
@@ -81,37 +91,61 @@ func Load(fsys manifest.FS, extra []string) (*Set, error) {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "listing %s", ManifestDir)
 	}
 	for _, name := range names {
+		// A parse error quotes the offending source, so a policy symlinked
+		// to another file in the manifest directory, such as its .env,
+		// would print that file into a pull request's CI log.
+		info, err := fsys.Lstat(name)
+		if err != nil {
+			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s", name)
+		}
+		if !info.Mode().IsRegular() {
+			return nil, kerrors.Validation("policy %s is not a regular file; a symlink is refused", name)
+		}
 		raw, err := fsys.ReadFile(name)
 		if err != nil {
 			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s", name)
 		}
 		sources[name] = string(raw)
 	}
+	extraSources := map[string]string{}
 	for _, path := range extra {
-		if err := readExtra(path, sources); err != nil {
+		if err := readExtra(path, extraSources); err != nil {
 			return nil, err
 		}
 	}
-	if len(sources) == 0 {
-		return &Set{}, nil
-	}
 
+	set := &Set{}
+	for _, group := range []map[string]string{sources, extraSources} {
+		if len(group) == 0 {
+			continue
+		}
+		u, err := compile(group)
+		if err != nil {
+			return nil, err
+		}
+		set.units = append(set.units, u)
+	}
+	return set, nil
+}
+
+// compile parses and compiles one group of policies on its own.
+func compile(sources map[string]string) (unit, error) {
 	caps := capabilities()
 	modules := make(map[string]*ast.Module, len(sources))
 	for name, source := range sources {
 		module, err := ast.ParseModuleWithOpts(name, source, ast.ParserOptions{RegoVersion: ast.RegoV1, Capabilities: caps})
 		if err != nil {
-			return nil, kerrors.Wrap(err, kerrors.CodeValidation, "parsing policy %s", name)
+			return unit{}, kerrors.Wrap(err, kerrors.CodeValidation, "parsing policy %s", name)
 		}
 		if err := checkPackage(name, module); err != nil {
-			return nil, err
+			return unit{}, err
 		}
 		modules[name] = module
 	}
 
 	compiler := ast.NewCompiler().WithCapabilities(caps)
 	if compiler.Compile(modules); compiler.Failed() {
-		return nil, kerrors.Wrap(compiler.Errors, kerrors.CodeValidation, "compiling policies")
+		return unit{}, kerrors.Wrap(compiler.Errors, kerrors.CodeValidation, "compiling policies")
 	}
 
 	gates := map[Gate]bool{}
@@ -125,17 +159,18 @@ func Load(fsys manifest.FS, extra []string) (*Set, error) {
 				continue
 			}
 			if rule.Head.RuleKind() != ast.MultiValue {
-				return nil, kerrors.Validation(
+				return unit{}, kerrors.Validation(
 					"policy %s: deny must be a set of messages (deny contains msg if { ... })", module.Package.Location.File)
 			}
 			gates[gate] = true
 		}
 	}
 	if len(gates) == 0 {
-		return nil, kerrors.Validation(
-			"policies define no deny rule in package kraai.plan or kraai.destroy, so they would never deny anything")
+		return unit{}, kerrors.Validation(
+			"policies %s define no deny rule in package kraai.plan or kraai.destroy, so they would never deny anything",
+			strings.Join(slices.Sorted(maps.Keys(sources)), ", "))
 	}
-	return &Set{compiler: compiler, gates: gates}, nil
+	return unit{compiler: compiler, gates: gates}, nil
 }
 
 // readExtra adds the policy at path, or every .rego file directly in it.
@@ -182,19 +217,38 @@ func gateOf(module *ast.Module) (Gate, bool) {
 	return "", false
 }
 
-// Evaluate returns every message the gate's deny rule produces for input,
-// sorted; none when no policy defines that gate. A message that is not a
-// string is reported as its JSON.
+// Evaluate returns every distinct message the gate's deny rules produce for
+// input, sorted; none when no policy defines that gate. A message that is
+// not a string is reported as its JSON.
 func (s *Set) Evaluate(ctx context.Context, gate Gate, input map[string]any) ([]string, error) {
-	if s.Empty() || !s.gates[gate] {
+	if s.Empty() {
 		return nil, nil
 	}
 	ctx, cancel := context.WithTimeout(ctx, evalTimeout)
 	defer cancel()
 
+	var denials []string
+	for _, u := range s.units {
+		if !u.gates[gate] {
+			continue
+		}
+		found, err := u.evaluate(ctx, gate, input)
+		if err != nil {
+			return nil, err
+		}
+		denials = append(denials, found...)
+	}
+	if denials == nil {
+		return nil, nil
+	}
+	sort.Strings(denials)
+	return slices.Compact(denials), nil
+}
+
+func (u unit) evaluate(ctx context.Context, gate Gate, input map[string]any) ([]string, error) {
 	results, err := rego.New(
 		rego.Query("data.kraai."+string(gate)+".deny"),
-		rego.Compiler(s.compiler),
+		rego.Compiler(u.compiler),
 		rego.Input(input),
 		rego.Capabilities(capabilities()),
 		rego.StrictBuiltinErrors(true),
@@ -219,7 +273,6 @@ func (s *Set) Evaluate(ctx context.Context, gate Gate, input map[string]any) ([]
 			}
 		}
 	}
-	sort.Strings(denials)
 	return denials, nil
 }
 

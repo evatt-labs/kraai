@@ -21,6 +21,8 @@ type FS interface {
 	// Glob returns every name relative to the manifest root matching
 	// pattern (io/fs.Glob syntax), sorted lexically.
 	Glob(pattern string) ([]string, error)
+	// Lstat describes the file at name without following a final symlink.
+	Lstat(name string) (fs.FileInfo, error)
 }
 
 // dirFS is FS's real implementation, rooted on disk via os.Root rather than
@@ -58,4 +60,8 @@ func (d dirFS) Glob(pattern string) ([]string, error) {
 	}
 	sort.Strings(matches)
 	return matches, nil
+}
+
+func (d dirFS) Lstat(name string) (fs.FileInfo, error) {
+	return fs.Lstat(d.fsys, name)
 }

@@ -10,6 +10,7 @@
 package manifest
 
 import (
+	fs "io/fs"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -52,6 +53,21 @@ func (m *MockFS) Glob(pattern string) ([]string, error) {
 func (mr *MockFSMockRecorder) Glob(pattern any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Glob", reflect.TypeOf((*MockFS)(nil).Glob), pattern)
+}
+
+// Lstat mocks base method.
+func (m *MockFS) Lstat(name string) (fs.FileInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Lstat", name)
+	ret0, _ := ret[0].(fs.FileInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Lstat indicates an expected call of Lstat.
+func (mr *MockFSMockRecorder) Lstat(name any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lstat", reflect.TypeOf((*MockFS)(nil).Lstat), name)
 }
 
 // ReadFile mocks base method.

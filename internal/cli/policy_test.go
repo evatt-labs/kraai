@@ -260,3 +260,50 @@ func TestPolicyInputLeavesValuesOut(t *testing.T) {
 		t.Fatalf("manifest.services = %v", input["manifest"])
 	}
 }
+
+// A pull request controls policies/ but not the --policy checkout. Nothing
+// it adds there may widen what the trusted policies allow: not a helper
+// under kraai.lib, and not an entry in a set the trusted deny negates.
+func TestManifestPoliciesCannotWeakenTrustedOnes(t *testing.T) {
+	trusted := t.TempDir()
+	for name, src := range map[string]string{
+		"lib.rego": "package kraai.lib.allow\n\nok(b) if b == \"NOTHING\"\n",
+		"deny.rego": `package kraai.plan
+
+import data.kraai.lib.allow
+
+exempt contains "NOTHING"
+
+deny contains msg if {
+	some a in input.actions
+	a.kind == "create"
+	not allow.ok(a.binding)
+	not exempt[a.binding]
+	msg := sprintf("%s may not be created", [a.binding])
+}
+`,
+	} {
+		if err := os.WriteFile(filepath.Join(trusted, name), []byte(src), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	quiet := "package kraai.plan\n\ndeny contains msg if { false; msg := \"\" }\n"
+	for name, files := range map[string]map[string]string{
+		"helper": {"helper.rego": "package kraai.lib.allow\n\nok(_) if true\n", "quiet.rego": quiet},
+		"set":    {"set.rego": "package kraai.plan\n\nexempt contains \"CACHE\"\n", "quiet.rego": quiet},
+	} {
+		t.Run(name, func(t *testing.T) {
+			dir := policyFixture(t, files)
+			r := &countingResource{}
+			_, err := execApplyWith(t, countingAssembler(t, r), memoryStores(lock.NewMemory()),
+				[]string{testEnvName, "--dir", dir, "--policy", trusted})
+			_ = requireCode(t, err, kerrors.CodeValidation)
+			if !strings.Contains(err.Error(), "CACHE may not be created") {
+				t.Fatalf("error = %q, want the trusted denial", err.Error())
+			}
+			if r.createCalls != 0 {
+				t.Fatalf("createCalls = %d, want zero", r.createCalls)
+			}
+		})
+	}
+}

@@ -170,3 +170,45 @@ func TestEvaluationIsBounded(t *testing.T) {
 		t.Fatalf("evaluation ran %v past a 200ms deadline", elapsed)
 	}
 }
+
+// The manifest's policies and --policy ones each deny on their own, and a
+// message both produce is reported once.
+func TestBothGroupsDeny(t *testing.T) {
+	extra := filepath.Join(t.TempDir(), "extra.rego")
+	src := "package kraai.plan\n\ndeny contains \"shared\"\n\ndeny contains \"from --policy\"\n"
+	if err := os.WriteFile(extra, []byte(src), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	manifestSrc := "package kraai.plan\n\ndeny contains \"shared\"\n\ndeny contains \"from policies/\"\n"
+	set, err := Load(manifestWith(t, map[string]string{"m.rego": manifestSrc}), []string{extra})
+	if err != nil {
+		t.Fatal(err)
+	}
+	denials, err := set.Evaluate(context.Background(), GatePlan, map[string]any{})
+	if want := []string{"from --policy", "from policies/", "shared"}; err != nil || !reflect.DeepEqual(denials, want) {
+		t.Fatalf("Evaluate = %q, %v, want %q", denials, err, want)
+	}
+}
+
+// A policy symlinked to another file in the manifest directory is refused
+// before it is parsed, since a parse error would quote that file.
+func TestASymlinkedPolicyIsRefusedUnread(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, ManifestDir), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, ".env"), []byte("TOKEN=canary-8f3a1\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("../.env", filepath.Join(dir, ManifestDir, "leak.rego")); err != nil {
+		t.Fatal(err)
+	}
+	fsys, err := manifest.NewFS(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = Load(fsys, nil)
+	if err == nil || !strings.Contains(err.Error(), "not a regular file") || strings.Contains(err.Error(), "canary") {
+		t.Fatalf("Load = %v, want a refusal that does not quote the target", err)
+	}
+}
