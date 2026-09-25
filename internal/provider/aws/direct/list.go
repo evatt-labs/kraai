@@ -87,26 +87,10 @@ func compileList(model *smithyModel, r *Reader, o Override, service, namespace s
 			fail("list input %s is not a member of %s's input", member, o.List.Operation)
 			continue
 		}
-		target := input.Members[member].Target
-		switch shape := model.Shapes[target]; {
-		case shape.Type == "enum":
-			var allowed []string
-			for _, em := range shape.Members {
-				var v string
-				_ = json.Unmarshal(em.Traits["smithy.api#enumValue"], &v)
-				allowed = append(allowed, v)
-				if v == value {
-					b.Value = value
-				}
-			}
-			if b.Value == "" {
-				fail("list input %s is %q, which is not one of %v", member, value, sortedStrings(allowed))
-			}
-		case targetType(shape.Type, target) == "string":
-			b.Value = value
-		default:
-			fail("list input %s is %s; only strings and enums can be fixed", member, targetType(shape.Type, target))
+		if reason := fixedValue(model, input.Members[member].Target, value); reason != "" {
+			fail("list input %s %s", member, reason)
 		}
+		b.Value = value
 		bound[member] = true
 		l.Input = append(l.Input, b)
 	}

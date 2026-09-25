@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
+	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
 	"github.com/aws/smithy-go"
 )
 
@@ -168,6 +169,45 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 	}
 	if unreadable > 0 && e.Instances > 0 {
 		e.Note = "Cloud Control could not read some listed instances"
+	}
+	if r.Probe != nil {
+		e = absenceParity(ctx, t, cc, client, r, e, perType)
+	}
+	return e
+}
+
+// absenceParity reads up to perType identifiers r's probe lists, each of
+// which Cloud Control must read as absent, and checks the direct read does
+// not find one present. An identifier Cloud Control finds proves nothing
+// and is not counted.
+func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, client *Client, r Reader, e TypeEvidence, perType int) TypeEvidence {
+	ids, err := client.Probe(ctx, r.Type)
+	if err != nil {
+		t.Errorf("probing: %v", err)
+		return e
+	}
+	if len(ids) > perType {
+		ids = ids[:perType]
+	}
+	present := 0
+	for _, id := range ids {
+		_, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(r.Type), Identifier: aws.String(id)})
+		var notFound *cctypes.ResourceNotFoundException
+		if !errors.As(err, &notFound) {
+			continue
+		}
+		e.Probed++
+		if _, err := client.Read(ctx, r.Type, map[string]string{r.Identifier[0].Property: id}); err == nil {
+			// Printed to this run's log only, never to evidence.
+			t.Errorf("Cloud Control reads %s as absent, the direct read finds it", id)
+			present++
+		}
+	}
+	switch {
+	case present > 0:
+		e.Absence = "differs"
+	case e.Probed > 0:
+		e.Absence = "parity"
 	}
 	return e
 }

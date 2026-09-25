@@ -100,6 +100,7 @@ func (r Reader) readXML(body []byte) (map[string]any, error) {
 			return nil, fmt.Errorf("the %s response has no %s", r.Type, r.Wrapper)
 		}
 	}
+	root := node
 	for _, step := range r.Response {
 		if !step.List {
 			if node = node.child(step.Name); node == nil {
@@ -108,12 +109,20 @@ func (r Reader) readXML(body []byte) (map[string]any, error) {
 			continue
 		}
 		items, _ := node.items(step.Name, step.Item)
+		if len(items) == 0 {
+			return nil, ErrAbsent
+		}
 		if len(items) != 1 {
 			return nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", r.Type, len(items), step.Name)
 		}
 		node = items[0]
 	}
-	return translateXML(node, r.Fields), nil
+	return r.finish(func(fields []Field, fromRoot bool) map[string]any {
+		if fromRoot {
+			return translateXML(root, fields)
+		}
+		return translateXML(node, fields)
+	})
 }
 
 // translateXML reads fields from n as translate reads them from JSON: keyed

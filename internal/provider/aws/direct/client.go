@@ -6,10 +6,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -49,7 +51,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if !ok {
 		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
-	values := make([]Binding, 0, len(r.Identifier))
+	values := make([]Binding, 0, len(r.Identifier)+len(r.Input))
 	for _, b := range r.Identifier {
 		value, ok := identifier[b.Property]
 		if !ok {
@@ -58,6 +60,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 		b.Value = value
 		values = append(values, b)
 	}
+	values = append(values, r.Input...)
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
@@ -69,11 +72,15 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if err != nil {
 		return nil, err
 	}
+	root, _ := out.(map[string]any)
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
 		out = obj[step.Name]
 		if step.List {
 			items, _ := out.([]any)
+			if len(items) == 0 {
+				return nil, ErrAbsent
+			}
 			if len(items) != 1 {
 				return nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
 			}
@@ -84,7 +91,43 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if !ok {
 		return nil, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
-	return r.translate(obj, r.Fields), nil
+	return r.finish(func(fields []Field, fromRoot bool) map[string]any {
+		if fromRoot {
+			return r.translate(root, fields)
+		}
+		return r.translate(obj, fields)
+	})
+}
+
+// ErrAbsent is Read's answer for an instance the service still returns
+// but the override says is gone, or a filtered read that matched nothing.
+var ErrAbsent = errors.New("the instance is absent")
+
+// finish assembles a read from translate, which reads fields from the
+// resource or, with fromRoot, from the whole output: the resource's own
+// properties, those carried beside it, and whether it is absent.
+func (r Reader) finish(translate func(fields []Field, fromRoot bool) map[string]any) (map[string]any, error) {
+	for _, c := range r.Absent {
+		got, present := translate([]Field{c.Field}, false)[c.Field.Property]
+		if present && slices.Contains(c.Values, fmt.Sprint(got)) {
+			return nil, ErrAbsent
+		}
+	}
+	var own, root []Field
+	for _, f := range r.Fields {
+		if f.Root {
+			root = append(root, f)
+		} else {
+			own = append(own, f)
+		}
+	}
+	props := translate(own, false)
+	if len(root) > 0 {
+		for k, v := range translate(root, true) {
+			props[k] = v
+		}
+	}
+	return props, nil
 }
 
 // responsePath is the response path for an error message.
@@ -115,7 +158,20 @@ func (c *Client) List(ctx context.Context, typeName string) ([]string, error) {
 	if !ok || r.List == nil {
 		return nil, fmt.Errorf("%s has no direct list", typeName)
 	}
-	l := r.List
+	return c.list(ctx, typeName, r, r.List)
+}
+
+// Probe lists the identifiers typeName's override names as absent,
+// across every page, as List does.
+func (c *Client) Probe(ctx context.Context, typeName string) ([]string, error) {
+	r, ok := readers[typeName]
+	if !ok || r.Probe == nil {
+		return nil, fmt.Errorf("%s has no probe", typeName)
+	}
+	return c.list(ctx, typeName, r, r.Probe)
+}
+
+func (c *Client) list(ctx context.Context, typeName string, r Reader, l *Lister) ([]string, error) {
 	var ids []string
 	seen := map[string]bool{}
 	token := ""

@@ -16,6 +16,10 @@ type Override struct {
 	Read Read   `yaml:"read"`
 	// List, when set, names the operation that lists every instance.
 	List *List `yaml:"list,omitempty"`
+	// Probe lists identifiers Cloud Control reads as absent although the
+	// service still describes them, such as deregistered revisions, for
+	// the read-parity harness to prove the direct read agrees.
+	Probe *List `yaml:"probe,omitempty"`
 	// Properties maps each readable CloudFormation property to where the
 	// response carries it.
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
@@ -36,6 +40,14 @@ type Read struct {
 	// Response is the dotted member path from the operation's output to
 	// the structure holding the resource; empty when the output is it.
 	Response string `yaml:"response,omitempty"`
+	// Input fixes input members to a value on every read, such as asking
+	// for tags the operation otherwise leaves out. A list member is sent
+	// the value as a list of one.
+	Input map[string]string `yaml:"input,omitempty"`
+	// Absent names members of the resource structure and the values that
+	// mean the instance is gone although the service still returns it,
+	// such as a status of INACTIVE.
+	Absent map[string][]string `yaml:"absent,omitempty"`
 }
 
 // List names the operation that lists every instance of a type, for a type
@@ -54,7 +66,9 @@ type List struct {
 
 // Mapping is where one property's value is in the response: a member of
 // the enclosing structure and, for a structure or a list of structures,
-// how each nested property maps.
+// how each nested property maps. A top-level property may instead name a
+// member of the operation's whole output with a leading "$.", for a value
+// the output carries beside the resource, such as its tags.
 type Mapping struct {
 	Member     string             `yaml:"member"`
 	Properties map[string]Mapping `yaml:"properties,omitempty"`

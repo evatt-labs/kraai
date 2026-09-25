@@ -5,6 +5,17 @@ read:
   identifier:
     TaskDefinitionArn: taskDefinition
   response: taskDefinition
+  # Tags are returned only when asked for, beside the task definition.
+  input:
+    include: TAGS
+  # A deregistered revision is still described; Cloud Control reads it as
+  # gone.
+  absent:
+    status: [INACTIVE, DELETE_IN_PROGRESS]
+probe:
+  operation: ListTaskDefinitions
+  input:
+    status: INACTIVE
 list:
   operation: ListTaskDefinitions
   # Cloud Control lists only active revisions; a deregistered one is gone.
@@ -196,6 +207,11 @@ properties:
       CpuArchitecture: cpuArchitecture
       OperatingSystemFamily: operatingSystemFamily
   TaskDefinitionArn: taskDefinitionArn
+  Tags:
+    member: $.tags
+    properties:
+      Key: key
+      Value: value
   TaskRoleArn: taskRoleArn
   Volumes:
     member: volumes
@@ -243,5 +259,3 @@ properties:
           FileSystemArn: fileSystemArn
           RootDirectory: rootDirectory
           TransitEncryptionPort: transitEncryptionPort
-skip:
-  Tags: tags are the response's own member beside taskDefinition, returned only when the request includes TAGS, and outside the response path

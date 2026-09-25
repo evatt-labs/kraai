@@ -606,10 +606,13 @@
         "PlacementConstraints",
         "RequiresCompatibilities",
         "RuntimePlatform",
+        "Tags",
         "TaskDefinitionArn",
         "TaskRoleArn",
         "Volumes"
-      ]
+      ],
+      "absence": "parity",
+      "probed": 20
     },
     {
       "type": "AWS::EMR::SecurityConfiguration",
