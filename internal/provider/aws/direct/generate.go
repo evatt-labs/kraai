@@ -28,6 +28,9 @@ func Generate() ([]byte, error) {
 		field(&b, "Target", r.Target)
 		field(&b, "Method", r.Method)
 		field(&b, "URI", r.URI)
+		field(&b, "Action", r.Action)
+		field(&b, "Version", r.Version)
+		field(&b, "Wrapper", r.Wrapper)
 		if len(r.Identifier) > 0 {
 			b.WriteString("Identifier: []Binding{\n")
 			for _, id := range r.Identifier {
@@ -38,12 +41,26 @@ func Generate() ([]byte, error) {
 				if id.JSONName != "" {
 					fmt.Fprintf(&b, ", JSONName: %q", id.JSONName)
 				}
+				if id.List {
+					b.WriteString(", List: true")
+				}
 				b.WriteString("},\n")
 			}
 			b.WriteString("},\n")
 		}
 		if len(r.Response) > 0 {
-			fmt.Fprintf(&b, "Response: %#v,\n", r.Response)
+			b.WriteString("Response: []Step{")
+			for _, st := range r.Response {
+				fmt.Fprintf(&b, "{Name: %q", st.Name)
+				if st.List {
+					b.WriteString(", List: true")
+				}
+				if st.Item != "" {
+					fmt.Fprintf(&b, ", Item: %q", st.Item)
+				}
+				b.WriteString("}, ")
+			}
+			b.WriteString("},\n")
 		}
 		fields(&b, r.Fields)
 		if l := r.List; l != nil {
@@ -97,6 +114,11 @@ func fields(b *bytes.Buffer, fs []Field) {
 		fmt.Fprintf(b, "{Property: %q, Member: %q, Kind: %q", f.Property, f.Member, f.Kind)
 		if f.JSONName != "" {
 			fmt.Fprintf(b, ", JSONName: %q", f.JSONName)
+		}
+		for _, x := range []struct{ name, value string }{{"XMLName", f.XMLName}, {"Item", f.Item}, {"Scalar", f.Scalar}} {
+			if x.value != "" {
+				fmt.Fprintf(b, ", %s: %q", x.name, x.value)
+			}
 		}
 		if len(f.Fields) > 0 {
 			b.WriteString(",\n")

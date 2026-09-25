@@ -156,10 +156,20 @@
       "sourceSha256": "a096d665ac8fdd8fe7d2bbe636cc9b5e12e41f2df97f2bf30bf7018ec8fd94f5",
       "subsetSha256": "464a214f97d23d25a5f08313661e9621fb652a4cc93f34e21f95fc4a602b262c"
     },
+    "ec2/service/2016-11-15/ec2-2016-11-15.json": {
+      "file": "models/ec2-2016-11-15.json",
+      "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
+      "subsetSha256": "6d3590ddeb4c567dd2c31203dacacb1b3c6476ea8dd3785d503a250c2fcfadac"
+    },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
       "sourceSha256": "039c1877a9b6b6997819988c4f8f7e9f063bcfe6afa6c431d2da45fc8422eace",
       "subsetSha256": "3786b00cbb780f0b457932e0a8e192b1c0d07b62e5d0fe4a43faeab098a60ccc"
+    },
+    "elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json": {
+      "file": "models/elastic-load-balancing-v2-2015-12-01.json",
+      "sourceSha256": "b8e2667dc02196215c863ecab13f2aecd8d9520262c85de1edbe80fd95e74d2f",
+      "subsetSha256": "5f3b6adca4a799647403333bc83687c777b4ac174ca2398fc0345c0aad6b1260"
     },
     "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
       "file": "models/elementalinference-2018-11-14.json",
@@ -848,6 +858,11 @@
       "sourceSha256": "0e43f2f422942e8f013fbde3305c1219db4bfc1e4bc847e3de9e186d19f63991",
       "subsetSha256": "f68e6ea32e74c9986b38d74f319097fa79a40e9738a489fbd551a5fc6c579ee9"
     },
+    "AWS::EC2::Subnet": {
+      "file": "schemas/AWS--EC2--Subnet.json",
+      "sourceSha256": "eb72b504512cd3eb92948347491c5afbe17397779e365286998b09c5ef880c28",
+      "subsetSha256": "939c211ef04d2839cc8ec24912e0a914356ebe062f1566babcd852b0a1f8fc41"
+    },
     "AWS::ECS::DaemonTaskDefinition": {
       "file": "schemas/AWS--ECS--DaemonTaskDefinition.json",
       "sourceSha256": "cfff3d2810fb1c5340ab813a0f7b9fcebbaedb990be0ac2b9b8d71718b684fc3",
@@ -862,6 +877,11 @@
       "file": "schemas/AWS--EMR--SecurityConfiguration.json",
       "sourceSha256": "738f3d02c65d7c621359ac44459712a331e34c37e160df0a765a8e861d86c6e7",
       "subsetSha256": "2d82a3fc1875b4dc739d918314d6297f91b428d3587fe7d54b806fecc15c07d7"
+    },
+    "AWS::ElasticLoadBalancingV2::TargetGroup": {
+      "file": "schemas/AWS--ElasticLoadBalancingV2--TargetGroup.json",
+      "sourceSha256": "571a5f140e428d7758ae00d093c92e030199834669d26f18f4b55b5eff1fbdf1",
+      "subsetSha256": "2b5ef07edfa1dde0e335c12023d8bf94d7395607af41d9816dcdde32b2658362"
     },
     "AWS::ElementalInference::Dictionary": {
       "file": "schemas/AWS--ElementalInference--Dictionary.json",

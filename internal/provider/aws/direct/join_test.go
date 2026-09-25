@@ -334,7 +334,7 @@ func TestCompileResponsePathJSONName(t *testing.T) {
 	if len(errs) > 0 {
 		t.Fatal(errs)
 	}
-	if !reflect.DeepEqual(r.Response, []string{"widget"}) {
+	if !reflect.DeepEqual(r.Response, []Step{{Name: "widget"}}) {
 		t.Fatalf("response path = %v, want [widget]", r.Response)
 	}
 	_, errs = compileWidget(t, named(widgetModel("Widgets", "widgets")), widgetOverride("Widget"))

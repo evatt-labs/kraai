@@ -58,19 +58,42 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 		b.Value = value
 		values = append(values, b)
 	}
+	if isXML(r.Protocol) {
+		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
+		if err != nil {
+			return nil, err
+		}
+		return r.readXML(body)
+	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
 		return nil, err
 	}
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
-		out = obj[step]
+		out = obj[step.Name]
+		if step.List {
+			items, _ := out.([]any)
+			if len(items) != 1 {
+				return nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
+			}
+			out = items[0]
+		}
 	}
 	obj, ok := out.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("the %s response has no resource at %s", typeName, strings.Join(r.Response, "."))
+		return nil, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
 	return r.translate(obj, r.Fields), nil
+}
+
+// responsePath is the response path for an error message.
+func (r Reader) responsePath() string {
+	names := make([]string, len(r.Response))
+	for i, st := range r.Response {
+		names[i] = st.Name
+	}
+	return strings.Join(names, ".")
 }
 
 // maxListPages bounds one List. A list longer than this is an error, never
@@ -154,6 +177,22 @@ func at(v any, path []string) (value any, present bool) {
 // call sends one signed request for an operation, placing each value by its
 // binding, and returns the decoded JSON response.
 func (c *Client) call(ctx context.Context, r Reader, method, uri, target string, values []Binding) (any, error) {
+	body, err := c.send(ctx, r, method, uri, target, values)
+	if err != nil {
+		return nil, err
+	}
+	var out any
+	dec := json.NewDecoder(bytes.NewReader(body))
+	dec.UseNumber()
+	if err := dec.Decode(&out); err != nil {
+		return nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
+	}
+	return out, nil
+}
+
+// send sends one signed request and returns the body of a successful
+// response.
+func (c *Client) send(ctx context.Context, r Reader, method, uri, target string, values []Binding) ([]byte, error) {
 	req, err := c.request(ctx, r, method, uri, target, values)
 	if err != nil {
 		return nil, err
@@ -168,15 +207,12 @@ func (c *Client) call(ctx context.Context, r Reader, method, uri, target string,
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		if isXML(r.Protocol) {
+			return nil, xmlAPIError(resp.StatusCode, body)
+		}
 		return nil, apiError(resp, body)
 	}
-	var out any
-	dec := json.NewDecoder(bytes.NewReader(body))
-	dec.UseNumber()
-	if err := dec.Decode(&out); err != nil {
-		return nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
-	}
-	return out, nil
+	return body, nil
 }
 
 func (c *Client) request(ctx context.Context, r Reader, method, uri, target string, values []Binding) (*http.Request, error) {
@@ -185,7 +221,7 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 		base = c.Endpoint(r.EndpointPrefix, c.Region)
 	}
 	body := map[string]any{}
-	path, query, headers := "/", url.Values{}, http.Header{}
+	path, query, headers, form := "/", url.Values{}, http.Header{}, url.Values{}
 	if r.Protocol == "restJson1" {
 		path = uri
 	} else {
@@ -204,8 +240,14 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 			query.Set(b.Name, b.Value)
 		case "header":
 			headers.Set(b.Name, b.Value)
+		case "form":
+			form.Set(b.Name, b.Value)
 		default:
-			body[r.wire(b.Member, b.JSONName)] = b.Value
+			var v any = b.Value
+			if b.List {
+				v = []string{b.Value}
+			}
+			body[r.wire(b.Member, b.JSONName)] = v
 		}
 	}
 	// The URI may carry a literal query string of its own.
@@ -221,7 +263,11 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 	}
 
 	var payload []byte
-	if r.Protocol != "restJson1" || len(body) > 0 {
+	if isXML(r.Protocol) {
+		form.Set("Action", r.Action)
+		form.Set("Version", r.Version)
+		payload = []byte(form.Encode())
+	} else if r.Protocol != "restJson1" || len(body) > 0 {
 		var err error
 		if payload, err = json.Marshal(body); err != nil {
 			return nil, err
@@ -245,6 +291,8 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 	case "awsJson1_1":
 		req.Header.Set("Content-Type", "application/x-amz-json-1.1")
 		req.Header.Set("X-Amz-Target", target)
+	case "awsQuery", "ec2Query":
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
 	default:
 		if payload != nil {
 			req.Header.Set("Content-Type", "application/json")

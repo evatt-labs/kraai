@@ -517,6 +517,28 @@
       "compared": []
     },
     {
+      "type": "AWS::EC2::Subnet",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 6,
+      "compared": [
+        "AssignIpv6AddressOnCreation",
+        "AvailabilityZone",
+        "AvailabilityZoneId",
+        "BlockPublicAccessStates",
+        "CidrBlock",
+        "EnableDns64",
+        "Ipv6Native",
+        "MapPublicIpOnLaunch",
+        "PrivateDnsNameOptionsOnLaunch",
+        "SubnetId",
+        "Tags",
+        "VpcId"
+      ]
+    },
+    {
       "type": "AWS::ECS::DaemonTaskDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -556,6 +578,35 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": []
+    },
+    {
+      "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "HealthCheckEnabled",
+        "HealthCheckIntervalSeconds",
+        "HealthCheckPath",
+        "HealthCheckPort",
+        "HealthCheckProtocol",
+        "HealthCheckTimeoutSeconds",
+        "HealthyThresholdCount",
+        "IpAddressType",
+        "LoadBalancerArns",
+        "Matcher",
+        "Name",
+        "Port",
+        "Protocol",
+        "ProtocolVersion",
+        "TargetGroupArn",
+        "TargetGroupName",
+        "TargetType",
+        "UnhealthyThresholdCount",
+        "VpcId"
+      ]
     },
     {
       "type": "AWS::ElementalInference::Dictionary",

@@ -1,0 +1,38 @@
+type: AWS::ElasticLoadBalancingV2::TargetGroup
+read:
+  model: elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json
+  operation: DescribeTargetGroups
+  identifier:
+    TargetGroupArn: TargetGroupArns
+  # DescribeTargetGroups filters by a list of ARNs and answers with a list.
+  response: TargetGroups[]
+properties:
+  HealthCheckEnabled: HealthCheckEnabled
+  HealthCheckIntervalSeconds: HealthCheckIntervalSeconds
+  HealthCheckPath: HealthCheckPath
+  HealthCheckPort: HealthCheckPort
+  HealthCheckProtocol: HealthCheckProtocol
+  HealthCheckTimeoutSeconds: HealthCheckTimeoutSeconds
+  HealthyThresholdCount: HealthyThresholdCount
+  IpAddressType: IpAddressType
+  LoadBalancerArns: LoadBalancerArns
+  Matcher:
+    member: Matcher
+    properties:
+      GrpcCode: GrpcCode
+      HttpCode: HttpCode
+  Name: TargetGroupName
+  Port: Port
+  Protocol: Protocol
+  ProtocolVersion: ProtocolVersion
+  TargetControlPort: TargetControlPort
+  TargetGroupArn: TargetGroupArn
+  TargetGroupName: TargetGroupName
+  TargetType: TargetType
+  UnhealthyThresholdCount: UnhealthyThresholdCount
+  VpcId: VpcId
+skip:
+  Tags: read from DescribeTags, a second call
+  TargetGroupAttributes: read from DescribeTargetGroupAttributes, a second call
+  TargetGroupFullName: derived from the ARN's resource part, not a member of the response
+  Targets: read from DescribeTargetHealth, a second call

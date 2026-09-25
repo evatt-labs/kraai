@@ -94,7 +94,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "AutoScalingConfigurationArn", Member: "AutoScalingConfigurationArn", Location: "body"},
 		},
-		Response: []string{"AutoScalingConfiguration"},
+		Response: []Step{{Name: "AutoScalingConfiguration"}},
 		Fields: []Field{
 			{Property: "AutoScalingConfigurationArn", Member: "AutoScalingConfigurationArn", Kind: "scalar"},
 			{Property: "AutoScalingConfigurationName", Member: "AutoScalingConfigurationName", Kind: "scalar"},
@@ -114,7 +114,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ObservabilityConfigurationArn", Member: "ObservabilityConfigurationArn", Location: "body"},
 		},
-		Response: []string{"ObservabilityConfiguration"},
+		Response: []Step{{Name: "ObservabilityConfiguration"}},
 		Fields: []Field{
 			{Property: "Latest", Member: "Latest", Kind: "scalar"},
 			{Property: "ObservabilityConfigurationArn", Member: "ObservabilityConfigurationArn", Kind: "scalar"},
@@ -136,7 +136,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "VpcConnectorArn", Member: "VpcConnectorArn", Location: "body"},
 		},
-		Response: []string{"VpcConnector"},
+		Response: []Step{{Name: "VpcConnector"}},
 		Fields: []Field{
 			{Property: "SecurityGroups", Member: "SecurityGroups", Kind: "list"},
 			{Property: "Subnets", Member: "Subnets", Kind: "list"},
@@ -154,7 +154,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "VpcIngressConnectionArn", Member: "VpcIngressConnectionArn", Location: "body"},
 		},
-		Response: []string{"VpcIngressConnection"},
+		Response: []Step{{Name: "VpcIngressConnection"}},
 		Fields: []Field{
 			{Property: "DomainName", Member: "DomainName", Kind: "scalar"},
 			{Property: "IngressVpcConfiguration", Member: "IngressVpcConfiguration", Kind: "structure",
@@ -179,7 +179,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DomainName", Member: "domainName", Location: "label"},
 		},
-		Response: []string{"domainNameConfig"},
+		Response: []Step{{Name: "domainNameConfig"}},
 		Fields: []Field{
 			{Property: "AppSyncDomainName", Member: "appsyncDomainName", Kind: "scalar"},
 			{Property: "CertificateArn", Member: "certificateArn", Kind: "scalar"},
@@ -198,7 +198,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Name", Member: "Name", Location: "body"},
 		},
-		Response: []string{"DataCatalog"},
+		Response: []Step{{Name: "DataCatalog"}},
 		Fields: []Field{
 			{Property: "ConnectionType", Member: "ConnectionType", Kind: "scalar"},
 			{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -218,7 +218,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "NamedQueryId", Member: "NamedQueryId", Location: "body"},
 		},
-		Response: []string{"NamedQuery"},
+		Response: []Step{{Name: "NamedQuery"}},
 		Fields: []Field{
 			{Property: "Database", Member: "Database", Kind: "scalar"},
 			{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -259,7 +259,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"scheduledReport"},
+		Response: []Step{{Name: "scheduledReport"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
@@ -316,7 +316,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "RestoreTestingPlanName", Member: "RestoreTestingPlanName", Location: "label"},
 		},
-		Response: []string{"RestoreTestingPlan"},
+		Response: []Step{{Name: "RestoreTestingPlan"}},
 		Fields: []Field{
 			{Property: "RecoveryPointSelection", Member: "RecoveryPointSelection", Kind: "structure",
 				Fields: []Field{
@@ -343,7 +343,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "HypervisorArn", Member: "HypervisorArn", Location: "body"},
 		},
-		Response: []string{"Hypervisor"},
+		Response: []Step{{Name: "Hypervisor"}},
 		Fields: []Field{
 			{Property: "Host", Member: "Host", Kind: "scalar"},
 			{Property: "HypervisorArn", Member: "HypervisorArn", Kind: "scalar"},
@@ -381,7 +381,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ProjectArn", Member: "projectArn", Location: "label"},
 		},
-		Response: []string{"project"},
+		Response: []Step{{Name: "project"}},
 		Fields: []Field{
 			{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
 			{Property: "CustomOutputConfiguration", Member: "customOutputConfiguration", Kind: "structure",
@@ -806,7 +806,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "AcmeExternalAccountBindingArn", Member: "AcmeExternalAccountBindingArn", Location: "body"},
 		},
-		Response: []string{"ExternalAccountBinding"},
+		Response: []Step{{Name: "ExternalAccountBinding"}},
 		Fields: []Field{
 			{Property: "AcmeEndpointArn", Member: "AcmeEndpointArn", Kind: "scalar"},
 			{Property: "AcmeExternalAccountBindingArn", Member: "AcmeExternalAccountBindingArn", Kind: "scalar"},
@@ -823,7 +823,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "CustomActionArn", Member: "CustomActionArn", Location: "body"},
 		},
-		Response: []string{"CustomAction"},
+		Response: []Step{{Name: "CustomAction"}},
 		Fields: []Field{
 			{Property: "ActionName", Member: "ActionName", Kind: "scalar"},
 			{Property: "AliasName", Member: "AliasName", Kind: "scalar"},
@@ -859,7 +859,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "AppInstanceArn", Member: "AppInstanceArn", Location: "label"},
 		},
-		Response: []string{"AppInstance"},
+		Response: []Step{{Name: "AppInstance"}},
 		Fields: []Field{
 			{Property: "AppInstanceArn", Member: "AppInstanceArn", Kind: "scalar"},
 			{Property: "CreatedTimestamp", Member: "CreatedTimestamp", Kind: "timestamp"},
@@ -878,7 +878,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "MediaInsightsPipelineConfigurationArn", Member: "Identifier", Location: "label"},
 		},
-		Response: []string{"MediaInsightsPipelineConfiguration"},
+		Response: []Step{{Name: "MediaInsightsPipelineConfiguration"}},
 		Fields: []Field{
 			{Property: "CreatedTimestamp", Member: "CreatedTimestamp", Kind: "timestamp"},
 			{Property: "Elements", Member: "Elements", Kind: "list",
@@ -989,7 +989,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "SipMediaApplicationArn", Member: "SipMediaApplicationId", Location: "label"},
 		},
-		Response: []string{"SipMediaApplication"},
+		Response: []Step{{Name: "SipMediaApplication"}},
 		Fields: []Field{
 			{Property: "AwsRegion", Member: "AwsRegion", Kind: "scalar"},
 			{Property: "CreatedTimestamp", Member: "CreatedTimestamp", Kind: "timestamp"},
@@ -1014,7 +1014,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "VoiceConnectorArn", Member: "VoiceConnectorId", Location: "label"},
 		},
-		Response: []string{"VoiceConnector"},
+		Response: []Step{{Name: "VoiceConnector"}},
 		Fields: []Field{
 			{Property: "AwsRegion", Member: "AwsRegion", Kind: "scalar"},
 			{Property: "CreatedTimestamp", Member: "CreatedTimestamp", Kind: "timestamp"},
@@ -1116,7 +1116,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ConnectionArn", Member: "ConnectionArn", Location: "body"},
 		},
-		Response: []string{"Connection"},
+		Response: []Step{{Name: "Connection"}},
 		Fields: []Field{
 			{Property: "ConnectionArn", Member: "ConnectionArn", Kind: "scalar"},
 			{Property: "ConnectionName", Member: "ConnectionName", Kind: "scalar"},
@@ -1135,7 +1135,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ApplicationName", Member: "applicationName", Location: "body"},
 		},
-		Response: []string{"application"},
+		Response: []Step{{Name: "application"}},
 		Fields: []Field{
 			{Property: "ApplicationName", Member: "applicationName", Kind: "scalar"},
 			{Property: "ComputePlatform", Member: "computePlatform", Kind: "scalar"},
@@ -1150,7 +1150,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DeploymentConfigName", Member: "deploymentConfigName", Location: "body"},
 		},
-		Response: []string{"deploymentConfigInfo"},
+		Response: []Step{{Name: "deploymentConfigInfo"}},
 		Fields: []Field{
 			{Property: "ComputePlatform", Member: "computePlatform", Kind: "scalar"},
 			{Property: "DeploymentConfigName", Member: "deploymentConfigName", Kind: "scalar"},
@@ -1200,7 +1200,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ConnectionArn", Member: "ConnectionArn", Location: "body"},
 		},
-		Response: []string{"Connection"},
+		Response: []Step{{Name: "Connection"}},
 		Fields: []Field{
 			{Property: "ConnectionArn", Member: "ConnectionArn", Kind: "scalar"},
 			{Property: "ConnectionName", Member: "ConnectionName", Kind: "scalar"},
@@ -1219,7 +1219,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "Arn", Location: "body"},
 		},
-		Response: []string{"Connector"},
+		Response: []Step{{Name: "Connector"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "ConnectorConfiguration", Member: "connectorConfiguration", Kind: "structure",
@@ -1746,7 +1746,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ClusterArn", Member: "clusterArn", Location: "label"},
 		},
-		Response: []string{"cluster"},
+		Response: []Step{{Name: "cluster"}},
 		Fields: []Field{
 			{Property: "AdminUserName", Member: "adminUserName", Kind: "scalar"},
 			{Property: "AuthType", Member: "authType", Kind: "scalar"},
@@ -1774,7 +1774,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "SnapshotArn", Member: "snapshotArn", Location: "label"},
 		},
-		Response: []string{"snapshot"},
+		Response: []Step{{Name: "snapshot"}},
 		Fields: []Field{
 			{Property: "AdminUserName", Member: "adminUserName", Kind: "scalar"},
 			{Property: "ClusterArn", Member: "clusterArn", Kind: "scalar"},
@@ -1789,6 +1789,48 @@ var readers = map[string]Reader{
 			{Property: "VpcSecurityGroupIds", Member: "vpcSecurityGroupIds", Kind: "list"},
 		},
 	},
+	"AWS::EC2::Subnet": {
+		Type:           "AWS::EC2::Subnet",
+		Protocol:       "ec2Query",
+		SigningName:    "ec2",
+		EndpointPrefix: "ec2",
+		Action:         "DescribeSubnets",
+		Version:        "2016-11-15",
+		Identifier: []Binding{
+			{Property: "SubnetId", Member: "SubnetIds", Location: "form", Name: "SubnetId.1", List: true},
+		},
+		Response: []Step{{Name: "subnetSet", List: true, Item: "item"}},
+		Fields: []Field{
+			{Property: "AssignIpv6AddressOnCreation", Member: "AssignIpv6AddressOnCreation", Kind: "scalar", XMLName: "assignIpv6AddressOnCreation", Scalar: "boolean"},
+			{Property: "AvailabilityZone", Member: "AvailabilityZone", Kind: "scalar", XMLName: "availabilityZone", Scalar: "string"},
+			{Property: "AvailabilityZoneId", Member: "AvailabilityZoneId", Kind: "scalar", XMLName: "availabilityZoneId", Scalar: "string"},
+			{Property: "BlockPublicAccessStates", Member: "BlockPublicAccessStates", Kind: "structure", XMLName: "blockPublicAccessStates",
+				Fields: []Field{
+					{Property: "InternetGatewayBlockMode", Member: "InternetGatewayBlockMode", Kind: "scalar", XMLName: "internetGatewayBlockMode", Scalar: "string"},
+				},
+			},
+			{Property: "CidrBlock", Member: "CidrBlock", Kind: "scalar", XMLName: "cidrBlock", Scalar: "string"},
+			{Property: "EnableDns64", Member: "EnableDns64", Kind: "scalar", XMLName: "enableDns64", Scalar: "boolean"},
+			{Property: "Ipv6Native", Member: "Ipv6Native", Kind: "scalar", XMLName: "ipv6Native", Scalar: "boolean"},
+			{Property: "MapPublicIpOnLaunch", Member: "MapPublicIpOnLaunch", Kind: "scalar", XMLName: "mapPublicIpOnLaunch", Scalar: "boolean"},
+			{Property: "OutpostArn", Member: "OutpostArn", Kind: "scalar", XMLName: "outpostArn", Scalar: "string"},
+			{Property: "PrivateDnsNameOptionsOnLaunch", Member: "PrivateDnsNameOptionsOnLaunch", Kind: "structure", XMLName: "privateDnsNameOptionsOnLaunch",
+				Fields: []Field{
+					{Property: "EnableResourceNameDnsAAAARecord", Member: "EnableResourceNameDnsAAAARecord", Kind: "scalar", XMLName: "enableResourceNameDnsAAAARecord", Scalar: "boolean"},
+					{Property: "EnableResourceNameDnsARecord", Member: "EnableResourceNameDnsARecord", Kind: "scalar", XMLName: "enableResourceNameDnsARecord", Scalar: "boolean"},
+					{Property: "HostnameType", Member: "HostnameType", Kind: "scalar", XMLName: "hostnameType", Scalar: "string"},
+				},
+			},
+			{Property: "SubnetId", Member: "SubnetId", Kind: "scalar", XMLName: "subnetId", Scalar: "string"},
+			{Property: "Tags", Member: "Tags", Kind: "list", XMLName: "tagSet", Item: "item",
+				Fields: []Field{
+					{Property: "Key", Member: "Key", Kind: "scalar", XMLName: "key", Scalar: "string"},
+					{Property: "Value", Member: "Value", Kind: "scalar", XMLName: "value", Scalar: "string"},
+				},
+			},
+			{Property: "VpcId", Member: "VpcId", Kind: "scalar", XMLName: "vpcId", Scalar: "string"},
+		},
+	},
 	"AWS::ECS::DaemonTaskDefinition": {
 		Type:           "AWS::ECS::DaemonTaskDefinition",
 		Protocol:       "awsJson1_1",
@@ -1798,7 +1840,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DaemonTaskDefinitionArn", Member: "daemonTaskDefinition", Location: "body"},
 		},
-		Response: []string{"daemonTaskDefinition"},
+		Response: []Step{{Name: "daemonTaskDefinition"}},
 		Fields: []Field{
 			{Property: "ContainerDefinitions", Member: "containerDefinitions", Kind: "list",
 				Fields: []Field{
@@ -1957,7 +1999,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "TaskDefinitionArn", Member: "taskDefinition", Location: "body"},
 		},
-		Response: []string{"taskDefinition"},
+		Response: []Step{{Name: "taskDefinition"}},
 		Fields: []Field{
 			{Property: "ContainerDefinitions", Member: "containerDefinitions", Kind: "list",
 				Fields: []Field{
@@ -2254,6 +2296,46 @@ var readers = map[string]Reader{
 			{Property: "SecurityConfiguration", Member: "SecurityConfiguration", Kind: "scalar"},
 		},
 	},
+	"AWS::ElasticLoadBalancingV2::TargetGroup": {
+		Type:           "AWS::ElasticLoadBalancingV2::TargetGroup",
+		Protocol:       "awsQuery",
+		SigningName:    "elasticloadbalancing",
+		EndpointPrefix: "elasticloadbalancing",
+		Action:         "DescribeTargetGroups",
+		Version:        "2015-12-01",
+		Wrapper:        "DescribeTargetGroupsResult",
+		Identifier: []Binding{
+			{Property: "TargetGroupArn", Member: "TargetGroupArns", Location: "form", Name: "TargetGroupArns.member.1", List: true},
+		},
+		Response: []Step{{Name: "TargetGroups", List: true, Item: "member"}},
+		Fields: []Field{
+			{Property: "HealthCheckEnabled", Member: "HealthCheckEnabled", Kind: "scalar", XMLName: "HealthCheckEnabled", Scalar: "boolean"},
+			{Property: "HealthCheckIntervalSeconds", Member: "HealthCheckIntervalSeconds", Kind: "scalar", XMLName: "HealthCheckIntervalSeconds", Scalar: "number"},
+			{Property: "HealthCheckPath", Member: "HealthCheckPath", Kind: "scalar", XMLName: "HealthCheckPath", Scalar: "string"},
+			{Property: "HealthCheckPort", Member: "HealthCheckPort", Kind: "scalar", XMLName: "HealthCheckPort", Scalar: "string"},
+			{Property: "HealthCheckProtocol", Member: "HealthCheckProtocol", Kind: "scalar", XMLName: "HealthCheckProtocol", Scalar: "string"},
+			{Property: "HealthCheckTimeoutSeconds", Member: "HealthCheckTimeoutSeconds", Kind: "scalar", XMLName: "HealthCheckTimeoutSeconds", Scalar: "number"},
+			{Property: "HealthyThresholdCount", Member: "HealthyThresholdCount", Kind: "scalar", XMLName: "HealthyThresholdCount", Scalar: "number"},
+			{Property: "IpAddressType", Member: "IpAddressType", Kind: "scalar", XMLName: "IpAddressType", Scalar: "string"},
+			{Property: "LoadBalancerArns", Member: "LoadBalancerArns", Kind: "list", XMLName: "LoadBalancerArns", Item: "member", Scalar: "string"},
+			{Property: "Matcher", Member: "Matcher", Kind: "structure", XMLName: "Matcher",
+				Fields: []Field{
+					{Property: "GrpcCode", Member: "GrpcCode", Kind: "scalar", XMLName: "GrpcCode", Scalar: "string"},
+					{Property: "HttpCode", Member: "HttpCode", Kind: "scalar", XMLName: "HttpCode", Scalar: "string"},
+				},
+			},
+			{Property: "Name", Member: "TargetGroupName", Kind: "scalar", XMLName: "TargetGroupName", Scalar: "string"},
+			{Property: "Port", Member: "Port", Kind: "scalar", XMLName: "Port", Scalar: "number"},
+			{Property: "Protocol", Member: "Protocol", Kind: "scalar", XMLName: "Protocol", Scalar: "string"},
+			{Property: "ProtocolVersion", Member: "ProtocolVersion", Kind: "scalar", XMLName: "ProtocolVersion", Scalar: "string"},
+			{Property: "TargetControlPort", Member: "TargetControlPort", Kind: "scalar", XMLName: "TargetControlPort", Scalar: "number"},
+			{Property: "TargetGroupArn", Member: "TargetGroupArn", Kind: "scalar", XMLName: "TargetGroupArn", Scalar: "string"},
+			{Property: "TargetGroupName", Member: "TargetGroupName", Kind: "scalar", XMLName: "TargetGroupName", Scalar: "string"},
+			{Property: "TargetType", Member: "TargetType", Kind: "scalar", XMLName: "TargetType", Scalar: "string"},
+			{Property: "UnhealthyThresholdCount", Member: "UnhealthyThresholdCount", Kind: "scalar", XMLName: "UnhealthyThresholdCount", Scalar: "number"},
+			{Property: "VpcId", Member: "VpcId", Kind: "scalar", XMLName: "VpcId", Scalar: "string"},
+		},
+	},
 	"AWS::ElementalInference::Dictionary": {
 		Type:           "AWS::ElementalInference::Dictionary",
 		Protocol:       "restJson1",
@@ -2459,7 +2541,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "AliasId", Member: "AliasId", Location: "body"},
 		},
-		Response: []string{"Alias"},
+		Response: []Step{{Name: "Alias"}},
 		Fields: []Field{
 			{Property: "AliasArn", Member: "AliasArn", Kind: "scalar"},
 			{Property: "AliasId", Member: "AliasId", Kind: "scalar"},
@@ -2483,7 +2565,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "BuildId", Member: "BuildId", Location: "body"},
 		},
-		Response: []string{"Build"},
+		Response: []Step{{Name: "Build"}},
 		Fields: []Field{
 			{Property: "BuildArn", Member: "BuildArn", Kind: "scalar"},
 			{Property: "BuildId", Member: "BuildId", Kind: "scalar"},
@@ -2502,7 +2584,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Name", Member: "Name", Location: "body"},
 		},
-		Response: []string{"ContainerGroupDefinition"},
+		Response: []Step{{Name: "ContainerGroupDefinition"}},
 		Fields: []Field{
 			{Property: "ContainerGroupDefinitionArn", Member: "ContainerGroupDefinitionArn", Kind: "scalar"},
 			{Property: "ContainerGroupType", Member: "ContainerGroupType", Kind: "scalar"},
@@ -2623,7 +2705,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "GameServerGroupArn", Member: "GameServerGroupName", Location: "body"},
 		},
-		Response: []string{"GameServerGroup"},
+		Response: []Step{{Name: "GameServerGroup"}},
 		Fields: []Field{
 			{Property: "AutoScalingGroupArn", Member: "AutoScalingGroupArn", Kind: "scalar"},
 			{Property: "BalancingStrategy", Member: "BalancingStrategy", Kind: "scalar"},
@@ -2648,7 +2730,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "AttachmentArn", Member: "AttachmentArn", Location: "body"},
 		},
-		Response: []string{"CrossAccountAttachment"},
+		Response: []Step{{Name: "CrossAccountAttachment"}},
 		Fields: []Field{
 			{Property: "AttachmentArn", Member: "AttachmentArn", Kind: "scalar"},
 			{Property: "Name", Member: "Name", Kind: "scalar"},
@@ -2727,7 +2809,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DatastoreId", Member: "datastoreId", Location: "label"},
 		},
-		Response: []string{"datastoreProperties"},
+		Response: []Step{{Name: "datastoreProperties"}},
 		Fields: []Field{
 			{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 			{Property: "DatastoreArn", Member: "datastoreArn", Kind: "scalar"},
@@ -2748,7 +2830,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"channel"},
+		Response: []Step{{Name: "channel"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Authorized", Member: "authorized", Kind: "scalar"},
@@ -2780,7 +2862,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"encoderConfiguration"},
+		Response: []Step{{Name: "encoderConfiguration"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Name", Member: "name", Kind: "scalar"},
@@ -2804,7 +2886,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"ingestConfiguration"},
+		Response: []Step{{Name: "ingestConfiguration"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "IngestProtocol", Member: "ingestProtocol", Kind: "scalar"},
@@ -2826,7 +2908,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"keyPair"},
+		Response: []Step{{Name: "keyPair"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Fingerprint", Member: "fingerprint", Kind: "scalar"},
@@ -2843,7 +2925,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"playbackRestrictionPolicy"},
+		Response: []Step{{Name: "playbackRestrictionPolicy"}},
 		Fields: []Field{
 			{Property: "AllowedCountries", Member: "allowedCountries", Kind: "list"},
 			{Property: "AllowedOrigins", Member: "allowedOrigins", Kind: "list"},
@@ -2862,7 +2944,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"publicKey"},
+		Response: []Step{{Name: "publicKey"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Fingerprint", Member: "fingerprint", Kind: "scalar"},
@@ -2880,7 +2962,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"recordingConfiguration"},
+		Response: []Step{{Name: "recordingConfiguration"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "DestinationConfiguration", Member: "destinationConfiguration", Kind: "structure",
@@ -2921,7 +3003,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"storageConfiguration"},
+		Response: []Step{{Name: "storageConfiguration"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Name", Member: "name", Kind: "scalar"},
@@ -2942,7 +3024,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "body"},
 		},
-		Response: []string{"streamKey"},
+		Response: []Step{{Name: "streamKey"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "ChannelArn", Member: "channelArn", Kind: "scalar"},
@@ -2984,7 +3066,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "lifecyclePolicyArn", Location: "query", Name: "lifecyclePolicyArn"},
 		},
-		Response: []string{"lifecyclePolicy"},
+		Response: []Step{{Name: "lifecyclePolicy"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Description", Member: "description", Kind: "scalar"},
@@ -3112,7 +3194,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ProcurementPortalPreferenceArn", Member: "ProcurementPortalPreferenceArn", Location: "body"},
 		},
-		Response: []string{"ProcurementPortalPreference"},
+		Response: []Step{{Name: "ProcurementPortalPreference"}},
 		Fields: []Field{
 			{Property: "AwsAccountId", Member: "AwsAccountId", Kind: "scalar"},
 			{Property: "BuyerDomain", Member: "BuyerDomain", Kind: "scalar"},
@@ -3243,7 +3325,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "RoleAlias", Member: "roleAlias", Location: "label"},
 		},
-		Response: []string{"roleAliasDescription"},
+		Response: []Step{{Name: "roleAliasDescription"}},
 		Fields: []Field{
 			{Property: "CredentialDurationSeconds", Member: "credentialDurationSeconds", Kind: "scalar"},
 			{Property: "RoleAlias", Member: "roleAlias", Kind: "scalar"},
@@ -3296,7 +3378,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "arn", Location: "label"},
 		},
-		Response: []string{"topicRuleDestination"},
+		Response: []Step{{Name: "topicRuleDestination"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "HttpUrlProperties", Member: "httpUrlProperties", Kind: "structure",
@@ -3809,7 +3891,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ChannelARN", Member: "ChannelARN", Location: "body"},
 		},
-		Response: []string{"ChannelDescription"},
+		Response: []Step{{Name: "ChannelDescription"}},
 		Fields: []Field{
 			{Property: "ChannelARN", Member: "ChannelARN", Kind: "scalar"},
 			{Property: "ChannelCreationTimestamp", Member: "ChannelCreationTimestamp", Kind: "timestamp"},
@@ -3907,7 +3989,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ConsumerARN", Member: "ConsumerARN", Location: "body"},
 		},
-		Response: []string{"ConsumerDescription"},
+		Response: []Step{{Name: "ConsumerDescription"}},
 		Fields: []Field{
 			{Property: "ConsumerARN", Member: "ConsumerARN", Kind: "scalar"},
 			{Property: "ConsumerCreationTimestamp", Member: "ConsumerCreationTimestamp", Kind: "timestamp"},
@@ -3942,7 +4024,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "CodeSigningConfigArn", Member: "CodeSigningConfigArn", Location: "label"},
 		},
-		Response: []string{"CodeSigningConfig"},
+		Response: []Step{{Name: "CodeSigningConfig"}},
 		Fields: []Field{
 			{Property: "AllowedPublishers", Member: "AllowedPublishers", Kind: "structure",
 				Fields: []Field{
@@ -3988,7 +4070,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "GrantArn", Member: "GrantArn", Location: "body"},
 		},
-		Response: []string{"Grant"},
+		Response: []Step{{Name: "Grant"}},
 		Fields: []Field{
 			{Property: "GrantArn", Member: "GrantArn", Kind: "scalar"},
 			{Property: "GrantName", Member: "GrantName", Kind: "scalar"},
@@ -4006,7 +4088,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "LicenseArn", Member: "LicenseArn", Location: "body"},
 		},
-		Response: []string{"License"},
+		Response: []Step{{Name: "License"}},
 		Fields: []Field{
 			{Property: "Beneficiary", Member: "Beneficiary", Kind: "scalar"},
 			{Property: "ConsumptionConfiguration", Member: "ConsumptionConfiguration", Kind: "structure",
@@ -4071,7 +4153,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "LicenseAssetGroupArn", Member: "LicenseAssetGroupArn", Location: "body"},
 		},
-		Response: []string{"LicenseAssetGroup"},
+		Response: []Step{{Name: "LicenseAssetGroup"}},
 		Fields: []Field{
 			{Property: "AssociatedLicenseAssetRulesetARNs", Member: "AssociatedLicenseAssetRulesetARNs", Kind: "list"},
 			{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -4099,7 +4181,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "LicenseAssetRulesetArn", Member: "LicenseAssetRulesetArn", Location: "body"},
 		},
-		Response: []string{"LicenseAssetRuleset"},
+		Response: []Step{{Name: "LicenseAssetRuleset"}},
 		Fields: []Field{
 			{Property: "Description", Member: "Description", Kind: "scalar"},
 			{Property: "LicenseAssetRulesetArn", Member: "LicenseAssetRulesetArn", Kind: "scalar"},
@@ -4222,7 +4304,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Name", Member: "name", Location: "body"},
 		},
-		Response: []string{"deliverySource"},
+		Response: []Step{{Name: "deliverySource"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "DeliverySourceConfiguration", Member: "deliverySourceConfiguration", Kind: "map"},
@@ -4643,7 +4725,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Name", Member: "Name", Location: "label"},
 		},
-		Response: []string{"Environment"},
+		Response: []Step{{Name: "Environment"}},
 		Fields: []Field{
 			{Property: "AirflowConfigurationOptions", Member: "AirflowConfigurationOptions", Kind: "map"},
 			{Property: "AirflowVersion", Member: "AirflowVersion", Kind: "scalar"},
@@ -4793,7 +4875,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "BridgeArn", Member: "BridgeArn", Location: "label"},
 		},
-		Response: []string{"bridge"},
+		Response: []Step{{Name: "bridge"}},
 		Fields: []Field{
 			{Property: "BridgeArn", Member: "BridgeArn", Kind: "scalar", JSONName: "bridgeArn"},
 			{Property: "BridgeState", Member: "BridgeState", Kind: "scalar", JSONName: "bridgeState"},
@@ -4876,7 +4958,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "GatewayArn", Member: "GatewayArn", Location: "label"},
 		},
-		Response: []string{"gateway"},
+		Response: []Step{{Name: "gateway"}},
 		Fields: []Field{
 			{Property: "EgressCidrBlocks", Member: "EgressCidrBlocks", Kind: "list", JSONName: "egressCidrBlocks"},
 			{Property: "GatewayArn", Member: "GatewayArn", Kind: "scalar", JSONName: "gatewayArn"},
@@ -4900,7 +4982,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Name", Member: "Name", Location: "label"},
 		},
-		Response: []string{"queue"},
+		Response: []Step{{Name: "queue"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 			{Property: "ConcurrentJobs", Member: "ConcurrentJobs", Kind: "scalar", JSONName: "concurrentJobs"},
@@ -4981,7 +5063,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "SdiSourceId", Location: "label"},
 		},
-		Response: []string{"sdiSource"},
+		Response: []Step{{Name: "sdiSource"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 			{Property: "Id", Member: "Id", Kind: "scalar", JSONName: "id"},
@@ -5727,7 +5809,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "OdbNetworkArn", Member: "odbNetworkId", Location: "body"},
 		},
-		Response: []string{"odbNetwork"},
+		Response: []Step{{Name: "odbNetwork"}},
 		Fields: []Field{
 			{Property: "AvailabilityZone", Member: "availabilityZone", Kind: "scalar"},
 			{Property: "AvailabilityZoneId", Member: "availabilityZoneId", Kind: "scalar"},
@@ -5808,7 +5890,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "OdbPeeringConnectionArn", Member: "odbPeeringConnectionId", Location: "body"},
 		},
-		Response: []string{"odbPeeringConnection"},
+		Response: []Step{{Name: "odbPeeringConnection"}},
 		Fields: []Field{
 			{Property: "DisplayName", Member: "displayName", Kind: "scalar"},
 			{Property: "OdbNetworkArn", Member: "odbNetworkArn", Kind: "scalar"},
@@ -5947,7 +6029,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "id", Location: "body"},
 		},
-		Response: []string{"securityConfigDetail"},
+		Response: []Step{{Name: "securityConfigDetail"}},
 		Fields: []Field{
 			{Property: "Description", Member: "description", Kind: "scalar"},
 			{Property: "IamFederationOptions", Member: "iamFederationOptions", Kind: "structure",
@@ -5989,7 +6071,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "OutpostArn", Member: "OutpostId", Location: "label"},
 		},
-		Response: []string{"Outpost"},
+		Response: []Step{{Name: "Outpost"}},
 		Fields: []Field{
 			{Property: "AvailabilityZone", Member: "AvailabilityZone", Kind: "scalar"},
 			{Property: "AvailabilityZoneId", Member: "AvailabilityZoneId", Kind: "scalar"},
@@ -6013,7 +6095,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "clusterIdentifier", Location: "body"},
 		},
-		Response: []string{"cluster"},
+		Response: []Step{{Name: "cluster"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Endpoints", Member: "endpoints", Kind: "list",
@@ -6109,7 +6191,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "AliasName", Member: "AliasName", Location: "body"},
 		},
-		Response: []string{"Alias"},
+		Response: []Step{{Name: "Alias"}},
 		Fields: []Field{
 			{Property: "AliasName", Member: "AliasName", Kind: "scalar"},
 			{Property: "KeyArn", Member: "KeyArn", Kind: "scalar"},
@@ -6124,7 +6206,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DatasetGroupArn", Member: "datasetGroupArn", Location: "body"},
 		},
-		Response: []string{"datasetGroup"},
+		Response: []Step{{Name: "datasetGroup"}},
 		Fields: []Field{
 			{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
 			{Property: "Domain", Member: "domain", Kind: "scalar"},
@@ -6142,7 +6224,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "EventTrackerArn", Member: "eventTrackerArn", Location: "body"},
 		},
-		Response: []string{"eventTracker"},
+		Response: []Step{{Name: "eventTracker"}},
 		Fields: []Field{
 			{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
 			{Property: "EventTrackerArn", Member: "eventTrackerArn", Kind: "scalar"},
@@ -6159,7 +6241,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "FilterArn", Member: "filterArn", Location: "body"},
 		},
-		Response: []string{"filter"},
+		Response: []Step{{Name: "filter"}},
 		Fields: []Field{
 			{Property: "CreationDateTime", Member: "creationDateTime", Kind: "timestamp"},
 			{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
@@ -6179,7 +6261,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "SchemaArn", Member: "schemaArn", Location: "body"},
 		},
-		Response: []string{"schema"},
+		Response: []Step{{Name: "schema"}},
 		Fields: []Field{
 			{Property: "Domain", Member: "domain", Kind: "scalar"},
 			{Property: "Name", Member: "name", Kind: "scalar"},
@@ -6196,7 +6278,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "SolutionArn", Member: "solutionArn", Location: "body"},
 		},
-		Response: []string{"solution"},
+		Response: []Step{{Name: "solution"}},
 		Fields: []Field{
 			{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
 			{Property: "EventType", Member: "eventType", Kind: "scalar"},
@@ -6436,7 +6518,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "id", Location: "body"},
 		},
-		Response: []string{"environmentAccountConnection"},
+		Response: []Step{{Name: "environmentAccountConnection"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "CodebuildRoleArn", Member: "codebuildRoleArn", Kind: "scalar"},
@@ -6458,7 +6540,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "name", Location: "body"},
 		},
-		Response: []string{"environmentTemplate"},
+		Response: []Step{{Name: "environmentTemplate"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Description", Member: "description", Kind: "scalar"},
@@ -6477,7 +6559,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "name", Location: "body"},
 		},
-		Response: []string{"serviceTemplate"},
+		Response: []Step{{Name: "serviceTemplate"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
 			{Property: "Description", Member: "description", Kind: "scalar"},
@@ -6553,7 +6635,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "PolicyArn", Member: "policyArn", Location: "query", Name: "policyArn"},
 		},
-		Response: []string{"policy"},
+		Response: []Step{{Name: "policy"}},
 		Fields: []Field{
 			{Property: "AssociatedServiceCount", Member: "associatedServiceCount", Kind: "scalar"},
 			{Property: "AvailabilitySlo", Member: "availabilitySlo", Kind: "structure",
@@ -6598,7 +6680,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "SystemArn", Member: "systemArn", Location: "query", Name: "systemArn"},
 		},
-		Response: []string{"system"},
+		Response: []Step{{Name: "system"}},
 		Fields: []Field{
 			{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 			{Property: "Description", Member: "description", Kind: "scalar"},
@@ -6619,7 +6701,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ProfileId", Member: "profileId", Location: "label"},
 		},
-		Response: []string{"profile"},
+		Response: []Step{{Name: "profile"}},
 		Fields: []Field{
 			{Property: "AcceptRoleSessionName", Member: "acceptRoleSessionName", Kind: "scalar"},
 			{Property: "AttributeMappings", Member: "attributeMappings", Kind: "list",
@@ -6652,7 +6734,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "ProfileId", Location: "label"},
 		},
-		Response: []string{"Profile"},
+		Response: []Step{{Name: "Profile"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "ClientToken", Member: "ClientToken", Kind: "scalar"},
@@ -6671,7 +6753,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "ProfileAssociationId", Location: "label"},
 		},
-		Response: []string{"ProfileAssociation"},
+		Response: []Step{{Name: "ProfileAssociation"}},
 		Fields: []Field{
 			{Property: "Id", Member: "Id", Kind: "scalar"},
 			{Property: "Name", Member: "Name", Kind: "scalar"},
@@ -6689,7 +6771,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "ProfileResourceAssociationId", Location: "label"},
 		},
-		Response: []string{"ProfileResourceAssociation"},
+		Response: []Step{{Name: "ProfileResourceAssociation"}},
 		Fields: []Field{
 			{Property: "Id", Member: "Id", Kind: "scalar"},
 			{Property: "Name", Member: "Name", Kind: "scalar"},
@@ -6709,7 +6791,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ClusterArn", Member: "ClusterArn", Location: "label"},
 		},
-		Response: []string{"Cluster"},
+		Response: []Step{{Name: "Cluster"}},
 		Fields: []Field{
 			{Property: "ClusterArn", Member: "ClusterArn", Kind: "scalar"},
 			{Property: "ClusterEndpoints", Member: "ClusterEndpoints", Kind: "list",
@@ -6733,7 +6815,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ControlPanelArn", Member: "ControlPanelArn", Location: "label"},
 		},
-		Response: []string{"ControlPanel"},
+		Response: []Step{{Name: "ControlPanel"}},
 		Fields: []Field{
 			{Property: "ClusterArn", Member: "ClusterArn", Kind: "scalar"},
 			{Property: "ControlPanelArn", Member: "ControlPanelArn", Kind: "scalar"},
@@ -6753,7 +6835,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "RoutingControlArn", Member: "RoutingControlArn", Location: "label"},
 		},
-		Response: []string{"RoutingControl"},
+		Response: []Step{{Name: "RoutingControl"}},
 		Fields: []Field{
 			{Property: "ControlPanelArn", Member: "ControlPanelArn", Kind: "scalar"},
 			{Property: "Name", Member: "Name", Kind: "scalar"},
@@ -6849,7 +6931,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "FirewallDomainListId", Location: "body"},
 		},
-		Response: []string{"FirewallDomainList"},
+		Response: []Step{{Name: "FirewallDomainList"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
@@ -6872,7 +6954,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "FirewallRuleGroupAssociationId", Location: "body"},
 		},
-		Response: []string{"FirewallRuleGroupAssociation"},
+		Response: []Step{{Name: "FirewallRuleGroupAssociation"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
@@ -6898,7 +6980,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "Id", Location: "body"},
 		},
-		Response: []string{"OutpostResolver"},
+		Response: []Step{{Name: "OutpostResolver"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
@@ -6922,7 +7004,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "ResolverQueryLogConfigId", Location: "body"},
 		},
-		Response: []string{"ResolverQueryLogConfig"},
+		Response: []Step{{Name: "ResolverQueryLogConfig"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "AssociationCount", Member: "AssociationCount", Kind: "scalar"},
@@ -6945,7 +7027,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "ResolverQueryLogConfigAssociationId", Location: "body"},
 		},
-		Response: []string{"ResolverQueryLogConfigAssociation"},
+		Response: []Step{{Name: "ResolverQueryLogConfigAssociation"}},
 		Fields: []Field{
 			{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
 			{Property: "Error", Member: "Error", Kind: "scalar"},
@@ -6966,7 +7048,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "VectorBucketArn", Member: "vectorBucketArn", Location: "body"},
 		},
-		Response: []string{"vectorBucket"},
+		Response: []Step{{Name: "vectorBucket"}},
 		Fields: []Field{
 			{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
 			{Property: "EncryptionConfiguration", Member: "encryptionConfiguration", Kind: "structure",
@@ -7078,7 +7160,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "AssociationId", Member: "AssociationId", Location: "body"},
 		},
-		Response: []string{"AssociationDescription"},
+		Response: []Step{{Name: "AssociationDescription"}},
 		Fields: []Field{
 			{Property: "ApplyOnlyAtCronInterval", Member: "ApplyOnlyAtCronInterval", Kind: "scalar"},
 			{Property: "AssociationDispatchAssumeRole", Member: "AssociationDispatchAssumeRole", Kind: "scalar"},
@@ -7147,7 +7229,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "SettingId", Location: "body"},
 		},
-		Response: []string{"ServiceSetting"},
+		Response: []Step{{Name: "ServiceSetting"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "ARN", Kind: "scalar"},
 			{Property: "LastModifiedDate", Member: "LastModifiedDate", Kind: "timestamp"},
@@ -8500,7 +8582,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "Id", Location: "body"},
 		},
-		Response: []string{"TagOptionDetail"},
+		Response: []Step{{Name: "TagOptionDetail"}},
 		Fields: []Field{
 			{Property: "Active", Member: "Active", Kind: "scalar"},
 			{Property: "Id", Member: "Id", Kind: "scalar"},
@@ -8517,7 +8599,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "Id", Location: "body"},
 		},
-		Response: []string{"Namespace"},
+		Response: []Step{{Name: "Namespace"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -8534,7 +8616,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ProtectionGroupArn", Member: "ProtectionGroupId", Location: "body"},
 		},
-		Response: []string{"ProtectionGroup"},
+		Response: []Step{{Name: "ProtectionGroup"}},
 		Fields: []Field{
 			{Property: "Aggregation", Member: "Aggregation", Kind: "scalar"},
 			{Property: "Members", Member: "Members", Kind: "list"},
@@ -8672,7 +8754,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "CertificateId", Member: "CertificateId", Location: "body"},
 		},
-		Response: []string{"Certificate"},
+		Response: []Step{{Name: "Certificate"}},
 		Fields: []Field{
 			{Property: "ActiveDate", Member: "ActiveDate", Kind: "timestamp"},
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
@@ -8704,7 +8786,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ProfileId", Member: "ProfileId", Location: "body"},
 		},
-		Response: []string{"Profile"},
+		Response: []Step{{Name: "Profile"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "As2Id", Member: "As2Id", Kind: "scalar"},
@@ -8728,7 +8810,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Arn", Member: "ServerId", Location: "body"},
 		},
-		Response: []string{"Server"},
+		Response: []Step{{Name: "Server"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "As2ServiceManagedEgressIpAddresses", Member: "As2ServiceManagedEgressIpAddresses", Kind: "list"},
@@ -8814,7 +8896,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "WorkflowId", Member: "WorkflowId", Location: "body"},
 		},
-		Response: []string{"Workflow"},
+		Response: []Step{{Name: "Workflow"}},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
 			{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -8994,7 +9076,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DomainId", Member: "DomainId", Location: "body"},
 		},
-		Response: []string{"Domain"},
+		Response: []Step{{Name: "Domain"}},
 		Fields: []Field{
 			{Property: "Description", Member: "Description", Kind: "scalar"},
 			{Property: "DomainId", Member: "DomainId", Kind: "scalar"},
@@ -9225,7 +9307,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ProfileArn", Member: "ProfileArn", Location: "label"},
 		},
-		Response: []string{"Profile"},
+		Response: []Step{{Name: "Profile"}},
 		Fields: []Field{
 			{Property: "CreatedAt", Member: "CreatedAt", Kind: "timestamp"},
 			{Property: "Owner", Member: "Owner", Kind: "scalar"},
@@ -9252,7 +9334,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "TemplateArn", Member: "TemplateArn", Location: "label"},
 		},
-		Response: []string{"ReviewTemplate"},
+		Response: []Step{{Name: "ReviewTemplate"}},
 		Fields: []Field{
 			{Property: "Description", Member: "Description", Kind: "scalar"},
 			{Property: "Lenses", Member: "Lenses", Kind: "list"},
@@ -9274,7 +9356,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "WorkloadArn", Member: "WorkloadId", Location: "label"},
 		},
-		Response: []string{"Workload"},
+		Response: []Step{{Name: "Workload"}},
 		Fields: []Field{
 			{Property: "AccountIds", Member: "AccountIds", Kind: "list"},
 			{Property: "ArchitecturalDesign", Member: "ArchitecturalDesign", Kind: "scalar"},
@@ -9329,7 +9411,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "BrowserSettingsArn", Member: "browserSettingsArn", Location: "label"},
 		},
-		Response: []string{"browserSettings"},
+		Response: []Step{{Name: "browserSettings"}},
 		Fields: []Field{
 			{Property: "AdditionalEncryptionContext", Member: "additionalEncryptionContext", Kind: "map"},
 			{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
@@ -9355,7 +9437,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DataProtectionSettingsArn", Member: "dataProtectionSettingsArn", Location: "label"},
 		},
-		Response: []string{"dataProtectionSettings"},
+		Response: []Step{{Name: "dataProtectionSettings"}},
 		Fields: []Field{
 			{Property: "AdditionalEncryptionContext", Member: "additionalEncryptionContext", Kind: "map"},
 			{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
@@ -9405,7 +9487,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "IdentityProviderArn", Member: "identityProviderArn", Location: "label"},
 		},
-		Response: []string{"identityProvider"},
+		Response: []Step{{Name: "identityProvider"}},
 		Fields: []Field{
 			{Property: "IdentityProviderArn", Member: "identityProviderArn", Kind: "scalar"},
 			{Property: "IdentityProviderDetails", Member: "identityProviderDetails", Kind: "map"},
@@ -9423,7 +9505,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "IpAccessSettingsArn", Member: "ipAccessSettingsArn", Location: "label"},
 		},
-		Response: []string{"ipAccessSettings"},
+		Response: []Step{{Name: "ipAccessSettings"}},
 		Fields: []Field{
 			{Property: "AdditionalEncryptionContext", Member: "additionalEncryptionContext", Kind: "map"},
 			{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
@@ -9450,7 +9532,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "NetworkSettingsArn", Member: "networkSettingsArn", Location: "label"},
 		},
-		Response: []string{"networkSettings"},
+		Response: []Step{{Name: "networkSettings"}},
 		Fields: []Field{
 			{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
 			{Property: "NetworkSettingsArn", Member: "networkSettingsArn", Kind: "scalar"},
@@ -9469,7 +9551,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "UserAccessLoggingSettingsArn", Member: "userAccessLoggingSettingsArn", Location: "label"},
 		},
-		Response: []string{"userAccessLoggingSettings"},
+		Response: []Step{{Name: "userAccessLoggingSettings"}},
 		Fields: []Field{
 			{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
 			{Property: "KinesisStreamArn", Member: "kinesisStreamArn", Kind: "scalar"},
@@ -9486,7 +9568,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "GroupARN", Member: "GroupARN", Location: "body"},
 		},
-		Response: []string{"Group"},
+		Response: []Step{{Name: "Group"}},
 		Fields: []Field{
 			{Property: "FilterExpression", Member: "FilterExpression", Kind: "scalar"},
 			{Property: "GroupARN", Member: "GroupARN", Kind: "scalar"},

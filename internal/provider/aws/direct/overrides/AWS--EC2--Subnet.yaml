@@ -1,0 +1,38 @@
+type: AWS::EC2::Subnet
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeSubnets
+  identifier:
+    SubnetId: SubnetIds
+  # DescribeSubnets filters by a list of ids and answers with a list.
+  response: Subnets[]
+properties:
+  AssignIpv6AddressOnCreation: AssignIpv6AddressOnCreation
+  AvailabilityZone: AvailabilityZone
+  AvailabilityZoneId: AvailabilityZoneId
+  BlockPublicAccessStates:
+    member: BlockPublicAccessStates
+    properties:
+      InternetGatewayBlockMode: InternetGatewayBlockMode
+  CidrBlock: CidrBlock
+  EnableDns64: EnableDns64
+  Ipv6Native: Ipv6Native
+  MapPublicIpOnLaunch: MapPublicIpOnLaunch
+  OutpostArn: OutpostArn
+  PrivateDnsNameOptionsOnLaunch:
+    member: PrivateDnsNameOptionsOnLaunch
+    properties:
+      EnableResourceNameDnsAAAARecord: EnableResourceNameDnsAAAARecord
+      EnableResourceNameDnsARecord: EnableResourceNameDnsARecord
+      HostnameType: HostnameType
+  SubnetId: SubnetId
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  VpcId: VpcId
+skip:
+  Ipv6CidrBlock: a projection of Ipv6CidrBlockAssociationSet, the first association's block, not a member of its own
+  Ipv6CidrBlocks: a projection of Ipv6CidrBlockAssociationSet, every association's block, not a member of its own
+  NetworkAclAssociationId: read from DescribeNetworkAcls, a second call
