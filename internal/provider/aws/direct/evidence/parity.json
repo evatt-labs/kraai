@@ -351,6 +351,19 @@
       "compared": []
     },
     {
+      "type": "AWS::CloudFront::CachePolicy",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 15,
+      "compared": [
+        "CachePolicyConfig",
+        "Id",
+        "LastModifiedTime"
+      ]
+    },
+    {
       "type": "AWS::CodeConnections::Connection",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -780,16 +793,6 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": []
-    },
-    {
-      "type": "AWS::IAM::ServiceLinkedRole",
-      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
-      "region": "us-east-1",
-      "outcome": "unlisted",
-      "instances": 0,
-      "compared": null,
-      "note": "Cloud Control could not list the type: UnsupportedActionException"
     },
     {
       "type": "AWS::IVS::Channel",
@@ -1721,34 +1724,6 @@
     },
     {
       "type": "AWS::Route53Profiles::ProfileResourceAssociation",
-      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
-      "region": "us-east-1",
-      "outcome": "unlisted",
-      "instances": 0,
-      "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
-    },
-    {
-      "type": "AWS::Route53RecoveryControl::Cluster",
-      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
-      "region": "us-east-1",
-      "outcome": "no-instances",
-      "instances": 0,
-      "compared": []
-    },
-    {
-      "type": "AWS::Route53RecoveryControl::ControlPanel",
-      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
-      "region": "us-east-1",
-      "outcome": "no-instances",
-      "instances": 0,
-      "compared": []
-    },
-    {
-      "type": "AWS::Route53RecoveryControl::RoutingControl",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
       "region": "us-east-1",

@@ -101,6 +101,11 @@
       "sourceSha256": "9992e8206bda7e3c3bb34886f99ca4e07acc12fa24542b788bf03759ad9e6a9c",
       "subsetSha256": "62c80d1de4690c0bbf907c8e167028dc983cd5703304b3b900871ac601caa46d"
     },
+    "cloudfront/service/2020-05-31/cloudfront-2020-05-31.json": {
+      "file": "models/cloudfront-2020-05-31.json",
+      "sourceSha256": "a2a8fff6faa4d1d97e958ae04ca8180d5e16e3073e2dd99bb88a3cc60e7f4928",
+      "subsetSha256": "b5c0d246fa05f4805c80003630d96ce66ddbae4818cfd6d79f3c8f10ee85a7b6"
+    },
     "cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json": {
       "file": "models/cloudwatch-logs-2014-03-28.json",
       "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
@@ -220,11 +225,6 @@
       "file": "models/greengrassv2-2020-11-30.json",
       "sourceSha256": "e0c324d26e877ff05a37ef087a68def9d29b0736941f9a263e2182fd0d4ad608",
       "subsetSha256": "0f0758774bcd1e5a059e533887e7f4d2bd95513b8b014812b588c8e59c7563c8"
-    },
-    "iam/service/2010-05-08/iam-2010-05-08.json": {
-      "file": "models/iam-2010-05-08.json",
-      "sourceSha256": "c1f74d3eda269e4fa2f00b57d57ed19c0e0a6d7fc7c70d4e351e319d178430f9",
-      "subsetSha256": "351b41c7de39179e4d8003c2e803b88169e78ad734ca5b43232df26bac4ee7ba"
     },
     "imagebuilder/service/2019-12-02/imagebuilder-2019-12-02.json": {
       "file": "models/imagebuilder-2019-12-02.json",
@@ -471,11 +471,6 @@
       "sourceSha256": "ec05a45aa6b4e4008780aa019e1f0df11df55c63b34d8ef59c20844498dadaef",
       "subsetSha256": "38dd67778d29e908c8cc804d8731ec92fc9719646758a295f4da0864af269f28"
     },
-    "route53-recovery-control-config/service/2020-11-02/route53-recovery-control-config-2020-11-02.json": {
-      "file": "models/route53-recovery-control-config-2020-11-02.json",
-      "sourceSha256": "d63ef56d94031b9ffddcdb31a99e49f13cf371f269fd7fd79fdde031e3c26508",
-      "subsetSha256": "ad540873121742c59fc05c2fddc50d2c01b33c97978ead744c4c9d7b91856f2a"
-    },
     "route53-recovery-readiness/service/2019-12-02/route53-recovery-readiness-2019-12-02.json": {
       "file": "models/route53-recovery-readiness-2019-12-02.json",
       "sourceSha256": "22dd4f313cf7f5c42204f571247d7169bc0042d7eb7588b036d271db4a5cef5b",
@@ -510,6 +505,11 @@
       "file": "models/schemas-2019-12-02.json",
       "sourceSha256": "801f795ec5f7973bcd2c6bae14dc03859c3e54e718f3e4b85b8445f47d798a68",
       "subsetSha256": "6a1eba34610d1ea5350ac54ea03e5b314b5b7c85d04b65f7a005565293b07997"
+    },
+    "securityagent/service/2025-09-06/securityagent-2025-09-06.json": {
+      "file": "models/securityagent-2025-09-06.json",
+      "sourceSha256": "26c14d384f79c859a5528aa7f6e361c801f68ff171a309380ace454f8a5fcdb1",
+      "subsetSha256": "1158cadf3ad30bf77a6d752e1dccd38171009d66984c6a5d5a7bfac9e81c1ccf"
     },
     "securityhub/service/2018-10-26/securityhub-2018-10-26.json": {
       "file": "models/securityhub-2018-10-26.json",
@@ -600,6 +600,11 @@
       "file": "models/wickr-2024-02-01.json",
       "sourceSha256": "84742f14a1f34f6a66a5efb93ef5a91f537fad019cb0fddabd6763293a3d22e6",
       "subsetSha256": "8ae59d4879b0c33d57b4072f5f6e55e3f960654583986def1099ee06994318be"
+    },
+    "workspaces-instances/service/2022-07-26/workspaces-instances-2022-07-26.json": {
+      "file": "models/workspaces-instances-2022-07-26.json",
+      "sourceSha256": "288391e01f1c9260c7060d57d95b6fd98cc45813b3e4a3a5ead4c63b4b71fa95",
+      "subsetSha256": "1e035c54b78bbc67a299ee5fe5aab77623d96daa0df31854a6110d582055b39a"
     },
     "workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json": {
       "file": "models/workspaces-web-2020-07-08.json",
@@ -782,6 +787,11 @@
       "file": "schemas/AWS--CloudFormation--ModuleDefaultVersion.json",
       "sourceSha256": "8bbc83a71a9428439591e00f5d62e25da9caaf66db51c355f5ff49c7d26da857",
       "subsetSha256": "8bb7ccfae278a97cd5d0659d08ec9726708e272c63a0f47f236bc2a0d1caa9dc"
+    },
+    "AWS::CloudFront::CachePolicy": {
+      "file": "schemas/AWS--CloudFront--CachePolicy.json",
+      "sourceSha256": "f5fe75ecfe594677190a6b95aaf5597eea0bb39fb5bec1a5a7a5686c7d6af141",
+      "subsetSha256": "d2adf82776346c72ab3203d4f0eb938e344b0f1806106f0f57c5720a02564d4a"
     },
     "AWS::CodeConnections::Connection": {
       "file": "schemas/AWS--CodeConnections--Connection.json",
@@ -992,11 +1002,6 @@
       "file": "schemas/AWS--HealthImaging--Datastore.json",
       "sourceSha256": "073fbcde11c74388e665abd6a5f55aa1dc7580f0dc23ac29adf6b146609b4152",
       "subsetSha256": "beab0793e4538682755228255e8a7c8d4e04a1982938b189a346f87a42d32d39"
-    },
-    "AWS::IAM::ServiceLinkedRole": {
-      "file": "schemas/AWS--IAM--ServiceLinkedRole.json",
-      "sourceSha256": "7e58f2ade27fcea5227ec6fb4e7bcb875652b5313a87dd992bca90b49cd9cb67",
-      "subsetSha256": "c64b088908c81395388747e2b462c85c1335b77e3b6bf4cb07e28a02c16ae0a7"
     },
     "AWS::IVS::Channel": {
       "file": "schemas/AWS--IVS--Channel.json",
@@ -1503,21 +1508,6 @@
       "sourceSha256": "979c3a2fc7ebdebef98cac07cf9735826ba21deee674ff690f7964d4f39e07d4",
       "subsetSha256": "e2d21cc5aeec74eae84969f208b8ea6c9ed789772ef65e2b778ad25303f3454b"
     },
-    "AWS::Route53RecoveryControl::Cluster": {
-      "file": "schemas/AWS--Route53RecoveryControl--Cluster.json",
-      "sourceSha256": "f9acf7c1bea1f9f5b4afda7c9014307952d3024168e225493975c678a8c47aee",
-      "subsetSha256": "f196df4b982e22cd44eeb61bf8333963e1c753899ad962d3a722a0083d5a1582"
-    },
-    "AWS::Route53RecoveryControl::ControlPanel": {
-      "file": "schemas/AWS--Route53RecoveryControl--ControlPanel.json",
-      "sourceSha256": "4902f18a4076d6c916b6e60627d1a67f2f859f439189e44e0825f021e2069b9d",
-      "subsetSha256": "895aa9a3c4b238ca3eac15d92524ad6f16f7ae24c906acdfb3c4759066745c3c"
-    },
-    "AWS::Route53RecoveryControl::RoutingControl": {
-      "file": "schemas/AWS--Route53RecoveryControl--RoutingControl.json",
-      "sourceSha256": "6b5523bba0b1cafbb5f34ddf57bc82b75ebe3f3c3e648e42d76180d888679f5e",
-      "subsetSha256": "cb3749420e7a1e40dc915b256ba379bd8b2e4af789c1c814c8c5419f29e94168"
-    },
     "AWS::Route53RecoveryReadiness::Cell": {
       "file": "schemas/AWS--Route53RecoveryReadiness--Cell.json",
       "sourceSha256": "2b96d1e208a7b383fc94c4ba29917eb4ac6d56a642d158a7d9e031f6da0246e2",
@@ -1703,6 +1693,11 @@
       "sourceSha256": "607803b13ffe2061134f1d99105c3cb20eb58de66ad682e09068ca35ca3899b5",
       "subsetSha256": "b9fbefa444bee84864962200385eeb48526307a6a3290b9759c28b4e3004edda"
     },
+    "AWS::SecurityAgent::Application": {
+      "file": "schemas/AWS--SecurityAgent--Application.json",
+      "sourceSha256": "cbab68b56a1778a8d4fcc3fbb19392b3e1717af903ee821c3d077ad781ac658b",
+      "subsetSha256": "7aeb6845861f03724769c390e0a58d22e421460727bf2be8d30025ccd05a3698"
+    },
     "AWS::SecurityHub::AggregatorV2": {
       "file": "schemas/AWS--SecurityHub--AggregatorV2.json",
       "sourceSha256": "bb11f74a4e2203157f1ffd4b4790595ceccdb4c09bdd9e4b7cea7decf51fdc3e",
@@ -1867,6 +1862,11 @@
       "file": "schemas/AWS--WorkSpacesWeb--UserAccessLoggingSettings.json",
       "sourceSha256": "eb5f0b23d5cbd234d40da9cb251a8cb5bc344f9721024a08cf3741e1bab6d952",
       "subsetSha256": "c6aa9075dad063710c29605ba57b495c364cfb51703e068d71a3d70c63392cc0"
+    },
+    "AWS::WorkspacesInstances::WorkspaceInstance": {
+      "file": "schemas/AWS--WorkspacesInstances--WorkspaceInstance.json",
+      "sourceSha256": "d7eddb3a3840f0d7bdb336e97159804ad45574ba72bd6ff4408fbb5bdd6c412e",
+      "subsetSha256": "6b5d58073de29f07d94ed842887d807298cc09ba415a4fabe745cc9ffc860870"
     },
     "AWS::XRay::Group": {
       "file": "schemas/AWS--XRay--Group.json",

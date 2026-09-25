@@ -23,9 +23,9 @@ type Client struct {
 	HTTP        *http.Client
 	Credentials aws.CredentialsProvider
 	Region      string
-	// Endpoint returns the base URL for an endpoint prefix and region; nil
-	// is the standard https://{prefix}.{region}.amazonaws.com.
-	Endpoint func(prefix, region string) string
+	// Endpoint returns the base URL for a reader's host, its region already
+	// filled in; nil is https://{host}.
+	Endpoint func(host string) string
 	// Now is the signing clock; nil is time.Now.
 	Now func() time.Time
 }
@@ -216,13 +216,14 @@ func (c *Client) send(ctx context.Context, r Reader, method, uri, target string,
 }
 
 func (c *Client) request(ctx context.Context, r Reader, method, uri, target string, values []Binding) (*http.Request, error) {
-	base := fmt.Sprintf("https://%s.%s.amazonaws.com", r.EndpointPrefix, c.Region)
+	host := strings.ReplaceAll(r.Host, "{region}", c.Region)
+	base := "https://" + host
 	if c.Endpoint != nil {
-		base = c.Endpoint(r.EndpointPrefix, c.Region)
+		base = c.Endpoint(host)
 	}
 	body := map[string]any{}
 	path, query, headers, form := "/", url.Values{}, http.Header{}, url.Values{}
-	if r.Protocol == "restJson1" {
+	if isREST(r.Protocol) {
 		path = uri
 	} else {
 		method = http.MethodPost
@@ -263,11 +264,11 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 	}
 
 	var payload []byte
-	if isXML(r.Protocol) {
+	if isQuery(r.Protocol) {
 		form.Set("Action", r.Action)
 		form.Set("Version", r.Version)
 		payload = []byte(form.Encode())
-	} else if r.Protocol != "restJson1" || len(body) > 0 {
+	} else if isAWSJSON(r.Protocol) || r.Protocol == "restJson1" && len(body) > 0 {
 		var err error
 		if payload, err = json.Marshal(body); err != nil {
 			return nil, err
@@ -308,7 +309,11 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 		now = c.Now
 	}
 	sum := sha256.Sum256(payload)
-	if err := v4.NewSigner().SignHTTP(ctx, creds, req, hex.EncodeToString(sum[:]), r.SigningName, c.Region, now()); err != nil {
+	region := c.Region
+	if r.SigningRegion != "" {
+		region = r.SigningRegion
+	}
+	if err := v4.NewSigner().SignHTTP(ctx, creds, req, hex.EncodeToString(sum[:]), r.SigningName, region, now()); err != nil {
 		return nil, err
 	}
 	return req, nil
@@ -347,7 +352,11 @@ func (r Reader) wire(member, jsonName string) string {
 func (r Reader) translate(obj map[string]any, fields []Field) map[string]any {
 	out := map[string]any{}
 	for _, f := range fields {
-		v, ok := obj[r.wire(f.Member, f.JSONName)]
+		holder := obj
+		for _, step := range f.Via {
+			holder, _ = holder[r.wire(step, "")].(map[string]any)
+		}
+		v, ok := holder[r.wire(f.Member, f.JSONName)]
 		if !ok || v == nil {
 			continue
 		}
