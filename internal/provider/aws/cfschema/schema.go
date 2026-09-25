@@ -93,8 +93,11 @@ func (d Document) resolve(raw json.RawMessage) (fragment, bool) {
 // fragment is the little of a property's JSON Schema that shape derivation
 // reads.
 type fragment struct {
-	Ref                  string                     `json:"$ref"`
-	Type                 string                     `json:"type"`
+	Ref  string `json:"$ref"`
+	Type string `json:"type"`
+	// InsertionOrder false declares an array's order meaningless; absent
+	// means true, the specification's default.
+	InsertionOrder       *bool                      `json:"insertionOrder"`
 	Items                json.RawMessage            `json:"items"`
 	Properties           map[string]json.RawMessage `json:"properties"`
 	PatternProperties    map[string]json.RawMessage `json:"patternProperties"`

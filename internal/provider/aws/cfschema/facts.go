@@ -60,6 +60,11 @@ type Facts struct {
 	ListScope   [][]string `json:"listScope,omitempty"`
 	HasUpdate   bool       `json:"hasUpdate"`
 	Permissions []string   `json:"permissions,omitempty"`
+	// Unordered is the pointer of every array the schema declares
+	// insertionOrder false, with "*" for each array it is nested in, such
+	// as /properties/ContainerDefinitions/*/Environment: an array whose
+	// order means nothing, so two orders of it are the same value.
+	Unordered []string `json:"unordered,omitempty"`
 }
 
 // Derive computes a type's Facts from its schema.
@@ -72,6 +77,7 @@ func Derive(doc Document) Facts {
 		ReadOnly:          doc.ReadOnlyProperties,
 		ListScope:         listScope(doc),
 		Permissions:       permissions(doc),
+		Unordered:         unordered(doc),
 	}
 	f.HasUpdate = hasHandler(doc, "update")
 	f.TagProperty, f.TagShape, f.TagOnCreate = tagPlacement(doc)
@@ -225,6 +231,46 @@ func permissions(doc Document) []string {
 	out := make([]string, 0, len(set))
 	for action := range set {
 		out = append(out, action)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// unordered walks doc's properties, through definitions, for the arrays
+// Facts.Unordered records. A definition already being walked is not walked
+// again, so a recursive schema ends.
+func unordered(doc Document) []string {
+	var out []string
+	var walk func(pointer string, raw json.RawMessage, open map[string]bool)
+	walk = func(pointer string, raw json.RawMessage, open map[string]bool) {
+		var ref struct {
+			Ref string `json:"$ref"`
+		}
+		_ = json.Unmarshal(raw, &ref)
+		if ref.Ref != "" {
+			if open[ref.Ref] {
+				return
+			}
+			open[ref.Ref] = true
+			defer delete(open, ref.Ref)
+		}
+		frag, ok := doc.resolve(raw)
+		if !ok {
+			return
+		}
+		if len(frag.Items) > 0 {
+			if frag.InsertionOrder != nil && !*frag.InsertionOrder {
+				out = append(out, pointer)
+			}
+			walk(pointer+"/*", frag.Items, open)
+			return
+		}
+		for name, child := range frag.Properties {
+			walk(pointer+"/"+name, child, open)
+		}
+	}
+	for name, raw := range doc.Properties {
+		walk("/properties/"+name, raw, map[string]bool{})
 	}
 	sort.Strings(out)
 	return out

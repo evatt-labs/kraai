@@ -44,6 +44,8 @@ func run() error {
 		workers = flag.Int("workers", 6, "concurrent DescribeType calls")
 		accept  = flag.Bool("accept-identity-changes", false,
 			"write the index even though it finds an already-indexed type differently")
+		same = flag.Bool("same-types", false,
+			"re-derive the types the existing index holds instead of listing the registry, to change a derivation without adding types")
 	)
 	flag.Parse()
 	if *cache == "" {
@@ -65,8 +67,21 @@ func run() error {
 	}
 	cf := cloudformation.NewFromConfig(cfg)
 
-	names, err := listTypes(ctx, cf)
-	if err != nil {
+	var names []string
+	if *same {
+		raw, err := os.ReadFile(*out)
+		if err != nil {
+			return err
+		}
+		existing, err := cfschema.DecodeIndex(raw)
+		if err != nil {
+			return err
+		}
+		for name := range existing {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+	} else if names, err = listTypes(ctx, cf); err != nil {
 		return err
 	}
 	fmt.Fprintf(os.Stderr, "%d AWS-published provisionable types\n", len(names))
