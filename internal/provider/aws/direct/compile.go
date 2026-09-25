@@ -33,6 +33,10 @@ type Reader struct {
 	Absent []Condition
 	// Probe lists identifiers that must read as absent, for the harness.
 	Probe *Lister
+	// Also is the further calls whose properties are merged into a read.
+	Also []Reader
+	// AbsentIDs are identifiers that must read as absent, for the harness.
+	AbsentIDs []string
 	// Complete is true when the override skips no property at any depth,
 	// so a read carries everything Cloud Control's does.
 	Complete bool
@@ -107,10 +111,13 @@ type Binding struct {
 type Field struct {
 	Property string
 	Member   string
-	// Via is the path of structures on the wire from the enclosing one to
-	// the one holding Member, for a property the API wraps, such as a list
-	// inside a Quantity and Items structure.
-	Via []string
+	// Via is the path on the wire from the enclosing structure to the one
+	// holding Member, for a property the API wraps, such as a list inside
+	// a Quantity and Items structure. A list step reads Member from every
+	// element, making the property the list of those values.
+	Via []Step
+	// Transform is applied to the value read; see Mapping.Transform.
+	Transform string
 	// Root reads the member from the operation's whole output rather than
 	// the resource, for a value carried beside it.
 	Root bool
@@ -199,6 +206,36 @@ func compileAll(files fs.FS) ([]Reader, error) {
 }
 
 func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
+	r, errs := compileCall(files, lock, o, nil)
+	for i, call := range o.Also {
+		only := map[string]bool{}
+		for name := range call.Properties {
+			only[name] = true
+		}
+		sub := Override{
+			Type: o.Type,
+			Read: Read{Model: o.Read.Model, Operation: call.Operation, Identifier: call.Identifier,
+				Response: call.Response, Input: call.Input},
+			Properties: call.Properties,
+		}
+		also, alsoErrs := compileCall(files, lock, sub, only)
+		for _, e := range alsoErrs {
+			errs = append(errs, fmt.Errorf("also[%d] %s: %w", i, call.Operation, e))
+		}
+		if len(call.Properties) == 0 {
+			errs = append(errs, fmt.Errorf("also[%d] %s maps no property", i, call.Operation))
+		}
+		r.Also = append(r.Also, also)
+	}
+	r.AbsentIDs = o.AbsentIDs
+	return r, errs
+}
+
+// compileCall compiles one call of a read. only, when set, limits the
+// properties the call must account for to those it maps, for a further
+// call; otherwise the call accounts for every readable property but those
+// o's further calls map.
+func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Reader, []error) {
 	var errs []error
 	fail := func(format string, args ...any) { errs = append(errs, fmt.Errorf(format, args...)) }
 
@@ -388,11 +425,21 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		fail("response path %q does not end at a structure", o.Read.Response)
 	}
 
+	elsewhere := map[string]bool{}
+	for _, call := range o.Also {
+		for name := range call.Properties {
+			if _, twice := o.Properties[name]; twice || elsewhere[name] {
+				fail("%s is mapped by more than one call", name)
+			}
+			elsewhere[name] = true
+		}
+	}
 	readable := map[string]cfnProperty{}
 	for name, p := range schema.Properties {
-		if !schema.writeOnly(name) {
-			readable[name] = p
+		if schema.writeOnly(name) || elsewhere[name] || only != nil && !only[name] {
+			continue
 		}
+		readable[name] = p
 	}
 	// A top-level mapping to "$.member" reads from the whole output.
 	output := ref(op.Output)
@@ -415,7 +462,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			ownMapped[name] = mapping
 		}
 	}
-	r.Complete = !skipsAny(o.Skip, o.Properties)
+	r.Complete = !skipsAny(o.Skip, o.Properties) && only == nil
 	r.Fields = compileFields(&model, &schema, ownProps, resource, ownMapped, o.Skip, "", fail)
 	if isXML(r.Protocol) {
 		xmlFields(&model, resource, r.Fields, "", fail)
@@ -541,12 +588,32 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s is neither mapped nor skipped", at, name)
 			continue
 		}
-		// A dotted member is a path through structures to the one mapped.
+		// A dotted member is a path through structures to the one mapped;
+		// a step ending [] is a list of structures, read element by element.
 		steps := strings.Split(mapping.Member, ".")
-		holder, via, walked := structure, []string{}, true
+		holder, via, walked, projected := structure, []Step{}, true, false
 		for _, step := range steps[:len(steps)-1] {
+			step, list := strings.CutSuffix(step, "[]")
 			pm, ok := model.Shapes[holder].Members[step]
-			if !ok || model.Shapes[pm.Target].Type != "structure" {
+			next := ""
+			if ok {
+				next = pm.Target
+				isList := targetType(model.Shapes[next].Type, next) == "list"
+				switch {
+				case list && !isList:
+					fail("%s%s maps to %s, but %s is not a list", at, name, mapping.Member, step)
+				case !list && isList:
+					fail("%s%s maps to %s, but %s is a list; mark it %s[]", at, name, mapping.Member, step, step)
+				}
+				if list != isList {
+					walked = false
+					break
+				}
+				if list {
+					next = ref(model.Shapes[next].Member)
+				}
+			}
+			if !ok || model.Shapes[next].Type != "structure" {
 				fail("%s%s maps to %s, but %s is not a structure member of %s", at, name, mapping.Member, step, holder)
 				walked = false
 				break
@@ -554,7 +621,8 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			if pm.Traits["smithy.api#jsonName"] != nil {
 				fail("%s%s maps through %s, whose jsonName a path does not follow", at, name, step)
 			}
-			via, holder = append(via, step), pm.Target
+			projected = projected || list
+			via, holder = append(via, Step{Name: step, List: list}), next
 		}
 		if !walked {
 			continue
@@ -564,12 +632,31 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s maps to %s, which %s does not have", at, name, mapping.Member, structure)
 			continue
 		}
-		f := Field{Property: name, Member: steps[len(steps)-1]}
+		f := Field{Property: name, Member: steps[len(steps)-1], Transform: mapping.Transform}
 		if len(via) > 0 {
 			f.Via = via
 		}
+		switch mapping.Transform {
+		case "":
+		case "arnResource":
+			if targetType(model.Shapes[m.Target].Type, m.Target) != "string" {
+				fail("%s%s transforms %s, which is not a string", at, name, f.Member)
+			}
+		default:
+			fail("%s%s names transform %q; the only one is arnResource", at, name, mapping.Transform)
+		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]
+		if projected {
+			// The property is the list of the member's values: its items
+			// are what must match the member.
+			if item := schema.resolve(prop); item.Items != nil {
+				prop = *item.Items
+			} else {
+				fail("%s%s maps through a list, but the schema does not declare it an array", at, name)
+				continue
+			}
+		}
 		types := schema.types(prop)
 		target := model.Shapes[m.Target]
 		if !compatible(types, target.Type, m.Target) {
@@ -919,8 +1006,14 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 		f := &fields[i]
 		holder := structure
 		for j, step := range f.Via {
-			pm := model.Shapes[holder].Members[step]
-			f.Via[j], holder = xmlName(step, pm), pm.Target
+			pm := model.Shapes[holder].Members[step.Name]
+			holder = pm.Target
+			f.Via[j].Name = xmlName(step.Name, pm)
+			if step.List {
+				listShape := model.Shapes[holder]
+				f.Via[j].Item = itemName(pm, listShape)
+				holder = ref(listShape.Member)
+			}
 		}
 		m := model.Shapes[holder].Members[f.Member]
 		f.XMLName = xmlName(f.Member, m)

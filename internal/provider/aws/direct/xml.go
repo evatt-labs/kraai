@@ -130,55 +130,86 @@ func (r Reader) readXML(body []byte) (map[string]any, error) {
 func translateXML(n *xmlNode, fields []Field) map[string]any {
 	out := map[string]any{}
 	for _, f := range fields {
-		holder := n
+		holders, projected := []*xmlNode{n}, false
 		for _, step := range f.Via {
-			if holder = holder.child(step); holder == nil {
-				break
+			var next []*xmlNode
+			for _, h := range holders {
+				if !step.List {
+					if c := h.child(step.Name); c != nil {
+						next = append(next, c)
+					}
+					continue
+				}
+				projected = true
+				items, _ := h.items(step.Name, step.Item)
+				next = append(next, items...)
+			}
+			holders = next
+		}
+		var values []any
+		for _, h := range holders {
+			if v, ok := xmlValue(h, f); ok {
+				values = append(values, v)
 			}
 		}
-		if holder == nil {
-			continue
-		}
-		n := holder
-		switch f.Kind {
-		case "structure":
-			if c := n.child(f.XMLName); c != nil {
-				out[f.Property] = translateXML(c, f.Fields)
+		switch {
+		case projected && len(holders) > 0:
+			if values == nil {
+				values = []any{}
 			}
-		case "list":
-			items, present := n.items(f.XMLName, f.Item)
-			if !present {
-				continue
-			}
-			list := make([]any, 0, len(items))
-			for _, item := range items {
-				if len(f.Fields) > 0 {
-					list = append(list, translateXML(item, f.Fields))
-				} else {
-					list = append(list, xmlScalar(item.text, f.Scalar))
-				}
-			}
-			out[f.Property] = list
-		case "map":
-			c := n.child(f.XMLName)
-			if c == nil {
-				continue
-			}
-			m := map[string]any{}
-			for _, entry := range c.children("entry") {
-				k, v := entry.child("key"), entry.child("value")
-				if k != nil && v != nil {
-					m[k.text] = xmlScalar(v.text, f.Scalar)
-				}
-			}
-			out[f.Property] = m
-		default:
-			if c := n.child(f.XMLName); c != nil {
-				out[f.Property] = xmlScalar(c.text, f.Scalar)
-			}
+			out[f.Property] = values
+		case len(values) == 1:
+			out[f.Property] = values[0]
 		}
 	}
 	return out
+}
+
+// xmlValue reads f's member from one element, as value does from JSON.
+func xmlValue(n *xmlNode, f Field) (any, bool) {
+	var v any
+	switch f.Kind {
+	case "structure":
+		c := n.child(f.XMLName)
+		if c == nil {
+			return nil, false
+		}
+		v = translateXML(c, f.Fields)
+	case "list":
+		items, present := n.items(f.XMLName, f.Item)
+		if !present {
+			return nil, false
+		}
+		list := make([]any, 0, len(items))
+		for _, item := range items {
+			if len(f.Fields) > 0 {
+				list = append(list, translateXML(item, f.Fields))
+			} else {
+				list = append(list, xmlScalar(item.text, f.Scalar))
+			}
+		}
+		v = list
+	case "map":
+		c := n.child(f.XMLName)
+		if c == nil {
+			return nil, false
+		}
+		m := map[string]any{}
+		for _, entry := range c.children("entry") {
+			k, val := entry.child("key"), entry.child("value")
+			if k != nil && val != nil {
+				m[k.text] = xmlScalar(val.text, f.Scalar)
+			}
+		}
+		v = m
+	default:
+		c := n.child(f.XMLName)
+		if c == nil {
+			return nil, false
+		}
+		v = xmlScalar(c.text, f.Scalar)
+	}
+	return transform(f.Transform, v), true
 }
 
 // xmlScalar types text as scalar says. Text that is not what the model

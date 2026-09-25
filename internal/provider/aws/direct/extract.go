@@ -42,6 +42,12 @@ type override struct {
 	List *struct {
 		Operation string `yaml:"operation"`
 	} `yaml:"list"`
+	Probe *struct {
+		Operation string `yaml:"operation"`
+	} `yaml:"probe"`
+	Also []struct {
+		Operation string `yaml:"operation"`
+	} `yaml:"also"`
 }
 
 type lockedFile struct {
@@ -93,6 +99,12 @@ func run() error {
 		ops[o.Read.Model] = append(ops[o.Read.Model], o.Read.Operation)
 		if o.List != nil {
 			ops[o.Read.Model] = append(ops[o.Read.Model], o.List.Operation)
+		}
+		if o.Probe != nil {
+			ops[o.Read.Model] = append(ops[o.Read.Model], o.Probe.Operation)
+		}
+		for _, also := range o.Also {
+			ops[o.Read.Model] = append(ops[o.Read.Model], also.Operation)
 		}
 	}
 
@@ -249,7 +261,12 @@ func subsetModel(raw []byte, operations []string) ([]byte, error) {
 		}
 	}
 	var opIDs []any
+	seen := map[string]bool{}
 	for _, op := range operations {
+		if seen[op] {
+			continue
+		}
+		seen[op] = true
 		id := namespace + op
 		if _, ok := shapes[id]; !ok {
 			return nil, fmt.Errorf("no operation %s", id)

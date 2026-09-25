@@ -645,12 +645,18 @@
         "Port",
         "Protocol",
         "ProtocolVersion",
+        "Tags",
         "TargetGroupArn",
+        "TargetGroupAttributes",
+        "TargetGroupFullName",
         "TargetGroupName",
         "TargetType",
+        "Targets",
         "UnhealthyThresholdCount",
         "VpcId"
-      ]
+      ],
+      "absence": "parity",
+      "probed": 1
     },
     {
       "type": "AWS::ElementalInference::Dictionary",

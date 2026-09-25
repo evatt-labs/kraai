@@ -17,6 +17,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"golang.org/x/sync/errgroup"
 )
 
 // Client reads resources through their own service APIs, from the
@@ -51,6 +52,40 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if !ok {
 		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
+	props, err := c.readCall(ctx, r, identifier)
+	if err != nil {
+		return nil, err
+	}
+	// The further calls are independent of one another: made together, a
+	// read costs two round trips rather than one per call.
+	results := make([]map[string]any, len(r.Also))
+	g, gctx := errgroup.WithContext(ctx)
+	for i, also := range r.Also {
+		g.Go(func() error {
+			more, err := c.readCall(gctx, also, identifier)
+			if errors.Is(err, ErrAbsent) {
+				// Gone between the calls, or a further call that finds
+				// nothing: not proof of absence, so not reported as it.
+				err = fmt.Errorf("the %s call %s found no instance", typeName, also.Action+also.Target+also.URI)
+			}
+			results[i] = more
+			return err
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	for _, more := range results {
+		for k, v := range more {
+			props[k] = v
+		}
+	}
+	return props, nil
+}
+
+// readCall makes one call of a read and translates its response.
+func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]string) (map[string]any, error) {
+	typeName := r.Type
 	values := make([]Binding, 0, len(r.Identifier)+len(r.Input))
 	for _, b := range r.Identifier {
 		value, ok := identifier[b.Property]
@@ -422,33 +457,72 @@ func (r Reader) wire(member, jsonName string) string {
 func (r Reader) translate(obj map[string]any, fields []Field) map[string]any {
 	out := map[string]any{}
 	for _, f := range fields {
-		holder := obj
+		// Walk Via to every structure holding the member; a list step
+		// fans out, making the property a list of the member's values.
+		holders, projected := []map[string]any{obj}, false
 		for _, step := range f.Via {
-			holder, _ = holder[r.wire(step, "")].(map[string]any)
-		}
-		v, ok := holder[r.wire(f.Member, f.JSONName)]
-		if !ok || v == nil {
-			continue
-		}
-		switch f.Kind {
-		case "structure":
-			if nested, ok := v.(map[string]any); ok && len(f.Fields) > 0 {
-				v = r.translate(nested, f.Fields)
-			}
-		case "list":
-			if items, ok := v.([]any); ok && len(f.Fields) > 0 {
-				translated := make([]any, 0, len(items))
+			var next []map[string]any
+			for _, h := range holders {
+				v := h[r.wire(step.Name, "")]
+				if !step.List {
+					if m, ok := v.(map[string]any); ok {
+						next = append(next, m)
+					}
+					continue
+				}
+				projected = true
+				items, _ := v.([]any)
 				for _, item := range items {
-					if nested, ok := item.(map[string]any); ok {
-						translated = append(translated, r.translate(nested, f.Fields))
+					if m, ok := item.(map[string]any); ok {
+						next = append(next, m)
 					}
 				}
-				v = translated
+			}
+			holders = next
+		}
+		var values []any
+		for _, h := range holders {
+			if v, ok := r.value(h, f); ok {
+				values = append(values, v)
 			}
 		}
-		out[f.Property] = v
+		switch {
+		case projected && len(holders) > 0:
+			if values == nil {
+				values = []any{}
+			}
+			out[f.Property] = values
+		case len(values) == 1:
+			out[f.Property] = values[0]
+		}
 	}
 	return out
+}
+
+// value reads f's member from one structure, translating nested fields
+// and applying f's transform; ok is false when the member is absent.
+func (r Reader) value(holder map[string]any, f Field) (any, bool) {
+	v, ok := holder[r.wire(f.Member, f.JSONName)]
+	if !ok || v == nil {
+		return nil, false
+	}
+	switch f.Kind {
+	case "structure":
+		if nested, ok := v.(map[string]any); ok && len(f.Fields) > 0 {
+			v = r.translate(nested, f.Fields)
+		}
+	case "list":
+		if items, ok := v.([]any); ok && len(f.Fields) > 0 {
+			translated := make([]any, 0, len(items))
+			for _, item := range items {
+				if nested, ok := item.(map[string]any); ok {
+					translated = append(translated, r.translate(nested, f.Fields))
+				}
+			}
+			v = translated
+		}
+	}
+	return transform(f.Transform, v), true
 }
 
 // apiError reads the error type from the X-Amzn-Errortype header, or a
@@ -479,4 +553,19 @@ func apiError(resp *http.Response, body []byte) error {
 		message = parsed.MessageUpper
 	}
 	return &APIError{Status: resp.StatusCode, Code: code, Message: message}
+}
+
+// transform applies a field's named transform to a value read for it.
+// arnResource keeps an ARN's resource part, everything after its fifth
+// colon, such as targetgroup/name/0123 from an ELB target group's ARN.
+func transform(name string, v any) any {
+	if name != "arnResource" {
+		return v
+	}
+	if arn, ok := v.(string); ok {
+		if parts := strings.SplitN(arn, ":", 6); len(parts) == 6 {
+			return parts[5]
+		}
+	}
+	return v
 }
