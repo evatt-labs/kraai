@@ -19,6 +19,9 @@ type cfnProperty struct {
 	AnyOf      []cfnProperty          `json:"anyOf"`
 	Items      *cfnProperty           `json:"items"`
 	Properties map[string]cfnProperty `json:"properties"`
+	// InsertionOrder false declares an array's order meaningless; absent
+	// means true, CloudFormation's default.
+	InsertionOrder *bool `json:"insertionOrder"`
 }
 
 func (s *cfnSchema) writeOnly(name string) bool {

@@ -72,21 +72,35 @@ func propose(files fs.FS, o Override) (Override, error) {
 		}
 	}
 
-	// Descend through an output that wraps the resource in its only member.
-	resource, path := ref(op.Output), []string{}
-	for {
-		members := model.Shapes[resource].Members
-		if len(members) != 1 {
-			break
+	// Walk a response path the override already names, such as one member
+	// of an output that also carries the resource's tags beside it.
+	// Otherwise descend through an output that wraps the resource in its
+	// only member.
+	resource := ref(op.Output)
+	if o.Read.Response != "" {
+		for step := range strings.SplitSeq(o.Read.Response, ".") {
+			m, ok := model.Shapes[resource].Members[step]
+			if !ok {
+				return o, fmt.Errorf("response path %s: %s has no member %s", o.Read.Response, resource, step)
+			}
+			resource = m.Target
 		}
-		name := sortedKeys(members)[0]
-		m := members[name]
-		if model.Shapes[m.Target].Type != "structure" {
-			break
+	} else {
+		var path []string
+		for {
+			members := model.Shapes[resource].Members
+			if len(members) != 1 {
+				break
+			}
+			name := sortedKeys(members)[0]
+			m := members[name]
+			if model.Shapes[m.Target].Type != "structure" {
+				break
+			}
+			path, resource = append(path, name), m.Target
 		}
-		path, resource = append(path, name), m.Target
+		o.Read.Response = strings.Join(path, ".")
 	}
-	o.Read.Response = strings.Join(path, ".")
 
 	readable := map[string]cfnProperty{}
 	for name, p := range schema.Properties {

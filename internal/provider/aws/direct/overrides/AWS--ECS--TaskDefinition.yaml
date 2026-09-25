@@ -1,0 +1,247 @@
+type: AWS::ECS::TaskDefinition
+read:
+  model: ecs/service/2014-11-13/ecs-2014-11-13.json
+  operation: DescribeTaskDefinition
+  identifier:
+    TaskDefinitionArn: taskDefinition
+  response: taskDefinition
+list:
+  operation: ListTaskDefinitions
+  # Cloud Control lists only active revisions; a deregistered one is gone.
+  input:
+    status: ACTIVE
+properties:
+  ContainerDefinitions:
+    member: containerDefinitions
+    properties:
+      Command: command
+      Cpu: cpu
+      CredentialSpecs: credentialSpecs
+      DependsOn:
+        member: dependsOn
+        properties:
+          Condition: condition
+          ContainerName: containerName
+      DisableNetworking: disableNetworking
+      DnsSearchDomains: dnsSearchDomains
+      DnsServers: dnsServers
+      DockerLabels: dockerLabels
+      DockerSecurityOptions: dockerSecurityOptions
+      EntryPoint: entryPoint
+      Environment:
+        member: environment
+        properties:
+          Name: name
+          Value: value
+      EnvironmentFiles:
+        member: environmentFiles
+        properties:
+          Type: type
+          Value: value
+      Essential: essential
+      ExtraHosts:
+        member: extraHosts
+        properties:
+          Hostname: hostname
+          IpAddress: ipAddress
+      FirelensConfiguration:
+        member: firelensConfiguration
+        properties:
+          Options: options
+          Type: type
+      HealthCheck:
+        member: healthCheck
+        properties:
+          Command: command
+          Interval: interval
+          Retries: retries
+          StartPeriod: startPeriod
+          Timeout: timeout
+      Hostname: hostname
+      Image: image
+      Interactive: interactive
+      Links: links
+      LinuxParameters:
+        member: linuxParameters
+        properties:
+          Capabilities:
+            member: capabilities
+            properties:
+              Add: add
+              Drop: drop
+          Devices:
+            member: devices
+            properties:
+              ContainerPath: containerPath
+              HostPath: hostPath
+              Permissions: permissions
+          InitProcessEnabled: initProcessEnabled
+          MaxSwap: maxSwap
+          SharedMemorySize: sharedMemorySize
+          Swappiness: swappiness
+          Tmpfs:
+            member: tmpfs
+            properties:
+              ContainerPath: containerPath
+              MountOptions: mountOptions
+              Size: size
+      LogConfiguration:
+        member: logConfiguration
+        properties:
+          LogDriver: logDriver
+          Options: options
+          SecretOptions:
+            member: secretOptions
+            properties:
+              Name: name
+              ValueFrom: valueFrom
+      Memory: memory
+      MemoryReservation: memoryReservation
+      MountPoints:
+        member: mountPoints
+        properties:
+          ContainerPath: containerPath
+          ReadOnly: readOnly
+          SourceVolume: sourceVolume
+      Name: name
+      PortMappings:
+        member: portMappings
+        properties:
+          AppProtocol: appProtocol
+          ContainerPort: containerPort
+          ContainerPortRange: containerPortRange
+          HostPort: hostPort
+          Name: name
+          Protocol: protocol
+      Privileged: privileged
+      PseudoTerminal: pseudoTerminal
+      ReadonlyRootFilesystem: readonlyRootFilesystem
+      RepositoryCredentials:
+        member: repositoryCredentials
+        properties:
+          CredentialsParameter: credentialsParameter
+      ResourceRequirements:
+        member: resourceRequirements
+        properties:
+          Type: type
+          Value: value
+      RestartPolicy:
+        member: restartPolicy
+        properties:
+          Enabled: enabled
+          IgnoredExitCodes: ignoredExitCodes
+          RestartAttemptPeriod: restartAttemptPeriod
+      Secrets:
+        member: secrets
+        properties:
+          Name: name
+          ValueFrom: valueFrom
+      StartTimeout: startTimeout
+      StopTimeout: stopTimeout
+      SystemControls:
+        member: systemControls
+        properties:
+          Namespace: namespace
+          Value: value
+      Ulimits:
+        member: ulimits
+        properties:
+          HardLimit: hardLimit
+          Name: name
+          SoftLimit: softLimit
+      User: user
+      VersionConsistency: versionConsistency
+      VolumesFrom:
+        member: volumesFrom
+        properties:
+          ReadOnly: readOnly
+          SourceContainer: sourceContainer
+      WorkingDirectory: workingDirectory
+  Cpu: cpu
+  EnableFaultInjection: enableFaultInjection
+  EphemeralStorage:
+    member: ephemeralStorage
+    properties:
+      SizeInGiB: sizeInGiB
+  ExecutionRoleArn: executionRoleArn
+  Family: family
+  InferenceAccelerators:
+    member: inferenceAccelerators
+    properties:
+      DeviceName: deviceName
+      DeviceType: deviceType
+  IpcMode: ipcMode
+  Memory: memory
+  NetworkMode: networkMode
+  PidMode: pidMode
+  PlacementConstraints:
+    member: placementConstraints
+    properties:
+      Expression: expression
+      Type: type
+  ProxyConfiguration:
+    member: proxyConfiguration
+    properties:
+      ContainerName: containerName
+      ProxyConfigurationProperties:
+        member: properties
+        properties:
+          Name: name
+          Value: value
+      Type: type
+  RequiresCompatibilities: requiresCompatibilities
+  RuntimePlatform:
+    member: runtimePlatform
+    properties:
+      CpuArchitecture: cpuArchitecture
+      OperatingSystemFamily: operatingSystemFamily
+  TaskDefinitionArn: taskDefinitionArn
+  TaskRoleArn: taskRoleArn
+  Volumes:
+    member: volumes
+    properties:
+      ConfiguredAtLaunch: configuredAtLaunch
+      DockerVolumeConfiguration:
+        member: dockerVolumeConfiguration
+        properties:
+          Autoprovision: autoprovision
+          Driver: driver
+          DriverOpts: driverOpts
+          Labels: labels
+          Scope: scope
+      EFSVolumeConfiguration:
+        member: efsVolumeConfiguration
+        properties:
+          AuthorizationConfig:
+            member: authorizationConfig
+            properties:
+              AccessPointId: accessPointId
+              IAM: iam
+          FilesystemId: fileSystemId
+          RootDirectory: rootDirectory
+          TransitEncryption: transitEncryption
+          TransitEncryptionPort: transitEncryptionPort
+      FSxWindowsFileServerVolumeConfiguration:
+        member: fsxWindowsFileServerVolumeConfiguration
+        properties:
+          AuthorizationConfig:
+            member: authorizationConfig
+            properties:
+              CredentialsParameter: credentialsParameter
+              Domain: domain
+          FileSystemId: fileSystemId
+          RootDirectory: rootDirectory
+      Host:
+        member: host
+        properties:
+          SourcePath: sourcePath
+      Name: name
+      S3FilesVolumeConfiguration:
+        member: s3filesVolumeConfiguration
+        properties:
+          AccessPointArn: accessPointArn
+          FileSystemArn: fileSystemArn
+          RootDirectory: rootDirectory
+          TransitEncryptionPort: transitEncryptionPort
+skip:
+  Tags: tags are the response's own member beside taskDefinition, returned only when the request includes TAGS, and outside the response path
