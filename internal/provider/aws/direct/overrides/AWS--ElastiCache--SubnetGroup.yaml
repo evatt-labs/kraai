@@ -1,0 +1,28 @@
+type: AWS::ElastiCache::SubnetGroup
+read:
+  model: elasticache/service/2015-02-02/elasticache-2015-02-02.json
+  operation: DescribeCacheSubnetGroups
+  identifier:
+    CacheSubnetGroupName: CacheSubnetGroupName
+  # DescribeCacheSubnetGroups filters by one name, not a list, and answers
+  # with a list of the one group; unlike EC2's filtered describes, a name
+  # matching nothing is a CacheSubnetGroupNotFoundFault, not an empty list.
+  # See the report: this override cannot turn that fault into absence.
+  response: CacheSubnetGroups[]
+properties:
+  CacheSubnetGroupName: CacheSubnetGroupName
+  Description: CacheSubnetGroupDescription
+  SubnetIds:
+    member: Subnets[].SubnetIdentifier
+skip:
+  # ListTagsForResource takes ResourceName as an ARN, not the subnet group
+  # name; the ARN is only known from this read's own response (ARN), and
+  # an also call's identifier may bind only the primary identifier
+  # CacheSubnetGroupName, so there is no construct in this vocabulary that
+  # reaches the tags. See the report for the two candidate constructs this
+  # would need. Proven: identifier: { ARN: ResourceName } fails to compile
+  # with "identifier binds ARN, which is not the primary identifier
+  # [/properties/CacheSubnetGroupName]".
+  Tags: "ListTagsForResource needs an ARN this override cannot chain from ARN; see report"
+absentIds:
+  - kraai-absent-probe-subnetgroup

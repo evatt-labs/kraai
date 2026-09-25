@@ -1,0 +1,24 @@
+type: AWS::Logs::LogGroup
+read:
+  model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
+  operation: DescribeLogGroups
+  identifier:
+    LogGroupName: logGroupIdentifiers
+  # logGroupIdentifiers filters by an exact list of names or ARNs, unlike
+  # logGroupNamePrefix, so the answer is at most the one log group read.
+  response: logGroups[]
+properties:
+  Arn: arn
+  BearerTokenAuthenticationEnabled: bearerTokenAuthenticationEnabled
+  DeletionProtectionEnabled: deletionProtectionEnabled
+  KmsKeyId: kmsKeyId
+  LogGroupClass: logGroupClass
+  LogGroupName: logGroupName
+  RetentionInDays: retentionInDays
+skip:
+  DataProtectionPolicy: GetDataProtectionPolicy's policyDocument is a JSON-encoded string, but the schema types this property object; no override construct parses a string into a document
+  FieldIndexPolicies: DescribeIndexPolicies' indexPolicies[].policyDocument is a JSON-encoded string against each item typed object in the schema, the same missing string-to-document construct
+  ResourcePolicyDocument: DescribeResourcePolicies lists every policy in the account with no member to filter by this log group's, and its policyDocument is also a JSON-encoded string against a schema type of object
+  Tags: ListTagsForResource answers a map of key to value, but the schema types Tags an array of Key/Value pairs; no override construct expands a map into one
+absentIds:
+  - does-not-exist-kraai-probe-xyz

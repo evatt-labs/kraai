@@ -16,6 +16,9 @@
     "com.amazonaws.ecs#AmazonEC2ContainerServiceV20141113": {
       "operations": [
         {
+          "target": "com.amazonaws.ecs#DescribeClusters"
+        },
+        {
           "target": "com.amazonaws.ecs#DescribeDaemonTaskDefinition"
         },
         {
@@ -391,6 +394,40 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ecs#Attachment": {
+      "members": {
+        "details": {
+          "target": "com.amazonaws.ecs#AttachmentDetails",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#AttachmentDetails": {
+      "member": {
+        "target": "com.amazonaws.ecs#KeyValuePair"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ecs#Attachments": {
+      "member": {
+        "target": "com.amazonaws.ecs#Attachment"
+      },
+      "type": "list"
+    },
     "com.amazonaws.ecs#Attribute": {
       "members": {
         "name": {
@@ -415,6 +452,12 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ecs#Boolean": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
     "com.amazonaws.ecs#BoxedBoolean": {
       "type": "boolean"
     },
@@ -438,6 +481,56 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ecs#CapacityProviderStrategy": {
+      "member": {
+        "target": "com.amazonaws.ecs#CapacityProviderStrategyItem"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ecs#CapacityProviderStrategyItem": {
+      "members": {
+        "base": {
+          "target": "com.amazonaws.ecs#CapacityProviderStrategyItemBase",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "capacityProvider": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "weight": {
+          "target": "com.amazonaws.ecs#CapacityProviderStrategyItemWeight",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#CapacityProviderStrategyItemBase": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 100000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ecs#CapacityProviderStrategyItemWeight": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
     "com.amazonaws.ecs#ClientException": {
       "members": {
         "message": {
@@ -449,6 +542,186 @@
         "smithy.api#error": "client"
       },
       "type": "structure"
+    },
+    "com.amazonaws.ecs#Cluster": {
+      "members": {
+        "activeServicesCount": {
+          "target": "com.amazonaws.ecs#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "attachments": {
+          "target": "com.amazonaws.ecs#Attachments",
+          "traits": {}
+        },
+        "attachmentsStatus": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "capacityProviders": {
+          "target": "com.amazonaws.ecs#StringList",
+          "traits": {}
+        },
+        "clusterArn": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "clusterName": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "configuration": {
+          "target": "com.amazonaws.ecs#ClusterConfiguration",
+          "traits": {}
+        },
+        "defaultCapacityProviderStrategy": {
+          "target": "com.amazonaws.ecs#CapacityProviderStrategy",
+          "traits": {}
+        },
+        "pendingTasksCount": {
+          "target": "com.amazonaws.ecs#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "registeredContainerInstancesCount": {
+          "target": "com.amazonaws.ecs#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "runningTasksCount": {
+          "target": "com.amazonaws.ecs#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "serviceConnectDefaults": {
+          "target": "com.amazonaws.ecs#ClusterServiceConnectDefaults",
+          "traits": {}
+        },
+        "settings": {
+          "target": "com.amazonaws.ecs#ClusterSettings",
+          "traits": {}
+        },
+        "statistics": {
+          "target": "com.amazonaws.ecs#Statistics",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ecs#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterConfiguration": {
+      "members": {
+        "executeCommandConfiguration": {
+          "target": "com.amazonaws.ecs#ExecuteCommandConfiguration",
+          "traits": {}
+        },
+        "managedStorageConfiguration": {
+          "target": "com.amazonaws.ecs#ManagedStorageConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterField": {
+      "members": {
+        "ATTACHMENTS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ATTACHMENTS"
+          }
+        },
+        "CONFIGURATIONS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONFIGURATIONS"
+          }
+        },
+        "SETTINGS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SETTINGS"
+          }
+        },
+        "STATISTICS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STATISTICS"
+          }
+        },
+        "TAGS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TAGS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ecs#ClusterFieldList": {
+      "member": {
+        "target": "com.amazonaws.ecs#ClusterField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ecs#ClusterServiceConnectDefaults": {
+      "members": {
+        "namespace": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterSetting": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.ecs#ClusterSettingName",
+          "traits": {}
+        },
+        "value": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterSettingName": {
+      "members": {
+        "CONTAINER_INSIGHTS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "containerInsights"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ecs#ClusterSettings": {
+      "member": {
+        "target": "com.amazonaws.ecs#ClusterSetting"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ecs#Clusters": {
+      "member": {
+        "target": "com.amazonaws.ecs#Cluster"
+      },
+      "type": "list"
     },
     "com.amazonaws.ecs#Compatibility": {
       "members": {
@@ -1039,6 +1312,81 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ecs#DescribeClusters": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ecs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClientException"
+        },
+        {
+          "target": "com.amazonaws.ecs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ServerException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ecs#DescribeClustersRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ecs#DescribeClustersResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to describes one or more of your clusters",
+          "relativeDocumentation": "API_DescribeClusters.html",
+          "resources": {
+            "required": {
+              "cluster": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ecs#DescribeClustersRequest": {
+      "members": {
+        "clusters": {
+          "target": "com.amazonaws.ecs#StringList",
+          "traits": {}
+        },
+        "include": {
+          "target": "com.amazonaws.ecs#ClusterFieldList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DescribeClustersResponse": {
+      "members": {
+        "clusters": {
+          "target": "com.amazonaws.ecs#Clusters",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        },
+        "failures": {
+          "target": "com.amazonaws.ecs#Failures",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ecs#DescribeDaemonTaskDefinition": {
       "errors": [
         {
@@ -1444,6 +1792,77 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ecs#ExecuteCommandConfiguration": {
+      "members": {
+        "kmsKeyId": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "logConfiguration": {
+          "target": "com.amazonaws.ecs#ExecuteCommandLogConfiguration",
+          "traits": {}
+        },
+        "logging": {
+          "target": "com.amazonaws.ecs#ExecuteCommandLogging",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ExecuteCommandLogConfiguration": {
+      "members": {
+        "cloudWatchEncryptionEnabled": {
+          "target": "com.amazonaws.ecs#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "cloudWatchLogGroupName": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "s3BucketName": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "s3EncryptionEnabled": {
+          "target": "com.amazonaws.ecs#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "s3KeyPrefix": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ExecuteCommandLogging": {
+      "members": {
+        "DEFAULT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEFAULT"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "OVERRIDE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OVERRIDE"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.ecs#FSxWindowsFileServerAuthorizationConfig": {
       "members": {
         "credentialsParameter": {
@@ -1485,6 +1904,30 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.ecs#Failure": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "detail": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "reason": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#Failures": {
+      "member": {
+        "target": "com.amazonaws.ecs#Failure"
+      },
+      "type": "list"
     },
     "com.amazonaws.ecs#FirelensConfiguration": {
       "members": {
@@ -1900,6 +2343,20 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ecs#ManagedStorageConfiguration": {
+      "members": {
+        "fargateEphemeralStorageKmsKeyId": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "kmsKeyId": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.ecs#MountPoint": {
       "members": {
         "containerPath": {
@@ -2282,6 +2739,12 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.ecs#Statistics": {
+      "member": {
+        "target": "com.amazonaws.ecs#KeyValuePair"
+      },
+      "type": "list"
     },
     "com.amazonaws.ecs#String": {
       "type": "string"

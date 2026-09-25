@@ -109,7 +109,7 @@
     "cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json": {
       "file": "models/cloudwatch-logs-2014-03-28.json",
       "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
-      "subsetSha256": "37b776c6166d47cb42f23be2da53ea22006bbe9e7de0f91c6aa02d66e404ccc7"
+      "subsetSha256": "a45794551a50fa93abb9230ecb9a3d47d06432cee5fb880fef35b2f2b77cf0ab"
     },
     "codeconnections/service/2023-12-01/codeconnections-2023-12-01.json": {
       "file": "models/codeconnections-2023-12-01.json",
@@ -169,17 +169,22 @@
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
-      "subsetSha256": "ac313c583ad19b9928fd7b6b00398b9b0dd00120059fb87c47f062ac59ce036d"
+      "subsetSha256": "0e83bd27f2b7d0444eaf06e2bc5e30ea24d4bbd7fc9b90405257fbe7c0750581"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
       "sourceSha256": "039c1877a9b6b6997819988c4f8f7e9f063bcfe6afa6c431d2da45fc8422eace",
-      "subsetSha256": "3786b00cbb780f0b457932e0a8e192b1c0d07b62e5d0fe4a43faeab098a60ccc"
+      "subsetSha256": "01cbeaeca01e38d0d9b88455e7cf4faec5afa4893048088dd7dd8a32cc968537"
     },
     "elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json": {
       "file": "models/elastic-load-balancing-v2-2015-12-01.json",
       "sourceSha256": "b8e2667dc02196215c863ecab13f2aecd8d9520262c85de1edbe80fd95e74d2f",
       "subsetSha256": "8eb6a59601980026de9b8b283bf584535aba15086d2691331a96d2f6449a1d9a"
+    },
+    "elasticache/service/2015-02-02/elasticache-2015-02-02.json": {
+      "file": "models/elasticache-2015-02-02.json",
+      "sourceSha256": "531f322d4461115b8cebe68b55a2dae3bbbcff5908b5ed711f19fd6bfb073940",
+      "subsetSha256": "000a3c249e7c1f6d2517c273ef4fa89e297fdfc9ebc9cea946ffe2f58f93dfc3"
     },
     "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
       "file": "models/elementalinference-2018-11-14.json",
@@ -460,6 +465,11 @@
       "file": "models/qbusiness-2023-11-27.json",
       "sourceSha256": "0144dc238009cbba58506f2a84055722c4d37ae3ed907116323ddabeef46d57d",
       "subsetSha256": "2884659d900826991d42bad3ecdd6030c31ac1067b57384ff02ec515319a39ba"
+    },
+    "rds/service/2014-10-31/rds-2014-10-31.json": {
+      "file": "models/rds-2014-10-31.json",
+      "sourceSha256": "ece1de6b0278c9327d5e79ac62032ca8c6c1f76e4d24fef95e7d3641f0459020",
+      "subsetSha256": "26fa4e0b784d5bd11ee33d07a3c478cd83907cf667eb1c13bf5aa97b9a89f43b"
     },
     "resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json": {
       "file": "models/resiliencehubv2-2026-02-17.json",
@@ -903,6 +913,11 @@
       "sourceSha256": "cd19ef77815ff53dcc05fb1cd97100c5bf2f959d345b1152b57340e6f91e7b7b",
       "subsetSha256": "b1349607719b4dc64ec2040d98deb16aad58db63dca04b4605f5fb9b2654a966"
     },
+    "AWS::EC2::RouteTable": {
+      "file": "schemas/AWS--EC2--RouteTable.json",
+      "sourceSha256": "a79ec11baf881707a4d8ca9648edf6e5a0939a50e93275cd41472ba2e1f48d29",
+      "subsetSha256": "072cc7de4121c0f36778f2a6b6b68f1b300560aeee2578eabf3c9832087e88c5"
+    },
     "AWS::EC2::SecurityGroup": {
       "file": "schemas/AWS--EC2--SecurityGroup.json",
       "sourceSha256": "27ae37729524cc52f1cbb251b9801e2a906b82b216137db9b89abb9e4d41e90b",
@@ -918,6 +933,11 @@
       "sourceSha256": "2168d5fa501c524d2663184a94de4bb0872a6ff62c038753024f56ebdcdd48b4",
       "subsetSha256": "90ffce310e820b9dde5d8b8677044ce41b94a2afe37a4a53c6b3646b9bba4050"
     },
+    "AWS::ECS::Cluster": {
+      "file": "schemas/AWS--ECS--Cluster.json",
+      "sourceSha256": "1cd9b909ca3f55a7abfb640d94d410e98e20434904c1550b6f1a8e46ac5ff695",
+      "subsetSha256": "3d4c144d1f11b008d4716cb5f83809e15d1c2d2a38c1cb255ead0dceef933553"
+    },
     "AWS::ECS::DaemonTaskDefinition": {
       "file": "schemas/AWS--ECS--DaemonTaskDefinition.json",
       "sourceSha256": "cfff3d2810fb1c5340ab813a0f7b9fcebbaedb990be0ac2b9b8d71718b684fc3",
@@ -932,6 +952,11 @@
       "file": "schemas/AWS--EMR--SecurityConfiguration.json",
       "sourceSha256": "738f3d02c65d7c621359ac44459712a331e34c37e160df0a765a8e861d86c6e7",
       "subsetSha256": "2d82a3fc1875b4dc739d918314d6297f91b428d3587fe7d54b806fecc15c07d7"
+    },
+    "AWS::ElastiCache::SubnetGroup": {
+      "file": "schemas/AWS--ElastiCache--SubnetGroup.json",
+      "sourceSha256": "7c22add6ae54a97a35feb2b23f49ecdf20f118c8cbe17aa9be02df046689b137",
+      "subsetSha256": "b7ced4fd0dcba1188c44d8521901e2e1dd4050b5265cee6311cd395ad7c37ee5"
     },
     "AWS::ElasticLoadBalancingV2::TargetGroup": {
       "file": "schemas/AWS--ElasticLoadBalancingV2--TargetGroup.json",
@@ -1243,6 +1268,11 @@
       "sourceSha256": "a5a9e5682ebe7dfa4613e3d3e8c9017aa447655564b51269dfe9399df2ac4922",
       "subsetSha256": "32c8b8fc8f7541ca4518729434a56e84a505209fa0835b05a88d5edd4f5589dd"
     },
+    "AWS::Logs::LogGroup": {
+      "file": "schemas/AWS--Logs--LogGroup.json",
+      "sourceSha256": "cdf562f338afd782d7c20f8e6423c11094d55d462a52cd01de4697d85452c53f",
+      "subsetSha256": "1de30640674ab51d79950a1c75cf3313b8b09d7a33fe3744faa13c03714ceb6e"
+    },
     "AWS::Logs::ScheduledQuery": {
       "file": "schemas/AWS--Logs--ScheduledQuery.json",
       "sourceSha256": "20425d768c180d965f38596d0c8496f1c9e77be132168c21b1e1a7a224e945b1",
@@ -1492,6 +1522,16 @@
       "file": "schemas/AWS--QBusiness--Application.json",
       "sourceSha256": "cb0f1c121c17f8976d2a269d40d793e69b10b41d0a267cd7bcb659432533bdb2",
       "subsetSha256": "373ede0001addd21a7d796fcdcf8a1219c37e1094c6a2f39d81a8ddd1f3299d3"
+    },
+    "AWS::RDS::DBClusterParameterGroup": {
+      "file": "schemas/AWS--RDS--DBClusterParameterGroup.json",
+      "sourceSha256": "2d47eff2dbb4a816649f30ce208cdbc2a01394bdd4ddb41a9d594c1fb1eb3dd7",
+      "subsetSha256": "c5876558cc1b93ed76778252600e3ddeefdb5ef10002d8542a6a8727037438bb"
+    },
+    "AWS::RDS::DBSubnetGroup": {
+      "file": "schemas/AWS--RDS--DBSubnetGroup.json",
+      "sourceSha256": "1ecc967a015dfab424d8625032c8f5d3499d51fa25e91dbf39e135eb971e419e",
+      "subsetSha256": "3bd66b650beb854b8af3e1b18d474c7b9cec8923de814ca17ca6fe12bec319fc"
     },
     "AWS::ResilienceHubV2::Policy": {
       "file": "schemas/AWS--ResilienceHubV2--Policy.json",

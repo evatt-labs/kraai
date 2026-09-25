@@ -154,7 +154,35 @@ func binding(b *bytes.Buffer, in Binding) {
 	if in.List {
 		b.WriteString(", List: true")
 	}
+	if in.Structured != nil {
+		b.WriteString(", Structured: ")
+		literal(b, in.Structured)
+	}
 	b.WriteString("},\n")
+}
+
+// literal writes a structured input value, as decoded from YAML, as a Go
+// expression of the same dynamic type.
+func literal(b *bytes.Buffer, v any) {
+	switch t := v.(type) {
+	case []any:
+		b.WriteString("[]any{")
+		for _, item := range t {
+			literal(b, item)
+			b.WriteString(", ")
+		}
+		b.WriteString("}")
+	case map[string]any:
+		b.WriteString("map[string]any{")
+		for _, k := range sortedKeys(t) {
+			fmt.Fprintf(b, "%q: ", k)
+			literal(b, t[k])
+			b.WriteString(", ")
+		}
+		b.WriteString("}")
+	default:
+		fmt.Fprintf(b, "%#v", t)
+	}
 }
 
 func field(b *bytes.Buffer, name, value string) {
