@@ -33,6 +33,19 @@ properties:
       Value: Value
   VpcId: VpcId
 skip:
-  Ipv6CidrBlock: a projection of Ipv6CidrBlockAssociationSet, the first association's block, not a member of its own
-  Ipv6CidrBlocks: a projection of Ipv6CidrBlockAssociationSet, every association's block, not a member of its own
-  NetworkAclAssociationId: read from DescribeNetworkAcls, a second call
+  Ipv6CidrBlock: which association's block Cloud Control reports is unproven; no subnet parity has run against holds an IPv6 block
+  Ipv6CidrBlocks: whether Cloud Control reports disassociated blocks is unproven; no subnet parity has run against holds an IPv6 block
+also:
+  # The subnet's network ACL association, found by filtering the ACLs on
+  # it; Cloud Control reports the association's id, not the ACL's.
+  - operation: DescribeNetworkAcls
+    input:
+      Filters:
+        - Name: association.subnet-id
+          Values: ["{SubnetId}"]
+    response: NetworkAcls[]
+    properties:
+      NetworkAclAssociationId:
+        member: Associations[SubnetId={SubnetId}].NetworkAclAssociationId
+absentIds:
+  - subnet-0123456789abcdef0

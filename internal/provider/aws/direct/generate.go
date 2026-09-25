@@ -186,6 +186,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 			if st.Item != "" {
 				fmt.Fprintf(b, ", Item: %q", st.Item)
 			}
+			if st.Where != "" {
+				fmt.Fprintf(b, ", Where: %q, Equals: %q", st.Where, st.Equals)
+			}
 			b.WriteString("}, ")
 		}
 		b.WriteString("}")

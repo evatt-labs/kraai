@@ -1970,6 +1970,25 @@ var readers = map[string]Reader{
 			},
 			{Property: "VpcId", Member: "VpcId", Kind: "scalar", XMLName: "vpcId", Scalar: "string"},
 		},
+		AbsentIDs: []string{"subnet-0123456789abcdef0"},
+		Also: []Reader{
+			{
+				Type:        "AWS::EC2::Subnet",
+				Protocol:    "ec2Query",
+				SigningName: "ec2",
+				Host:        "ec2.{region}.amazonaws.com",
+				Action:      "DescribeNetworkAcls",
+				Version:     "2016-11-15",
+				Input: []Binding{
+					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Name", Value: "association.subnet-id"},
+					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Value.1", Value: "{SubnetId}"},
+				},
+				Response: []Step{{Name: "networkAclSet", List: true, Item: "item"}},
+				Fields: []Field{
+					{Property: "NetworkAclAssociationId", Member: "NetworkAclAssociationId", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "subnetId", Equals: "{SubnetId}"}}, XMLName: "networkAclAssociationId", Scalar: "string"},
+				},
+			},
+		},
 	},
 	"AWS::ECS::DaemonTaskDefinition": {
 		Type:        "AWS::ECS::DaemonTaskDefinition",

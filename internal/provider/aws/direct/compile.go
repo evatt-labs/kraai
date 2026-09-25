@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -87,7 +88,15 @@ type Step struct {
 	// Item is the element each list item is wrapped in, under an XML
 	// protocol; empty when the list is flattened.
 	Item string
+	// Where and Equals select, from a list, the one element whose member
+	// Where equals Equals, with {Property} standing for that identifier
+	// property's value: a selection, not a projection.
+	Where, Equals string
 }
+
+// selection matches a path step that selects one element of a list, such
+// as Associations[SubnetId={SubnetId}].
+var selection = regexp.MustCompile(`^([A-Za-z0-9]+)\[([A-Za-z0-9]+)=(.+)\]$`)
 
 // Binding places one primary identifier property in the request.
 type Binding struct {
@@ -103,8 +112,12 @@ type Binding struct {
 	List bool
 	// JSONName is the member's jsonName trait, when it has one.
 	JSONName string
-	// Value is a fixed input's value.
+	// Value is a fixed input's value. {Property} in it stands for that
+	// identifier property's value.
 	Value string
+	// Structured is a fixed input's value when it is a list or map, sent
+	// as the member's structure under an awsJson protocol.
+	Structured any
 }
 
 // Field reads one property from the response.
@@ -340,15 +353,40 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 			continue
 		}
 		bound[member] = true
-		b := bindInput(&model, r.Protocol, member, m, "read input", fail)
-		if reason := fixedValue(&model, m.Target, o.Read.Input[member]); reason != "" {
-			fail("read input %s %s", member, reason)
+		value := o.Read.Input[member]
+		for _, name := range placeholders(value) {
+			if !want[name] {
+				fail("read input %s names {%s}, which is not the primary identifier", member, name)
+			}
 		}
-		b.Value = o.Read.Input[member]
-		r.Input = append(r.Input, b)
+		text, isText := value.(string)
+		switch {
+		case isText:
+			b := bindInput(&model, r.Protocol, member, m, "read input", fail)
+			if reason := fixedValue(&model, m.Target, text); reason != "" && !strings.Contains(text, "{") {
+				fail("read input %s %s", member, reason)
+			}
+			b.Value = text
+			r.Input = append(r.Input, b)
+		case isQuery(r.Protocol):
+			r.Input = append(r.Input, formPairs(&model, r.Protocol, member, queryName(r.Protocol, member, m), m.Target, value, "read input "+member, fail)...)
+		case isAWSJSON(r.Protocol):
+			checkStructure(&model, m.Target, value, "read input "+member, fail)
+			r.Input = append(r.Input, Binding{Member: member, Location: "body", Structured: value})
+		default:
+			fail("read input %s is a list or map, which this client does not send under %s", member, r.Protocol)
+		}
+	}
+	// A call filtered by the identifier binds it through a placeholder in
+	// its input rather than an input member of its own.
+	inInput := map[string]bool{}
+	for _, value := range o.Read.Input {
+		for _, name := range placeholders(value) {
+			inInput[name] = true
+		}
 	}
 	for property := range want {
-		if _, ok := o.Read.Identifier[property]; !ok {
+		if _, ok := o.Read.Identifier[property]; !ok && !inInput[property] {
 			fail("identifier does not bind %s", property)
 		}
 	}
@@ -467,6 +505,20 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 	if isXML(r.Protocol) {
 		xmlFields(&model, resource, r.Fields, "", fail)
 	}
+	var checkSelections func([]Field)
+	checkSelections = func(fields []Field) {
+		for _, f := range fields {
+			for _, st := range f.Via {
+				for _, p := range placeholders(st.Equals) {
+					if !want[p] {
+						fail("%s selects by {%s}, which is not the primary identifier", f.Property, p)
+					}
+				}
+			}
+			checkSelections(f.Fields)
+		}
+	}
+	checkSelections(r.Fields)
 	if len(rootMapped) > 0 {
 		if payload != "" {
 			fail("a $. mapping reads the output, but the body is the payload %s", payload)
@@ -591,8 +643,12 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		// A dotted member is a path through structures to the one mapped;
 		// a step ending [] is a list of structures, read element by element.
 		steps := strings.Split(mapping.Member, ".")
-		holder, via, walked, projected := structure, []Step{}, true, false
+		holder, via, walked, projected, selected := structure, []Step{}, true, false, false
 		for _, step := range steps[:len(steps)-1] {
+			var where, equals string
+			if sel := selection.FindStringSubmatch(step); sel != nil {
+				step, where, equals = sel[1]+"[]", sel[2], sel[3]
+			}
 			step, list := strings.CutSuffix(step, "[]")
 			pm, ok := model.Shapes[holder].Members[step]
 			next := ""
@@ -621,10 +677,23 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			if pm.Traits["smithy.api#jsonName"] != nil {
 				fail("%s%s maps through %s, whose jsonName a path does not follow", at, name, step)
 			}
-			projected = projected || list
-			via, holder = append(via, Step{Name: step, List: list}), next
+			if where != "" {
+				if wm, ok := model.Shapes[next].Members[where]; !ok || targetType(model.Shapes[wm.Target].Type, wm.Target) != "string" {
+					fail("%s%s selects by %s, which is not a string member of %s", at, name, where, next)
+					walked = false
+					break
+				}
+				selected = true
+			} else {
+				projected = projected || list
+			}
+			via, holder = append(via, Step{Name: step, List: list, Where: where, Equals: equals}), next
 		}
 		if !walked {
+			continue
+		}
+		if selected && projected {
+			fail("%s%s both selects and projects; a path does one or the other", at, name)
 			continue
 		}
 		m, ok := model.Shapes[holder].Members[steps[len(steps)-1]]
@@ -973,6 +1042,98 @@ func itemName(m smithyMember, list smithyShape) string {
 	return "member"
 }
 
+// placeholderName matches a {Property} placeholder.
+var placeholderName = regexp.MustCompile(`\{([A-Za-z0-9]+)\}`)
+
+// placeholders lists the {Property} names in every string of value.
+func placeholders(value any) []string {
+	var out []string
+	switch v := value.(type) {
+	case string:
+		for _, m := range placeholderName.FindAllStringSubmatch(v, -1) {
+			out = append(out, m[1])
+		}
+	case []any:
+		for _, item := range v {
+			out = append(out, placeholders(item)...)
+		}
+	case map[string]any:
+		for _, item := range v {
+			out = append(out, placeholders(item)...)
+		}
+	}
+	return out
+}
+
+// queryName is the form name of a structure member under protocol, before
+// any list index: ec2Query's ec2QueryName or capitalized xmlName, or
+// awsQuery's xmlName.
+func queryName(protocol, member string, m smithyMember) string {
+	key := xmlName(member, m)
+	if protocol != "ec2Query" {
+		return key
+	}
+	var name string
+	if json.Unmarshal(m.Traits["aws.protocols#ec2QueryName"], &name) != nil || name == "" {
+		name = strings.ToUpper(key[:1]) + key[1:]
+	}
+	return name
+}
+
+// formPairs flattens a structured input value into the form keys a query
+// protocol sends it as: a structure's members by their query names, a
+// list's items numbered from 1, under awsQuery inside the list's item
+// element unless flattened. Each leaf must be a string for a string or
+// enum shape.
+func formPairs(model *smithyModel, protocol, member, key, target string, value any, what string, fail func(string, ...any)) []Binding {
+	shape := model.Shapes[target]
+	switch v := value.(type) {
+	case []any:
+		if targetType(shape.Type, target) != "list" {
+			fail("%s gives a list where %s is %s", what, key, targetType(shape.Type, target))
+			return nil
+		}
+		prefix := key
+		if protocol == "awsQuery" {
+			prefix += ".member"
+		}
+		var out []Binding
+		for i, item := range v {
+			out = append(out, formPairs(model, protocol, member, fmt.Sprintf("%s.%d", prefix, i+1), ref(shape.Member), item, what, fail)...)
+		}
+		return out
+	case map[string]any:
+		if shape.Type != "structure" {
+			fail("%s gives a map where %s is %s", what, key, targetType(shape.Type, target))
+			return nil
+		}
+		var out []Binding
+		for _, name := range sortedKeys(v) {
+			m, ok := shape.Members[name]
+			if !ok {
+				fail("%s names %s, which %s does not have", what, name, target)
+				continue
+			}
+			out = append(out, formPairs(model, protocol, member, key+"."+queryName(protocol, name, m), m.Target, v[name], what, fail)...)
+		}
+		return out
+	case string:
+		if reason := fixedValue(model, target, v); reason != "" && !strings.Contains(v, "{") {
+			fail("%s at %s %s", what, key, reason)
+		}
+		return []Binding{{Member: member, Location: "form", Name: key, Value: v}}
+	default:
+		fail("%s at %s is %T; only strings, lists and maps can be sent", what, key, value)
+		return nil
+	}
+}
+
+// checkStructure checks a structured input value against target's shape,
+// as formPairs does, for a protocol that sends it as JSON.
+func checkStructure(model *smithyModel, target string, value any, what string, fail func(string, ...any)) {
+	formPairs(model, "awsJson", "", "", target, value, what, fail)
+}
+
 // queryKey is the form key an input member is sent under: under ec2Query
 // its ec2QueryName, or its xmlName or own name capitalized; under awsQuery
 // its xmlName or own name. A list sends its one item at index 1, under
@@ -1013,6 +1174,9 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 				listShape := model.Shapes[holder]
 				f.Via[j].Item = itemName(pm, listShape)
 				holder = ref(listShape.Member)
+			}
+			if step.Where != "" {
+				f.Via[j].Where = xmlName(step.Where, model.Shapes[holder].Members[step.Where])
 			}
 		}
 		m := model.Shapes[holder].Members[f.Member]

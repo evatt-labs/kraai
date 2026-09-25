@@ -573,11 +573,14 @@
         "EnableDns64",
         "Ipv6Native",
         "MapPublicIpOnLaunch",
+        "NetworkAclAssociationId",
         "PrivateDnsNameOptionsOnLaunch",
         "SubnetId",
         "Tags",
         "VpcId"
-      ]
+      ],
+      "absence": "parity",
+      "probed": 1
     },
     {
       "type": "AWS::ECS::DaemonTaskDefinition",
