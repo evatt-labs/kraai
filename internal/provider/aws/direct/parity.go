@@ -176,6 +176,12 @@ type TypeEvidence struct {
 	Differing []string `json:"differing,omitempty"`
 	// Note says why an instance was not compared, without naming it.
 	Note string `json:"note,omitempty"`
+	// Absence is parity when every probed identifier Cloud Control reads
+	// as absent also reads as absent directly, differs when one reads as
+	// present, and empty when the type has no probe or none was found.
+	Absence string `json:"absence,omitempty"`
+	// Probed is how many such identifiers were read.
+	Probed int `json:"probed,omitempty"`
 }
 
 // shape is where a type's schema declares an array unordered, nested as

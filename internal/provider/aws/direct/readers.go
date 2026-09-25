@@ -2130,6 +2130,12 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "TaskDefinitionArn", Member: "taskDefinition", Location: "body"},
 		},
+		Input: []Binding{
+			Binding{Member: "include", Location: "body", Value: "TAGS", List: true},
+		},
+		Absent: []Condition{
+			{Field: Field{Property: "status", Member: "status", Kind: "scalar"}, Values: []string{"INACTIVE", "DELETE_IN_PROGRESS"}},
+		},
 		Response: []Step{{Name: "taskDefinition"}},
 		Fields: []Field{
 			{Property: "ContainerDefinitions", Member: "containerDefinitions", Kind: "list",
@@ -2344,6 +2350,12 @@ var readers = map[string]Reader{
 					{Property: "OperatingSystemFamily", Member: "operatingSystemFamily", Kind: "scalar"},
 				},
 			},
+			{Property: "Tags", Member: "tags", Kind: "list", Root: true,
+				Fields: []Field{
+					{Property: "Key", Member: "key", Kind: "scalar"},
+					{Property: "Value", Member: "value", Kind: "scalar"},
+				},
+			},
 			{Property: "TaskDefinitionArn", Member: "taskDefinitionArn", Kind: "scalar"},
 			{Property: "TaskRoleArn", Member: "taskRoleArn", Kind: "scalar"},
 			{Property: "Volumes", Member: "volumes", Kind: "list",
@@ -2406,6 +2418,17 @@ var readers = map[string]Reader{
 			Target:    "AmazonEC2ContainerServiceV20141113.ListTaskDefinitions",
 			Input: []Binding{
 				Binding{Member: "status", Location: "body", Value: "ACTIVE"},
+			},
+			Token:     Binding{Member: "nextToken", Location: "body"},
+			NextToken: []string{"nextToken"},
+			Items:     []string{"taskDefinitionArns"},
+			Property:  "TaskDefinitionArn",
+		},
+		Probe: &Lister{
+			Operation: "ListTaskDefinitions",
+			Target:    "AmazonEC2ContainerServiceV20141113.ListTaskDefinitions",
+			Input: []Binding{
+				Binding{Member: "status", Location: "body", Value: "INACTIVE"},
 			},
 			Token:     Binding{Member: "nextToken", Location: "body"},
 			NextToken: []string{"nextToken"},

@@ -27,6 +27,12 @@ type Reader struct {
 	// Wrapper the element awsQuery wraps its output in.
 	Action, Version, Wrapper string
 	Identifier               []Binding
+	// Input is every fixed input, each with its Value.
+	Input []Binding
+	// Absent is every condition under which a returned instance is gone.
+	Absent []Condition
+	// Probe lists identifiers that must read as absent, for the harness.
+	Probe *Lister
 	// Response is the path from the output to the resource.
 	Response []Step
 	Fields   []Field
@@ -51,6 +57,13 @@ type Lister struct {
 	// Item is the wire member of each item carrying Property, the primary
 	// identifier; empty when each item is the identifier itself.
 	Item, Property string
+}
+
+// Condition is the values of one resource member that mean the instance
+// is absent; Field reads the member, keyed by its own name.
+type Condition struct {
+	Field  Field
+	Values []string
 }
 
 // Step is one member of a response path: its name on the wire and, when
@@ -89,6 +102,9 @@ type Field struct {
 	// the one holding Member, for a property the API wraps, such as a list
 	// inside a Quantity and Items structure.
 	Via []string
+	// Root reads the member from the operation's whole output rather than
+	// the resource, for a value carried beside it.
+	Root bool
 	// JSONName is the member's jsonName trait, when it has one.
 	JSONName string
 	// Kind is scalar, timestamp, structure, list or map. A structure's
@@ -257,37 +273,33 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			continue
 		}
 		bound[member] = true
-		b := Binding{Property: property, Member: member, Location: "body"}
-		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &b.JSONName)
 		if target := model.Shapes[m.Target]; targetType(target.Type, m.Target) == "list" {
 			el := ref(target.Member)
 			if targetType(model.Shapes[el].Type, el) != "string" {
 				fail("identifier binds %s to %s, a list of something other than strings", property, member)
 			}
-			b.List = true
 		}
-		if isQuery(r.Protocol) {
-			b.Location, b.Name = "form", queryKey(&model, r.Protocol, member, m)
-		}
-		if isREST(r.Protocol) && b.List {
-			fail("identifier binds %s to the list %s, which %s would not send as a body", property, member, r.Protocol)
-		}
-		if isREST(r.Protocol) {
-			switch {
-			case m.Traits["smithy.api#httpLabel"] != nil:
-				b.Location = "label"
-			case m.Traits["smithy.api#httpQuery"] != nil:
-				b.Location = "query"
-				_ = json.Unmarshal(m.Traits["smithy.api#httpQuery"], &b.Name)
-			case m.Traits["smithy.api#httpHeader"] != nil:
-				b.Location = "header"
-				_ = json.Unmarshal(m.Traits["smithy.api#httpHeader"], &b.Name)
-			}
-		}
-		if r.Protocol == "restXml" && b.Location == "body" {
-			fail("identifier binds %s to %s, a body member, and this client sends no XML body", property, member)
-		}
+		b := bindInput(&model, r.Protocol, member, m, "identifier binds "+property+" to", fail)
+		b.Property = property
 		r.Identifier = append(r.Identifier, b)
+	}
+	for _, member := range sortedKeys(o.Read.Input) {
+		m, ok := input.Members[member]
+		if !ok {
+			fail("read input %s is not a member of %s's input", member, o.Read.Operation)
+			continue
+		}
+		if bound[member] {
+			fail("read input %s is already bound to the identifier", member)
+			continue
+		}
+		bound[member] = true
+		b := bindInput(&model, r.Protocol, member, m, "read input", fail)
+		if reason := fixedValue(&model, m.Target, o.Read.Input[member]); reason != "" {
+			fail("read input %s %s", member, reason)
+		}
+		b.Value = o.Read.Input[member]
+		r.Input = append(r.Input, b)
 	}
 	for property := range want {
 		if _, ok := o.Read.Identifier[property]; !ok {
@@ -373,15 +385,84 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			readable[name] = p
 		}
 	}
-	r.Fields = compileFields(&model, &schema, readable, resource, o.Properties, o.Skip, "", fail)
+	// A top-level mapping to "$.member" reads from the whole output.
+	output := ref(op.Output)
+	ownProps, rootProps := map[string]cfnProperty{}, map[string]cfnProperty{}
+	ownMapped, rootMapped := map[string]Mapping{}, map[string]Mapping{}
+	for name, p := range readable {
+		mapping, ok := o.Properties[name]
+		if member, root := strings.CutPrefix(mapping.Member, "$."); ok && root {
+			mapping.Member = member
+			rootProps[name], rootMapped[name] = p, mapping
+			continue
+		}
+		ownProps[name] = p
+		if ok {
+			ownMapped[name] = mapping
+		}
+	}
+	for name, mapping := range o.Properties {
+		if _, known := readable[name]; !known {
+			ownMapped[name] = mapping
+		}
+	}
+	r.Fields = compileFields(&model, &schema, ownProps, resource, ownMapped, o.Skip, "", fail)
 	if isXML(r.Protocol) {
 		xmlFields(&model, resource, r.Fields, "", fail)
+	}
+	if len(rootMapped) > 0 {
+		if payload != "" {
+			fail("a $. mapping reads the output, but the body is the payload %s", payload)
+		}
+		root := compileFields(&model, &schema, rootProps, output, rootMapped, nil, "$.", fail)
+		if isXML(r.Protocol) {
+			xmlFields(&model, output, root, "$.", fail)
+		}
+		for i := range root {
+			root[i].Root = true
+		}
+		r.Fields = append(r.Fields, root...)
+		sort.Slice(r.Fields, func(i, j int) bool { return r.Fields[i].Property < r.Fields[j].Property })
+	}
+
+	for _, member := range sortedKeys(o.Read.Absent) {
+		m, ok := model.Shapes[resource].Members[member]
+		if !ok {
+			fail("absent names %s, which %s does not have", member, resource)
+			continue
+		}
+		if kind := kindOf(model.Shapes[m.Target].Type, m.Target); kind != "scalar" {
+			fail("absent names %s, which is a %s, not a scalar", member, kind)
+			continue
+		}
+		if len(o.Read.Absent[member]) == 0 {
+			fail("absent names %s with no value", member)
+		}
+		for _, value := range o.Read.Absent[member] {
+			if reason := fixedValue(&model, m.Target, value); reason != "" {
+				fail("absent %s %s", member, reason)
+			}
+		}
+		f := Field{Property: member, Member: member, Kind: "scalar"}
+		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
+		fields := []Field{f}
+		if isXML(r.Protocol) {
+			xmlFields(&model, resource, fields, "absent ", fail)
+		}
+		r.Absent = append(r.Absent, Condition{Field: fields[0], Values: o.Read.Absent[member]})
 	}
 
 	if o.List != nil && isXML(r.Protocol) {
 		fail("a list under %s is not supported yet", r.Protocol)
 	} else if o.List != nil {
 		r.List = compileList(&model, &r, o, service, namespace, fail)
+	}
+	if o.Probe != nil && isXML(r.Protocol) {
+		fail("a probe under %s is not supported yet", r.Protocol)
+	} else if o.Probe != nil {
+		probe := o
+		probe.List = o.Probe
+		r.Probe = compileList(&model, &r, probe, service, namespace, func(format string, args ...any) { fail("probe: "+format, args...) })
 	}
 
 	// The awsJson specifications say nothing of jsonName, so a member
@@ -697,6 +778,65 @@ func sortedKeys[V any](m map[string]V) []string {
 }
 
 func sortedSet(m map[string]bool) []string { return sortedKeys(m) }
+
+// bindInput places one input member in a request under protocol: in the
+// body, a form, or, under a REST protocol, wherever its HTTP binding puts
+// it. A list member is sent a list of one. what begins each refusal.
+func bindInput(model *smithyModel, protocol, member string, m smithyMember, what string, fail func(string, ...any)) Binding {
+	b := Binding{Member: member, Location: "body"}
+	_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &b.JSONName)
+	b.List = targetType(model.Shapes[m.Target].Type, m.Target) == "list"
+	if isQuery(protocol) {
+		b.Location, b.Name = "form", queryKey(model, protocol, member, m)
+	}
+	if isREST(protocol) && b.List {
+		fail("%s the list %s, which %s would not send as a body", what, member, protocol)
+	}
+	if isREST(protocol) {
+		switch {
+		case m.Traits["smithy.api#httpLabel"] != nil:
+			b.Location = "label"
+		case m.Traits["smithy.api#httpQuery"] != nil:
+			b.Location = "query"
+			_ = json.Unmarshal(m.Traits["smithy.api#httpQuery"], &b.Name)
+		case m.Traits["smithy.api#httpHeader"] != nil:
+			b.Location = "header"
+			_ = json.Unmarshal(m.Traits["smithy.api#httpHeader"], &b.Name)
+		}
+	}
+	if protocol == "restXml" && b.Location == "body" {
+		fail("%s %s, a body member, and this client sends no XML body", what, member)
+	}
+	return b
+}
+
+// fixedValue checks value can be sent as the input target: a string, one
+// of an enum's values, or, for a list of either, the one item sent. It
+// returns why not, or "".
+func fixedValue(model *smithyModel, target, value string) string {
+	shape := model.Shapes[target]
+	if targetType(shape.Type, target) == "list" {
+		target = ref(shape.Member)
+		shape = model.Shapes[target]
+	}
+	switch {
+	case shape.Type == "enum":
+		var allowed []string
+		for _, em := range shape.Members {
+			var v string
+			_ = json.Unmarshal(em.Traits["smithy.api#enumValue"], &v)
+			if v == value {
+				return ""
+			}
+			allowed = append(allowed, v)
+		}
+		return fmt.Sprintf("is %q, which is not one of %v", value, sortedStrings(allowed))
+	case targetType(shape.Type, target) == "string":
+		return ""
+	default:
+		return fmt.Sprintf("is %s; only strings, enums and lists of them can be fixed", targetType(shape.Type, target))
+	}
+}
 
 // xmlName is the element a structure member is read from under an XML
 // protocol: its xmlName trait, or its own name.

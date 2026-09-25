@@ -49,6 +49,22 @@ func Generate() ([]byte, error) {
 			}
 			b.WriteString("},\n")
 		}
+		if len(r.Input) > 0 {
+			b.WriteString("Input: []Binding{\n")
+			for _, in := range r.Input {
+				binding(&b, in)
+			}
+			b.WriteString("},\n")
+		}
+		if len(r.Absent) > 0 {
+			b.WriteString("Absent: []Condition{\n")
+			for _, c := range r.Absent {
+				b.WriteString("{Field: ")
+				fieldLiteral(&b, c.Field, "Field")
+				fmt.Fprintf(&b, ", Values: %#v},\n", c.Values)
+			}
+			b.WriteString("},\n")
+		}
 		if len(r.Response) > 0 {
 			b.WriteString("Response: []Step{")
 			for _, st := range r.Response {
@@ -64,30 +80,36 @@ func Generate() ([]byte, error) {
 			b.WriteString("},\n")
 		}
 		fields(&b, r.Fields)
-		if l := r.List; l != nil {
-			b.WriteString("List: &Lister{\n")
-			field(&b, "Operation", l.Operation)
-			field(&b, "Target", l.Target)
-			field(&b, "Method", l.Method)
-			field(&b, "URI", l.URI)
-			if len(l.Input) > 0 {
-				b.WriteString("Input: []Binding{\n")
-				for _, in := range l.Input {
-					binding(&b, in)
-				}
-				b.WriteString("},\n")
-			}
-			b.WriteString("Token: ")
-			binding(&b, l.Token)
-			fmt.Fprintf(&b, "NextToken: %#v,\nItems: %#v,\n", l.NextToken, l.Items)
-			field(&b, "Item", l.Item)
-			field(&b, "Property", l.Property)
-			b.WriteString("},\n")
-		}
+		lister(&b, "List", r.List)
+		lister(&b, "Probe", r.Probe)
 		b.WriteString("},\n")
 	}
 	b.WriteString("}\n")
 	return format.Source(b.Bytes())
+}
+
+func lister(b *bytes.Buffer, name string, l *Lister) {
+	if l == nil {
+		return
+	}
+	fmt.Fprintf(b, "%s: &Lister{\n", name)
+	field(b, "Operation", l.Operation)
+	field(b, "Target", l.Target)
+	field(b, "Method", l.Method)
+	field(b, "URI", l.URI)
+	if len(l.Input) > 0 {
+		b.WriteString("Input: []Binding{\n")
+		for _, in := range l.Input {
+			binding(b, in)
+		}
+		b.WriteString("},\n")
+	}
+	b.WriteString("Token: ")
+	binding(b, l.Token)
+	fmt.Fprintf(b, "NextToken: %#v,\nItems: %#v,\n", l.NextToken, l.Items)
+	field(b, "Item", l.Item)
+	field(b, "Property", l.Property)
+	b.WriteString("},\n")
 }
 
 func binding(b *bytes.Buffer, in Binding) {
@@ -96,6 +118,9 @@ func binding(b *bytes.Buffer, in Binding) {
 		if f.value != "" {
 			fmt.Fprintf(b, ", %s: %q", f.name, f.value)
 		}
+	}
+	if in.List {
+		b.WriteString(", List: true")
 	}
 	b.WriteString("},\n")
 }
@@ -112,25 +137,35 @@ func fields(b *bytes.Buffer, fs []Field) {
 	}
 	b.WriteString("Fields: []Field{\n")
 	for _, f := range fs {
-		fmt.Fprintf(b, "{Property: %q, Member: %q, Kind: %q", f.Property, f.Member, f.Kind)
-		if len(f.Via) > 0 {
-			fmt.Fprintf(b, ", Via: %#v", f.Via)
-		}
-		if f.JSONName != "" {
-			fmt.Fprintf(b, ", JSONName: %q", f.JSONName)
-		}
-		for _, x := range []struct{ name, value string }{{"XMLName", f.XMLName}, {"Item", f.Item}, {"Scalar", f.Scalar}} {
-			if x.value != "" {
-				fmt.Fprintf(b, ", %s: %q", x.name, x.value)
-			}
-		}
-		if len(f.Fields) > 0 {
-			b.WriteString(",\n")
-			fields(b, f.Fields)
-		}
-		b.WriteString("},\n")
+		fieldLiteral(b, f, "")
+		b.WriteString(",\n")
 	}
 	b.WriteString("},\n")
+}
+
+// fieldLiteral writes f as a composite literal, prefixed by typeName
+// where the context does not already give the type.
+func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
+	fmt.Fprintf(b, "%s{Property: %q, Member: %q, Kind: %q", typeName, f.Property, f.Member, f.Kind)
+	if len(f.Via) > 0 {
+		fmt.Fprintf(b, ", Via: %#v", f.Via)
+	}
+	if f.Root {
+		b.WriteString(", Root: true")
+	}
+	if f.JSONName != "" {
+		fmt.Fprintf(b, ", JSONName: %q", f.JSONName)
+	}
+	for _, x := range []struct{ name, value string }{{"XMLName", f.XMLName}, {"Item", f.Item}, {"Scalar", f.Scalar}} {
+		if x.value != "" {
+			fmt.Fprintf(b, ", %s: %q", x.name, x.value)
+		}
+	}
+	if len(f.Fields) > 0 {
+		b.WriteString(",\n")
+		fields(b, f.Fields)
+	}
+	b.WriteString("}")
 }
 
 // Readers returns every compiled reader, sorted by type.

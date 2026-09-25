@@ -290,7 +290,12 @@ func restJSONWidget() map[string]any {
 
 func compileWidget(t *testing.T, model map[string]any, o Override) (Reader, []error) {
 	t.Helper()
-	files := fstest.MapFS{"model.json": {Data: encode(t, model)}, "schema.json": {Data: encode(t, widgetSchema())}}
+	return compileWith(t, model, widgetSchema(), o)
+}
+
+func compileWith(t *testing.T, model, schema map[string]any, o Override) (Reader, []error) {
+	t.Helper()
+	files := fstest.MapFS{"model.json": {Data: encode(t, model)}, "schema.json": {Data: encode(t, schema)}}
 	lock := Lock{
 		Models:  map[string]LockedFile{"widgets.json": {File: "model.json"}},
 		Schemas: map[string]LockedFile{"AWS::Widgets::Widget": {File: "schema.json"}},
