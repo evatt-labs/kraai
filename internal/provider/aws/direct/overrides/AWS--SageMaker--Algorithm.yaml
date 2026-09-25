@@ -1,0 +1,89 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::Algorithm
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeAlgorithm
+  identifier:
+    AlgorithmArn: AlgorithmName
+properties:
+  AlgorithmArn: AlgorithmArn
+  AlgorithmDescription: AlgorithmDescription
+  AlgorithmName: AlgorithmName
+  CertifyForMarketplace: CertifyForMarketplace
+  CreationTime: CreationTime
+  InferenceSpecification:
+    member: InferenceSpecification
+    properties:
+      Containers:
+        member: Containers
+        properties:
+          ContainerHostname: ContainerHostname
+          Environment: Environment
+          Framework: Framework
+          FrameworkVersion: FrameworkVersion
+          Image: Image
+          ImageDigest: ImageDigest
+          IsCheckpoint: IsCheckpoint
+          ModelInput:
+            member: ModelInput
+            properties:
+              DataInputConfig: DataInputConfig
+          NearestModelName: NearestModelName
+      SupportedContentTypes: SupportedContentTypes
+      SupportedRealtimeInferenceInstanceTypes: SupportedRealtimeInferenceInstanceTypes
+      SupportedResponseMIMETypes: SupportedResponseMIMETypes
+      SupportedTransformInstanceTypes: SupportedTransformInstanceTypes
+  TrainingSpecification:
+    member: TrainingSpecification
+    properties:
+      MetricDefinitions:
+        member: MetricDefinitions
+        properties:
+          Name: Name
+          Regex: Regex
+      SupportedHyperParameters:
+        member: SupportedHyperParameters
+        properties:
+          DefaultValue: DefaultValue
+          Description: Description
+          IsRequired: IsRequired
+          IsTunable: IsTunable
+          Name: Name
+          Range:
+            member: Range
+            properties:
+              CategoricalParameterRangeSpecification:
+                member: CategoricalParameterRangeSpecification
+                properties:
+                  Values: Values
+              ContinuousParameterRangeSpecification:
+                member: ContinuousParameterRangeSpecification
+                properties:
+                  MaxValue: MaxValue
+                  MinValue: MinValue
+              IntegerParameterRangeSpecification:
+                member: IntegerParameterRangeSpecification
+                properties:
+                  MaxValue: MaxValue
+                  MinValue: MinValue
+          Type: Type
+      SupportedTrainingInstanceTypes: SupportedTrainingInstanceTypes
+      SupportedTuningJobObjectiveMetrics:
+        member: SupportedTuningJobObjectiveMetrics
+        properties:
+          MetricName: MetricName
+          Type: Type
+      SupportsDistributedTraining: SupportsDistributedTraining
+      TrainingChannels:
+        member: TrainingChannels
+        properties:
+          Description: Description
+          IsRequired: IsRequired
+          Name: Name
+          SupportedCompressionTypes: SupportedCompressionTypes
+          SupportedContentTypes: SupportedContentTypes
+          SupportedInputModes: SupportedInputModes
+      TrainingImage: TrainingImage
+      TrainingImageDigest: TrainingImageDigest
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

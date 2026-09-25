@@ -1,0 +1,95 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::KafkaConnect::Connector
+read:
+  model: kafkaconnect/service/2021-09-14/kafkaconnect-2021-09-14.json
+  operation: DescribeConnector
+  identifier:
+    ConnectorArn: connectorArn
+properties:
+  Capacity:
+    member: capacity
+    properties:
+      AutoScaling:
+        member: autoScaling
+        properties:
+          MaxAutoscalingTaskCount: maxAutoscalingTaskCount
+          MaxWorkerCount: maxWorkerCount
+          McuCount: mcuCount
+          MinWorkerCount: minWorkerCount
+          ScaleInPolicy:
+            member: scaleInPolicy
+            properties:
+              CpuUtilizationPercentage: cpuUtilizationPercentage
+          ScaleOutPolicy:
+            member: scaleOutPolicy
+            properties:
+              CpuUtilizationPercentage: cpuUtilizationPercentage
+      ProvisionedCapacity:
+        member: provisionedCapacity
+        properties:
+          McuCount: mcuCount
+          WorkerCount: workerCount
+  ConnectorArn: connectorArn
+  ConnectorConfiguration: connectorConfiguration
+  ConnectorDescription: connectorDescription
+  ConnectorName: connectorName
+  KafkaCluster:
+    member: kafkaCluster
+    properties:
+      ApacheKafkaCluster:
+        member: apacheKafkaCluster
+        properties:
+          BootstrapServers: bootstrapServers
+          Vpc:
+            member: vpc
+            properties:
+              SecurityGroups: securityGroups
+              Subnets: subnets
+  KafkaClusterClientAuthentication:
+    member: kafkaClusterClientAuthentication
+    properties:
+      AuthenticationType: authenticationType
+  KafkaClusterEncryptionInTransit:
+    member: kafkaClusterEncryptionInTransit
+    properties:
+      EncryptionType: encryptionType
+  KafkaConnectVersion: kafkaConnectVersion
+  LogDelivery:
+    member: logDelivery
+    properties:
+      WorkerLogDelivery:
+        member: workerLogDelivery
+        properties:
+          CloudWatchLogs:
+            member: cloudWatchLogs
+            properties:
+              Enabled: enabled
+              LogGroup: logGroup
+          Firehose:
+            member: firehose
+            properties:
+              DeliveryStream: deliveryStream
+              Enabled: enabled
+          S3:
+            member: s3
+            properties:
+              Bucket: bucket
+              Enabled: enabled
+              Prefix: prefix
+  NetworkType: networkType
+  Plugins:
+    member: plugins
+    properties:
+      CustomPlugin:
+        member: customPlugin
+        properties:
+          CustomPluginArn: customPluginArn
+          Revision: revision
+  ServiceExecutionRoleArn: serviceExecutionRoleArn
+  WorkerConfiguration:
+    member: workerConfiguration
+    properties:
+      Revision: revision
+      WorkerConfigurationArn: workerConfigurationArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

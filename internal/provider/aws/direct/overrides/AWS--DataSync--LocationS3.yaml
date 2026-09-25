@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataSync::LocationS3
+read:
+  model: datasync/service/2018-11-09/datasync-2018-11-09.json
+  operation: DescribeLocationS3
+  identifier:
+    LocationArn: LocationArn
+properties:
+  LocationArn: LocationArn
+  LocationUri: LocationUri
+  S3Config:
+    member: S3Config
+    properties:
+      BucketAccessRoleArn: BucketAccessRoleArn
+  S3StorageClass: S3StorageClass
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

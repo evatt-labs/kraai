@@ -1,0 +1,40 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaTailor::Function
+read:
+  model: mediatailor/service/2018-04-23/mediatailor-2018-04-23.json
+  operation: GetFunction
+  identifier:
+    FunctionId: FunctionId
+properties:
+  Arn: Arn
+  CustomOutputConfiguration:
+    member: CustomOutputConfiguration
+    properties:
+      Output: Output
+      Runtime: Runtime
+  Description: Description
+  FunctionId: FunctionId
+  FunctionType: FunctionType
+  HttpRequestConfiguration:
+    member: HttpRequestConfiguration
+    properties:
+      Body: Body
+      Headers: Headers
+      MethodType: MethodType
+      Output: Output
+      RequestTimeoutMilliseconds: RequestTimeoutMilliseconds
+      Runtime: Runtime
+      Url: Url
+  SequentialExecutorConfiguration:
+    member: SequentialExecutorConfiguration
+    properties:
+      FunctionList:
+        member: FunctionList
+        properties:
+          FunctionId: FunctionId
+          RunCondition: RunCondition
+      Output: Output
+      Runtime: Runtime
+      TimeoutMilliseconds: TimeoutMilliseconds
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

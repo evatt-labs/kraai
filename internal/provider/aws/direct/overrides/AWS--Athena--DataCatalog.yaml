@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Athena::DataCatalog
+read:
+  model: athena/service/2017-05-18/athena-2017-05-18.json
+  operation: GetDataCatalog
+  identifier:
+    Name: Name
+  response: DataCatalog
+properties:
+  ConnectionType: ConnectionType
+  Description: Description
+  Error: Error
+  Name: Name
+  Parameters: Parameters
+  Status: Status
+  Type: Type
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

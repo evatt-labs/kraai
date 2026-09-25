@@ -1,0 +1,40 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MGN::NetworkMigrationDefinition
+read:
+  model: mgn/service/2020-02-26/mgn-2020-02-26.json
+  operation: GetNetworkMigrationDefinition
+  identifier:
+    Arn: networkMigrationDefinitionID
+properties:
+  Arn: arn
+  CreatedAt: createdAt
+  Description: description
+  Name: name
+  NetworkMigrationDefinitionID: networkMigrationDefinitionID
+  ScopeTags: scopeTags
+  SourceConfigurations:
+    member: sourceConfigurations
+    properties:
+      SourceEnvironment: sourceEnvironment
+      SourceS3Configuration:
+        member: sourceS3Configuration
+        properties:
+          S3Bucket: s3Bucket
+          S3BucketOwner: s3BucketOwner
+          S3Key: s3Key
+  TargetDeployment: targetDeployment
+  TargetNetwork:
+    member: targetNetwork
+    properties:
+      InboundCidr: inboundCidr
+      InspectionCidr: inspectionCidr
+      OutboundCidr: outboundCidr
+      Topology: topology
+  TargetS3Configuration:
+    member: targetS3Configuration
+    properties:
+      S3Bucket: s3Bucket
+      S3BucketOwner: s3BucketOwner
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

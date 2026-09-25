@@ -1,0 +1,94 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CustomerProfiles::Domain
+read:
+  model: customer-profiles/service/2020-08-15/customer-profiles-2020-08-15.json
+  operation: GetDomain
+  identifier:
+    DomainName: DomainName
+properties:
+  CreatedAt: CreatedAt
+  DataStore:
+    member: DataStore
+    properties:
+      Enabled: Enabled
+      Readiness:
+        member: Readiness
+        properties:
+          Message: Message
+          ProgressPercentage: ProgressPercentage
+  DeadLetterQueueUrl: DeadLetterQueueUrl
+  DefaultEncryptionKey: DefaultEncryptionKey
+  DefaultExpirationDays: DefaultExpirationDays
+  DomainName: DomainName
+  LastUpdatedAt: LastUpdatedAt
+  Matching:
+    member: Matching
+    properties:
+      AutoMerging:
+        member: AutoMerging
+        properties:
+          ConflictResolution:
+            member: ConflictResolution
+            properties:
+              ConflictResolvingModel: ConflictResolvingModel
+              SourceName: SourceName
+          Consolidation:
+            member: Consolidation
+            properties:
+              MatchingAttributesList: MatchingAttributesList
+          Enabled: Enabled
+          MinAllowedConfidenceScoreForMerging: MinAllowedConfidenceScoreForMerging
+      Enabled: Enabled
+      ExportingConfig:
+        member: ExportingConfig
+        properties:
+          S3Exporting:
+            member: S3Exporting
+            properties:
+              S3BucketName: S3BucketName
+              S3KeyName: S3KeyName
+      JobSchedule:
+        member: JobSchedule
+        properties:
+          DayOfTheWeek: DayOfTheWeek
+          Time: Time
+  RuleBasedMatching:
+    member: RuleBasedMatching
+    properties:
+      AttributeTypesSelector:
+        member: AttributeTypesSelector
+        properties:
+          Address: Address
+          AttributeMatchingModel: AttributeMatchingModel
+          EmailAddress: EmailAddress
+          PhoneNumber: PhoneNumber
+      ConflictResolution:
+        member: ConflictResolution
+        properties:
+          ConflictResolvingModel: ConflictResolvingModel
+          SourceName: SourceName
+      Enabled: Enabled
+      ExportingConfig:
+        member: ExportingConfig
+        properties:
+          S3Exporting:
+            member: S3Exporting
+            properties:
+              S3BucketName: S3BucketName
+              S3KeyName: S3KeyName
+      MatchingRules:
+        member: MatchingRules
+        properties:
+          Rule: Rule
+      MaxAllowedRuleLevelForMatching: MaxAllowedRuleLevelForMatching
+      MaxAllowedRuleLevelForMerging: MaxAllowedRuleLevelForMerging
+      Status: Status
+  Stats:
+    member: Stats
+    properties:
+      MeteringProfileCount: MeteringProfileCount
+      ObjectCount: ObjectCount
+      ProfileCount: ProfileCount
+      TotalSize: TotalSize
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WorkSpacesWeb::NetworkSettings
+read:
+  model: workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json
+  operation: GetNetworkSettings
+  identifier:
+    NetworkSettingsArn: networkSettingsArn
+  response: networkSettings
+properties:
+  AssociatedPortalArns: associatedPortalArns
+  NetworkSettingsArn: networkSettingsArn
+  SecurityGroupIds: securityGroupIds
+  SubnetIds: subnetIds
+  VpcId: vpcId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

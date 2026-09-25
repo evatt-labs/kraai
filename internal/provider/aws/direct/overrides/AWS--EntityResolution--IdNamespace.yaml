@@ -1,0 +1,42 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::EntityResolution::IdNamespace
+read:
+  model: entityresolution/service/2018-05-10/entityresolution-2018-05-10.json
+  operation: GetIdNamespace
+  identifier:
+    IdNamespaceName: idNamespaceName
+properties:
+  CreatedAt: createdAt
+  Description: description
+  IdMappingWorkflowProperties:
+    member: idMappingWorkflowProperties
+    properties:
+      IdMappingType: idMappingType
+      ProviderProperties:
+        member: providerProperties
+        properties:
+          ProviderConfiguration: providerConfiguration
+          ProviderServiceArn: providerServiceArn
+      RuleBasedProperties:
+        member: ruleBasedProperties
+        properties:
+          AttributeMatchingModel: attributeMatchingModel
+          RecordMatchingModels: recordMatchingModels
+          RuleDefinitionTypes: ruleDefinitionTypes
+          Rules:
+            member: rules
+            properties:
+              MatchingKeys: matchingKeys
+              RuleName: ruleName
+  IdNamespaceArn: idNamespaceArn
+  IdNamespaceName: idNamespaceName
+  InputSourceConfig:
+    member: inputSourceConfig
+    properties:
+      InputSourceARN: inputSourceARN
+      SchemaName: schemaName
+  RoleArn: roleArn
+  Type: type
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

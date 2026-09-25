@@ -1,0 +1,744 @@
+{
+  "shapes": {
+    "com.amazonaws.lambda#AWSGirApiService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.lambda#GetCodeSigningConfig"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "lambda",
+          "cloudFormationName": "Lambda",
+          "cloudTrailEventSource": "lambda.amazonaws.com",
+          "endpointPrefix": "lambda",
+          "sdkId": "Lambda"
+        },
+        "aws.api#tagEnabled": {
+          "disableDefaultOperations": true
+        },
+        "aws.auth#sigv4": {
+          "name": "lambda"
+        },
+        "aws.iam#disableConditionKeyInference": {},
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#paginated": {
+          "inputToken": "Marker",
+          "outputToken": "NextMarker",
+          "pageSize": "MaxItems"
+        },
+        "smithy.api#suppress": [
+          "ServiceTagging"
+        ],
+        "smithy.api#tags": [
+          "feature:public"
+        ],
+        "smithy.api#title": "AWS Lambda",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://lambda-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://lambda-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://lambda.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://lambda.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2015-03-31"
+    },
+    "com.amazonaws.lambda#AllowedPublishers": {
+      "members": {
+        "SigningProfileVersionArns": {
+          "target": "com.amazonaws.lambda#SigningProfileVersionArns",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10000,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-])+:((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1})?:(\\d{12})?:(.*)$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#CodeSigningConfig": {
+      "members": {
+        "AllowedPublishers": {
+          "target": "com.amazonaws.lambda#AllowedPublishers",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "CodeSigningConfigArn": {
+          "target": "com.amazonaws.lambda#CodeSigningConfigArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "CodeSigningConfigId": {
+          "target": "com.amazonaws.lambda#CodeSigningConfigId",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "CodeSigningPolicies": {
+          "target": "com.amazonaws.lambda#CodeSigningPolicies",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.lambda#Description",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "LastModified": {
+          "target": "com.amazonaws.lambda#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#CodeSigningConfigArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:code-signing-config:csc-[a-z0-9]{17}$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#CodeSigningConfigId": {
+      "traits": {
+        "smithy.api#pattern": "^csc-[a-zA-Z0-9-_\\.]{17}$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#CodeSigningPolicies": {
+      "members": {
+        "UntrustedArtifactOnDeployment": {
+          "target": "com.amazonaws.lambda#CodeSigningPolicy",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#CodeSigningPolicy": {
+      "members": {
+        "Enforce": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Enforce",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Warn": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Warn",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.lambda#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#GetCodeSigningConfig": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambda#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ServiceException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lambda#GetCodeSigningConfigRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.lambda#GetCodeSigningConfigResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to view details about an AWS Lambda code signing config",
+          "relativeDocumentation": "API_GetCodeSigningConfig.html",
+          "resources": {
+            "required": {
+              "code signing config": {}
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/2020-04-22/code-signing-configs/{CodeSigningConfigArn}"
+        },
+        "smithy.api#readonly": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.lambda#GetCodeSigningConfigRequest": {
+      "members": {
+        "CodeSigningConfigArn": {
+          "target": "com.amazonaws.lambda#CodeSigningConfigArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#GetCodeSigningConfigResponse": {
+      "members": {
+        "CodeSigningConfig": {
+          "target": "com.amazonaws.lambda#CodeSigningConfig",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#InvalidParameterValueException": {
+      "members": {
+        "Type": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "message": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400,
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404,
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#ServiceException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#SigningProfileVersionArns": {
+      "member": {
+        "target": "com.amazonaws.lambda#Arn",
+        "traits": {
+          "smithy.api#tags": [
+            "feature:public"
+          ]
+        }
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        },
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "list"
+    },
+    "com.amazonaws.lambda#String": {
+      "traits": {
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#Timestamp": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        },
+        "smithy.api#pattern": "^.*$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

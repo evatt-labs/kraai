@@ -1,0 +1,702 @@
+{
+  "shapes": {
+    "com.amazonaws.lambdamicrovms#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#GetMicrovmImage": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambdamicrovms#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.lambdamicrovms#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.lambdamicrovms#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lambdamicrovms#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.lambdamicrovms#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lambdamicrovms#GetMicrovmImageInput"
+      },
+      "output": {
+        "target": "com.amazonaws.lambdamicrovms#GetMicrovmImageOutput"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to view information about an AWS Lambda MicroVM image",
+          "relativeDocumentation": "API_GetMicrovmImage.html"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/2025-09-09/microvm-images/{imageIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.lambdamicrovms#GetMicrovmImageInput": {
+      "members": {
+        "imageIdentifier": {
+          "target": "com.amazonaws.lambdamicrovms#MicrovmImageIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#GetMicrovmImageOutput": {
+      "members": {
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "imageArn": {
+          "target": "com.amazonaws.lambdamicrovms#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "latestActiveImageVersion": {
+          "target": "com.amazonaws.lambdamicrovms#NonBlankString",
+          "traits": {}
+        },
+        "latestFailedImageVersion": {
+          "target": "com.amazonaws.lambdamicrovms#NonBlankString",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.lambdamicrovms#ImageName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "state": {
+          "target": "com.amazonaws.lambdamicrovms#MicrovmImageState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.lambdamicrovms#Tags",
+          "traits": {}
+        },
+        "updatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#ImageName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambdamicrovms#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#LambdaMicrovms": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambdamicrovms#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.lambdamicrovms#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.lambdamicrovms#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.lambdamicrovms#ValidationException"
+        }
+      ],
+      "operations": [
+        {
+          "target": "com.amazonaws.lambdamicrovms#GetMicrovmImage"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "lambda",
+          "sdkId": "Lambda Microvms"
+        },
+        "aws.auth#sigv4": {
+          "name": "lambda"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Lambda MicroVMs",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://lambda-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://lambda-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://lambda.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://lambda.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2025-09-09"
+    },
+    "com.amazonaws.lambdamicrovms#MicrovmImageIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambdamicrovms#MicrovmImageState": {
+      "members": {
+        "CREATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATED"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "UPDATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATED"
+          }
+        },
+        "UPDATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.lambdamicrovms#NonBlankString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^\\s]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambdamicrovms#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambdamicrovms#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambdamicrovms#Tags": {
+      "key": {
+        "target": "com.amazonaws.lambdamicrovms#TagKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.lambdamicrovms#TagValue"
+      }
+    },
+    "com.amazonaws.lambdamicrovms#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#ValidationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

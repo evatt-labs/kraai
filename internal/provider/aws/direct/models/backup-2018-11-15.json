@@ -1,0 +1,580 @@
+{
+  "shapes": {
+    "com.amazonaws.backup#CryoControllerUserManager": {
+      "operations": [
+        {
+          "target": "com.amazonaws.backup#GetRestoreTestingPlan"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "backup",
+          "cloudFormationName": "Backup",
+          "cloudTrailEventSource": "backup.amazonaws.com",
+          "endpointPrefix": "backup",
+          "sdkId": "Backup"
+        },
+        "aws.auth#sigv4": {
+          "name": "backup"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS Backup",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://backup-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://backup-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://backup.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://backup.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-11-15"
+    },
+    "com.amazonaws.backup#GetRestoreTestingPlan": {
+      "errors": [
+        {
+          "target": "com.amazonaws.backup#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.backup#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.backup#GetRestoreTestingPlanInput"
+      },
+      "output": {
+        "target": "com.amazonaws.backup#GetRestoreTestingPlanOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/restore-testing/plans/{RestoreTestingPlanName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.backup#GetRestoreTestingPlanInput": {
+      "members": {
+        "RestoreTestingPlanName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#GetRestoreTestingPlanOutput": {
+      "members": {
+        "RestoreTestingPlan": {
+          "target": "com.amazonaws.backup#RestoreTestingPlanForGet",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#ResourceNotFoundException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#RestoreTestingPlanForGet": {
+      "members": {
+        "CreationTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "CreatorRequestId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "LastExecutionTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "LastUpdateTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "RecoveryPointSelection": {
+          "target": "com.amazonaws.backup#RestoreTestingRecoveryPointSelection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RestoreTestingPlanArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RestoreTestingPlanName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ScheduleExpression": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ScheduleExpressionTimezone": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "StartWindowHours": {
+          "target": "com.amazonaws.backup#integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.backup#RestoreTestingRecoveryPointSelection": {
+      "members": {
+        "Algorithm": {
+          "target": "com.amazonaws.backup#RestoreTestingRecoveryPointSelectionAlgorithm",
+          "traits": {}
+        },
+        "ExcludeVaults": {
+          "target": "com.amazonaws.backup#stringList",
+          "traits": {}
+        },
+        "IncludeVaults": {
+          "target": "com.amazonaws.backup#stringList",
+          "traits": {}
+        },
+        "RecoveryPointTypes": {
+          "target": "com.amazonaws.backup#RestoreTestingRecoveryPointTypeList",
+          "traits": {}
+        },
+        "SelectionWindowDays": {
+          "target": "com.amazonaws.backup#integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.backup#RestoreTestingRecoveryPointSelectionAlgorithm": {
+      "members": {
+        "LATEST_WITHIN_WINDOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LATEST_WITHIN_WINDOW"
+          }
+        },
+        "RANDOM_WITHIN_WINDOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RANDOM_WITHIN_WINDOW"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.backup#RestoreTestingRecoveryPointType": {
+      "members": {
+        "CONTINUOUS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTINUOUS"
+          }
+        },
+        "SNAPSHOT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SNAPSHOT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.backup#RestoreTestingRecoveryPointTypeList": {
+      "member": {
+        "target": "com.amazonaws.backup#RestoreTestingRecoveryPointType"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.backup#ServiceUnavailableException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#integer": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.backup#string": {
+      "type": "string"
+    },
+    "com.amazonaws.backup#stringList": {
+      "member": {
+        "target": "com.amazonaws.backup#string"
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::Hub
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeHub
+  identifier:
+    HubArn: HubName
+properties:
+  CreationTime: CreationTime
+  HubArn: HubArn
+  HubDescription: HubDescription
+  HubDisplayName: HubDisplayName
+  HubName: HubName
+  HubSearchKeywords: HubSearchKeywords
+  HubStatus: HubStatus
+  LastModifiedTime: LastModifiedTime
+  S3StorageConfig:
+    member: S3StorageConfig
+    properties:
+      S3OutputPath: S3OutputPath
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

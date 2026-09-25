@@ -1,0 +1,1139 @@
+{
+  "shapes": {
+    "com.amazonaws.mwaa#AirflowConfigurationOptions": {
+      "key": {
+        "target": "com.amazonaws.mwaa#ConfigKey"
+      },
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.mwaa#ConfigValue"
+      }
+    },
+    "com.amazonaws.mwaa#AirflowVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-z.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#AmazonMWAA": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mwaa#GetEnvironment"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "airflow",
+          "sdkId": "MWAA"
+        },
+        "aws.auth#sigv4": {
+          "name": "airflow"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AmazonMWAA",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://airflow-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://airflow-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://airflow.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://airflow.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-07-01"
+    },
+    "com.amazonaws.mwaa#CeleryExecutorQueue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:sqs:[a-z0-9\\-]+:\\d{12}:[a-zA-Z_0-9+=,.@\\-_/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#CloudWatchLogGroupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:logs:[a-z0-9\\-]+:\\d{12}:log-group:\\w+"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#ConfigKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-z]+([a-z0-9._]*[a-z0-9_]+)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#ConfigValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 65536,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[ -~]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#CreatedAt": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.mwaa#EndpointManagement": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CUSTOMER",
+            "value": "CUSTOMER"
+          },
+          {
+            "name": "SERVICE",
+            "value": "SERVICE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#Environment": {
+      "members": {
+        "AirflowConfigurationOptions": {
+          "target": "com.amazonaws.mwaa#AirflowConfigurationOptions",
+          "traits": {}
+        },
+        "AirflowVersion": {
+          "target": "com.amazonaws.mwaa#AirflowVersion",
+          "traits": {}
+        },
+        "Arn": {
+          "target": "com.amazonaws.mwaa#EnvironmentArn",
+          "traits": {}
+        },
+        "CeleryExecutorQueue": {
+          "target": "com.amazonaws.mwaa#CeleryExecutorQueue",
+          "traits": {}
+        },
+        "CreatedAt": {
+          "target": "com.amazonaws.mwaa#CreatedAt",
+          "traits": {}
+        },
+        "DagS3Path": {
+          "target": "com.amazonaws.mwaa#RelativePath",
+          "traits": {}
+        },
+        "DatabaseVpcEndpointService": {
+          "target": "com.amazonaws.mwaa#VpcEndpointServiceName",
+          "traits": {}
+        },
+        "EndpointManagement": {
+          "target": "com.amazonaws.mwaa#EndpointManagement",
+          "traits": {}
+        },
+        "EnvironmentClass": {
+          "target": "com.amazonaws.mwaa#EnvironmentClass",
+          "traits": {}
+        },
+        "ExecutionRoleArn": {
+          "target": "com.amazonaws.mwaa#IamRoleArn",
+          "traits": {}
+        },
+        "KmsKey": {
+          "target": "com.amazonaws.mwaa#KmsKey",
+          "traits": {}
+        },
+        "LastUpdate": {
+          "target": "com.amazonaws.mwaa#LastUpdate",
+          "traits": {}
+        },
+        "LoggingConfiguration": {
+          "target": "com.amazonaws.mwaa#LoggingConfiguration",
+          "traits": {}
+        },
+        "MaxWebservers": {
+          "target": "com.amazonaws.mwaa#MaxWebservers",
+          "traits": {}
+        },
+        "MaxWorkers": {
+          "target": "com.amazonaws.mwaa#MaxWorkers",
+          "traits": {}
+        },
+        "MinWebservers": {
+          "target": "com.amazonaws.mwaa#MinWebservers",
+          "traits": {}
+        },
+        "MinWorkers": {
+          "target": "com.amazonaws.mwaa#MinWorkers",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.mwaa#EnvironmentName",
+          "traits": {}
+        },
+        "NetworkConfiguration": {
+          "target": "com.amazonaws.mwaa#NetworkConfiguration",
+          "traits": {}
+        },
+        "PluginsS3ObjectVersion": {
+          "target": "com.amazonaws.mwaa#S3ObjectVersion",
+          "traits": {}
+        },
+        "PluginsS3Path": {
+          "target": "com.amazonaws.mwaa#RelativePath",
+          "traits": {}
+        },
+        "RequirementsS3ObjectVersion": {
+          "target": "com.amazonaws.mwaa#S3ObjectVersion",
+          "traits": {}
+        },
+        "RequirementsS3Path": {
+          "target": "com.amazonaws.mwaa#RelativePath",
+          "traits": {}
+        },
+        "Schedulers": {
+          "target": "com.amazonaws.mwaa#Schedulers",
+          "traits": {}
+        },
+        "ServiceRoleArn": {
+          "target": "com.amazonaws.mwaa#IamRoleArn",
+          "traits": {}
+        },
+        "SourceBucketArn": {
+          "target": "com.amazonaws.mwaa#S3BucketArn",
+          "traits": {}
+        },
+        "StartupScriptS3ObjectVersion": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "StartupScriptS3Path": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.mwaa#EnvironmentStatus",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.mwaa#TagMap",
+          "traits": {}
+        },
+        "WebserverAccessMode": {
+          "target": "com.amazonaws.mwaa#WebserverAccessMode",
+          "traits": {}
+        },
+        "WebserverUrl": {
+          "target": "com.amazonaws.mwaa#WebserverUrl",
+          "traits": {}
+        },
+        "WebserverVpcEndpointService": {
+          "target": "com.amazonaws.mwaa#VpcEndpointServiceName",
+          "traits": {}
+        },
+        "WeeklyMaintenanceWindowStart": {
+          "target": "com.amazonaws.mwaa#WeeklyMaintenanceWindowStart",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#EnvironmentArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:airflow:[a-z0-9\\-]+:\\d{12}:environment/\\w+"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#EnvironmentClass": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#EnvironmentName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 80,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z][0-9a-zA-Z-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#EnvironmentStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CREATING",
+            "value": "CREATING"
+          },
+          {
+            "name": "CREATE_FAILED",
+            "value": "CREATE_FAILED"
+          },
+          {
+            "name": "AVAILABLE",
+            "value": "AVAILABLE"
+          },
+          {
+            "name": "UPDATING",
+            "value": "UPDATING"
+          },
+          {
+            "name": "DELETING",
+            "value": "DELETING"
+          },
+          {
+            "name": "DELETED",
+            "value": "DELETED"
+          },
+          {
+            "name": "UNAVAILABLE",
+            "value": "UNAVAILABLE"
+          },
+          {
+            "name": "UPDATE_FAILED",
+            "value": "UPDATE_FAILED"
+          },
+          {
+            "name": "ROLLING_BACK",
+            "value": "ROLLING_BACK"
+          },
+          {
+            "name": "CREATING_SNAPSHOT",
+            "value": "CREATING_SNAPSHOT"
+          },
+          {
+            "name": "PENDING",
+            "value": "PENDING"
+          },
+          {
+            "name": "MAINTENANCE",
+            "value": "MAINTENANCE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#ErrorCode": {
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#ErrorMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#GetEnvironment": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mwaa#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.mwaa#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mwaa#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mwaa#GetEnvironmentInput"
+      },
+      "output": {
+        "target": "com.amazonaws.mwaa#GetEnvironmentOutput"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "api."
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/environments/{Name}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mwaa#GetEnvironmentInput": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.mwaa#EnvironmentName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#GetEnvironmentOutput": {
+      "members": {
+        "Environment": {
+          "target": "com.amazonaws.mwaa#Environment",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#IamRoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#KmsKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(((arn:aws(-[a-z]+)?:kms:[a-z]{2}-[a-z]+-\\d:\\d+:)?key\\/)?[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|(arn:aws(-[a-z]+)?:kms:[a-z]{2}-[a-z]+-\\d:\\d+:)?alias/.+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#LastUpdate": {
+      "members": {
+        "CreatedAt": {
+          "target": "com.amazonaws.mwaa#UpdateCreatedAt",
+          "traits": {}
+        },
+        "Error": {
+          "target": "com.amazonaws.mwaa#UpdateError",
+          "traits": {}
+        },
+        "Source": {
+          "target": "com.amazonaws.mwaa#UpdateSource",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.mwaa#UpdateStatus",
+          "traits": {}
+        },
+        "WorkerReplacementStrategy": {
+          "target": "com.amazonaws.mwaa#WorkerReplacementStrategy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#LoggingConfiguration": {
+      "members": {
+        "DagProcessingLogs": {
+          "target": "com.amazonaws.mwaa#ModuleLoggingConfiguration",
+          "traits": {}
+        },
+        "SchedulerLogs": {
+          "target": "com.amazonaws.mwaa#ModuleLoggingConfiguration",
+          "traits": {}
+        },
+        "TaskLogs": {
+          "target": "com.amazonaws.mwaa#ModuleLoggingConfiguration",
+          "traits": {}
+        },
+        "WebserverLogs": {
+          "target": "com.amazonaws.mwaa#ModuleLoggingConfiguration",
+          "traits": {}
+        },
+        "WorkerLogs": {
+          "target": "com.amazonaws.mwaa#ModuleLoggingConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#LoggingEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.mwaa#LoggingLevel": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CRITICAL",
+            "value": "CRITICAL"
+          },
+          {
+            "name": "ERROR",
+            "value": "ERROR"
+          },
+          {
+            "name": "WARNING",
+            "value": "WARNING"
+          },
+          {
+            "name": "INFO",
+            "value": "INFO"
+          },
+          {
+            "name": "DEBUG",
+            "value": "DEBUG"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#MaxWebservers": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mwaa#MaxWorkers": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mwaa#MinWebservers": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mwaa#MinWorkers": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mwaa#ModuleLoggingConfiguration": {
+      "members": {
+        "CloudWatchLogGroupArn": {
+          "target": "com.amazonaws.mwaa#CloudWatchLogGroupArn",
+          "traits": {}
+        },
+        "Enabled": {
+          "target": "com.amazonaws.mwaa#LoggingEnabled",
+          "traits": {}
+        },
+        "LogLevel": {
+          "target": "com.amazonaws.mwaa#LoggingLevel",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#NetworkConfiguration": {
+      "members": {
+        "SecurityGroupIds": {
+          "target": "com.amazonaws.mwaa#SecurityGroupList",
+          "traits": {}
+        },
+        "SubnetIds": {
+          "target": "com.amazonaws.mwaa#SubnetList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#RelativePath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": ".*"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#S3BucketArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:s3:::[a-z0-9.\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#S3ObjectVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#Schedulers": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mwaa#SecurityGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^sg-[a-zA-Z0-9\\-._]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#SecurityGroupList": {
+      "member": {
+        "target": "com.amazonaws.mwaa#SecurityGroupId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mwaa#SubnetId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^subnet-[a-zA-Z0-9\\-._]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#SubnetList": {
+      "member": {
+        "target": "com.amazonaws.mwaa#SubnetId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 2,
+          "min": 2
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mwaa#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#TagMap": {
+      "key": {
+        "target": "com.amazonaws.mwaa#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.mwaa#TagValue"
+      }
+    },
+    "com.amazonaws.mwaa#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#UpdateCreatedAt": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.mwaa#UpdateError": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.mwaa#ErrorCode",
+          "traits": {}
+        },
+        "ErrorMessage": {
+          "target": "com.amazonaws.mwaa#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#UpdateSource": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#UpdateStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "SUCCESS",
+            "value": "SUCCESS"
+          },
+          {
+            "name": "PENDING",
+            "value": "PENDING"
+          },
+          {
+            "name": "FAILED",
+            "value": "FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#ValidationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#VpcEndpointServiceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-z.-]+)?com\\.amazonaws\\.vpce\\.[a-z0-9\\-]+\\.[a-zA-Z_0-9+=,.@\\-_/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#WebserverAccessMode": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "PRIVATE_ONLY",
+            "value": "PRIVATE_ONLY"
+          },
+          {
+            "name": "PUBLIC_ONLY",
+            "value": "PUBLIC_ONLY"
+          },
+          {
+            "name": "PUBLIC_AND_PRIVATE",
+            "value": "PUBLIC_AND_PRIVATE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#WebserverUrl": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^https://.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#WeeklyMaintenanceWindowStart": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 9,
+          "min": 1
+        },
+        "smithy.api#pattern": "(MON|TUE|WED|THU|FRI|SAT|SUN):([01]\\d|2[0-3]):(00|30)"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mwaa#WorkerReplacementStrategy": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "FORCED",
+            "value": "FORCED"
+          },
+          {
+            "name": "GRACEFUL",
+            "value": "GRACEFUL"
+          }
+        ]
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

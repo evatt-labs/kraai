@@ -1,0 +1,685 @@
+{
+  "shapes": {
+    "com.amazonaws.b2bi#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.b2bi#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.b2bi#B2BI": {
+      "operations": [
+        {
+          "target": "com.amazonaws.b2bi#GetProfile"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "endpointPrefix": "b2bi",
+          "sdkId": "b2bi"
+        },
+        "aws.api#tagEnabled": {},
+        "aws.auth#sigv4": {
+          "name": "b2bi"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#cors": {},
+        "smithy.api#title": "AWS B2B Data Interchange",
+        "smithy.api#unstable": {},
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://b2bi-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://b2bi-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://b2bi.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://b2bi.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2022-06-23"
+    },
+    "com.amazonaws.b2bi#BusinessName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 254,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#CreatedDate": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.b2bi#Email": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 254,
+          "min": 5
+        },
+        "smithy.api#pattern": "^[\\w\\.\\-]+@[\\w\\.\\-]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#ErrorMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 10
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#GetProfile": {
+      "errors": [
+        {
+          "target": "com.amazonaws.b2bi#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.b2bi#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.b2bi#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.b2bi#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.b2bi#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.b2bi#GetProfileRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.b2bi#GetProfileResponse"
+      },
+      "traits": {
+        "aws.iam#requiredActions": [
+          "b2bi:ListTagsForResource"
+        ],
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/profiles/{profileId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.b2bi#GetProfileRequest": {
+      "members": {
+        "profileId": {
+          "target": "com.amazonaws.b2bi#ProfileId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.b2bi#GetProfileResponse": {
+      "members": {
+        "businessName": {
+          "target": "com.amazonaws.b2bi#BusinessName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "com.amazonaws.b2bi#CreatedDate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "email": {
+          "target": "com.amazonaws.b2bi#Email",
+          "traits": {}
+        },
+        "logGroupName": {
+          "target": "com.amazonaws.b2bi#LogGroupName",
+          "traits": {}
+        },
+        "logging": {
+          "target": "com.amazonaws.b2bi#Logging",
+          "traits": {}
+        },
+        "modifiedAt": {
+          "target": "com.amazonaws.b2bi#ModifiedDate",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.b2bi#ProfileName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "phone": {
+          "target": "com.amazonaws.b2bi#Phone",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "profileArn": {
+          "target": "com.amazonaws.b2bi#ResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "profileId": {
+          "target": "com.amazonaws.b2bi#ProfileId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.b2bi#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.b2bi#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.b2bi#LogGroupName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#Logging": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.b2bi#ModifiedDate": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.b2bi#Phone": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 7
+        },
+        "smithy.api#pattern": "^\\+?([0-9 \\t\\-()\\/]{7,})(?:\\s*(?:#|x\\.?|ext\\.?|extension) \\t*(\\d+))?$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#ProfileId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#ProfileName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 254,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#ResourceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.b2bi#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.b2bi#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.b2bi#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.b2bi#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.b2bi#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.b2bi#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,1113 @@
+{
+  "shapes": {
+    "com.amazonaws.customerprofiles#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.customerprofiles#message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#AddressList": {
+      "member": {
+        "target": "com.amazonaws.customerprofiles#string1To255"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 4,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.customerprofiles#AttributeMatchingModel": {
+      "members": {
+        "MANY_TO_MANY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANY_TO_MANY"
+          }
+        },
+        "ONE_TO_ONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONE_TO_ONE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.customerprofiles#AttributeTypesSelector": {
+      "members": {
+        "Address": {
+          "target": "com.amazonaws.customerprofiles#AddressList",
+          "traits": {}
+        },
+        "AttributeMatchingModel": {
+          "target": "com.amazonaws.customerprofiles#AttributeMatchingModel",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "EmailAddress": {
+          "target": "com.amazonaws.customerprofiles#EmailList",
+          "traits": {}
+        },
+        "PhoneNumber": {
+          "target": "com.amazonaws.customerprofiles#PhoneNumberList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#AutoMerging": {
+      "members": {
+        "ConflictResolution": {
+          "target": "com.amazonaws.customerprofiles#ConflictResolution",
+          "traits": {}
+        },
+        "Consolidation": {
+          "target": "com.amazonaws.customerprofiles#Consolidation",
+          "traits": {}
+        },
+        "Enabled": {
+          "target": "com.amazonaws.customerprofiles#optionalBoolean",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MinAllowedConfidenceScoreForMerging": {
+          "target": "com.amazonaws.customerprofiles#Double0To1",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#BadRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.customerprofiles#message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#ConflictResolution": {
+      "members": {
+        "ConflictResolvingModel": {
+          "target": "com.amazonaws.customerprofiles#ConflictResolvingModel",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SourceName": {
+          "target": "com.amazonaws.customerprofiles#string1To255",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#ConflictResolvingModel": {
+      "members": {
+        "RECENCY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RECENCY"
+          }
+        },
+        "SOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SOURCE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.customerprofiles#Consolidation": {
+      "members": {
+        "MatchingAttributesList": {
+          "target": "com.amazonaws.customerprofiles#MatchingAttributesList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#CustomerProfiles_20200815": {
+      "operations": [
+        {
+          "target": "com.amazonaws.customerprofiles#GetDomain"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "profile",
+          "cloudFormationName": "CustomerProfiles",
+          "cloudTrailEventSource": "profile.amazonaws.com",
+          "endpointPrefix": "profile",
+          "sdkId": "Customer Profiles"
+        },
+        "aws.auth#sigv4": {
+          "name": "profile"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon Connect Customer Profiles",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://profile-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://profile-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://profile.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://profile.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-08-15"
+    },
+    "com.amazonaws.customerprofiles#DataStoreResponse": {
+      "members": {
+        "Enabled": {
+          "target": "com.amazonaws.customerprofiles#optionalBoolean",
+          "traits": {}
+        },
+        "Readiness": {
+          "target": "com.amazonaws.customerprofiles#Readiness"
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#DomainStats": {
+      "members": {
+        "MeteringProfileCount": {
+          "target": "com.amazonaws.customerprofiles#long",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "ObjectCount": {
+          "target": "com.amazonaws.customerprofiles#long",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "ProfileCount": {
+          "target": "com.amazonaws.customerprofiles#long",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "TotalSize": {
+          "target": "com.amazonaws.customerprofiles#long",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#Double0To1": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1,
+          "min": 0
+        }
+      },
+      "type": "double"
+    },
+    "com.amazonaws.customerprofiles#EmailList": {
+      "member": {
+        "target": "com.amazonaws.customerprofiles#string1To255"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.customerprofiles#ExportingConfig": {
+      "members": {
+        "S3Exporting": {
+          "target": "com.amazonaws.customerprofiles#S3ExportingConfig",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#GetDomain": {
+      "errors": [
+        {
+          "target": "com.amazonaws.customerprofiles#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.customerprofiles#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.customerprofiles#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.customerprofiles#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.customerprofiles#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.customerprofiles#GetDomainRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.customerprofiles#GetDomainResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/domains/{DomainName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.customerprofiles#GetDomainRequest": {
+      "members": {
+        "DomainName": {
+          "target": "com.amazonaws.customerprofiles#name",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#GetDomainResponse": {
+      "members": {
+        "CreatedAt": {
+          "target": "com.amazonaws.customerprofiles#timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DataStore": {
+          "target": "com.amazonaws.customerprofiles#DataStoreResponse",
+          "traits": {}
+        },
+        "DeadLetterQueueUrl": {
+          "target": "com.amazonaws.customerprofiles#sqsQueueUrl",
+          "traits": {}
+        },
+        "DefaultEncryptionKey": {
+          "target": "com.amazonaws.customerprofiles#encryptionKey",
+          "traits": {}
+        },
+        "DefaultExpirationDays": {
+          "target": "com.amazonaws.customerprofiles#expirationDaysInteger",
+          "traits": {}
+        },
+        "DomainName": {
+          "target": "com.amazonaws.customerprofiles#name",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "LastUpdatedAt": {
+          "target": "com.amazonaws.customerprofiles#timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Matching": {
+          "target": "com.amazonaws.customerprofiles#MatchingResponse",
+          "traits": {}
+        },
+        "RuleBasedMatching": {
+          "target": "com.amazonaws.customerprofiles#RuleBasedMatchingResponse",
+          "traits": {}
+        },
+        "Stats": {
+          "target": "com.amazonaws.customerprofiles#DomainStats",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.customerprofiles#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.customerprofiles#message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#JobSchedule": {
+      "members": {
+        "DayOfTheWeek": {
+          "target": "com.amazonaws.customerprofiles#JobScheduleDayOfTheWeek",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Time": {
+          "target": "com.amazonaws.customerprofiles#JobScheduleTime",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#JobScheduleDayOfTheWeek": {
+      "members": {
+        "FRIDAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FRIDAY"
+          }
+        },
+        "MONDAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MONDAY"
+          }
+        },
+        "SATURDAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SATURDAY"
+          }
+        },
+        "SUNDAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUNDAY"
+          }
+        },
+        "THURSDAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "THURSDAY"
+          }
+        },
+        "TUESDAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TUESDAY"
+          }
+        },
+        "WEDNESDAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WEDNESDAY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.customerprofiles#JobScheduleTime": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 3
+        },
+        "smithy.api#pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#MatchingAttributes": {
+      "member": {
+        "target": "com.amazonaws.customerprofiles#string1To255"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.customerprofiles#MatchingAttributesList": {
+      "member": {
+        "target": "com.amazonaws.customerprofiles#MatchingAttributes"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.customerprofiles#MatchingResponse": {
+      "members": {
+        "AutoMerging": {
+          "target": "com.amazonaws.customerprofiles#AutoMerging",
+          "traits": {}
+        },
+        "Enabled": {
+          "target": "com.amazonaws.customerprofiles#optionalBoolean",
+          "traits": {}
+        },
+        "ExportingConfig": {
+          "target": "com.amazonaws.customerprofiles#ExportingConfig",
+          "traits": {}
+        },
+        "JobSchedule": {
+          "target": "com.amazonaws.customerprofiles#JobSchedule",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#MatchingRule": {
+      "members": {
+        "Rule": {
+          "target": "com.amazonaws.customerprofiles#MatchingRuleAttributeList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#MatchingRuleAttributeList": {
+      "member": {
+        "target": "com.amazonaws.customerprofiles#string1To255"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 15,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.customerprofiles#MatchingRules": {
+      "member": {
+        "target": "com.amazonaws.customerprofiles#MatchingRule"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 15,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.customerprofiles#MaxAllowedRuleLevelForMatching": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.customerprofiles#MaxAllowedRuleLevelForMerging": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.customerprofiles#PhoneNumberList": {
+      "member": {
+        "target": "com.amazonaws.customerprofiles#string1To255"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 4,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.customerprofiles#Readiness": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.customerprofiles#text",
+          "traits": {}
+        },
+        "ProgressPercentage": {
+          "target": "com.amazonaws.customerprofiles#percentageInteger",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.customerprofiles#message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#RuleBasedMatchingResponse": {
+      "members": {
+        "AttributeTypesSelector": {
+          "target": "com.amazonaws.customerprofiles#AttributeTypesSelector",
+          "traits": {}
+        },
+        "ConflictResolution": {
+          "target": "com.amazonaws.customerprofiles#ConflictResolution"
+        },
+        "Enabled": {
+          "target": "com.amazonaws.customerprofiles#optionalBoolean",
+          "traits": {}
+        },
+        "ExportingConfig": {
+          "target": "com.amazonaws.customerprofiles#ExportingConfig"
+        },
+        "MatchingRules": {
+          "target": "com.amazonaws.customerprofiles#MatchingRules",
+          "traits": {}
+        },
+        "MaxAllowedRuleLevelForMatching": {
+          "target": "com.amazonaws.customerprofiles#MaxAllowedRuleLevelForMatching",
+          "traits": {}
+        },
+        "MaxAllowedRuleLevelForMerging": {
+          "target": "com.amazonaws.customerprofiles#MaxAllowedRuleLevelForMerging",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.customerprofiles#RuleBasedMatchingStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#RuleBasedMatchingStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_PROGRESS"
+          }
+        },
+        "PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.customerprofiles#S3ExportingConfig": {
+      "members": {
+        "S3BucketName": {
+          "target": "com.amazonaws.customerprofiles#s3BucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "S3KeyName": {
+          "target": "com.amazonaws.customerprofiles#s3KeyNameCustomerOutputConfig",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!aws:)[a-zA-Z+-=._:/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#TagMap": {
+      "key": {
+        "target": "com.amazonaws.customerprofiles#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.customerprofiles#TagValue"
+      }
+    },
+    "com.amazonaws.customerprofiles#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.customerprofiles#message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.customerprofiles#encryptionKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#expirationDaysInteger": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1098,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.customerprofiles#long": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "long"
+    },
+    "com.amazonaws.customerprofiles#message": {
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#name": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#optionalBoolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.customerprofiles#percentageInteger": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.customerprofiles#s3BucketName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-z0-9.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#s3KeyNameCustomerOutputConfig": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 800,
+          "min": 1
+        },
+        "smithy.api#pattern": ".*"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#sqsQueueUrl": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#string1To255": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#text": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.customerprofiles#timestamp": {
+      "type": "timestamp"
+    }
+  },
+  "smithy": "2.0"
+}

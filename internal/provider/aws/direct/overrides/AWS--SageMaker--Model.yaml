@@ -1,0 +1,101 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::Model
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeModel
+  identifier:
+    ModelArn: ModelName
+properties:
+  Containers:
+    member: Containers
+    properties:
+      ContainerHostname: ContainerHostname
+      Environment: Environment
+      Image: Image
+      ImageConfig:
+        member: ImageConfig
+        properties:
+          RepositoryAccessMode: RepositoryAccessMode
+          RepositoryAuthConfig:
+            member: RepositoryAuthConfig
+            properties:
+              RepositoryCredentialsProviderArn: RepositoryCredentialsProviderArn
+      InferenceSpecificationName: InferenceSpecificationName
+      Mode: Mode
+      ModelDataSource:
+        member: ModelDataSource
+        properties:
+          S3DataSource:
+            member: S3DataSource
+            properties:
+              CompressionType: CompressionType
+              HubAccessConfig:
+                member: HubAccessConfig
+                properties:
+                  HubContentArn: HubContentArn
+              ModelAccessConfig:
+                member: ModelAccessConfig
+                properties:
+                  AcceptEula: AcceptEula
+              S3DataType: S3DataType
+              S3Uri: S3Uri
+      ModelDataUrl: ModelDataUrl
+      ModelPackageName: ModelPackageName
+      MultiModelConfig:
+        member: MultiModelConfig
+        properties:
+          ModelCacheSetting: ModelCacheSetting
+  EnableNetworkIsolation: EnableNetworkIsolation
+  ExecutionRoleArn: ExecutionRoleArn
+  InferenceExecutionConfig:
+    member: InferenceExecutionConfig
+    properties:
+      Mode: Mode
+  ModelArn: ModelArn
+  ModelName: ModelName
+  PrimaryContainer:
+    member: PrimaryContainer
+    properties:
+      ContainerHostname: ContainerHostname
+      Environment: Environment
+      Image: Image
+      ImageConfig:
+        member: ImageConfig
+        properties:
+          RepositoryAccessMode: RepositoryAccessMode
+          RepositoryAuthConfig:
+            member: RepositoryAuthConfig
+            properties:
+              RepositoryCredentialsProviderArn: RepositoryCredentialsProviderArn
+      InferenceSpecificationName: InferenceSpecificationName
+      Mode: Mode
+      ModelDataSource:
+        member: ModelDataSource
+        properties:
+          S3DataSource:
+            member: S3DataSource
+            properties:
+              CompressionType: CompressionType
+              HubAccessConfig:
+                member: HubAccessConfig
+                properties:
+                  HubContentArn: HubContentArn
+              ModelAccessConfig:
+                member: ModelAccessConfig
+                properties:
+                  AcceptEula: AcceptEula
+              S3DataType: S3DataType
+              S3Uri: S3Uri
+      ModelDataUrl: ModelDataUrl
+      ModelPackageName: ModelPackageName
+      MultiModelConfig:
+        member: MultiModelConfig
+        properties:
+          ModelCacheSetting: ModelCacheSetting
+  VpcConfig:
+    member: VpcConfig
+    properties:
+      SecurityGroupIds: SecurityGroupIds
+      Subnets: Subnets
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

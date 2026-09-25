@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SES::MailManagerAddressList
+read:
+  model: mailmanager/service/2023-10-17/mailmanager-2023-10-17.json
+  operation: GetAddressList
+  identifier:
+    AddressListId: AddressListId
+properties:
+  AddressListArn: AddressListArn
+  AddressListId: AddressListId
+  AddressListName: AddressListName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

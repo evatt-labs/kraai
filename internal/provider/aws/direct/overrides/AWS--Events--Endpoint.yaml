@@ -1,0 +1,38 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Events::Endpoint
+read:
+  model: eventbridge/service/2015-10-07/eventbridge-2015-10-07.json
+  operation: DescribeEndpoint
+  identifier:
+    Name: Name
+properties:
+  Arn: Arn
+  Description: Description
+  EndpointId: EndpointId
+  EndpointUrl: EndpointUrl
+  EventBuses:
+    member: EventBuses
+    properties:
+      EventBusArn: EventBusArn
+  Name: Name
+  ReplicationConfig:
+    member: ReplicationConfig
+    properties:
+      State: State
+  RoleArn: RoleArn
+  RoutingConfig:
+    member: RoutingConfig
+    properties:
+      FailoverConfig:
+        member: FailoverConfig
+        properties:
+          Primary:
+            member: Primary
+            properties:
+              HealthCheck: HealthCheck
+          Secondary:
+            member: Secondary
+            properties:
+              Route: Route
+  State: State
+  StateReason: StateReason

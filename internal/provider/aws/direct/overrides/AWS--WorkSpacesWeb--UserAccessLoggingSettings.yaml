@@ -1,0 +1,14 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WorkSpacesWeb::UserAccessLoggingSettings
+read:
+  model: workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json
+  operation: GetUserAccessLoggingSettings
+  identifier:
+    UserAccessLoggingSettingsArn: userAccessLoggingSettingsArn
+  response: userAccessLoggingSettings
+properties:
+  AssociatedPortalArns: associatedPortalArns
+  KinesisStreamArn: kinesisStreamArn
+  UserAccessLoggingSettingsArn: userAccessLoggingSettingsArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

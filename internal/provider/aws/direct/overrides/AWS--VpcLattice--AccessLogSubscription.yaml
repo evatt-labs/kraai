@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::VpcLattice::AccessLogSubscription
+read:
+  model: vpc-lattice/service/2022-11-30/vpc-lattice-2022-11-30.json
+  operation: GetAccessLogSubscription
+  identifier:
+    Arn: accessLogSubscriptionIdentifier
+properties:
+  Arn: arn
+  DestinationArn: destinationArn
+  Id: id
+  ResourceArn: resourceArn
+  ResourceId: resourceId
+  ServiceNetworkLogType: serviceNetworkLogType
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

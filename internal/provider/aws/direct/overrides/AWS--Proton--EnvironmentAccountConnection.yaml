@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Proton::EnvironmentAccountConnection
+read:
+  model: proton/service/2020-07-20/proton-2020-07-20.json
+  operation: GetEnvironmentAccountConnection
+  identifier:
+    Arn: id
+  response: environmentAccountConnection
+properties:
+  Arn: arn
+  CodebuildRoleArn: codebuildRoleArn
+  ComponentRoleArn: componentRoleArn
+  EnvironmentAccountId: environmentAccountId
+  EnvironmentName: environmentName
+  Id: id
+  ManagementAccountId: managementAccountId
+  RoleArn: roleArn
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

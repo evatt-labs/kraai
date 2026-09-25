@@ -1,0 +1,23 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Omics::Configuration
+read:
+  model: omics/service/2022-11-28/omics-2022-11-28.json
+  operation: GetConfiguration
+  identifier:
+    Name: name
+properties:
+  Arn: arn
+  CreationTime: creationTime
+  Description: description
+  Name: name
+  RunConfigurations:
+    member: runConfigurations
+    properties:
+      VpcConfig:
+        member: vpcConfig
+        properties:
+          SecurityGroupIds: securityGroupIds
+          SubnetIds: subnetIds
+  Status: status
+  Tags: tags
+  Uuid: uuid

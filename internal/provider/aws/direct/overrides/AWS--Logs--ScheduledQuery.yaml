@@ -1,0 +1,35 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Logs::ScheduledQuery
+read:
+  model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
+  operation: GetScheduledQuery
+  identifier:
+    ScheduledQueryArn: identifier
+properties:
+  CreationTime: creationTime
+  Description: description
+  DestinationConfiguration:
+    member: destinationConfiguration
+    properties:
+      S3Configuration:
+        member: s3Configuration
+        properties:
+          DestinationIdentifier: destinationIdentifier
+          RoleArn: roleArn
+  ExecutionRoleArn: executionRoleArn
+  LastExecutionStatus: lastExecutionStatus
+  LastTriggeredTime: lastTriggeredTime
+  LastUpdatedTime: lastUpdatedTime
+  LogGroupIdentifiers: logGroupIdentifiers
+  Name: name
+  QueryLanguage: queryLanguage
+  QueryString: queryString
+  ScheduleEndTime: scheduleEndTime
+  ScheduleExpression: scheduleExpression
+  ScheduleStartTime: scheduleStartTime
+  ScheduledQueryArn: scheduledQueryArn
+  StartTimeOffset: startTimeOffset
+  State: state
+  Timezone: timezone
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

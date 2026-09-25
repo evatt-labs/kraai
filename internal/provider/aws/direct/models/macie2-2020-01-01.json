@@ -1,0 +1,1057 @@
+{
+  "shapes": {
+    "com.amazonaws.macie2#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#Criterion": {
+      "key": {
+        "target": "com.amazonaws.macie2#__string"
+      },
+      "traits": {},
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.macie2#CriterionAdditionalProperties"
+      }
+    },
+    "com.amazonaws.macie2#CriterionAdditionalProperties": {
+      "members": {
+        "eq": {
+          "target": "com.amazonaws.macie2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "eq"
+          }
+        },
+        "eqExactMatch": {
+          "target": "com.amazonaws.macie2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "eqExactMatch"
+          }
+        },
+        "gt": {
+          "target": "com.amazonaws.macie2#__long",
+          "traits": {
+            "smithy.api#jsonName": "gt"
+          }
+        },
+        "gte": {
+          "target": "com.amazonaws.macie2#__long",
+          "traits": {
+            "smithy.api#jsonName": "gte"
+          }
+        },
+        "lt": {
+          "target": "com.amazonaws.macie2#__long",
+          "traits": {
+            "smithy.api#jsonName": "lt"
+          }
+        },
+        "lte": {
+          "target": "com.amazonaws.macie2#__long",
+          "traits": {
+            "smithy.api#jsonName": "lte"
+          }
+        },
+        "neq": {
+          "target": "com.amazonaws.macie2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "neq"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#DataIdentifierSeverity": {
+      "members": {
+        "HIGH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HIGH"
+          }
+        },
+        "LOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LOW"
+          }
+        },
+        "MEDIUM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEDIUM"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.macie2#FindingCriteria": {
+      "members": {
+        "criterion": {
+          "target": "com.amazonaws.macie2#Criterion",
+          "traits": {
+            "smithy.api#jsonName": "criterion"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#FindingsFilterAction": {
+      "members": {
+        "ARCHIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ARCHIVE"
+          }
+        },
+        "NOOP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOOP"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.macie2#GetCustomDataIdentifier": {
+      "errors": [
+        {
+          "target": "com.amazonaws.macie2#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.macie2#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.macie2#GetCustomDataIdentifierRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.macie2#GetCustomDataIdentifierResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/custom-data-identifiers/{id}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.macie2#GetCustomDataIdentifierRequest": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#GetCustomDataIdentifierResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "createdAt": {
+          "target": "com.amazonaws.macie2#__timestampIso8601",
+          "traits": {
+            "smithy.api#jsonName": "createdAt"
+          }
+        },
+        "deleted": {
+          "target": "com.amazonaws.macie2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "deleted"
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "id": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "ignoreWords": {
+          "target": "com.amazonaws.macie2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "ignoreWords"
+          }
+        },
+        "keywords": {
+          "target": "com.amazonaws.macie2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "keywords"
+          }
+        },
+        "maximumMatchDistance": {
+          "target": "com.amazonaws.macie2#__integer",
+          "traits": {
+            "smithy.api#jsonName": "maximumMatchDistance"
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "regex": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "regex"
+          }
+        },
+        "severityLevels": {
+          "target": "com.amazonaws.macie2#SeverityLevelList",
+          "traits": {
+            "smithy.api#jsonName": "severityLevels"
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.macie2#TagMap",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#GetFindingsFilter": {
+      "errors": [
+        {
+          "target": "com.amazonaws.macie2#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.macie2#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.macie2#GetFindingsFilterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.macie2#GetFindingsFilterResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/findingsfilters/{id}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.macie2#GetFindingsFilterRequest": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#GetFindingsFilterResponse": {
+      "members": {
+        "action": {
+          "target": "com.amazonaws.macie2#FindingsFilterAction",
+          "traits": {
+            "smithy.api#jsonName": "action"
+          }
+        },
+        "arn": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "findingCriteria": {
+          "target": "com.amazonaws.macie2#FindingCriteria",
+          "traits": {
+            "smithy.api#jsonName": "findingCriteria"
+          }
+        },
+        "id": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "position": {
+          "target": "com.amazonaws.macie2#__integer",
+          "traits": {
+            "smithy.api#jsonName": "position"
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.macie2#TagMap",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#GetMember": {
+      "errors": [
+        {
+          "target": "com.amazonaws.macie2#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.macie2#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.macie2#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.macie2#GetMemberRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.macie2#GetMemberResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/members/{id}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.macie2#GetMemberRequest": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#GetMemberResponse": {
+      "members": {
+        "accountId": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "accountId"
+          }
+        },
+        "administratorAccountId": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "administratorAccountId"
+          }
+        },
+        "arn": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "email": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "email"
+          }
+        },
+        "invitedAt": {
+          "target": "com.amazonaws.macie2#__timestampIso8601",
+          "traits": {
+            "smithy.api#jsonName": "invitedAt"
+          }
+        },
+        "masterAccountId": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "masterAccountId"
+          }
+        },
+        "relationshipStatus": {
+          "target": "com.amazonaws.macie2#RelationshipStatus",
+          "traits": {
+            "smithy.api#jsonName": "relationshipStatus"
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.macie2#TagMap",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "updatedAt": {
+          "target": "com.amazonaws.macie2#__timestampIso8601",
+          "traits": {
+            "smithy.api#jsonName": "updatedAt"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#Macie2": {
+      "operations": [
+        {
+          "target": "com.amazonaws.macie2#GetCustomDataIdentifier"
+        },
+        {
+          "target": "com.amazonaws.macie2#GetFindingsFilter"
+        },
+        {
+          "target": "com.amazonaws.macie2#GetMember"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "macie2",
+          "cloudFormationName": "Macie2",
+          "cloudTrailEventSource": "macie2.amazonaws.com",
+          "endpointPrefix": "macie2",
+          "sdkId": "Macie2"
+        },
+        "aws.auth#sigv4": {
+          "name": "macie2"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#auth": [
+          "aws.auth#sigv4"
+        ],
+        "smithy.api#title": "Amazon Macie 2",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://macie2-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://macie2-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://macie2.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://macie2.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-01-01"
+    },
+    "com.amazonaws.macie2#RelationshipStatus": {
+      "members": {
+        "AccountSuspended": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AccountSuspended"
+          }
+        },
+        "Created": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Created"
+          }
+        },
+        "EmailVerificationFailed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EmailVerificationFailed"
+          }
+        },
+        "EmailVerificationInProgress": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EmailVerificationInProgress"
+          }
+        },
+        "Enabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Enabled"
+          }
+        },
+        "Invited": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Invited"
+          }
+        },
+        "Paused": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Paused"
+          }
+        },
+        "RegionDisabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RegionDisabled"
+          }
+        },
+        "Removed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Removed"
+          }
+        },
+        "Resigned": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Resigned"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.macie2#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#SeverityLevel": {
+      "members": {
+        "occurrencesThreshold": {
+          "target": "com.amazonaws.macie2#__long",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "occurrencesThreshold",
+            "smithy.api#required": {}
+          }
+        },
+        "severity": {
+          "target": "com.amazonaws.macie2#DataIdentifierSeverity",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "severity",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#SeverityLevelList": {
+      "member": {
+        "target": "com.amazonaws.macie2#SeverityLevel"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.macie2#TagMap": {
+      "key": {
+        "target": "com.amazonaws.macie2#__string"
+      },
+      "traits": {},
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.macie2#__string"
+      }
+    },
+    "com.amazonaws.macie2#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.macie2#__boolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.macie2#__integer": {
+      "type": "integer"
+    },
+    "com.amazonaws.macie2#__listOf__string": {
+      "member": {
+        "target": "com.amazonaws.macie2#__string"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.macie2#__long": {
+      "type": "long"
+    },
+    "com.amazonaws.macie2#__string": {
+      "type": "string"
+    },
+    "com.amazonaws.macie2#__timestampIso8601": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    }
+  },
+  "smithy": "2.0"
+}

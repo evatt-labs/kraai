@@ -1,0 +1,24 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaLive::Network
+read:
+  model: medialive/service/2017-10-14/medialive-2017-10-14.json
+  operation: DescribeNetwork
+  identifier:
+    Id: NetworkId
+properties:
+  Arn: Arn
+  AssociatedClusterIds: AssociatedClusterIds
+  Id: Id
+  IpPools:
+    member: IpPools
+    properties:
+      Cidr: Cidr
+  Name: Name
+  Routes:
+    member: Routes
+    properties:
+      Cidr: Cidr
+      Gateway: Gateway
+  State: State
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

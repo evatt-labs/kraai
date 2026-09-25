@@ -115,3 +115,43 @@ func TestEvidenceCarriesNothingFromTheAccount(t *testing.T) {
 		}
 	}
 }
+
+func TestMergeEvidence(t *testing.T) {
+	rec := func(typeName, outcome, date string) TypeEvidence {
+		return TypeEvidence{Type: typeName, Outcome: outcome, Date: date}
+	}
+	prior := Evidence{Types: []TypeEvidence{
+		rec("AWS::A::Kept", "parity", "d1"),
+		rec("AWS::B::Rerun", "parity", "d1"),
+		rec("AWS::C::Empty", "parity", "d1"),
+		rec("AWS::D::Gone", "parity", "d1"),
+		rec("AWS::E::WasEmpty", "no-instances", "d1"),
+		rec("AWS::F::Regressed", "parity", "d1"),
+	}}
+	run := Evidence{Types: []TypeEvidence{
+		rec("AWS::B::Rerun", "parity", "d2"),
+		rec("AWS::C::Empty", "no-instances", "d2"),
+		rec("AWS::E::WasEmpty", "unlisted", "d2"),
+		rec("AWS::F::Regressed", "differs", "d2"),
+		rec("AWS::G::New", "no-instances", "d2"),
+	}}
+	readers := map[string]bool{}
+	for _, name := range []string{"AWS::A::Kept", "AWS::B::Rerun", "AWS::C::Empty", "AWS::E::WasEmpty", "AWS::F::Regressed", "AWS::G::New"} {
+		readers[name] = true
+	}
+	got := map[string]string{}
+	for _, e := range MergeEvidence(prior, run, readers).Types {
+		got[e.Type] = e.Outcome + "@" + e.Date
+	}
+	want := map[string]string{
+		"AWS::A::Kept":      "parity@d1",       // not run
+		"AWS::B::Rerun":     "parity@d2",       // rerun
+		"AWS::C::Empty":     "parity@d1",       // inconclusive does not undo parity
+		"AWS::E::WasEmpty":  "unlisted@d2",     // inconclusive replaces inconclusive
+		"AWS::F::Regressed": "differs@d2",      // a regression replaces parity
+		"AWS::G::New":       "no-instances@d2", // first record
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("merged = %v\nwant     %v", got, want)
+	}
+}

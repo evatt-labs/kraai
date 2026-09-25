@@ -1,0 +1,43 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Timestream::InfluxDBCluster
+read:
+  model: timestream-influxdb/service/2023-01-27/timestream-influxdb-2023-01-27.json
+  operation: GetDbCluster
+  identifier:
+    Id: dbClusterId
+properties:
+  AllocatedStorage: allocatedStorage
+  Arn: arn
+  DbInstanceType: dbInstanceType
+  DbParameterGroupIdentifier: dbParameterGroupIdentifier
+  DbStorageType: dbStorageType
+  DeploymentType: deploymentType
+  Endpoint: endpoint
+  EngineType: engineType
+  FailoverMode: failoverMode
+  Id: id
+  InfluxAuthParametersSecretArn: influxAuthParametersSecretArn
+  LogDeliveryConfiguration:
+    member: logDeliveryConfiguration
+    properties:
+      S3Configuration:
+        member: s3Configuration
+        properties:
+          BucketName: bucketName
+          Enabled: enabled
+  MaintenanceSchedule:
+    member: maintenanceSchedule
+    properties:
+      PreferredMaintenanceWindow: preferredMaintenanceWindow
+      Timezone: timezone
+  Name: name
+  NetworkType: networkType
+  NextMaintenanceTime: nextMaintenanceTime
+  Port: port
+  PubliclyAccessible: publiclyAccessible
+  ReaderEndpoint: readerEndpoint
+  Status: status
+  VpcSecurityGroupIds: vpcSecurityGroupIds
+  VpcSubnetIds: vpcSubnetIds
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

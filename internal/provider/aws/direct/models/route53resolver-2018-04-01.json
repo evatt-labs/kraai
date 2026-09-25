@@ -1,0 +1,1406 @@
+{
+  "shapes": {
+    "com.amazonaws.route53resolver#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 12
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#Category": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#Count": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.route53resolver#CreatorRequestId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#DestinationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#DomainListType": {
+      "members": {
+        "CONTENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTENT"
+          }
+        },
+        "THREAT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "THREAT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#ExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#FirewallDomainList": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.route53resolver#Arn",
+          "traits": {}
+        },
+        "Category": {
+          "target": "com.amazonaws.route53resolver#Category",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "CreatorRequestId": {
+          "target": "com.amazonaws.route53resolver#CreatorRequestId",
+          "traits": {}
+        },
+        "DomainCount": {
+          "target": "com.amazonaws.route53resolver#Unsigned",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "ManagedListType": {
+          "target": "com.amazonaws.route53resolver#DomainListType",
+          "traits": {}
+        },
+        "ManagedOwnerName": {
+          "target": "com.amazonaws.route53resolver#ServicePrinciple",
+          "traits": {}
+        },
+        "ModificationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.route53resolver#Name",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.route53resolver#FirewallDomainListStatus",
+          "traits": {}
+        },
+        "StatusMessage": {
+          "target": "com.amazonaws.route53resolver#StatusMessage",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#FirewallDomainListStatus": {
+      "members": {
+        "COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COMPLETE"
+          }
+        },
+        "COMPLETE_IMPORT_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COMPLETE_IMPORT_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "IMPORTING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IMPORTING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#FirewallRuleGroupAssociation": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.route53resolver#Arn",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "CreatorRequestId": {
+          "target": "com.amazonaws.route53resolver#CreatorRequestId",
+          "traits": {}
+        },
+        "FirewallRuleGroupId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "ManagedOwnerName": {
+          "target": "com.amazonaws.route53resolver#ServicePrinciple",
+          "traits": {}
+        },
+        "ModificationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "MutationProtection": {
+          "target": "com.amazonaws.route53resolver#MutationProtectionStatus",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.route53resolver#Name",
+          "traits": {}
+        },
+        "Priority": {
+          "target": "com.amazonaws.route53resolver#Priority",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.route53resolver#FirewallRuleGroupAssociationStatus",
+          "traits": {}
+        },
+        "StatusMessage": {
+          "target": "com.amazonaws.route53resolver#StatusMessage",
+          "traits": {}
+        },
+        "VpcId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#FirewallRuleGroupAssociationStatus": {
+      "members": {
+        "COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COMPLETE"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#GetFirewallDomainList": {
+      "errors": [
+        {
+          "target": "com.amazonaws.route53resolver#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.route53resolver#GetFirewallDomainListRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.route53resolver#GetFirewallDomainListResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.route53resolver#GetFirewallDomainListRequest": {
+      "members": {
+        "FirewallDomainListId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetFirewallDomainListResponse": {
+      "members": {
+        "FirewallDomainList": {
+          "target": "com.amazonaws.route53resolver#FirewallDomainList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetFirewallRuleGroupAssociation": {
+      "errors": [
+        {
+          "target": "com.amazonaws.route53resolver#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.route53resolver#GetFirewallRuleGroupAssociationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.route53resolver#GetFirewallRuleGroupAssociationResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.route53resolver#GetFirewallRuleGroupAssociationRequest": {
+      "members": {
+        "FirewallRuleGroupAssociationId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetFirewallRuleGroupAssociationResponse": {
+      "members": {
+        "FirewallRuleGroupAssociation": {
+          "target": "com.amazonaws.route53resolver#FirewallRuleGroupAssociation",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetOutpostResolver": {
+      "errors": [
+        {
+          "target": "com.amazonaws.route53resolver#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.route53resolver#GetOutpostResolverRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.route53resolver#GetOutpostResolverResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.route53resolver#GetOutpostResolverRequest": {
+      "members": {
+        "Id": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetOutpostResolverResponse": {
+      "members": {
+        "OutpostResolver": {
+          "target": "com.amazonaws.route53resolver#OutpostResolver",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetResolverQueryLogConfig": {
+      "errors": [
+        {
+          "target": "com.amazonaws.route53resolver#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.route53resolver#GetResolverQueryLogConfigRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.route53resolver#GetResolverQueryLogConfigResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.route53resolver#GetResolverQueryLogConfigAssociation": {
+      "errors": [
+        {
+          "target": "com.amazonaws.route53resolver#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.route53resolver#GetResolverQueryLogConfigAssociationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.route53resolver#GetResolverQueryLogConfigAssociationResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.route53resolver#GetResolverQueryLogConfigAssociationRequest": {
+      "members": {
+        "ResolverQueryLogConfigAssociationId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetResolverQueryLogConfigAssociationResponse": {
+      "members": {
+        "ResolverQueryLogConfigAssociation": {
+          "target": "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociation",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetResolverQueryLogConfigRequest": {
+      "members": {
+        "ResolverQueryLogConfigId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#GetResolverQueryLogConfigResponse": {
+      "members": {
+        "ResolverQueryLogConfig": {
+          "target": "com.amazonaws.route53resolver#ResolverQueryLogConfig",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#InstanceCount": {
+      "type": "integer"
+    },
+    "com.amazonaws.route53resolver#InternalServiceErrorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#InvalidParameterException": {
+      "members": {
+        "FieldName": {
+          "target": "com.amazonaws.route53resolver#String",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#InvalidRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#MutationProtectionStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#Name": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(?!^[0-9]+$)([a-zA-Z0-9\\-_' ']+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#OutpostArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws([a-z-]+)?:outposts:[a-z\\d-]+:\\d{12}:outpost/op-[a-f0-9]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#OutpostInstanceType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#OutpostResolver": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.route53resolver#Arn",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "CreatorRequestId": {
+          "target": "com.amazonaws.route53resolver#CreatorRequestId",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "InstanceCount": {
+          "target": "com.amazonaws.route53resolver#InstanceCount",
+          "traits": {}
+        },
+        "ModificationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.route53resolver#OutpostResolverName",
+          "traits": {}
+        },
+        "OutpostArn": {
+          "target": "com.amazonaws.route53resolver#OutpostArn",
+          "traits": {}
+        },
+        "PreferredInstanceType": {
+          "target": "com.amazonaws.route53resolver#OutpostInstanceType",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.route53resolver#OutpostResolverStatus",
+          "traits": {}
+        },
+        "StatusMessage": {
+          "target": "com.amazonaws.route53resolver#OutpostResolverStatusMessage",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#OutpostResolverName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#OutpostResolverStatus": {
+      "members": {
+        "ACTION_NEEDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTION_NEEDED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "FAILED_CREATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED_CREATION"
+          }
+        },
+        "FAILED_DELETION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED_DELETION"
+          }
+        },
+        "OPERATIONAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OPERATIONAL"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#OutpostResolverStatusMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#Priority": {
+      "type": "integer"
+    },
+    "com.amazonaws.route53resolver#ResolverQueryLogConfig": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.route53resolver#Arn",
+          "traits": {}
+        },
+        "AssociationCount": {
+          "target": "com.amazonaws.route53resolver#Count",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "CreatorRequestId": {
+          "target": "com.amazonaws.route53resolver#CreatorRequestId",
+          "traits": {}
+        },
+        "DestinationArn": {
+          "target": "com.amazonaws.route53resolver#DestinationArn",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.route53resolver#ResolverQueryLogConfigName",
+          "traits": {}
+        },
+        "OwnerId": {
+          "target": "com.amazonaws.route53resolver#AccountId",
+          "traits": {}
+        },
+        "ShareStatus": {
+          "target": "com.amazonaws.route53resolver#ShareStatus",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.route53resolver#ResolverQueryLogConfigStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociation": {
+      "members": {
+        "CreationTime": {
+          "target": "com.amazonaws.route53resolver#Rfc3339TimeString",
+          "traits": {}
+        },
+        "Error": {
+          "target": "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociationError",
+          "traits": {}
+        },
+        "ErrorMessage": {
+          "target": "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociationErrorMessage",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "ResolverQueryLogConfigId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.route53resolver#ResourceId",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociationStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociationError": {
+      "members": {
+        "AccessDenied": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACCESS_DENIED"
+          }
+        },
+        "DestinationNotFound": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DESTINATION_NOT_FOUND"
+          }
+        },
+        "InternalServiceError": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTERNAL_SERVICE_ERROR"
+          }
+        },
+        "None": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociationErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#ResolverQueryLogConfigAssociationStatus": {
+      "members": {
+        "ActionNeeded": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTION_NEEDED"
+          }
+        },
+        "Active": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "Creating": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "Deleting": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "Failed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#ResolverQueryLogConfigName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!^[0-9]+$)([a-zA-Z0-9\\-_' ']+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#ResolverQueryLogConfigStatus": {
+      "members": {
+        "Created": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATED"
+          }
+        },
+        "Creating": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "Deleting": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "Failed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#ResourceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.route53resolver#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#Rfc3339TimeString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 20
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#Route53Resolver": {
+      "operations": [
+        {
+          "target": "com.amazonaws.route53resolver#GetFirewallDomainList"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#GetFirewallRuleGroupAssociation"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#GetOutpostResolver"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#GetResolverQueryLogConfig"
+        },
+        {
+          "target": "com.amazonaws.route53resolver#GetResolverQueryLogConfigAssociation"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "route53resolver",
+          "cloudFormationName": "Route53Resolver",
+          "cloudTrailEventSource": "route53resolver.amazonaws.com",
+          "endpointPrefix": "route53resolver",
+          "sdkId": "Route53Resolver"
+        },
+        "aws.auth#sigv4": {
+          "name": "route53resolver"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "Amazon Route 53 Resolver",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://route53resolver-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-east-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://route53resolver.us-gov-east-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-west-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://route53resolver.us-gov-west-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://route53resolver-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://route53resolver.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://route53resolver.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-04-01"
+    },
+    "com.amazonaws.route53resolver#ServicePrinciple": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#ShareStatus": {
+      "members": {
+        "NotShared": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_SHARED"
+          }
+        },
+        "SharedByMe": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHARED_BY_ME"
+          }
+        },
+        "SharedWithMe": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHARED_WITH_ME"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.route53resolver#StatusMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#String": {
+      "type": "string"
+    },
+    "com.amazonaws.route53resolver#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#Unsigned": {
+      "type": "integer"
+    },
+    "com.amazonaws.route53resolver#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,1052 @@
+{
+  "shapes": {
+    "com.amazonaws.invoicing#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.invoicing#InvoiceUnitArnString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvoicingAccessDenied",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#AccountIdString": {
+      "traits": {
+        "smithy.api#pattern": "^\\d{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.invoicing#BasicString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\s\\S]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.invoicing#BasicStringWithoutSpace": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.invoicing#BuyerDomain": {
+      "members": {
+        "NetworkID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NetworkID"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString"
+        },
+        "resourceId": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvoicingConflict",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#ConnectionTestingMethod": {
+      "members": {
+        "PROD_ENV_DOLLAR_TEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROD_ENV_DOLLAR_TEST"
+          }
+        },
+        "TEST_ENV_REPLAY_TEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TEST_ENV_REPLAY_TEST"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#Contact": {
+      "members": {
+        "Email": {
+          "target": "com.amazonaws.invoicing#EmailString",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#Contacts": {
+      "member": {
+        "target": "com.amazonaws.invoicing#Contact"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.invoicing#EinvoiceDeliveryAttachmentType": {
+      "members": {
+        "INVOICE_PDF": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVOICE_PDF"
+          }
+        },
+        "RFP_PDF": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RFP_PDF"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#EinvoiceDeliveryAttachmentTypes": {
+      "member": {
+        "target": "com.amazonaws.invoicing#EinvoiceDeliveryAttachmentType"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.invoicing#EinvoiceDeliveryDocumentType": {
+      "members": {
+        "AWS_CLOUD_CREDIT_MEMO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_CLOUD_CREDIT_MEMO"
+          }
+        },
+        "AWS_CLOUD_INVOICE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_CLOUD_INVOICE"
+          }
+        },
+        "AWS_MARKETPLACE_CREDIT_MEMO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_MARKETPLACE_CREDIT_MEMO"
+          }
+        },
+        "AWS_MARKETPLACE_INVOICE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_MARKETPLACE_INVOICE"
+          }
+        },
+        "AWS_REQUEST_FOR_PAYMENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_REQUEST_FOR_PAYMENT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#EinvoiceDeliveryDocumentTypes": {
+      "member": {
+        "target": "com.amazonaws.invoicing#EinvoiceDeliveryDocumentType"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.invoicing#EinvoiceDeliveryPreference": {
+      "members": {
+        "ConnectionTestingMethod": {
+          "target": "com.amazonaws.invoicing#ConnectionTestingMethod",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "EinvoiceDeliveryActivationDate": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "EinvoiceDeliveryAttachmentTypes": {
+          "target": "com.amazonaws.invoicing#EinvoiceDeliveryAttachmentTypes",
+          "traits": {}
+        },
+        "EinvoiceDeliveryDocumentTypes": {
+          "target": "com.amazonaws.invoicing#EinvoiceDeliveryDocumentTypes",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Protocol": {
+          "target": "com.amazonaws.invoicing#Protocol",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "PurchaseOrderDataSources": {
+          "target": "com.amazonaws.invoicing#PurchaseOrderDataSources",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#EmailString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.invoicing#GetProcurementPortalPreference": {
+      "errors": [
+        {
+          "target": "com.amazonaws.invoicing#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.invoicing#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.invoicing#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.invoicing#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.invoicing#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.invoicing#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.invoicing#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.invoicing#GetProcurementPortalPreferenceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.invoicing#GetProcurementPortalPreferenceResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.invoicing#GetProcurementPortalPreferenceRequest": {
+      "members": {
+        "ProcurementPortalPreferenceArn": {
+          "target": "com.amazonaws.invoicing#ProcurementPortalPreferenceArnString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#GetProcurementPortalPreferenceResponse": {
+      "members": {
+        "ProcurementPortalPreference": {
+          "target": "com.amazonaws.invoicing#ProcurementPortalPreference",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString"
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvoicingInternalServer",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#InvoiceUnitArnString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z0-9]*:[a-z0-9]+:[-a-z0-9]*:[0-9]{12}:[-a-zA-Z0-9/:_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.invoicing#InvoiceUnitArns": {
+      "member": {
+        "target": "com.amazonaws.invoicing#InvoiceUnitArnString"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.invoicing#Invoicing": {
+      "operations": [
+        {
+          "target": "com.amazonaws.invoicing#GetProcurementPortalPreference"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "invoicing",
+          "cloudTrailEventSource": "invoicing.amazonaws.com",
+          "docId": "invoicing-2024-12-01",
+          "endpointPrefix": "invoicing",
+          "sdkId": "Invoicing"
+        },
+        "aws.auth#sigv4": {
+          "name": "invoicing"
+        },
+        "aws.endpoints#dualStackOnlyEndpoints": {},
+        "aws.endpoints#standardPartitionalEndpoints": {
+          "endpointPatternType": "service_region_dnsSuffix"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#title": "AWS Invoicing",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4",
+                                  "signingRegion": "{PartitionResult#implicitGlobalRegion}"
+                                }
+                              ]
+                            },
+                            "url": "https://invoicing-fips.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4",
+                                  "signingRegion": "{PartitionResult#implicitGlobalRegion}"
+                                }
+                              ]
+                            },
+                            "url": "https://invoicing.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2024-12-01"
+    },
+    "com.amazonaws.invoicing#ProcurementPortalName": {
+      "members": {
+        "COUPA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COUPA"
+          }
+        },
+        "SAP_BUSINESS_NETWORK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAP_BUSINESS_NETWORK"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#ProcurementPortalPreference": {
+      "members": {
+        "AwsAccountId": {
+          "target": "com.amazonaws.invoicing#AccountIdString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "BuyerDomain": {
+          "target": "com.amazonaws.invoicing#BuyerDomain",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "BuyerIdentifier": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Contacts": {
+          "target": "com.amazonaws.invoicing#Contacts",
+          "traits": {}
+        },
+        "CreateDate": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "EinvoiceDeliveryEnabled": {
+          "target": "smithy.api#Boolean",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "EinvoiceDeliveryPreference": {
+          "target": "com.amazonaws.invoicing#EinvoiceDeliveryPreference",
+          "traits": {}
+        },
+        "EinvoiceDeliveryPreferenceStatus": {
+          "target": "com.amazonaws.invoicing#ProcurementPortalPreferenceStatus",
+          "traits": {}
+        },
+        "EinvoiceDeliveryPreferenceStatusReason": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {}
+        },
+        "LastUpdateDate": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProcurementPortalInstanceEndpoint": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {}
+        },
+        "ProcurementPortalName": {
+          "target": "com.amazonaws.invoicing#ProcurementPortalName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProcurementPortalPreferenceArn": {
+          "target": "com.amazonaws.invoicing#ProcurementPortalPreferenceArnString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProcurementPortalSharedSecret": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {}
+        },
+        "PurchaseOrderRetrievalEnabled": {
+          "target": "smithy.api#Boolean",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "PurchaseOrderRetrievalEndpoint": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {}
+        },
+        "PurchaseOrderRetrievalPreferenceStatus": {
+          "target": "com.amazonaws.invoicing#ProcurementPortalPreferenceStatus",
+          "traits": {}
+        },
+        "PurchaseOrderRetrievalPreferenceStatusReason": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {}
+        },
+        "Selector": {
+          "target": "com.amazonaws.invoicing#ProcurementPortalPreferenceSelector"
+        },
+        "SupplierDomain": {
+          "target": "com.amazonaws.invoicing#SupplierDomain",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SupplierIdentifier": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TestEnvPreference": {
+          "target": "com.amazonaws.invoicing#TestEnvPreference",
+          "traits": {}
+        },
+        "Version": {
+          "target": "smithy.api#Long",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#ProcurementPortalPreferenceArnString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:invoicing::[0-9]{12}:procurement-portal-preference/[-a-zA-Z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.invoicing#ProcurementPortalPreferenceSelector": {
+      "members": {
+        "InvoiceUnitArns": {
+          "target": "com.amazonaws.invoicing#InvoiceUnitArns",
+          "traits": {}
+        },
+        "SellerOfRecords": {
+          "target": "com.amazonaws.invoicing#SellerOfRecords",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#ProcurementPortalPreferenceStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "PENDING_VERIFICATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_VERIFICATION"
+          }
+        },
+        "SUSPENDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUSPENDED"
+          }
+        },
+        "TEST_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TEST_FAILED"
+          }
+        },
+        "TEST_INITIALIZATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TEST_INITIALIZATION_FAILED"
+          }
+        },
+        "TEST_INITIALIZED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TEST_INITIALIZED"
+          }
+        },
+        "VALIDATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VALIDATED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#Protocol": {
+      "members": {
+        "CXML": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CXML"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#PurchaseOrderDataSource": {
+      "members": {
+        "EinvoiceDeliveryDocumentType": {
+          "target": "com.amazonaws.invoicing#EinvoiceDeliveryDocumentType",
+          "traits": {}
+        },
+        "PurchaseOrderDataSourceType": {
+          "target": "com.amazonaws.invoicing#PurchaseOrderDataSourceType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#PurchaseOrderDataSourceType": {
+      "members": {
+        "ASSOCIATED_PURCHASE_ORDER_REQUIRED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ASSOCIATED_PURCHASE_ORDER_REQUIRED"
+          }
+        },
+        "PURCHASE_ORDER_NOT_REQUIRED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PURCHASE_ORDER_NOT_REQUIRED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#PurchaseOrderDataSources": {
+      "member": {
+        "target": "com.amazonaws.invoicing#PurchaseOrderDataSource"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.invoicing#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.invoicing#InvoiceUnitArnString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvoicingResourceNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#SellerOfRecords": {
+      "member": {
+        "target": "com.amazonaws.invoicing#BasicStringWithoutSpace"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.invoicing#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvoicingServiceQuotaExceeded",
+          "httpResponseCode": 402
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#SupplierDomain": {
+      "members": {
+        "NetworkID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NetworkID"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.invoicing#TestEnvPreference": {
+      "members": {
+        "BuyerDomain": {
+          "target": "com.amazonaws.invoicing#BuyerDomain",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "BuyerIdentifier": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProcurementPortalInstanceEndpoint": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {}
+        },
+        "ProcurementPortalSharedSecret": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {}
+        },
+        "PurchaseOrderRetrievalEndpoint": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {}
+        },
+        "SupplierDomain": {
+          "target": "com.amazonaws.invoicing#SupplierDomain",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SupplierIdentifier": {
+          "target": "com.amazonaws.invoicing#BasicStringWithoutSpace",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvoicingThrottling",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.invoicing#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString"
+        },
+        "reason": {
+          "target": "com.amazonaws.invoicing#ValidationExceptionReason",
+          "traits": {}
+        },
+        "resourceName": {
+          "target": "com.amazonaws.invoicing#InvoiceUnitArnString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvoicingValidation",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.invoicing#BasicString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.invoicing#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.invoicing#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.invoicing#ValidationExceptionReason": {
+      "members": {
+        "ACCOUNT_MEMBERSHIP_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "accountMembershipError"
+          }
+        },
+        "CANNOT_PARSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "cannotParse"
+          }
+        },
+        "DUPLICATE_INVOICE_UNIT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "duplicateInvoiceUnit"
+          }
+        },
+        "EXPIRED_NEXT_TOKEN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "expiredNextToken"
+          }
+        },
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fieldValidationFailed"
+          }
+        },
+        "INVALID_INPUT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "invalidInput"
+          }
+        },
+        "INVALID_NEXT_TOKEN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "invalidNextToken"
+          }
+        },
+        "MAX_ACCOUNTS_EXCEEDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "maxAccountsExceeded"
+          }
+        },
+        "MAX_INVOICE_UNITS_EXCEEDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "maxInvoiceUnitsExceeded"
+          }
+        },
+        "MUTUAL_EXCLUSION_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "mutualExclusionError"
+          }
+        },
+        "NON_MEMBERS_PRESENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "nonMemberPresent"
+          }
+        },
+        "OTHER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "other"
+          }
+        },
+        "TAX_SETTINGS_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "taxSettingsError"
+          }
+        },
+        "UNKNOWN_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unknownOperation"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

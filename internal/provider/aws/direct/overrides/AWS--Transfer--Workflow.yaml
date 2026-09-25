@@ -1,0 +1,137 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Transfer::Workflow
+read:
+  model: transfer/service/2018-11-05/transfer-2018-11-05.json
+  operation: DescribeWorkflow
+  identifier:
+    WorkflowId: WorkflowId
+  response: Workflow
+properties:
+  Arn: Arn
+  Description: Description
+  OnExceptionSteps:
+    member: OnExceptionSteps
+    properties:
+      CopyStepDetails:
+        member: CopyStepDetails
+        properties:
+          DestinationFileLocation:
+            member: DestinationFileLocation
+            properties:
+              S3FileLocation:
+                member: S3FileLocation
+                properties:
+                  Bucket: Bucket
+                  Key: Key
+          Name: Name
+          OverwriteExisting: OverwriteExisting
+          SourceFileLocation: SourceFileLocation
+      CustomStepDetails:
+        member: CustomStepDetails
+        properties:
+          Name: Name
+          SourceFileLocation: SourceFileLocation
+          Target: Target
+          TimeoutSeconds: TimeoutSeconds
+      DecryptStepDetails:
+        member: DecryptStepDetails
+        properties:
+          DestinationFileLocation:
+            member: DestinationFileLocation
+            properties:
+              EfsFileLocation:
+                member: EfsFileLocation
+                properties:
+                  FileSystemId: FileSystemId
+                  Path: Path
+              S3FileLocation:
+                member: S3FileLocation
+                properties:
+                  Bucket: Bucket
+                  Key: Key
+          Name: Name
+          OverwriteExisting: OverwriteExisting
+          SourceFileLocation: SourceFileLocation
+          Type: Type
+      DeleteStepDetails:
+        member: DeleteStepDetails
+        properties:
+          Name: Name
+          SourceFileLocation: SourceFileLocation
+      TagStepDetails:
+        member: TagStepDetails
+        properties:
+          Name: Name
+          SourceFileLocation: SourceFileLocation
+          Tags:
+            member: Tags
+            properties:
+              Key: Key
+              Value: Value
+      Type: Type
+  Steps:
+    member: Steps
+    properties:
+      CopyStepDetails:
+        member: CopyStepDetails
+        properties:
+          DestinationFileLocation:
+            member: DestinationFileLocation
+            properties:
+              S3FileLocation:
+                member: S3FileLocation
+                properties:
+                  Bucket: Bucket
+                  Key: Key
+          Name: Name
+          OverwriteExisting: OverwriteExisting
+          SourceFileLocation: SourceFileLocation
+      CustomStepDetails:
+        member: CustomStepDetails
+        properties:
+          Name: Name
+          SourceFileLocation: SourceFileLocation
+          Target: Target
+          TimeoutSeconds: TimeoutSeconds
+      DecryptStepDetails:
+        member: DecryptStepDetails
+        properties:
+          DestinationFileLocation:
+            member: DestinationFileLocation
+            properties:
+              EfsFileLocation:
+                member: EfsFileLocation
+                properties:
+                  FileSystemId: FileSystemId
+                  Path: Path
+              S3FileLocation:
+                member: S3FileLocation
+                properties:
+                  Bucket: Bucket
+                  Key: Key
+          Name: Name
+          OverwriteExisting: OverwriteExisting
+          SourceFileLocation: SourceFileLocation
+          Type: Type
+      DeleteStepDetails:
+        member: DeleteStepDetails
+        properties:
+          Name: Name
+          SourceFileLocation: SourceFileLocation
+      TagStepDetails:
+        member: TagStepDetails
+        properties:
+          Name: Name
+          SourceFileLocation: SourceFileLocation
+          Tags:
+            member: Tags
+            properties:
+              Key: Key
+              Value: Value
+      Type: Type
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  WorkflowId: WorkflowId

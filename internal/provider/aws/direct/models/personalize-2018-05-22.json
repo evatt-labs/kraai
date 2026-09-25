@@ -1,0 +1,1680 @@
+{
+  "shapes": {
+    "com.amazonaws.personalize#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#AmazonPersonalize": {
+      "operations": [
+        {
+          "target": "com.amazonaws.personalize#DescribeDatasetGroup"
+        },
+        {
+          "target": "com.amazonaws.personalize#DescribeEventTracker"
+        },
+        {
+          "target": "com.amazonaws.personalize#DescribeFilter"
+        },
+        {
+          "target": "com.amazonaws.personalize#DescribeSchema"
+        },
+        {
+          "target": "com.amazonaws.personalize#DescribeSolution"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "personalize",
+          "cloudFormationName": "Personalize",
+          "cloudTrailEventSource": "personalize.amazonaws.com",
+          "endpointPrefix": "personalize",
+          "sdkId": "Personalize"
+        },
+        "aws.auth#sigv4": {
+          "name": "personalize"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "Amazon Personalize",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://personalize-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://personalize-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://personalize.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://personalize.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-05-22"
+    },
+    "com.amazonaws.personalize#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:([a-z\\d-]+):personalize:.*:.*:.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#ArnList": {
+      "member": {
+        "target": "com.amazonaws.personalize#Arn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.personalize#AutoMLConfig": {
+      "members": {
+        "metricName": {
+          "target": "com.amazonaws.personalize#MetricName",
+          "traits": {}
+        },
+        "recipeList": {
+          "target": "com.amazonaws.personalize#ArnList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#AutoMLResult": {
+      "members": {
+        "bestRecipeArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#AutoTrainingConfig": {
+      "members": {
+        "schedulingExpression": {
+          "target": "com.amazonaws.personalize#SchedulingExpression",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#AvroSchema": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#CategoricalHyperParameterRange": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.personalize#ParameterName",
+          "traits": {}
+        },
+        "values": {
+          "target": "com.amazonaws.personalize#CategoricalValues",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#CategoricalHyperParameterRanges": {
+      "member": {
+        "target": "com.amazonaws.personalize#CategoricalHyperParameterRange"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.personalize#CategoricalValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#CategoricalValues": {
+      "member": {
+        "target": "com.amazonaws.personalize#CategoricalValue"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.personalize#ColumnName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 150,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[A-Za-z_][A-Za-z\\d_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#ColumnNamesList": {
+      "member": {
+        "target": "com.amazonaws.personalize#ColumnName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.personalize#ContinuousHyperParameterRange": {
+      "members": {
+        "maxValue": {
+          "target": "com.amazonaws.personalize#ContinuousMaxValue",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "minValue": {
+          "target": "com.amazonaws.personalize#ContinuousMinValue",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.personalize#ParameterName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#ContinuousHyperParameterRanges": {
+      "member": {
+        "target": "com.amazonaws.personalize#ContinuousHyperParameterRange"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.personalize#ContinuousMaxValue": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "min": -1000000
+        }
+      },
+      "type": "double"
+    },
+    "com.amazonaws.personalize#ContinuousMinValue": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "min": -1000000
+        }
+      },
+      "type": "double"
+    },
+    "com.amazonaws.personalize#DatasetGroup": {
+      "members": {
+        "creationDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "datasetGroupArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "domain": {
+          "target": "com.amazonaws.personalize#Domain",
+          "traits": {}
+        },
+        "failureReason": {
+          "target": "com.amazonaws.personalize#FailureReason",
+          "traits": {}
+        },
+        "kmsKeyArn": {
+          "target": "com.amazonaws.personalize#KmsKeyArn",
+          "traits": {}
+        },
+        "lastUpdatedDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.personalize#Name",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.personalize#RoleArn",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.personalize#Status",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DatasetSchema": {
+      "members": {
+        "creationDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "domain": {
+          "target": "com.amazonaws.personalize#Domain",
+          "traits": {}
+        },
+        "lastUpdatedDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.personalize#Name",
+          "traits": {}
+        },
+        "schema": {
+          "target": "com.amazonaws.personalize#AvroSchema",
+          "traits": {}
+        },
+        "schemaArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DatasetType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[A-Za-z_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#Date": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.personalize#DescribeDatasetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.personalize#InvalidInputException"
+        },
+        {
+          "target": "com.amazonaws.personalize#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.personalize#DescribeDatasetGroupRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.personalize#DescribeDatasetGroupResponse"
+      },
+      "traits": {
+        "smithy.api#idempotent": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.personalize#DescribeDatasetGroupRequest": {
+      "members": {
+        "datasetGroupArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeDatasetGroupResponse": {
+      "members": {
+        "datasetGroup": {
+          "target": "com.amazonaws.personalize#DatasetGroup",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeEventTracker": {
+      "errors": [
+        {
+          "target": "com.amazonaws.personalize#InvalidInputException"
+        },
+        {
+          "target": "com.amazonaws.personalize#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.personalize#DescribeEventTrackerRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.personalize#DescribeEventTrackerResponse"
+      },
+      "traits": {
+        "smithy.api#idempotent": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.personalize#DescribeEventTrackerRequest": {
+      "members": {
+        "eventTrackerArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeEventTrackerResponse": {
+      "members": {
+        "eventTracker": {
+          "target": "com.amazonaws.personalize#EventTracker",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeFilter": {
+      "errors": [
+        {
+          "target": "com.amazonaws.personalize#InvalidInputException"
+        },
+        {
+          "target": "com.amazonaws.personalize#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.personalize#DescribeFilterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.personalize#DescribeFilterResponse"
+      },
+      "traits": {
+        "smithy.api#idempotent": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.personalize#DescribeFilterRequest": {
+      "members": {
+        "filterArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeFilterResponse": {
+      "members": {
+        "filter": {
+          "target": "com.amazonaws.personalize#Filter",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeSchema": {
+      "errors": [
+        {
+          "target": "com.amazonaws.personalize#InvalidInputException"
+        },
+        {
+          "target": "com.amazonaws.personalize#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.personalize#DescribeSchemaRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.personalize#DescribeSchemaResponse"
+      },
+      "traits": {
+        "smithy.api#idempotent": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.personalize#DescribeSchemaRequest": {
+      "members": {
+        "schemaArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeSchemaResponse": {
+      "members": {
+        "schema": {
+          "target": "com.amazonaws.personalize#DatasetSchema",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeSolution": {
+      "errors": [
+        {
+          "target": "com.amazonaws.personalize#InvalidInputException"
+        },
+        {
+          "target": "com.amazonaws.personalize#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.personalize#DescribeSolutionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.personalize#DescribeSolutionResponse"
+      },
+      "traits": {
+        "smithy.api#idempotent": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.personalize#DescribeSolutionRequest": {
+      "members": {
+        "solutionArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#DescribeSolutionResponse": {
+      "members": {
+        "solution": {
+          "target": "com.amazonaws.personalize#Solution",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#Domain": {
+      "members": {
+        "ECOMMERCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ECOMMERCE"
+          }
+        },
+        "VIDEO_ON_DEMAND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VIDEO_ON_DEMAND"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.personalize#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.personalize#EventParameters": {
+      "members": {
+        "eventType": {
+          "target": "com.amazonaws.personalize#EventType",
+          "traits": {}
+        },
+        "eventValueThreshold": {
+          "target": "com.amazonaws.personalize#EventTypeThresholdValue",
+          "traits": {}
+        },
+        "weight": {
+          "target": "com.amazonaws.personalize#EventTypeWeight",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#EventParametersList": {
+      "member": {
+        "target": "com.amazonaws.personalize#EventParameters"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.personalize#EventTracker": {
+      "members": {
+        "accountId": {
+          "target": "com.amazonaws.personalize#AccountId",
+          "traits": {}
+        },
+        "creationDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "datasetGroupArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "eventTrackerArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "lastUpdatedDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.personalize#Name",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.personalize#Status",
+          "traits": {}
+        },
+        "trackingId": {
+          "target": "com.amazonaws.personalize#TrackingId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#EventType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#EventTypeThresholdValue": {
+      "type": "double"
+    },
+    "com.amazonaws.personalize#EventTypeWeight": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1,
+          "min": 0
+        }
+      },
+      "type": "double"
+    },
+    "com.amazonaws.personalize#EventValueThreshold": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#EventsConfig": {
+      "members": {
+        "eventParametersList": {
+          "target": "com.amazonaws.personalize#EventParametersList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#ExcludedDatasetColumns": {
+      "key": {
+        "target": "com.amazonaws.personalize#DatasetType"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 3,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.personalize#ColumnNamesList"
+      }
+    },
+    "com.amazonaws.personalize#FailureReason": {
+      "type": "string"
+    },
+    "com.amazonaws.personalize#FeatureTransformationParameters": {
+      "key": {
+        "target": "com.amazonaws.personalize#ParameterName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.personalize#ParameterValue"
+      }
+    },
+    "com.amazonaws.personalize#Filter": {
+      "members": {
+        "creationDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "datasetGroupArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "failureReason": {
+          "target": "com.amazonaws.personalize#FailureReason",
+          "traits": {}
+        },
+        "filterArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "filterExpression": {
+          "target": "com.amazonaws.personalize#FilterExpression",
+          "traits": {}
+        },
+        "lastUpdatedDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.personalize#Name",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.personalize#Status",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#FilterExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2500,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#HPOConfig": {
+      "members": {
+        "algorithmHyperParameterRanges": {
+          "target": "com.amazonaws.personalize#HyperParameterRanges",
+          "traits": {}
+        },
+        "hpoObjective": {
+          "target": "com.amazonaws.personalize#HPOObjective",
+          "traits": {}
+        },
+        "hpoResourceConfig": {
+          "target": "com.amazonaws.personalize#HPOResourceConfig",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#HPOObjective": {
+      "members": {
+        "metricName": {
+          "target": "com.amazonaws.personalize#MetricName",
+          "traits": {}
+        },
+        "metricRegex": {
+          "target": "com.amazonaws.personalize#MetricRegex",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.personalize#HPOObjectiveType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#HPOObjectiveType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#HPOResource": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#HPOResourceConfig": {
+      "members": {
+        "maxNumberOfTrainingJobs": {
+          "target": "com.amazonaws.personalize#HPOResource",
+          "traits": {}
+        },
+        "maxParallelTrainingJobs": {
+          "target": "com.amazonaws.personalize#HPOResource",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#HyperParameterRanges": {
+      "members": {
+        "categoricalHyperParameterRanges": {
+          "target": "com.amazonaws.personalize#CategoricalHyperParameterRanges",
+          "traits": {}
+        },
+        "continuousHyperParameterRanges": {
+          "target": "com.amazonaws.personalize#ContinuousHyperParameterRanges",
+          "traits": {}
+        },
+        "integerHyperParameterRanges": {
+          "target": "com.amazonaws.personalize#IntegerHyperParameterRanges",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#HyperParameters": {
+      "key": {
+        "target": "com.amazonaws.personalize#ParameterName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.personalize#ParameterValue"
+      }
+    },
+    "com.amazonaws.personalize#IncludedDatasetColumns": {
+      "key": {
+        "target": "com.amazonaws.personalize#DatasetType"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 3,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.personalize#ColumnNamesList"
+      }
+    },
+    "com.amazonaws.personalize#IntegerHyperParameterRange": {
+      "members": {
+        "maxValue": {
+          "target": "com.amazonaws.personalize#IntegerMaxValue",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "minValue": {
+          "target": "com.amazonaws.personalize#IntegerMinValue",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.personalize#ParameterName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#IntegerHyperParameterRanges": {
+      "member": {
+        "target": "com.amazonaws.personalize#IntegerHyperParameterRange"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.personalize#IntegerMaxValue": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 1000000
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.personalize#IntegerMinValue": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "min": -1000000
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.personalize#InvalidInputException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#ItemAttribute": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 150,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:aws.*:kms:.*:[0-9]{12}:key/"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#MetricName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#MetricRegex": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#Name": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#ObjectiveSensitivity": {
+      "members": {
+        "HIGH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HIGH"
+          }
+        },
+        "LOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LOW"
+          }
+        },
+        "MEDIUM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEDIUM"
+          }
+        },
+        "OFF": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OFF"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.personalize#OptimizationObjective": {
+      "members": {
+        "itemAttribute": {
+          "target": "com.amazonaws.personalize#ItemAttribute",
+          "traits": {}
+        },
+        "objectiveSensitivity": {
+          "target": "com.amazonaws.personalize#ObjectiveSensitivity",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#ParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#ParameterValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#PerformAutoML": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.personalize#PerformAutoTraining": {
+      "type": "boolean"
+    },
+    "com.amazonaws.personalize#PerformHPO": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.personalize#PerformIncrementalUpdate": {
+      "type": "boolean"
+    },
+    "com.amazonaws.personalize#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:([a-z\\d-]+):iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#SchedulingExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 16,
+          "min": 1
+        },
+        "smithy.api#pattern": "^rate\\(\\d+ days?\\)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#Solution": {
+      "members": {
+        "autoMLResult": {
+          "target": "com.amazonaws.personalize#AutoMLResult",
+          "traits": {}
+        },
+        "creationDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "datasetGroupArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "eventType": {
+          "target": "com.amazonaws.personalize#EventType",
+          "traits": {}
+        },
+        "lastUpdatedDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "latestSolutionUpdate": {
+          "target": "com.amazonaws.personalize#SolutionUpdateSummary",
+          "traits": {}
+        },
+        "latestSolutionVersion": {
+          "target": "com.amazonaws.personalize#SolutionVersionSummary",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.personalize#Name",
+          "traits": {}
+        },
+        "performAutoML": {
+          "target": "com.amazonaws.personalize#PerformAutoML",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "performAutoTraining": {
+          "target": "com.amazonaws.personalize#PerformAutoTraining",
+          "traits": {}
+        },
+        "performHPO": {
+          "target": "com.amazonaws.personalize#PerformHPO",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "performIncrementalUpdate": {
+          "target": "com.amazonaws.personalize#PerformIncrementalUpdate",
+          "traits": {}
+        },
+        "recipeArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "solutionArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "solutionConfig": {
+          "target": "com.amazonaws.personalize#SolutionConfig",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.personalize#Status",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#SolutionConfig": {
+      "members": {
+        "algorithmHyperParameters": {
+          "target": "com.amazonaws.personalize#HyperParameters",
+          "traits": {}
+        },
+        "autoMLConfig": {
+          "target": "com.amazonaws.personalize#AutoMLConfig",
+          "traits": {}
+        },
+        "autoTrainingConfig": {
+          "target": "com.amazonaws.personalize#AutoTrainingConfig",
+          "traits": {}
+        },
+        "eventValueThreshold": {
+          "target": "com.amazonaws.personalize#EventValueThreshold",
+          "traits": {}
+        },
+        "eventsConfig": {
+          "target": "com.amazonaws.personalize#EventsConfig",
+          "traits": {}
+        },
+        "featureTransformationParameters": {
+          "target": "com.amazonaws.personalize#FeatureTransformationParameters",
+          "traits": {}
+        },
+        "hpoConfig": {
+          "target": "com.amazonaws.personalize#HPOConfig",
+          "traits": {}
+        },
+        "optimizationObjective": {
+          "target": "com.amazonaws.personalize#OptimizationObjective",
+          "traits": {}
+        },
+        "trainingDataConfig": {
+          "target": "com.amazonaws.personalize#TrainingDataConfig",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#SolutionUpdateConfig": {
+      "members": {
+        "autoTrainingConfig": {
+          "target": "com.amazonaws.personalize#AutoTrainingConfig"
+        },
+        "eventsConfig": {
+          "target": "com.amazonaws.personalize#EventsConfig",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#SolutionUpdateSummary": {
+      "members": {
+        "creationDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "failureReason": {
+          "target": "com.amazonaws.personalize#FailureReason",
+          "traits": {}
+        },
+        "lastUpdatedDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "performAutoTraining": {
+          "target": "com.amazonaws.personalize#PerformAutoTraining",
+          "traits": {}
+        },
+        "performIncrementalUpdate": {
+          "target": "com.amazonaws.personalize#PerformIncrementalUpdate",
+          "traits": {}
+        },
+        "solutionUpdateConfig": {
+          "target": "com.amazonaws.personalize#SolutionUpdateConfig",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.personalize#Status",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#SolutionVersionSummary": {
+      "members": {
+        "creationDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "failureReason": {
+          "target": "com.amazonaws.personalize#FailureReason",
+          "traits": {}
+        },
+        "lastUpdatedDateTime": {
+          "target": "com.amazonaws.personalize#Date",
+          "traits": {}
+        },
+        "solutionVersionArn": {
+          "target": "com.amazonaws.personalize#Arn",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.personalize#Status",
+          "traits": {}
+        },
+        "trainingMode": {
+          "target": "com.amazonaws.personalize#TrainingMode",
+          "traits": {}
+        },
+        "trainingType": {
+          "target": "com.amazonaws.personalize#TrainingType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#Status": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#TrackingId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.personalize#TrainingDataConfig": {
+      "members": {
+        "excludedDatasetColumns": {
+          "target": "com.amazonaws.personalize#ExcludedDatasetColumns",
+          "traits": {}
+        },
+        "includedDatasetColumns": {
+          "target": "com.amazonaws.personalize#IncludedDatasetColumns",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#TrainingMode": {
+      "members": {
+        "AUTOTRAIN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTOTRAIN"
+          }
+        },
+        "FULL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FULL"
+          }
+        },
+        "UPDATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.personalize#TrainingType": {
+      "members": {
+        "AUTOMATIC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTOMATIC"
+          }
+        },
+        "MANUAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANUAL"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

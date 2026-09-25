@@ -1,0 +1,73 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Transfer::Server
+read:
+  model: transfer/service/2018-11-05/transfer-2018-11-05.json
+  operation: DescribeServer
+  identifier:
+    Arn: ServerId
+  response: Server
+properties:
+  Arn: Arn
+  As2ServiceManagedEgressIpAddresses: As2ServiceManagedEgressIpAddresses
+  Certificate: Certificate
+  Domain: Domain
+  EndpointDetails:
+    member: EndpointDetails
+    properties:
+      AddressAllocationIds: AddressAllocationIds
+      SecurityGroupIds: SecurityGroupIds
+      SubnetIds: SubnetIds
+      VpcEndpointId: VpcEndpointId
+      VpcId: VpcId
+  EndpointType: EndpointType
+  IdentityProviderDetails:
+    member: IdentityProviderDetails
+    properties:
+      DirectoryId: DirectoryId
+      Function: Function
+      InvocationRole: InvocationRole
+      SftpAuthenticationMethods: SftpAuthenticationMethods
+      Url: Url
+  IdentityProviderType: IdentityProviderType
+  IpAddressType: IpAddressType
+  LoggingRole: LoggingRole
+  PostAuthenticationLoginBanner: PostAuthenticationLoginBanner
+  PreAuthenticationLoginBanner: PreAuthenticationLoginBanner
+  ProtocolDetails:
+    member: ProtocolDetails
+    properties:
+      As2Transports: As2Transports
+      PassiveIp: PassiveIp
+      ProxyConfig:
+        member: ProxyConfig
+        properties:
+          SftpMode: SftpMode
+      SetStatOption: SetStatOption
+      TlsSessionResumptionMode: TlsSessionResumptionMode
+  Protocols: Protocols
+  S3StorageOptions:
+    member: S3StorageOptions
+    properties:
+      DirectoryListingOptimization: DirectoryListingOptimization
+  SecurityPolicyName: SecurityPolicyName
+  ServerId: ServerId
+  State: State
+  StructuredLogDestinations: StructuredLogDestinations
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  WorkflowDetails:
+    member: WorkflowDetails
+    properties:
+      OnPartialUpload:
+        member: OnPartialUpload
+        properties:
+          ExecutionRole: ExecutionRole
+          WorkflowId: WorkflowId
+      OnUpload:
+        member: OnUpload
+        properties:
+          ExecutionRole: ExecutionRole
+          WorkflowId: WorkflowId

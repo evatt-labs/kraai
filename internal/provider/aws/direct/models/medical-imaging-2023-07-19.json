@@ -1,0 +1,655 @@
+{
+  "shapes": {
+    "com.amazonaws.medicalimaging#AHIGatewayService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.medicalimaging#GetDatastore"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "medical-imaging",
+          "endpointPrefix": "medical-imaging",
+          "sdkId": "Medical Imaging"
+        },
+        "aws.auth#sigv4": {
+          "name": "medical-imaging"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS Health Imaging",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://medical-imaging-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://medical-imaging-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://medical-imaging.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://medical-imaging.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2023-07-19"
+    },
+    "com.amazonaws.medicalimaging#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#Arn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:aws((-us-gov)|(-iso)|(-iso-b)|(-cn))?:medical-imaging:[a-z0-9-]+:[0-9]{12}:datastore/[0-9a-z]{32}(/imageset/[0-9a-z]{32})?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.medicalimaging#DatastoreId": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9a-z]{32}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.medicalimaging#DatastoreName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9._/#-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.medicalimaging#DatastoreProperties": {
+      "members": {
+        "createdAt": {
+          "target": "com.amazonaws.medicalimaging#Date",
+          "traits": {}
+        },
+        "datastoreArn": {
+          "target": "com.amazonaws.medicalimaging#Arn",
+          "traits": {}
+        },
+        "datastoreId": {
+          "target": "com.amazonaws.medicalimaging#DatastoreId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "datastoreName": {
+          "target": "com.amazonaws.medicalimaging#DatastoreName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "datastoreStatus": {
+          "target": "com.amazonaws.medicalimaging#DatastoreStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "kmsKeyArn": {
+          "target": "com.amazonaws.medicalimaging#KmsKeyArn",
+          "traits": {}
+        },
+        "lambdaAuthorizerArn": {
+          "target": "com.amazonaws.medicalimaging#LambdaArn",
+          "traits": {}
+        },
+        "losslessStorageFormat": {
+          "target": "com.amazonaws.medicalimaging#LosslessStorageFormat",
+          "traits": {}
+        },
+        "updatedAt": {
+          "target": "com.amazonaws.medicalimaging#Date",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#DatastoreStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.medicalimaging#Date": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.medicalimaging#GetDatastore": {
+      "errors": [
+        {
+          "target": "com.amazonaws.medicalimaging#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.medicalimaging#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.medicalimaging#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.medicalimaging#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.medicalimaging#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.medicalimaging#GetDatastoreRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.medicalimaging#GetDatastoreResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "GET",
+          "uri": "/datastore/{datastoreId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.medicalimaging#GetDatastoreRequest": {
+      "members": {
+        "datastoreId": {
+          "target": "com.amazonaws.medicalimaging#DatastoreId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#GetDatastoreResponse": {
+      "members": {
+        "datastoreProperties": {
+          "target": "com.amazonaws.medicalimaging#DatastoreProperties",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#KmsKeyArn": {
+      "traits": {
+        "aws.api#arnReference": {},
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[a-zA-Z-]{0,16}:kms:[a-z]{2}(-[a-z]{1,16}){1,3}-\\d{1}:\\d{12}:((key/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})|(alias/[a-zA-Z0-9:/_-]{1,256}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.medicalimaging#LambdaArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:(aws[a-zA-Z-]*)?:lambda:[a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(:(\\$LATEST|[a-zA-Z0-9-_]+))?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.medicalimaging#LosslessStorageFormat": {
+      "members": {
+        "HTJ2K": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTJ2K"
+          }
+        },
+        "JPEG_2000_LOSSLESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "JPEG_2000_LOSSLESS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.medicalimaging#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#ValidationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

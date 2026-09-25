@@ -1,0 +1,38 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53RecoveryReadiness::ResourceSet
+read:
+  model: route53-recovery-readiness/service/2019-12-02/route53-recovery-readiness-2019-12-02.json
+  operation: GetResourceSet
+  identifier:
+    ResourceSetName: ResourceSetName
+properties:
+  ResourceSetArn: ResourceSetArn
+  ResourceSetName: ResourceSetName
+  ResourceSetType: ResourceSetType
+  Resources:
+    member: Resources
+    properties:
+      ComponentId: ComponentId
+      DnsTargetResource:
+        member: DnsTargetResource
+        properties:
+          DomainName: DomainName
+          HostedZoneArn: HostedZoneArn
+          RecordSetId: RecordSetId
+          RecordType: RecordType
+          TargetResource:
+            member: TargetResource
+            properties:
+              NLBResource:
+                member: NLBResource
+                properties:
+                  Arn: Arn
+              R53Resource:
+                member: R53Resource
+                properties:
+                  DomainName: DomainName
+                  RecordSetId: RecordSetId
+      ReadinessScopes: ReadinessScopes
+      ResourceArn: ResourceArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,680 @@
+{
+  "shapes": {
+    "com.amazonaws.wickr#AccessLevel": {
+      "members": {
+        "PREMIUM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PREMIUM"
+          }
+        },
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.wickr#BadRequestError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#ErrorDetail": {
+      "members": {
+        "field": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {}
+        },
+        "reason": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#ErrorDetailList": {
+      "member": {
+        "target": "com.amazonaws.wickr#ErrorDetail"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.wickr#ForbiddenError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#GenericString": {
+      "traits": {
+        "smithy.api#pattern": "^[\\S\\s]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.wickr#GetNetwork": {
+      "errors": [
+        {
+          "target": "com.amazonaws.wickr#BadRequestError"
+        },
+        {
+          "target": "com.amazonaws.wickr#ForbiddenError"
+        },
+        {
+          "target": "com.amazonaws.wickr#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.wickr#RateLimitError"
+        },
+        {
+          "target": "com.amazonaws.wickr#ResourceNotFoundError"
+        },
+        {
+          "target": "com.amazonaws.wickr#UnauthorizedError"
+        },
+        {
+          "target": "com.amazonaws.wickr#ValidationError"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.wickr#GetNetworkRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.wickr#GetNetworkResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/networks/{networkId}"
+        },
+        "smithy.api#readonly": {},
+        "smithy.api#tags": [
+          "network",
+          "mysql",
+          "management"
+        ],
+        "smithy.test#smokeTests": [
+          {
+            "expect": {
+              "failure": {}
+            },
+            "id": "GetNetworkUnauthorized",
+            "params": {
+              "networkId": "12345678"
+            },
+            "vendorParams": {
+              "region": "us-east-1"
+            },
+            "vendorParamsShape": "aws.test#AwsVendorParams"
+          }
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.wickr#GetNetworkRequest": {
+      "members": {
+        "networkId": {
+          "target": "com.amazonaws.wickr#NetworkId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#GetNetworkResponse": {
+      "members": {
+        "accessLevel": {
+          "target": "com.amazonaws.wickr#AccessLevel",
+          "traits": {
+            "smithy.api#property": {},
+            "smithy.api#required": {}
+          }
+        },
+        "awsAccountId": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {
+            "smithy.api#property": {},
+            "smithy.api#required": {}
+          }
+        },
+        "encryptionKeyArn": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {
+            "smithy.api#property": {}
+          }
+        },
+        "freeTrialExpiration": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {
+            "smithy.api#property": {}
+          }
+        },
+        "migrationState": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#property": {}
+          }
+        },
+        "networkArn": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {
+            "smithy.api#property": {},
+            "smithy.api#required": {}
+          }
+        },
+        "networkId": {
+          "target": "com.amazonaws.wickr#NetworkId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "networkName": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {
+            "smithy.api#property": {},
+            "smithy.api#required": {}
+          }
+        },
+        "standing": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#property": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#InternalServerError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#NetworkId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 8,
+          "min": 8
+        },
+        "smithy.api#pattern": "^[0-9]{8}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.wickr#RateLimitError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {
+            "smithy.api#default": "Too many requests sent"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#ResourceNotFoundError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#UnauthorizedError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#ValidationError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.wickr#GenericString",
+          "traits": {}
+        },
+        "reasons": {
+          "target": "com.amazonaws.wickr#ErrorDetailList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 422
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.wickr#WickrAdminApi": {
+      "operations": [
+        {
+          "target": "com.amazonaws.wickr#GetNetwork"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "wickr",
+          "endpointPrefix": "admin.wickr",
+          "sdkId": "Wickr"
+        },
+        "aws.auth#sigv4": {
+          "name": "wickr"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow_Methods",
+            "Access-Control-Allow-Credentials",
+            "Vary",
+            "Access-Control-Max-Age",
+            "Access-Control-Allow-Headers"
+          ],
+          "origin": "*"
+        },
+        "smithy.api#title": "AWS Wickr Admin API",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://admin.wickr-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://admin.wickr-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://admin.wickr.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://admin.wickr.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2024-02-01"
+    }
+  },
+  "smithy": "2.0"
+}

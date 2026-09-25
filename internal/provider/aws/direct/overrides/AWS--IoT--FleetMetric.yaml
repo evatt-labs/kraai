@@ -1,0 +1,27 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoT::FleetMetric
+read:
+  model: iot/service/2015-05-28/iot-2015-05-28.json
+  operation: DescribeFleetMetric
+  identifier:
+    MetricName: metricName
+properties:
+  AggregationField: aggregationField
+  AggregationType:
+    member: aggregationType
+    properties:
+      Name: name
+      Values: values
+  CreationDate: creationDate
+  Description: description
+  IndexName: indexName
+  LastModifiedDate: lastModifiedDate
+  MetricArn: metricArn
+  MetricName: metricName
+  Period: period
+  QueryString: queryString
+  QueryVersion: queryVersion
+  Unit: unit
+  Version: version
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

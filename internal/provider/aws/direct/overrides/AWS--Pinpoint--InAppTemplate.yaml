@@ -1,0 +1,86 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Pinpoint::InAppTemplate
+read:
+  model: pinpoint/service/2016-12-01/pinpoint-2016-12-01.json
+  operation: GetInAppTemplate
+  identifier:
+    TemplateName: TemplateName
+  response: InAppTemplateResponse
+properties:
+  Arn: Arn
+  Content:
+    member: Content
+    properties:
+      BackgroundColor: BackgroundColor
+      BodyConfig:
+        member: BodyConfig
+        properties:
+          Alignment: Alignment
+          Body: Body
+          TextColor: TextColor
+      HeaderConfig:
+        member: HeaderConfig
+        properties:
+          Alignment: Alignment
+          Header: Header
+          TextColor: TextColor
+      ImageUrl: ImageUrl
+      PrimaryBtn:
+        member: PrimaryBtn
+        properties:
+          Android:
+            member: Android
+            properties:
+              ButtonAction: ButtonAction
+              Link: Link
+          DefaultConfig:
+            member: DefaultConfig
+            properties:
+              BackgroundColor: BackgroundColor
+              BorderRadius: BorderRadius
+              ButtonAction: ButtonAction
+              Link: Link
+              Text: Text
+              TextColor: TextColor
+          IOS:
+            member: IOS
+            properties:
+              ButtonAction: ButtonAction
+              Link: Link
+          Web:
+            member: Web
+            properties:
+              ButtonAction: ButtonAction
+              Link: Link
+      SecondaryBtn:
+        member: SecondaryBtn
+        properties:
+          Android:
+            member: Android
+            properties:
+              ButtonAction: ButtonAction
+              Link: Link
+          DefaultConfig:
+            member: DefaultConfig
+            properties:
+              BackgroundColor: BackgroundColor
+              BorderRadius: BorderRadius
+              ButtonAction: ButtonAction
+              Link: Link
+              Text: Text
+              TextColor: TextColor
+          IOS:
+            member: IOS
+            properties:
+              ButtonAction: ButtonAction
+              Link: Link
+          Web:
+            member: Web
+            properties:
+              ButtonAction: ButtonAction
+              Link: Link
+  CustomConfig: CustomConfig
+  Layout: Layout
+  Tags: tags
+  TemplateDescription: TemplateDescription
+  TemplateName: TemplateName

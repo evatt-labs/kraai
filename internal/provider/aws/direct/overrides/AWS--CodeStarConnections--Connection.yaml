@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CodeStarConnections::Connection
+read:
+  model: codestar-connections/service/2019-12-01/codestar-connections-2019-12-01.json
+  operation: GetConnection
+  identifier:
+    ConnectionArn: ConnectionArn
+  response: Connection
+properties:
+  ConnectionArn: ConnectionArn
+  ConnectionName: ConnectionName
+  ConnectionStatus: ConnectionStatus
+  HostArn: HostArn
+  OwnerAccountId: OwnerAccountId
+  ProviderType: ProviderType
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

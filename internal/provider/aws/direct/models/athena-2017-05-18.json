@@ -1,0 +1,851 @@
+{
+  "shapes": {
+    "com.amazonaws.athena#AmazonAthena": {
+      "operations": [
+        {
+          "target": "com.amazonaws.athena#GetDataCatalog"
+        },
+        {
+          "target": "com.amazonaws.athena#GetNamedQuery"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "athena",
+          "cloudFormationName": "Athena",
+          "cloudTrailEventSource": "athena.amazonaws.com",
+          "endpointPrefix": "athena",
+          "sdkId": "Athena"
+        },
+        "aws.auth#sigv4": {
+          "name": "athena"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "Amazon Athena",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://athena-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://athena-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://athena.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://athena.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-05-18"
+    },
+    "com.amazonaws.athena#CatalogNameString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#ConnectionType": {
+      "members": {
+        "BIGQUERY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BIGQUERY"
+          }
+        },
+        "CMDB": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CMDB"
+          }
+        },
+        "DATALAKEGEN2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DATALAKEGEN2"
+          }
+        },
+        "DB2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DB2"
+          }
+        },
+        "DB2AS400": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DB2AS400"
+          }
+        },
+        "DOCUMENTDB": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DOCUMENTDB"
+          }
+        },
+        "DYNAMODB": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DYNAMODB"
+          }
+        },
+        "GOOGLECLOUDSTORAGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GOOGLECLOUDSTORAGE"
+          }
+        },
+        "HBASE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HBASE"
+          }
+        },
+        "MYSQL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MYSQL"
+          }
+        },
+        "OPENSEARCH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OPENSEARCH"
+          }
+        },
+        "ORACLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ORACLE"
+          }
+        },
+        "POSTGRESQL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "POSTGRESQL"
+          }
+        },
+        "REDSHIFT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REDSHIFT"
+          }
+        },
+        "SAPHANA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAPHANA"
+          }
+        },
+        "SNOWFLAKE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SNOWFLAKE"
+          }
+        },
+        "SQLSERVER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SQLSERVER"
+          }
+        },
+        "SYNAPSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYNAPSE"
+          }
+        },
+        "TIMESTREAM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TIMESTREAM"
+          }
+        },
+        "TPCDS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TPCDS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.athena#DataCatalog": {
+      "members": {
+        "ConnectionType": {
+          "target": "com.amazonaws.athena#ConnectionType",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.athena#DescriptionString",
+          "traits": {}
+        },
+        "Error": {
+          "target": "com.amazonaws.athena#ErrorMessage",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.athena#CatalogNameString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.athena#ParametersMap",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.athena#DataCatalogStatus",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.athena#DataCatalogType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.athena#DataCatalogStatus": {
+      "members": {
+        "CREATE_COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_COMPLETE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATE_FAILED_CLEANUP_COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED_CLEANUP_COMPLETE"
+          }
+        },
+        "CREATE_FAILED_CLEANUP_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED_CLEANUP_FAILED"
+          }
+        },
+        "CREATE_FAILED_CLEANUP_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED_CLEANUP_IN_PROGRESS"
+          }
+        },
+        "CREATE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_IN_PROGRESS"
+          }
+        },
+        "DELETE_COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_COMPLETE"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_IN_PROGRESS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.athena#DataCatalogType": {
+      "members": {
+        "FEDERATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FEDERATED"
+          }
+        },
+        "GLUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GLUE"
+          }
+        },
+        "HIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HIVE"
+          }
+        },
+        "LAMBDA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LAMBDA"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.athena#DatabaseString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#DescriptionString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#ErrorCode": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.athena#GetDataCatalog": {
+      "errors": [
+        {
+          "target": "com.amazonaws.athena#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.athena#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.athena#GetDataCatalogInput"
+      },
+      "output": {
+        "target": "com.amazonaws.athena#GetDataCatalogOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.athena#GetDataCatalogInput": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.athena#CatalogNameString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "WorkGroup": {
+          "target": "com.amazonaws.athena#WorkGroupName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#GetDataCatalogOutput": {
+      "members": {
+        "DataCatalog": {
+          "target": "com.amazonaws.athena#DataCatalog",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#GetNamedQuery": {
+      "errors": [
+        {
+          "target": "com.amazonaws.athena#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.athena#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.athena#GetNamedQueryInput"
+      },
+      "output": {
+        "target": "com.amazonaws.athena#GetNamedQueryOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.athena#GetNamedQueryInput": {
+      "members": {
+        "NamedQueryId": {
+          "target": "com.amazonaws.athena#NamedQueryId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#GetNamedQueryOutput": {
+      "members": {
+        "NamedQuery": {
+          "target": "com.amazonaws.athena#NamedQuery",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.athena#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#InvalidRequestException": {
+      "members": {
+        "AthenaErrorCode": {
+          "target": "com.amazonaws.athena#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.athena#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#KeyString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\t]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#NameString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#NamedQuery": {
+      "members": {
+        "Database": {
+          "target": "com.amazonaws.athena#DatabaseString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.athena#DescriptionString",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.athena#NameString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "NamedQueryId": {
+          "target": "com.amazonaws.athena#NamedQueryId",
+          "traits": {}
+        },
+        "QueryString": {
+          "target": "com.amazonaws.athena#QueryString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "WorkGroup": {
+          "target": "com.amazonaws.athena#WorkGroupName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.athena#NamedQueryId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#ParametersMap": {
+      "key": {
+        "target": "com.amazonaws.athena#KeyString"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.athena#ParametersMapValue"
+      }
+    },
+    "com.amazonaws.athena#ParametersMapValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 51200,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#QueryString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 262144,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.athena#WorkGroupName": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z0-9._-]{1,128}$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

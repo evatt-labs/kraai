@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53Profiles::ProfileResourceAssociation
+read:
+  model: route53profiles/service/2018-05-10/route53profiles-2018-05-10.json
+  operation: GetProfileResourceAssociation
+  identifier:
+    Id: ProfileResourceAssociationId
+  response: ProfileResourceAssociation
+properties:
+  Id: Id
+  Name: Name
+  ProfileId: ProfileId
+  ResourceArn: ResourceArn
+  ResourceProperties: ResourceProperties
+  ResourceType: ResourceType

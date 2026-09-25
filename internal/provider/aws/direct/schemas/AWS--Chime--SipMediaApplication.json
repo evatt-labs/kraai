@@ -1,0 +1,169 @@
+{
+  "additionalIdentifiers": [
+    [
+      "/properties/SipMediaApplicationId"
+    ]
+  ],
+  "additionalProperties": false,
+  "createOnlyProperties": [
+    "/properties/AwsRegion"
+  ],
+  "definitions": {
+    "SipMediaApplicationEndpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "LambdaArn": {
+          "description": "Valid Amazon Resource Name (ARN) of the Lambda function.",
+          "maxLength": 10000,
+          "minLength": 0,
+          "pattern": "^arn:(aws[a-zA-Z-]*)?:lambda:[a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(:(\\$LATEST|[a-zA-Z0-9-_]+))?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "LambdaArn"
+      ],
+      "type": "object"
+    },
+    "Tag": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "description": "The tag key.",
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "Value": {
+          "description": "The tag value.",
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Resource Type definition for AWS::Chime::SipMediaApplication",
+  "handlers": {
+    "create": {
+      "permissions": [
+        "chime:CreateSipMediaApplication",
+        "chime:GetSipMediaApplication",
+        "chime:TagResource",
+        "chime:ListTagsForResource",
+        "lambda:GetPolicy",
+        "lambda:AddPermission"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "chime:DeleteSipMediaApplication",
+        "chime:GetSipMediaApplication"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "chime:ListSipMediaApplications"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "chime:GetSipMediaApplication",
+        "chime:ListTagsForResource"
+      ]
+    },
+    "update": {
+      "permissions": [
+        "chime:UpdateSipMediaApplication",
+        "chime:GetSipMediaApplication",
+        "chime:TagResource",
+        "chime:UntagResource",
+        "chime:ListTagsForResource",
+        "lambda:GetPolicy",
+        "lambda:AddPermission"
+      ]
+    }
+  },
+  "primaryIdentifier": [
+    "/properties/SipMediaApplicationArn"
+  ],
+  "properties": {
+    "AwsRegion": {
+      "description": "The AWS Region in which the SIP media application is created.",
+      "type": "string"
+    },
+    "CreatedTimestamp": {
+      "description": "The SIP media application creation timestamp, in ISO 8601 format.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "Endpoints": {
+      "description": "List of endpoints (Lambda ARNs) specified for the SIP media application.",
+      "items": {
+        "$ref": "#/definitions/SipMediaApplicationEndpoint"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+    },
+    "Name": {
+      "description": "The name of the SIP media application.",
+      "maxLength": 256,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9 _.-]+$",
+      "type": "string"
+    },
+    "SipMediaApplicationArn": {
+      "description": "The ARN of the SIP media application.",
+      "type": "string"
+    },
+    "SipMediaApplicationId": {
+      "description": "The SIP media application ID.",
+      "type": "string"
+    },
+    "Tags": {
+      "description": "Tags assigned to the SIP media application.",
+      "insertionOrder": false,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+    },
+    "UpdatedTimestamp": {
+      "description": "The time at which the SIP media application was updated.",
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "readOnlyProperties": [
+    "/properties/SipMediaApplicationId",
+    "/properties/SipMediaApplicationArn",
+    "/properties/CreatedTimestamp",
+    "/properties/UpdatedTimestamp"
+  ],
+  "required": [
+    "AwsRegion",
+    "Name",
+    "Endpoints"
+  ],
+  "tagging": {
+    "cloudFormationSystemTags": false,
+    "permissions": [
+      "chime:TagResource",
+      "chime:UntagResource",
+      "chime:ListTagsForResource"
+    ],
+    "tagOnCreate": true,
+    "tagProperty": "/properties/Tags",
+    "tagUpdatable": true,
+    "taggable": true
+  },
+  "typeName": "AWS::Chime::SipMediaApplication"
+}

@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoTWireless::NetworkAnalyzerConfiguration
+read:
+  model: iot-wireless/service/2020-11-22/iot-wireless-2020-11-22.json
+  operation: GetNetworkAnalyzerConfiguration
+  identifier:
+    Name: ConfigurationName
+properties:
+  Arn: Arn
+  Description: Description
+  Name: Name
+  TraceContent:
+    member: TraceContent
+    properties:
+      LogLevel: LogLevel
+      WirelessDeviceFrameInfo: WirelessDeviceFrameInfo
+  WirelessDevices: WirelessDevices
+  WirelessGateways: WirelessGateways
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

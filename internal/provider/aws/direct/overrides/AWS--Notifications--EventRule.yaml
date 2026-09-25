@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Notifications::EventRule
+read:
+  model: notifications/service/2018-05-10/notifications-2018-05-10.json
+  operation: GetEventRule
+  identifier:
+    Arn: arn
+properties:
+  Arn: arn
+  CreationTime: creationTime
+  EventPattern: eventPattern
+  EventType: eventType
+  ManagedRules: managedRules
+  NotificationConfigurationArn: notificationConfigurationArn
+  Regions: regions
+  Source: source
+  StatusSummaryByRegion: statusSummaryByRegion

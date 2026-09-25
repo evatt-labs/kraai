@@ -1,0 +1,742 @@
+{
+  "shapes": {
+    "com.amazonaws.chatbot#CustomAction": {
+      "members": {
+        "ActionName": {
+          "target": "com.amazonaws.chatbot#CustomActionName",
+          "traits": {}
+        },
+        "AliasName": {
+          "target": "com.amazonaws.chatbot#CustomActionAliasName",
+          "traits": {}
+        },
+        "Attachments": {
+          "target": "com.amazonaws.chatbot#CustomActionAttachmentList",
+          "traits": {}
+        },
+        "CustomActionArn": {
+          "target": "com.amazonaws.chatbot#CustomActionArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "CustomActionArn"
+          }
+        },
+        "Definition": {
+          "target": "com.amazonaws.chatbot#CustomActionDefinition",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#CustomActionAliasName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 30,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9-_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chatbot#CustomActionArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.chatbot#CustomActionResource",
+          "service": "com.amazonaws.chatbot#WheatleyOrchestration_20171011",
+          "type": "AWS::Chatbot::CustomAction"
+        },
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:chatbot:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9_/.-]{0,63}:custom-action/[a-zA-Z0-9_-]{1,64}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chatbot#CustomActionAttachment": {
+      "members": {
+        "ButtonText": {
+          "target": "com.amazonaws.chatbot#CustomActionButtonText",
+          "traits": {}
+        },
+        "Criteria": {
+          "target": "com.amazonaws.chatbot#CustomActionAttachmentCriteriaList",
+          "traits": {}
+        },
+        "NotificationType": {
+          "target": "com.amazonaws.chatbot#CustomActionAttachmentNotificationType",
+          "traits": {}
+        },
+        "Variables": {
+          "target": "com.amazonaws.chatbot#CustomActionAttachmentVariables",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#CustomActionAttachmentCriteria": {
+      "members": {
+        "Operator": {
+          "target": "com.amazonaws.chatbot#CustomActionAttachmentCriteriaOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 1024,
+              "min": 0
+            },
+            "smithy.api#pattern": "^[\\S\\s]+$"
+          }
+        },
+        "VariableName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 100,
+              "min": 1
+            },
+            "smithy.api#pattern": "^[A-Za-z0-9-_]+$",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#CustomActionAttachmentCriteriaList": {
+      "member": {
+        "target": "com.amazonaws.chatbot#CustomActionAttachmentCriteria"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.chatbot#CustomActionAttachmentCriteriaOperator": {
+      "members": {
+        "EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EQUALS"
+          }
+        },
+        "HAS_VALUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HAS_VALUE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chatbot#CustomActionAttachmentList": {
+      "member": {
+        "target": "com.amazonaws.chatbot#CustomActionAttachment"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.chatbot#CustomActionAttachmentNotificationType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chatbot#CustomActionAttachmentVariables": {
+      "key": {
+        "target": "smithy.api#String",
+        "traits": {
+          "smithy.api#length": {
+            "max": 100,
+            "min": 1
+          },
+          "smithy.api#pattern": "^[A-Za-z0-9-_]+$"
+        }
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "smithy.api#String",
+        "traits": {
+          "smithy.api#length": {
+            "max": 1024,
+            "min": 0
+          },
+          "smithy.api#pattern": "^[\\x21-\\x7F]+$"
+        }
+      }
+    },
+    "com.amazonaws.chatbot#CustomActionButtonText": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\S\\s]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chatbot#CustomActionDefinition": {
+      "members": {
+        "CommandText": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 100,
+              "min": 1
+            },
+            "smithy.api#pattern": "^[\\S\\s]+$",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#CustomActionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_-]{1,64}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chatbot#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.chatbot#GetCustomAction": {
+      "errors": [
+        {
+          "target": "com.amazonaws.chatbot#InternalServiceError"
+        },
+        {
+          "target": "com.amazonaws.chatbot#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.chatbot#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.chatbot#UnauthorizedException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.chatbot#GetCustomActionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.chatbot#GetCustomActionResult"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to get a custom action"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "POST",
+          "uri": "/get-custom-action"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.chatbot#GetCustomActionRequest": {
+      "members": {
+        "CustomActionArn": {
+          "target": "com.amazonaws.chatbot#CustomActionArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "CustomActionArn"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#GetCustomActionResult": {
+      "members": {
+        "CustomAction": {
+          "target": "com.amazonaws.chatbot#CustomAction",
+          "traits": {
+            "smithy.api#nestedProperties": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#InternalServiceError": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#InvalidRequestException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#UnauthorizedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#WheatleyOrchestration_20171011": {
+      "operations": [
+        {
+          "target": "com.amazonaws.chatbot#GetCustomAction"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "chatbot",
+          "cloudFormationName": "Chatbot",
+          "cloudTrailEventSource": "chatbot.amazonaws.com",
+          "endpointPrefix": "chatbot",
+          "sdkId": "chatbot"
+        },
+        "aws.auth#sigv4": {
+          "name": "chatbot"
+        },
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#auth": [
+          "aws.auth#sigv4"
+        ],
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "AWS Chatbot",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://wheatley.amazonaws.com/orchestration/2017-10-11/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://chatbot-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://chatbot-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://chatbot.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://chatbot.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-10-11"
+    }
+  },
+  "smithy": "2.0"
+}

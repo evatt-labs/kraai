@@ -1,0 +1,1076 @@
+{
+  "shapes": {
+    "com.amazonaws.databrew#AWSGlueDataBrew": {
+      "operations": [
+        {
+          "target": "com.amazonaws.databrew#DescribeProject"
+        },
+        {
+          "target": "com.amazonaws.databrew#DescribeRecipe"
+        },
+        {
+          "target": "com.amazonaws.databrew#DescribeSchedule"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "databrew",
+          "cloudFormationName": "DataBrew",
+          "cloudTrailEventSource": "databrew.amazonaws.com",
+          "endpointPrefix": "databrew",
+          "sdkId": "DataBrew"
+        },
+        "aws.auth#sigv4": {
+          "name": "databrew"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS Glue DataBrew",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://databrew-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-west-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://databrew.us-gov-west-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://databrew-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://databrew.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://databrew.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-07-25"
+    },
+    "com.amazonaws.databrew#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#Condition": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Z\\_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#ConditionExpression": {
+      "members": {
+        "Condition": {
+          "target": "com.amazonaws.databrew#Condition",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TargetColumn": {
+          "target": "com.amazonaws.databrew#TargetColumn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.databrew#ConditionValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#ConditionExpressionList": {
+      "member": {
+        "target": "com.amazonaws.databrew#ConditionExpression"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.databrew#ConditionValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#CreatedBy": {
+      "type": "string"
+    },
+    "com.amazonaws.databrew#CronExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#DatasetName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#Date": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.databrew#DescribeProject": {
+      "errors": [
+        {
+          "target": "com.amazonaws.databrew#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.databrew#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.databrew#DescribeProjectRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.databrew#DescribeProjectResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/projects/{Name}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.databrew#DescribeProjectRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.databrew#ProjectName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#DescribeProjectResponse": {
+      "members": {
+        "CreateDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "CreatedBy": {
+          "target": "com.amazonaws.databrew#CreatedBy",
+          "traits": {}
+        },
+        "DatasetName": {
+          "target": "com.amazonaws.databrew#DatasetName",
+          "traits": {}
+        },
+        "LastModifiedBy": {
+          "target": "com.amazonaws.databrew#LastModifiedBy",
+          "traits": {}
+        },
+        "LastModifiedDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.databrew#ProjectName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OpenDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "OpenedBy": {
+          "target": "com.amazonaws.databrew#OpenedBy",
+          "traits": {}
+        },
+        "RecipeName": {
+          "target": "com.amazonaws.databrew#RecipeName",
+          "traits": {}
+        },
+        "ResourceArn": {
+          "target": "com.amazonaws.databrew#Arn",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.databrew#Arn",
+          "traits": {}
+        },
+        "Sample": {
+          "target": "com.amazonaws.databrew#Sample"
+        },
+        "SessionStatus": {
+          "target": "com.amazonaws.databrew#SessionStatus",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.databrew#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#DescribeRecipe": {
+      "errors": [
+        {
+          "target": "com.amazonaws.databrew#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.databrew#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.databrew#DescribeRecipeRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.databrew#DescribeRecipeResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/recipes/{Name}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.databrew#DescribeRecipeRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.databrew#RecipeName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "RecipeVersion": {
+          "target": "com.amazonaws.databrew#RecipeVersion",
+          "traits": {
+            "smithy.api#httpQuery": "recipeVersion"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#DescribeRecipeResponse": {
+      "members": {
+        "CreateDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "CreatedBy": {
+          "target": "com.amazonaws.databrew#CreatedBy",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.databrew#RecipeDescription",
+          "traits": {}
+        },
+        "LastModifiedBy": {
+          "target": "com.amazonaws.databrew#LastModifiedBy",
+          "traits": {}
+        },
+        "LastModifiedDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.databrew#RecipeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProjectName": {
+          "target": "com.amazonaws.databrew#ProjectName",
+          "traits": {}
+        },
+        "PublishedBy": {
+          "target": "com.amazonaws.databrew#PublishedBy",
+          "traits": {}
+        },
+        "PublishedDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "RecipeVersion": {
+          "target": "com.amazonaws.databrew#RecipeVersion",
+          "traits": {}
+        },
+        "ResourceArn": {
+          "target": "com.amazonaws.databrew#Arn",
+          "traits": {}
+        },
+        "Steps": {
+          "target": "com.amazonaws.databrew#RecipeStepList",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.databrew#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#DescribeSchedule": {
+      "errors": [
+        {
+          "target": "com.amazonaws.databrew#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.databrew#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.databrew#DescribeScheduleRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.databrew#DescribeScheduleResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/schedules/{Name}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.databrew#DescribeScheduleRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.databrew#ScheduleName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#DescribeScheduleResponse": {
+      "members": {
+        "CreateDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "CreatedBy": {
+          "target": "com.amazonaws.databrew#CreatedBy",
+          "traits": {}
+        },
+        "CronExpression": {
+          "target": "com.amazonaws.databrew#CronExpression",
+          "traits": {}
+        },
+        "JobNames": {
+          "target": "com.amazonaws.databrew#JobNameList",
+          "traits": {}
+        },
+        "LastModifiedBy": {
+          "target": "com.amazonaws.databrew#LastModifiedBy",
+          "traits": {}
+        },
+        "LastModifiedDate": {
+          "target": "com.amazonaws.databrew#Date",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.databrew#ScheduleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceArn": {
+          "target": "com.amazonaws.databrew#Arn",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.databrew#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#JobName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 240,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#JobNameList": {
+      "member": {
+        "target": "com.amazonaws.databrew#JobName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.databrew#LastModifiedBy": {
+      "type": "string"
+    },
+    "com.amazonaws.databrew#Message": {
+      "type": "string"
+    },
+    "com.amazonaws.databrew#OpenedBy": {
+      "type": "string"
+    },
+    "com.amazonaws.databrew#Operation": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Z\\_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#ParameterMap": {
+      "key": {
+        "target": "com.amazonaws.databrew#ParameterName"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.databrew#ParameterValue"
+      }
+    },
+    "com.amazonaws.databrew#ParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#ParameterValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32768,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#ProjectName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#PublishedBy": {
+      "type": "string"
+    },
+    "com.amazonaws.databrew#RecipeAction": {
+      "members": {
+        "Operation": {
+          "target": "com.amazonaws.databrew#Operation",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.databrew#ParameterMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#RecipeDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#RecipeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#RecipeStep": {
+      "members": {
+        "Action": {
+          "target": "com.amazonaws.databrew#RecipeAction",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ConditionExpressions": {
+          "target": "com.amazonaws.databrew#ConditionExpressionList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#RecipeStepList": {
+      "member": {
+        "target": "com.amazonaws.databrew#RecipeStep"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.databrew#RecipeVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 16,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.databrew#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#Sample": {
+      "members": {
+        "Size": {
+          "target": "com.amazonaws.databrew#SampleSize",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.databrew#SampleType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.databrew#SampleSize": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 5000,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.databrew#SampleType": {
+      "members": {
+        "FIRST_N": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FIRST_N"
+          }
+        },
+        "LAST_N": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LAST_N"
+          }
+        },
+        "RANDOM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RANDOM"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.databrew#ScheduleName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#SessionStatus": {
+      "members": {
+        "ASSIGNED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ASSIGNED"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "INITIALIZING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INITIALIZING"
+          }
+        },
+        "PROVISIONING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVISIONING"
+          }
+        },
+        "READY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "READY"
+          }
+        },
+        "RECYCLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RECYCLING"
+          }
+        },
+        "ROTATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ROTATING"
+          }
+        },
+        "TERMINATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TERMINATED"
+          }
+        },
+        "TERMINATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TERMINATING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.databrew#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#TagMap": {
+      "key": {
+        "target": "com.amazonaws.databrew#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.databrew#TagValue"
+      }
+    },
+    "com.amazonaws.databrew#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#TargetColumn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.databrew#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.databrew#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

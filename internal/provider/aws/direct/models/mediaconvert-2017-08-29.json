@@ -1,0 +1,853 @@
+{
+  "shapes": {
+    "com.amazonaws.mediaconvert#BadRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#Commitment": {
+      "members": {
+        "ONE_YEAR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONE_YEAR"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconvert#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#ForbiddenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#GetQueue": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mediaconvert#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.mediaconvert#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.mediaconvert#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.mediaconvert#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.mediaconvert#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mediaconvert#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.mediaconvert#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mediaconvert#GetQueueRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediaconvert#GetQueueResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/2017-08-29/queues/{Name}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediaconvert#GetQueueRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#GetQueueResponse": {
+      "members": {
+        "Queue": {
+          "target": "com.amazonaws.mediaconvert#Queue",
+          "traits": {
+            "smithy.api#jsonName": "queue"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#InternalServerErrorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#MediaConvert": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mediaconvert#GetQueue"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "mediaconvert",
+          "cloudFormationName": "MediaConvert",
+          "cloudTrailEventSource": "mediaconvert.amazonaws.com",
+          "endpointPrefix": "mediaconvert",
+          "sdkId": "MediaConvert"
+        },
+        "aws.auth#sigv4": {
+          "name": "mediaconvert"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#auth": [
+          "aws.auth#sigv4"
+        ],
+        "smithy.api#title": "AWS Elemental MediaConvert",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediaconvert-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediaconvert.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediaconvert-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediaconvert.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "cn-northwest-1"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://subscribe.mediaconvert.cn-northwest-1.amazonaws.com.cn"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://mediaconvert.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-08-29"
+    },
+    "com.amazonaws.mediaconvert#NotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#PricingPlan": {
+      "members": {
+        "ON_DEMAND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ON_DEMAND"
+          }
+        },
+        "RESERVED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESERVED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconvert#Queue": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "ConcurrentJobs": {
+          "target": "com.amazonaws.mediaconvert#__integer",
+          "traits": {
+            "smithy.api#jsonName": "concurrentJobs"
+          }
+        },
+        "CreatedAt": {
+          "target": "com.amazonaws.mediaconvert#__timestampUnix",
+          "traits": {
+            "smithy.api#jsonName": "createdAt"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "LastUpdated": {
+          "target": "com.amazonaws.mediaconvert#__timestampUnix",
+          "traits": {
+            "smithy.api#jsonName": "lastUpdated"
+          }
+        },
+        "MaximumConcurrentFeeds": {
+          "target": "com.amazonaws.mediaconvert#__integerMin0",
+          "traits": {
+            "smithy.api#jsonName": "maximumConcurrentFeeds"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        },
+        "PricingPlan": {
+          "target": "com.amazonaws.mediaconvert#PricingPlan",
+          "traits": {
+            "smithy.api#jsonName": "pricingPlan"
+          }
+        },
+        "ProgressingJobsCount": {
+          "target": "com.amazonaws.mediaconvert#__integer",
+          "traits": {
+            "smithy.api#jsonName": "progressingJobsCount"
+          }
+        },
+        "ReservationPlan": {
+          "target": "com.amazonaws.mediaconvert#ReservationPlan",
+          "traits": {
+            "smithy.api#jsonName": "reservationPlan"
+          }
+        },
+        "ServiceOverrides": {
+          "target": "com.amazonaws.mediaconvert#__listOfServiceOverride",
+          "traits": {
+            "smithy.api#jsonName": "serviceOverrides"
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.mediaconvert#QueueStatus",
+          "traits": {
+            "smithy.api#jsonName": "status"
+          }
+        },
+        "SubmittedJobsCount": {
+          "target": "com.amazonaws.mediaconvert#__integer",
+          "traits": {
+            "smithy.api#jsonName": "submittedJobsCount"
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.mediaconvert#Type",
+          "traits": {
+            "smithy.api#jsonName": "type"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#QueueStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "PAUSED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PAUSED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconvert#RenewalType": {
+      "members": {
+        "AUTO_RENEW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTO_RENEW"
+          }
+        },
+        "EXPIRE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXPIRE"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconvert#ReservationPlan": {
+      "members": {
+        "Commitment": {
+          "target": "com.amazonaws.mediaconvert#Commitment",
+          "traits": {
+            "smithy.api#jsonName": "commitment"
+          }
+        },
+        "ExpiresAt": {
+          "target": "com.amazonaws.mediaconvert#__timestampUnix",
+          "traits": {
+            "smithy.api#jsonName": "expiresAt"
+          }
+        },
+        "PurchasedAt": {
+          "target": "com.amazonaws.mediaconvert#__timestampUnix",
+          "traits": {
+            "smithy.api#jsonName": "purchasedAt"
+          }
+        },
+        "RenewalType": {
+          "target": "com.amazonaws.mediaconvert#RenewalType",
+          "traits": {
+            "smithy.api#jsonName": "renewalType"
+          }
+        },
+        "ReservedSlots": {
+          "target": "com.amazonaws.mediaconvert#__integer",
+          "traits": {
+            "smithy.api#jsonName": "reservedSlots"
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.mediaconvert#ReservationPlanStatus",
+          "traits": {
+            "smithy.api#jsonName": "status"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#ReservationPlanStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "EXPIRED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXPIRED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconvert#ServiceOverride": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "OverrideValue": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "overrideValue"
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "value"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#TooManyRequestsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconvert#Type": {
+      "members": {
+        "CUSTOM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CUSTOM"
+          }
+        },
+        "SYSTEM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYSTEM"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconvert#__integer": {
+      "type": "integer"
+    },
+    "com.amazonaws.mediaconvert#__integerMin0": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mediaconvert#__listOfServiceOverride": {
+      "member": {
+        "target": "com.amazonaws.mediaconvert#ServiceOverride"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediaconvert#__string": {
+      "type": "string"
+    },
+    "com.amazonaws.mediaconvert#__timestampUnix": {
+      "traits": {
+        "smithy.api#timestampFormat": "epoch-seconds"
+      },
+      "type": "timestamp"
+    }
+  },
+  "smithy": "2.0"
+}

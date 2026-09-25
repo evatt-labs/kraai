@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Wickr::Network
+read:
+  model: wickr/service/2024-02-01/wickr-2024-02-01.json
+  operation: GetNetwork
+  identifier:
+    NetworkArn: networkId
+properties:
+  AccessLevel: accessLevel
+  AwsAccountId: awsAccountId
+  MigrationState: migrationState
+  NetworkArn: networkArn
+  NetworkId: networkId
+  NetworkName: networkName
+  Standing: standing

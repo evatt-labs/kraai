@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ServiceCatalog::TagOption
+read:
+  model: service-catalog/service/2015-12-10/service-catalog-2015-12-10.json
+  operation: DescribeTagOption
+  identifier:
+    Id: Id
+  response: TagOptionDetail
+properties:
+  Active: Active
+  Id: Id
+  Key: Key
+  Value: Value

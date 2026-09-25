@@ -1,0 +1,1214 @@
+{
+  "shapes": {
+    "com.amazonaws.pcs#AWSParallelComputingService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.pcs#GetCluster"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "pcs",
+          "sdkId": "PCS"
+        },
+        "aws.auth#sigv4": {
+          "name": "pcs"
+        },
+        "aws.iam#disableConditionKeyInference": {},
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*,authorization,date,x-amz-date,x-amz-security-token,x-amz-target,content-type,x-amz-content-sha256,x-amz-user-agent,x-amzn-platform-id,x-amzn-trace-id,amz-sdk-invocation-id,amz-sdk-request"
+          ]
+        },
+        "smithy.api#title": "AWS Parallel Computing Service",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://pcs-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://pcs-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://pcs.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://pcs.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2023-02-10"
+    },
+    "com.amazonaws.pcs#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#Accounting": {
+      "members": {
+        "defaultPurgeTimeInDays": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 10000,
+              "min": -1
+            }
+          }
+        },
+        "mode": {
+          "target": "com.amazonaws.pcs#AccountingMode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#AccountingMode": {
+      "members": {
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pcs#CgroupCustomSetting": {
+      "members": {
+        "parameterName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "parameterValue": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#CgroupCustomSettings": {
+      "member": {
+        "target": "com.amazonaws.pcs#CgroupCustomSetting"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#Cluster": {
+      "members": {
+        "arn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#timestampFormat": "date-time"
+          }
+        },
+        "endpoints": {
+          "target": "com.amazonaws.pcs#Endpoints",
+          "traits": {}
+        },
+        "errorInfo": {
+          "target": "com.amazonaws.pcs#ErrorInfoList",
+          "traits": {}
+        },
+        "id": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "modifiedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#timestampFormat": "date-time"
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "networking": {
+          "target": "com.amazonaws.pcs#Networking",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "scheduler": {
+          "target": "com.amazonaws.pcs#Scheduler",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "size": {
+          "target": "com.amazonaws.pcs#Size",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "slurmConfiguration": {
+          "target": "com.amazonaws.pcs#ClusterSlurmConfiguration",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.pcs#ClusterStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#ClusterIdentifier": {
+      "traits": {
+        "smithy.api#pattern": "^(pcs_[a-zA-Z0-9]+|[A-Za-z][A-Za-z0-9-]{2,40})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pcs#ClusterSlurmConfiguration": {
+      "members": {
+        "accounting": {
+          "target": "com.amazonaws.pcs#Accounting",
+          "traits": {}
+        },
+        "authKey": {
+          "target": "com.amazonaws.pcs#SlurmAuthKey",
+          "traits": {}
+        },
+        "cgroupCustomSettings": {
+          "target": "com.amazonaws.pcs#CgroupCustomSettings",
+          "traits": {}
+        },
+        "jwtAuth": {
+          "target": "com.amazonaws.pcs#JwtAuth",
+          "traits": {}
+        },
+        "scaleDownIdleTimeInSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 10000000,
+              "min": 1
+            }
+          }
+        },
+        "slurmCustomSettings": {
+          "target": "com.amazonaws.pcs#SlurmCustomSettings",
+          "traits": {}
+        },
+        "slurmRest": {
+          "target": "com.amazonaws.pcs#SlurmRest",
+          "traits": {}
+        },
+        "slurmdbdCustomSettings": {
+          "target": "com.amazonaws.pcs#SlurmdbdCustomSettings",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#ClusterStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "RESUMING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESUMING"
+          }
+        },
+        "SUSPENDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUSPENDED"
+          }
+        },
+        "SUSPENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUSPENDING"
+          }
+        },
+        "UPDATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pcs#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#Endpoint": {
+      "members": {
+        "ipv6Address": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "port": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "privateIpAddress": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "publicIpAddress": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.pcs#EndpointType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#EndpointType": {
+      "members": {
+        "SLURMCTLD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SLURMCTLD"
+          }
+        },
+        "SLURMDBD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SLURMDBD"
+          }
+        },
+        "SLURMRESTD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SLURMRESTD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pcs#Endpoints": {
+      "member": {
+        "target": "com.amazonaws.pcs#Endpoint"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#ErrorInfo": {
+      "members": {
+        "code": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#ErrorInfoList": {
+      "member": {
+        "target": "com.amazonaws.pcs#ErrorInfo"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#GetCluster": {
+      "errors": [
+        {
+          "target": "com.amazonaws.pcs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.pcs#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.pcs#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.pcs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.pcs#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.pcs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.pcs#GetClusterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.pcs#GetClusterResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {},
+        "smithy.api#tags": [
+          "Cluster"
+        ],
+        "smithy.test#smokeTests": [
+          {
+            "expect": {
+              "failure": {
+                "errorId": "com.amazonaws.pcs#AccessDeniedException"
+              }
+            },
+            "id": "GetCluster_AccessDeniedException",
+            "params": {
+              "clusterIdentifier": "pcs_donotexist"
+            },
+            "vendorParams": {
+              "region": "us-west-2"
+            },
+            "vendorParamsShape": "aws.test#AwsVendorParams"
+          }
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.pcs#GetClusterRequest": {
+      "members": {
+        "clusterIdentifier": {
+          "target": "com.amazonaws.pcs#ClusterIdentifier",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#GetClusterResponse": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.pcs#Cluster",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#JwtAuth": {
+      "members": {
+        "jwtKey": {
+          "target": "com.amazonaws.pcs#JwtKey",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#JwtKey": {
+      "members": {
+        "secretArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "secretVersion": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#NetworkType": {
+      "members": {
+        "IPV4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IPV4"
+          }
+        },
+        "IPV6": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IPV6"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pcs#Networking": {
+      "members": {
+        "networkType": {
+          "target": "com.amazonaws.pcs#NetworkType",
+          "traits": {}
+        },
+        "securityGroupIds": {
+          "target": "com.amazonaws.pcs#SecurityGroupIdList",
+          "traits": {}
+        },
+        "subnetIds": {
+          "target": "com.amazonaws.pcs#SubnetIdList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#Scheduler": {
+      "members": {
+        "type": {
+          "target": "com.amazonaws.pcs#SchedulerType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "version": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#SchedulerType": {
+      "members": {
+        "SLURM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SLURM"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pcs#SecurityGroupId": {
+      "traits": {
+        "smithy.api#pattern": "^sg-\\w{8,17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pcs#SecurityGroupIdList": {
+      "member": {
+        "target": "com.amazonaws.pcs#SecurityGroupId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#Size": {
+      "members": {
+        "LARGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LARGE"
+          }
+        },
+        "MEDIUM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEDIUM"
+          }
+        },
+        "SMALL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SMALL"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pcs#SlurmAuthKey": {
+      "members": {
+        "secretArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "secretVersion": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#SlurmCustomSetting": {
+      "members": {
+        "parameterName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "parameterValue": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#SlurmCustomSettings": {
+      "member": {
+        "target": "com.amazonaws.pcs#SlurmCustomSetting"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#SlurmRest": {
+      "members": {
+        "mode": {
+          "target": "com.amazonaws.pcs#SlurmRestMode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#SlurmRestMode": {
+      "members": {
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pcs#SlurmdbdCustomSetting": {
+      "members": {
+        "parameterName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "parameterValue": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#SlurmdbdCustomSettings": {
+      "member": {
+        "target": "com.amazonaws.pcs#SlurmdbdCustomSetting"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#SubnetId": {
+      "traits": {
+        "smithy.api#pattern": "^subnet-\\w{8,17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pcs#SubnetIdList": {
+      "member": {
+        "target": "com.amazonaws.pcs#SubnetId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.pcs#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.pcs#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pcs#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.pcs#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pcs#ValidationExceptionReason": {
+      "members": {
+        "CANNOT_PARSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "cannotParse"
+          }
+        },
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fieldValidationFailed"
+          }
+        },
+        "OTHER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "other"
+          }
+        },
+        "UNKNOWN_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unknownOperation"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

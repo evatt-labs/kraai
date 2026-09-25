@@ -1,0 +1,14 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IVS::StreamKey
+read:
+  model: ivs/service/2020-07-14/ivs-2020-07-14.json
+  operation: GetStreamKey
+  identifier:
+    Arn: arn
+  response: streamKey
+properties:
+  Arn: arn
+  ChannelArn: channelArn
+  Value: value
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

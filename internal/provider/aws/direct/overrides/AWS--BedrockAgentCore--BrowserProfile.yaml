@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::BedrockAgentCore::BrowserProfile
+read:
+  model: bedrock-agentcore-control/service/2023-06-05/bedrock-agentcore-control-2023-06-05.json
+  operation: GetBrowserProfile
+  identifier:
+    ProfileId: profileId
+properties:
+  CreatedAt: createdAt
+  Description: description
+  LastSavedAt: lastSavedAt
+  LastSavedBrowserId: lastSavedBrowserId
+  LastSavedBrowserSessionId: lastSavedBrowserSessionId
+  LastUpdatedAt: lastUpdatedAt
+  Name: name
+  ProfileArn: profileArn
+  ProfileId: profileId
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

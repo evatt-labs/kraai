@@ -1,0 +1,123 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::ProcessingJob
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeProcessingJob
+  identifier:
+    ProcessingJobArn: ProcessingJobName
+properties:
+  AppSpecification:
+    member: AppSpecification
+    properties:
+      ContainerArguments: ContainerArguments
+      ContainerEntrypoint: ContainerEntrypoint
+      ImageUri: ImageUri
+  AutoMLJobArn: AutoMLJobArn
+  CreationTime: CreationTime
+  Environment: Environment
+  ExitMessage: ExitMessage
+  ExperimentConfig:
+    member: ExperimentConfig
+    properties:
+      ExperimentName: ExperimentName
+      RunName: RunName
+      TrialComponentDisplayName: TrialComponentDisplayName
+      TrialName: TrialName
+  FailureReason: FailureReason
+  LastModifiedTime: LastModifiedTime
+  MonitoringScheduleArn: MonitoringScheduleArn
+  NetworkConfig:
+    member: NetworkConfig
+    properties:
+      EnableInterContainerTrafficEncryption: EnableInterContainerTrafficEncryption
+      EnableNetworkIsolation: EnableNetworkIsolation
+      VpcConfig:
+        member: VpcConfig
+        properties:
+          SecurityGroupIds: SecurityGroupIds
+          Subnets: Subnets
+  ProcessingEndTime: ProcessingEndTime
+  ProcessingInputs:
+    member: ProcessingInputs
+    properties:
+      AppManaged: AppManaged
+      DatasetDefinition:
+        member: DatasetDefinition
+        properties:
+          AthenaDatasetDefinition:
+            member: AthenaDatasetDefinition
+            properties:
+              Catalog: Catalog
+              Database: Database
+              KmsKeyId: KmsKeyId
+              OutputCompression: OutputCompression
+              OutputFormat: OutputFormat
+              OutputS3Uri: OutputS3Uri
+              QueryString: QueryString
+              WorkGroup: WorkGroup
+          DataDistributionType: DataDistributionType
+          InputMode: InputMode
+          LocalPath: LocalPath
+          RedshiftDatasetDefinition:
+            member: RedshiftDatasetDefinition
+            properties:
+              ClusterId: ClusterId
+              ClusterRoleArn: ClusterRoleArn
+              Database: Database
+              DbUser: DbUser
+              KmsKeyId: KmsKeyId
+              OutputCompression: OutputCompression
+              OutputFormat: OutputFormat
+              OutputS3Uri: OutputS3Uri
+              QueryString: QueryString
+      InputName: InputName
+      S3Input:
+        member: S3Input
+        properties:
+          LocalPath: LocalPath
+          S3CompressionType: S3CompressionType
+          S3DataDistributionType: S3DataDistributionType
+          S3DataType: S3DataType
+          S3InputMode: S3InputMode
+          S3Uri: S3Uri
+  ProcessingJobArn: ProcessingJobArn
+  ProcessingJobName: ProcessingJobName
+  ProcessingJobStatus: ProcessingJobStatus
+  ProcessingOutputConfig:
+    member: ProcessingOutputConfig
+    properties:
+      KmsKeyId: KmsKeyId
+      Outputs:
+        member: Outputs
+        properties:
+          AppManaged: AppManaged
+          FeatureStoreOutput:
+            member: FeatureStoreOutput
+            properties:
+              FeatureGroupName: FeatureGroupName
+          OutputName: OutputName
+          S3Output:
+            member: S3Output
+            properties:
+              LocalPath: LocalPath
+              S3UploadMode: S3UploadMode
+              S3Uri: S3Uri
+  ProcessingResources:
+    member: ProcessingResources
+    properties:
+      ClusterConfig:
+        member: ClusterConfig
+        properties:
+          InstanceCount: InstanceCount
+          InstanceType: InstanceType
+          VolumeKmsKeyId: VolumeKmsKeyId
+          VolumeSizeInGB: VolumeSizeInGB
+  ProcessingStartTime: ProcessingStartTime
+  RoleArn: RoleArn
+  StoppingCondition:
+    member: StoppingCondition
+    properties:
+      MaxRuntimeInSeconds: MaxRuntimeInSeconds
+  TrainingJobArn: TrainingJobArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

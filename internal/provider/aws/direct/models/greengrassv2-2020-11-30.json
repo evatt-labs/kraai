@@ -1,0 +1,901 @@
+{
+  "shapes": {
+    "com.amazonaws.greengrassv2#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#CloudComponentState": {
+      "members": {
+        "DEPLOYABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEPLOYABLE"
+          }
+        },
+        "DEPRECATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEPRECATED"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "INITIATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INITIATED"
+          }
+        },
+        "REQUESTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REQUESTED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.greengrassv2#CloudComponentStatus": {
+      "members": {
+        "componentState": {
+          "target": "com.amazonaws.greengrassv2#CloudComponentState",
+          "traits": {}
+        },
+        "errors": {
+          "target": "com.amazonaws.greengrassv2#StringMap",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.greengrassv2#NonEmptyString",
+          "traits": {}
+        },
+        "vendorGuidance": {
+          "target": "com.amazonaws.greengrassv2#VendorGuidance",
+          "traits": {}
+        },
+        "vendorGuidanceMessage": {
+          "target": "com.amazonaws.greengrassv2#NonEmptyString",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#ComponentNameString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#ComponentPlatform": {
+      "members": {
+        "attributes": {
+          "target": "com.amazonaws.greengrassv2#PlatformAttributesMap",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.greengrassv2#NonEmptyString",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#ComponentPlatformList": {
+      "member": {
+        "target": "com.amazonaws.greengrassv2#ComponentPlatform"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.greengrassv2#ComponentVersionARN": {
+      "traits": {
+        "smithy.api#pattern": "^arn:[^:]*:greengrass:[^:]*:(aws|[0-9]+):components:[^:]+:versions:[^:]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#ComponentVersionString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#DescribeComponent": {
+      "errors": [
+        {
+          "target": "com.amazonaws.greengrassv2#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.greengrassv2#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.greengrassv2#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.greengrassv2#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.greengrassv2#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.greengrassv2#DescribeComponentRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.greengrassv2#DescribeComponentResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/greengrass/v2/components/{arn}/metadata"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.greengrassv2#DescribeComponentRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.greengrassv2#ComponentVersionARN",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#DescribeComponentResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.greengrassv2#ComponentVersionARN",
+          "traits": {}
+        },
+        "componentName": {
+          "target": "com.amazonaws.greengrassv2#ComponentNameString",
+          "traits": {}
+        },
+        "componentVersion": {
+          "target": "com.amazonaws.greengrassv2#ComponentVersionString",
+          "traits": {}
+        },
+        "creationTimestamp": {
+          "target": "com.amazonaws.greengrassv2#Timestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.greengrassv2#DescriptionString",
+          "traits": {}
+        },
+        "platforms": {
+          "target": "com.amazonaws.greengrassv2#ComponentPlatformList",
+          "traits": {}
+        },
+        "publisher": {
+          "target": "com.amazonaws.greengrassv2#PublisherString",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.greengrassv2#CloudComponentStatus",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.greengrassv2#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#DescriptionString": {
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#GreengrassV2": {
+      "operations": [
+        {
+          "target": "com.amazonaws.greengrassv2#DescribeComponent"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "greengrass",
+          "cloudFormationName": "GreengrassV2",
+          "cloudTrailEventSource": "greengrass.amazonaws.com",
+          "endpointPrefix": "greengrass",
+          "sdkId": "GreengrassV2"
+        },
+        "aws.auth#sigv4": {
+          "name": "greengrass"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS IoT Greengrass V2",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://greengrass-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-east-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://greengrass.us-gov-east-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-west-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://greengrass.us-gov-west-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://greengrass-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://greengrass.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "dataplane-us-gov-east-1"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {
+                          "authSchemes": [
+                            {
+                              "name": "sigv4",
+                              "signingName": "greengrass",
+                              "signingRegion": "us-gov-east-1"
+                            }
+                          ]
+                        },
+                        "url": "https://greengrass-ats.iot.us-gov-east-1.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "dataplane-us-gov-west-1"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {
+                          "authSchemes": [
+                            {
+                              "name": "sigv4",
+                              "signingName": "greengrass",
+                              "signingRegion": "us-gov-west-1"
+                            }
+                          ]
+                        },
+                        "url": "https://greengrass-ats.iot.us-gov-west-1.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://greengrass.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-11-30"
+    },
+    "com.amazonaws.greengrassv2#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "com.amazonaws.greengrassv2#RetryAfterSeconds",
+          "traits": {
+            "smithy.api#default": 0,
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#NonEmptyString": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#PlatformAttributesMap": {
+      "key": {
+        "target": "com.amazonaws.greengrassv2#NonEmptyString"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.greengrassv2#NonEmptyString"
+      }
+    },
+    "com.amazonaws.greengrassv2#PublisherString": {
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#RetryAfterSeconds": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.greengrassv2#String": {
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#StringMap": {
+      "key": {
+        "target": "com.amazonaws.greengrassv2#NonEmptyString"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.greengrassv2#NonEmptyString"
+      }
+    },
+    "com.amazonaws.greengrassv2#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#TagMap": {
+      "key": {
+        "target": "com.amazonaws.greengrassv2#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.greengrassv2#TagValue"
+      }
+    },
+    "com.amazonaws.greengrassv2#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.greengrassv2#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "com.amazonaws.greengrassv2#RetryAfterSeconds",
+          "traits": {
+            "smithy.api#default": 0,
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.greengrassv2#ValidationException": {
+      "members": {
+        "fields": {
+          "target": "com.amazonaws.greengrassv2#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.greengrassv2#ValidationExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.greengrassv2#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.greengrassv2#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.greengrassv2#ValidationExceptionReason": {
+      "members": {
+        "CANNOT_PARSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CANNOT_PARSE"
+          }
+        },
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FIELD_VALIDATION_FAILED"
+          }
+        },
+        "OTHER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OTHER"
+          }
+        },
+        "UNKNOWN_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNKNOWN_OPERATION"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.greengrassv2#VendorGuidance": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DISCONTINUED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISCONTINUED"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,1505 @@
+{
+  "shapes": {
+    "com.amazonaws.scheduler#AWSChronosService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.scheduler#GetSchedule"
+        },
+        {
+          "target": "com.amazonaws.scheduler#GetScheduleGroup"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "scheduler",
+          "cloudFormationName": "Scheduler",
+          "sdkId": "Scheduler"
+        },
+        "aws.auth#sigv4": {
+          "name": "scheduler"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon EventBridge Scheduler",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://scheduler-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://scheduler-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://scheduler.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://scheduler.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2021-06-30"
+    },
+    "com.amazonaws.scheduler#ActionAfterCompletion": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "NONE",
+            "value": "NONE"
+          },
+          {
+            "name": "DELETE",
+            "value": "DELETE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#AssignPublicIp": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ENABLED",
+            "value": "ENABLED"
+          },
+          {
+            "name": "DISABLED",
+            "value": "DISABLED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#AwsVpcConfiguration": {
+      "members": {
+        "AssignPublicIp": {
+          "target": "com.amazonaws.scheduler#AssignPublicIp",
+          "traits": {}
+        },
+        "SecurityGroups": {
+          "target": "com.amazonaws.scheduler#SecurityGroups",
+          "traits": {}
+        },
+        "Subnets": {
+          "target": "com.amazonaws.scheduler#Subnets",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#CapacityProvider": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#CapacityProviderStrategy": {
+      "member": {
+        "target": "com.amazonaws.scheduler#CapacityProviderStrategyItem"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 6
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.scheduler#CapacityProviderStrategyItem": {
+      "members": {
+        "base": {
+          "target": "com.amazonaws.scheduler#CapacityProviderStrategyItemBase",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "capacityProvider": {
+          "target": "com.amazonaws.scheduler#CapacityProvider",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "weight": {
+          "target": "com.amazonaws.scheduler#CapacityProviderStrategyItemWeight",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#CapacityProviderStrategyItemBase": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 100000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.scheduler#CapacityProviderStrategyItemWeight": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.scheduler#CreationDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.scheduler#DeadLetterConfig": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.scheduler#ResourceArn",
+          "traits": {
+            "smithy.api#pattern": "^arn:aws(-[a-z]+)?:sqs:[a-z0-9\\-]+:\\d{12}:[a-zA-Z0-9\\-_]+$"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#DetailType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#EcsParameters": {
+      "members": {
+        "CapacityProviderStrategy": {
+          "target": "com.amazonaws.scheduler#CapacityProviderStrategy",
+          "traits": {}
+        },
+        "EnableECSManagedTags": {
+          "target": "com.amazonaws.scheduler#EnableECSManagedTags",
+          "traits": {}
+        },
+        "EnableExecuteCommand": {
+          "target": "com.amazonaws.scheduler#EnableExecuteCommand",
+          "traits": {}
+        },
+        "Group": {
+          "target": "com.amazonaws.scheduler#Group",
+          "traits": {}
+        },
+        "LaunchType": {
+          "target": "com.amazonaws.scheduler#LaunchType",
+          "traits": {}
+        },
+        "NetworkConfiguration": {
+          "target": "com.amazonaws.scheduler#NetworkConfiguration",
+          "traits": {}
+        },
+        "PlacementConstraints": {
+          "target": "com.amazonaws.scheduler#PlacementConstraints",
+          "traits": {}
+        },
+        "PlacementStrategy": {
+          "target": "com.amazonaws.scheduler#PlacementStrategies",
+          "traits": {}
+        },
+        "PlatformVersion": {
+          "target": "com.amazonaws.scheduler#PlatformVersion",
+          "traits": {}
+        },
+        "PropagateTags": {
+          "target": "com.amazonaws.scheduler#PropagateTags",
+          "traits": {}
+        },
+        "ReferenceId": {
+          "target": "com.amazonaws.scheduler#ReferenceId",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.scheduler#Tags",
+          "traits": {}
+        },
+        "TaskCount": {
+          "target": "com.amazonaws.scheduler#TaskCount",
+          "traits": {}
+        },
+        "TaskDefinitionArn": {
+          "target": "com.amazonaws.scheduler#TaskDefinitionArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#EnableECSManagedTags": {
+      "type": "boolean"
+    },
+    "com.amazonaws.scheduler#EnableExecuteCommand": {
+      "type": "boolean"
+    },
+    "com.amazonaws.scheduler#EndDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.scheduler#EventBridgeParameters": {
+      "members": {
+        "DetailType": {
+          "target": "com.amazonaws.scheduler#DetailType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Source": {
+          "target": "com.amazonaws.scheduler#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#FlexibleTimeWindow": {
+      "members": {
+        "MaximumWindowInMinutes": {
+          "target": "com.amazonaws.scheduler#MaximumWindowInMinutes",
+          "traits": {}
+        },
+        "Mode": {
+          "target": "com.amazonaws.scheduler#FlexibleTimeWindowMode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#FlexibleTimeWindowMode": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "OFF",
+            "value": "OFF"
+          },
+          {
+            "name": "FLEXIBLE",
+            "value": "FLEXIBLE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#GetSchedule": {
+      "errors": [
+        {
+          "target": "com.amazonaws.scheduler#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.scheduler#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.scheduler#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.scheduler#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.scheduler#GetScheduleInput"
+      },
+      "output": {
+        "target": "com.amazonaws.scheduler#GetScheduleOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/schedules/{Name}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.scheduler#GetScheduleGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.scheduler#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.scheduler#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.scheduler#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.scheduler#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.scheduler#GetScheduleGroupInput"
+      },
+      "output": {
+        "target": "com.amazonaws.scheduler#GetScheduleGroupOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/schedule-groups/{Name}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.scheduler#GetScheduleGroupInput": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.scheduler#ScheduleGroupName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#GetScheduleGroupOutput": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.scheduler#ScheduleGroupArn",
+          "traits": {}
+        },
+        "CreationDate": {
+          "target": "com.amazonaws.scheduler#CreationDate",
+          "traits": {}
+        },
+        "LastModificationDate": {
+          "target": "com.amazonaws.scheduler#LastModificationDate",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.scheduler#ScheduleGroupName",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.scheduler#ScheduleGroupState",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#GetScheduleInput": {
+      "members": {
+        "GroupName": {
+          "target": "com.amazonaws.scheduler#ScheduleGroupName",
+          "traits": {
+            "smithy.api#httpQuery": "groupName"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.scheduler#Name",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#GetScheduleOutput": {
+      "members": {
+        "ActionAfterCompletion": {
+          "target": "com.amazonaws.scheduler#ActionAfterCompletion",
+          "traits": {}
+        },
+        "Arn": {
+          "target": "com.amazonaws.scheduler#ScheduleArn",
+          "traits": {}
+        },
+        "CreationDate": {
+          "target": "com.amazonaws.scheduler#CreationDate",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#suppress": [
+              "UnstableTrait"
+            ]
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.scheduler#Description",
+          "traits": {}
+        },
+        "EndDate": {
+          "target": "com.amazonaws.scheduler#EndDate",
+          "traits": {}
+        },
+        "FlexibleTimeWindow": {
+          "target": "com.amazonaws.scheduler#FlexibleTimeWindow",
+          "traits": {}
+        },
+        "GroupName": {
+          "target": "com.amazonaws.scheduler#ScheduleGroupName",
+          "traits": {}
+        },
+        "KmsKeyArn": {
+          "target": "com.amazonaws.scheduler#KmsKeyArn",
+          "traits": {}
+        },
+        "LastModificationDate": {
+          "target": "com.amazonaws.scheduler#LastModificationDate",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#suppress": [
+              "UnstableTrait"
+            ]
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.scheduler#Name",
+          "traits": {}
+        },
+        "ScheduleExpression": {
+          "target": "com.amazonaws.scheduler#ScheduleExpression",
+          "traits": {}
+        },
+        "ScheduleExpressionTimezone": {
+          "target": "com.amazonaws.scheduler#ScheduleExpressionTimezone",
+          "traits": {}
+        },
+        "StartDate": {
+          "target": "com.amazonaws.scheduler#StartDate",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.scheduler#ScheduleState",
+          "traits": {}
+        },
+        "Target": {
+          "target": "com.amazonaws.scheduler#Target",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#Group": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#KinesisParameters": {
+      "members": {
+        "PartitionKey": {
+          "target": "com.amazonaws.scheduler#TargetPartitionKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:kms:[a-z0-9\\-]+:\\d{12}:(key|alias)\\/[0-9a-zA-Z-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#LastModificationDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.scheduler#LaunchType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "EC2",
+            "value": "EC2"
+          },
+          {
+            "name": "FARGATE",
+            "value": "FARGATE"
+          },
+          {
+            "name": "EXTERNAL",
+            "value": "EXTERNAL"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#MaximumEventAgeInSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 86400,
+          "min": 60
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.scheduler#MaximumRetryAttempts": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 185,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.scheduler#MaximumWindowInMinutes": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1440,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.scheduler#MessageGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#Name": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z-_.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#NetworkConfiguration": {
+      "members": {
+        "awsvpcConfiguration": {
+          "target": "com.amazonaws.scheduler#AwsVpcConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#PlacementConstraint": {
+      "members": {
+        "expression": {
+          "target": "com.amazonaws.scheduler#PlacementConstraintExpression",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.scheduler#PlacementConstraintType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#PlacementConstraintExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2000
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#PlacementConstraintType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "DISTINCT_INSTANCE",
+            "value": "distinctInstance"
+          },
+          {
+            "name": "MEMBER_OF",
+            "value": "memberOf"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#PlacementConstraints": {
+      "member": {
+        "target": "com.amazonaws.scheduler#PlacementConstraint"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.scheduler#PlacementStrategies": {
+      "member": {
+        "target": "com.amazonaws.scheduler#PlacementStrategy"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.scheduler#PlacementStrategy": {
+      "members": {
+        "field": {
+          "target": "com.amazonaws.scheduler#PlacementStrategyField",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.scheduler#PlacementStrategyType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#PlacementStrategyField": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#PlacementStrategyType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "RANDOM",
+            "value": "random"
+          },
+          {
+            "name": "SPREAD",
+            "value": "spread"
+          },
+          {
+            "name": "BINPACK",
+            "value": "binpack"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#PlatformVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#PropagateTags": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "TASK_DEFINITION",
+            "value": "TASK_DEFINITION"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ReferenceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ResourceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#RetryPolicy": {
+      "members": {
+        "MaximumEventAgeInSeconds": {
+          "target": "com.amazonaws.scheduler#MaximumEventAgeInSeconds",
+          "traits": {}
+        },
+        "MaximumRetryAttempts": {
+          "target": "com.amazonaws.scheduler#MaximumRetryAttempts",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:iam::\\d{12}:role\\/[\\w+=,.@\\/-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#SageMakerPipelineParameter": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.scheduler#SageMakerPipelineParameterName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.scheduler#SageMakerPipelineParameterValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#SageMakerPipelineParameterList": {
+      "member": {
+        "target": "com.amazonaws.scheduler#SageMakerPipelineParameter"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.scheduler#SageMakerPipelineParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9\\-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#SageMakerPipelineParameterValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#SageMakerPipelineParameters": {
+      "members": {
+        "PipelineParameterList": {
+          "target": "com.amazonaws.scheduler#SageMakerPipelineParameterList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#ScheduleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:scheduler:[a-z0-9\\-]+:\\d{12}:schedule\\/[0-9a-zA-Z-_.]+\\/[0-9a-zA-Z-_.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ScheduleExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ScheduleExpressionTimezone": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ScheduleGroupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]+)?:scheduler:[a-z0-9\\-]+:\\d{12}:schedule-group\\/[0-9a-zA-Z-_.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ScheduleGroupName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z-_.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ScheduleGroupState": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "name": "DELETING",
+            "value": "DELETING"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ScheduleState": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ENABLED",
+            "value": "ENABLED"
+          },
+          {
+            "name": "DISABLED",
+            "value": "DISABLED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#SecurityGroup": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#SecurityGroups": {
+      "member": {
+        "target": "com.amazonaws.scheduler#SecurityGroup"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.scheduler#Source": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?=[/\\.\\-_A-Za-z0-9]+)((?!aws\\.).*)|(\\$(\\.[\\w_-]+(\\[(\\d+|\\*)\\])*)*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#SqsParameters": {
+      "members": {
+        "MessageGroupId": {
+          "target": "com.amazonaws.scheduler#MessageGroupId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#StartDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.scheduler#Subnet": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#Subnets": {
+      "member": {
+        "target": "com.amazonaws.scheduler#Subnet"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 16,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.scheduler#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#TagMap": {
+      "key": {
+        "target": "com.amazonaws.scheduler#TagKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.scheduler#TagValue"
+      }
+    },
+    "com.amazonaws.scheduler#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#Tags": {
+      "member": {
+        "target": "com.amazonaws.scheduler#TagMap"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.scheduler#Target": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.scheduler#TargetArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DeadLetterConfig": {
+          "target": "com.amazonaws.scheduler#DeadLetterConfig",
+          "traits": {}
+        },
+        "EcsParameters": {
+          "target": "com.amazonaws.scheduler#EcsParameters",
+          "traits": {}
+        },
+        "EventBridgeParameters": {
+          "target": "com.amazonaws.scheduler#EventBridgeParameters",
+          "traits": {}
+        },
+        "Input": {
+          "target": "com.amazonaws.scheduler#TargetInput",
+          "traits": {}
+        },
+        "KinesisParameters": {
+          "target": "com.amazonaws.scheduler#KinesisParameters",
+          "traits": {}
+        },
+        "RetryPolicy": {
+          "target": "com.amazonaws.scheduler#RetryPolicy",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.scheduler#RoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SageMakerPipelineParameters": {
+          "target": "com.amazonaws.scheduler#SageMakerPipelineParameters",
+          "traits": {}
+        },
+        "SqsParameters": {
+          "target": "com.amazonaws.scheduler#SqsParameters",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#TargetArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#TargetInput": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#TargetPartitionKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#TaskCount": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.scheduler#TaskDefinitionArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.scheduler#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.scheduler#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

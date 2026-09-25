@@ -1,0 +1,827 @@
+{
+  "shapes": {
+    "com.amazonaws.lookoutequipment#AWSLookoutEquipmentFrontendService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.lookoutequipment#DescribeInferenceScheduler"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "lookoutequipment",
+          "cloudFormationName": "LookoutEquipment",
+          "cloudTrailEventSource": "lookoutequipment.amazonaws.com",
+          "endpointPrefix": "lookoutequipment",
+          "sdkId": "LookoutEquipment"
+        },
+        "aws.auth#sigv4": {
+          "name": "lookoutequipment"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#title": "Amazon Lookout for Equipment",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://lookoutequipment-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://lookoutequipment-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://lookoutequipment.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://lookoutequipment.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-12-15"
+    },
+    "com.amazonaws.lookoutequipment#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lookoutequipment#BoundedLengthString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#BoundedLengthString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 5000,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\P{M}\\p{M}]{1,5000}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#ComponentTimestampDelimiter": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(\\-|\\_|\\s)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#DataDelayOffsetInMinutes": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 60,
+          "min": 0
+        }
+      },
+      "type": "long"
+    },
+    "com.amazonaws.lookoutequipment#DataUploadFrequency": {
+      "members": {
+        "PT10M": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PT10M"
+          }
+        },
+        "PT15M": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PT15M"
+          }
+        },
+        "PT1H": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PT1H"
+          }
+        },
+        "PT30M": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PT30M"
+          }
+        },
+        "PT5M": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PT5M"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.lookoutequipment#DescribeInferenceScheduler": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lookoutequipment#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.lookoutequipment#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.lookoutequipment#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lookoutequipment#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.lookoutequipment#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lookoutequipment#DescribeInferenceSchedulerRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.lookoutequipment#DescribeInferenceSchedulerResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.lookoutequipment#DescribeInferenceSchedulerRequest": {
+      "members": {
+        "InferenceSchedulerName": {
+          "target": "com.amazonaws.lookoutequipment#InferenceSchedulerIdentifier",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#DescribeInferenceSchedulerResponse": {
+      "members": {
+        "CreatedAt": {
+          "target": "com.amazonaws.lookoutequipment#Timestamp",
+          "traits": {}
+        },
+        "DataDelayOffsetInMinutes": {
+          "target": "com.amazonaws.lookoutequipment#DataDelayOffsetInMinutes",
+          "traits": {}
+        },
+        "DataInputConfiguration": {
+          "target": "com.amazonaws.lookoutequipment#InferenceInputConfiguration",
+          "traits": {}
+        },
+        "DataOutputConfiguration": {
+          "target": "com.amazonaws.lookoutequipment#InferenceOutputConfiguration",
+          "traits": {}
+        },
+        "DataUploadFrequency": {
+          "target": "com.amazonaws.lookoutequipment#DataUploadFrequency",
+          "traits": {}
+        },
+        "InferenceSchedulerArn": {
+          "target": "com.amazonaws.lookoutequipment#InferenceSchedulerArn",
+          "traits": {}
+        },
+        "InferenceSchedulerName": {
+          "target": "com.amazonaws.lookoutequipment#InferenceSchedulerName",
+          "traits": {}
+        },
+        "LatestInferenceResult": {
+          "target": "com.amazonaws.lookoutequipment#LatestInferenceResult",
+          "traits": {}
+        },
+        "ModelArn": {
+          "target": "com.amazonaws.lookoutequipment#ModelArn",
+          "traits": {}
+        },
+        "ModelName": {
+          "target": "com.amazonaws.lookoutequipment#ModelName",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.lookoutequipment#IamRoleArn",
+          "traits": {}
+        },
+        "ServerSideKmsKeyId": {
+          "target": "com.amazonaws.lookoutequipment#KmsKeyArn",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.lookoutequipment#InferenceSchedulerStatus",
+          "traits": {}
+        },
+        "UpdatedAt": {
+          "target": "com.amazonaws.lookoutequipment#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#FileNameTimestampFormat": {
+      "traits": {
+        "smithy.api#pattern": "^EPOCH|yyyy-MM-dd-HH-mm-ss|yyyyMMddHHmmss$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#IamRoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:iam::[0-9]{12}:role/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#InferenceInputConfiguration": {
+      "members": {
+        "InferenceInputNameConfiguration": {
+          "target": "com.amazonaws.lookoutequipment#InferenceInputNameConfiguration",
+          "traits": {}
+        },
+        "InputTimeZoneOffset": {
+          "target": "com.amazonaws.lookoutequipment#TimeZoneOffset",
+          "traits": {}
+        },
+        "S3InputConfiguration": {
+          "target": "com.amazonaws.lookoutequipment#InferenceS3InputConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#InferenceInputNameConfiguration": {
+      "members": {
+        "ComponentTimestampDelimiter": {
+          "target": "com.amazonaws.lookoutequipment#ComponentTimestampDelimiter",
+          "traits": {}
+        },
+        "TimestampFormat": {
+          "target": "com.amazonaws.lookoutequipment#FileNameTimestampFormat",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#InferenceOutputConfiguration": {
+      "members": {
+        "KmsKeyId": {
+          "target": "com.amazonaws.lookoutequipment#NameOrArn",
+          "traits": {}
+        },
+        "S3OutputConfiguration": {
+          "target": "com.amazonaws.lookoutequipment#InferenceS3OutputConfiguration",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#InferenceS3InputConfiguration": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.lookoutequipment#S3Bucket",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Prefix": {
+          "target": "com.amazonaws.lookoutequipment#S3Prefix",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#InferenceS3OutputConfiguration": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.lookoutequipment#S3Bucket",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Prefix": {
+          "target": "com.amazonaws.lookoutequipment#S3Prefix",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#InferenceSchedulerArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:lookoutequipment:[a-zA-Z0-9\\-]*:[0-9]{12}:inference-scheduler\\/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#InferenceSchedulerIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z_-]{1,200}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#InferenceSchedulerName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z_-]{1,200}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#InferenceSchedulerStatus": {
+      "members": {
+        "PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING"
+          }
+        },
+        "RUNNING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RUNNING"
+          }
+        },
+        "STOPPED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STOPPED"
+          }
+        },
+        "STOPPING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STOPPING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.lookoutequipment#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lookoutequipment#BoundedLengthString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[a-z\\-]*:kms:[a-z0-9\\-]*:\\d{12}:[\\w\\-\\/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#LatestInferenceResult": {
+      "members": {
+        "ANOMALOUS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ANOMALOUS"
+          }
+        },
+        "NORMAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NORMAL"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.lookoutequipment#ModelArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:lookoutequipment:[a-zA-Z0-9\\-]*:[0-9]{12}:model\\/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#ModelName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z_-]{1,200}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#NameOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,2048}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lookoutequipment#BoundedLengthString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#S3Bucket": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#S3Prefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(^$)|([\\u0009\\u000A\\u000D\\u0020-\\u00FF]{1,1023}/$)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lookoutequipment#BoundedLengthString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lookoutequipment#TimeZoneOffset": {
+      "traits": {
+        "smithy.api#pattern": "^(\\+|\\-)[0-9]{2}\\:[0-9]{2}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.lookoutequipment#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lookoutequipment#BoundedLengthString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,2719 @@
+{
+  "shapes": {
+    "com.amazonaws.mailmanager#AcceptAction": {
+      "members": {
+        "ALLOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALLOW"
+          }
+        },
+        "DENY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DENY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mailmanager#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#ActionFailurePolicy": {
+      "members": {
+        "CONTINUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTINUE"
+          }
+        },
+        "DROP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DROP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#AddHeaderAction": {
+      "members": {
+        "HeaderName": {
+          "target": "com.amazonaws.mailmanager#HeaderName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "HeaderValue": {
+          "target": "com.amazonaws.mailmanager#HeaderValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#AddressListArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazon.pancetta.addresslist.management#AddressListResource",
+          "service": "ses"
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#AddressListId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#AddressListName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#Analysis": {
+      "members": {
+        "Analyzer": {
+          "target": "com.amazonaws.mailmanager#AnalyzerArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResultField": {
+          "target": "com.amazonaws.mailmanager#ResultField",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#AnalyzerArn": {
+      "traits": {
+        "aws.api#arnReference": {},
+        "smithy.api#pattern": "^[a-zA-Z0-9:_/+=,@.#-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#ArchiveAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "TargetArchive": {
+          "target": "com.amazonaws.mailmanager#NameOrArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#BounceAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "DiagnosticMessage": {
+          "target": "com.amazonaws.mailmanager#DiagnosticMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.mailmanager#BounceMessage",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mailmanager#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Sender": {
+          "target": "com.amazonaws.mailmanager#EmailAddress",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SmtpReplyCode": {
+          "target": "com.amazonaws.mailmanager#SmtpReplyCode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StatusCode": {
+          "target": "com.amazonaws.mailmanager#StatusCode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#BounceMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\r\\n\\x20-\\x7e]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#DeliverToMailboxAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "MailboxArn": {
+          "target": "com.amazonaws.mailmanager#NameOrArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mailmanager#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#DeliverToQBusinessAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "ApplicationId": {
+          "target": "com.amazonaws.mailmanager#QBusinessApplicationId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "IndexId": {
+          "target": "com.amazonaws.mailmanager#QBusinessIndexId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mailmanager#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#DiagnosticMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\x20-\\x7e]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#DropAction": {
+      "members": {},
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#EmailAddress": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 254,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#GetAddressList": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mailmanager#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.mailmanager#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mailmanager#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.mailmanager#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mailmanager#GetAddressListRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mailmanager#GetAddressListResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mailmanager#GetAddressListRequest": {
+      "members": {
+        "AddressListId": {
+          "target": "com.amazonaws.mailmanager#AddressListId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#GetAddressListResponse": {
+      "members": {
+        "AddressListArn": {
+          "target": "com.amazonaws.mailmanager#AddressListArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "AddressListId": {
+          "target": "com.amazonaws.mailmanager#AddressListId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "AddressListName": {
+          "target": "com.amazonaws.mailmanager#AddressListName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "CreatedTimestamp": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "LastUpdatedTimestamp": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#GetRuleSet": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mailmanager#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mailmanager#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mailmanager#GetRuleSetRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mailmanager#GetRuleSetResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mailmanager#GetRuleSetRequest": {
+      "members": {
+        "RuleSetId": {
+          "target": "com.amazonaws.mailmanager#RuleSetId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#GetRuleSetResponse": {
+      "members": {
+        "CreatedDate": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "LastModificationDate": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RuleSetArn": {
+          "target": "com.amazonaws.mailmanager#RuleSetArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RuleSetId": {
+          "target": "com.amazonaws.mailmanager#RuleSetId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RuleSetName": {
+          "target": "com.amazonaws.mailmanager#RuleSetName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Rules": {
+          "target": "com.amazonaws.mailmanager#Rules",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#GetTrafficPolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mailmanager#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mailmanager#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mailmanager#GetTrafficPolicyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mailmanager#GetTrafficPolicyResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mailmanager#GetTrafficPolicyRequest": {
+      "members": {
+        "TrafficPolicyId": {
+          "target": "com.amazonaws.mailmanager#TrafficPolicyId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#GetTrafficPolicyResponse": {
+      "members": {
+        "CreatedTimestamp": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "DefaultAction": {
+          "target": "com.amazonaws.mailmanager#AcceptAction",
+          "traits": {}
+        },
+        "LastUpdatedTimestamp": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "MaxMessageSizeBytes": {
+          "target": "com.amazonaws.mailmanager#MaxMessageSizeBytes",
+          "traits": {}
+        },
+        "PolicyStatements": {
+          "target": "com.amazonaws.mailmanager#PolicyStatementList",
+          "traits": {}
+        },
+        "TrafficPolicyArn": {
+          "target": "com.amazonaws.mailmanager#TrafficPolicyArn",
+          "traits": {}
+        },
+        "TrafficPolicyId": {
+          "target": "com.amazonaws.mailmanager#TrafficPolicyId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TrafficPolicyName": {
+          "target": "com.amazonaws.mailmanager#TrafficPolicyName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#HeaderName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[xX]\\-[a-zA-Z0-9\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#HeaderValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#IamRoleArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::IAM::Role"
+        },
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9:_/+=,@.#-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#IdOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9:_/+=,@.#-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#IngressAddressListArnList": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#AddressListArn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        },
+        "smithy.api#uniqueItems": {}
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#IngressAddressListEmailAttribute": {
+      "members": {
+        "RECIPIENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RECIPIENT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressAnalysis": {
+      "members": {
+        "Analyzer": {
+          "target": "com.amazonaws.mailmanager#AnalyzerArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResultField": {
+          "target": "com.amazonaws.mailmanager#ResultField",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#IngressBooleanExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#IngressBooleanToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#IngressBooleanOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#IngressBooleanOperator": {
+      "members": {
+        "IS_FALSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IS_FALSE"
+          }
+        },
+        "IS_TRUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IS_TRUE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressBooleanToEvaluate": {
+      "members": {
+        "Analysis": {
+          "target": "com.amazonaws.mailmanager#IngressAnalysis",
+          "traits": {}
+        },
+        "IsInAddressList": {
+          "target": "com.amazonaws.mailmanager#IngressIsInAddressList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#IngressIpOperator": {
+      "members": {
+        "CIDR_MATCHES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CIDR_MATCHES"
+          }
+        },
+        "NOT_CIDR_MATCHES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_CIDR_MATCHES"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressIpToEvaluate": {
+      "members": {
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#IngressIpv4Attribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#IngressIpv4Attribute": {
+      "members": {
+        "SENDER_IP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SENDER_IP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressIpv4Expression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#IngressIpToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#IngressIpOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.mailmanager#Ipv4Cidrs",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#IngressIpv6Attribute": {
+      "members": {
+        "SENDER_IPV6": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SENDER_IPV6"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressIpv6Expression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#IngressIpv6ToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#IngressIpOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.mailmanager#Ipv6Cidrs",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#IngressIpv6ToEvaluate": {
+      "members": {
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#IngressIpv6Attribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#IngressIsInAddressList": {
+      "members": {
+        "AddressLists": {
+          "target": "com.amazonaws.mailmanager#IngressAddressListArnList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#IngressAddressListEmailAttribute",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#IngressStringEmailAttribute": {
+      "members": {
+        "RECIPIENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RECIPIENT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressStringExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#IngressStringToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#IngressStringOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.mailmanager#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#IngressStringOperator": {
+      "members": {
+        "CONTAINS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTAINS"
+          }
+        },
+        "ENDS_WITH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENDS_WITH"
+          }
+        },
+        "EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EQUALS"
+          }
+        },
+        "NOT_EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_EQUALS"
+          }
+        },
+        "STARTS_WITH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STARTS_WITH"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressStringToEvaluate": {
+      "members": {
+        "Analysis": {
+          "target": "com.amazonaws.mailmanager#IngressAnalysis",
+          "traits": {}
+        },
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#IngressStringEmailAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#IngressTlsAttribute": {
+      "members": {
+        "TLS_PROTOCOL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS_PROTOCOL"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressTlsProtocolAttribute": {
+      "members": {
+        "TLS1_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS1_2"
+          }
+        },
+        "TLS1_3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS1_3"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressTlsProtocolExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#IngressTlsProtocolToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#IngressTlsProtocolOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.mailmanager#IngressTlsProtocolAttribute",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#IngressTlsProtocolOperator": {
+      "members": {
+        "IS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IS"
+          }
+        },
+        "MINIMUM_TLS_VERSION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MINIMUM_TLS_VERSION"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#IngressTlsProtocolToEvaluate": {
+      "members": {
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#IngressTlsAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#InvokeLambdaAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "FunctionArn": {
+          "target": "com.amazonaws.mailmanager#LambdaFunctionArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "InvocationType": {
+          "target": "com.amazonaws.mailmanager#LambdaInvocationType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RetryTimeMinutes": {
+          "target": "com.amazonaws.mailmanager#LambdaRetryTimeMinutes",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mailmanager#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#Ipv4Cidr": {
+      "traits": {
+        "smithy.api#pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/([0-9]|[12][0-9]|3[0-2])$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#Ipv4Cidrs": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#Ipv4Cidr"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#Ipv6Cidr": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 49
+        },
+        "smithy.api#pattern": "^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))\\/(12[0-8]|1[0-1][0-9]|[1-9][0-9]|[0-9])$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#Ipv6Cidrs": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#Ipv6Cidr"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#KmsKeyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-:/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#LambdaFunctionArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::Lambda::Function"
+        },
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9:_/+=,@.#-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#LambdaInvocationType": {
+      "members": {
+        "EVENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EVENT"
+          }
+        },
+        "REQUEST_RESPONSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REQUEST_RESPONSE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#LambdaRetryTimeMinutes": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2160,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mailmanager#MailFrom": {
+      "members": {
+        "PRESERVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESERVE"
+          }
+        },
+        "REPLACE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REPLACE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#MailManagerSvc": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mailmanager#GetAddressList"
+        },
+        {
+          "target": "com.amazonaws.mailmanager#GetRuleSet"
+        },
+        {
+          "target": "com.amazonaws.mailmanager#GetTrafficPolicy"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "ses",
+          "cloudFormationName": "SES",
+          "endpointPrefix": "mail-manager",
+          "sdkId": "MailManager"
+        },
+        "aws.auth#sigv4": {
+          "name": "ses"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#cors": {},
+        "smithy.api#externalDocumentation": {
+          "API Reference": "https://w.amazon.com/bin/view/AWS/Border"
+        },
+        "smithy.api#title": "MailManager",
+        "smithy.protocols#rpcv2Cbor": {},
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://mail-manager-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://mail-manager-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://mail-manager.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mail-manager.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2023-10-17"
+    },
+    "com.amazonaws.mailmanager#MaxMessageSizeBytes": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.mailmanager#MimeHeaderAttribute": {
+      "traits": {
+        "smithy.api#pattern": "^X-[a-zA-Z0-9-]{1,256}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#NameOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9:_/+=,@.#-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#PolicyCondition": {
+      "members": {
+        "BooleanExpression": {
+          "target": "com.amazonaws.mailmanager#IngressBooleanExpression",
+          "traits": {}
+        },
+        "IpExpression": {
+          "target": "com.amazonaws.mailmanager#IngressIpv4Expression",
+          "traits": {}
+        },
+        "Ipv6Expression": {
+          "target": "com.amazonaws.mailmanager#IngressIpv6Expression",
+          "traits": {}
+        },
+        "StringExpression": {
+          "target": "com.amazonaws.mailmanager#IngressStringExpression",
+          "traits": {}
+        },
+        "TlsExpression": {
+          "target": "com.amazonaws.mailmanager#IngressTlsProtocolExpression",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#PolicyConditions": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#PolicyCondition"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#PolicyStatement": {
+      "members": {
+        "Action": {
+          "target": "com.amazonaws.mailmanager#AcceptAction",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Conditions": {
+          "target": "com.amazonaws.mailmanager#PolicyConditions",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#PolicyStatementList": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#PolicyStatement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#QBusinessApplicationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 36
+        },
+        "smithy.api#pattern": "^[a-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#QBusinessIndexId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 36
+        },
+        "smithy.api#pattern": "^[a-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#Recipients": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#EmailAddress"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#uniqueItems": {}
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#RelayAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "MailFrom": {
+          "target": "com.amazonaws.mailmanager#MailFrom",
+          "traits": {}
+        },
+        "Relay": {
+          "target": "com.amazonaws.mailmanager#IdOrArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#ReplaceRecipientAction": {
+      "members": {
+        "ReplaceWith": {
+          "target": "com.amazonaws.mailmanager#Recipients",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mailmanager#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#ResultField": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(addon\\.)?[\\sa-zA-Z0-9_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#Rule": {
+      "members": {
+        "Actions": {
+          "target": "com.amazonaws.mailmanager#RuleActions",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Conditions": {
+          "target": "com.amazonaws.mailmanager#RuleConditions",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.mailmanager#RuleName",
+          "traits": {}
+        },
+        "Unless": {
+          "target": "com.amazonaws.mailmanager#RuleConditions",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleAction": {
+      "members": {
+        "AddHeader": {
+          "target": "com.amazonaws.mailmanager#AddHeaderAction",
+          "traits": {}
+        },
+        "Archive": {
+          "target": "com.amazonaws.mailmanager#ArchiveAction",
+          "traits": {}
+        },
+        "Bounce": {
+          "target": "com.amazonaws.mailmanager#BounceAction",
+          "traits": {}
+        },
+        "DeliverToMailbox": {
+          "target": "com.amazonaws.mailmanager#DeliverToMailboxAction",
+          "traits": {}
+        },
+        "DeliverToQBusiness": {
+          "target": "com.amazonaws.mailmanager#DeliverToQBusinessAction",
+          "traits": {}
+        },
+        "Drop": {
+          "target": "com.amazonaws.mailmanager#DropAction",
+          "traits": {}
+        },
+        "InvokeLambda": {
+          "target": "com.amazonaws.mailmanager#InvokeLambdaAction",
+          "traits": {}
+        },
+        "PublishToSns": {
+          "target": "com.amazonaws.mailmanager#SnsAction",
+          "traits": {}
+        },
+        "Relay": {
+          "target": "com.amazonaws.mailmanager#RelayAction",
+          "traits": {}
+        },
+        "ReplaceRecipient": {
+          "target": "com.amazonaws.mailmanager#ReplaceRecipientAction",
+          "traits": {}
+        },
+        "Send": {
+          "target": "com.amazonaws.mailmanager#SendAction",
+          "traits": {}
+        },
+        "WriteToS3": {
+          "target": "com.amazonaws.mailmanager#S3Action",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#RuleActions": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#RuleAction"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#RuleAddressListArnList": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#AddressListArn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        },
+        "smithy.api#uniqueItems": {}
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#RuleAddressListEmailAttribute": {
+      "members": {
+        "CC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CC"
+          }
+        },
+        "FROM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FROM"
+          }
+        },
+        "MAIL_FROM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MAIL_FROM"
+          }
+        },
+        "RECIPIENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RECIPIENT"
+          }
+        },
+        "SENDER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SENDER"
+          }
+        },
+        "TO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TO"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleBooleanEmailAttribute": {
+      "members": {
+        "READ_RECEIPT_REQUESTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "READ_RECEIPT_REQUESTED"
+          }
+        },
+        "TLS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS"
+          }
+        },
+        "TLS_WRAPPED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS_WRAPPED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleBooleanExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#RuleBooleanToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#RuleBooleanOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleBooleanOperator": {
+      "members": {
+        "IS_FALSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IS_FALSE"
+          }
+        },
+        "IS_TRUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IS_TRUE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleBooleanToEvaluate": {
+      "members": {
+        "Analysis": {
+          "target": "com.amazonaws.mailmanager#Analysis",
+          "traits": {}
+        },
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#RuleBooleanEmailAttribute",
+          "traits": {}
+        },
+        "IsInAddressList": {
+          "target": "com.amazonaws.mailmanager#RuleIsInAddressList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#RuleClientCertificateAttribute": {
+      "members": {
+        "CN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CN"
+          }
+        },
+        "SAN_DIRECTORY_NAME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAN_DIRECTORY_NAME"
+          }
+        },
+        "SAN_DNS_NAME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAN_DNS_NAME"
+          }
+        },
+        "SAN_IP_ADDRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAN_IP_ADDRESS"
+          }
+        },
+        "SAN_REGISTERED_ID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAN_REGISTERED_ID"
+          }
+        },
+        "SAN_RFC822_NAME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAN_RFC822_NAME"
+          }
+        },
+        "SAN_UNIFORM_RESOURCE_IDENTIFIER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAN_UNIFORM_RESOURCE_IDENTIFIER"
+          }
+        },
+        "SERIAL_NUMBER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SERIAL_NUMBER"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleCondition": {
+      "members": {
+        "BooleanExpression": {
+          "target": "com.amazonaws.mailmanager#RuleBooleanExpression",
+          "traits": {}
+        },
+        "DmarcExpression": {
+          "target": "com.amazonaws.mailmanager#RuleDmarcExpression",
+          "traits": {}
+        },
+        "IpExpression": {
+          "target": "com.amazonaws.mailmanager#RuleIpExpression",
+          "traits": {}
+        },
+        "NumberExpression": {
+          "target": "com.amazonaws.mailmanager#RuleNumberExpression",
+          "traits": {}
+        },
+        "StringExpression": {
+          "target": "com.amazonaws.mailmanager#RuleStringExpression",
+          "traits": {}
+        },
+        "VerdictExpression": {
+          "target": "com.amazonaws.mailmanager#RuleVerdictExpression",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#RuleConditions": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#RuleCondition"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#RuleDmarcExpression": {
+      "members": {
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#RuleDmarcOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.mailmanager#RuleDmarcValueList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleDmarcOperator": {
+      "members": {
+        "EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EQUALS"
+          }
+        },
+        "NOT_EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_EQUALS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleDmarcPolicy": {
+      "members": {
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "QUARANTINE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "QUARANTINE"
+          }
+        },
+        "REJECT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REJECT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleDmarcValueList": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#RuleDmarcPolicy"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#RuleIpEmailAttribute": {
+      "members": {
+        "SOURCE_IP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SOURCE_IP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleIpExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#RuleIpToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#RuleIpOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.mailmanager#RuleIpValueList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleIpOperator": {
+      "members": {
+        "CIDR_MATCHES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CIDR_MATCHES"
+          }
+        },
+        "NOT_CIDR_MATCHES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_CIDR_MATCHES"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleIpStringValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 43,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(([0-9]|.|:|/)*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#RuleIpToEvaluate": {
+      "members": {
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#RuleIpEmailAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#RuleIpValueList": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#RuleIpStringValue"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#RuleIsInAddressList": {
+      "members": {
+        "AddressLists": {
+          "target": "com.amazonaws.mailmanager#RuleAddressListArnList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#RuleAddressListEmailAttribute",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#RuleNumberEmailAttribute": {
+      "members": {
+        "MESSAGE_SIZE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MESSAGE_SIZE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleNumberExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#RuleNumberToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#RuleNumberOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "smithy.api#Double",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleNumberOperator": {
+      "members": {
+        "EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EQUALS"
+          }
+        },
+        "GREATER_THAN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GREATER_THAN"
+          }
+        },
+        "GREATER_THAN_OR_EQUAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GREATER_THAN_OR_EQUAL"
+          }
+        },
+        "LESS_THAN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LESS_THAN"
+          }
+        },
+        "LESS_THAN_OR_EQUAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LESS_THAN_OR_EQUAL"
+          }
+        },
+        "NOT_EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_EQUALS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleNumberToEvaluate": {
+      "members": {
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#RuleNumberEmailAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#RuleSetArn": {
+      "traits": {
+        "aws.api#arnReference": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#RuleSetId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#RuleSetName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#RuleStringEmailAttribute": {
+      "members": {
+        "CC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CC"
+          }
+        },
+        "FROM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FROM"
+          }
+        },
+        "HELO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HELO"
+          }
+        },
+        "MAIL_FROM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MAIL_FROM"
+          }
+        },
+        "RECIPIENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RECIPIENT"
+          }
+        },
+        "SENDER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SENDER"
+          }
+        },
+        "SUBJECT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUBJECT"
+          }
+        },
+        "TO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TO"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleStringExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#RuleStringToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#RuleStringOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.mailmanager#RuleStringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleStringList": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#RuleStringValue"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#RuleStringOperator": {
+      "members": {
+        "CONTAINS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTAINS"
+          }
+        },
+        "ENDS_WITH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENDS_WITH"
+          }
+        },
+        "EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EQUALS"
+          }
+        },
+        "NOT_EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_EQUALS"
+          }
+        },
+        "STARTS_WITH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STARTS_WITH"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleStringToEvaluate": {
+      "members": {
+        "Analysis": {
+          "target": "com.amazonaws.mailmanager#Analysis",
+          "traits": {}
+        },
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#RuleStringEmailAttribute",
+          "traits": {}
+        },
+        "ClientCertificateAttribute": {
+          "target": "com.amazonaws.mailmanager#RuleClientCertificateAttribute",
+          "traits": {}
+        },
+        "MimeHeaderAttribute": {
+          "target": "com.amazonaws.mailmanager#MimeHeaderAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#RuleStringValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#RuleVerdict": {
+      "members": {
+        "FAIL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAIL"
+          }
+        },
+        "GRAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GRAY"
+          }
+        },
+        "PASS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PASS"
+          }
+        },
+        "PROCESSING_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROCESSING_FAILED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleVerdictAttribute": {
+      "members": {
+        "DKIM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DKIM"
+          }
+        },
+        "SPF": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SPF"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleVerdictExpression": {
+      "members": {
+        "Evaluate": {
+          "target": "com.amazonaws.mailmanager#RuleVerdictToEvaluate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Operator": {
+          "target": "com.amazonaws.mailmanager#RuleVerdictOperator",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.mailmanager#RuleVerdictValueList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#RuleVerdictOperator": {
+      "members": {
+        "EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EQUALS"
+          }
+        },
+        "NOT_EQUALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_EQUALS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#RuleVerdictToEvaluate": {
+      "members": {
+        "Analysis": {
+          "target": "com.amazonaws.mailmanager#Analysis",
+          "traits": {}
+        },
+        "Attribute": {
+          "target": "com.amazonaws.mailmanager#RuleVerdictAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.mailmanager#RuleVerdictValueList": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#RuleVerdict"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#Rules": {
+      "member": {
+        "target": "com.amazonaws.mailmanager#Rule"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#S3Action": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mailmanager#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "S3Bucket": {
+          "target": "com.amazonaws.mailmanager#S3Bucket",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "S3Prefix": {
+          "target": "com.amazonaws.mailmanager#S3Prefix",
+          "traits": {}
+        },
+        "S3SseKmsKeyId": {
+          "target": "com.amazonaws.mailmanager#KmsKeyId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#S3Bucket": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 62,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#S3Prefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 62,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9!_.*'()/-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#SendAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mailmanager#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#SmtpReplyCode": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 3,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[45][0-9][0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#SnsAction": {
+      "members": {
+        "ActionFailurePolicy": {
+          "target": "com.amazonaws.mailmanager#ActionFailurePolicy",
+          "traits": {}
+        },
+        "Encoding": {
+          "target": "com.amazonaws.mailmanager#SnsNotificationEncoding",
+          "traits": {
+            "smithy.api#default": "UTF-8"
+          }
+        },
+        "PayloadType": {
+          "target": "com.amazonaws.mailmanager#SnsNotificationPayloadType",
+          "traits": {
+            "smithy.api#default": "CONTENT"
+          }
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mailmanager#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TopicArn": {
+          "target": "com.amazonaws.mailmanager#SnsTopicArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#SnsNotificationEncoding": {
+      "members": {
+        "BASE64": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BASE64"
+          }
+        },
+        "UTF_8": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UTF-8"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#SnsNotificationPayloadType": {
+      "members": {
+        "CONTENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTENT"
+          }
+        },
+        "HEADERS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HEADERS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mailmanager#SnsTopicArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::SNS::Topic"
+        },
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc):sns:[a-z0-9-]+:\\d{12}:[\\w\\-]{1,256}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#StatusCode": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 9,
+          "min": 5
+        },
+        "smithy.api#pattern": "^[45]\\.[0-9]{1,3}\\.[0-9]{1,3}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#StringList": {
+      "member": {
+        "target": "smithy.api#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mailmanager#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mailmanager#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#TrafficPolicyArn": {
+      "traits": {
+        "aws.api#arnReference": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#TrafficPolicyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#TrafficPolicyName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9_\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mailmanager#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mailmanager#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

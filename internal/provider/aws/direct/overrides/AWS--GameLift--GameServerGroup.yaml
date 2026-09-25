@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::GameLift::GameServerGroup
+read:
+  model: gamelift/service/2015-10-01/gamelift-2015-10-01.json
+  operation: DescribeGameServerGroup
+  identifier:
+    GameServerGroupArn: GameServerGroupName
+  response: GameServerGroup
+properties:
+  AutoScalingGroupArn: AutoScalingGroupArn
+  BalancingStrategy: BalancingStrategy
+  GameServerGroupArn: GameServerGroupArn
+  GameServerGroupName: GameServerGroupName
+  GameServerProtectionPolicy: GameServerProtectionPolicy
+  InstanceDefinitions:
+    member: InstanceDefinitions
+    properties:
+      InstanceType: InstanceType
+      WeightedCapacity: WeightedCapacity
+  RoleArn: RoleArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

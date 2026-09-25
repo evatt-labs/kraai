@@ -1,0 +1,31 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WellArchitected::AgentProfile
+read:
+  model: wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json
+  operation: GetAgentProfile
+  identifier:
+    Arn: profileArn
+properties:
+  AggregationConfiguration:
+    member: aggregationConfiguration
+    properties:
+      AccessRoleArn: accessRoleArn
+      AccountId: accountId
+      Regions: regions
+  Arn: arn
+  BusinessOverview: businessOverview
+  CreatedAt: createdAt
+  CreatedBy: createdBy
+  DeletionProtection: deletionProtection
+  Description: description
+  DisplayName: displayName
+  ExecutionRoleArn: executionRoleArn
+  LastModifiedAt: lastModifiedAt
+  LastModifiedBy: lastModifiedBy
+  Name: name
+  Pillars: pillars
+  Tags:
+    member: tags
+    properties:
+      Key: key
+      Value: value

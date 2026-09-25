@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Macie::Member
+read:
+  model: macie2/service/2020-01-01/macie2-2020-01-01.json
+  operation: GetMember
+  identifier:
+    Arn: id
+properties:
+  AccountId: accountId
+  AdministratorAccountId: administratorAccountId
+  Arn: arn
+  RelationshipStatus: relationshipStatus
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

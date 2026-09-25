@@ -1,0 +1,2587 @@
+{
+  "shapes": {
+    "com.amazonaws.gamelift#Alias": {
+      "members": {
+        "AliasArn": {
+          "target": "com.amazonaws.gamelift#AliasArn",
+          "traits": {}
+        },
+        "AliasId": {
+          "target": "com.amazonaws.gamelift#AliasId",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.gamelift#Timestamp",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.gamelift#FreeText",
+          "traits": {}
+        },
+        "LastUpdatedTime": {
+          "target": "com.amazonaws.gamelift#Timestamp",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.gamelift#NonBlankAndLengthConstraintString",
+          "traits": {}
+        },
+        "RoutingStrategy": {
+          "target": "com.amazonaws.gamelift#RoutingStrategy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#AliasArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:.*:alias\\/alias-\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#AliasId": {
+      "traits": {
+        "smithy.api#pattern": "^alias-\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#AliasIdOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(alias-\\S+|arn:.*:alias\\/alias-\\S+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#AutoScalingGroupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#BalancingStrategy": {
+      "members": {
+        "ON_DEMAND_ONLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ON_DEMAND_ONLY"
+          }
+        },
+        "SPOT_ONLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SPOT_ONLY"
+          }
+        },
+        "SPOT_PREFERRED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SPOT_PREFERRED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#BooleanModel": {
+      "type": "boolean"
+    },
+    "com.amazonaws.gamelift#Build": {
+      "members": {
+        "BuildArn": {
+          "target": "com.amazonaws.gamelift#BuildArn",
+          "traits": {}
+        },
+        "BuildId": {
+          "target": "com.amazonaws.gamelift#BuildId",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.gamelift#Timestamp",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.gamelift#FreeText",
+          "traits": {}
+        },
+        "OperatingSystem": {
+          "target": "com.amazonaws.gamelift#OperatingSystem",
+          "traits": {}
+        },
+        "ServerSdkVersion": {
+          "target": "com.amazonaws.gamelift#ServerSdkVersion",
+          "traits": {}
+        },
+        "SizeOnDisk": {
+          "target": "com.amazonaws.gamelift#WholeNumberLong",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.gamelift#BuildStatus",
+          "traits": {}
+        },
+        "Version": {
+          "target": "com.amazonaws.gamelift#FreeText",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#BuildArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:.*:build\\/build-\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#BuildId": {
+      "traits": {
+        "smithy.api#pattern": "^build-\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#BuildIdOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(build-\\S+|arn:.*:build\\/build-\\S+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#BuildStatus": {
+      "members": {
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "INITIALIZED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INITIALIZED"
+          }
+        },
+        "READY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "READY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#ContainerCommandStringList": {
+      "member": {
+        "target": "com.amazonaws.gamelift#NonZeroAnd255MaxString"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#ContainerDependency": {
+      "members": {
+        "Condition": {
+          "target": "com.amazonaws.gamelift#ContainerDependencyCondition",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ContainerName": {
+          "target": "com.amazonaws.gamelift#NonZeroAnd128MaxAsciiString",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#ContainerDependencyCondition": {
+      "members": {
+        "COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COMPLETE"
+          }
+        },
+        "HEALTHY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HEALTHY"
+          }
+        },
+        "START": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "START"
+          }
+        },
+        "SUCCESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUCCESS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#ContainerDependencyList": {
+      "member": {
+        "target": "com.amazonaws.gamelift#ContainerDependency"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#ContainerEnvironment": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.gamelift#NonZeroAnd255MaxString",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.gamelift#NonZeroAnd255MaxString",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#ContainerEnvironmentList": {
+      "member": {
+        "target": "com.amazonaws.gamelift#ContainerEnvironment"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#ContainerGroupDefinition": {
+      "members": {
+        "ContainerGroupDefinitionArn": {
+          "target": "com.amazonaws.gamelift#ContainerGroupDefinitionArn",
+          "traits": {}
+        },
+        "ContainerGroupType": {
+          "target": "com.amazonaws.gamelift#ContainerGroupType",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.gamelift#Timestamp",
+          "traits": {}
+        },
+        "GameServerContainerDefinition": {
+          "target": "com.amazonaws.gamelift#GameServerContainerDefinition",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.gamelift#ContainerGroupDefinitionName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "OperatingSystem": {
+          "target": "com.amazonaws.gamelift#ContainerOperatingSystem",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.gamelift#ContainerGroupDefinitionStatus",
+          "traits": {}
+        },
+        "StatusReason": {
+          "target": "com.amazonaws.gamelift#NonZeroAndMaxString",
+          "traits": {}
+        },
+        "SupportContainerDefinitions": {
+          "target": "com.amazonaws.gamelift#SupportContainerDefinitionList",
+          "traits": {}
+        },
+        "TotalMemoryLimitMebibytes": {
+          "target": "com.amazonaws.gamelift#ContainerTotalMemoryLimit",
+          "traits": {}
+        },
+        "TotalVcpuLimit": {
+          "target": "com.amazonaws.gamelift#ContainerTotalVcpuLimit",
+          "traits": {}
+        },
+        "VersionDescription": {
+          "target": "com.amazonaws.gamelift#NonZeroAndMaxString",
+          "traits": {}
+        },
+        "VersionNumber": {
+          "target": "com.amazonaws.gamelift#PositiveInteger",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#ContainerGroupDefinitionArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.*:containergroupdefinition\\/[a-zA-Z0-9\\-]+(:[0-9]+)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#ContainerGroupDefinitionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#ContainerGroupDefinitionNameOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9\\-]+$|^arn:.*:containergroupdefinition\\/[a-zA-Z0-9\\-]+(:[0-9]+)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#ContainerGroupDefinitionStatus": {
+      "members": {
+        "COPYING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COPYING"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "READY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "READY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#ContainerGroupType": {
+      "members": {
+        "GAME_SERVER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GAME_SERVER"
+          }
+        },
+        "PER_INSTANCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PER_INSTANCE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#ContainerHealthCheck": {
+      "members": {
+        "Command": {
+          "target": "com.amazonaws.gamelift#ContainerCommandStringList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Interval": {
+          "target": "com.amazonaws.gamelift#ContainerHealthCheckInterval",
+          "traits": {}
+        },
+        "Retries": {
+          "target": "com.amazonaws.gamelift#ContainerHealthCheckRetries",
+          "traits": {}
+        },
+        "StartPeriod": {
+          "target": "com.amazonaws.gamelift#ContainerHealthCheckStartPeriod",
+          "traits": {}
+        },
+        "Timeout": {
+          "target": "com.amazonaws.gamelift#ContainerHealthCheckTimeout",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#ContainerHealthCheckInterval": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 300,
+          "min": 60
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#ContainerHealthCheckRetries": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#ContainerHealthCheckStartPeriod": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 300,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#ContainerHealthCheckTimeout": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 60,
+          "min": 30
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#ContainerMemoryLimit": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1024000,
+          "min": 4
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#ContainerMountPoint": {
+      "members": {
+        "AccessLevel": {
+          "target": "com.amazonaws.gamelift#ContainerMountPointAccessLevel",
+          "traits": {}
+        },
+        "ContainerPath": {
+          "target": "com.amazonaws.gamelift#ContainerPathString",
+          "traits": {}
+        },
+        "InstancePath": {
+          "target": "com.amazonaws.gamelift#InstancePathString",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#ContainerMountPointAccessLevel": {
+      "members": {
+        "READ_AND_WRITE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "READ_AND_WRITE"
+          }
+        },
+        "READ_ONLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "READ_ONLY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#ContainerMountPointList": {
+      "member": {
+        "target": "com.amazonaws.gamelift#ContainerMountPoint"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#ContainerOperatingSystem": {
+      "members": {
+        "AMAZON_LINUX_2023": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AMAZON_LINUX_2023"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#ContainerPathString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(\\/+[^\\/]+\\/*)+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#ContainerPortConfiguration": {
+      "members": {
+        "ContainerPortRanges": {
+          "target": "com.amazonaws.gamelift#ContainerPortRangeList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#ContainerPortRange": {
+      "members": {
+        "FromPort": {
+          "target": "com.amazonaws.gamelift#PortNumber",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Protocol": {
+          "target": "com.amazonaws.gamelift#IpProtocol",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ToPort": {
+          "target": "com.amazonaws.gamelift#PortNumber",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#ContainerPortRangeList": {
+      "member": {
+        "target": "com.amazonaws.gamelift#ContainerPortRange"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#ContainerTotalMemoryLimit": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1024000,
+          "min": 4
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#ContainerTotalVcpuLimit": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 0.125
+        }
+      },
+      "type": "double"
+    },
+    "com.amazonaws.gamelift#ContainerVcpu": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 0.125
+        }
+      },
+      "type": "double"
+    },
+    "com.amazonaws.gamelift#DescribeAlias": {
+      "errors": [
+        {
+          "target": "com.amazonaws.gamelift#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#UnauthorizedException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.gamelift#DescribeAliasInput"
+      },
+      "output": {
+        "target": "com.amazonaws.gamelift#DescribeAliasOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.gamelift#DescribeAliasInput": {
+      "members": {
+        "AliasId": {
+          "target": "com.amazonaws.gamelift#AliasIdOrArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#DescribeAliasOutput": {
+      "members": {
+        "Alias": {
+          "target": "com.amazonaws.gamelift#Alias",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#DescribeBuild": {
+      "errors": [
+        {
+          "target": "com.amazonaws.gamelift#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#UnauthorizedException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.gamelift#DescribeBuildInput"
+      },
+      "output": {
+        "target": "com.amazonaws.gamelift#DescribeBuildOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.gamelift#DescribeBuildInput": {
+      "members": {
+        "BuildId": {
+          "target": "com.amazonaws.gamelift#BuildIdOrArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#DescribeBuildOutput": {
+      "members": {
+        "Build": {
+          "target": "com.amazonaws.gamelift#Build",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#DescribeContainerGroupDefinition": {
+      "errors": [
+        {
+          "target": "com.amazonaws.gamelift#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#UnauthorizedException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#UnsupportedRegionException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.gamelift#DescribeContainerGroupDefinitionInput"
+      },
+      "output": {
+        "target": "com.amazonaws.gamelift#DescribeContainerGroupDefinitionOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.gamelift#DescribeContainerGroupDefinitionInput": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.gamelift#ContainerGroupDefinitionNameOrArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "VersionNumber": {
+          "target": "com.amazonaws.gamelift#PositiveInteger",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#DescribeContainerGroupDefinitionOutput": {
+      "members": {
+        "ContainerGroupDefinition": {
+          "target": "com.amazonaws.gamelift#ContainerGroupDefinition",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#DescribeGameServerGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.gamelift#InternalServiceException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.gamelift#UnauthorizedException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.gamelift#DescribeGameServerGroupInput"
+      },
+      "output": {
+        "target": "com.amazonaws.gamelift#DescribeGameServerGroupOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.gamelift#DescribeGameServerGroupInput": {
+      "members": {
+        "GameServerGroupName": {
+          "target": "com.amazonaws.gamelift#GameServerGroupNameOrArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#DescribeGameServerGroupOutput": {
+      "members": {
+        "GameServerGroup": {
+          "target": "com.amazonaws.gamelift#GameServerGroup",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#FleetId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-z]*fleet-[a-zA-Z0-9\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#FreeText": {
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#GameLift": {
+      "operations": [
+        {
+          "target": "com.amazonaws.gamelift#DescribeAlias"
+        },
+        {
+          "target": "com.amazonaws.gamelift#DescribeBuild"
+        },
+        {
+          "target": "com.amazonaws.gamelift#DescribeContainerGroupDefinition"
+        },
+        {
+          "target": "com.amazonaws.gamelift#DescribeGameServerGroup"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "gamelift",
+          "cloudFormationName": "GameLift",
+          "cloudTrailEventSource": "gamelift.amazonaws.com",
+          "endpointPrefix": "gamelift",
+          "sdkId": "GameLift"
+        },
+        "aws.auth#sigv4": {
+          "name": "gamelift"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "Amazon GameLift",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://gamelift.amazonaws.com/doc/"
+        },
+        "smithy.protocols#rpcv2Cbor": {},
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://gamelift-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://gamelift-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://gamelift.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://gamelift.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2015-10-01"
+    },
+    "com.amazonaws.gamelift#GameServerContainerDefinition": {
+      "members": {
+        "ContainerName": {
+          "target": "com.amazonaws.gamelift#NonZeroAnd128MaxAsciiString",
+          "traits": {}
+        },
+        "DependsOn": {
+          "target": "com.amazonaws.gamelift#ContainerDependencyList",
+          "traits": {}
+        },
+        "EnvironmentOverride": {
+          "target": "com.amazonaws.gamelift#ContainerEnvironmentList",
+          "traits": {}
+        },
+        "ImageUri": {
+          "target": "com.amazonaws.gamelift#ImageUriString",
+          "traits": {}
+        },
+        "LinuxCapabilities": {
+          "target": "com.amazonaws.gamelift#LinuxCapabilities",
+          "traits": {}
+        },
+        "MountPoints": {
+          "target": "com.amazonaws.gamelift#ContainerMountPointList",
+          "traits": {}
+        },
+        "PortConfiguration": {
+          "target": "com.amazonaws.gamelift#ContainerPortConfiguration",
+          "traits": {}
+        },
+        "ResolvedImageDigest": {
+          "target": "com.amazonaws.gamelift#Sha256",
+          "traits": {}
+        },
+        "ServerSdkVersion": {
+          "target": "com.amazonaws.gamelift#ServerSdkVersion",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#GameServerGroup": {
+      "members": {
+        "AutoScalingGroupArn": {
+          "target": "com.amazonaws.gamelift#AutoScalingGroupArn",
+          "traits": {}
+        },
+        "BalancingStrategy": {
+          "target": "com.amazonaws.gamelift#BalancingStrategy",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.gamelift#Timestamp",
+          "traits": {}
+        },
+        "GameServerGroupArn": {
+          "target": "com.amazonaws.gamelift#GameServerGroupArn",
+          "traits": {}
+        },
+        "GameServerGroupName": {
+          "target": "com.amazonaws.gamelift#GameServerGroupName",
+          "traits": {}
+        },
+        "GameServerProtectionPolicy": {
+          "target": "com.amazonaws.gamelift#GameServerProtectionPolicy",
+          "traits": {}
+        },
+        "InstanceDefinitions": {
+          "target": "com.amazonaws.gamelift#InstanceDefinitions",
+          "traits": {}
+        },
+        "LastUpdatedTime": {
+          "target": "com.amazonaws.gamelift#Timestamp",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.gamelift#IamRoleArn",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.gamelift#GameServerGroupStatus",
+          "traits": {}
+        },
+        "StatusReason": {
+          "target": "com.amazonaws.gamelift#NonZeroAndMaxString",
+          "traits": {}
+        },
+        "SuspendedActions": {
+          "target": "com.amazonaws.gamelift#GameServerGroupActions",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#GameServerGroupAction": {
+      "members": {
+        "REPLACE_INSTANCE_TYPES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REPLACE_INSTANCE_TYPES"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#GameServerGroupActions": {
+      "member": {
+        "target": "com.amazonaws.gamelift#GameServerGroupAction"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#GameServerGroupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.*:gameservergroup\\/[a-zA-Z0-9-\\.]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#GameServerGroupInstanceType": {
+      "members": {
+        "c4_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c4.2xlarge"
+          }
+        },
+        "c4_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c4.4xlarge"
+          }
+        },
+        "c4_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c4.8xlarge"
+          }
+        },
+        "c4_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c4.large"
+          }
+        },
+        "c4_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c4.xlarge"
+          }
+        },
+        "c5_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.12xlarge"
+          }
+        },
+        "c5_18xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.18xlarge"
+          }
+        },
+        "c5_24xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.24xlarge"
+          }
+        },
+        "c5_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.2xlarge"
+          }
+        },
+        "c5_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.4xlarge"
+          }
+        },
+        "c5_9xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.9xlarge"
+          }
+        },
+        "c5_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.large"
+          }
+        },
+        "c5_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5.xlarge"
+          }
+        },
+        "c5a_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.12xlarge"
+          }
+        },
+        "c5a_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.16xlarge"
+          }
+        },
+        "c5a_24xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.24xlarge"
+          }
+        },
+        "c5a_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.2xlarge"
+          }
+        },
+        "c5a_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.4xlarge"
+          }
+        },
+        "c5a_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.8xlarge"
+          }
+        },
+        "c5a_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.large"
+          }
+        },
+        "c5a_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c5a.xlarge"
+          }
+        },
+        "c6g_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.12xlarge"
+          }
+        },
+        "c6g_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.16xlarge"
+          }
+        },
+        "c6g_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.2xlarge"
+          }
+        },
+        "c6g_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.4xlarge"
+          }
+        },
+        "c6g_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.8xlarge"
+          }
+        },
+        "c6g_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.large"
+          }
+        },
+        "c6g_medium": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.medium"
+          }
+        },
+        "c6g_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "c6g.xlarge"
+          }
+        },
+        "m4_10xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m4.10xlarge"
+          }
+        },
+        "m4_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m4.2xlarge"
+          }
+        },
+        "m4_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m4.4xlarge"
+          }
+        },
+        "m4_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m4.large"
+          }
+        },
+        "m4_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m4.xlarge"
+          }
+        },
+        "m5_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.12xlarge"
+          }
+        },
+        "m5_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.16xlarge"
+          }
+        },
+        "m5_24xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.24xlarge"
+          }
+        },
+        "m5_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.2xlarge"
+          }
+        },
+        "m5_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.4xlarge"
+          }
+        },
+        "m5_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.8xlarge"
+          }
+        },
+        "m5_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.large"
+          }
+        },
+        "m5_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5.xlarge"
+          }
+        },
+        "m5a_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.12xlarge"
+          }
+        },
+        "m5a_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.16xlarge"
+          }
+        },
+        "m5a_24xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.24xlarge"
+          }
+        },
+        "m5a_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.2xlarge"
+          }
+        },
+        "m5a_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.4xlarge"
+          }
+        },
+        "m5a_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.8xlarge"
+          }
+        },
+        "m5a_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.large"
+          }
+        },
+        "m5a_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m5a.xlarge"
+          }
+        },
+        "m6g_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.12xlarge"
+          }
+        },
+        "m6g_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.16xlarge"
+          }
+        },
+        "m6g_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.2xlarge"
+          }
+        },
+        "m6g_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.4xlarge"
+          }
+        },
+        "m6g_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.8xlarge"
+          }
+        },
+        "m6g_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.large"
+          }
+        },
+        "m6g_medium": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.medium"
+          }
+        },
+        "m6g_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "m6g.xlarge"
+          }
+        },
+        "r4_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r4.16xlarge"
+          }
+        },
+        "r4_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r4.2xlarge"
+          }
+        },
+        "r4_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r4.4xlarge"
+          }
+        },
+        "r4_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r4.8xlarge"
+          }
+        },
+        "r4_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r4.large"
+          }
+        },
+        "r4_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r4.xlarge"
+          }
+        },
+        "r5_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.12xlarge"
+          }
+        },
+        "r5_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.16xlarge"
+          }
+        },
+        "r5_24xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.24xlarge"
+          }
+        },
+        "r5_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.2xlarge"
+          }
+        },
+        "r5_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.4xlarge"
+          }
+        },
+        "r5_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.8xlarge"
+          }
+        },
+        "r5_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.large"
+          }
+        },
+        "r5_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5.xlarge"
+          }
+        },
+        "r5a_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.12xlarge"
+          }
+        },
+        "r5a_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.16xlarge"
+          }
+        },
+        "r5a_24xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.24xlarge"
+          }
+        },
+        "r5a_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.2xlarge"
+          }
+        },
+        "r5a_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.4xlarge"
+          }
+        },
+        "r5a_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.8xlarge"
+          }
+        },
+        "r5a_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.large"
+          }
+        },
+        "r5a_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r5a.xlarge"
+          }
+        },
+        "r6g_12xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.12xlarge"
+          }
+        },
+        "r6g_16xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.16xlarge"
+          }
+        },
+        "r6g_2xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.2xlarge"
+          }
+        },
+        "r6g_4xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.4xlarge"
+          }
+        },
+        "r6g_8xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.8xlarge"
+          }
+        },
+        "r6g_large": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.large"
+          }
+        },
+        "r6g_medium": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.medium"
+          }
+        },
+        "r6g_xlarge": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "r6g.xlarge"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#GameServerGroupName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-\\.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#GameServerGroupNameOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-zA-Z0-9-\\.]+|arn:.*:gameservergroup\\/[a-zA-Z0-9-\\.]+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#GameServerGroupStatus": {
+      "members": {
+        "ACTIVATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVATING"
+          }
+        },
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETE_SCHEDULED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_SCHEDULED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ERROR"
+          }
+        },
+        "NEW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NEW"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#GameServerProtectionPolicy": {
+      "members": {
+        "FULL_PROTECTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FULL_PROTECTION"
+          }
+        },
+        "NO_PROTECTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NO_PROTECTION"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#IamRoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.*:role\\/[\\w+=,.@-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#ImageUriString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_\\.@\\/:]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#InstanceDefinition": {
+      "members": {
+        "InstanceType": {
+          "target": "com.amazonaws.gamelift#GameServerGroupInstanceType",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "WeightedCapacity": {
+          "target": "com.amazonaws.gamelift#WeightedCapacity",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#InstanceDefinitions": {
+      "member": {
+        "target": "com.amazonaws.gamelift#InstanceDefinition"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 2
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#InstancePathString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^\\/[\\s\\S]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#InternalServiceException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#InvalidRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#IpProtocol": {
+      "members": {
+        "TCP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TCP"
+          }
+        },
+        "UDP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UDP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#LinuxCapabilities": {
+      "members": {
+        "Include": {
+          "target": "com.amazonaws.gamelift#LinuxCapabilityList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#LinuxCapability": {
+      "members": {
+        "AUDIT_CONTROL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUDIT_CONTROL"
+          }
+        },
+        "AUDIT_WRITE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUDIT_WRITE"
+          }
+        },
+        "BLOCK_SUSPEND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BLOCK_SUSPEND"
+          }
+        },
+        "CHOWN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CHOWN"
+          }
+        },
+        "DAC_OVERRIDE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DAC_OVERRIDE"
+          }
+        },
+        "DAC_READ_SEARCH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DAC_READ_SEARCH"
+          }
+        },
+        "FOWNER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FOWNER"
+          }
+        },
+        "FSETID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FSETID"
+          }
+        },
+        "IPC_LOCK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IPC_LOCK"
+          }
+        },
+        "IPC_OWNER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IPC_OWNER"
+          }
+        },
+        "KILL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KILL"
+          }
+        },
+        "LEASE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LEASE"
+          }
+        },
+        "LINUX_IMMUTABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LINUX_IMMUTABLE"
+          }
+        },
+        "MAC_ADMIN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MAC_ADMIN"
+          }
+        },
+        "MAC_OVERRIDE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MAC_OVERRIDE"
+          }
+        },
+        "MKNOD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MKNOD"
+          }
+        },
+        "NET_ADMIN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NET_ADMIN"
+          }
+        },
+        "NET_BIND_SERVICE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NET_BIND_SERVICE"
+          }
+        },
+        "NET_BROADCAST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NET_BROADCAST"
+          }
+        },
+        "NET_RAW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NET_RAW"
+          }
+        },
+        "SETFCAP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SETFCAP"
+          }
+        },
+        "SETGID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SETGID"
+          }
+        },
+        "SETPCAP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SETPCAP"
+          }
+        },
+        "SETUID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SETUID"
+          }
+        },
+        "SYSLOG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYSLOG"
+          }
+        },
+        "SYS_ADMIN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_ADMIN"
+          }
+        },
+        "SYS_BOOT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_BOOT"
+          }
+        },
+        "SYS_CHROOT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_CHROOT"
+          }
+        },
+        "SYS_MODULE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_MODULE"
+          }
+        },
+        "SYS_NICE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_NICE"
+          }
+        },
+        "SYS_PACCT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_PACCT"
+          }
+        },
+        "SYS_PTRACE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_PTRACE"
+          }
+        },
+        "SYS_RAWIO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_RAWIO"
+          }
+        },
+        "SYS_RESOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_RESOURCE"
+          }
+        },
+        "SYS_TIME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_TIME"
+          }
+        },
+        "SYS_TTY_CONFIG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SYS_TTY_CONFIG"
+          }
+        },
+        "WAKE_ALARM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WAKE_ALARM"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#LinuxCapabilityList": {
+      "member": {
+        "target": "com.amazonaws.gamelift#LinuxCapability"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 37,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#NonBlankAndLengthConstraintString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.*\\S.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#NonEmptyString": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#NonZeroAnd128MaxAsciiString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#NonZeroAnd255MaxString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#NonZeroAndMaxString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#NotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#OperatingSystem": {
+      "members": {
+        "AMAZON_LINUX": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AMAZON_LINUX"
+          }
+        },
+        "AMAZON_LINUX_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AMAZON_LINUX_2"
+          }
+        },
+        "AMAZON_LINUX_2023": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AMAZON_LINUX_2023"
+          }
+        },
+        "WINDOWS_2012": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WINDOWS_2012"
+          }
+        },
+        "WINDOWS_2016": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WINDOWS_2016"
+          }
+        },
+        "WINDOWS_2022": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WINDOWS_2022"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#PortNumber": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 60000,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#PositiveInteger": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.gamelift#RoutingStrategy": {
+      "members": {
+        "FleetId": {
+          "target": "com.amazonaws.gamelift#FleetId",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.gamelift#FreeText",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.gamelift#RoutingStrategyType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#RoutingStrategyType": {
+      "members": {
+        "SIMPLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SIMPLE"
+          }
+        },
+        "TERMINAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TERMINAL"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.gamelift#ServerSdkVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^\\d+\\.\\d+\\.\\d+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#Sha256": {
+      "traits": {
+        "smithy.api#pattern": "^sha256:[a-fA-F0-9]{64}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#SupportContainerDefinition": {
+      "members": {
+        "ContainerName": {
+          "target": "com.amazonaws.gamelift#NonZeroAnd128MaxAsciiString",
+          "traits": {}
+        },
+        "DependsOn": {
+          "target": "com.amazonaws.gamelift#ContainerDependencyList",
+          "traits": {}
+        },
+        "EnvironmentOverride": {
+          "target": "com.amazonaws.gamelift#ContainerEnvironmentList",
+          "traits": {}
+        },
+        "Essential": {
+          "target": "com.amazonaws.gamelift#BooleanModel",
+          "traits": {}
+        },
+        "HealthCheck": {
+          "target": "com.amazonaws.gamelift#ContainerHealthCheck",
+          "traits": {}
+        },
+        "ImageUri": {
+          "target": "com.amazonaws.gamelift#ImageUriString",
+          "traits": {}
+        },
+        "LinuxCapabilities": {
+          "target": "com.amazonaws.gamelift#LinuxCapabilities",
+          "traits": {}
+        },
+        "MemoryHardLimitMebibytes": {
+          "target": "com.amazonaws.gamelift#ContainerMemoryLimit",
+          "traits": {}
+        },
+        "MountPoints": {
+          "target": "com.amazonaws.gamelift#ContainerMountPointList",
+          "traits": {}
+        },
+        "PortConfiguration": {
+          "target": "com.amazonaws.gamelift#ContainerPortConfiguration",
+          "traits": {}
+        },
+        "ResolvedImageDigest": {
+          "target": "com.amazonaws.gamelift#Sha256",
+          "traits": {}
+        },
+        "Vcpu": {
+          "target": "com.amazonaws.gamelift#ContainerVcpu",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#SupportContainerDefinitionList": {
+      "member": {
+        "target": "com.amazonaws.gamelift#SupportContainerDefinition"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.gamelift#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.gamelift#UnauthorizedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#UnsupportedRegionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#WeightedCapacity": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 3,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\u0031-\\u0039][\\u0030-\\u0039]{0,2}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.gamelift#WholeNumberLong": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "long"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,48 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::BCM::ScheduledReport
+read:
+  model: bcm-dashboards/service/2025-08-18/bcm-dashboards-2025-08-18.json
+  operation: GetScheduledReport
+  identifier:
+    Arn: arn
+  response: scheduledReport
+properties:
+  Arn: arn
+  CreatedAt: createdAt
+  DashboardArn: dashboardArn
+  Description: description
+  HealthStatus:
+    member: healthStatus
+    properties:
+      LastRefreshedAt: lastRefreshedAt
+      StatusCode: statusCode
+  Name: name
+  ScheduleConfig:
+    member: scheduleConfig
+    properties:
+      ScheduleExpression: scheduleExpression
+      ScheduleExpressionTimeZone: scheduleExpressionTimeZone
+      SchedulePeriod:
+        member: schedulePeriod
+        properties:
+          EndTime: endTime
+          StartTime: startTime
+      State: state
+  ScheduledReportExecutionRoleArn: scheduledReportExecutionRoleArn
+  UpdatedAt: updatedAt
+  WidgetDateRangeOverride:
+    member: widgetDateRangeOverride
+    properties:
+      EndTime:
+        member: endTime
+        properties:
+          Type: type
+          Value: value
+      StartTime:
+        member: startTime
+        properties:
+          Type: type
+          Value: value
+  WidgetIds: widgetIds
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

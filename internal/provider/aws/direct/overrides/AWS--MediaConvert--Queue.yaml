@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaConvert::Queue
+read:
+  model: mediaconvert/service/2017-08-29/mediaconvert-2017-08-29.json
+  operation: GetQueue
+  identifier:
+    Name: Name
+  response: Queue
+properties:
+  Arn: Arn
+  ConcurrentJobs: ConcurrentJobs
+  Description: Description
+  MaximumConcurrentFeeds: MaximumConcurrentFeeds
+  Name: Name
+  PricingPlan: PricingPlan
+  Status: Status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

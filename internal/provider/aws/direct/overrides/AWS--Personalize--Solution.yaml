@@ -1,0 +1,63 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Personalize::Solution
+read:
+  model: personalize/service/2018-05-22/personalize-2018-05-22.json
+  operation: DescribeSolution
+  identifier:
+    SolutionArn: solutionArn
+  response: solution
+properties:
+  DatasetGroupArn: datasetGroupArn
+  EventType: eventType
+  Name: name
+  PerformAutoML: performAutoML
+  PerformHPO: performHPO
+  RecipeArn: recipeArn
+  SolutionArn: solutionArn
+  SolutionConfig:
+    member: solutionConfig
+    properties:
+      AlgorithmHyperParameters: algorithmHyperParameters
+      AutoMLConfig:
+        member: autoMLConfig
+        properties:
+          MetricName: metricName
+          RecipeList: recipeList
+      EventValueThreshold: eventValueThreshold
+      FeatureTransformationParameters: featureTransformationParameters
+      HpoConfig:
+        member: hpoConfig
+        properties:
+          AlgorithmHyperParameterRanges:
+            member: algorithmHyperParameterRanges
+            properties:
+              CategoricalHyperParameterRanges:
+                member: categoricalHyperParameterRanges
+                properties:
+                  Name: name
+                  Values: values
+              ContinuousHyperParameterRanges:
+                member: continuousHyperParameterRanges
+                properties:
+                  MaxValue: maxValue
+                  MinValue: minValue
+                  Name: name
+              IntegerHyperParameterRanges:
+                member: integerHyperParameterRanges
+                properties:
+                  MaxValue: maxValue
+                  MinValue: minValue
+                  Name: name
+          HpoObjective:
+            member: hpoObjective
+            properties:
+              MetricName: metricName
+              MetricRegex: metricRegex
+              Type: type
+          HpoResourceConfig:
+            member: hpoResourceConfig
+            properties:
+              MaxNumberOfTrainingJobs: maxNumberOfTrainingJobs
+              MaxParallelTrainingJobs: maxParallelTrainingJobs
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,34 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::OpenSearchServerless::SecurityConfig
+read:
+  model: opensearchserverless/service/2021-11-01/opensearchserverless-2021-11-01.json
+  operation: GetSecurityConfig
+  identifier:
+    Id: id
+  response: securityConfigDetail
+properties:
+  Description: description
+  IamFederationOptions:
+    member: iamFederationOptions
+    properties:
+      GroupAttribute: groupAttribute
+      UserAttribute: userAttribute
+  IamIdentityCenterOptions:
+    member: iamIdentityCenterOptions
+    properties:
+      ApplicationArn: applicationArn
+      ApplicationDescription: applicationDescription
+      ApplicationName: applicationName
+      GroupAttribute: groupAttribute
+      InstanceArn: instanceArn
+      UserAttribute: userAttribute
+  Id: id
+  SamlOptions:
+    member: samlOptions
+    properties:
+      GroupAttribute: groupAttribute
+      Metadata: metadata
+      OpenSearchServerlessEntityId: openSearchServerlessEntityId
+      SessionTimeout: sessionTimeout
+      UserAttribute: userAttribute
+  Type: type

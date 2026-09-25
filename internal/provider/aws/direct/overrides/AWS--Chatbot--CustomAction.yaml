@@ -1,0 +1,30 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Chatbot::CustomAction
+read:
+  model: chatbot/service/2017-10-11/chatbot-2017-10-11.json
+  operation: GetCustomAction
+  identifier:
+    CustomActionArn: CustomActionArn
+  response: CustomAction
+properties:
+  ActionName: ActionName
+  AliasName: AliasName
+  Attachments:
+    member: Attachments
+    properties:
+      ButtonText: ButtonText
+      Criteria:
+        member: Criteria
+        properties:
+          Operator: Operator
+          Value: Value
+          VariableName: VariableName
+      NotificationType: NotificationType
+      Variables: Variables
+  CustomActionArn: CustomActionArn
+  Definition:
+    member: Definition
+    properties:
+      CommandText: CommandText
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

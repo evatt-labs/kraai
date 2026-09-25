@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Chime::VoiceConnector
+read:
+  model: chime-sdk-voice/service/2022-08-03/chime-sdk-voice-2022-08-03.json
+  operation: GetVoiceConnector
+  identifier:
+    VoiceConnectorArn: VoiceConnectorId
+  response: VoiceConnector
+properties:
+  AwsRegion: AwsRegion
+  CreatedTimestamp: CreatedTimestamp
+  Name: Name
+  NetworkType: NetworkType
+  OutboundHostName: OutboundHostName
+  RequireEncryption: RequireEncryption
+  UpdatedTimestamp: UpdatedTimestamp
+  VoiceConnectorArn: VoiceConnectorArn
+  VoiceConnectorId: VoiceConnectorId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

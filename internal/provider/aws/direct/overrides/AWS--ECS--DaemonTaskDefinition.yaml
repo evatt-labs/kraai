@@ -1,0 +1,137 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ECS::DaemonTaskDefinition
+read:
+  model: ecs/service/2014-11-13/ecs-2014-11-13.json
+  operation: DescribeDaemonTaskDefinition
+  identifier:
+    DaemonTaskDefinitionArn: daemonTaskDefinition
+  response: daemonTaskDefinition
+properties:
+  ContainerDefinitions:
+    member: containerDefinitions
+    properties:
+      Command: command
+      Cpu: cpu
+      DependsOn:
+        member: dependsOn
+        properties:
+          Condition: condition
+          ContainerName: containerName
+      EntryPoint: entryPoint
+      Environment:
+        member: environment
+        properties:
+          Name: name
+          Value: value
+      EnvironmentFiles:
+        member: environmentFiles
+        properties:
+          Type: type
+          Value: value
+      Essential: essential
+      FirelensConfiguration:
+        member: firelensConfiguration
+        properties:
+          Options: options
+          Type: type
+      HealthCheck:
+        member: healthCheck
+        properties:
+          Command: command
+          Interval: interval
+          Retries: retries
+          StartPeriod: startPeriod
+          Timeout: timeout
+      Image: image
+      Interactive: interactive
+      LinuxParameters:
+        member: linuxParameters
+        properties:
+          Capabilities:
+            member: capabilities
+            properties:
+              Add: add
+              Drop: drop
+          Devices:
+            member: devices
+            properties:
+              ContainerPath: containerPath
+              HostPath: hostPath
+              Permissions: permissions
+          InitProcessEnabled: initProcessEnabled
+          Tmpfs:
+            member: tmpfs
+            properties:
+              ContainerPath: containerPath
+              MountOptions: mountOptions
+              Size: size
+      LogConfiguration:
+        member: logConfiguration
+        properties:
+          LogDriver: logDriver
+          Options: options
+          SecretOptions:
+            member: secretOptions
+            properties:
+              Name: name
+              ValueFrom: valueFrom
+      Memory: memory
+      MemoryReservation: memoryReservation
+      MountPoints:
+        member: mountPoints
+        properties:
+          ContainerPath: containerPath
+          ReadOnly: readOnly
+          SourceVolume: sourceVolume
+      Name: name
+      Privileged: privileged
+      PseudoTerminal: pseudoTerminal
+      ReadonlyRootFilesystem: readonlyRootFilesystem
+      RepositoryCredentials:
+        member: repositoryCredentials
+        properties:
+          CredentialsParameter: credentialsParameter
+      RestartPolicy:
+        member: restartPolicy
+        properties:
+          Enabled: enabled
+          IgnoredExitCodes: ignoredExitCodes
+          RestartAttemptPeriod: restartAttemptPeriod
+      Secrets:
+        member: secrets
+        properties:
+          Name: name
+          ValueFrom: valueFrom
+      StartTimeout: startTimeout
+      StopTimeout: stopTimeout
+      SystemControls:
+        member: systemControls
+        properties:
+          Namespace: namespace
+          Value: value
+      Ulimits:
+        member: ulimits
+        properties:
+          HardLimit: hardLimit
+          Name: name
+          SoftLimit: softLimit
+      User: user
+      WorkingDirectory: workingDirectory
+  Cpu: cpu
+  DaemonTaskDefinitionArn: daemonTaskDefinitionArn
+  ExecutionRoleArn: executionRoleArn
+  Family: family
+  IpcMode: ipcMode
+  Memory: memory
+  PidMode: pidMode
+  TaskRoleArn: taskRoleArn
+  Volumes:
+    member: volumes
+    properties:
+      Host:
+        member: host
+        properties:
+          SourcePath: sourcePath
+      Name: name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

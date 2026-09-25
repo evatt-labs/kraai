@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Config::Connector
+read:
+  model: config-service/service/2014-11-12/config-service-2014-11-12.json
+  operation: GetConnector
+  identifier:
+    Arn: Arn
+  response: Connector
+properties:
+  Arn: arn
+  ConnectorConfiguration:
+    member: connectorConfiguration
+    properties:
+      Azure:
+        member: azure
+        properties:
+          ClientIdentifier: clientIdentifier
+          TenantIdentifier: tenantIdentifier
+  CreatedTime: createdTime
+  Name: name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

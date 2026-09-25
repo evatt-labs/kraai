@@ -1,0 +1,2727 @@
+{
+  "shapes": {
+    "com.amazonaws.cloudwatchlogs#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^\\d{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#AddKeyEntries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#AddKeyEntry"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#AddKeyEntry": {
+      "members": {
+        "key": {
+          "target": "com.amazonaws.cloudwatchlogs#Key",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "overwriteIfExists": {
+          "target": "com.amazonaws.cloudwatchlogs#OverwriteIfExists",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "value": {
+          "target": "com.amazonaws.cloudwatchlogs#AddKeyValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#AddKeyValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#AddKeys": {
+      "members": {
+        "entries": {
+          "target": "com.amazonaws.cloudwatchlogs#AddKeyEntries",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Arn": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#CSV": {
+      "members": {
+        "columns": {
+          "target": "com.amazonaws.cloudwatchlogs#Columns",
+          "traits": {}
+        },
+        "delimiter": {
+          "target": "com.amazonaws.cloudwatchlogs#Delimiter",
+          "traits": {}
+        },
+        "destination": {
+          "target": "com.amazonaws.cloudwatchlogs#DestinationField",
+          "traits": {}
+        },
+        "quoteCharacter": {
+          "target": "com.amazonaws.cloudwatchlogs#QuoteCharacter",
+          "traits": {}
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Column": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#Columns": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#Column"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#CopyValue": {
+      "members": {
+        "entries": {
+          "target": "com.amazonaws.cloudwatchlogs#CopyValueEntries",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#CopyValueEntries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#CopyValueEntry"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#CopyValueEntry": {
+      "members": {
+        "overwriteIfExists": {
+          "target": "com.amazonaws.cloudwatchlogs#OverwriteIfExists",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "target": {
+          "target": "com.amazonaws.cloudwatchlogs#Target",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DateTimeConverter": {
+      "members": {
+        "locale": {
+          "target": "com.amazonaws.cloudwatchlogs#Locale",
+          "traits": {}
+        },
+        "matchPatterns": {
+          "target": "com.amazonaws.cloudwatchlogs#MatchPatterns",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "sourceTimezone": {
+          "target": "com.amazonaws.cloudwatchlogs#SourceTimezone",
+          "traits": {}
+        },
+        "target": {
+          "target": "com.amazonaws.cloudwatchlogs#Target",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "targetFormat": {
+          "target": "com.amazonaws.cloudwatchlogs#TargetFormat",
+          "traits": {}
+        },
+        "targetTimezone": {
+          "target": "com.amazonaws.cloudwatchlogs#TargetTimezone",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DeleteKeys": {
+      "members": {
+        "withKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#DeleteWithKeys",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DeleteWithKeys": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#WithKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#Delimiter": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#DeliverySource": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        },
+        "deliverySourceConfiguration": {
+          "target": "com.amazonaws.cloudwatchlogs#DeliverySourceConfiguration",
+          "traits": {}
+        },
+        "logType": {
+          "target": "com.amazonaws.cloudwatchlogs#LogType",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.cloudwatchlogs#DeliverySourceName",
+          "traits": {}
+        },
+        "resourceArns": {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceArns",
+          "traits": {}
+        },
+        "service": {
+          "target": "com.amazonaws.cloudwatchlogs#Service",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#DeliverySourceStatus",
+          "traits": {}
+        },
+        "statusReason": {
+          "target": "com.amazonaws.cloudwatchlogs#DeliverySourceStatusReason",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.cloudwatchlogs#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DeliverySourceConfiguration": {
+      "key": {
+        "target": "com.amazonaws.cloudwatchlogs#DeliverySourceConfigurationKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.cloudwatchlogs#DeliverySourceConfigurationValue"
+      }
+    },
+    "com.amazonaws.cloudwatchlogs#DeliverySourceConfigurationKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#DeliverySourceConfigurationValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#DeliverySourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 60,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#DeliverySourceStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "INACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INACTIVE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#DeliverySourceStatusReason": {
+      "members": {
+        "RESOURCE_DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESOURCE_DELETED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#DestinationConfiguration": {
+      "members": {
+        "lookupTableConfiguration": {
+          "target": "com.amazonaws.cloudwatchlogs#LookupTableConfiguration",
+          "traits": {}
+        },
+        "s3Configuration": {
+          "target": "com.amazonaws.cloudwatchlogs#S3Configuration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DestinationField": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#EndTimeOffset": {
+      "type": "long"
+    },
+    "com.amazonaws.cloudwatchlogs#EventSource": {
+      "members": {
+        "AWSWAF": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWSWAF"
+          }
+        },
+        "CLOUD_TRAIL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CloudTrail"
+          }
+        },
+        "EKS_AUDIT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EKSAudit"
+          }
+        },
+        "ROUTE53_RESOLVER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Route53Resolver"
+          }
+        },
+        "VPC_FLOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VPCFlow"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#ExecutionStatus": {
+      "members": {
+        "Complete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Complete"
+          }
+        },
+        "Failed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Failed"
+          }
+        },
+        "InvalidQuery": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InvalidQuery"
+          }
+        },
+        "Running": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Running"
+          }
+        },
+        "Timeout": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Timeout"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#Flatten": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudwatchlogs#FlattenedElement": {
+      "members": {
+        "FIRST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "first"
+          }
+        },
+        "LAST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "last"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#FromKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#GetDeliverySource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#GetDeliverySourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#GetDeliverySourceResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#GetDeliverySourceRequest": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.cloudwatchlogs#DeliverySourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetDeliverySourceResponse": {
+      "members": {
+        "deliverySource": {
+          "target": "com.amazonaws.cloudwatchlogs#DeliverySource",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetIntegration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#GetIntegrationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#GetIntegrationResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#GetIntegrationRequest": {
+      "members": {
+        "integrationName": {
+          "target": "com.amazonaws.cloudwatchlogs#IntegrationName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetIntegrationResponse": {
+      "members": {
+        "integrationDetails": {
+          "target": "com.amazonaws.cloudwatchlogs#IntegrationDetails",
+          "traits": {}
+        },
+        "integrationName": {
+          "target": "com.amazonaws.cloudwatchlogs#IntegrationName",
+          "traits": {}
+        },
+        "integrationStatus": {
+          "target": "com.amazonaws.cloudwatchlogs#IntegrationStatus",
+          "traits": {}
+        },
+        "integrationType": {
+          "target": "com.amazonaws.cloudwatchlogs#IntegrationType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetScheduledQuery": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#GetScheduledQueryRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#GetScheduledQueryResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#GetScheduledQueryRequest": {
+      "members": {
+        "identifier": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduledQueryIdentifier",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetScheduledQueryResponse": {
+      "members": {
+        "creationTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduledQueryDescription",
+          "traits": {}
+        },
+        "destinationConfiguration": {
+          "target": "com.amazonaws.cloudwatchlogs#DestinationConfiguration",
+          "traits": {}
+        },
+        "endTimeOffset": {
+          "target": "com.amazonaws.cloudwatchlogs#EndTimeOffset",
+          "traits": {}
+        },
+        "executionRoleArn": {
+          "target": "com.amazonaws.cloudwatchlogs#RoleArn",
+          "traits": {}
+        },
+        "lastExecutionStatus": {
+          "target": "com.amazonaws.cloudwatchlogs#ExecutionStatus",
+          "traits": {}
+        },
+        "lastTriggeredTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "lastUpdatedTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "logGroupIdentifiers": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduledQueryLogGroupIdentifiers",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduledQueryName",
+          "traits": {}
+        },
+        "queryLanguage": {
+          "target": "com.amazonaws.cloudwatchlogs#QueryLanguage",
+          "traits": {}
+        },
+        "queryString": {
+          "target": "com.amazonaws.cloudwatchlogs#QueryString",
+          "traits": {}
+        },
+        "scheduleEndTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "scheduleExpression": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduleExpression",
+          "traits": {}
+        },
+        "scheduleStartTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "scheduleType": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduleType",
+          "traits": {}
+        },
+        "scheduledQueryArn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        },
+        "startTimeOffset": {
+          "target": "com.amazonaws.cloudwatchlogs#StartTimeOffset",
+          "traits": {}
+        },
+        "state": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduledQueryState",
+          "traits": {}
+        },
+        "timezone": {
+          "target": "com.amazonaws.cloudwatchlogs#ScheduleTimezone",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetTransformer": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidOperationException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#GetTransformerRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#GetTransformerResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#GetTransformerRequest": {
+      "members": {
+        "logGroupIdentifier": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetTransformerResponse": {
+      "members": {
+        "creationTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "lastModifiedTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "logGroupIdentifier": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier",
+          "traits": {}
+        },
+        "transformerConfig": {
+          "target": "com.amazonaws.cloudwatchlogs#Processors",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Grok": {
+      "members": {
+        "match": {
+          "target": "com.amazonaws.cloudwatchlogs#GrokMatch",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GrokMatch": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#IntegrationDetails": {
+      "members": {
+        "openSearchIntegrationDetails": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchIntegrationDetails",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.cloudwatchlogs#IntegrationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#IntegrationStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "PROVISIONING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVISIONING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#IntegrationStatusMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#IntegrationType": {
+      "members": {
+        "OPENSEARCH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OPENSEARCH"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#InvalidOperationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#InvalidParameterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Key": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#KeyPrefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#KeyValueDelimiter": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#KmsKeyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ListToMap": {
+      "members": {
+        "flatten": {
+          "target": "com.amazonaws.cloudwatchlogs#Flatten",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "flattenedElement": {
+          "target": "com.amazonaws.cloudwatchlogs#FlattenedElement",
+          "traits": {}
+        },
+        "key": {
+          "target": "com.amazonaws.cloudwatchlogs#Key",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "target": {
+          "target": "com.amazonaws.cloudwatchlogs#Target",
+          "traits": {}
+        },
+        "valueKey": {
+          "target": "com.amazonaws.cloudwatchlogs#ValueKey",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Locale": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LogGroupIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w#+=/:,.@-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LogType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#Logs_20140328": {
+      "operations": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#GetDeliverySource"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#GetIntegration"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#GetScheduledQuery"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#GetTransformer"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "logs",
+          "cloudFormationName": "Logs",
+          "cloudTrailEventSource": "logs.amazonaws.com",
+          "docId": "logs-2014-03-28",
+          "endpointPrefix": "logs",
+          "sdkId": "CloudWatch Logs"
+        },
+        "aws.auth#sigv4": {
+          "name": "logs"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "Amazon CloudWatch Logs",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://monitoring.amazonaws.com/doc/2014-03-28/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://logs-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-east-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://logs.us-gov-east-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-west-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://logs.us-gov-west-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://logs-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://logs.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://logs.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2014-03-28"
+    },
+    "com.amazonaws.cloudwatchlogs#LookupTableConfiguration": {
+      "members": {
+        "description": {
+          "target": "com.amazonaws.cloudwatchlogs#LookupTableDescription",
+          "traits": {}
+        },
+        "kmsKeyId": {
+          "target": "com.amazonaws.cloudwatchlogs#KmsKeyId",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.cloudwatchlogs#RoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tableName": {
+          "target": "com.amazonaws.cloudwatchlogs#LookupTableName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.cloudwatchlogs#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#LookupTableDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LookupTableName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LowerCaseString": {
+      "members": {
+        "withKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#LowerCaseStringWithKeys",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#LowerCaseStringWithKeys": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#WithKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#MappingVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        },
+        "smithy.api#pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#MatchPattern": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#MatchPatterns": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#MatchPattern"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#Message": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#MoveKeyEntries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#MoveKeyEntry"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#MoveKeyEntry": {
+      "members": {
+        "overwriteIfExists": {
+          "target": "com.amazonaws.cloudwatchlogs#OverwriteIfExists",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "target": {
+          "target": "com.amazonaws.cloudwatchlogs#Target",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#MoveKeys": {
+      "members": {
+        "entries": {
+          "target": "com.amazonaws.cloudwatchlogs#MoveKeyEntries",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#NonMatchValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#OCSFVersion": {
+      "members": {
+        "V1_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "V1.1"
+          }
+        },
+        "V1_5": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "V1.5"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchApplication": {
+      "members": {
+        "applicationArn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        },
+        "applicationEndpoint": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchApplicationEndpoint",
+          "traits": {}
+        },
+        "applicationId": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchApplicationId",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchApplicationEndpoint": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^https://[\\.\\-_/#:A-Za-z0-9]+\\.com$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchApplicationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchCollection": {
+      "members": {
+        "collectionArn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        },
+        "collectionEndpoint": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchCollectionEndpoint",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchCollectionEndpoint": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^https://[\\.\\-_/#:A-Za-z0-9]+\\.com$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchDataAccessPolicy": {
+      "members": {
+        "policyName": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchPolicyName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchDataSource": {
+      "members": {
+        "dataSourceName": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchDataSourceName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchDataSourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchEncryptionPolicy": {
+      "members": {
+        "policyName": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchPolicyName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchIntegrationDetails": {
+      "members": {
+        "accessPolicy": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchDataAccessPolicy",
+          "traits": {}
+        },
+        "application": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchApplication",
+          "traits": {}
+        },
+        "collection": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchCollection",
+          "traits": {}
+        },
+        "dataSource": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchDataSource",
+          "traits": {}
+        },
+        "encryptionPolicy": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchEncryptionPolicy",
+          "traits": {}
+        },
+        "lifecyclePolicy": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchLifecyclePolicy",
+          "traits": {}
+        },
+        "networkPolicy": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchNetworkPolicy",
+          "traits": {}
+        },
+        "workspace": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchWorkspace",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchLifecyclePolicy": {
+      "members": {
+        "policyName": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchPolicyName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchNetworkPolicy": {
+      "members": {
+        "policyName": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchPolicyName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchPolicyName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus": {
+      "members": {
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatusType",
+          "traits": {}
+        },
+        "statusMessage": {
+          "target": "com.amazonaws.cloudwatchlogs#IntegrationStatusMessage",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatusType": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ERROR"
+          }
+        },
+        "NOT_FOUND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_FOUND"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchWorkspace": {
+      "members": {
+        "status": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchResourceStatus",
+          "traits": {}
+        },
+        "workspaceId": {
+          "target": "com.amazonaws.cloudwatchlogs#OpenSearchWorkspaceId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#OpenSearchWorkspaceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#OverwriteIfExists": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudwatchlogs#ParseCloudfront": {
+      "members": {
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParseJSON": {
+      "members": {
+        "destination": {
+          "target": "com.amazonaws.cloudwatchlogs#DestinationField",
+          "traits": {}
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParseKeyValue": {
+      "members": {
+        "destination": {
+          "target": "com.amazonaws.cloudwatchlogs#DestinationField",
+          "traits": {}
+        },
+        "fieldDelimiter": {
+          "target": "com.amazonaws.cloudwatchlogs#ParserFieldDelimiter",
+          "traits": {}
+        },
+        "keyPrefix": {
+          "target": "com.amazonaws.cloudwatchlogs#KeyPrefix",
+          "traits": {}
+        },
+        "keyValueDelimiter": {
+          "target": "com.amazonaws.cloudwatchlogs#KeyValueDelimiter",
+          "traits": {}
+        },
+        "nonMatchValue": {
+          "target": "com.amazonaws.cloudwatchlogs#NonMatchValue",
+          "traits": {}
+        },
+        "overwriteIfExists": {
+          "target": "com.amazonaws.cloudwatchlogs#OverwriteIfExists",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParsePostgres": {
+      "members": {
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParseRoute53": {
+      "members": {
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParseToOCSF": {
+      "members": {
+        "eventSource": {
+          "target": "com.amazonaws.cloudwatchlogs#EventSource",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "mappingVersion": {
+          "target": "com.amazonaws.cloudwatchlogs#MappingVersion",
+          "traits": {}
+        },
+        "ocsfVersion": {
+          "target": "com.amazonaws.cloudwatchlogs#OCSFVersion",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParseVPC": {
+      "members": {
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParseWAF": {
+      "members": {
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ParserFieldDelimiter": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#Processor": {
+      "members": {
+        "addKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#AddKeys",
+          "traits": {}
+        },
+        "copyValue": {
+          "target": "com.amazonaws.cloudwatchlogs#CopyValue",
+          "traits": {}
+        },
+        "csv": {
+          "target": "com.amazonaws.cloudwatchlogs#CSV",
+          "traits": {}
+        },
+        "dateTimeConverter": {
+          "target": "com.amazonaws.cloudwatchlogs#DateTimeConverter",
+          "traits": {}
+        },
+        "deleteKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#DeleteKeys",
+          "traits": {}
+        },
+        "grok": {
+          "target": "com.amazonaws.cloudwatchlogs#Grok",
+          "traits": {}
+        },
+        "listToMap": {
+          "target": "com.amazonaws.cloudwatchlogs#ListToMap",
+          "traits": {}
+        },
+        "lowerCaseString": {
+          "target": "com.amazonaws.cloudwatchlogs#LowerCaseString",
+          "traits": {}
+        },
+        "moveKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#MoveKeys",
+          "traits": {}
+        },
+        "parseCloudfront": {
+          "target": "com.amazonaws.cloudwatchlogs#ParseCloudfront",
+          "traits": {}
+        },
+        "parseJSON": {
+          "target": "com.amazonaws.cloudwatchlogs#ParseJSON",
+          "traits": {}
+        },
+        "parseKeyValue": {
+          "target": "com.amazonaws.cloudwatchlogs#ParseKeyValue",
+          "traits": {}
+        },
+        "parsePostgres": {
+          "target": "com.amazonaws.cloudwatchlogs#ParsePostgres",
+          "traits": {}
+        },
+        "parseRoute53": {
+          "target": "com.amazonaws.cloudwatchlogs#ParseRoute53",
+          "traits": {}
+        },
+        "parseToOCSF": {
+          "target": "com.amazonaws.cloudwatchlogs#ParseToOCSF",
+          "traits": {}
+        },
+        "parseVPC": {
+          "target": "com.amazonaws.cloudwatchlogs#ParseVPC",
+          "traits": {}
+        },
+        "parseWAF": {
+          "target": "com.amazonaws.cloudwatchlogs#ParseWAF",
+          "traits": {}
+        },
+        "renameKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#RenameKeys",
+          "traits": {}
+        },
+        "splitString": {
+          "target": "com.amazonaws.cloudwatchlogs#SplitString",
+          "traits": {}
+        },
+        "substituteString": {
+          "target": "com.amazonaws.cloudwatchlogs#SubstituteString",
+          "traits": {}
+        },
+        "trimString": {
+          "target": "com.amazonaws.cloudwatchlogs#TrimString",
+          "traits": {}
+        },
+        "typeConverter": {
+          "target": "com.amazonaws.cloudwatchlogs#TypeConverter",
+          "traits": {}
+        },
+        "upperCaseString": {
+          "target": "com.amazonaws.cloudwatchlogs#UpperCaseString",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Processors": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#Processor"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#QueryLanguage": {
+      "members": {
+        "CWLI": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CWLI"
+          }
+        },
+        "PPL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PPL"
+          }
+        },
+        "SQL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SQL"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#QueryString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#QuoteCharacter": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#RenameKeyEntries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#RenameKeyEntry"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#RenameKeyEntry": {
+      "members": {
+        "key": {
+          "target": "com.amazonaws.cloudwatchlogs#Key",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "overwriteIfExists": {
+          "target": "com.amazonaws.cloudwatchlogs#OverwriteIfExists",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "renameTo": {
+          "target": "com.amazonaws.cloudwatchlogs#RenameTo",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#RenameKeys": {
+      "members": {
+        "entries": {
+          "target": "com.amazonaws.cloudwatchlogs#RenameKeyEntries",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#RenameTo": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ResourceArns": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#Arn"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#S3Configuration": {
+      "members": {
+        "destinationIdentifier": {
+          "target": "com.amazonaws.cloudwatchlogs#S3Uri",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "kmsKeyId": {
+          "target": "com.amazonaws.cloudwatchlogs#KmsKeyId",
+          "traits": {}
+        },
+        "ownerAccountId": {
+          "target": "com.amazonaws.cloudwatchlogs#AccountId",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.cloudwatchlogs#RoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#S3Uri": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^s3://[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9](/.*)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduleExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduleTimezone": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduleType": {
+      "members": {
+        "AWS_MANAGED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_MANAGED"
+          }
+        },
+        "CUSTOMER_MANAGED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CUSTOMER_MANAGED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduledQueryDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduledQueryIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 300,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduledQueryLogGroupIdentifiers": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduledQueryName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 300,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ScheduledQueryState": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#Service": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w_-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Source": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#SourceTimezone": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#SplitString": {
+      "members": {
+        "entries": {
+          "target": "com.amazonaws.cloudwatchlogs#SplitStringEntries",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#SplitStringDelimiter": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#SplitStringEntries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#SplitStringEntry"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#SplitStringEntry": {
+      "members": {
+        "delimiter": {
+          "target": "com.amazonaws.cloudwatchlogs#SplitStringDelimiter",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#StartTimeOffset": {
+      "type": "long"
+    },
+    "com.amazonaws.cloudwatchlogs#SubstituteString": {
+      "members": {
+        "entries": {
+          "target": "com.amazonaws.cloudwatchlogs#SubstituteStringEntries",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#SubstituteStringEntries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#SubstituteStringEntry"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#SubstituteStringEntry": {
+      "members": {
+        "from": {
+          "target": "com.amazonaws.cloudwatchlogs#FromKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "to": {
+          "target": "com.amazonaws.cloudwatchlogs#ToKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#Tags": {
+      "key": {
+        "target": "com.amazonaws.cloudwatchlogs#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.cloudwatchlogs#TagValue"
+      }
+    },
+    "com.amazonaws.cloudwatchlogs#Target": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#TargetFormat": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#TargetTimezone": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#Timestamp": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "long"
+    },
+    "com.amazonaws.cloudwatchlogs#ToKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#TrimString": {
+      "members": {
+        "withKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#TrimStringWithKeys",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#TrimStringWithKeys": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#WithKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#Type": {
+      "members": {
+        "BOOLEAN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "boolean"
+          }
+        },
+        "DOUBLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "double"
+          }
+        },
+        "INTEGER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "integer"
+          }
+        },
+        "STRING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "string"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#TypeConverter": {
+      "members": {
+        "entries": {
+          "target": "com.amazonaws.cloudwatchlogs#TypeConverterEntries",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#TypeConverterEntries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#TypeConverterEntry"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#TypeConverterEntry": {
+      "members": {
+        "key": {
+          "target": "com.amazonaws.cloudwatchlogs#Key",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "type": {
+          "target": "com.amazonaws.cloudwatchlogs#Type",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#UpperCaseString": {
+      "members": {
+        "withKeys": {
+          "target": "com.amazonaws.cloudwatchlogs#UpperCaseStringWithKeys",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#UpperCaseStringWithKeys": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#WithKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ValueKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#WithKey": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

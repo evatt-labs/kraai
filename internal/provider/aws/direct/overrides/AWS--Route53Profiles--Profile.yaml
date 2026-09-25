@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53Profiles::Profile
+read:
+  model: route53profiles/service/2018-05-10/route53profiles-2018-05-10.json
+  operation: GetProfile
+  identifier:
+    Id: ProfileId
+  response: Profile
+properties:
+  Arn: Arn
+  ClientToken: ClientToken
+  Id: Id
+  Name: Name
+  ShareStatus: ShareStatus
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

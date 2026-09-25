@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CodeDeploy::Application
+read:
+  model: codedeploy/service/2014-10-06/codedeploy-2014-10-06.json
+  operation: GetApplication
+  identifier:
+    ApplicationName: applicationName
+  response: application
+properties:
+  ApplicationName: applicationName
+  ComputePlatform: computePlatform
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

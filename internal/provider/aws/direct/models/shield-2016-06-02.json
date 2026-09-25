@@ -1,0 +1,682 @@
+{
+  "shapes": {
+    "com.amazonaws.shield#AWSShield_20160616": {
+      "operations": [
+        {
+          "target": "com.amazonaws.shield#DescribeProtectionGroup"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "shield",
+          "cloudFormationName": "Shield",
+          "cloudTrailEventSource": "shield.amazonaws.com",
+          "endpointPrefix": "shield",
+          "sdkId": "Shield"
+        },
+        "aws.auth#sigv4": {
+          "name": "shield"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "AWS Shield",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://ddp.amazonaws.com/doc/2016-06-02/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "aws"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            false
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            false
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {
+                          "authSchemes": [
+                            {
+                              "name": "sigv4",
+                              "signingName": "shield",
+                              "signingRegion": "us-east-1"
+                            }
+                          ]
+                        },
+                        "url": "https://shield.us-east-1.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "aws"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            false
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {
+                          "authSchemes": [
+                            {
+                              "name": "sigv4",
+                              "signingName": "shield",
+                              "signingRegion": "us-east-1"
+                            }
+                          ]
+                        },
+                        "url": "https://shield-fips.us-east-1.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://shield-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://shield-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://shield.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://shield.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2016-06-02"
+    },
+    "com.amazonaws.shield#DescribeProtectionGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.shield#InternalErrorException"
+        },
+        {
+          "target": "com.amazonaws.shield#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.shield#DescribeProtectionGroupRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.shield#DescribeProtectionGroupResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.shield#DescribeProtectionGroupRequest": {
+      "members": {
+        "ProtectionGroupId": {
+          "target": "com.amazonaws.shield#ProtectionGroupId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#DescribeProtectionGroupResponse": {
+      "members": {
+        "ProtectionGroup": {
+          "target": "com.amazonaws.shield#ProtectionGroup",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#InternalErrorException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#ProtectedResourceType": {
+      "members": {
+        "APPLICATION_LOAD_BALANCER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "APPLICATION_LOAD_BALANCER"
+          }
+        },
+        "CLASSIC_LOAD_BALANCER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CLASSIC_LOAD_BALANCER"
+          }
+        },
+        "CLOUDFRONT_DISTRIBUTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CLOUDFRONT_DISTRIBUTION"
+          }
+        },
+        "ELASTIC_IP_ALLOCATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ELASTIC_IP_ALLOCATION"
+          }
+        },
+        "GLOBAL_ACCELERATOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GLOBAL_ACCELERATOR"
+          }
+        },
+        "ROUTE_53_HOSTED_ZONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ROUTE_53_HOSTED_ZONE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.shield#ProtectionGroup": {
+      "members": {
+        "Aggregation": {
+          "target": "com.amazonaws.shield#ProtectionGroupAggregation",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Members": {
+          "target": "com.amazonaws.shield#ProtectionGroupMembers",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Pattern": {
+          "target": "com.amazonaws.shield#ProtectionGroupPattern",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProtectionGroupArn": {
+          "target": "com.amazonaws.shield#ResourceArn",
+          "traits": {}
+        },
+        "ProtectionGroupId": {
+          "target": "com.amazonaws.shield#ProtectionGroupId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.shield#ProtectedResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.shield#ProtectionGroupAggregation": {
+      "members": {
+        "MAX": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MAX"
+          }
+        },
+        "MEAN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEAN"
+          }
+        },
+        "SUM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUM"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.shield#ProtectionGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9\\\\-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.shield#ProtectionGroupMembers": {
+      "member": {
+        "target": "com.amazonaws.shield#ResourceArn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10000,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.shield#ProtectionGroupPattern": {
+      "members": {
+        "ALL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALL"
+          }
+        },
+        "ARBITRARY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ARBITRARY"
+          }
+        },
+        "BY_RESOURCE_TYPE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BY_RESOURCE_TYPE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.shield#ResourceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.shield#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        },
+        "resourceType": {
+          "target": "com.amazonaws.shield#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#String": {
+      "type": "string"
+    },
+    "com.amazonaws.shield#errorMessage": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

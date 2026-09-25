@@ -1,0 +1,97 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Chime::MediaInsightsPipelineConfiguration
+read:
+  model: chime-sdk-media-pipelines/service/2021-07-15/chime-sdk-media-pipelines-2021-07-15.json
+  operation: GetMediaInsightsPipelineConfiguration
+  identifier:
+    MediaInsightsPipelineConfigurationArn: Identifier
+  response: MediaInsightsPipelineConfiguration
+properties:
+  CreatedTimestamp: CreatedTimestamp
+  Elements:
+    member: Elements
+    properties:
+      AmazonTranscribeCallAnalyticsProcessorConfiguration:
+        member: AmazonTranscribeCallAnalyticsProcessorConfiguration
+        properties:
+          CallAnalyticsStreamCategories: CallAnalyticsStreamCategories
+          ContentIdentificationType: ContentIdentificationType
+          ContentRedactionType: ContentRedactionType
+          EnablePartialResultsStabilization: EnablePartialResultsStabilization
+          FilterPartialResults: FilterPartialResults
+          LanguageCode: LanguageCode
+          LanguageModelName: LanguageModelName
+          PartialResultsStability: PartialResultsStability
+          PiiEntityTypes: PiiEntityTypes
+          PostCallAnalyticsSettings:
+            member: PostCallAnalyticsSettings
+            properties:
+              ContentRedactionOutput: ContentRedactionOutput
+              DataAccessRoleArn: DataAccessRoleArn
+              OutputEncryptionKMSKeyId: OutputEncryptionKMSKeyId
+              OutputLocation: OutputLocation
+          VocabularyFilterMethod: VocabularyFilterMethod
+          VocabularyFilterName: VocabularyFilterName
+          VocabularyName: VocabularyName
+      AmazonTranscribeProcessorConfiguration:
+        member: AmazonTranscribeProcessorConfiguration
+        properties:
+          ContentIdentificationType: ContentIdentificationType
+          ContentRedactionType: ContentRedactionType
+          EnablePartialResultsStabilization: EnablePartialResultsStabilization
+          FilterPartialResults: FilterPartialResults
+          IdentifyLanguage: IdentifyLanguage
+          IdentifyMultipleLanguages: IdentifyMultipleLanguages
+          LanguageCode: LanguageCode
+          LanguageModelName: LanguageModelName
+          LanguageOptions: LanguageOptions
+          PartialResultsStability: PartialResultsStability
+          PiiEntityTypes: PiiEntityTypes
+          PreferredLanguage: PreferredLanguage
+          ShowSpeakerLabel: ShowSpeakerLabel
+          VocabularyFilterMethod: VocabularyFilterMethod
+          VocabularyFilterName: VocabularyFilterName
+          VocabularyFilterNames: VocabularyFilterNames
+          VocabularyName: VocabularyName
+          VocabularyNames: VocabularyNames
+      KinesisDataStreamSinkConfiguration:
+        member: KinesisDataStreamSinkConfiguration
+        properties:
+          InsightsTarget: InsightsTarget
+      S3RecordingSinkConfiguration:
+        member: S3RecordingSinkConfiguration
+        properties:
+          Destination: Destination
+          RecordingFileFormat: RecordingFileFormat
+      Type: Type
+  MediaInsightsPipelineConfigurationArn: MediaInsightsPipelineConfigurationArn
+  MediaInsightsPipelineConfigurationId: MediaInsightsPipelineConfigurationId
+  MediaInsightsPipelineConfigurationName: MediaInsightsPipelineConfigurationName
+  RealTimeAlertConfiguration:
+    member: RealTimeAlertConfiguration
+    properties:
+      Disabled: Disabled
+      Rules:
+        member: Rules
+        properties:
+          IssueDetectionConfiguration:
+            member: IssueDetectionConfiguration
+            properties:
+              RuleName: RuleName
+          KeywordMatchConfiguration:
+            member: KeywordMatchConfiguration
+            properties:
+              Keywords: Keywords
+              Negate: Negate
+              RuleName: RuleName
+          SentimentConfiguration:
+            member: SentimentConfiguration
+            properties:
+              RuleName: RuleName
+              SentimentType: SentimentType
+              TimePeriod: TimePeriod
+          Type: Type
+  ResourceAccessRoleArn: ResourceAccessRoleArn
+  UpdatedTimestamp: UpdatedTimestamp
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

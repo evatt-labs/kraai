@@ -1,0 +1,654 @@
+{
+  "shapes": {
+    "com.amazonaws.chimesdkidentity#AppInstance": {
+      "members": {
+        "AppInstanceArn": {
+          "target": "com.amazonaws.chimesdkidentity#ChimeArn",
+          "traits": {}
+        },
+        "CreatedTimestamp": {
+          "target": "com.amazonaws.chimesdkidentity#Timestamp",
+          "traits": {}
+        },
+        "LastUpdatedTimestamp": {
+          "target": "com.amazonaws.chimesdkidentity#Timestamp",
+          "traits": {}
+        },
+        "Metadata": {
+          "target": "com.amazonaws.chimesdkidentity#Metadata",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.chimesdkidentity#NonEmptyResourceName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#BadRequestException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#ChimeArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 5
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkidentity#ChimeIdentityService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.chimesdkidentity#DescribeAppInstance"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "chime",
+          "cloudFormationName": "ChimeSDKIdentity",
+          "cloudTrailEventSource": "chimesdkidentity.amazonaws.com",
+          "endpointPrefix": "identity-chime",
+          "sdkId": "Chime SDK Identity"
+        },
+        "aws.auth#sigv4": {
+          "name": "chime"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon Chime SDK Identity",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://identity-chime-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://identity-chime-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://identity-chime.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://identity-chime.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2021-04-20"
+    },
+    "com.amazonaws.chimesdkidentity#DescribeAppInstance": {
+      "errors": [
+        {
+          "target": "com.amazonaws.chimesdkidentity#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkidentity#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkidentity#ServiceFailureException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkidentity#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkidentity#ThrottledClientException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkidentity#UnauthorizedClientException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.chimesdkidentity#DescribeAppInstanceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.chimesdkidentity#DescribeAppInstanceResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/app-instances/{AppInstanceArn}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.chimesdkidentity#DescribeAppInstanceRequest": {
+      "members": {
+        "AppInstanceArn": {
+          "target": "com.amazonaws.chimesdkidentity#ChimeArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#DescribeAppInstanceResponse": {
+      "members": {
+        "AppInstance": {
+          "target": "com.amazonaws.chimesdkidentity#AppInstance",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#ErrorCode": {
+      "members": {
+        "AccessDenied": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AccessDenied"
+          }
+        },
+        "BadRequest": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BadRequest"
+          }
+        },
+        "Conflict": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Conflict"
+          }
+        },
+        "Forbidden": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Forbidden"
+          }
+        },
+        "NotFound": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NotFound"
+          }
+        },
+        "PhoneNumberAssociationsExist": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PhoneNumberAssociationsExist"
+          }
+        },
+        "PreconditionFailed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PreconditionFailed"
+          }
+        },
+        "ResourceLimitExceeded": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ResourceLimitExceeded"
+          }
+        },
+        "ServiceFailure": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ServiceFailure"
+          }
+        },
+        "ServiceUnavailable": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ServiceUnavailable"
+          }
+        },
+        "Throttled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Throttled"
+          }
+        },
+        "Throttling": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Throttling"
+          }
+        },
+        "Unauthorized": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Unauthorized"
+          }
+        },
+        "Unprocessable": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Unprocessable"
+          }
+        },
+        "VoiceConnectorGroupAssociationsExist": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VoiceConnectorGroupAssociationsExist"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkidentity#ForbiddenException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#Metadata": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": ".*",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkidentity#NonEmptyResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u0085\\u00A0-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkidentity#ServiceFailureException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#ServiceUnavailableException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#String": {
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkidentity#ThrottledClientException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.chimesdkidentity#UnauthorizedClientException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

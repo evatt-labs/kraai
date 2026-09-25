@@ -1,0 +1,38 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ResilienceHubV2::Policy
+read:
+  model: resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json
+  operation: GetPolicy
+  identifier:
+    PolicyArn: policyArn
+  response: policy
+properties:
+  AssociatedServiceCount: associatedServiceCount
+  AvailabilitySlo:
+    member: availabilitySlo
+    properties:
+      Target: target
+  CreatedAt: createdAt
+  DataRecovery:
+    member: dataRecovery
+    properties:
+      TimeBetweenBackupsInMinutes: timeBetweenBackupsInMinutes
+  Description: description
+  MultiAz:
+    member: multiAz
+    properties:
+      DisasterRecoveryApproach: disasterRecoveryApproach
+      RpoInMinutes: rpoInMinutes
+      RtoInMinutes: rtoInMinutes
+  MultiRegion:
+    member: multiRegion
+    properties:
+      DisasterRecoveryApproach: disasterRecoveryApproach
+      RpoInMinutes: rpoInMinutes
+      RtoInMinutes: rtoInMinutes
+  Name: name
+  PolicyArn: policyArn
+  SharingEnabled: sharingEnabled
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

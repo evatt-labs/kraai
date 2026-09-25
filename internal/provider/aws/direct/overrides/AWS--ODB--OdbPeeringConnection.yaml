@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ODB::OdbPeeringConnection
+read:
+  model: odb/service/2024-08-20/odb-2024-08-20.json
+  operation: GetOdbPeeringConnection
+  identifier:
+    OdbPeeringConnectionArn: odbPeeringConnectionId
+  response: odbPeeringConnection
+properties:
+  DisplayName: displayName
+  OdbNetworkArn: odbNetworkArn
+  OdbPeeringConnectionArn: odbPeeringConnectionArn
+  OdbPeeringConnectionId: odbPeeringConnectionId
+  PeerNetworkArn: peerNetworkArn
+  PeerNetworkCidrs: peerNetworkCidrs
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

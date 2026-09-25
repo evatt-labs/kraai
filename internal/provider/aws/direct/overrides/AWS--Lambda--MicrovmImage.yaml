@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Lambda::MicrovmImage
+read:
+  model: lambda-microvms/service/2025-09-09/lambda-microvms-2025-09-09.json
+  operation: GetMicrovmImage
+  identifier:
+    ImageArn: imageIdentifier
+properties:
+  CreatedAt: createdAt
+  ImageArn: imageArn
+  LatestActiveImageVersion: latestActiveImageVersion
+  LatestFailedImageVersion: latestFailedImageVersion
+  Name: name
+  State: state
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

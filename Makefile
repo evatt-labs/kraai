@@ -82,9 +82,9 @@ direct-extract:
 
 # Read-only, needs AWS credentials: reads each direct type's live instances
 # both directly and through Cloud Control and compares them. UPDATE=1
-# rewrites the recorded evidence from a passing run.
+# merges the run into the recorded evidence; TYPES=AWS::X::Y,... limits it.
 direct-parity:
-	go test -tags integration ./internal/provider/aws/direct -run TestReadParity -count=1 -v $(if $(UPDATE),-args -update-evidence)
+	go test -tags integration ./internal/provider/aws/direct -run TestReadParity -count=1 -v -timeout 90m -args $(if $(UPDATE),-update-evidence) $(if $(TYPES),-types $(TYPES))
 
 # A local OpenTelemetry backend and the kraai dashboard: one grafana/otel-lgtm
 # container (collector, Prometheus, Tempo, Grafana), pinned by digest. Ports

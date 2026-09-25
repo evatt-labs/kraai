@@ -1,0 +1,31 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SSMQuickSetup::ConfigurationManager
+read:
+  model: ssm-quicksetup/service/2018-05-10/ssm-quicksetup-2018-05-10.json
+  operation: GetConfigurationManager
+  identifier:
+    ManagerArn: ManagerArn
+properties:
+  ConfigurationDefinitions:
+    member: ConfigurationDefinitions
+    properties:
+      LocalDeploymentAdministrationRoleArn: LocalDeploymentAdministrationRoleArn
+      LocalDeploymentExecutionRoleName: LocalDeploymentExecutionRoleName
+      Parameters: Parameters
+      Type: Type
+      TypeVersion: TypeVersion
+      id: Id
+  CreatedAt: CreatedAt
+  Description: Description
+  LastModifiedAt: LastModifiedAt
+  ManagerArn: ManagerArn
+  Name: Name
+  StatusSummaries:
+    member: StatusSummaries
+    properties:
+      LastUpdatedAt: LastUpdatedAt
+      Status: Status
+      StatusDetails: StatusDetails
+      StatusMessage: StatusMessage
+      StatusType: StatusType
+  Tags: Tags

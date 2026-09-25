@@ -1,0 +1,1062 @@
+{
+  "shapes": {
+    "com.amazonaws.resiliencehubv2#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 31
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-iso|aws-iso-[a-z]{1}|aws-us-gov):[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:([a-z]{2}-((iso[a-z]{0,1}-)|(gov-)){0,1}[a-z]+-[0-9]):[0-9]{12}:[A-Za-z0-9/][A-Za-z0-9:_/+.-]{0,1023}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#AvailabilitySlo": {
+      "members": {
+        "target": {
+          "target": "smithy.api#Double",
+          "traits": {
+            "smithy.api#range": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#DataRecoveryTargets": {
+      "members": {
+        "timeBetweenBackupsInMinutes": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "min": 0
+            }
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#EntityDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 500
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#EntityName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 60,
+          "min": 2
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9][A-Za-z0-9_\\-]{1,59}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#GetPolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.resiliencehubv2#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.resiliencehubv2#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.resiliencehubv2#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.resiliencehubv2#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.resiliencehubv2#GetPolicyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.resiliencehubv2#GetPolicyResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to retrieve a resilience policy",
+          "resources": {
+            "required": {
+              "policy": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        },
+        "smithy.api#http": {
+          "method": "GET",
+          "uri": "/v2/get-policy"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.resiliencehubv2#GetPolicyRequest": {
+      "members": {
+        "policyArn": {
+          "target": "com.amazonaws.resiliencehubv2#Arn",
+          "traits": {
+            "smithy.api#httpQuery": "policyArn",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.resiliencehubv2#IamPolicyResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#GetPolicyResponse": {
+      "members": {
+        "policy": {
+          "target": "com.amazonaws.resiliencehubv2#Policy",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#GetSystem": {
+      "errors": [
+        {
+          "target": "com.amazonaws.resiliencehubv2#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.resiliencehubv2#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.resiliencehubv2#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.resiliencehubv2#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.resiliencehubv2#GetSystemRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.resiliencehubv2#GetSystemResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to retrieve a system",
+          "resources": {
+            "required": {
+              "system": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        },
+        "smithy.api#http": {
+          "method": "GET",
+          "uri": "/v2/get-system"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.resiliencehubv2#GetSystemRequest": {
+      "members": {
+        "systemArn": {
+          "target": "com.amazonaws.resiliencehubv2#Arn",
+          "traits": {
+            "smithy.api#httpQuery": "systemArn",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.resiliencehubv2#IamSystemResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#GetSystemResponse": {
+      "members": {
+        "system": {
+          "target": "com.amazonaws.resiliencehubv2#System",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#KmsKeyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#LongDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 615
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#MultiAzDisasterRecoveryApproach": {
+      "members": {
+        "ACTIVE_ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE_ACTIVE"
+          }
+        },
+        "BACKUP_AND_RESTORE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BACKUP_AND_RESTORE"
+          }
+        },
+        "HOT_STANDBY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HOT_STANDBY"
+          }
+        },
+        "PILOT_LIGHT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PILOT_LIGHT"
+          }
+        },
+        "WARM_STANDBY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WARM_STANDBY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.resiliencehubv2#MultiAzTargets": {
+      "members": {
+        "disasterRecoveryApproach": {
+          "target": "com.amazonaws.resiliencehubv2#MultiAzDisasterRecoveryApproach",
+          "traits": {}
+        },
+        "rpoInMinutes": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "min": 0
+            }
+          }
+        },
+        "rtoInMinutes": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "min": 0
+            }
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#MultiRegionDisasterRecoveryApproach": {
+      "members": {
+        "ACTIVE_ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE_ACTIVE"
+          }
+        },
+        "BACKUP_AND_RESTORE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BACKUP_AND_RESTORE"
+          }
+        },
+        "HOT_STANDBY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HOT_STANDBY"
+          }
+        },
+        "PILOT_LIGHT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PILOT_LIGHT"
+          }
+        },
+        "WARM_STANDBY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WARM_STANDBY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.resiliencehubv2#MultiRegionTargets": {
+      "members": {
+        "disasterRecoveryApproach": {
+          "target": "com.amazonaws.resiliencehubv2#MultiRegionDisasterRecoveryApproach",
+          "traits": {}
+        },
+        "rpoInMinutes": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "min": 0
+            }
+          }
+        },
+        "rtoInMinutes": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "min": 0
+            }
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#NGRHServiceCore": {
+      "operations": [
+        {
+          "target": "com.amazonaws.resiliencehubv2#GetPolicy"
+        },
+        {
+          "target": "com.amazonaws.resiliencehubv2#GetSystem"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "resiliencehub",
+          "cloudFormationName": "Resiliencehub",
+          "cloudTrailEventSource": "resiliencehub.amazonaws.com",
+          "endpointPrefix": "resiliencehub",
+          "sdkId": "resiliencehubv2"
+        },
+        "aws.auth#sigv4": {
+          "name": "resiliencehub"
+        },
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*,authorization,date,x-amz-date,x-amz-security-token,x-amz-target,content-type,x-amz-content-sha256,x-amz-user-agent,x-amzn-platform-id,x-amzn-trace-id,amz-sdk-invocation-id,amz-sdk-request"
+          ]
+        },
+        "smithy.api#title": "AWS Resilience Hub V2",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://resiliencehub-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://resiliencehub-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://resiliencehub.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://resiliencehub.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2026-02-17"
+    },
+    "com.amazonaws.resiliencehubv2#OrganizationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 34,
+          "min": 12
+        },
+        "smithy.api#pattern": "^o-[a-z0-9]{10,32}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#OuId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 68,
+          "min": 16
+        },
+        "smithy.api#pattern": "^ou-[a-z0-9]{4,32}-[a-z0-9]{8,32}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#Policy": {
+      "members": {
+        "associatedServiceCount": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        },
+        "availabilitySlo": {
+          "target": "com.amazonaws.resiliencehubv2#AvailabilitySlo",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "dataRecovery": {
+          "target": "com.amazonaws.resiliencehubv2#DataRecoveryTargets",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.resiliencehubv2#LongDescription"
+        },
+        "kmsKeyId": {
+          "target": "com.amazonaws.resiliencehubv2#KmsKeyId"
+        },
+        "multiAz": {
+          "target": "com.amazonaws.resiliencehubv2#MultiAzTargets",
+          "traits": {}
+        },
+        "multiRegion": {
+          "target": "com.amazonaws.resiliencehubv2#MultiRegionTargets",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.resiliencehubv2#EntityName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "organizationId": {
+          "target": "com.amazonaws.resiliencehubv2#OrganizationId",
+          "traits": {}
+        },
+        "policyArn": {
+          "target": "com.amazonaws.resiliencehubv2#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "sharingEnabled": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.resiliencehubv2#TagMap"
+        },
+        "updatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.resiliencehubv2#IamPolicyResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#System": {
+      "members": {
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.resiliencehubv2#EntityDescription"
+        },
+        "kmsKeyId": {
+          "target": "com.amazonaws.resiliencehubv2#KmsKeyId"
+        },
+        "name": {
+          "target": "com.amazonaws.resiliencehubv2#EntityName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "organizationId": {
+          "target": "com.amazonaws.resiliencehubv2#OrganizationId",
+          "traits": {}
+        },
+        "ouId": {
+          "target": "com.amazonaws.resiliencehubv2#OuId",
+          "traits": {}
+        },
+        "sharingEnabled": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        },
+        "systemArn": {
+          "target": "com.amazonaws.resiliencehubv2#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "systemId": {
+          "target": "com.amazonaws.resiliencehubv2#SystemId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.resiliencehubv2#TagMap"
+        },
+        "updatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.resiliencehubv2#IamSystemResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#SystemId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^\\S{1,255}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^\\x00-\\x1f\\x22]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#TagMap": {
+      "key": {
+        "target": "com.amazonaws.resiliencehubv2#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.resiliencehubv2#TagValue"
+      }
+    },
+    "com.amazonaws.resiliencehubv2#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\x00-\\x1f\\x22]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.resiliencehubv2#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.resiliencehubv2#ValidationExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.resiliencehubv2#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.resiliencehubv2#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.resiliencehubv2#ValidationExceptionReason": {
+      "members": {
+        "DUPLICATE_VALUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DUPLICATE_VALUE"
+          }
+        },
+        "INVALID_FIELD_VALUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_FIELD_VALUE"
+          }
+        },
+        "MISSING_REQUIRED_FIELD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MISSING_REQUIRED_FIELD"
+          }
+        },
+        "OTHER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OTHER"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

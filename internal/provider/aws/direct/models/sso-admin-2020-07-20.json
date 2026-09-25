@@ -1,0 +1,1071 @@
+{
+  "shapes": {
+    "com.amazonaws.ssoadmin#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssoadmin#AccessDeniedExceptionMessage"
+        },
+        "Reason": {
+          "target": "com.amazonaws.ssoadmin#AccessDeniedExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#AccessDeniedExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#AccessDeniedExceptionReason": {
+      "members": {
+        "KMS_ACCESS_DENIED_EXCEPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KMS_AccessDeniedException"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^\\d{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#ApplicationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 10
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]{1,5}){0,3}:sso::\\d{12}:application/(sso)?ins-[a-zA-Z0-9-.]{16}/apl-[a-zA-Z0-9]{16}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#ApplicationNameType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\S\\s]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#ApplicationProviderArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 10
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]{1,5}){0,3}:sso::aws:applicationProvider/[a-zA-Z0-9-/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#ApplicationStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#ApplicationUrl": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^http(s)?:\\/\\/[-a-zA-Z0-9+&@#\\/%?=~_|!:,.;]*[-a-zA-Z0-9+&bb@#\\/%?=~_|]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#ApplicationVisibility": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#default": "ENABLED"
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#Date": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.ssoadmin#DescribeApplication": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssoadmin#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssoadmin#DescribeApplicationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssoadmin#DescribeApplicationResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssoadmin#DescribeApplicationRequest": {
+      "members": {
+        "ApplicationArn": {
+          "target": "com.amazonaws.ssoadmin#ApplicationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#DescribeApplicationResponse": {
+      "members": {
+        "ApplicationAccount": {
+          "target": "com.amazonaws.ssoadmin#AccountId",
+          "traits": {}
+        },
+        "ApplicationArn": {
+          "target": "com.amazonaws.ssoadmin#ApplicationArn",
+          "traits": {}
+        },
+        "ApplicationProviderArn": {
+          "target": "com.amazonaws.ssoadmin#ApplicationProviderArn",
+          "traits": {}
+        },
+        "CreatedDate": {
+          "target": "com.amazonaws.ssoadmin#Date",
+          "traits": {}
+        },
+        "CreatedFrom": {
+          "target": "com.amazonaws.ssoadmin#RegionName",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.ssoadmin#Description",
+          "traits": {}
+        },
+        "IdentityStoreArn": {
+          "target": "com.amazonaws.ssoadmin#IdentityStoreArn",
+          "traits": {}
+        },
+        "InstanceArn": {
+          "target": "com.amazonaws.ssoadmin#InstanceArn",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.ssoadmin#ApplicationNameType",
+          "traits": {}
+        },
+        "PortalOptions": {
+          "target": "com.amazonaws.ssoadmin#PortalOptions",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.ssoadmin#ApplicationStatus",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#DescribeInstance": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssoadmin#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssoadmin#DescribeInstanceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssoadmin#DescribeInstanceResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssoadmin#DescribeInstanceRequest": {
+      "members": {
+        "InstanceArn": {
+          "target": "com.amazonaws.ssoadmin#InstanceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#DescribeInstanceResponse": {
+      "members": {
+        "CreatedDate": {
+          "target": "com.amazonaws.ssoadmin#Date",
+          "traits": {}
+        },
+        "EncryptionConfigurationDetails": {
+          "target": "com.amazonaws.ssoadmin#EncryptionConfigurationDetails",
+          "traits": {}
+        },
+        "IdentityStoreArn": {
+          "target": "com.amazonaws.ssoadmin#InstanceIdentityStoreArn",
+          "traits": {}
+        },
+        "IdentityStoreId": {
+          "target": "com.amazonaws.ssoadmin#Id",
+          "traits": {}
+        },
+        "InstanceArn": {
+          "target": "com.amazonaws.ssoadmin#InstanceArn",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.ssoadmin#NameType",
+          "traits": {}
+        },
+        "OwnerAccountId": {
+          "target": "com.amazonaws.ssoadmin#AccountId",
+          "traits": {}
+        },
+        "PermissionSetsEnabled": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        },
+        "PrimaryRegion": {
+          "target": "com.amazonaws.ssoadmin#RegionName",
+          "traits": {}
+        },
+        "Regions": {
+          "target": "com.amazonaws.ssoadmin#RegionMetadataList",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.ssoadmin#InstanceStatus",
+          "traits": {}
+        },
+        "StatusReason": {
+          "target": "com.amazonaws.ssoadmin#Reason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#EncryptionConfigurationDetails": {
+      "members": {
+        "EncryptionStatus": {
+          "target": "com.amazonaws.ssoadmin#KmsKeyStatus",
+          "traits": {}
+        },
+        "EncryptionStatusReason": {
+          "target": "com.amazonaws.ssoadmin#Reason",
+          "traits": {}
+        },
+        "KeyType": {
+          "target": "com.amazonaws.ssoadmin#KmsKeyType",
+          "traits": {}
+        },
+        "KmsKeyArn": {
+          "target": "com.amazonaws.ssoadmin#KmsKeyArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#Id": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#IdentityStoreArn": {
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#InstanceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 10
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]{1,5}){0,3}:sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#InstanceIdentityStoreArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 93,
+          "min": 62
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]{1,5}){0,3}:identitystore::\\d{12}:identitystore/(d-[0-9a-f]{10}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#InstanceStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_IN_PROGRESS"
+          }
+        },
+        "DELETE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_IN_PROGRESS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#InternalFailureMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssoadmin#InternalFailureMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#IsPrimaryRegion": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ssoadmin#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws(-[a-z]{1,5}){0,3}:kms:([a-z]{2,}(-[a-z0-9]+)+){1}:[0-9]{12}:key/(mrk-[a-f0-9]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#KmsKeyStatus": {
+      "members": {
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "UPDATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#KmsKeyType": {
+      "members": {
+        "AWS_OWNED_KMS_KEY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_OWNED_KMS_KEY"
+          }
+        },
+        "CUSTOMER_MANAGED_KEY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CUSTOMER_MANAGED_KEY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#NameType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\w+=,.@-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#PortalOptions": {
+      "members": {
+        "SignInOptions": {
+          "target": "com.amazonaws.ssoadmin#SignInOptions",
+          "traits": {}
+        },
+        "Visibility": {
+          "target": "com.amazonaws.ssoadmin#ApplicationVisibility",
+          "traits": {
+            "smithy.api#default": "ENABLED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#Reason": {
+      "traits": {
+        "smithy.api#pattern": "^[\\p{L}\\p{M}\\p{Z}\\p{S}\\p{N}\\p{P}]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#RegionMetadata": {
+      "members": {
+        "AddedDate": {
+          "target": "com.amazonaws.ssoadmin#Date",
+          "traits": {}
+        },
+        "IsPrimaryRegion": {
+          "target": "com.amazonaws.ssoadmin#IsPrimaryRegion",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "RegionName": {
+          "target": "com.amazonaws.ssoadmin#RegionName",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.ssoadmin#RegionStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#RegionMetadataList": {
+      "member": {
+        "target": "com.amazonaws.ssoadmin#RegionMetadata"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssoadmin#RegionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-z]+-){2,3}\\d$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#RegionStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "ADDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDING"
+          }
+        },
+        "REMOVING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REMOVING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssoadmin#ResourceNotFoundMessage"
+        },
+        "Reason": {
+          "target": "com.amazonaws.ssoadmin#ResourceNotFoundExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#ResourceNotFoundExceptionReason": {
+      "members": {
+        "KMS_NOT_FOUND_EXCEPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KMS_NotFoundException"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#ResourceNotFoundMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#SWBExternalService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.ssoadmin#DescribeApplication"
+        },
+        {
+          "target": "com.amazonaws.ssoadmin#DescribeInstance"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "sso",
+          "cloudFormationName": "SSO",
+          "cloudTrailEventSource": "sso.amazonaws.com",
+          "endpointPrefix": "sso",
+          "sdkId": "SSO Admin"
+        },
+        "aws.auth#sigv4": {
+          "name": "sso"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "AWS Single Sign-On Admin",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sso-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sso.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sso-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sso.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://sso.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-07-20"
+    },
+    "com.amazonaws.ssoadmin#SignInOptions": {
+      "members": {
+        "ApplicationUrl": {
+          "target": "com.amazonaws.ssoadmin#ApplicationUrl",
+          "traits": {}
+        },
+        "Origin": {
+          "target": "com.amazonaws.ssoadmin#SignInOrigin",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#SignInOrigin": {
+      "members": {
+        "APPLICATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "APPLICATION"
+          }
+        },
+        "IDENTITY_CENTER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IDENTITY_CENTER"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssoadmin#ThrottlingExceptionMessage"
+        },
+        "Reason": {
+          "target": "com.amazonaws.ssoadmin#ThrottlingExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#ThrottlingExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#ThrottlingExceptionReason": {
+      "members": {
+        "KMS_THROTTLING_EXCEPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KMS_ThrottlingException"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssoadmin#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssoadmin#ValidationExceptionMessage"
+        },
+        "Reason": {
+          "target": "com.amazonaws.ssoadmin#ValidationExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#ValidationExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.ssoadmin#ValidationExceptionReason": {
+      "members": {
+        "KMS_DISABLED_EXCEPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KMS_DisabledException"
+          }
+        },
+        "KMS_INVALID_KEY_USAGE_EXCEPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KMS_InvalidKeyUsageException"
+          }
+        },
+        "KMS_INVALID_STATE_EXCEPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KMS_InvalidStateException"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

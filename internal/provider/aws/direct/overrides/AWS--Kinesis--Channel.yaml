@@ -1,0 +1,83 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Kinesis::Channel
+read:
+  model: kinesis/service/2013-12-02/kinesis-2013-12-02.json
+  operation: DescribeChannel
+  identifier:
+    ChannelARN: ChannelARN
+  response: ChannelDescription
+properties:
+  ChannelARN: ChannelARN
+  ChannelCreationTimestamp: ChannelCreationTimestamp
+  ChannelId: ChannelId
+  ChannelName: ChannelName
+  ChannelStatus: ChannelStatus
+  EncryptionConfiguration:
+    member: EncryptionConfiguration
+    properties:
+      EncryptionType: EncryptionType
+      KeyId: KeyId
+  LoggingConfiguration:
+    member: LoggingConfiguration
+    properties:
+      CloudWatchLogs:
+        member: CloudWatchLogs
+        properties:
+          Enabled: Enabled
+          LogGroupName: LogGroupName
+          LogStreamName: LogStreamName
+  S3DestinationConfiguration:
+    member: S3DestinationConfiguration
+    properties:
+      DataFreshnessInSeconds: DataFreshnessInSeconds
+      DeadLetterQueueS3Configuration:
+        member: DeadLetterQueueS3Configuration
+        properties:
+          BucketARN: BucketARN
+          ErrorOutputPrefix: ErrorOutputPrefix
+          ExpectedBucketOwner: ExpectedBucketOwner
+      StorageConfiguration:
+        member: StorageConfiguration
+        properties:
+          BucketARN: BucketARN
+          CompressionType: CompressionType
+          ExpectedBucketOwner: ExpectedBucketOwner
+          OutputKeyTemplate: OutputKeyTemplate
+          StorageClass: StorageClass
+  S3TablesDestinationConfiguration:
+    member: S3TablesDestinationConfiguration
+    properties:
+      DataFreshnessInSeconds: DataFreshnessInSeconds
+      DeadLetterQueueS3Configuration:
+        member: DeadLetterQueueS3Configuration
+        properties:
+          BucketARN: BucketARN
+          ErrorOutputPrefix: ErrorOutputPrefix
+          ExpectedBucketOwner: ExpectedBucketOwner
+      S3TablesConfigurationList:
+        member: S3TablesConfigurationList
+        properties:
+          CompressionType: CompressionType
+          Namespace: Namespace
+          PartitionSpec:
+            member: PartitionSpec
+            properties:
+              PartitionFields:
+                member: PartitionFields
+                properties:
+                  SourceName: SourceName
+                  Transform: Transform
+          TableBucketARN: TableBucketARN
+          TableName: TableName
+  ServiceExecutionRoleARN: ServiceExecutionRoleARN
+  StreamConfigurationList:
+    member: StreamConfigurationList
+    properties:
+      RecordConfiguration:
+        member: RecordConfiguration
+        properties:
+          GSRSchemaARN: GSRSchemaARN
+          RecordFormatType: RecordFormatType
+      StreamARN: StreamARN
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

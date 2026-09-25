@@ -1,0 +1,19 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Transfer::Profile
+read:
+  model: transfer/service/2018-11-05/transfer-2018-11-05.json
+  operation: DescribeProfile
+  identifier:
+    ProfileId: ProfileId
+  response: Profile
+properties:
+  Arn: Arn
+  As2Id: As2Id
+  CertificateIds: CertificateIds
+  ProfileId: ProfileId
+  ProfileType: ProfileType
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value

@@ -1,0 +1,25 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::VpcLattice::Service
+read:
+  model: vpc-lattice/service/2022-11-30/vpc-lattice-2022-11-30.json
+  operation: GetService
+  identifier:
+    Arn: serviceIdentifier
+properties:
+  Arn: arn
+  AuthType: authType
+  CertificateArn: certificateArn
+  CreatedAt: createdAt
+  CustomDomainName: customDomainName
+  DnsEntry:
+    member: dnsEntry
+    properties:
+      DomainName: domainName
+      HostedZoneId: hostedZoneId
+  Id: id
+  IdleTimeoutSeconds: idleTimeoutSeconds
+  LastUpdatedAt: lastUpdatedAt
+  Name: name
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

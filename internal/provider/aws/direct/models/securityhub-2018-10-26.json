@@ -1,0 +1,657 @@
+{
+  "shapes": {
+    "com.amazonaws.securityhub#AccessDeniedException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#ConflictException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#GetAggregatorV2": {
+      "errors": [
+        {
+          "target": "com.amazonaws.securityhub#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.securityhub#GetAggregatorV2Request"
+      },
+      "output": {
+        "target": "com.amazonaws.securityhub#GetAggregatorV2Response"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/aggregatorv2/get/{AggregatorV2Arn+}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.securityhub#GetAggregatorV2Request": {
+      "members": {
+        "AggregatorV2Arn": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#GetAggregatorV2Response": {
+      "members": {
+        "AggregationRegion": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {}
+        },
+        "AggregatorV2Arn": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {}
+        },
+        "LinkedRegions": {
+          "target": "com.amazonaws.securityhub#StringList",
+          "traits": {}
+        },
+        "RegionLinkingMode": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#GetFindingAggregator": {
+      "errors": [
+        {
+          "target": "com.amazonaws.securityhub#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#InternalException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#InvalidAccessException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#InvalidInputException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.securityhub#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.securityhub#GetFindingAggregatorRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.securityhub#GetFindingAggregatorResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/findingAggregator/get/{FindingAggregatorArn+}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.securityhub#GetFindingAggregatorRequest": {
+      "members": {
+        "FindingAggregatorArn": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#GetFindingAggregatorResponse": {
+      "members": {
+        "FindingAggregationRegion": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {}
+        },
+        "FindingAggregatorArn": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {}
+        },
+        "RegionLinkingMode": {
+          "target": "com.amazonaws.securityhub#NonEmptyString",
+          "traits": {}
+        },
+        "Regions": {
+          "target": "com.amazonaws.securityhub#StringList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#InternalException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#InternalServerException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#InvalidAccessException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#InvalidInputException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#LimitExceededException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#NonEmptyString": {
+      "traits": {
+        "smithy.api#pattern": "\\S"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.securityhub#ResourceNotFoundException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#SecurityHubAPIService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.securityhub#GetAggregatorV2"
+        },
+        {
+          "target": "com.amazonaws.securityhub#GetFindingAggregator"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "securityhub",
+          "cloudFormationName": "SecurityHub",
+          "cloudTrailEventSource": "securityhub.amazonaws.com",
+          "endpointPrefix": "securityhub",
+          "sdkId": "SecurityHub"
+        },
+        "aws.auth#sigv4": {
+          "name": "securityhub"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS SecurityHub",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://securityhub-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://securityhub-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://securityhub.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://securityhub.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-10-26"
+    },
+    "com.amazonaws.securityhub#StringList": {
+      "member": {
+        "target": "com.amazonaws.securityhub#NonEmptyString"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.securityhub#ThrottlingException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#ValidationException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

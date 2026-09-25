@@ -1,0 +1,894 @@
+{
+  "shapes": {
+    "com.amazonaws.sesv2#BadRequestException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#ContactListName": {
+      "type": "string"
+    },
+    "com.amazonaws.sesv2#Description": {
+      "type": "string"
+    },
+    "com.amazonaws.sesv2#DisplayName": {
+      "type": "string"
+    },
+    "com.amazonaws.sesv2#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.sesv2#GetContactList": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sesv2#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.sesv2#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.sesv2#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sesv2#GetContactListRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.sesv2#GetContactListResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v2/email/contact-lists/{ContactListName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.sesv2#GetContactListRequest": {
+      "members": {
+        "ContactListName": {
+          "target": "com.amazonaws.sesv2#ContactListName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#GetContactListResponse": {
+      "members": {
+        "ContactListName": {
+          "target": "com.amazonaws.sesv2#ContactListName",
+          "traits": {}
+        },
+        "CreatedTimestamp": {
+          "target": "com.amazonaws.sesv2#Timestamp",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.sesv2#Description",
+          "traits": {}
+        },
+        "LastUpdatedTimestamp": {
+          "target": "com.amazonaws.sesv2#Timestamp",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.sesv2#TagList",
+          "traits": {}
+        },
+        "Topics": {
+          "target": "com.amazonaws.sesv2#Topics",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#NotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#SimpleEmailService_v2": {
+      "operations": [
+        {
+          "target": "com.amazonaws.sesv2#GetContactList"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "ses",
+          "cloudFormationName": "SESv2",
+          "cloudTrailEventSource": "sesv2.amazonaws.com",
+          "endpointPrefix": "email",
+          "sdkId": "SESv2"
+        },
+        "aws.auth#sigv4": {
+          "name": "ses"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon Simple Email Service",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "EndpointId": {
+              "documentation": "Operation parameter for EndpointId",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "EndpointId"
+                    }
+                  ],
+                  "fn": "isSet"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "assign": "PartitionResult",
+                  "fn": "aws.partition"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "EndpointId"
+                        },
+                        true
+                      ],
+                      "fn": "isValidHostLabel"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            false
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "Endpoint"
+                                }
+                              ],
+                              "fn": "isSet"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4a",
+                                  "signingName": "ses",
+                                  "signingRegionSet": [
+                                    "*"
+                                  ]
+                                }
+                              ]
+                            },
+                            "url": {
+                              "ref": "Endpoint"
+                            }
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "name"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                "aws-us-gov"
+                              ],
+                              "fn": "stringEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {
+                                      "authSchemes": [
+                                        {
+                                          "name": "sigv4a",
+                                          "signingName": "ses",
+                                          "signingRegionSet": [
+                                            "*"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "url": "https://{EndpointId}.endpoints.email.us-gov.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "name"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                "aws-us-gov"
+                              ],
+                              "fn": "stringEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4a",
+                                  "signingName": "ses",
+                                  "signingRegionSet": [
+                                    "*"
+                                  ]
+                                }
+                              ]
+                            },
+                            "url": "https://{EndpointId}.endpoints.email.us-gov.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "fn": "not"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {
+                                      "authSchemes": [
+                                        {
+                                          "name": "sigv4a",
+                                          "signingName": "ses",
+                                          "signingRegionSet": [
+                                            "*"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "url": "https://{EndpointId}.endpoints.email.global.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "fn": "not"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4a",
+                                  "signingName": "ses",
+                                  "signingRegionSet": [
+                                    "*"
+                                  ]
+                                }
+                              ]
+                            },
+                            "url": "https://{EndpointId}.endpoints.email.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "error": "Invalid Configuration: FIPS is not supported with multi-region endpoints",
+                      "type": "error"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "EndpointId must be a valid host label",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://email-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://email-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://email.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://email.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2019-09-27"
+    },
+    "com.amazonaws.sesv2#SubscriptionStatus": {
+      "members": {
+        "OPT_IN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OPT_IN"
+          }
+        },
+        "OPT_OUT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OPT_OUT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.sesv2#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.sesv2#TagKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.sesv2#TagValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#TagKey": {
+      "type": "string"
+    },
+    "com.amazonaws.sesv2#TagList": {
+      "member": {
+        "target": "com.amazonaws.sesv2#Tag"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sesv2#TagValue": {
+      "type": "string"
+    },
+    "com.amazonaws.sesv2#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.sesv2#TooManyRequestsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#Topic": {
+      "members": {
+        "DefaultSubscriptionStatus": {
+          "target": "com.amazonaws.sesv2#SubscriptionStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.sesv2#Description",
+          "traits": {}
+        },
+        "DisplayName": {
+          "target": "com.amazonaws.sesv2#DisplayName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TopicName": {
+          "target": "com.amazonaws.sesv2#TopicName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#TopicName": {
+      "type": "string"
+    },
+    "com.amazonaws.sesv2#Topics": {
+      "member": {
+        "target": "com.amazonaws.sesv2#Topic"
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

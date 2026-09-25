@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ServiceDiscovery::HttpNamespace
+read:
+  model: servicediscovery/service/2017-03-14/servicediscovery-2017-03-14.json
+  operation: GetNamespace
+  identifier:
+    Id: Id
+  response: Namespace
+properties:
+  Arn: Arn
+  Description: Description
+  Id: Id
+  Name: Name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,2036 @@
+{
+  "shapes": {
+    "com.amazonaws.vpclattice#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#AccessLogDestinationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn(:[a-z0-9]+([.-][a-z0-9]+)*){2}(:([a-z0-9]+([.-][a-z0-9]+)*)?){2}:([^/].*)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#AccessLogSubscriptionArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:accesslogsubscription/als-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#AccessLogSubscriptionId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 21,
+          "min": 21
+        },
+        "smithy.api#pattern": "^als-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#AccessLogSubscriptionIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 17
+        },
+        "smithy.api#pattern": "^((als-[0-9a-z]{17})|(arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:accesslogsubscription/als-[0-9a-z]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#AuthType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "NONE",
+            "value": "NONE"
+          },
+          {
+            "name": "AWS_IAM",
+            "value": "AWS_IAM"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#Boolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.vpclattice#CertificateArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048
+        },
+        "smithy.api#pattern": "^(arn(:[a-z0-9]+([.-][a-z0-9]+)*){2}(:([a-z0-9]+([.-][a-z0-9]+)*)?){2}:certificate/[0-9a-z-]+)?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#DnsEntry": {
+      "members": {
+        "domainName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "hostedZoneId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#DnsOptions": {
+      "members": {
+        "privateDnsPreference": {
+          "target": "com.amazonaws.vpclattice#PrivateDnsPreference",
+          "traits": {}
+        },
+        "privateDnsSpecifiedDomains": {
+          "target": "com.amazonaws.vpclattice#PrivateDnsSpecifiedDomainsList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#DomainName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 3
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#DomainVerificationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9f\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:domainverification/dv-[a-fA-F0-9]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#DomainVerificationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 20
+        },
+        "smithy.api#pattern": "^dv-[a-fA-F0-9]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#DomainVerificationIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^((dv-[0-9a-z]{17})|(arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:domainverification/dv-[a-fA-F0-9]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#FailureCode": {
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#FailureMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#GetAccessLogSubscription": {
+      "errors": [
+        {
+          "target": "com.amazonaws.vpclattice#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.vpclattice#GetAccessLogSubscriptionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.vpclattice#GetAccessLogSubscriptionResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/accesslogsubscriptions/{accessLogSubscriptionIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.vpclattice#GetAccessLogSubscriptionRequest": {
+      "members": {
+        "accessLogSubscriptionIdentifier": {
+          "target": "com.amazonaws.vpclattice#AccessLogSubscriptionIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetAccessLogSubscriptionResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.vpclattice#AccessLogSubscriptionArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "destinationArn": {
+          "target": "com.amazonaws.vpclattice#AccessLogDestinationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "id": {
+          "target": "com.amazonaws.vpclattice#AccessLogSubscriptionId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "lastUpdatedAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceArn": {
+          "target": "com.amazonaws.vpclattice#ResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.vpclattice#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "serviceNetworkLogType": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkLogType",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetDomainVerification": {
+      "errors": [
+        {
+          "target": "com.amazonaws.vpclattice#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.vpclattice#GetDomainVerificationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.vpclattice#GetDomainVerificationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/domainverifications/{domainVerificationIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.vpclattice#GetDomainVerificationRequest": {
+      "members": {
+        "domainVerificationIdentifier": {
+          "target": "com.amazonaws.vpclattice#DomainVerificationIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetDomainVerificationResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.vpclattice#DomainVerificationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "domainName": {
+          "target": "com.amazonaws.vpclattice#DomainName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "id": {
+          "target": "com.amazonaws.vpclattice#DomainVerificationId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "lastVerifiedTime": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.vpclattice#VerificationStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.vpclattice#TagMap",
+          "traits": {}
+        },
+        "txtMethodConfig": {
+          "target": "com.amazonaws.vpclattice#TxtMethodConfig",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetService": {
+      "errors": [
+        {
+          "target": "com.amazonaws.vpclattice#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.vpclattice#GetServiceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.vpclattice#GetServiceResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/services/{serviceIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetwork": {
+      "errors": [
+        {
+          "target": "com.amazonaws.vpclattice#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/servicenetworks/{serviceNetworkIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkRequest": {
+      "members": {
+        "serviceNetworkIdentifier": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkResourceAssociation": {
+      "errors": [
+        {
+          "target": "com.amazonaws.vpclattice#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkResourceAssociationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkResourceAssociationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/servicenetworkresourceassociations/{serviceNetworkResourceAssociationIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkResourceAssociationRequest": {
+      "members": {
+        "serviceNetworkResourceAssociationIdentifier": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkResourceAssociationResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationArn",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "createdBy": {
+          "target": "com.amazonaws.vpclattice#AccountId",
+          "traits": {}
+        },
+        "dnsEntry": {
+          "target": "com.amazonaws.vpclattice#DnsEntry",
+          "traits": {}
+        },
+        "domainVerificationStatus": {
+          "target": "com.amazonaws.vpclattice#VerificationStatus",
+          "traits": {}
+        },
+        "failureCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "failureReason": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationId",
+          "traits": {}
+        },
+        "isManagedAssociation": {
+          "target": "com.amazonaws.vpclattice#Boolean",
+          "traits": {}
+        },
+        "lastUpdatedAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "privateDnsEnabled": {
+          "target": "com.amazonaws.vpclattice#Boolean",
+          "traits": {}
+        },
+        "privateDnsEntry": {
+          "target": "com.amazonaws.vpclattice#DnsEntry",
+          "traits": {}
+        },
+        "resourceConfigurationArn": {
+          "target": "com.amazonaws.vpclattice#ResourceConfigurationArn",
+          "traits": {}
+        },
+        "resourceConfigurationId": {
+          "target": "com.amazonaws.vpclattice#ResourceConfigurationId",
+          "traits": {}
+        },
+        "resourceConfigurationName": {
+          "target": "com.amazonaws.vpclattice#ResourceConfigurationName",
+          "traits": {}
+        },
+        "serviceNetworkArn": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkIdentifierWithoutRegex",
+          "traits": {}
+        },
+        "serviceNetworkId": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkIdentifierWithoutRegex",
+          "traits": {}
+        },
+        "serviceNetworkName": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkNameWithoutRegex",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationStatus",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkArn",
+          "traits": {}
+        },
+        "authType": {
+          "target": "com.amazonaws.vpclattice#AuthType",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkId",
+          "traits": {}
+        },
+        "lastUpdatedAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkName",
+          "traits": {}
+        },
+        "numberOfAssociatedServices": {
+          "target": "smithy.api#Long",
+          "traits": {}
+        },
+        "numberOfAssociatedVPCs": {
+          "target": "smithy.api#Long",
+          "traits": {}
+        },
+        "sharingConfig": {
+          "target": "com.amazonaws.vpclattice#SharingConfig",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkServiceAssociation": {
+      "errors": [
+        {
+          "target": "com.amazonaws.vpclattice#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkServiceAssociationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkServiceAssociationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/servicenetworkserviceassociations/{serviceNetworkServiceAssociationIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkServiceAssociationRequest": {
+      "members": {
+        "serviceNetworkServiceAssociationIdentifier": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkServiceAssociationIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkServiceAssociationResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkServiceAssociationArn",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "createdBy": {
+          "target": "com.amazonaws.vpclattice#AccountId",
+          "traits": {}
+        },
+        "customDomainName": {
+          "target": "com.amazonaws.vpclattice#ServiceCustomDomainName",
+          "traits": {}
+        },
+        "dnsEntry": {
+          "target": "com.amazonaws.vpclattice#DnsEntry",
+          "traits": {}
+        },
+        "failureCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "failureMessage": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkServiceAssociationIdentifier",
+          "traits": {}
+        },
+        "serviceArn": {
+          "target": "com.amazonaws.vpclattice#ServiceArn",
+          "traits": {}
+        },
+        "serviceId": {
+          "target": "com.amazonaws.vpclattice#ServiceId",
+          "traits": {}
+        },
+        "serviceName": {
+          "target": "com.amazonaws.vpclattice#ServiceName",
+          "traits": {}
+        },
+        "serviceNetworkArn": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkArn",
+          "traits": {}
+        },
+        "serviceNetworkId": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkId",
+          "traits": {}
+        },
+        "serviceNetworkName": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkServiceAssociationStatus",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkVpcAssociation": {
+      "errors": [
+        {
+          "target": "com.amazonaws.vpclattice#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkVpcAssociationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.vpclattice#GetServiceNetworkVpcAssociationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/servicenetworkvpcassociations/{serviceNetworkVpcAssociationIdentifier}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkVpcAssociationRequest": {
+      "members": {
+        "serviceNetworkVpcAssociationIdentifier": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceNetworkVpcAssociationResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationArn",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "createdBy": {
+          "target": "com.amazonaws.vpclattice#AccountId",
+          "traits": {}
+        },
+        "dnsOptions": {
+          "target": "com.amazonaws.vpclattice#DnsOptions",
+          "traits": {}
+        },
+        "failureCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "failureMessage": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationId",
+          "traits": {}
+        },
+        "lastUpdatedAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "privateDnsEnabled": {
+          "target": "com.amazonaws.vpclattice#Boolean",
+          "traits": {}
+        },
+        "securityGroupIds": {
+          "target": "com.amazonaws.vpclattice#SecurityGroupList",
+          "traits": {}
+        },
+        "serviceNetworkArn": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkArn",
+          "traits": {}
+        },
+        "serviceNetworkId": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkId",
+          "traits": {}
+        },
+        "serviceNetworkName": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationStatus",
+          "traits": {}
+        },
+        "vpcId": {
+          "target": "com.amazonaws.vpclattice#VpcId",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceRequest": {
+      "members": {
+        "serviceIdentifier": {
+          "target": "com.amazonaws.vpclattice#ServiceIdentifier",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#GetServiceResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.vpclattice#ServiceArn",
+          "traits": {}
+        },
+        "authType": {
+          "target": "com.amazonaws.vpclattice#AuthType",
+          "traits": {}
+        },
+        "certificateArn": {
+          "target": "com.amazonaws.vpclattice#CertificateArn",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "customDomainName": {
+          "target": "com.amazonaws.vpclattice#ServiceCustomDomainName",
+          "traits": {}
+        },
+        "dnsEntry": {
+          "target": "com.amazonaws.vpclattice#DnsEntry",
+          "traits": {}
+        },
+        "failureCode": {
+          "target": "com.amazonaws.vpclattice#FailureCode",
+          "traits": {}
+        },
+        "failureMessage": {
+          "target": "com.amazonaws.vpclattice#FailureMessage",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.vpclattice#ServiceId",
+          "traits": {}
+        },
+        "idleTimeoutSeconds": {
+          "target": "com.amazonaws.vpclattice#IdleTimeoutSeconds",
+          "traits": {}
+        },
+        "lastUpdatedAt": {
+          "target": "com.amazonaws.vpclattice#Timestamp",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.vpclattice#ServiceName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.vpclattice#ServiceStatus",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#IdleTimeoutSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 600,
+          "min": 60
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.vpclattice#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#MercuryControlPlane": {
+      "operations": [
+        {
+          "target": "com.amazonaws.vpclattice#GetAccessLogSubscription"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#GetDomainVerification"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#GetService"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#GetServiceNetwork"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#GetServiceNetworkResourceAssociation"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#GetServiceNetworkServiceAssociation"
+        },
+        {
+          "target": "com.amazonaws.vpclattice#GetServiceNetworkVpcAssociation"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "vpc-lattice",
+          "cloudFormationName": "VpcLattice",
+          "cloudTrailEventSource": "vpc-lattice.amazonaws.com",
+          "sdkId": "VPC Lattice"
+        },
+        "aws.auth#sigv4": {
+          "name": "vpc-lattice"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ]
+        },
+        "smithy.api#title": "Amazon VPC Lattice",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://vpc-lattice-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://vpc-lattice-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://vpc-lattice.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://vpc-lattice.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2022-11-30"
+    },
+    "com.amazonaws.vpclattice#PrivateDnsPreference": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "VERIFIED_DOMAINS_ONLY",
+            "value": "VERIFIED_DOMAINS_ONLY"
+          },
+          {
+            "name": "ALL_DOMAINS",
+            "value": "ALL_DOMAINS"
+          },
+          {
+            "name": "VERIFIED_DOMAINS_AND_SPECIFIED_DOMAINS",
+            "value": "VERIFIED_DOMAINS_AND_SPECIFIED_DOMAINS"
+          },
+          {
+            "name": "SPECIFIED_DOMAINS_ONLY",
+            "value": "SPECIFIED_DOMAINS_ONLY"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#PrivateDnsSpecifiedDomain": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#PrivateDnsSpecifiedDomainsList": {
+      "member": {
+        "target": "com.amazonaws.vpclattice#PrivateDnsSpecifiedDomain"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.vpclattice#ResourceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn(:[a-z0-9]+([.-][a-z0-9]+)*){2}(:([a-z0-9]+([.-][a-z0-9]+)*)?){2}:((servicenetwork/sn)|(service/svc)|(resourceconfiguration/rcfg))-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ResourceConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9f\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:resourceconfiguration/rcfg-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ResourceConfigurationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 22
+        },
+        "smithy.api#pattern": "^rcfg-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ResourceConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 3
+        },
+        "smithy.api#pattern": "^(?!rcfg-)(?![-])(?!.*[-]$)(?!.*[-]{2})[a-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ResourceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 20
+        },
+        "smithy.api#pattern": "^((sn)|(svc))-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#SecurityGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 5
+        },
+        "smithy.api#pattern": "^sg-(([0-9a-z]{8})|([0-9a-z]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#SecurityGroupList": {
+      "member": {
+        "target": "com.amazonaws.vpclattice#SecurityGroupId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.vpclattice#ServiceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:service/svc-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceCustomDomainName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 3
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 21,
+          "min": 21
+        },
+        "smithy.api#pattern": "^svc-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 17
+        },
+        "smithy.api#pattern": "^((svc-[0-9a-z]{17})|(arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:service/svc-[0-9a-z]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 3
+        },
+        "smithy.api#pattern": "^(?!svc-)(?![-])(?!.*[-]$)(?!.*[-]{2})[a-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 32
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetwork/sn-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 20
+        },
+        "smithy.api#pattern": "^sn-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 3
+        },
+        "smithy.api#pattern": "^((sn-[0-9a-z]{17})|(arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetwork/sn-[0-9a-z]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkIdentifierWithoutRegex": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 3
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkLogType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "Indicates logs for Lattice services.",
+            "name": "SERVICE",
+            "value": "SERVICE"
+          },
+          {
+            "documentation": "Indicates logs for Lattice resource configurations.",
+            "name": "RESOURCE",
+            "value": "RESOURCE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^(?![-])(?!.*[-]$)(?!.*[-]{2})[a-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkNameWithoutRegex": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 3
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 22
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetworkresourceassociation/snra-[0-9a-f]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 22
+        },
+        "smithy.api#pattern": "^snra-[0-9a-f]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 22
+        },
+        "smithy.api#pattern": "^((snra-[0-9a-z]{17})|(arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetworkresourceassociation/snra-[0-9a-f]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkResourceAssociationStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "ServiceNetwork and Service association creation in progress",
+            "name": "CREATE_IN_PROGRESS",
+            "value": "CREATE_IN_PROGRESS"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association is active",
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association is partial",
+            "name": "PARTIAL",
+            "value": "PARTIAL"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association deletion in progress",
+            "name": "DELETE_IN_PROGRESS",
+            "value": "DELETE_IN_PROGRESS"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association creation failed.",
+            "name": "CREATE_FAILED",
+            "value": "CREATE_FAILED"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association deletion failed",
+            "name": "DELETE_FAILED",
+            "value": "DELETE_FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkServiceAssociationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetworkserviceassociation/snsa-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkServiceAssociationIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 17
+        },
+        "smithy.api#pattern": "^((snsa-[0-9a-z]{17})|(arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetworkserviceassociation/snsa-[0-9a-z]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkServiceAssociationStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "ServiceNetwork and Service association creation in progress",
+            "name": "CREATE_IN_PROGRESS",
+            "value": "CREATE_IN_PROGRESS"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association is active",
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association deletion in progress",
+            "name": "DELETE_IN_PROGRESS",
+            "value": "DELETE_IN_PROGRESS"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association creation failed.",
+            "name": "CREATE_FAILED",
+            "value": "CREATE_FAILED"
+          },
+          {
+            "documentation": "ServiceNetwork and Service association deletion failed",
+            "name": "DELETE_FAILED",
+            "value": "DELETE_FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetworkvpcassociation/snva-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 22
+        },
+        "smithy.api#pattern": "^snva-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 17
+        },
+        "smithy.api#pattern": "^((snva-[0-9a-z]{17})|(arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:servicenetworkvpcassociation/snva-[0-9a-z]{17}))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceNetworkVpcAssociationStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "ServiceNetwork and Vpc association creation in progress",
+            "name": "CREATE_IN_PROGRESS",
+            "value": "CREATE_IN_PROGRESS"
+          },
+          {
+            "documentation": "ServiceNetwork and Vpc association is active",
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "documentation": "ServiceNetwork and Vpc association update in progress",
+            "name": "UPDATE_IN_PROGRESS",
+            "value": "UPDATE_IN_PROGRESS"
+          },
+          {
+            "documentation": "ServiceNetwork and Vpc association deletion in progress",
+            "name": "DELETE_IN_PROGRESS",
+            "value": "DELETE_IN_PROGRESS"
+          },
+          {
+            "documentation": "ServiceNetwork and Vpc association creation failed.",
+            "name": "CREATE_FAILED",
+            "value": "CREATE_FAILED"
+          },
+          {
+            "documentation": "ServiceNetwork and Vpc association deletion failed",
+            "name": "DELETE_FAILED",
+            "value": "DELETE_FAILED"
+          },
+          {
+            "documentation": "ServiceNetwork and Vpc association update failed",
+            "name": "UPDATE_FAILED",
+            "value": "UPDATE_FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ServiceStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "Service is active.",
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "documentation": "Service creation in progress.",
+            "name": "CREATE_IN_PROGRESS",
+            "value": "CREATE_IN_PROGRESS"
+          },
+          {
+            "documentation": "Service deletion in progress",
+            "name": "DELETE_IN_PROGRESS",
+            "value": "DELETE_IN_PROGRESS"
+          },
+          {
+            "documentation": "Service creation failed",
+            "name": "CREATE_FAILED",
+            "value": "CREATE_FAILED"
+          },
+          {
+            "documentation": "Service deletion failed.",
+            "name": "DELETE_FAILED",
+            "value": "DELETE_FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#SharingConfig": {
+      "members": {
+        "enabled": {
+          "target": "com.amazonaws.vpclattice#Boolean",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#TagMap": {
+      "key": {
+        "target": "com.amazonaws.vpclattice#TagKey",
+        "traits": {
+          "smithy.api#documentation": "The key of the tag.\n\nConstraints: Tag keys are case-sensitive and accept a maximum of 128 Unicode characters.\nValid characters are Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - @\nMay not begin with `aws:`.\n"
+        }
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.vpclattice#TagValue",
+        "traits": {
+          "smithy.api#documentation": "The value of the tag.\n\nConstraints: Tag values are case-sensitive and accept a maximum of 256 Unicode characters.\nValid characters are Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - @\n"
+        }
+      }
+    },
+    "com.amazonaws.vpclattice#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#Timestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.vpclattice#TxtMethodConfig": {
+      "members": {
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "value": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.vpclattice#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.vpclattice#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.vpclattice#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.vpclattice#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.vpclattice#ValidationExceptionReason": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "UNKNOWN_OPERATION",
+            "value": "unknownOperation"
+          },
+          {
+            "name": "CANNOT_PARSE",
+            "value": "cannotParse"
+          },
+          {
+            "name": "FIELD_VALIDATION_FAILED",
+            "value": "fieldValidationFailed"
+          },
+          {
+            "name": "OTHER",
+            "value": "other"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#VerificationStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "VERIFIED",
+            "value": "VERIFIED"
+          },
+          {
+            "name": "PENDING",
+            "value": "PENDING"
+          },
+          {
+            "name": "VERIFICATION_TIMED_OUT",
+            "value": "VERIFICATION_TIMED_OUT"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.vpclattice#VpcId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 5
+        },
+        "smithy.api#pattern": "^vpc-(([0-9a-z]{8})|([0-9a-z]{17}))$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

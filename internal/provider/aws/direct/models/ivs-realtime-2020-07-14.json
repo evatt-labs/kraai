@@ -1,0 +1,1454 @@
+{
+  "shapes": {
+    "com.amazonaws.ivsrealtime#AccessDeniedException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivsrealtime#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#AmazonInteractiveVideoServiceRealTime": {
+      "operations": [
+        {
+          "target": "com.amazonaws.ivsrealtime#GetEncoderConfiguration"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#GetIngestConfiguration"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#GetPublicKey"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#GetStorageConfiguration"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "ivs",
+          "cloudFormationName": "IVS",
+          "cloudTrailEventSource": "ivs.amazonaws.com",
+          "endpointPrefix": "ivsrealtime",
+          "sdkId": "IVS RealTime"
+        },
+        "aws.auth#sigv4": {
+          "name": "ivs"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "Content-Type",
+            "X-Api-Key",
+            "X-Amz-Content-Sha256",
+            "X-Amz-User-Agent",
+            "amz-sdk-invocation-id",
+            "amz-sdk-request"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-errormessage",
+            "x-amzn-trace-id",
+            "x-amzn-requestid",
+            "x-amz-apigw-id",
+            "date"
+          ]
+        },
+        "smithy.api#title": "Amazon Interactive Video Service RealTime",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://ivsrealtime-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://ivsrealtime-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://ivsrealtime.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ivsrealtime.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-07-14"
+    },
+    "com.amazonaws.ivsrealtime#Bitrate": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 8500000,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ivsrealtime#ConflictException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivsrealtime#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#EncoderConfiguration": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#EncoderConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.ivsrealtime#EncoderConfigurationName",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ivsrealtime#Tags",
+          "traits": {}
+        },
+        "video": {
+          "target": "com.amazonaws.ivsrealtime#Video",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#EncoderConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:encoder-configuration/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#EncoderConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#Framerate": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 60,
+          "min": 1
+        }
+      },
+      "type": "float"
+    },
+    "com.amazonaws.ivsrealtime#GetEncoderConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivsrealtime#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivsrealtime#GetEncoderConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivsrealtime#GetEncoderConfigurationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetEncoderConfiguration"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivsrealtime#GetEncoderConfigurationRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#EncoderConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#GetEncoderConfigurationResponse": {
+      "members": {
+        "encoderConfiguration": {
+          "target": "com.amazonaws.ivsrealtime#EncoderConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#GetIngestConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivsrealtime#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivsrealtime#GetIngestConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivsrealtime#GetIngestConfigurationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetIngestConfiguration"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivsrealtime#GetIngestConfigurationRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#IngestConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#GetIngestConfigurationResponse": {
+      "members": {
+        "ingestConfiguration": {
+          "target": "com.amazonaws.ivsrealtime#IngestConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#GetPublicKey": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivsrealtime#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivsrealtime#GetPublicKeyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivsrealtime#GetPublicKeyResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetPublicKey"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivsrealtime#GetPublicKeyRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#PublicKeyArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#GetPublicKeyResponse": {
+      "members": {
+        "publicKey": {
+          "target": "com.amazonaws.ivsrealtime#PublicKey",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#GetStorageConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivsrealtime#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.ivsrealtime#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivsrealtime#GetStorageConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivsrealtime#GetStorageConfigurationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetStorageConfiguration"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivsrealtime#GetStorageConfigurationRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#StorageConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#GetStorageConfigurationResponse": {
+      "members": {
+        "storageConfiguration": {
+          "target": "com.amazonaws.ivsrealtime#StorageConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#Height": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1920,
+          "min": 2
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ivsrealtime#IngestConfiguration": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#IngestConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "attributes": {
+          "target": "com.amazonaws.ivsrealtime#ParticipantAttributes",
+          "traits": {}
+        },
+        "ingestProtocol": {
+          "target": "com.amazonaws.ivsrealtime#IngestProtocol",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.ivsrealtime#IngestConfigurationName",
+          "traits": {}
+        },
+        "participantId": {
+          "target": "com.amazonaws.ivsrealtime#ParticipantId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "redundantIngest": {
+          "target": "com.amazonaws.ivsrealtime#RedundantIngest",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "redundantIngestCredentials": {
+          "target": "com.amazonaws.ivsrealtime#RedundantIngestCredentials",
+          "traits": {}
+        },
+        "stageArn": {
+          "target": "com.amazonaws.ivsrealtime#IngestConfigurationStageArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "state": {
+          "target": "com.amazonaws.ivsrealtime#IngestConfigurationState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "streamKey": {
+          "target": "com.amazonaws.ivsrealtime#StreamKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.ivsrealtime#Tags",
+          "traits": {}
+        },
+        "userId": {
+          "target": "com.amazonaws.ivsrealtime#UserId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#IngestConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:ingest-configuration/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#IngestConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#IngestConfigurationStageArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^^$|^arn:aws:ivs:[a-z0-9-]+:[0-9]+:stage/[a-zA-Z0-9-]+$$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#IngestConfigurationState": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "name": "INACTIVE",
+            "value": "INACTIVE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#IngestProtocol": {
+      "members": {
+        "RTMP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RTMP"
+          }
+        },
+        "RTMPS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RTMPS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ivsrealtime#InternalServerException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivsrealtime#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#ParticipantAttributes": {
+      "key": {
+        "target": "com.amazonaws.ivsrealtime#String"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.ivsrealtime#String"
+      }
+    },
+    "com.amazonaws.ivsrealtime#ParticipantId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#PublicKey": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#PublicKeyArn",
+          "traits": {}
+        },
+        "fingerprint": {
+          "target": "com.amazonaws.ivsrealtime#PublicKeyFingerprint",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.ivsrealtime#PublicKeyName",
+          "traits": {}
+        },
+        "publicKeyMaterial": {
+          "target": "com.amazonaws.ivsrealtime#PublicKeyMaterial",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ivsrealtime#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#PublicKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:public-key/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#PublicKeyFingerprint": {
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#PublicKeyMaterial": {
+      "traits": {
+        "smithy.api#pattern": "-----BEGIN PUBLIC KEY-----\\r?\\n([a-zA-Z0-9+/=\\r\\n]+)\\r?\\n-----END PUBLIC KEY-----(\\r?\\n)?"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#PublicKeyName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#RedundantIngest": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ivsrealtime#RedundantIngestCredential": {
+      "members": {
+        "participantId": {
+          "target": "com.amazonaws.ivsrealtime#ParticipantId",
+          "traits": {}
+        },
+        "streamKey": {
+          "target": "com.amazonaws.ivsrealtime#StreamKey",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#RedundantIngestCredentials": {
+      "member": {
+        "target": "com.amazonaws.ivsrealtime#RedundantIngestCredential"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ivsrealtime#ResourceNotFoundException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivsrealtime#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#S3BucketName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-z0-9-.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#S3StorageConfiguration": {
+      "members": {
+        "bucketName": {
+          "target": "com.amazonaws.ivsrealtime#S3BucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#ServiceQuotaExceededException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivsrealtime#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#StorageConfiguration": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivsrealtime#StorageConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.ivsrealtime#StorageConfigurationName",
+          "traits": {}
+        },
+        "s3": {
+          "target": "com.amazonaws.ivsrealtime#S3StorageConfiguration",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ivsrealtime#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#StorageConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:storage-configuration/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#StorageConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#StreamKey": {
+      "traits": {
+        "smithy.api#pattern": "^rt_[0-9]+_[a-z0-9-]+_[a-zA-Z0-9-]+_.+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#String": {
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#Tags": {
+      "key": {
+        "target": "com.amazonaws.ivsrealtime#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.ivsrealtime#TagValue"
+      }
+    },
+    "com.amazonaws.ivsrealtime#UserId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivsrealtime#ValidationException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivsrealtime#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#Video": {
+      "members": {
+        "bitrate": {
+          "target": "com.amazonaws.ivsrealtime#Bitrate",
+          "traits": {}
+        },
+        "framerate": {
+          "target": "com.amazonaws.ivsrealtime#Framerate",
+          "traits": {}
+        },
+        "height": {
+          "target": "com.amazonaws.ivsrealtime#Height",
+          "traits": {}
+        },
+        "width": {
+          "target": "com.amazonaws.ivsrealtime#Width",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivsrealtime#Width": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1920,
+          "min": 2
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ivsrealtime#errorMessage": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

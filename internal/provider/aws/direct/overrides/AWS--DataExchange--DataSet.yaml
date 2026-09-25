@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataExchange::DataSet
+read:
+  model: dataexchange/service/2017-07-25/dataexchange-2017-07-25.json
+  operation: GetDataSet
+  identifier:
+    Arn: DataSetId
+properties:
+  Arn: Arn
+  AssetType: AssetType
+  CreatedAt: CreatedAt
+  Description: Description
+  Id: Id
+  Name: Name
+  Origin: Origin
+  UpdatedAt: UpdatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

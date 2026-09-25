@@ -1,0 +1,1664 @@
+{
+  "shapes": {
+    "com.amazonaws.ssm#Account": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#Accounts": {
+      "member": {
+        "target": "com.amazonaws.ssm#Account"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#Alarm": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ssm#AlarmName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AlarmConfiguration": {
+      "members": {
+        "Alarms": {
+          "target": "com.amazonaws.ssm#AlarmList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "IgnorePollAlarmFailure": {
+          "target": "com.amazonaws.ssm#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AlarmList": {
+      "member": {
+        "target": "com.amazonaws.ssm#Alarm"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#AlarmName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!\\s*$).+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#AlarmStateInformation": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ssm#AlarmName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "State": {
+          "target": "com.amazonaws.ssm#ExternalAlarmState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AlarmStateInformationList": {
+      "member": {
+        "target": "com.amazonaws.ssm#AlarmStateInformation"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#AmazonSSM": {
+      "operations": [
+        {
+          "target": "com.amazonaws.ssm#DescribeAssociation"
+        },
+        {
+          "target": "com.amazonaws.ssm#GetMaintenanceWindow"
+        },
+        {
+          "target": "com.amazonaws.ssm#GetServiceSetting"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "ssm",
+          "cloudFormationName": "SSM",
+          "cloudTrailEventSource": "ssm.amazonaws.com",
+          "endpointPrefix": "ssm",
+          "sdkId": "SSM"
+        },
+        "aws.auth#sigv4": {
+          "name": "ssm"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "Amazon Simple Systems Manager (SSM)",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://ssm.amazonaws.com/doc/2014-11-06/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ssm-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ssm.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ssm-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ssm.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://ssm.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2014-11-06"
+    },
+    "com.amazonaws.ssm#ApplyOnlyAtCronInterval": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ssm#AssociationComplianceSeverity": {
+      "members": {
+        "Critical": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CRITICAL"
+          }
+        },
+        "High": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HIGH"
+          }
+        },
+        "Low": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LOW"
+          }
+        },
+        "Medium": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEDIUM"
+          }
+        },
+        "Unspecified": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNSPECIFIED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssm#AssociationDescription": {
+      "members": {
+        "AlarmConfiguration": {
+          "target": "com.amazonaws.ssm#AlarmConfiguration"
+        },
+        "ApplyOnlyAtCronInterval": {
+          "target": "com.amazonaws.ssm#ApplyOnlyAtCronInterval",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "AssociationDispatchAssumeRole": {
+          "target": "com.amazonaws.ssm#AssociationDispatchAssumeRoleArn",
+          "traits": {}
+        },
+        "AssociationId": {
+          "target": "com.amazonaws.ssm#AssociationId",
+          "traits": {}
+        },
+        "AssociationName": {
+          "target": "com.amazonaws.ssm#AssociationName",
+          "traits": {}
+        },
+        "AssociationVersion": {
+          "target": "com.amazonaws.ssm#AssociationVersion",
+          "traits": {}
+        },
+        "AutomationTargetParameterName": {
+          "target": "com.amazonaws.ssm#AutomationTargetParameterName",
+          "traits": {}
+        },
+        "CalendarNames": {
+          "target": "com.amazonaws.ssm#CalendarNameOrARNList",
+          "traits": {}
+        },
+        "ComplianceSeverity": {
+          "target": "com.amazonaws.ssm#AssociationComplianceSeverity",
+          "traits": {}
+        },
+        "Date": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "DocumentVersion": {
+          "target": "com.amazonaws.ssm#DocumentVersion",
+          "traits": {}
+        },
+        "Duration": {
+          "target": "com.amazonaws.ssm#Duration",
+          "traits": {}
+        },
+        "InstanceId": {
+          "target": "com.amazonaws.ssm#InstanceId",
+          "traits": {}
+        },
+        "LastExecutionDate": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "LastSuccessfulExecutionDate": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "LastUpdateAssociationDate": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "MaxConcurrency": {
+          "target": "com.amazonaws.ssm#MaxConcurrency",
+          "traits": {}
+        },
+        "MaxErrors": {
+          "target": "com.amazonaws.ssm#MaxErrors",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.ssm#DocumentARN",
+          "traits": {}
+        },
+        "OutputLocation": {
+          "target": "com.amazonaws.ssm#InstanceAssociationOutputLocation",
+          "traits": {}
+        },
+        "Overview": {
+          "target": "com.amazonaws.ssm#AssociationOverview",
+          "traits": {}
+        },
+        "Parameters": {
+          "target": "com.amazonaws.ssm#Parameters",
+          "traits": {}
+        },
+        "ScheduleExpression": {
+          "target": "com.amazonaws.ssm#ScheduleExpression",
+          "traits": {}
+        },
+        "ScheduleOffset": {
+          "target": "com.amazonaws.ssm#ScheduleOffset",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.ssm#AssociationStatus",
+          "traits": {}
+        },
+        "SyncCompliance": {
+          "target": "com.amazonaws.ssm#AssociationSyncCompliance",
+          "traits": {}
+        },
+        "TargetLocations": {
+          "target": "com.amazonaws.ssm#TargetLocations",
+          "traits": {}
+        },
+        "TargetMaps": {
+          "target": "com.amazonaws.ssm#TargetMaps",
+          "traits": {}
+        },
+        "Targets": {
+          "target": "com.amazonaws.ssm#Targets",
+          "traits": {}
+        },
+        "TriggeredAlarms": {
+          "target": "com.amazonaws.ssm#AlarmStateInformationList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AssociationDispatchAssumeRoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:iam::[0-9]{12}:role/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#AssociationDoesNotExist": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AssociationDoesNotExist",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AssociationId": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#AssociationName": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z0-9_\\-.]{3,128}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#AssociationOverview": {
+      "members": {
+        "AssociationStatusAggregatedCount": {
+          "target": "com.amazonaws.ssm#AssociationStatusAggregatedCount",
+          "traits": {}
+        },
+        "DetailedStatus": {
+          "target": "com.amazonaws.ssm#StatusName",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.ssm#StatusName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AssociationStatus": {
+      "members": {
+        "AdditionalInfo": {
+          "target": "com.amazonaws.ssm#StatusAdditionalInfo",
+          "traits": {}
+        },
+        "Date": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.ssm#StatusMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.ssm#AssociationStatusName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AssociationStatusAggregatedCount": {
+      "key": {
+        "target": "com.amazonaws.ssm#StatusName"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.ssm#InstanceCount"
+      }
+    },
+    "com.amazonaws.ssm#AssociationStatusName": {
+      "members": {
+        "Failed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Failed"
+          }
+        },
+        "Pending": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Pending"
+          }
+        },
+        "Success": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Success"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssm#AssociationSyncCompliance": {
+      "members": {
+        "Auto": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTO"
+          }
+        },
+        "Manual": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANUAL"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssm#AssociationVersion": {
+      "traits": {
+        "smithy.api#pattern": "^([$]LATEST)|([1-9][0-9]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#AutomationTargetParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#AutomationTargets": {
+      "member": {
+        "target": "com.amazonaws.ssm#Target"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#Boolean": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ssm#CalendarNameOrARN": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#CalendarNameOrARNList": {
+      "member": {
+        "target": "com.amazonaws.ssm#CalendarNameOrARN"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#DateTime": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.ssm#DescribeAssociation": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#AssociationDoesNotExist"
+        },
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidAssociationVersion"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidDocument"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidInstanceId"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#DescribeAssociationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#DescribeAssociationResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#DescribeAssociationRequest": {
+      "members": {
+        "AssociationId": {
+          "target": "com.amazonaws.ssm#AssociationId",
+          "traits": {}
+        },
+        "AssociationVersion": {
+          "target": "com.amazonaws.ssm#AssociationVersion",
+          "traits": {}
+        },
+        "InstanceId": {
+          "target": "com.amazonaws.ssm#InstanceId",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.ssm#DocumentARN",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DescribeAssociationResult": {
+      "members": {
+        "AssociationDescription": {
+          "target": "com.amazonaws.ssm#AssociationDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DocumentARN": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#DocumentVersion": {
+      "traits": {
+        "smithy.api#pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#DoesNotExistException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DoesNotExistException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#Duration": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 24,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ssm#ExcludeAccount": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 68,
+          "min": 6
+        },
+        "smithy.api#pattern": "^(ou-[a-z0-9]{4,32}-[a-z0-9]{8,32})|(\\d{12})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ExcludeAccounts": {
+      "member": {
+        "target": "com.amazonaws.ssm#ExcludeAccount"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5000,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#ExecutionRoleName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w+=,.@/-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ExternalAlarmState": {
+      "members": {
+        "ALARM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALARM"
+          }
+        },
+        "UNKNOWN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNKNOWN"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssm#GetMaintenanceWindow": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#DoesNotExistException"
+        },
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#GetMaintenanceWindowRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#GetMaintenanceWindowResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#GetMaintenanceWindowRequest": {
+      "members": {
+        "WindowId": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#GetMaintenanceWindowResult": {
+      "members": {
+        "AllowUnassociatedTargets": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowAllowUnassociatedTargets",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "CreatedDate": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "Cutoff": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowCutoff",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowDescription",
+          "traits": {}
+        },
+        "Duration": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowDurationHours",
+          "traits": {}
+        },
+        "Enabled": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowEnabled",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "EndDate": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowStringDateTime",
+          "traits": {}
+        },
+        "ModifiedDate": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowName",
+          "traits": {}
+        },
+        "NextExecutionTime": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowStringDateTime",
+          "traits": {}
+        },
+        "Schedule": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowSchedule",
+          "traits": {}
+        },
+        "ScheduleOffset": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowOffset",
+          "traits": {}
+        },
+        "ScheduleTimezone": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowTimezone",
+          "traits": {}
+        },
+        "StartDate": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowStringDateTime",
+          "traits": {}
+        },
+        "WindowId": {
+          "target": "com.amazonaws.ssm#MaintenanceWindowId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#GetServiceSetting": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#ServiceSettingNotFound"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#GetServiceSettingRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#GetServiceSettingResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#GetServiceSettingRequest": {
+      "members": {
+        "SettingId": {
+          "target": "com.amazonaws.ssm#ServiceSettingId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#GetServiceSettingResult": {
+      "members": {
+        "ServiceSetting": {
+          "target": "com.amazonaws.ssm#ServiceSetting",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InstanceAssociationOutputLocation": {
+      "members": {
+        "S3Location": {
+          "target": "com.amazonaws.ssm#S3OutputLocation",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InstanceCount": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ssm#InstanceId": {
+      "traits": {
+        "smithy.api#pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#InternalServerError": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InternalServerError",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidAssociationVersion": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAssociationVersion",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidDocument": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDocument",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidInstanceId": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidInstanceId",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowAllowUnassociatedTargets": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowCutoff": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 23,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowDurationHours": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 24,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowEnabled": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 20
+        },
+        "smithy.api#pattern": "^mw-[0-9a-f]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_\\-.]{3,128}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowOffset": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 6,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowSchedule": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowStringDateTime": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#MaintenanceWindowTimezone": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#MaxConcurrency": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 7,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#MaxErrors": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 7,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterName": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterValue": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterValueList": {
+      "member": {
+        "target": "com.amazonaws.ssm#ParameterValue"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#Parameters": {
+      "key": {
+        "target": "com.amazonaws.ssm#ParameterName"
+      },
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.ssm#ParameterValueList"
+      }
+    },
+    "com.amazonaws.ssm#Region": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#Regions": {
+      "member": {
+        "target": "com.amazonaws.ssm#Region"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#S3BucketName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#S3KeyPrefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#S3OutputLocation": {
+      "members": {
+        "OutputS3BucketName": {
+          "target": "com.amazonaws.ssm#S3BucketName",
+          "traits": {}
+        },
+        "OutputS3KeyPrefix": {
+          "target": "com.amazonaws.ssm#S3KeyPrefix",
+          "traits": {}
+        },
+        "OutputS3Region": {
+          "target": "com.amazonaws.ssm#S3Region",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#S3Region": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 3
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ScheduleExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ScheduleOffset": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 6,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ssm#ServiceSetting": {
+      "members": {
+        "ARN": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        },
+        "LastModifiedDate": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "LastModifiedUser": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        },
+        "SettingId": {
+          "target": "com.amazonaws.ssm#ServiceSettingId",
+          "traits": {}
+        },
+        "SettingValue": {
+          "target": "com.amazonaws.ssm#ServiceSettingValue",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ServiceSettingId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ServiceSettingNotFound": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServiceSettingNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ServiceSettingValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#StatusAdditionalInfo": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#StatusMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#StatusName": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#String": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#Target": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.ssm#TargetKey",
+          "traits": {}
+        },
+        "Values": {
+          "target": "com.amazonaws.ssm#TargetValues",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#TargetKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 163,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}\\p{Z}\\p{N}_.:/=\\-@]*$|resource-groups:ResourceTypeFilters|resource-groups:Name$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#TargetLocation": {
+      "members": {
+        "Accounts": {
+          "target": "com.amazonaws.ssm#Accounts",
+          "traits": {}
+        },
+        "ExcludeAccounts": {
+          "target": "com.amazonaws.ssm#ExcludeAccounts",
+          "traits": {}
+        },
+        "ExecutionRoleName": {
+          "target": "com.amazonaws.ssm#ExecutionRoleName",
+          "traits": {}
+        },
+        "IncludeChildOrganizationUnits": {
+          "target": "com.amazonaws.ssm#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "Regions": {
+          "target": "com.amazonaws.ssm#Regions",
+          "traits": {}
+        },
+        "TargetLocationAlarmConfiguration": {
+          "target": "com.amazonaws.ssm#AlarmConfiguration"
+        },
+        "TargetLocationMaxConcurrency": {
+          "target": "com.amazonaws.ssm#MaxConcurrency",
+          "traits": {}
+        },
+        "TargetLocationMaxErrors": {
+          "target": "com.amazonaws.ssm#MaxErrors",
+          "traits": {}
+        },
+        "Targets": {
+          "target": "com.amazonaws.ssm#AutomationTargets",
+          "traits": {}
+        },
+        "TargetsMaxConcurrency": {
+          "target": "com.amazonaws.ssm#MaxConcurrency",
+          "traits": {}
+        },
+        "TargetsMaxErrors": {
+          "target": "com.amazonaws.ssm#MaxErrors",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#TargetLocations": {
+      "member": {
+        "target": "com.amazonaws.ssm#TargetLocation"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#TargetMap": {
+      "key": {
+        "target": "com.amazonaws.ssm#TargetMapKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.ssm#TargetMapValueList"
+      }
+    },
+    "com.amazonaws.ssm#TargetMapKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#TargetMapValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#TargetMapValueList": {
+      "member": {
+        "target": "com.amazonaws.ssm#TargetMapValue"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 25,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#TargetMaps": {
+      "member": {
+        "target": "com.amazonaws.ssm#TargetMap"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 300,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#TargetValue": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#TargetValues": {
+      "member": {
+        "target": "com.amazonaws.ssm#TargetValue"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#Targets": {
+      "member": {
+        "target": "com.amazonaws.ssm#Target"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

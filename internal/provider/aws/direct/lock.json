@@ -1,35 +1,590 @@
 {
   "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
   "models": {
+    "acm/service/2015-12-08/acm-2015-12-08.json": {
+      "file": "models/acm-2015-12-08.json",
+      "sourceSha256": "4f2e27af9601556e61e14d7250cf57fcc303acd82b36e066a793381582966e81",
+      "subsetSha256": "ee43dafe7f049121bf2e92cc6feb01edd9575347f7aad70f255ea1fa67f66ec2"
+    },
     "appconfig/service/2019-10-09/appconfig-2019-10-09.json": {
       "file": "models/appconfig-2019-10-09.json",
       "sourceSha256": "ae80951fcaa00840d0b273ee198998789aafb452cd34107599fb48590c9428e3",
-      "subsetSha256": "fd6bffd0476064abffd271009eb23853bd75c61db45c4118b27fca4fe5be498c"
+      "subsetSha256": "69bf5fcd077226748eb99e1eaaaf402dc59d85f225bd032d16ec0b9415668eb5"
+    },
+    "appintegrations/service/2020-07-29/appintegrations-2020-07-29.json": {
+      "file": "models/appintegrations-2020-07-29.json",
+      "sourceSha256": "085662661107e651741cea85ed5b10bac1d9e4487bcae9b4a84b00ae4476e4a8",
+      "subsetSha256": "7a79b1ca5e6595ea36134fc156379b100f24661b8cc672b389e62142778d8e1b"
     },
     "apprunner/service/2020-05-15/apprunner-2020-05-15.json": {
       "file": "models/apprunner-2020-05-15.json",
       "sourceSha256": "322b9b69806ead20132e77fa5080ec9f0564183a3a42daf9246777a2421488f2",
-      "subsetSha256": "bd62025913af13fe207939a0ff585d14dd77f7065f874fce0d9718f79d8bafad"
+      "subsetSha256": "1fbaf1beb9eb8826d858b3d20c148b3ea0b1b426c68df756582089877a5bd6db"
+    },
+    "appsync/service/2017-07-25/appsync-2017-07-25.json": {
+      "file": "models/appsync-2017-07-25.json",
+      "sourceSha256": "5db1d883689ffe44163ff9a72c4a5df42683a2a5b52d1eebded1e96557324642",
+      "subsetSha256": "0bf7b8e808204b91895aa0ffab4ff7d435150b5046667b64847a4ebbc40effac"
+    },
+    "athena/service/2017-05-18/athena-2017-05-18.json": {
+      "file": "models/athena-2017-05-18.json",
+      "sourceSha256": "bd1b3de55549f9de8c1ff8856c0623af35b4c9ed272c6f2dfbdf930beb2ccbdd",
+      "subsetSha256": "345ee60d6ea7a24d987a2093025d07c88d937ce680abd9c3a4d85874df0b0c6c"
+    },
+    "b2bi/service/2022-06-23/b2bi-2022-06-23.json": {
+      "file": "models/b2bi-2022-06-23.json",
+      "sourceSha256": "57ddb6317ceb7c2d1255ac2ab7d7d1807949ecd1a2324cf7e378ad9113d54c40",
+      "subsetSha256": "385f3b9b44eb75efd17fb94902243b66d6afbc2f52d9748f0da16c343c4d10cc"
+    },
+    "backup-gateway/service/2021-01-01/backup-gateway-2021-01-01.json": {
+      "file": "models/backup-gateway-2021-01-01.json",
+      "sourceSha256": "008b43cb3d3a82fa9c7030dccea9c75ec128d90f24fd7c806dc2f5fbb7df2417",
+      "subsetSha256": "5df3326af41feef73795a7e6548c574201460ca0c80fda74e2eb738a73f0788d"
+    },
+    "backup/service/2018-11-15/backup-2018-11-15.json": {
+      "file": "models/backup-2018-11-15.json",
+      "sourceSha256": "42fd0f16fd8896247137607430b54f69079678c8fb461afe3fe54a4fdf00f65d",
+      "subsetSha256": "f240259feeb883d0580d1afc814cd9a60faa676aa16cac060de3f91648121ac6"
+    },
+    "bcm-dashboards/service/2025-08-18/bcm-dashboards-2025-08-18.json": {
+      "file": "models/bcm-dashboards-2025-08-18.json",
+      "sourceSha256": "ce2e2ccbe11baf560316d4eb70fa105ec6cc6dfc6fec419b43aaaa56f4d5465b",
+      "subsetSha256": "22d58aa07dc32dc2f64d1afca34e9bf24920ba0782684032c0beb7d5cb4ca90b"
+    },
+    "bedrock-agent-runtime/service/2023-07-26/bedrock-agent-runtime-2023-07-26.json": {
+      "file": "models/bedrock-agent-runtime-2023-07-26.json",
+      "sourceSha256": "bc5a151f224452a51106cf964365299832737cb63b3be0d5ba4fa77602e274f5",
+      "subsetSha256": "ca44ee3e21495dc10dc8eeb92f3b5b1bff73a1a9c555f549c06ff763835369e9"
+    },
+    "bedrock-agentcore-control/service/2023-06-05/bedrock-agentcore-control-2023-06-05.json": {
+      "file": "models/bedrock-agentcore-control-2023-06-05.json",
+      "sourceSha256": "d5cfa2b23d02d7e32fe6269d4edc9f94435bfe0710c5a29df4c177fb569e2079",
+      "subsetSha256": "e802f9c68b578fda1dc7e6e4c505f496466535dca0b196d30a3ec0f411f7c3e8"
+    },
+    "bedrock-data-automation/service/2023-07-26/bedrock-data-automation-2023-07-26.json": {
+      "file": "models/bedrock-data-automation-2023-07-26.json",
+      "sourceSha256": "57a9478257e596708233bf3e7b1113a6df8e1dcd0016380aff8a615c867be128",
+      "subsetSha256": "40a0b9ce67a808ee985e91e5863a14e77849fd633607456dcca913d0c6f4574d"
     },
     "bedrock/service/2023-04-20/bedrock-2023-04-20.json": {
       "file": "models/bedrock-2023-04-20.json",
       "sourceSha256": "31e8c7eb23e9e87e564c4e1ad8f7f07a65fd0e3f15ce60f799872e4236744c8d",
-      "subsetSha256": "e536436bcb1bc4d6372201a5405d284428799e5108cafbcee89d84b921c8055e"
+      "subsetSha256": "1d7364b89ae0438882261f11a871154f66d610df14a65f6b0420041ebfd18378"
+    },
+    "chatbot/service/2017-10-11/chatbot-2017-10-11.json": {
+      "file": "models/chatbot-2017-10-11.json",
+      "sourceSha256": "961871e816fc4cb786963aaad6f6341f50dc60a8e91b67b80b17c3d859631e85",
+      "subsetSha256": "125b5715e98d61c074b053a4ddde3e5bf0f6bbc11cb548343a44798cb8a6502f"
+    },
+    "chime-sdk-identity/service/2021-04-20/chime-sdk-identity-2021-04-20.json": {
+      "file": "models/chime-sdk-identity-2021-04-20.json",
+      "sourceSha256": "0c77cd74ac7c47306bb99893260361eb043856424b12b481d0d62ebe1159a0a4",
+      "subsetSha256": "efd39ad5915389358bcbb5e97d0d125bc4a5148ba2be3801119b1148f1d5d894"
+    },
+    "chime-sdk-media-pipelines/service/2021-07-15/chime-sdk-media-pipelines-2021-07-15.json": {
+      "file": "models/chime-sdk-media-pipelines-2021-07-15.json",
+      "sourceSha256": "251918ed38214f2ce08f24acab3d185b8f974494d89b79807f882bc5ad2b9dae",
+      "subsetSha256": "12b8e716a7a8c07a1913d7d39fa89ef982abf7383a39a5a5c637e0232c92c1e7"
+    },
+    "chime-sdk-voice/service/2022-08-03/chime-sdk-voice-2022-08-03.json": {
+      "file": "models/chime-sdk-voice-2022-08-03.json",
+      "sourceSha256": "360e0333677be40befb511f78ba5d1558b6fa6d5f3fcd9705fe701793063d12d",
+      "subsetSha256": "e9608796e0d4707aa52267ed4d18e3c63dca76c9cfe61c1d89bfe1df711e5f26"
+    },
+    "cleanroomsml/service/2023-09-06/cleanroomsml-2023-09-06.json": {
+      "file": "models/cleanroomsml-2023-09-06.json",
+      "sourceSha256": "b5864764e76291c93dc4157a489771d073a8c6cbffecdd4e453a5149237b2937",
+      "subsetSha256": "b24002382cb105cb671702b8aed742898d908e0b1bf9860cde75ee990eeaa72e"
+    },
+    "cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json": {
+      "file": "models/cloudwatch-logs-2014-03-28.json",
+      "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
+      "subsetSha256": "37b776c6166d47cb42f23be2da53ea22006bbe9e7de0f91c6aa02d66e404ccc7"
+    },
+    "codeconnections/service/2023-12-01/codeconnections-2023-12-01.json": {
+      "file": "models/codeconnections-2023-12-01.json",
+      "sourceSha256": "df2b3888b5330379673d58477c15feadb296bcf47d6e6e120bf1be15ec5845b0",
+      "subsetSha256": "dec2eb3d977d44705c5a804c5928012cb14ed5fa7fac0c049dedcdafa46f9d35"
     },
     "codedeploy/service/2014-10-06/codedeploy-2014-10-06.json": {
       "file": "models/codedeploy-2014-10-06.json",
       "sourceSha256": "e270383d2bb6dd822f4f617cbf2dc32112beb5c766b5b345cbfd253ff1af6e4a",
-      "subsetSha256": "b379e066497ed8af47ef9ad00b828da8ffb7491a9a1da66f0affd1a7051471e9"
+      "subsetSha256": "ea83cc09e38dc96b43e3fd47b402be8dd4e6fcebc6d13685a251249900bc79af"
+    },
+    "codestar-connections/service/2019-12-01/codestar-connections-2019-12-01.json": {
+      "file": "models/codestar-connections-2019-12-01.json",
+      "sourceSha256": "7a88b767bb489aba8892e784e5658bc37be9cfa8558e15e9727de6922af889a8",
+      "subsetSha256": "ab2c04d574eec77abbd7f055892147a64266eccab71c9379c6861f58cbeba365"
+    },
+    "config-service/service/2014-11-12/config-service-2014-11-12.json": {
+      "file": "models/config-service-2014-11-12.json",
+      "sourceSha256": "140b2f862c302d6d747c170e61f22a3108d517b42af3623c3e329027d373862b",
+      "subsetSha256": "7d00403b4ee0d78ed577a5d4fa1727852bdf2926de163b35317193d4c8a97602"
+    },
+    "connectcases/service/2022-10-03/connectcases-2022-10-03.json": {
+      "file": "models/connectcases-2022-10-03.json",
+      "sourceSha256": "254ab28f34918b41695ee9662bc6d4294b2670dd71a0c074a12b3f0d23f54070",
+      "subsetSha256": "bd48d038ea2e74d16b924c03d2b4296a0ac566d4fefe9f0c5ec992c9386998d5"
+    },
+    "connecthealth/service/2025-01-29/connecthealth-2025-01-29.json": {
+      "file": "models/connecthealth-2025-01-29.json",
+      "sourceSha256": "b8a39db72d49f6cdb52e67bd3378b1de69df38b43ca69643a1275f3c2e5add19",
+      "subsetSha256": "666f222339a0d428b30f47c477dc7311810b9ee44844bbbb73361d34f92b877b"
+    },
+    "customer-profiles/service/2020-08-15/customer-profiles-2020-08-15.json": {
+      "file": "models/customer-profiles-2020-08-15.json",
+      "sourceSha256": "fe531aa3b9897d9acf8380a8a1147ba12a03c4f6ade6e4eedb97e6a3e1738840",
+      "subsetSha256": "d79a356fb5d6f25c780dd8b3e892fcda617dac6fa17a3d5831be2ca6d7bc3656"
+    },
+    "databrew/service/2017-07-25/databrew-2017-07-25.json": {
+      "file": "models/databrew-2017-07-25.json",
+      "sourceSha256": "b214b8341c14abc6cc88896f4b3864ac9532edda80e78e6503dc4eeb4229a7fd",
+      "subsetSha256": "1797d079f205d66cbf5d1ab891ed8a56d175f587a9b1d9306f5845128ddbfb2b"
+    },
+    "dataexchange/service/2017-07-25/dataexchange-2017-07-25.json": {
+      "file": "models/dataexchange-2017-07-25.json",
+      "sourceSha256": "0891c22c6bd7a43cccbaf0055ae1511a9ccdc62054059f8cbacddd5e5a6ec834",
+      "subsetSha256": "2bbaf40f2cf67444803204fdd690886c326d9632205d14431e55cb7470790e5a"
+    },
+    "datasync/service/2018-11-09/datasync-2018-11-09.json": {
+      "file": "models/datasync-2018-11-09.json",
+      "sourceSha256": "70ec45e7317c498df52ba9a0978d85be9ea82ee3da31a9c8858b2559d07adcd1",
+      "subsetSha256": "d836eb2d4a9911a85365a94884394c44a2e6ce73dffdbedfc133871328d425f9"
+    },
+    "docdb-elastic/service/2022-11-28/docdb-elastic-2022-11-28.json": {
+      "file": "models/docdb-elastic-2022-11-28.json",
+      "sourceSha256": "a096d665ac8fdd8fe7d2bbe636cc9b5e12e41f2df97f2bf30bf7018ec8fd94f5",
+      "subsetSha256": "464a214f97d23d25a5f08313661e9621fb652a4cc93f34e21f95fc4a602b262c"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
       "sourceSha256": "039c1877a9b6b6997819988c4f8f7e9f063bcfe6afa6c431d2da45fc8422eace",
-      "subsetSha256": "aef3d74a33f143a56112c79aecef03dc3cd4c25ea12acbe0fe4f0690c648b5f9"
+      "subsetSha256": "3786b00cbb780f0b457932e0a8e192b1c0d07b62e5d0fe4a43faeab098a60ccc"
+    },
+    "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
+      "file": "models/elementalinference-2018-11-14.json",
+      "sourceSha256": "ce05de4443c6bfc811a649225eb3435e092405ee2234b835d0dc6c8a8518b1d2",
+      "subsetSha256": "08d55878f0751f6d0bcdae6f6330bf60eeaba23dd2244604c79442a45ab1ae25"
+    },
+    "emr/service/2009-03-31/emr-2009-03-31.json": {
+      "file": "models/emr-2009-03-31.json",
+      "sourceSha256": "cff4f77057767f2010954968e34881199e6d306510ca2d8c4175a6deb2c02add",
+      "subsetSha256": "ca51b167a7605d23a4a40ecdc8d17656133e26e94714e336c220b36725f24921"
+    },
+    "entityresolution/service/2018-05-10/entityresolution-2018-05-10.json": {
+      "file": "models/entityresolution-2018-05-10.json",
+      "sourceSha256": "dd59315e6bb76673dc5be3935c55aa2b785821b056b3bc5637eee5baaed1c7fd",
+      "subsetSha256": "b21f125dcd01dea958d6a4fde205349a243ba5b4a65756ce3ac323cadc9dfc6a"
+    },
+    "eventbridge/service/2015-10-07/eventbridge-2015-10-07.json": {
+      "file": "models/eventbridge-2015-10-07.json",
+      "sourceSha256": "47054e3cf1572673a5dc9931c0a6cddc1fc29b9338d9b124bc4ad8a0ec3bb2e7",
+      "subsetSha256": "ff75cc707fe41dac7e22e43ba30f5a4eae4feab4ca8d4031eb277f8f1978858a"
+    },
+    "forecast/service/2018-06-26/forecast-2018-06-26.json": {
+      "file": "models/forecast-2018-06-26.json",
+      "sourceSha256": "0e4f7f80f98dac93ccce5dbde32282ec47f8b8c20f9a8436268b1607badee025",
+      "subsetSha256": "7255e469d64601461747691b553f5f0266da71fe59732cfe67e68a7105131734"
+    },
+    "gamelift/service/2015-10-01/gamelift-2015-10-01.json": {
+      "file": "models/gamelift-2015-10-01.json",
+      "sourceSha256": "39cf197ca0c0e9eb769cc41223c8d0533340d43e33aff06b73d7b947bf3a3a28",
+      "subsetSha256": "3efcd14ba2524666873a9ee0042c3d0edcb0edf91429558793ad1d38d46f4b7b"
+    },
+    "global-accelerator/service/2018-08-08/global-accelerator-2018-08-08.json": {
+      "file": "models/global-accelerator-2018-08-08.json",
+      "sourceSha256": "ee5f1987dd083d041633bf1bd4d91f289840e86e8e2102b4dcf172697e258cda",
+      "subsetSha256": "4e99bb5d72988cc94277ab08d5ba4d43f852e070222232a974c1bdb75d677c33"
+    },
+    "glue/service/2017-03-31/glue-2017-03-31.json": {
+      "file": "models/glue-2017-03-31.json",
+      "sourceSha256": "e3cce2bd91eee6615cfe07ccc281d73b01513156e461e8c10d52b2a733a31c02",
+      "subsetSha256": "c05fb9525acc113d4384872fd92a145c1f53112707f727f8b6c4b051025a245b"
+    },
+    "greengrassv2/service/2020-11-30/greengrassv2-2020-11-30.json": {
+      "file": "models/greengrassv2-2020-11-30.json",
+      "sourceSha256": "e0c324d26e877ff05a37ef087a68def9d29b0736941f9a263e2182fd0d4ad608",
+      "subsetSha256": "0f0758774bcd1e5a059e533887e7f4d2bd95513b8b014812b588c8e59c7563c8"
+    },
+    "imagebuilder/service/2019-12-02/imagebuilder-2019-12-02.json": {
+      "file": "models/imagebuilder-2019-12-02.json",
+      "sourceSha256": "61991b5b1aea5f8530e847ebfdcd42d863f42d824cf0e0f366692a41145cfc80",
+      "subsetSha256": "09ba5b7fd609e81d424243267899de72d595ed3375badb9742becbf5b4e7bdb8"
+    },
+    "internetmonitor/service/2021-06-03/internetmonitor-2021-06-03.json": {
+      "file": "models/internetmonitor-2021-06-03.json",
+      "sourceSha256": "7290eac49fbb1bbff6c958df3b369590edc97c50b7f85112a2196a23e29d53e4",
+      "subsetSha256": "4f7e3db09ac6afcefe59660fb4093e96581964c29ea91bb93892f6e618334af8"
+    },
+    "invoicing/service/2024-12-01/invoicing-2024-12-01.json": {
+      "file": "models/invoicing-2024-12-01.json",
+      "sourceSha256": "d5fce15437dc55ec764aa343f1028790b6c23565ae06cb1113d9dee836c978b9",
+      "subsetSha256": "58f635552105c6210b642d3e73ee33682c740dd6f65c5abc2e40ddf41a8f71a2"
+    },
+    "iot-wireless/service/2020-11-22/iot-wireless-2020-11-22.json": {
+      "file": "models/iot-wireless-2020-11-22.json",
+      "sourceSha256": "c6ac65397dd493eece348a9ebf61079e5b7ce6749ee0f6ee4a7c6bf04a97832d",
+      "subsetSha256": "1a6e7fef421fbccd0aabff3a5996aa1d493763a8f837fc063c192e82613794e2"
+    },
+    "iot/service/2015-05-28/iot-2015-05-28.json": {
+      "file": "models/iot-2015-05-28.json",
+      "sourceSha256": "88664a70aaae99eae112a1bfad74052ff2764916aa536b5d19a33723f2ae1a1f",
+      "subsetSha256": "febb107b977dfe708232bafb1e090bc3716f48d30d12d5e878411b19f0fc323a"
+    },
+    "iotdeviceadvisor/service/2020-09-18/iotdeviceadvisor-2020-09-18.json": {
+      "file": "models/iotdeviceadvisor-2020-09-18.json",
+      "sourceSha256": "00aee2b78a76f36a5ae37dd968a8e22fd5e2854f9aa3a3d19152a2a429f2fd39",
+      "subsetSha256": "b7aba81b9dbab209aeb49efee86c004b5112afc1c42281bf1f86fa1e4d930fda"
+    },
+    "iotfleetwise/service/2021-06-17/iotfleetwise-2021-06-17.json": {
+      "file": "models/iotfleetwise-2021-06-17.json",
+      "sourceSha256": "9f2e33b6a840fd3721cc5bc03a3e4ff30ddb289e78c607e51622686a1e86934f",
+      "subsetSha256": "afc595f5e12eb0a2275bf44f75509d6d9815326a2f757c9ac0f6f51729f0a7f5"
+    },
+    "iotsitewise/service/2019-12-02/iotsitewise-2019-12-02.json": {
+      "file": "models/iotsitewise-2019-12-02.json",
+      "sourceSha256": "29268ed6f84f8a517d0087cc6f3ad3a6845f649885f5069f3a1f75134c28d36e",
+      "subsetSha256": "28c35498db7b7673ccc4da9b4a7dd9ce652ac80ccfd76191b74d613529a750c4"
+    },
+    "iottwinmaker/service/2021-11-29/iottwinmaker-2021-11-29.json": {
+      "file": "models/iottwinmaker-2021-11-29.json",
+      "sourceSha256": "4ed54955625de2c0e751c58f1c2a6e4ab51c771a71c4788274ac13ec8da0cd1b",
+      "subsetSha256": "f98da46a937ac1e66bb06b762def2f500c0d6d27b29d2278f97938dd5f246387"
+    },
+    "ivs-realtime/service/2020-07-14/ivs-realtime-2020-07-14.json": {
+      "file": "models/ivs-realtime-2020-07-14.json",
+      "sourceSha256": "eb15a9fe06a16106f7b0a2ee3d869d8214f371c2745352c78f96a7632d61907b",
+      "subsetSha256": "5f3002858c37f3bc667bb3a1491fbe53507741a7c22e1e87dd4298caf77e9f53"
+    },
+    "ivs/service/2020-07-14/ivs-2020-07-14.json": {
+      "file": "models/ivs-2020-07-14.json",
+      "sourceSha256": "c7228fa78bdd0191ac3e14d187c28ea8bdaee508c3acf3b321e7482d867e688d",
+      "subsetSha256": "59ce82da08d01cf542789ffc9716f194be46ab16d503a49d81c1ebb9efde2377"
+    },
+    "ivschat/service/2020-07-14/ivschat-2020-07-14.json": {
+      "file": "models/ivschat-2020-07-14.json",
+      "sourceSha256": "5629ed4ef708a281fbf1b7d95fb0ccf4a054bd46443cc55ff1ba47f2762b4c3b",
+      "subsetSha256": "6db795d6300ecf553398e518c84c5e2037a0e7538995121ee2c08077bfea0848"
+    },
+    "kafkaconnect/service/2021-09-14/kafkaconnect-2021-09-14.json": {
+      "file": "models/kafkaconnect-2021-09-14.json",
+      "sourceSha256": "d4d4ce36cea68e054d646d6dd4f968cea460ad1b9bdcc5fc6f5dbe84d0e93804",
+      "subsetSha256": "11bdd85f95be52eb17b93c9b976afeafc2d0f8ecab4699846f007a3f4336f90f"
+    },
+    "kendra-ranking/service/2022-10-19/kendra-ranking-2022-10-19.json": {
+      "file": "models/kendra-ranking-2022-10-19.json",
+      "sourceSha256": "86122553038a316b022eef1fc0d826544bea593351dade1b9bfa2abd82d69c04",
+      "subsetSha256": "2df3166af5008eb861417cff01d427bddf03b2de2d23d8c22b5071f0ccf5d1f2"
+    },
+    "kinesis/service/2013-12-02/kinesis-2013-12-02.json": {
+      "file": "models/kinesis-2013-12-02.json",
+      "sourceSha256": "156f6bde03b979d270b23bb55b0d0b8307b4e4c780febd3a0749f50c4c2b766b",
+      "subsetSha256": "e0c32910ec0edeb18a7f8d133454f6073b0c07136104a691d3367db8d3d4c694"
+    },
+    "lakeformation/service/2017-03-31/lakeformation-2017-03-31.json": {
+      "file": "models/lakeformation-2017-03-31.json",
+      "sourceSha256": "69a11756fd55fde42ad3c5f672013eead9b8b24e37658ccc8af520965e566dae",
+      "subsetSha256": "18e3ecf62a6b84c67f4fb1dba91d2e639ce60780759975e7c0476b5733e84358"
+    },
+    "lambda-microvms/service/2025-09-09/lambda-microvms-2025-09-09.json": {
+      "file": "models/lambda-microvms-2025-09-09.json",
+      "sourceSha256": "1553849887e0154eae91b3960b5770e08798c404e2909bca65f06be5a9458dad",
+      "subsetSha256": "b09bd76b07fd0283586e7fc9ce5b4ffcee91405585e67faeeb399aa4704586af"
+    },
+    "lambda/service/2015-03-31/lambda-2015-03-31.json": {
+      "file": "models/lambda-2015-03-31.json",
+      "sourceSha256": "595dcd2bd52005ed888323578f9239a4e5b5ccccebf49ee3ab1e0057ce387c54",
+      "subsetSha256": "f6eaeaf1fb950c9eaddeb1541fbc2569284c2e222df24c6763470f5fbbdc29e1"
+    },
+    "license-manager/service/2018-08-01/license-manager-2018-08-01.json": {
+      "file": "models/license-manager-2018-08-01.json",
+      "sourceSha256": "4df617a87f7aed3ad37f1e1c295e95926da09617dfb64cdfc2f74c0c51be5a0d",
+      "subsetSha256": "49659a2f07971ab4a4a5fc13fbdb51b64954b181803bc4d910d3e437814a05e0"
+    },
+    "lookoutequipment/service/2020-12-15/lookoutequipment-2020-12-15.json": {
+      "file": "models/lookoutequipment-2020-12-15.json",
+      "sourceSha256": "9da9fb51b2e9c7cd53ae221ed535ccb69b1374c3f22e20424259f34380df3314",
+      "subsetSha256": "a9fc5ed0c3f213c93a358c44597fdc1ca800756a810d319ad283c0707cc3dea5"
+    },
+    "m2/service/2021-04-28/m2-2021-04-28.json": {
+      "file": "models/m2-2021-04-28.json",
+      "sourceSha256": "0828b076e8b231ec4ad5c9e6dd06cc95181c2dbe47a5502c62445998b6b1acfb",
+      "subsetSha256": "d5db563cac11e861a515c886443ebe7320545deeb5df0366e7d4239e4954e36e"
+    },
+    "macie2/service/2020-01-01/macie2-2020-01-01.json": {
+      "file": "models/macie2-2020-01-01.json",
+      "sourceSha256": "955d6cb7818b30536daa0a7f928044b0349f7e84cec9400022b024b10c70a6cf",
+      "subsetSha256": "db14cc7e9f50a2de8aa54ec19861e27d2e32096f4e9392be37c841605f3829d1"
+    },
+    "mailmanager/service/2023-10-17/mailmanager-2023-10-17.json": {
+      "file": "models/mailmanager-2023-10-17.json",
+      "sourceSha256": "7e6d05d13cac582d3799813fee7936b00013762bfe5314aa4552fb5c8d9800a8",
+      "subsetSha256": "d76960442f375367db612b302b4eb8ebf8b5d484a1ca99e5456bd73119743f6b"
+    },
+    "mediaconnect/service/2018-11-14/mediaconnect-2018-11-14.json": {
+      "file": "models/mediaconnect-2018-11-14.json",
+      "sourceSha256": "97103176f08eb4be5a3ba326b31964ee4170ebb8824e22f7a9e8dc7417312cc9",
+      "subsetSha256": "30da720841903857bc64ee9cc94005fbb0feb73b47d3d1ac06a7ef201c59c500"
+    },
+    "mediaconvert/service/2017-08-29/mediaconvert-2017-08-29.json": {
+      "file": "models/mediaconvert-2017-08-29.json",
+      "sourceSha256": "6fad649fc43970a67e959ba68d972c4ba83c1c5ffa305db1559a5bd47619ee40",
+      "subsetSha256": "a9df2fe9a3410cfed18587e4c890d0d3e6e3637ffea71874ffff283d78a19d24"
+    },
+    "medialive/service/2017-10-14/medialive-2017-10-14.json": {
+      "file": "models/medialive-2017-10-14.json",
+      "sourceSha256": "c46630bd8d1b0739f35a71732ec9cf544cf14a0e080b2fb70edf74f7b93aba9b",
+      "subsetSha256": "92c258055b87f32beeef403385299e3210e3b819a3c963e7d61a0355228e20a5"
+    },
+    "mediapackage-vod/service/2018-11-07/mediapackage-vod-2018-11-07.json": {
+      "file": "models/mediapackage-vod-2018-11-07.json",
+      "sourceSha256": "4ee5951cc62b0d975cf5a99069766f94202c4e84e92b9566ba6fa5bd433681b9",
+      "subsetSha256": "320cd009f379838791d4b1020258a880065fdf3ce74f4561a43597ed4166b272"
+    },
+    "mediapackage/service/2017-10-12/mediapackage-2017-10-12.json": {
+      "file": "models/mediapackage-2017-10-12.json",
+      "sourceSha256": "4d43c7b611ea16967351b4627ff0d028751174cac77d09b2c9813ca3b4aad09e",
+      "subsetSha256": "e0f82f30c99bde9ee49d08a2be58a45c5dc9875526d60409326a6dfd675cde79"
+    },
+    "mediapackagev2/service/2022-12-25/mediapackagev2-2022-12-25.json": {
+      "file": "models/mediapackagev2-2022-12-25.json",
+      "sourceSha256": "c33a32d5b2a911646310fc3612b7d73d9edd0140449c200ad9a32ff57e0177ee",
+      "subsetSha256": "866d9b5a5a70e4bfb06ffe935e30d129b46cfee9800e9ebad320154a9376c4c0"
+    },
+    "mediatailor/service/2018-04-23/mediatailor-2018-04-23.json": {
+      "file": "models/mediatailor-2018-04-23.json",
+      "sourceSha256": "9749e439ae084109157aec94c9fe66cdfcd5c0f3c7c10ebd363329fb3451102f",
+      "subsetSha256": "5141457eea5f152a9a8330bab755996f87d675bbd156c42177c6bd3d08025e5c"
+    },
+    "medical-imaging/service/2023-07-19/medical-imaging-2023-07-19.json": {
+      "file": "models/medical-imaging-2023-07-19.json",
+      "sourceSha256": "3d9dc6daa81b49f6c4aaef88631a9c3d823e15e0f8652bd3af5c4b213dcbdf19",
+      "subsetSha256": "1a7a214874434e919f2020f7c147831fde8a3786be0a218b7ca9b7c216f07f6c"
+    },
+    "mgn/service/2020-02-26/mgn-2020-02-26.json": {
+      "file": "models/mgn-2020-02-26.json",
+      "sourceSha256": "8e742eeb56b96ff78d8332fc2bd89af2891e5ed21f99a7fb43d8b2a95d22db98",
+      "subsetSha256": "42be0cad61414b8d245cdc99baec01be065791e3f3f320a7c988840589179caf"
+    },
+    "mwaa/service/2020-07-01/mwaa-2020-07-01.json": {
+      "file": "models/mwaa-2020-07-01.json",
+      "sourceSha256": "4b66b349f8f02d9bdbe7b84897364da4b9e7b95e8f7d2f2ef40e9bdc8745a8fb",
+      "subsetSha256": "07be1a2d8e003e90eeb9160414b7ed1ec47fe0a82827754dd99e19a1dda444a7"
+    },
+    "network-firewall/service/2020-11-12/network-firewall-2020-11-12.json": {
+      "file": "models/network-firewall-2020-11-12.json",
+      "sourceSha256": "28e889751b5cf1374412f70b4b31770ccfbb3fd868ae864538afabf65384b06a",
+      "subsetSha256": "ecb02177919e0553bfefdd16c49065f11314ac62cfcd7c98b642b0a6432b7e7b"
+    },
+    "notifications/service/2018-05-10/notifications-2018-05-10.json": {
+      "file": "models/notifications-2018-05-10.json",
+      "sourceSha256": "d872475b481d272ae1b26198a730907ba85d03a1f7fa7b60e6023baf3e5dd551",
+      "subsetSha256": "c8701fa329ddb283fcd85980c571e9e8110fb9b85b669d7cec0f80d4674023d0"
+    },
+    "nova-act/service/2025-08-22/nova-act-2025-08-22.json": {
+      "file": "models/nova-act-2025-08-22.json",
+      "sourceSha256": "135733771a656e4a6b12663e065ff05d6679398e84e60216b73732277c08ab20",
+      "subsetSha256": "434061783ab5f885bbbf8135fefd63424d5f5df6f4fb10f037a26225c3348665"
+    },
+    "odb/service/2024-08-20/odb-2024-08-20.json": {
+      "file": "models/odb-2024-08-20.json",
+      "sourceSha256": "33ebfe46d63d991946c4b337428b7cbf2a3be10b87ff53b0cb4fe69730392e27",
+      "subsetSha256": "fa3299aa6552dc72b617e2699516b24f69ba9e364dca1ca9acbf722fa003c111"
+    },
+    "omics/service/2022-11-28/omics-2022-11-28.json": {
+      "file": "models/omics-2022-11-28.json",
+      "sourceSha256": "ad318cdf2a2d5026def389f5afc8123cf42b5d7339fe85922f80b282ac750c35",
+      "subsetSha256": "e4e7491a2602f328c6f4857e110f16b6085a350661b2658847ed070f1461e5db"
+    },
+    "opensearchserverless/service/2021-11-01/opensearchserverless-2021-11-01.json": {
+      "file": "models/opensearchserverless-2021-11-01.json",
+      "sourceSha256": "a0507d78c8bdec6faf31df2e94277d2a5722674788a96eabe23890e1f760f060",
+      "subsetSha256": "4780acb51c2038a2ba55214d3ff942dffd49344bea5b918f89c574e0274f32f8"
+    },
+    "outposts/service/2019-12-03/outposts-2019-12-03.json": {
+      "file": "models/outposts-2019-12-03.json",
+      "sourceSha256": "0c52837db231b007cd228ccb8de005b4498b6ec1abc37c905aa7053929cf79dc",
+      "subsetSha256": "33a9921f122c044a78ce83a4a53419384a980f4a219768554b527313cd15695e"
+    },
+    "payment-cryptography/service/2021-09-14/payment-cryptography-2021-09-14.json": {
+      "file": "models/payment-cryptography-2021-09-14.json",
+      "sourceSha256": "4aa023efb919d68df4c06aeed23a26c0fe05ec864b3e08a16e9be2908db8575d",
+      "subsetSha256": "a70f2415da56590b5cf5ee8648b071bf63939fd2a76c6f5f85852775ad43f931"
+    },
+    "pcs/service/2023-02-10/pcs-2023-02-10.json": {
+      "file": "models/pcs-2023-02-10.json",
+      "sourceSha256": "7b4e9f41f09ff396758a40920bba55cda7067e30a1499dc96f337ef2187c0fca",
+      "subsetSha256": "3e1ccc68ce5f7df4699dd107b1f899fe76a5d4881223918b3900b2fb2061c09b"
+    },
+    "personalize/service/2018-05-22/personalize-2018-05-22.json": {
+      "file": "models/personalize-2018-05-22.json",
+      "sourceSha256": "1cd24395bc9e495437ab25660de92bc293bedaaf4ef513b33087866217457912",
+      "subsetSha256": "e1edcb872956d41efce4e3b8efc9a94c24c69cc49672bb7980ae7348123276a5"
+    },
+    "pinpoint/service/2016-12-01/pinpoint-2016-12-01.json": {
+      "file": "models/pinpoint-2016-12-01.json",
+      "sourceSha256": "79595a61c51bb24e1704f481c6faa3526f7f80a90fdeb94964c8384e46a3d39f",
+      "subsetSha256": "27839a175995cc85d9c47f152839c7b1c347b3deb17325a3d87b7feb70a1bb81"
+    },
+    "pipes/service/2015-10-07/pipes-2015-10-07.json": {
+      "file": "models/pipes-2015-10-07.json",
+      "sourceSha256": "9ab8abf2fa45ef8dd89a0ec37aca1b374a889ba472d2f52e88057f66b79e4f05",
+      "subsetSha256": "c36fe095c981166c4fbf1be122fc17e27699131ff712b014b4dcc8f16e7cae9d"
+    },
+    "proton/service/2020-07-20/proton-2020-07-20.json": {
+      "file": "models/proton-2020-07-20.json",
+      "sourceSha256": "97e381a75da5de3e9f33d6229900a3a1be42c4b6ab901758855d768d78bb17e0",
+      "subsetSha256": "2f8e3cc5095d615b44265722fd37780659043527f8324a6451405f473d67615b"
+    },
+    "qbusiness/service/2023-11-27/qbusiness-2023-11-27.json": {
+      "file": "models/qbusiness-2023-11-27.json",
+      "sourceSha256": "0144dc238009cbba58506f2a84055722c4d37ae3ed907116323ddabeef46d57d",
+      "subsetSha256": "2884659d900826991d42bad3ecdd6030c31ac1067b57384ff02ec515319a39ba"
+    },
+    "resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json": {
+      "file": "models/resiliencehubv2-2026-02-17.json",
+      "sourceSha256": "63bfcfdaa37c68c13c600b108439435a15360a27fdb96221377a366c0c427593",
+      "subsetSha256": "0230b11cabe10992154d1f6f60b938940b8fe74471628073bda24fa517832dfc"
+    },
+    "rolesanywhere/service/2018-05-10/rolesanywhere-2018-05-10.json": {
+      "file": "models/rolesanywhere-2018-05-10.json",
+      "sourceSha256": "ec05a45aa6b4e4008780aa019e1f0df11df55c63b34d8ef59c20844498dadaef",
+      "subsetSha256": "38dd67778d29e908c8cc804d8731ec92fc9719646758a295f4da0864af269f28"
+    },
+    "route53-recovery-control-config/service/2020-11-02/route53-recovery-control-config-2020-11-02.json": {
+      "file": "models/route53-recovery-control-config-2020-11-02.json",
+      "sourceSha256": "d63ef56d94031b9ffddcdb31a99e49f13cf371f269fd7fd79fdde031e3c26508",
+      "subsetSha256": "ad540873121742c59fc05c2fddc50d2c01b33c97978ead744c4c9d7b91856f2a"
+    },
+    "route53-recovery-readiness/service/2019-12-02/route53-recovery-readiness-2019-12-02.json": {
+      "file": "models/route53-recovery-readiness-2019-12-02.json",
+      "sourceSha256": "22dd4f313cf7f5c42204f571247d7169bc0042d7eb7588b036d271db4a5cef5b",
+      "subsetSha256": "d76a86fb513aefa10fca0531d2a0830c6f9bca4828395d0eedf48dbb4d7e62a7"
+    },
+    "route53profiles/service/2018-05-10/route53profiles-2018-05-10.json": {
+      "file": "models/route53profiles-2018-05-10.json",
+      "sourceSha256": "170cf11ffd8fb2683d76023dce5367b48b07639290d613ae002b05ae90dfaba9",
+      "subsetSha256": "5626f25755cf3f5062db4fd26076e1a0f916361e45565e6139756677abc31a5f"
+    },
+    "route53resolver/service/2018-04-01/route53resolver-2018-04-01.json": {
+      "file": "models/route53resolver-2018-04-01.json",
+      "sourceSha256": "5f58cbcaf19e9ca4916816c06241f7e3bc6edf38ec08d1a77ce1e02006a4e2e8",
+      "subsetSha256": "96a71113ec3d97d7f3c3badfd7b7bb22713c650613b750d6bc9f7b28d64497f0"
+    },
+    "s3vectors/service/2025-07-15/s3vectors-2025-07-15.json": {
+      "file": "models/s3vectors-2025-07-15.json",
+      "sourceSha256": "627c33dc6e867bd3a96821bad2c5cca4ecc0e17a98b6835fc3a8d274061a6e46",
+      "subsetSha256": "4a237e71192db04ab1e3ea05ee4460e5d2534f2713eefb1f19b906be2a00eb05"
+    },
+    "sagemaker/service/2017-07-24/sagemaker-2017-07-24.json": {
+      "file": "models/sagemaker-2017-07-24.json",
+      "sourceSha256": "d13d6714b2160891023ff9eb46b1e956c63cb4c1165aab7e27162b50da88557c",
+      "subsetSha256": "74704a8c3dd0b2605f978f5bb75132ee0decc2ecda83c89031f21876c8eb79ec"
+    },
+    "scheduler/service/2021-06-30/scheduler-2021-06-30.json": {
+      "file": "models/scheduler-2021-06-30.json",
+      "sourceSha256": "7917c15f45862b8579b6d798cd9d884a0c9251d267b50f4892bca4d5e8d42ad9",
+      "subsetSha256": "0c3e2819d91bef92e976aee4598eeb1ca050f861938de5cb63aa87361b14e0d5"
+    },
+    "schemas/service/2019-12-02/schemas-2019-12-02.json": {
+      "file": "models/schemas-2019-12-02.json",
+      "sourceSha256": "801f795ec5f7973bcd2c6bae14dc03859c3e54e718f3e4b85b8445f47d798a68",
+      "subsetSha256": "6a1eba34610d1ea5350ac54ea03e5b314b5b7c85d04b65f7a005565293b07997"
+    },
+    "securityhub/service/2018-10-26/securityhub-2018-10-26.json": {
+      "file": "models/securityhub-2018-10-26.json",
+      "sourceSha256": "166cd45a727aaf252f96587ecd1f234fc6a6f27f12f055c4d6396d4601759782",
+      "subsetSha256": "348129ec0e79eeaae1a0c37b7c92c984f0b9f6f7ffdba8b01d37bf84e43af085"
+    },
+    "serverlessapplicationrepository/service/2017-09-08/serverlessapplicationrepository-2017-09-08.json": {
+      "file": "models/serverlessapplicationrepository-2017-09-08.json",
+      "sourceSha256": "25d74570261704fb96d31565e51899fa7e758c3cf608592489854e2a6372527d",
+      "subsetSha256": "c39febc19c6c35f12a92cc9cb83a9f9ab74b442354ad4232a67f7dc7d187a9e0"
+    },
+    "service-catalog/service/2015-12-10/service-catalog-2015-12-10.json": {
+      "file": "models/service-catalog-2015-12-10.json",
+      "sourceSha256": "6abf3b40b5a9ff390b36a247a3c1e5d38c8e5ad04e377dd04290e9a1bb85f12e",
+      "subsetSha256": "7a81d2b9742c2ac5c709d5a5653f889f53b71b5cc4dc3c4be097c5cad67a1ce8"
+    },
+    "servicediscovery/service/2017-03-14/servicediscovery-2017-03-14.json": {
+      "file": "models/servicediscovery-2017-03-14.json",
+      "sourceSha256": "8156815ba7a3e4cb6b369234bb7e75698c3ba9962eac3b76f407cd55274fc7d7",
+      "subsetSha256": "acbb54bc05b0c2c924948b225f5e9bd3f175c41e0c2cd7acb93a306711967e75"
+    },
+    "sesv2/service/2019-09-27/sesv2-2019-09-27.json": {
+      "file": "models/sesv2-2019-09-27.json",
+      "sourceSha256": "b6ee9e6b19642fedddae1fd4b5c6235d88c5b4ce6b244f21c0b57f721d12a233",
+      "subsetSha256": "714e20a6ccc0fbe8615e68dc22a498eba8cf2c2aa3db303c3e320f415d3480fe"
+    },
+    "shield/service/2016-06-02/shield-2016-06-02.json": {
+      "file": "models/shield-2016-06-02.json",
+      "sourceSha256": "639fe74bff059d2e4884fc5883e70fbd55ea62c318d0cd746358be355d04342e",
+      "subsetSha256": "eb27e3a5d008eaa277a1b93e1e08d451e76e1c059296718fff7cb1833bfdea43"
+    },
+    "signer/service/2017-08-25/signer-2017-08-25.json": {
+      "file": "models/signer-2017-08-25.json",
+      "sourceSha256": "1145d7c9e3867eeb629d1aa934b8da3a2031102c9f5382dcb898fd8ae7cd19d3",
+      "subsetSha256": "ce4181cababaefe2774486af545d9c3a4dbb4787dcb4a436d0189be753c49021"
+    },
+    "ssm-quicksetup/service/2018-05-10/ssm-quicksetup-2018-05-10.json": {
+      "file": "models/ssm-quicksetup-2018-05-10.json",
+      "sourceSha256": "faa363535a435d522becae7ab4d0d8b1fba1f2a68433f8e20b6c26d6da3613b6",
+      "subsetSha256": "d01e7c32eae128b679d83149bf41d64945ea2e472d87847abc3c28dd311759ce"
+    },
+    "ssm/service/2014-11-06/ssm-2014-11-06.json": {
+      "file": "models/ssm-2014-11-06.json",
+      "sourceSha256": "23a5af746171632c4e9eabd6e5c7ea32cfc3c772307fb81e8cc920b17992a61c",
+      "subsetSha256": "adec9465dcbbcdbefa10ff53668eb1dc4771a4c210f03826611f3ddf00222989"
+    },
+    "sso-admin/service/2020-07-20/sso-admin-2020-07-20.json": {
+      "file": "models/sso-admin-2020-07-20.json",
+      "sourceSha256": "55abac354aee5b5b9583291e8798141c2e56f430fff8a1a2e4686293b7e31c2e",
+      "subsetSha256": "7ae5da82bfafdd089faa2752dffed9646799b672fa3dc347d8a34f6ffe9249af"
+    },
+    "timestream-influxdb/service/2023-01-27/timestream-influxdb-2023-01-27.json": {
+      "file": "models/timestream-influxdb-2023-01-27.json",
+      "sourceSha256": "dc3fe9a84bd31db133c83b5f913679453201cda163be1a4c784805a5002a465f",
+      "subsetSha256": "cd81bcbcad5a2cd9a2263cebc4c90398e0f98d1cb3c0ef8df06ef9f3fbb58f89"
+    },
+    "transfer/service/2018-11-05/transfer-2018-11-05.json": {
+      "file": "models/transfer-2018-11-05.json",
+      "sourceSha256": "a3f19665a141dea8777bede9628bc57a9248fe093f19fc15327f568272e19607",
+      "subsetSha256": "24572f8af944ecf68f9faa68f7ab5aa40a4135355f1055cd3c90f1aa007f7b8c"
+    },
+    "verifiedpermissions/service/2021-12-01/verifiedpermissions-2021-12-01.json": {
+      "file": "models/verifiedpermissions-2021-12-01.json",
+      "sourceSha256": "26caa56d6911fda01b4c77477bef353d385a827428cf4a6d8944238f5a1a45a4",
+      "subsetSha256": "d728b7e3a16c5f7275d2e6502fcb7872f444d824111ccf7a7578f09bab656fff"
+    },
+    "voice-id/service/2021-09-27/voice-id-2021-09-27.json": {
+      "file": "models/voice-id-2021-09-27.json",
+      "sourceSha256": "6773374810e7e0048b2123857b9a8e95b589c36fa530908625ac92333b9a7d86",
+      "subsetSha256": "7407b4b52a367bb1aac1ae668743965ac33074deb72782eafbe8ed4a55a2631c"
+    },
+    "vpc-lattice/service/2022-11-30/vpc-lattice-2022-11-30.json": {
+      "file": "models/vpc-lattice-2022-11-30.json",
+      "sourceSha256": "1d4a53307e88624cc84190e4f96948adae6b8d657e4dcf603828fb9a19f40afd",
+      "subsetSha256": "d4a67d283676eae3c0da5ca14c57507c97f9c5f8d56b95e754f07fac5fdf0b4b"
+    },
+    "wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json": {
+      "file": "models/wellarchitected-2020-03-31.json",
+      "sourceSha256": "060d12694f778b0081e34932728f19badbd99c7d5ccba9f5dbd9ff384cefc4e3",
+      "subsetSha256": "5ffd4a8beb58b8749ce56c2866f7603ac887b64d6a6c0cd75af31502ab1e16fe"
+    },
+    "wickr/service/2024-02-01/wickr-2024-02-01.json": {
+      "file": "models/wickr-2024-02-01.json",
+      "sourceSha256": "84742f14a1f34f6a66a5efb93ef5a91f537fad019cb0fddabd6763293a3d22e6",
+      "subsetSha256": "8ae59d4879b0c33d57b4072f5f6e55e3f960654583986def1099ee06994318be"
+    },
+    "workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json": {
+      "file": "models/workspaces-web-2020-07-08.json",
+      "sourceSha256": "77098e3a28a21f6ec6cdef6c4772da2d1a84b1d542ff721a21c01549cfa3b6cc",
+      "subsetSha256": "70fd84b0f0a4d2ddea531faa0067a7e63bfdc800ad68fd5961cf46e835cc44e8"
     },
     "xray/service/2016-04-12/xray-2016-04-12.json": {
       "file": "models/xray-2016-04-12.json",
       "sourceSha256": "ab1a0cfc7a244eb934542d67949631b6b353d1165e263e8cd2dcaff84c9f554c",
-      "subsetSha256": "3a720b56b3dc97c96cb01c4028ec727603731d476b333beaa1f628fb680a041a"
+      "subsetSha256": "89d30d1c06b6f9ac12a54888ecadff31eb133199722388b7485fe96f91d76293"
     }
   },
   "schemas": {
@@ -38,25 +593,1220 @@
       "sourceSha256": "40e5e783ec5c982e3330f6d87ed18abe28d224e1815f1b458a3bbd70f6268741",
       "subsetSha256": "aaaccfc5488e94c9a3abb02777fb1198b08db11aee79eb587404e71ff9a71b17"
     },
+    "AWS::AppConfig::Extension": {
+      "file": "schemas/AWS--AppConfig--Extension.json",
+      "sourceSha256": "885e8fe69cd30a737ab72be77abd2819cd40f53e303a119596b6b7fd29324d8e",
+      "subsetSha256": "5f8bbfef222ec9d6cc65e8c84c2d0bc4ec68faa878145083d7bbb27e0cd98ace"
+    },
+    "AWS::AppConfig::ExtensionAssociation": {
+      "file": "schemas/AWS--AppConfig--ExtensionAssociation.json",
+      "sourceSha256": "81a34ebdd3a73beb6efb25acdcbb4705500edbea5455294afb1d27158d925d19",
+      "subsetSha256": "b175ed070d61ef8784a0f2deb237a38867807ded71b2bbd66986f9cd5d101b33"
+    },
+    "AWS::AppIntegrations::EventIntegration": {
+      "file": "schemas/AWS--AppIntegrations--EventIntegration.json",
+      "sourceSha256": "6bfc0e0729f9276ba7578723a347d3d69a42909da3e3bf796d5e33309d72915b",
+      "subsetSha256": "d71126cc42e74417e8d235dac834711f550e0aaed12a549d43a263389b0a3c8e"
+    },
     "AWS::AppRunner::AutoScalingConfiguration": {
       "file": "schemas/AWS--AppRunner--AutoScalingConfiguration.json",
       "sourceSha256": "9fd9a3ec64ff272b9f35086fbc28827cca21c40a2235930f21670e0a23cc5b4d",
       "subsetSha256": "03bd82501aff17a3e487a3720fd4ac77e5a9b06cffa0c30e1272e0a8dcf4335e"
+    },
+    "AWS::AppRunner::ObservabilityConfiguration": {
+      "file": "schemas/AWS--AppRunner--ObservabilityConfiguration.json",
+      "sourceSha256": "b8eac1019dbd591f609c976cdcd431645d0141aed54dd85afccf93d6a07794be",
+      "subsetSha256": "8db1dad6da37240d60ed04edb8ee84aecae38debd90ed84ffdaa7805942945a5"
+    },
+    "AWS::AppRunner::VpcConnector": {
+      "file": "schemas/AWS--AppRunner--VpcConnector.json",
+      "sourceSha256": "ba6bf630133daa21522a670e9bfb3d1f3152ea9381b11ec9a71f126fc6f3d724",
+      "subsetSha256": "ae1987ded945b8f1ab008d270f9cbf1d74ffa4aa658ddc354bfe0d1e4a6f4d10"
+    },
+    "AWS::AppRunner::VpcIngressConnection": {
+      "file": "schemas/AWS--AppRunner--VpcIngressConnection.json",
+      "sourceSha256": "c1e232f1a133d16b07316a5adea14aee9009774becf4f9ef95f12cf99fb344a6",
+      "subsetSha256": "55214aaa848a7a42ad2b3e14da189c72f0cc5b5f3c29e7f507ed1916fdc94f9e"
+    },
+    "AWS::AppSync::DomainName": {
+      "file": "schemas/AWS--AppSync--DomainName.json",
+      "sourceSha256": "c03a35b6e82288ea452b9519b023a0d6a2464b0c65e4a04ef3361fb996f86e32",
+      "subsetSha256": "4f2ec607f0d6cbe75dcdfe43aa97c1d554c573ebce0205818415e9053befdd87"
+    },
+    "AWS::Athena::DataCatalog": {
+      "file": "schemas/AWS--Athena--DataCatalog.json",
+      "sourceSha256": "623179dae5828fb589da49a418cf49256d4be8c44dc9b856c336698ac6d0c489",
+      "subsetSha256": "6ae3dcb0800fa65d7c5fe80e905d29535e207ab63a57484c81610fa79007337a"
+    },
+    "AWS::Athena::NamedQuery": {
+      "file": "schemas/AWS--Athena--NamedQuery.json",
+      "sourceSha256": "e756f77d45b7b0db7525fdc226f0d9b02bf61ae3ebc0e947e32a802af50437b9",
+      "subsetSha256": "befee7ac41523ed95cabe71f99aaa1304eeab5b365ae5438989da8d74882b49c"
+    },
+    "AWS::B2BI::Profile": {
+      "file": "schemas/AWS--B2BI--Profile.json",
+      "sourceSha256": "00d2cff08ddeb422cb2978f8dbac3f296a941d03a246e0f0397a16fbbb19d53d",
+      "subsetSha256": "081ab1fcca53cda7e1c7cabd7e7d69c173fcf0dcb8203db7130591b2a9f6b1f5"
+    },
+    "AWS::BCM::ScheduledReport": {
+      "file": "schemas/AWS--BCM--ScheduledReport.json",
+      "sourceSha256": "a1b4311940de24b63c687550087deb88e240af6ebe73339638f77367e83c73ba",
+      "subsetSha256": "8f7fe37105a4f69b7a1a99214c177fc6169668313030757eb8295bc0fbf9a67e"
+    },
+    "AWS::Backup::RestoreTestingPlan": {
+      "file": "schemas/AWS--Backup--RestoreTestingPlan.json",
+      "sourceSha256": "219700861c0755ebec43f584bb6437bc787beef726eaea28afacc3cb876e94de",
+      "subsetSha256": "c9e6c7c3b2e633540c2c6df61e4eb1a4fa4465e388f2b7f5b445bcd66d425763"
+    },
+    "AWS::BackupGateway::Hypervisor": {
+      "file": "schemas/AWS--BackupGateway--Hypervisor.json",
+      "sourceSha256": "3621f7b9edb8322078ccfae437b3e25586fce3e63a9a366f359780eab656e1d8",
+      "subsetSha256": "4e1a00e049f83ffc4d89cdebd14e155645cfa9577225abaa05b390c1dde2d6ce"
+    },
+    "AWS::Bedrock::AutomatedReasoningPolicy": {
+      "file": "schemas/AWS--Bedrock--AutomatedReasoningPolicy.json",
+      "sourceSha256": "dd0b86122e27207fb01337a9ff695369218ebfa7cab23e7acd2d19497ec6ea2f",
+      "subsetSha256": "a4f0fd698e9cfb0adb62182260395a135c97b0d8b4e6d577cf9f50c59d0927d7"
+    },
+    "AWS::Bedrock::DataAutomationProject": {
+      "file": "schemas/AWS--Bedrock--DataAutomationProject.json",
+      "sourceSha256": "97c3ad04d3a9ddf07d6206ac5343219b51838837c9e051bc70724178d64ec99d",
+      "subsetSha256": "0d37695c58e1f2f9a678f67da0bdfac6e3ac4a00dc8a0f5bae1b6343ebb3cd21"
     },
     "AWS::Bedrock::IntelligentPromptRouter": {
       "file": "schemas/AWS--Bedrock--IntelligentPromptRouter.json",
       "sourceSha256": "e7547213ae907c0b8d3a65d245f6ca1cadadd1a780f755fa68c6c63db8f0cc79",
       "subsetSha256": "7591576fea0429984fe286ce6b34a6773c7052e4537d5d9b6e3e912e9fca3e6a"
     },
+    "AWS::Bedrock::Session": {
+      "file": "schemas/AWS--Bedrock--Session.json",
+      "sourceSha256": "7e49ca1a4581895c566005afe2bc2ef34d1410adb8508dd82e9d5b0a8cd70dd9",
+      "subsetSha256": "57df798784fcae5a375249aa29bb0e3bc3d8907543b2c46fb03c359740341dd2"
+    },
+    "AWS::BedrockAgentCore::ApiKeyCredentialProvider": {
+      "file": "schemas/AWS--BedrockAgentCore--ApiKeyCredentialProvider.json",
+      "sourceSha256": "9ec2b933a48b7ad5b3d82b79f9f6a16bb8b0574787e8c305e72dbb1f150e3ddf",
+      "subsetSha256": "65183efd5bb6392025820e8160c3f93d9bfdb06f855a6fa6e475ddb2fb7e46da"
+    },
+    "AWS::BedrockAgentCore::BrowserProfile": {
+      "file": "schemas/AWS--BedrockAgentCore--BrowserProfile.json",
+      "sourceSha256": "3e700da2c40f4d35112316e41c469c59d306089ac9f5c588f053e9f4c8a42152",
+      "subsetSha256": "39b79181791ac60472705089edb9d240226f587262ada6d72f4a9e2c1fc99dfb"
+    },
+    "AWS::BedrockAgentCore::PolicyEngine": {
+      "file": "schemas/AWS--BedrockAgentCore--PolicyEngine.json",
+      "sourceSha256": "b777a1fb4fa3e2c4185319c316b482c5f649e790c98c574f3c51b60df5a82179",
+      "subsetSha256": "9c525af88f661291b5d9fcdb2a3058fb5c46243416df562cd5d345b7869964df"
+    },
+    "AWS::Cases::Domain": {
+      "file": "schemas/AWS--Cases--Domain.json",
+      "sourceSha256": "11f2e4f9b7838e1e579197a73ba81aed89f4bac3f1d54b8ae9df61878e7cea3f",
+      "subsetSha256": "1153e28b1e60c3d4b2cba887a5043c1420b1615ee868d5356f4eca7c0c94df2b"
+    },
+    "AWS::CertificateManager::AcmeExternalAccountBinding": {
+      "file": "schemas/AWS--CertificateManager--AcmeExternalAccountBinding.json",
+      "sourceSha256": "c78a2ce83ea35e44409588bfabdbda8fd8ba8ead959e66f5d91a6510f7677f2d",
+      "subsetSha256": "4616dfda86204902f6217df7ff7cd8f1883547481a5bd1cf0266da8fd42a2a45"
+    },
+    "AWS::Chatbot::CustomAction": {
+      "file": "schemas/AWS--Chatbot--CustomAction.json",
+      "sourceSha256": "baf754c61c93161746910fa58e0d27bd63ea554c887f486ff95ad723d9c5ceaa",
+      "subsetSha256": "8b786135259f9b7f8c2a8d0fa14a5bc798edbeeafd24f2181bc6e3fc4d39c032"
+    },
+    "AWS::Chime::AppInstance": {
+      "file": "schemas/AWS--Chime--AppInstance.json",
+      "sourceSha256": "76ed632395c181948b0e1f7e581a634ece68777c5016e40091629e5bd30c9aa2",
+      "subsetSha256": "439501826b34d14c997e7f7cf7ea8b11700ee9b40ff1e5cd60f51390650e8282"
+    },
+    "AWS::Chime::MediaInsightsPipelineConfiguration": {
+      "file": "schemas/AWS--Chime--MediaInsightsPipelineConfiguration.json",
+      "sourceSha256": "5338037fd154edcc1a0dc0557908f9adbb815e8026e0481233102d904d49adcf",
+      "subsetSha256": "30d19004f5f828f9a7b1fd98d9fc420333acb70f52b8d5bcacf6e4acf21b7e3a"
+    },
+    "AWS::Chime::SipMediaApplication": {
+      "file": "schemas/AWS--Chime--SipMediaApplication.json",
+      "sourceSha256": "30c38ac95c7f8ca526d577e21ec68d6f49b9eb45fd1aef290c2669d111fbda31",
+      "subsetSha256": "631ebe126e500d8bf2cf681b94c4e2b576982fe0205919ec336fc25681841257"
+    },
+    "AWS::Chime::VoiceConnector": {
+      "file": "schemas/AWS--Chime--VoiceConnector.json",
+      "sourceSha256": "0d7602d3fa70033730f986c8a525e97a1ba27fd12fbe4fa3b7e8d96560260c79",
+      "subsetSha256": "b8eadf4791c77de8d9747a64a6883b9d02195c4487d1cfffdf56a1af4c36bbe5"
+    },
+    "AWS::CleanRoomsML::ConfiguredModelAlgorithm": {
+      "file": "schemas/AWS--CleanRoomsML--ConfiguredModelAlgorithm.json",
+      "sourceSha256": "6f88621540798fa873df8b2e0c29c4cbe6f4de20af412b1adb5ee2ff27a57477",
+      "subsetSha256": "71ae924c29b88e4828875baf828758926c9517de83d9dc0ee1136827af62afc3"
+    },
+    "AWS::CleanRoomsML::TrainingDataset": {
+      "file": "schemas/AWS--CleanRoomsML--TrainingDataset.json",
+      "sourceSha256": "bc5caeaa09dc4aa37184291ce0b18b6cb589ba4d1466f144e5392425f6279e30",
+      "subsetSha256": "967ce2b86962aa471a6f043932aa1684869790562b9809ffa49bec67ec992aaa"
+    },
+    "AWS::CodeConnections::Connection": {
+      "file": "schemas/AWS--CodeConnections--Connection.json",
+      "sourceSha256": "3a6470c12ad8d7cb3ad45717dbd1cb1267634309f1ea2981ab9420e162bbff55",
+      "subsetSha256": "cc3a21cc19dd9476f1bab73778274a5d338c4241332d2f184453feed7f1fd33e"
+    },
+    "AWS::CodeDeploy::Application": {
+      "file": "schemas/AWS--CodeDeploy--Application.json",
+      "sourceSha256": "590384623293374885b9f01b4f16c99d8635bd589ea5d6ae47285fc8bbcc0cb2",
+      "subsetSha256": "11313d2ff193d854e7674aeef9ca0ba81a1efc9aab18d63b96e23c81fa4dacdf"
+    },
     "AWS::CodeDeploy::DeploymentConfig": {
       "file": "schemas/AWS--CodeDeploy--DeploymentConfig.json",
       "sourceSha256": "1558b45944010952a8dc76874c42bd96ffb99f750292e3dade34ab7a03ab33bb",
       "subsetSha256": "3fd56969264aecf8dbcc5ff4da608e4b12ab1bb9cb95ae74b73436f0aeb8a662"
     },
+    "AWS::CodeStarConnections::Connection": {
+      "file": "schemas/AWS--CodeStarConnections--Connection.json",
+      "sourceSha256": "8d38a34ed4aaa00a8ea2618c38871c8395d11fee97183bf0fd705a1d5a5f97a0",
+      "subsetSha256": "da83673337cb5f953c8794d12227515e85f0993c3ab51b9084a58e87081dba47"
+    },
+    "AWS::Config::Connector": {
+      "file": "schemas/AWS--Config--Connector.json",
+      "sourceSha256": "2e988fc9cb6aea9cc4fb015ee65d5652866124d07404e900991fae526892cde7",
+      "subsetSha256": "74d989585ef76ec27c926eb9923faa0c8e795b03b366d960bc52cf776deb3e67"
+    },
+    "AWS::CustomerProfiles::Domain": {
+      "file": "schemas/AWS--CustomerProfiles--Domain.json",
+      "sourceSha256": "2def5887bf9b1531b8340f7af5a699a786c02874de6298b737b5908442aaaa86",
+      "subsetSha256": "5eaafee21343cd2c9fcf50140f47e7db1f27ea9368e312dcf1696ec32584de56"
+    },
+    "AWS::DataBrew::Project": {
+      "file": "schemas/AWS--DataBrew--Project.json",
+      "sourceSha256": "fe8a1d28e2a39b687b9b3bbe9ecaa6a96bca80d38b8401fef7fcbb57291baff6",
+      "subsetSha256": "17fab3b3a96844396b5e89cddce41fc97fcd9c896de3ddabea06c53a906d0deb"
+    },
+    "AWS::DataBrew::Recipe": {
+      "file": "schemas/AWS--DataBrew--Recipe.json",
+      "sourceSha256": "9ded42a56758b456bc5861b9ea145aa921299547b30c9fda262f31f60a42c0e2",
+      "subsetSha256": "3cfcd8a23a8395b09c942ede299409ebb58792ee90bb3816c0a7b73600099cc5"
+    },
+    "AWS::DataBrew::Schedule": {
+      "file": "schemas/AWS--DataBrew--Schedule.json",
+      "sourceSha256": "73379bc3988e7b3245b9cfb936097f80dc8baaf62632025d92bf3a9b6b1cd5f8",
+      "subsetSha256": "df25caa20a74f8e7d6aa30493eb59ccee5f3a6319529188e60ac7cdee4beedcf"
+    },
+    "AWS::DataExchange::DataSet": {
+      "file": "schemas/AWS--DataExchange--DataSet.json",
+      "sourceSha256": "a3b863fcb327e86ee05e1cb4246feb8ca09da61d2b955614bd5f3f2cfa427e98",
+      "subsetSha256": "000a6c3cea781b4275644586bffccb3b176593c99563d63d38f43c345c6810a6"
+    },
+    "AWS::DataSync::LocationEFS": {
+      "file": "schemas/AWS--DataSync--LocationEFS.json",
+      "sourceSha256": "2857217686b340bdacafbbe7b98554b9cc2bf12a96fb78598f72f2e3d04452a8",
+      "subsetSha256": "e74baf0833081aee896d489850630d42ffc39ce26d17e8bdbbe4227c0c13e363"
+    },
+    "AWS::DataSync::LocationFSxLustre": {
+      "file": "schemas/AWS--DataSync--LocationFSxLustre.json",
+      "sourceSha256": "470cbefe829f492c146d8367c8dea92e0fce122ceb8860b09ce650a9e02dd02c",
+      "subsetSha256": "1f3323f9bf5bc0ecd795f43781ec7ec8090e0378adb3c04b840beaf4825ac6a8"
+    },
+    "AWS::DataSync::LocationFSxONTAP": {
+      "file": "schemas/AWS--DataSync--LocationFSxONTAP.json",
+      "sourceSha256": "6c51864dd8f26e5c444ca6dff89edbfb7cd7384886725608c73bb92055e5d4cf",
+      "subsetSha256": "7bd48ac1ef22376fbf8e749e11167e4229d7d7ae2f8be5bf62f2aa9b0112a741"
+    },
+    "AWS::DataSync::LocationFSxOpenZFS": {
+      "file": "schemas/AWS--DataSync--LocationFSxOpenZFS.json",
+      "sourceSha256": "23f5a99922f1d192a61715842eb70f2397077ff929c1cf7172743231a89efdda",
+      "subsetSha256": "37c576f3ba9e600e86561c6c3b4a063d2459a8c59a8edde2cd25f2315c9ead6e"
+    },
+    "AWS::DataSync::LocationFSxWindows": {
+      "file": "schemas/AWS--DataSync--LocationFSxWindows.json",
+      "sourceSha256": "5ac974a98ef55ecc61993d4d1688b9804432976bc60c943f99428e4c5e82beb8",
+      "subsetSha256": "ae8bb45d6f34f1d1e85f6176dbbd293e5371b12fe6e24ab537de220bad6062ea"
+    },
+    "AWS::DataSync::LocationHDFS": {
+      "file": "schemas/AWS--DataSync--LocationHDFS.json",
+      "sourceSha256": "11c11a30be79e274f557504c3ffc30b2ca7798f2cb2b2d05712878d08328e521",
+      "subsetSha256": "bad3102ce1d1fd647039df8a96bd297f8a2e6078f9f52ddf1e1e9e421fc58aa6"
+    },
+    "AWS::DataSync::LocationNFS": {
+      "file": "schemas/AWS--DataSync--LocationNFS.json",
+      "sourceSha256": "29f7ef5c3aa557d00d45374756d8a433434b14fb5e72d50eee4cf36254c40884",
+      "subsetSha256": "023dcdcc1df86e6b811d1d2f35a7b8cb4eff611d87f3962d94f22c7175dbaab9"
+    },
+    "AWS::DataSync::LocationS3": {
+      "file": "schemas/AWS--DataSync--LocationS3.json",
+      "sourceSha256": "19129f16d41efcf7b496a0c1c7a45e91644e54cbaa3d9831965dc54c7bfc8519",
+      "subsetSha256": "86f5b6b658fde82246dd9c1fe7c31832be848f29f38700da784dacacd9d51669"
+    },
+    "AWS::DataSync::LocationSMB": {
+      "file": "schemas/AWS--DataSync--LocationSMB.json",
+      "sourceSha256": "d64d4d065424a6c238da55f56472690c6809bdab3989f736c3ebcd93b65b950e",
+      "subsetSha256": "645c0b991524b5e8fafd06d950a2d738e227260ff0cb7d23b601db895d26b25a"
+    },
+    "AWS::DocDBElastic::Cluster": {
+      "file": "schemas/AWS--DocDBElastic--Cluster.json",
+      "sourceSha256": "7b65366076113cc52d02a5e16d154ebaf1d19f12607378025be641c1dcad5e77",
+      "subsetSha256": "5332280ca18c895780601d9fffa8a6cf8e28a4c01dbf6a5a251a493ac04a62f0"
+    },
+    "AWS::DocDBElastic::ClusterSnapshot": {
+      "file": "schemas/AWS--DocDBElastic--ClusterSnapshot.json",
+      "sourceSha256": "0e43f2f422942e8f013fbde3305c1219db4bfc1e4bc847e3de9e186d19f63991",
+      "subsetSha256": "f68e6ea32e74c9986b38d74f319097fa79a40e9738a489fbd551a5fc6c579ee9"
+    },
+    "AWS::ECS::DaemonTaskDefinition": {
+      "file": "schemas/AWS--ECS--DaemonTaskDefinition.json",
+      "sourceSha256": "cfff3d2810fb1c5340ab813a0f7b9fcebbaedb990be0ac2b9b8d71718b684fc3",
+      "subsetSha256": "84258e3e4755c82dedb84098b50e9aa39db3ecde5dd86f768ca3aff9e8ac1f10"
+    },
     "AWS::ECS::TaskDefinition": {
       "file": "schemas/AWS--ECS--TaskDefinition.json",
       "sourceSha256": "d0cdd2e998ae30211bb754fa3ec54cc9780bd14842e4108620ed4d53a7ee8762",
       "subsetSha256": "e7d1b0a9cb0d41e914bbc7d78b63e0cddd37bd61b2ba030f84441639b2ca7eb4"
+    },
+    "AWS::EMR::SecurityConfiguration": {
+      "file": "schemas/AWS--EMR--SecurityConfiguration.json",
+      "sourceSha256": "738f3d02c65d7c621359ac44459712a331e34c37e160df0a765a8e861d86c6e7",
+      "subsetSha256": "2d82a3fc1875b4dc739d918314d6297f91b428d3587fe7d54b806fecc15c07d7"
+    },
+    "AWS::ElementalInference::Dictionary": {
+      "file": "schemas/AWS--ElementalInference--Dictionary.json",
+      "sourceSha256": "fb17d9f992fefb593e78578418f8a8b806dc9d0f529e5e7eace6803740fe3cf7",
+      "subsetSha256": "3d97973d571d310756413bb81b760b9d098fd8bb2b6741a48cec60a401a94509"
+    },
+    "AWS::EntityResolution::IdNamespace": {
+      "file": "schemas/AWS--EntityResolution--IdNamespace.json",
+      "sourceSha256": "275cb39ab5cd85642849b37fec24b960a371bc7f8c5042370eb7afe58ac28a73",
+      "subsetSha256": "3cd60dd7143f7cc9c73c1523f1b13a61c883bcb56e504786f304fe9a213dc7ef"
+    },
+    "AWS::EntityResolution::SchemaMapping": {
+      "file": "schemas/AWS--EntityResolution--SchemaMapping.json",
+      "sourceSha256": "a98ce1de3e218d634e1553d197d39e900772d85e52951d0c1d4ebc82f0d18ff7",
+      "subsetSha256": "124303feda8520c26a7edcc321a3a85ad36092aca333c6665c3300d350d4a17d"
+    },
+    "AWS::EventSchemas::Discoverer": {
+      "file": "schemas/AWS--EventSchemas--Discoverer.json",
+      "sourceSha256": "a21260786a1050c618eec496212c73188d38e1841e654bae3c20ba07277f249a",
+      "subsetSha256": "2dc2d837857a0ab6551c8a485f78d86f588f8ad10250ad07e42edbdc1692606f"
+    },
+    "AWS::EventSchemas::Registry": {
+      "file": "schemas/AWS--EventSchemas--Registry.json",
+      "sourceSha256": "a986c784c8fef0d0138db7edebcdd5364f6700fba132455ef9629256eef9107b",
+      "subsetSha256": "741c3a5ce57b5703b4b57f29b2e8e6a3fe77bc7718fbd71420cb06970ef81f5a"
+    },
+    "AWS::Events::Endpoint": {
+      "file": "schemas/AWS--Events--Endpoint.json",
+      "sourceSha256": "028ffaffc1dd66df7c3e48f954fbda0914ac732edd882e65f00daa7aca32ccc3",
+      "subsetSha256": "99fd65e93747fb1caa02530dae12bbc17495a7ede71033a4bcc4bd21d4ba59a6"
+    },
+    "AWS::Forecast::DatasetGroup": {
+      "file": "schemas/AWS--Forecast--DatasetGroup.json",
+      "sourceSha256": "cbba07aad22d75f990684b044ad8fb7434dbdf28c79a2a8206f24efed493d0f1",
+      "subsetSha256": "c7df0aa2fcbf635b6bc10677d5135fda529bb91dfc79cc9617ef417a2ea90121"
+    },
+    "AWS::GameLift::Alias": {
+      "file": "schemas/AWS--GameLift--Alias.json",
+      "sourceSha256": "dc1bf14daea09e12395ecbe13d3e3f3825144f0ae4327ea7119f389149d09723",
+      "subsetSha256": "743885b6b806f81304110d012914ad2f26390d288a696b5762d0ce187a7da0a6"
+    },
+    "AWS::GameLift::Build": {
+      "file": "schemas/AWS--GameLift--Build.json",
+      "sourceSha256": "ee888ad19656cd37de4501c65703b5bb52a877c119700a33d43d7a2ddd05ac20",
+      "subsetSha256": "4821d7024857285bab9ca3a303e68ff147f688d794bec3b655c688a026dfca6e"
+    },
+    "AWS::GameLift::ContainerGroupDefinition": {
+      "file": "schemas/AWS--GameLift--ContainerGroupDefinition.json",
+      "sourceSha256": "8380461568db3319f43fb299927ed0ad1ccffb0a526ce65704fce3d48502cbf5",
+      "subsetSha256": "198a115478ed75a34df1a97a8c7b392e3b7b4096f967323bace0a3e7833fa6a6"
+    },
+    "AWS::GameLift::GameServerGroup": {
+      "file": "schemas/AWS--GameLift--GameServerGroup.json",
+      "sourceSha256": "79c5c7e55a3aece2e433f892a99f6bb77769fdcaaece306975b67f7528a4b22b",
+      "subsetSha256": "80a45722e4aebe77a008e7ada509f4f1d2a0c2b61a8c5dd07059ee04ede58e3a"
+    },
+    "AWS::GlobalAccelerator::CrossAccountAttachment": {
+      "file": "schemas/AWS--GlobalAccelerator--CrossAccountAttachment.json",
+      "sourceSha256": "cdde4f8b84967d79208253cccc829ee358d92a60eed8ae06b44ddb17a7998409",
+      "subsetSha256": "668b51a5519d7393740a9707eef533567e6bf286e973ec1f1497f368aac96add"
+    },
+    "AWS::Glue::CustomEntityType": {
+      "file": "schemas/AWS--Glue--CustomEntityType.json",
+      "sourceSha256": "4fdbf93ff18ca9d9a3cd20671a12cd80b77a6dd33e11da0806662ee94b29536c",
+      "subsetSha256": "56fe87647084e2b3200c3d14d8183508847db9fdcaa5cd746aa6fe437e7afeab"
+    },
+    "AWS::GreengrassV2::ComponentVersion": {
+      "file": "schemas/AWS--GreengrassV2--ComponentVersion.json",
+      "sourceSha256": "62ce79767fb8025cf0b307e737ff8ef47612d87260e6e796096d070784bf2786",
+      "subsetSha256": "190db47b55334b0dd96b49a13d7510316c66a2ffd6a46f69de268def6c8b5940"
+    },
+    "AWS::HealthAgent::Domain": {
+      "file": "schemas/AWS--HealthAgent--Domain.json",
+      "sourceSha256": "209c5ce4768c0a082a479b8e58184c92eb9468b541c49ae59ff1e76e50f874fc",
+      "subsetSha256": "f843294e629bbfc6826249ec123f9e919f7616762bb2fb98678559e5a9391053"
+    },
+    "AWS::HealthImaging::Datastore": {
+      "file": "schemas/AWS--HealthImaging--Datastore.json",
+      "sourceSha256": "073fbcde11c74388e665abd6a5f55aa1dc7580f0dc23ac29adf6b146609b4152",
+      "subsetSha256": "beab0793e4538682755228255e8a7c8d4e04a1982938b189a346f87a42d32d39"
+    },
+    "AWS::IVS::Channel": {
+      "file": "schemas/AWS--IVS--Channel.json",
+      "sourceSha256": "2d3b739e40625eccfa2b711ebc2bfe27db09297ad1d76316a4caef150ecd7941",
+      "subsetSha256": "4e0049c52a63ed23affa50366147254dcf6b1ab1f327cfc5ae83fd2d9eb660bd"
+    },
+    "AWS::IVS::EncoderConfiguration": {
+      "file": "schemas/AWS--IVS--EncoderConfiguration.json",
+      "sourceSha256": "03921e8564d4b8d3f5e0ae15969e3243d15c9680736532b6ffff40aab4bed383",
+      "subsetSha256": "477af9f08f6a4bf6c123b34319e8dd209b9573bc0e02edc167d29929ec390bc4"
+    },
+    "AWS::IVS::IngestConfiguration": {
+      "file": "schemas/AWS--IVS--IngestConfiguration.json",
+      "sourceSha256": "17f4888adbd838391a0fbb3817535a78697cc86a31e6cf0073906adeb30ca000",
+      "subsetSha256": "8e82b7ee872f4a14d3b7853eda2deddad58c4cc83308c299039225ca0873310e"
+    },
+    "AWS::IVS::PlaybackKeyPair": {
+      "file": "schemas/AWS--IVS--PlaybackKeyPair.json",
+      "sourceSha256": "0321fa1a6f876b2e3c7d9e0b7b4115f614c71674990062077db46b51fa138f72",
+      "subsetSha256": "e8e5e7df2adf698b23f8e229d1a75e45546433680f44e24f7991d5a8159fdd49"
+    },
+    "AWS::IVS::PlaybackRestrictionPolicy": {
+      "file": "schemas/AWS--IVS--PlaybackRestrictionPolicy.json",
+      "sourceSha256": "768419b9f6664970106f1651ca13442759c16138f42a9b193466afc0b98b85fa",
+      "subsetSha256": "17d3ca5843c6371da7d429356656c3b8b9c98bb0658c9232d67a02d87c09109a"
+    },
+    "AWS::IVS::PublicKey": {
+      "file": "schemas/AWS--IVS--PublicKey.json",
+      "sourceSha256": "8256781c21f73a4b90b7237fc0e972dbca0337723d095d9a3b825966d337286d",
+      "subsetSha256": "2e0230ed736573a988058d456f4e37575961bb19cab896cff142692c62d7ae6d"
+    },
+    "AWS::IVS::RecordingConfiguration": {
+      "file": "schemas/AWS--IVS--RecordingConfiguration.json",
+      "sourceSha256": "eb7d3aae6e13f922ff4710f431024cd21afc0ef07b91735df0e573d0fde1b1a1",
+      "subsetSha256": "a454f4fe9632cb84c4f57758a8471faf0680e96e0807dafa0bd8ae299212536c"
+    },
+    "AWS::IVS::StorageConfiguration": {
+      "file": "schemas/AWS--IVS--StorageConfiguration.json",
+      "sourceSha256": "511a0b57e5ce06606a93d0e99177a0f87542688bcdb84d0edf062658b81006a7",
+      "subsetSha256": "4364673ae1b5e341f8d94c27f11911e6822643239d61533c8ddd7b4f6f487999"
+    },
+    "AWS::IVS::StreamKey": {
+      "file": "schemas/AWS--IVS--StreamKey.json",
+      "sourceSha256": "4b1d98ba9cfbd44b8ab635b1dd0d09722146510b4c1d3f039ccec17427dfc1a7",
+      "subsetSha256": "693c25b3dfb4263ae1d5ad6e33d56f81272aa16ce1c813958d6659d6d9db5d21"
+    },
+    "AWS::IVSChat::Room": {
+      "file": "schemas/AWS--IVSChat--Room.json",
+      "sourceSha256": "4737e55e1055ee381405ba27d79bbab320ba19b8a12ca4c77c24a47fbf7e5804",
+      "subsetSha256": "326a89e52ecdba0e134783af819d5a2bdb017a1f9a5e768c397aa126029c97ef"
+    },
+    "AWS::ImageBuilder::LifecyclePolicy": {
+      "file": "schemas/AWS--ImageBuilder--LifecyclePolicy.json",
+      "sourceSha256": "71f206746794bef11722f56296bab9a3434d9a88dc96fcc4e05945d81575d8bd",
+      "subsetSha256": "bf43652d7e74b26f92bb0f7b9818eb8dac44b7f398fe8d1878846509fb3e6dae"
+    },
+    "AWS::InternetMonitor::Monitor": {
+      "file": "schemas/AWS--InternetMonitor--Monitor.json",
+      "sourceSha256": "466275879d81b11b805c87ad7bd44ad38bbd32fe12e88862bdbc1afd50f671d6",
+      "subsetSha256": "9e5669fa813ef75f2d4b64f6c65564fa2f6afcbb88759a086b02fa23aa685da0"
+    },
+    "AWS::Invoicing::ProcurementPortalPreference": {
+      "file": "schemas/AWS--Invoicing--ProcurementPortalPreference.json",
+      "sourceSha256": "92dc18d1140ea306b2989bb25eabacba2538761f118c79b9d286abf02246e036",
+      "subsetSha256": "78d34d50c595cec2ff7456d367eabad5b1b1029adcf1c8875ad1cf9df64bc800"
+    },
+    "AWS::IoT::CustomMetric": {
+      "file": "schemas/AWS--IoT--CustomMetric.json",
+      "sourceSha256": "7772cf44eb87a6e3579bd45acdc76d9afe501ccdd14818324737377031bd7542",
+      "subsetSha256": "c38ef7936a218ba3adac0eea34329df885b3e77df98f49e56117162f53c22cd5"
+    },
+    "AWS::IoT::Dimension": {
+      "file": "schemas/AWS--IoT--Dimension.json",
+      "sourceSha256": "3731235ce0bcc5ed54c7e015d1271a10adae65fabf3fad81ec9479024f2a5e12",
+      "subsetSha256": "b41e9e61e6c86c6c0c04810359ae3b77b8c19cf61381b6c2f32762bb0a835c7f"
+    },
+    "AWS::IoT::FleetMetric": {
+      "file": "schemas/AWS--IoT--FleetMetric.json",
+      "sourceSha256": "972bab9ff6e09c3b12eb1489a63fe4e1f6818126fd1e79fffaadbda50d5beb9a",
+      "subsetSha256": "3bdf2ca1022e8c7dbae6dcfdda58fd37f0ed64a9fcdd0a3f98117e11b06d3e65"
+    },
+    "AWS::IoT::RoleAlias": {
+      "file": "schemas/AWS--IoT--RoleAlias.json",
+      "sourceSha256": "3b078a3977ea096e2cd8ae46da08f1571c15e70192696406ba39e1ab72190aa9",
+      "subsetSha256": "5bc556f4ad0c9844b19c55a8a4558dd501f5fbdcee0976fbf60b97cda1d63a62"
+    },
+    "AWS::IoT::ScheduledAudit": {
+      "file": "schemas/AWS--IoT--ScheduledAudit.json",
+      "sourceSha256": "5fcbba7ff5854854ac42bf3cc9e92530250df744a60af99eff5c46fc9a9e9498",
+      "subsetSha256": "342ec6ba68690e48a1db09696224ad2feaf96418a904db0752726afb6af14a6d"
+    },
+    "AWS::IoT::SoftwarePackage": {
+      "file": "schemas/AWS--IoT--SoftwarePackage.json",
+      "sourceSha256": "e5b00784a95d2363e096b74b2424c13289f479ff4a42d2459bab63ed2668629e",
+      "subsetSha256": "bcceed8d8dd7f40e9553d251b6f12540736a9cad338332ab3284a690fec6d82e"
+    },
+    "AWS::IoT::TopicRuleDestination": {
+      "file": "schemas/AWS--IoT--TopicRuleDestination.json",
+      "sourceSha256": "bd781fc39ebc37ae4ae6be67ac900f5b2e556210bbc0f54c266fc2a6fccc8c0a",
+      "subsetSha256": "54d13b9655830697bfd2e25f3f63100845a6a6cdc38615f123fc7a510cfd4c54"
+    },
+    "AWS::IoTCoreDeviceAdvisor::SuiteDefinition": {
+      "file": "schemas/AWS--IoTCoreDeviceAdvisor--SuiteDefinition.json",
+      "sourceSha256": "c8dd6b12c73e006f86d58dd558f1c2087eb2c1c93ad6f7969abe4809cc754603",
+      "subsetSha256": "e3b50b1b9576a79680dd269dbbd450c44cfcf8ddb0756fd96552d33acc5e00c3"
+    },
+    "AWS::IoTFleetWise::Fleet": {
+      "file": "schemas/AWS--IoTFleetWise--Fleet.json",
+      "sourceSha256": "e1cafc6cae08ae0e83b15f19b69ea0b372a77f4cd4b47cb2bcba3b1e076eae6e",
+      "subsetSha256": "8a151ab5a3a95f5cca6b47e8de1c509af6606b71c79575755885c88ea94c8e48"
+    },
+    "AWS::IoTFleetWise::StateTemplate": {
+      "file": "schemas/AWS--IoTFleetWise--StateTemplate.json",
+      "sourceSha256": "a3ec7cad3ce643c0f470ea74144872935d28661849cfe5015a52c7426bb98c3f",
+      "subsetSha256": "ac6db8dd633f2eb42fc6807347166266192f54f82908ca85e685367cf230d2b6"
+    },
+    "AWS::IoTSiteWise::AccessPolicy": {
+      "file": "schemas/AWS--IoTSiteWise--AccessPolicy.json",
+      "sourceSha256": "aeb93ba8cf655593e8812a2b81a065a0b22eac3018145a5407d0a8c5d85b447a",
+      "subsetSha256": "d2bfb2fa8c08aecd34a4d08925634efa43370cbaff74423f323bdf87b8d4cedd"
+    },
+    "AWS::IoTSiteWise::ComputationModel": {
+      "file": "schemas/AWS--IoTSiteWise--ComputationModel.json",
+      "sourceSha256": "a150eec4b480958dd5a9655c44810fd1ff5a14a55e64a7091c006f0101ab1efc",
+      "subsetSha256": "4ce35d36c7f2c555e9459a12e763ff50089e9eef3853a50c90544fad3cd120bf"
+    },
+    "AWS::IoTSiteWise::Dashboard": {
+      "file": "schemas/AWS--IoTSiteWise--Dashboard.json",
+      "sourceSha256": "e9e10cf609ea4710b6601725241715b5e83dc487551cbd2cc850e0d0b82a139b",
+      "subsetSha256": "b40c78259568408b3569c00c73f94252049750c6254110c10aa0a85963a6c65a"
+    },
+    "AWS::IoTSiteWise::Portal": {
+      "file": "schemas/AWS--IoTSiteWise--Portal.json",
+      "sourceSha256": "7726cd6ad9da905be1333702f13b4ea08c223481e034d2cf3d32614d4834e528",
+      "subsetSha256": "ff1872224aa835d2e3abc422023ff0d3201352f1454bef58c2133a0045e4a48a"
+    },
+    "AWS::IoTTwinMaker::Workspace": {
+      "file": "schemas/AWS--IoTTwinMaker--Workspace.json",
+      "sourceSha256": "a62ca66d46be6be2dfb26c5226aa986f912be18b6959edc2d0c4458e6460e2c0",
+      "subsetSha256": "4667d99baae6b30b7c5ae6aec1aef2ae24c98a609fddab4bc9ea9da6fd5708af"
+    },
+    "AWS::IoTWireless::Destination": {
+      "file": "schemas/AWS--IoTWireless--Destination.json",
+      "sourceSha256": "a534e18cab9d30203f3a779c496232a4a9bdbc28521f50a6d9c8e0c746968c6c",
+      "subsetSha256": "f16c1dfa28d6507418d6fcd666cdd652a93802d449f874254885819f2c02f693"
+    },
+    "AWS::IoTWireless::DeviceProfile": {
+      "file": "schemas/AWS--IoTWireless--DeviceProfile.json",
+      "sourceSha256": "6261948ae6fa95042a25d9ea74e7139499679db6c309c71ab57befae37525332",
+      "subsetSha256": "45fad497024c906211f637ce68c892b2e3fb50a926cd077bf6c32ad55842ebe6"
+    },
+    "AWS::IoTWireless::NetworkAnalyzerConfiguration": {
+      "file": "schemas/AWS--IoTWireless--NetworkAnalyzerConfiguration.json",
+      "sourceSha256": "fe2fa514f8945e14a9be20bfc9eceb34df4c5b3f0a6efc0ec6bbf55c6746ede1",
+      "subsetSha256": "ba9352d55166ea5d6563ece28bf491961490ff83b8ff6bb01c437e29a60bc2f0"
+    },
+    "AWS::IoTWireless::ServiceProfile": {
+      "file": "schemas/AWS--IoTWireless--ServiceProfile.json",
+      "sourceSha256": "1a85d12d0b44e481ad2fa3ee4275e8234cf4c9f41dd39ff334c56adcc06e5ce7",
+      "subsetSha256": "35e2d0e9fa6e837793bf4e596162f68c3ed759c553547df3cabd9dbb590060ab"
+    },
+    "AWS::KafkaConnect::Connector": {
+      "file": "schemas/AWS--KafkaConnect--Connector.json",
+      "sourceSha256": "ecc179e4dda0de79169732378e48ad2e18c7622308a7f3b00a0bc1c6ad6a2f35",
+      "subsetSha256": "84b5047096a4081250a886c86ac59c6e2b7c1057399019ea24c9528e59954fd7"
+    },
+    "AWS::KendraRanking::ExecutionPlan": {
+      "file": "schemas/AWS--KendraRanking--ExecutionPlan.json",
+      "sourceSha256": "7f32301e91eb468b160f7148ec5d5deb1c6da33cde6083a9101cbbcb213826ac",
+      "subsetSha256": "7f6d71b4f27995101f85dc98d957fd9266672d287e85e919e7d90fd5b1d54c8e"
+    },
+    "AWS::Kinesis::Channel": {
+      "file": "schemas/AWS--Kinesis--Channel.json",
+      "sourceSha256": "84dc2d87f2439b8e754f00e1701cc4d69a5e5450a736999f7e00f584f57676e3",
+      "subsetSha256": "71473faf1acd5cef16bd7e6bbeb8fb6d1841c3c1b9f39243951ad40964bf2c26"
+    },
+    "AWS::Kinesis::StreamConsumer": {
+      "file": "schemas/AWS--Kinesis--StreamConsumer.json",
+      "sourceSha256": "e4a383b32f9007a171a91305578ada103509978a218b50ba09d98dd1089884c4",
+      "subsetSha256": "cf689712ebf052732ed4fd0d54358027c0d06d9b8e9afaf31ddab14e781ae9e7"
+    },
+    "AWS::LakeFormation::Tag": {
+      "file": "schemas/AWS--LakeFormation--Tag.json",
+      "sourceSha256": "8a9c08ebfe1a68c7e78db9ddfdfe93c858b1d0c0531de3733a719629a297be97",
+      "subsetSha256": "5f09e8c989b9d8f7d10dcab9b9b7a399ac2595f782187104a71d8753c6b16f90"
+    },
+    "AWS::Lambda::CodeSigningConfig": {
+      "file": "schemas/AWS--Lambda--CodeSigningConfig.json",
+      "sourceSha256": "32b79a170cb73e8185fe406c2731bf3f82bcd78ec65c3049cd2dcd981802b8bb",
+      "subsetSha256": "41ddd2cfd21f5e01dd46f5951b2c5347ce8bc54df2771301eff7e31c742c0184"
+    },
+    "AWS::Lambda::MicrovmImage": {
+      "file": "schemas/AWS--Lambda--MicrovmImage.json",
+      "sourceSha256": "7ead841005af188095acae79ca5fb117e3cf0dfabd4d5a3238c931526d9dc7dd",
+      "subsetSha256": "65c23927d9d9f21fe7e5e2d2e59778f7bc13be7e8265f0d462186588839f3a69"
+    },
+    "AWS::LicenseManager::Grant": {
+      "file": "schemas/AWS--LicenseManager--Grant.json",
+      "sourceSha256": "b1fc44bd54a18488321f1df560fabf8859fc68fdaf71062dd0ad3ebba62cf387",
+      "subsetSha256": "1369218cfd7c0086d57163b8ddc592061be95d2481ed5ed6e429396c07847c9c"
+    },
+    "AWS::LicenseManager::License": {
+      "file": "schemas/AWS--LicenseManager--License.json",
+      "sourceSha256": "0e2e21b2ba49675330c4dd65f262036290befb14550f802831e83acb05637d91",
+      "subsetSha256": "710e3eb2814523a7a37c6f52250f7678f335a330f93dd0fe2d6c49057508fa7e"
+    },
+    "AWS::LicenseManager::LicenseAssetGroup": {
+      "file": "schemas/AWS--LicenseManager--LicenseAssetGroup.json",
+      "sourceSha256": "2e34b04bb2b4bf3f85f8c3628bbbd92ad6be54036282da8186e046eba29a624b",
+      "subsetSha256": "bc77d6e3902ea190a02e83a4b682c2e085cf78f1c6d7962405d252a36d875f4f"
+    },
+    "AWS::LicenseManager::LicenseAssetRuleSet": {
+      "file": "schemas/AWS--LicenseManager--LicenseAssetRuleSet.json",
+      "sourceSha256": "99e2e0f533ef1e365a914eb1e738d43c6860e9b15205bedc207b6a5407052cf9",
+      "subsetSha256": "0c40a19c19064caf8d55fa5d0198e7bd8878d237c25e6dab7d2f3f038f0e8a78"
+    },
+    "AWS::Logs::DeliverySource": {
+      "file": "schemas/AWS--Logs--DeliverySource.json",
+      "sourceSha256": "4aff1e55d8785605e65efb03dcaffe644c1639ee996b066d3ab5a9e8837366b7",
+      "subsetSha256": "2158399d6d356a835bde501e62511df473936c6f7348e8151d4a45418fe63e73"
+    },
+    "AWS::Logs::Integration": {
+      "file": "schemas/AWS--Logs--Integration.json",
+      "sourceSha256": "a5a9e5682ebe7dfa4613e3d3e8c9017aa447655564b51269dfe9399df2ac4922",
+      "subsetSha256": "32c8b8fc8f7541ca4518729434a56e84a505209fa0835b05a88d5edd4f5589dd"
+    },
+    "AWS::Logs::ScheduledQuery": {
+      "file": "schemas/AWS--Logs--ScheduledQuery.json",
+      "sourceSha256": "20425d768c180d965f38596d0c8496f1c9e77be132168c21b1e1a7a224e945b1",
+      "subsetSha256": "9eab7f29192bd305a6f2f518d7b7a0e2fb3e80552e905466a9fa4160fca43523"
+    },
+    "AWS::Logs::Transformer": {
+      "file": "schemas/AWS--Logs--Transformer.json",
+      "sourceSha256": "41e037f099f03f87e1355a6250bc3b5829aaa64ee7cf12aaf22b4ebd08370127",
+      "subsetSha256": "779423635f956abad0c30eae9c3051d81521ed63d7fc9bd78a0de036603546ba"
+    },
+    "AWS::LookoutEquipment::InferenceScheduler": {
+      "file": "schemas/AWS--LookoutEquipment--InferenceScheduler.json",
+      "sourceSha256": "c6937bef9bdb3e44acd40378f2500c46d632fb2f72cffa45e1f810507b3d53a9",
+      "subsetSha256": "cc8650d7fb037208c11808785ab8ca39a38dc05984ef3c1d6afff42362023714"
+    },
+    "AWS::M2::Application": {
+      "file": "schemas/AWS--M2--Application.json",
+      "sourceSha256": "33a2fee0b4c4c358916da93c78217940efac6cb5f394793d4a6be1c6ff5a5608",
+      "subsetSha256": "08a809a581bb87b6e966d76d3ebd32f2215e61c8ac9d71f47d76f3f495d099fb"
+    },
+    "AWS::M2::Environment": {
+      "file": "schemas/AWS--M2--Environment.json",
+      "sourceSha256": "ff8195d7d96bde26f74e1ba97e721d811c0d627d4c838768dbfbbfe5466b5b30",
+      "subsetSha256": "2d769941ae64a080db5d67e0cd3ad1b4df0d727ee96c58b8a91e9daf144c473b"
+    },
+    "AWS::MGN::NetworkMigrationDefinition": {
+      "file": "schemas/AWS--MGN--NetworkMigrationDefinition.json",
+      "sourceSha256": "79462723ff81d42843cd9a375706f83c076d90228cc6c7d87a4d48e2e6f2756d",
+      "subsetSha256": "3ac45b9009560cc706255411d5d7469b93634078745d7a564adcb8488d44c5af"
+    },
+    "AWS::MWAA::Environment": {
+      "file": "schemas/AWS--MWAA--Environment.json",
+      "sourceSha256": "ba755def35b607eb58470f36c546b947872492cc47cf34510358614940882bbd",
+      "subsetSha256": "1e527d252cce274f0ef4b1b0eb4204e2e0666d6976bf1da65b29444e7660fa80"
+    },
+    "AWS::Macie::CustomDataIdentifier": {
+      "file": "schemas/AWS--Macie--CustomDataIdentifier.json",
+      "sourceSha256": "e03e941ba2e283da12f7b8ceb4391d9b8e0a276484418b1a939cce64acdbac36",
+      "subsetSha256": "7f2fad2e4f6720fc9525e7aa278dc9190949d1a264002eb529aee0a6b0a66cec"
+    },
+    "AWS::Macie::FindingsFilter": {
+      "file": "schemas/AWS--Macie--FindingsFilter.json",
+      "sourceSha256": "9d0f8fd5f2586ab063fc6c9ac9298e4ea4a23cd3ee2c4ae74ba1a34833f4d1b2",
+      "subsetSha256": "ecdeb1e5f341a0ba6e792bca05cb0ddba81aa146d853e1b44591c708b5f76a57"
+    },
+    "AWS::Macie::Member": {
+      "file": "schemas/AWS--Macie--Member.json",
+      "sourceSha256": "babc12e3a3b35605479c6465879d015bfcb199eb64ac87008dad27ef75f8777c",
+      "subsetSha256": "cc08b330124416aea23c23f2f816b02fa33d723e165f6654233d5512e911a99a"
+    },
+    "AWS::MediaConnect::Bridge": {
+      "file": "schemas/AWS--MediaConnect--Bridge.json",
+      "sourceSha256": "34c6ae48a1d910c761b6ab951a2c36a35ee295fcd27dd84a8f8ce794156acd29",
+      "subsetSha256": "d92851465e6cd8ec3f3d0cc137efd77aa7759ec983599b1f4b9d1503896b04bd"
+    },
+    "AWS::MediaConnect::Gateway": {
+      "file": "schemas/AWS--MediaConnect--Gateway.json",
+      "sourceSha256": "46f48b5c30629aec29959a889af14351753968896a7b36641710bb3aa9dafce8",
+      "subsetSha256": "5bce200fd64d06c802ff8c6d46e5501ad119ed556f64e543ae8f2793d3b0530b"
+    },
+    "AWS::MediaConvert::Queue": {
+      "file": "schemas/AWS--MediaConvert--Queue.json",
+      "sourceSha256": "2900f599918f25d00bd2628fb014f137b2cb8ec7954eaaf4d36d4864cc976fc6",
+      "subsetSha256": "62859feca38cd65f862666092598fb336e5053a29ead592713eb6de2562e5ae6"
+    },
+    "AWS::MediaLive::Cluster": {
+      "file": "schemas/AWS--MediaLive--Cluster.json",
+      "sourceSha256": "0c9e54103109732b70f0835225e39c439e9e1bb6228abbb84b29740bd48a476e",
+      "subsetSha256": "b9f12394b3ab1d2faeb2163f9f02a959a1065bebda9f94667e641c20f867a3a1"
+    },
+    "AWS::MediaLive::Network": {
+      "file": "schemas/AWS--MediaLive--Network.json",
+      "sourceSha256": "7833cfa121d7f083c4384ce3374d9a39bf5f8394c42369b5869a160dcf90258d",
+      "subsetSha256": "9e0697fb833c103a33b92098e25ca091e7063e2dc2fb395b0b84460d7ea02172"
+    },
+    "AWS::MediaLive::SdiSource": {
+      "file": "schemas/AWS--MediaLive--SdiSource.json",
+      "sourceSha256": "3bc21f83007358b8159a8478ad6bb2c7009a3dc74b4455ee515417910816bd66",
+      "subsetSha256": "00a35644740aae2c608e2006ddd11e74095b89121bddbd956097a3e6d5c7ee2c"
+    },
+    "AWS::MediaPackage::Asset": {
+      "file": "schemas/AWS--MediaPackage--Asset.json",
+      "sourceSha256": "4c21ddac8884cbe1cf6a2be8e1c3da1148428a08743d26ac4c4fe02b51852561",
+      "subsetSha256": "1c0ff827162c86716eb28583548281e2310b97dbab3771628a34feab8523902e"
+    },
+    "AWS::MediaPackage::Channel": {
+      "file": "schemas/AWS--MediaPackage--Channel.json",
+      "sourceSha256": "82d186112148979900bfe39990853ac93be6bc25c93890a931b6f1bb668f9f3d",
+      "subsetSha256": "f0673518f28994ed8d9b2b403fdde2a1dfae834298486b335e2f5774aeb07b5d"
+    },
+    "AWS::MediaPackage::OriginEndpoint": {
+      "file": "schemas/AWS--MediaPackage--OriginEndpoint.json",
+      "sourceSha256": "811f17d20acc15d1bda4bdd944617e98eff55d06dd2bb8c1fa202a931037184e",
+      "subsetSha256": "08c5027c9cdaad93646cecba6380f521e6576a73f40a3e22ae70bb5470eee0b5"
+    },
+    "AWS::MediaPackage::PackagingConfiguration": {
+      "file": "schemas/AWS--MediaPackage--PackagingConfiguration.json",
+      "sourceSha256": "9ee76029606795723045088e5a48df136d8df3a5027806220b1b4257a63a1490",
+      "subsetSha256": "797e1d9282dc7c6f6a6182ac13ba0a266863124ae5ed3b96e6147e3523271796"
+    },
+    "AWS::MediaPackage::PackagingGroup": {
+      "file": "schemas/AWS--MediaPackage--PackagingGroup.json",
+      "sourceSha256": "a98163be3ceea90b987d5794b0d87adcfffda17fac991be6f2b49cd06e567eb3",
+      "subsetSha256": "31cf3da9ce4bb136ece07e15de4a2d27f7b87ef36770197ea2249ce5f4e28a36"
+    },
+    "AWS::MediaPackageV2::ChannelGroup": {
+      "file": "schemas/AWS--MediaPackageV2--ChannelGroup.json",
+      "sourceSha256": "0c3a7b626106b1efd564a137f6da2c89f57fae2953bafd57e5dd849b9f1da692",
+      "subsetSha256": "4e2ccf14f22f12e817ef46516ee68080ec80c30c5ed2c26147b578b8ca38b300"
+    },
+    "AWS::MediaTailor::Channel": {
+      "file": "schemas/AWS--MediaTailor--Channel.json",
+      "sourceSha256": "fd5acd62652f55f071ed6729e519fb0d525c17277ae2ab727b817bbad98a72ac",
+      "subsetSha256": "f6942e9275fb8c40d441c933644ef7ad4407ea28f5b93db2a838e04773ce532d"
+    },
+    "AWS::MediaTailor::Function": {
+      "file": "schemas/AWS--MediaTailor--Function.json",
+      "sourceSha256": "e017ad4b9b61ad71a822620f9ea0370db9618e13c32307e89005177f0a69897b",
+      "subsetSha256": "913d2991b1e9b754519d6cce8520da760e2ab211cfca85d20402853e29efdcf6"
+    },
+    "AWS::MediaTailor::SourceLocation": {
+      "file": "schemas/AWS--MediaTailor--SourceLocation.json",
+      "sourceSha256": "7dd470b3e16f3baa9f6f24452aaafde5ecd1a0c15569e0d142f5305743c963af",
+      "subsetSha256": "5dca0c4b22befcadf5e8ccfe49d54cc4cfd4cd80740e8847dd91f434da17f92e"
+    },
+    "AWS::NetworkFirewall::ContainerAssociation": {
+      "file": "schemas/AWS--NetworkFirewall--ContainerAssociation.json",
+      "sourceSha256": "fdee7243de2ae703aa768fba82b085ee7c53857cbee03cf08001d2133461ee9c",
+      "subsetSha256": "b59774f8d9b69c4f4bcaf6141523a10c146b9af5144eb9479ea602376e67173b"
+    },
+    "AWS::Notifications::EventRule": {
+      "file": "schemas/AWS--Notifications--EventRule.json",
+      "sourceSha256": "08fb54ac816c1c2e27853821533f4a53214c53be13568803df1e317ce5d3fa33",
+      "subsetSha256": "bcffb0d667ff36228a2c21c6520816c0d0829982b5630579de2317101a0c11b6"
+    },
+    "AWS::Notifications::NotificationConfiguration": {
+      "file": "schemas/AWS--Notifications--NotificationConfiguration.json",
+      "sourceSha256": "f273de54f696bfa4598d423b6a33ddfc666289e1ae60fd6214e5a27d635e0924",
+      "subsetSha256": "882ee172caf9412a6ec8cfe3ca56cd2646c646aa1d419790fd8536962f39bf4d"
+    },
+    "AWS::NovaAct::WorkflowDefinition": {
+      "file": "schemas/AWS--NovaAct--WorkflowDefinition.json",
+      "sourceSha256": "eaeaed301bc4ac8879305b3ff9fed3b91aaa21c2471503d9a1d1c95e321f33d0",
+      "subsetSha256": "48efe08a9a080fd3c0e8b117cb25af6586f7c6e169d6a78edbdb5761567bfb4c"
+    },
+    "AWS::ODB::OdbNetwork": {
+      "file": "schemas/AWS--ODB--OdbNetwork.json",
+      "sourceSha256": "73b1c77d01a33f78133144fa524c991ae22d2685a2b88589c212462ef9f69ebc",
+      "subsetSha256": "3cf5259fad248f3e733c27748b90c51a4c97eb3ab91c87a630aad5a66e0a037d"
+    },
+    "AWS::ODB::OdbPeeringConnection": {
+      "file": "schemas/AWS--ODB--OdbPeeringConnection.json",
+      "sourceSha256": "2e6e09630a33f8a76ffcc4710dc3332452ba8524777c451149e5341f334c7d50",
+      "subsetSha256": "333c6ee47223b0947665bf0c297d1e394547a011349a832b1150eda3813b6a41"
+    },
+    "AWS::Omics::Configuration": {
+      "file": "schemas/AWS--Omics--Configuration.json",
+      "sourceSha256": "a4e152e89aebe3fd76423d7a4826da19629134a78c1fb9283596ea7e213dce3f",
+      "subsetSha256": "a1afe7a7b9b28557cc6b09529b85e45caf05f6c53708c057a955ce9a4b88282c"
+    },
+    "AWS::Omics::RunCache": {
+      "file": "schemas/AWS--Omics--RunCache.json",
+      "sourceSha256": "bfc7fc36017863b0557cc6870a787c3623ccaf30a58f7ab56adb9ea2896f122f",
+      "subsetSha256": "e1232b7c21c6d0f4a3d2353a84bcb71948484d1a6af8a1646fff07ba284a5da6"
+    },
+    "AWS::Omics::RunGroup": {
+      "file": "schemas/AWS--Omics--RunGroup.json",
+      "sourceSha256": "8fd3a68b39224970992a94039b42447d8f225f31e9ae687e62e9c489a5b372d4",
+      "subsetSha256": "92dd2a5fdab4c39dad310de4411af0f286f0c6362ac4b9ec806e298fccb1ee86"
+    },
+    "AWS::Omics::Workflow": {
+      "file": "schemas/AWS--Omics--Workflow.json",
+      "sourceSha256": "91f5d7d89995ec5b17a1a4cecade70808b4c1e7e8bdb3d71004a367afacf3c7a",
+      "subsetSha256": "c3f938af9fcf4f1057736eff191bd0679007e43a73b2abd0a0485ed369cb8ee6"
+    },
+    "AWS::OpenSearchServerless::SecurityConfig": {
+      "file": "schemas/AWS--OpenSearchServerless--SecurityConfig.json",
+      "sourceSha256": "fa9c789635f96e16d95bba48e6f42298dace340666a0c14586f07cf2a5c1f0a1",
+      "subsetSha256": "05bee8ce931b7a646229285715395ec69544a0c3dbd6710f8355b23bcb548106"
+    },
+    "AWS::Outposts::Outpost": {
+      "file": "schemas/AWS--Outposts--Outpost.json",
+      "sourceSha256": "f7d411fff6e8eabd2921908e412b1d0b94db72f74ba6095f6b505430f810d979",
+      "subsetSha256": "ff921ed9651d837ae6855d684d0d18d13495277ba59a57494612c384981647a6"
+    },
+    "AWS::PCS::Cluster": {
+      "file": "schemas/AWS--PCS--Cluster.json",
+      "sourceSha256": "0315c22555fa45a4bacd96621e83f4303e1e7f326a0b4a9eb4925f66929bac05",
+      "subsetSha256": "edf88405ae607e768635debd6aacdacbd78e08b32c6a6debd945d5eeeba2669c"
+    },
+    "AWS::PaymentCryptography::Alias": {
+      "file": "schemas/AWS--PaymentCryptography--Alias.json",
+      "sourceSha256": "a8ee60ef3508c5e321365c2cd3cab348d6c6363dd974909a09bde1f4da3fe1a4",
+      "subsetSha256": "8a1441398abc694e67e79c2903721862ba64952a21a8bb2c3e957c4b3688e6dc"
+    },
+    "AWS::Personalize::DatasetGroup": {
+      "file": "schemas/AWS--Personalize--DatasetGroup.json",
+      "sourceSha256": "b7727569eaaf7f6c231cd20830c0a0274f2d10abd3b5db6b99ff6ce941304d44",
+      "subsetSha256": "3be3a18225b91265ffb60cafbf25156106bc11238bfcc700ab770a351f5b7efc"
+    },
+    "AWS::Personalize::EventTracker": {
+      "file": "schemas/AWS--Personalize--EventTracker.json",
+      "sourceSha256": "5ed05a357990f5a1b15f7cfbe0999b6f69852298323cbafc793a88b7f9ee14e5",
+      "subsetSha256": "c637e4645f221d56797d474160bd250c563b9965fb340c5e7e9eeba4486a37f7"
+    },
+    "AWS::Personalize::Filter": {
+      "file": "schemas/AWS--Personalize--Filter.json",
+      "sourceSha256": "c49fb99fc014894bd972231e03afec8df2878efd2f829832cefb9c2b359b82a8",
+      "subsetSha256": "a37d85794d3bfc5c6313d4b7f917e7588e4886977b6888a9c476932309bf7197"
+    },
+    "AWS::Personalize::Schema": {
+      "file": "schemas/AWS--Personalize--Schema.json",
+      "sourceSha256": "a7bbed5c0feb7cc266a6a30083ac6f4fa6ccecc81ab557b50e82d93246c0f824",
+      "subsetSha256": "f191fd992a88c236ba736240a89e2914f91e4529f56e40e5920f85a453a20ae3"
+    },
+    "AWS::Personalize::Solution": {
+      "file": "schemas/AWS--Personalize--Solution.json",
+      "sourceSha256": "0fc35ca2601e9dc7ceb7c34b1ae48a94ef3e0a7853c54c227d2ac11a17f2455e",
+      "subsetSha256": "515cb973712ad0bc499e1fa0b05209547d80dea591bd0e82bf8e14c3e591c800"
+    },
+    "AWS::Pinpoint::InAppTemplate": {
+      "file": "schemas/AWS--Pinpoint--InAppTemplate.json",
+      "sourceSha256": "03f31f0cc1e09f9040943b2f51fff5919898b5572a168b2741aeb98d80ac0fa3",
+      "subsetSha256": "b7b9020c243b95426d3061d375292481ea6f55653cf8bc784249c1f145e07f4f"
+    },
+    "AWS::Pipes::Pipe": {
+      "file": "schemas/AWS--Pipes--Pipe.json",
+      "sourceSha256": "4340d71ab0a644002ff6613d4463ec217b8de68a628c07117d3f932173232824",
+      "subsetSha256": "97eb4e5b25ae89307c9b7884555fe531aeaa2b6503302c60c69bbe81d69da6be"
+    },
+    "AWS::Proton::EnvironmentAccountConnection": {
+      "file": "schemas/AWS--Proton--EnvironmentAccountConnection.json",
+      "sourceSha256": "aba72fa4ad9b30e549a71c5020b7fc85aacab5acae007a1959a32f843a9026f5",
+      "subsetSha256": "c262b11af8bc5ad31280aabeba3baab6c53ae800e425fd652e21db329b8b329a"
+    },
+    "AWS::Proton::EnvironmentTemplate": {
+      "file": "schemas/AWS--Proton--EnvironmentTemplate.json",
+      "sourceSha256": "28e1f5dc7fb3a9196dda069a34b0ce0176a3448982448e9eacb0f87de96b8c81",
+      "subsetSha256": "e2e34a8dac329910ddea7d9ed84f05688c38f306ffd05de8a60bf0358c27929f"
+    },
+    "AWS::Proton::ServiceTemplate": {
+      "file": "schemas/AWS--Proton--ServiceTemplate.json",
+      "sourceSha256": "854bd615e22d1ee3cf30d1bbc19094f15d42631423c54484dc03159b03c5bc58",
+      "subsetSha256": "75e2d9af586c363a7fbe52c7a724be79490c68e392838fe9f5d02bec1df5c353"
+    },
+    "AWS::QBusiness::Application": {
+      "file": "schemas/AWS--QBusiness--Application.json",
+      "sourceSha256": "cb0f1c121c17f8976d2a269d40d793e69b10b41d0a267cd7bcb659432533bdb2",
+      "subsetSha256": "373ede0001addd21a7d796fcdcf8a1219c37e1094c6a2f39d81a8ddd1f3299d3"
+    },
+    "AWS::ResilienceHubV2::Policy": {
+      "file": "schemas/AWS--ResilienceHubV2--Policy.json",
+      "sourceSha256": "7b72dcb66440f275d9b73e89903a5311dc65f3e391488be3c9fed72af64f9271",
+      "subsetSha256": "571ecde96375636301b0778c3903f169a6a893192c369165c56e1c68fe35c7ae"
+    },
+    "AWS::ResilienceHubV2::System": {
+      "file": "schemas/AWS--ResilienceHubV2--System.json",
+      "sourceSha256": "fe27cec8b7bd9fe31905a6e5d8084f8b904ff3691129c7788a1d2a7940462073",
+      "subsetSha256": "da7f81c7c69a2c99c1f5880afc94d64314abe365f02db9eaf045ce3558223335"
+    },
+    "AWS::RolesAnywhere::Profile": {
+      "file": "schemas/AWS--RolesAnywhere--Profile.json",
+      "sourceSha256": "0c86c575e169dd8dc7f27f003b1e9e628d3022025dda794d44b1f75e59080794",
+      "subsetSha256": "5dc13bc561112e8bb96e5c0f2b5f2a37d0283595856c067accd3e3363fcd403d"
+    },
+    "AWS::Route53Profiles::Profile": {
+      "file": "schemas/AWS--Route53Profiles--Profile.json",
+      "sourceSha256": "8c42f75e810e9059080120e327c9b972fac7b3161aab606b1f464e69ed8f45aa",
+      "subsetSha256": "8fa755aae56e5acbac04bb565a77f3e9fca4da8f1906259b6787f849a11123ff"
+    },
+    "AWS::Route53Profiles::ProfileAssociation": {
+      "file": "schemas/AWS--Route53Profiles--ProfileAssociation.json",
+      "sourceSha256": "031375aa0e3e3cc202da9fb78db1ec00de2fc948b5a808270446add90b36e514",
+      "subsetSha256": "7b549be38c5c4acaaf44d9f096a18337f91c349535fe4885f878f24a584ce52e"
+    },
+    "AWS::Route53Profiles::ProfileResourceAssociation": {
+      "file": "schemas/AWS--Route53Profiles--ProfileResourceAssociation.json",
+      "sourceSha256": "979c3a2fc7ebdebef98cac07cf9735826ba21deee674ff690f7964d4f39e07d4",
+      "subsetSha256": "e2d21cc5aeec74eae84969f208b8ea6c9ed789772ef65e2b778ad25303f3454b"
+    },
+    "AWS::Route53RecoveryControl::Cluster": {
+      "file": "schemas/AWS--Route53RecoveryControl--Cluster.json",
+      "sourceSha256": "f9acf7c1bea1f9f5b4afda7c9014307952d3024168e225493975c678a8c47aee",
+      "subsetSha256": "f196df4b982e22cd44eeb61bf8333963e1c753899ad962d3a722a0083d5a1582"
+    },
+    "AWS::Route53RecoveryControl::ControlPanel": {
+      "file": "schemas/AWS--Route53RecoveryControl--ControlPanel.json",
+      "sourceSha256": "4902f18a4076d6c916b6e60627d1a67f2f859f439189e44e0825f021e2069b9d",
+      "subsetSha256": "895aa9a3c4b238ca3eac15d92524ad6f16f7ae24c906acdfb3c4759066745c3c"
+    },
+    "AWS::Route53RecoveryControl::RoutingControl": {
+      "file": "schemas/AWS--Route53RecoveryControl--RoutingControl.json",
+      "sourceSha256": "6b5523bba0b1cafbb5f34ddf57bc82b75ebe3f3c3e648e42d76180d888679f5e",
+      "subsetSha256": "cb3749420e7a1e40dc915b256ba379bd8b2e4af789c1c814c8c5419f29e94168"
+    },
+    "AWS::Route53RecoveryReadiness::Cell": {
+      "file": "schemas/AWS--Route53RecoveryReadiness--Cell.json",
+      "sourceSha256": "2b96d1e208a7b383fc94c4ba29917eb4ac6d56a642d158a7d9e031f6da0246e2",
+      "subsetSha256": "44c7a8ce06113af53a9d72be4ae9c6c7a1f6187e1f466ec9d177dcbfe3735c08"
+    },
+    "AWS::Route53RecoveryReadiness::RecoveryGroup": {
+      "file": "schemas/AWS--Route53RecoveryReadiness--RecoveryGroup.json",
+      "sourceSha256": "1300dddd048d6d9c85c775d4465e8728eb665c80cb5217342177b46070caf533",
+      "subsetSha256": "8f7664c6fc7a12565133e03c90a1a4cea2449fd61f7e652cdcb1ba5be4bd5173"
+    },
+    "AWS::Route53RecoveryReadiness::ResourceSet": {
+      "file": "schemas/AWS--Route53RecoveryReadiness--ResourceSet.json",
+      "sourceSha256": "3dc39e2697679b8a559b51ca7489ce1daf5494a27d421ea66baba2e857557c7f",
+      "subsetSha256": "b02ec0889f4d68fec9077d85912af287bad7819d96fce10d066865a098bb3a41"
+    },
+    "AWS::Route53Resolver::FirewallDomainList": {
+      "file": "schemas/AWS--Route53Resolver--FirewallDomainList.json",
+      "sourceSha256": "2c051a6757d471a4bcf4eb42c65a24219e7b0023514c0d5c8f98862f9a1dac97",
+      "subsetSha256": "5703c9671d7c61776670d4a6ef959cd65d2fca9429ea9f977a8e363d6b4f2c31"
+    },
+    "AWS::Route53Resolver::FirewallRuleGroupAssociation": {
+      "file": "schemas/AWS--Route53Resolver--FirewallRuleGroupAssociation.json",
+      "sourceSha256": "1055e5c906c0e6c6aa88b3dcfeb614419de63441fe3c80f022fd687a1e17e213",
+      "subsetSha256": "fa70cb1c7756759e5112f08c3c5e398b40ec126d743fb8952aad1fed40c6c8d6"
+    },
+    "AWS::Route53Resolver::OutpostResolver": {
+      "file": "schemas/AWS--Route53Resolver--OutpostResolver.json",
+      "sourceSha256": "557db38ead705f946760017db33df576454157e3cda307bb64f88527f620dcd0",
+      "subsetSha256": "293dc510ba8a7dc2bf08da3cb8502fa60b5b6385ee02f48f02a6ec5638df8b7e"
+    },
+    "AWS::Route53Resolver::ResolverQueryLoggingConfig": {
+      "file": "schemas/AWS--Route53Resolver--ResolverQueryLoggingConfig.json",
+      "sourceSha256": "4f35bae9847c8f167fb7435444d2dcc3a96623e242869360c6fe8b50b99b446f",
+      "subsetSha256": "2945b004ad4bbeb036d96ab2131b2ea5c6c0f898c3d9b6a967dfc696a8e17e01"
+    },
+    "AWS::Route53Resolver::ResolverQueryLoggingConfigAssociation": {
+      "file": "schemas/AWS--Route53Resolver--ResolverQueryLoggingConfigAssociation.json",
+      "sourceSha256": "8765441f73c8f19b7328200674542b907f5fd05623c0f004c9cb43830e52cfd3",
+      "subsetSha256": "9a1ba1fcae8db2d34703e7e646e3fa11c97f99962b4928b6d72c6e27700c3ea7"
+    },
+    "AWS::S3Vectors::VectorBucket": {
+      "file": "schemas/AWS--S3Vectors--VectorBucket.json",
+      "sourceSha256": "013d4f2275e4093574e922c635b77b80c7e7a6f7e03c0ed5e28b2d8b25c32517",
+      "subsetSha256": "31cc8e51d73d8c4dd20285098f370973f50cf6c12cd645b13433b8fa6dc3a196"
+    },
+    "AWS::SES::ContactList": {
+      "file": "schemas/AWS--SES--ContactList.json",
+      "sourceSha256": "c8434b7570c4931b5239680234efaeaa076647176caf4032e2d43b6ca88ce73d",
+      "subsetSha256": "c587ad28d19dac90c289b53e42e1cffd5cf1cd11cb003cd5554103f72e4ab863"
+    },
+    "AWS::SES::MailManagerAddressList": {
+      "file": "schemas/AWS--SES--MailManagerAddressList.json",
+      "sourceSha256": "64c463531c77d2d87eac2523a68990685da4f47b095a62d6ab0fd184b795dd87",
+      "subsetSha256": "5818b6a02078ed0fdfdebaafb8e5be8a49c9c4edc0cb2eda0b3081cf90622df3"
+    },
+    "AWS::SES::MailManagerRuleSet": {
+      "file": "schemas/AWS--SES--MailManagerRuleSet.json",
+      "sourceSha256": "4414d6b4160322361552b2fe9e567e81fb86237a8d47d2ee898137ec91d0f8a6",
+      "subsetSha256": "52a33e922b2e8dba45e266103ebba74340d2b0bbd365036dba471d4c5f0a3a7b"
+    },
+    "AWS::SES::MailManagerTrafficPolicy": {
+      "file": "schemas/AWS--SES--MailManagerTrafficPolicy.json",
+      "sourceSha256": "0a29347805eb0e1d3038908411e8b6ca8d0ec920edb13b4282756742308dc461",
+      "subsetSha256": "34ff80507924796c777ea79ed44cb7b9c445d341b21b652ee7f507fd60dc3881"
+    },
+    "AWS::SSM::Association": {
+      "file": "schemas/AWS--SSM--Association.json",
+      "sourceSha256": "7c2f10061e56f336bb9346052df6d39eb1aa376d8d199299bdf237cdad9938cc",
+      "subsetSha256": "b7f043c4fb19d98de2b5c0fb4798a55ff906a46cf0c39be84fc1366e9f3d50e3"
+    },
+    "AWS::SSM::MaintenanceWindow": {
+      "file": "schemas/AWS--SSM--MaintenanceWindow.json",
+      "sourceSha256": "5493a8de7ed8d9ff3c4ed6abb4908aca1ea5786521298341a829b43e78d355fd",
+      "subsetSha256": "4378513d277eaf41223b085fbccf36bdec5f0f20665aebeb14aaa40f5f66f8be"
+    },
+    "AWS::SSM::ServiceSetting": {
+      "file": "schemas/AWS--SSM--ServiceSetting.json",
+      "sourceSha256": "3557bba15e4242a974f5bb1f36c55b4005a06d63bc96918e2ce13da35df58711",
+      "subsetSha256": "014efc3b87f8854083e76729244d3bd3d75fae8fba7de7ace2a2701bad7ff645"
+    },
+    "AWS::SSMQuickSetup::ConfigurationManager": {
+      "file": "schemas/AWS--SSMQuickSetup--ConfigurationManager.json",
+      "sourceSha256": "7d49a90cffca9b0945459307e4d764f66c5683314549aeb12818cfa3f397e0f0",
+      "subsetSha256": "647402749c64258b9471049046c98289b013cce8855f335070024f5f427a4393"
+    },
+    "AWS::SSO::Application": {
+      "file": "schemas/AWS--SSO--Application.json",
+      "sourceSha256": "aea50cfc5e7955f358d22c29342b7757fa684ac162b4741e0c3bf0a237fedcc5",
+      "subsetSha256": "166f8e6ba7dd3c1a848ace8792332a1d612ad7f9a10ffdfe34ee948570de2f0e"
+    },
+    "AWS::SSO::Instance": {
+      "file": "schemas/AWS--SSO--Instance.json",
+      "sourceSha256": "5ebe81f4b4bfd33ad8b03f720e8acbc963b12bdc41a871fad4beaacd7103de49",
+      "subsetSha256": "65cea43c88f7c46d86955199d6959281fc84b4a3a3a883195dc963c58264540f"
+    },
+    "AWS::SageMaker::Algorithm": {
+      "file": "schemas/AWS--SageMaker--Algorithm.json",
+      "sourceSha256": "e9311b9e2f9361d32d2ecdb150f423c85befa7887075c5342f1b094b49b23c95",
+      "subsetSha256": "d71fcbaf463867df858a94fb9e19012c05fcab2ce57a8e5dc0da759e8e2014d8"
+    },
+    "AWS::SageMaker::ClusterSchedulerConfig": {
+      "file": "schemas/AWS--SageMaker--ClusterSchedulerConfig.json",
+      "sourceSha256": "4f8b29119360e8becb56f34f37fb9be605a5467231cab3fe6b6c5a6da1ae587f",
+      "subsetSha256": "bc1fe0ccbf15b2eaf248f590cb35855f11e28f6959f188c2bb14f25c8198e6bb"
+    },
+    "AWS::SageMaker::CodeRepository": {
+      "file": "schemas/AWS--SageMaker--CodeRepository.json",
+      "sourceSha256": "802c044762cc4920e49cb36d7824750e13bf47577d92fb977176687d1c0f5bde",
+      "subsetSha256": "ff309d47cd98185ce57e1c5b24b301254f08977f5faf9ce2464d22ad7955b479"
+    },
+    "AWS::SageMaker::DeviceFleet": {
+      "file": "schemas/AWS--SageMaker--DeviceFleet.json",
+      "sourceSha256": "c3a366ca51240d196a94af29f8b36235c8acce6d6ab4873a75e6c51393212545",
+      "subsetSha256": "74f58df404c2976ad0309df46d918a24e56d686507cbfab7784552f3c5f4129a"
+    },
+    "AWS::SageMaker::FeatureGroup": {
+      "file": "schemas/AWS--SageMaker--FeatureGroup.json",
+      "sourceSha256": "4dcd7713f6234a9a84bcc5bddddd3a21116a3c5236131b31dd7e1778db44f64a",
+      "subsetSha256": "91068841e902e17135f05ecdf1dfb2d2a3cea697a348eaa00ddf091c08f8e4bb"
+    },
+    "AWS::SageMaker::Hub": {
+      "file": "schemas/AWS--SageMaker--Hub.json",
+      "sourceSha256": "1bf9c96b465b34c6f83df111727478f7108e855064c9afdf017b9a5e142ce6fb",
+      "subsetSha256": "b45a2de1e86fc9bc605c4e817c96d28c2e6c5a5bff28371ca8ec1a3913c3acec"
+    },
+    "AWS::SageMaker::HumanTaskUi": {
+      "file": "schemas/AWS--SageMaker--HumanTaskUi.json",
+      "sourceSha256": "4c1d9376bca61f69ca6ee2c873702fdd6be6a7d884fd4f90c744ce66fba2d01c",
+      "subsetSha256": "fd57fd98c02f84b6991cf3d5bd5caaf9b2ffdadb39c7f53b73a7819632fab02b"
+    },
+    "AWS::SageMaker::MlflowTrackingServer": {
+      "file": "schemas/AWS--SageMaker--MlflowTrackingServer.json",
+      "sourceSha256": "7042f46756b1d3349b27a362b7c172e4b4fe3c609f7959a7267b84f96a018ce5",
+      "subsetSha256": "8d0890a8ae0b98dcc58b6d00c41b7bb417cab77d7962627a5f9f560580d6ba1b"
+    },
+    "AWS::SageMaker::Model": {
+      "file": "schemas/AWS--SageMaker--Model.json",
+      "sourceSha256": "633eeb7dc3ccd0c8d94d451ba568a120f8589a1693ed017d3f478c55cc269ebc",
+      "subsetSha256": "e5bd4b12e7095705ef3ab067e0965cbf202ab14400afd6f8b538fa1cfe3d087e"
+    },
+    "AWS::SageMaker::ModelPackage": {
+      "file": "schemas/AWS--SageMaker--ModelPackage.json",
+      "sourceSha256": "5198054088a28e81039944043f1c2480f1fb84de9f2895cedff624b5dc32acce",
+      "subsetSha256": "aee56ec2d3bd70cb3dcc41d882938274b0973e372268695d3f670c05ac04ba1d"
+    },
+    "AWS::SageMaker::NotebookInstanceLifecycleConfig": {
+      "file": "schemas/AWS--SageMaker--NotebookInstanceLifecycleConfig.json",
+      "sourceSha256": "237e6f67ea5e567b3a6cfe90be3ac13c5cfdbafd8b20bb9e708bef900f41bc76",
+      "subsetSha256": "5f492b9664a3bd7b60ed4fcb5e5f1fc8c435a102fc5758119a1c748f5c276c0c"
+    },
+    "AWS::SageMaker::ProcessingJob": {
+      "file": "schemas/AWS--SageMaker--ProcessingJob.json",
+      "sourceSha256": "10f0bd96f46204fcae2cc4215d6827515a3ba5fca87288cc5be4e051407d040d",
+      "subsetSha256": "eae18d5daaf58211b3b12a38a93af63f94d6e755322ab19eabcbdb9a5065724e"
+    },
+    "AWS::SageMaker::Project": {
+      "file": "schemas/AWS--SageMaker--Project.json",
+      "sourceSha256": "0ab4d2a23486f161798492e9ed611b16a9e6b85fb5ac68c08ab0c8e089c55f9e",
+      "subsetSha256": "ef5facf39fd91f618eec5575fc92c94dcf725a37e98cafd9a5af02e135b31cf2"
+    },
+    "AWS::SageMaker::StudioLifecycleConfig": {
+      "file": "schemas/AWS--SageMaker--StudioLifecycleConfig.json",
+      "sourceSha256": "c508aef7f2446f17eeb36fd87441649c8a703d00eec34247e179046c73c794c1",
+      "subsetSha256": "1c03e666b065cc788e9e64e26c14a3de98bf7a03d038e3f7b685becfe8001079"
+    },
+    "AWS::SageMaker::TrialComponent": {
+      "file": "schemas/AWS--SageMaker--TrialComponent.json",
+      "sourceSha256": "ef720f38ca719c36d32f64b20ef1daef328deb385bc272a9c37d70635441b195",
+      "subsetSha256": "7057585c7507868194d7bb289c9a10a221a80c7ed6749b13322bdb964329e45f"
+    },
+    "AWS::Scheduler::Schedule": {
+      "file": "schemas/AWS--Scheduler--Schedule.json",
+      "sourceSha256": "6b9be3f55314e923d5b67312500efb9d3133e11b6e7498067e58a9ca47db9b06",
+      "subsetSha256": "c80aeee52685deb0cd2af0c06674ae63877d2777e11f7cdf1c4bb299f12c2cb1"
+    },
+    "AWS::Scheduler::ScheduleGroup": {
+      "file": "schemas/AWS--Scheduler--ScheduleGroup.json",
+      "sourceSha256": "607803b13ffe2061134f1d99105c3cb20eb58de66ad682e09068ca35ca3899b5",
+      "subsetSha256": "b9fbefa444bee84864962200385eeb48526307a6a3290b9759c28b4e3004edda"
+    },
+    "AWS::SecurityHub::AggregatorV2": {
+      "file": "schemas/AWS--SecurityHub--AggregatorV2.json",
+      "sourceSha256": "bb11f74a4e2203157f1ffd4b4790595ceccdb4c09bdd9e4b7cea7decf51fdc3e",
+      "subsetSha256": "cf3bc9579e5deb73199429529fc58131cbf9b0a8056adc04c073379b0e560f30"
+    },
+    "AWS::SecurityHub::FindingAggregator": {
+      "file": "schemas/AWS--SecurityHub--FindingAggregator.json",
+      "sourceSha256": "f5fde356b32d5ae875ee436ca82606ce873b50ac1aa874edc09c7d79ec10df28",
+      "subsetSha256": "9c418fcca634f0593ced55c9915906706b42ff99b1b297d675a2450274168604"
+    },
+    "AWS::ServerlessRepo::Application": {
+      "file": "schemas/AWS--ServerlessRepo--Application.json",
+      "sourceSha256": "7fd67a1b55544ba12f58063003179fc1dbb12ad079c3b48ea71b598eaa53de67",
+      "subsetSha256": "1acc9542a652639fe147ca73d5d6e5f6b10f40fcc06775ae0e6895320e71f20b"
+    },
+    "AWS::ServiceCatalog::TagOption": {
+      "file": "schemas/AWS--ServiceCatalog--TagOption.json",
+      "sourceSha256": "857b0524d3ca92ab60375a628e2749b1939602655d043ecafd248dab31150273",
+      "subsetSha256": "620b5adfb54b848549b2ff9abb33d688b1a641b26ba26c6ad1ef8820248af543"
+    },
+    "AWS::ServiceDiscovery::HttpNamespace": {
+      "file": "schemas/AWS--ServiceDiscovery--HttpNamespace.json",
+      "sourceSha256": "b8ee1ae84dc79044f2379be8f922c3972e7d6e79399fad83e3fac157aa63dbf0",
+      "subsetSha256": "d66bf1d5eb2ee82f425535e8d6dd8123d3a0db2b3e1096d055d068ff98149725"
+    },
+    "AWS::Shield::ProtectionGroup": {
+      "file": "schemas/AWS--Shield--ProtectionGroup.json",
+      "sourceSha256": "473137a5d12b0c6670c970a6c3608814b6a630471a22a27f3abfda92be9fd0f7",
+      "subsetSha256": "46b778faa9df2459d327fb2ca1e9dc30f9e1180d4011d8e5783b64519dea2c1c"
+    },
+    "AWS::Signer::SigningProfile": {
+      "file": "schemas/AWS--Signer--SigningProfile.json",
+      "sourceSha256": "f21fee00572a32be323704cc3afaff641098679cb68f300431091883acb3f03a",
+      "subsetSha256": "f2faf0ff6b46a22d11089839c278af8d0d87a7b780520e96a65b9807dd66863a"
+    },
+    "AWS::Timestream::InfluxDBCluster": {
+      "file": "schemas/AWS--Timestream--InfluxDBCluster.json",
+      "sourceSha256": "decf7b60e5d2c910fbff684e93240a66411a5e292b38270883184876e7abdc30",
+      "subsetSha256": "347a2905f343823df9a6f4765d0ac22de89790973f98fd987ec2b8e6940fc2e7"
+    },
+    "AWS::Timestream::InfluxDBInstance": {
+      "file": "schemas/AWS--Timestream--InfluxDBInstance.json",
+      "sourceSha256": "2be62509ece5c1ebd5bb3088578256acdfc2f50d502cc11fa5be287c331aa909",
+      "subsetSha256": "708959d06f3533f37dad4aee2b693c8d1eb3002db9f06413bad79d91190a3942"
+    },
+    "AWS::Transfer::Certificate": {
+      "file": "schemas/AWS--Transfer--Certificate.json",
+      "sourceSha256": "a559735c75a4dc50d4e47771245ce2277383264568913ffd1bde29193bf7da8e",
+      "subsetSha256": "c01aa1491c4643b847f50635af9f45ee810633b3ee6be10ec2d274620d54fa9a"
+    },
+    "AWS::Transfer::Profile": {
+      "file": "schemas/AWS--Transfer--Profile.json",
+      "sourceSha256": "d39f31a99612f843edf6acec90bc641fb37339934e5173f5aa95ca23d8b6360d",
+      "subsetSha256": "c97fb746b6a96b679938b11298b8a61a31d97dded900b639b520e5efdcfc07c4"
+    },
+    "AWS::Transfer::Server": {
+      "file": "schemas/AWS--Transfer--Server.json",
+      "sourceSha256": "bd7fdc6fc71aec6b50f34915d59c62bac821ed64166b95de16ed7fdfa27d2890",
+      "subsetSha256": "4e1cb21f7d62eecbddc1cb70f7264254068cf4e4c3f97c8884b0566a80e67a2a"
+    },
+    "AWS::Transfer::Workflow": {
+      "file": "schemas/AWS--Transfer--Workflow.json",
+      "sourceSha256": "aba8c934398eeb17b80c9241f60c4745588bdec50d7dea00bb141e438f7f2837",
+      "subsetSha256": "bf72b0aea80698637eb100488e2b10513892bb7736119ec76c09d5b7c931a282"
+    },
+    "AWS::VerifiedPermissions::PolicyStoreAlias": {
+      "file": "schemas/AWS--VerifiedPermissions--PolicyStoreAlias.json",
+      "sourceSha256": "13a7ee853ed805c8bb1c6c4bc1b4097c16b3d200eb325b71f32e8beddc333848",
+      "subsetSha256": "e65575079a4cc89d3c41dbaffb65900adbe62f24b72cea21b574408b47e8f09a"
+    },
+    "AWS::VoiceID::Domain": {
+      "file": "schemas/AWS--VoiceID--Domain.json",
+      "sourceSha256": "abb903a899fc58e6f7361dc9cf3aa0d6191a3694ee111894ca8ef8e4b7c795a6",
+      "subsetSha256": "2937d7069387f7f5302d3a8ae79954bb63213a4fa7eda803493cec3f61662218"
+    },
+    "AWS::VpcLattice::AccessLogSubscription": {
+      "file": "schemas/AWS--VpcLattice--AccessLogSubscription.json",
+      "sourceSha256": "f3c06c66837c399d69cce79bb1eaa2ef71837d3fc84ba2a7ffdcf08fcbe6a483",
+      "subsetSha256": "e459181586ff9da88f332d04af838002c0c9457db5969454f2070b6914c4d0e2"
+    },
+    "AWS::VpcLattice::DomainVerification": {
+      "file": "schemas/AWS--VpcLattice--DomainVerification.json",
+      "sourceSha256": "af0861a1c0b293a07e3b237d86d7b544d14e69d06e75c62b2f6677e09108ded3",
+      "subsetSha256": "9d32713d081a8e016b713d05d0511007f58f088667c7d2e047e5b68bc29fcb31"
+    },
+    "AWS::VpcLattice::Service": {
+      "file": "schemas/AWS--VpcLattice--Service.json",
+      "sourceSha256": "ace8a3697a21611daa4dca8b46597004cfd83247fe2bb2414600a3f01f122667",
+      "subsetSha256": "ea9225e5b6e98b78a56d38afcb0b5d6c5ccbd99801abc9833e09d1d344ebb99a"
+    },
+    "AWS::VpcLattice::ServiceNetwork": {
+      "file": "schemas/AWS--VpcLattice--ServiceNetwork.json",
+      "sourceSha256": "1b123cabd67732d693a7a02fe8e2b6deaf7b938351dd00bdfecdba765bf48c73",
+      "subsetSha256": "a51c3129dc103ec5f8f6b8849b7e7f2eae521c5a79455a3f78bea8bedbe0471c"
+    },
+    "AWS::VpcLattice::ServiceNetworkResourceAssociation": {
+      "file": "schemas/AWS--VpcLattice--ServiceNetworkResourceAssociation.json",
+      "sourceSha256": "5ac5222dd6d510002ea30121fafa9390131cc5e3f39956553003f6636643a306",
+      "subsetSha256": "97d17921c4a6f8c8fcc54330ee5bdba9844516ae11c1adbf149b79daeb25a098"
+    },
+    "AWS::VpcLattice::ServiceNetworkServiceAssociation": {
+      "file": "schemas/AWS--VpcLattice--ServiceNetworkServiceAssociation.json",
+      "sourceSha256": "e40bea4343d5cd3d3fd460bd493239cce56b1ccb7b7106348ad5c8365aecb7cc",
+      "subsetSha256": "213000517f73690db7eff0944042706ab72645c32231e662f1fd4715b80707a0"
+    },
+    "AWS::VpcLattice::ServiceNetworkVpcAssociation": {
+      "file": "schemas/AWS--VpcLattice--ServiceNetworkVpcAssociation.json",
+      "sourceSha256": "1c12041d2220ad4e7312936f88af32104fa3ced36c67b60ab4cb1ea808f2d210",
+      "subsetSha256": "2d32efc7c0a1e3bb05cf26a3cb8d13fce45631bd3d59a1fa87f18e4b4c9b583b"
+    },
+    "AWS::WellArchitected::AgentProfile": {
+      "file": "schemas/AWS--WellArchitected--AgentProfile.json",
+      "sourceSha256": "7ebee6349979bcf51a0f22f1f2689b5443a6824317f8cd6c5f3ab2b628459f48",
+      "subsetSha256": "85086a1be5863cd2bddbef2caa88d0d938f69a58331afd845ef339d7045e4f73"
+    },
+    "AWS::WellArchitected::Profile": {
+      "file": "schemas/AWS--WellArchitected--Profile.json",
+      "sourceSha256": "7ecc0408ea66fe1764923fabb84f7d3e027459fb9e729ac15a9d999e95d954ef",
+      "subsetSha256": "22c501f0864415731556ca69f8f6bce8853893333dae32b2a05c61d1b2f34f67"
+    },
+    "AWS::WellArchitected::ReviewTemplate": {
+      "file": "schemas/AWS--WellArchitected--ReviewTemplate.json",
+      "sourceSha256": "18c9103b53919c73bedcee5676494f09e3b4a826fd63b6eca6525acce4b5b670",
+      "subsetSha256": "dd462bbde007b19bc018a624ce1421ef0139d3e38519abc95bdc1da39ca590da"
+    },
+    "AWS::WellArchitected::Workload": {
+      "file": "schemas/AWS--WellArchitected--Workload.json",
+      "sourceSha256": "246deda42021b45cb20e58cdbb64150c78dc4de8d2170703a3b34d11d251e89b",
+      "subsetSha256": "e01e56a03006bb237e7cbc4e3344d38442dc0c8a75c1b5b5e154d7b16bc514a1"
+    },
+    "AWS::Wickr::Network": {
+      "file": "schemas/AWS--Wickr--Network.json",
+      "sourceSha256": "555774c45096cd58f75d98da51828d2e42fb4e235152e87019979b14fb1bd1f7",
+      "subsetSha256": "f02c387ac8ae1444100ef18368c124368e0a56e4d6bd2c95ff8582e88bf79519"
+    },
+    "AWS::WorkSpacesWeb::BrowserSettings": {
+      "file": "schemas/AWS--WorkSpacesWeb--BrowserSettings.json",
+      "sourceSha256": "216e79b2435fc69cbad2a04365fb7caee5061f610f7537b647b237e9ce27e3d8",
+      "subsetSha256": "856adf481d18a79ad7ce165fbbf806deaba0b30880825dc6aa0c00e739e30983"
+    },
+    "AWS::WorkSpacesWeb::DataProtectionSettings": {
+      "file": "schemas/AWS--WorkSpacesWeb--DataProtectionSettings.json",
+      "sourceSha256": "09d9cd945b1fa0b4de2150092a9590a718314280ab40abf7aeb7945523e618e7",
+      "subsetSha256": "331bafcb0dd7048c485a8626e9ade05ed7321e392906d41e077f951b8423ced9"
+    },
+    "AWS::WorkSpacesWeb::IdentityProvider": {
+      "file": "schemas/AWS--WorkSpacesWeb--IdentityProvider.json",
+      "sourceSha256": "9b1280bfc2a00e8eed90bed3399f587fdb2955a83ea861300a56cd0fa47127d0",
+      "subsetSha256": "a3f853473eb47dde5386307fae38de57f419c88589b442c17a3309b436593129"
+    },
+    "AWS::WorkSpacesWeb::IpAccessSettings": {
+      "file": "schemas/AWS--WorkSpacesWeb--IpAccessSettings.json",
+      "sourceSha256": "504eac9bd6e100851649f355acda101b7becbfdef2218ce35f2506bb31d6120c",
+      "subsetSha256": "9119fbbc41f0ec6b69d885284ad83a687a54872d1e63d29a1f110b40313e7a60"
+    },
+    "AWS::WorkSpacesWeb::NetworkSettings": {
+      "file": "schemas/AWS--WorkSpacesWeb--NetworkSettings.json",
+      "sourceSha256": "234b4eaf7cfa38543fc4424e0d4c66033447d63db067acad742dd2851a0c124a",
+      "subsetSha256": "206b073a417568515d1d7189bfcd314c1a97886a8fc896cf215544fc6ebe132e"
+    },
+    "AWS::WorkSpacesWeb::UserAccessLoggingSettings": {
+      "file": "schemas/AWS--WorkSpacesWeb--UserAccessLoggingSettings.json",
+      "sourceSha256": "eb5f0b23d5cbd234d40da9cb251a8cb5bc344f9721024a08cf3741e1bab6d952",
+      "subsetSha256": "c6aa9075dad063710c29605ba57b495c364cfb51703e068d71a3d70c63392cc0"
     },
     "AWS::XRay::Group": {
       "file": "schemas/AWS--XRay--Group.json",

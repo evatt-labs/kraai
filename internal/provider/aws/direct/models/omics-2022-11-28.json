@@ -1,0 +1,1943 @@
+{
+  "shapes": {
+    "com.amazonaws.omics#Accelerators": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "GPU",
+            "value": "GPU"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#AwsAccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^[0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#CacheBehavior": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CACHE_ON_FAILURE",
+            "value": "CACHE_ON_FAILURE"
+          },
+          {
+            "name": "CACHE_ALWAYS",
+            "value": "CACHE_ALWAYS"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ConfigurationArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::Omics::Configuration"
+        },
+        "smithy.api#length": {
+          "max": 190,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ConfigurationDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9][A-Za-z0-9\\-\\._]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ConfigurationStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CREATING",
+            "value": "CREATING"
+          },
+          {
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "name": "UPDATING",
+            "value": "UPDATING"
+          },
+          {
+            "name": "DELETING",
+            "value": "DELETING"
+          },
+          {
+            "name": "DELETED",
+            "value": "DELETED"
+          },
+          {
+            "name": "FAILED",
+            "value": "FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ConfigurationTimestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.omics#ConfigurationUuid": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#ConnectionArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[\\w]+)*:.+:.+:[0-9]{12}:.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ContainerRegistryMap": {
+      "members": {
+        "imageMappings": {
+          "target": "com.amazonaws.omics#ImageMappingsList",
+          "traits": {}
+        },
+        "registryMappings": {
+          "target": "com.amazonaws.omics#RegistryMappingsList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#DefinitionRepositoryDetails": {
+      "members": {
+        "connectionArn": {
+          "target": "com.amazonaws.omics#ConnectionArn",
+          "traits": {}
+        },
+        "fullRepositoryId": {
+          "target": "com.amazonaws.omics#FullRepositoryId",
+          "traits": {}
+        },
+        "providerEndpoint": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "providerType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "sourceReference": {
+          "target": "com.amazonaws.omics#SourceReference",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#EcrRepositoryPrefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#FullRepositoryId": {
+      "traits": {
+        "smithy.api#pattern": "^.+/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#GetConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.omics#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.omics#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.omics#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.omics#RequestTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.omics#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.omics#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.omics#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.omics#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.omics#GetConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.omics#GetConfigurationResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "workflows-"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/configuration/{name}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.omics#GetConfigurationRequest": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.omics#ConfigurationName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#GetConfigurationResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.omics#ConfigurationArn",
+          "traits": {}
+        },
+        "creationTime": {
+          "target": "com.amazonaws.omics#ConfigurationTimestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.omics#ConfigurationDescription",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.omics#ConfigurationName",
+          "traits": {}
+        },
+        "runConfigurations": {
+          "target": "com.amazonaws.omics#RunConfigurationsResponse",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.omics#ConfigurationStatus",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.omics#TagMap",
+          "traits": {}
+        },
+        "uuid": {
+          "target": "com.amazonaws.omics#ConfigurationUuid",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#GetRunCache": {
+      "errors": [
+        {
+          "target": "com.amazonaws.omics#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.omics#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.omics#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.omics#RequestTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.omics#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.omics#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.omics#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.omics#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.omics#GetRunCacheRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.omics#GetRunCacheResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "workflows-"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/runCache/{id}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.omics#GetRunCacheRequest": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.omics#RunCacheId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#GetRunCacheResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.omics#RunCacheArn",
+          "traits": {}
+        },
+        "cacheBehavior": {
+          "target": "com.amazonaws.omics#CacheBehavior",
+          "traits": {}
+        },
+        "cacheBucketOwnerId": {
+          "target": "com.amazonaws.omics#AwsAccountId",
+          "traits": {}
+        },
+        "cacheS3Uri": {
+          "target": "com.amazonaws.omics#S3UriForBucketOrObject",
+          "traits": {}
+        },
+        "creationTime": {
+          "target": "com.amazonaws.omics#RunCacheTimestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.omics#UserCustomDescription",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.omics#RunCacheId",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.omics#UserCustomName",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.omics#RunCacheStatus",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.omics#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#GetRunGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.omics#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.omics#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.omics#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.omics#RequestTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.omics#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.omics#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.omics#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.omics#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.omics#GetRunGroupRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.omics#GetRunGroupResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "workflows-"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/runGroup/{id}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.omics#GetRunGroupRequest": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.omics#RunGroupId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#GetRunGroupResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.omics#RunGroupArn",
+          "traits": {}
+        },
+        "creationTime": {
+          "target": "com.amazonaws.omics#RunGroupTimestamp",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.omics#RunGroupId",
+          "traits": {}
+        },
+        "maxCpus": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 100000,
+              "min": 1
+            }
+          }
+        },
+        "maxDuration": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 100000,
+              "min": 1
+            }
+          }
+        },
+        "maxGpus": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 100000,
+              "min": 1
+            }
+          }
+        },
+        "maxRuns": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 100000,
+              "min": 1
+            }
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.omics#RunGroupName",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.omics#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#GetWorkflow": {
+      "errors": [
+        {
+          "target": "com.amazonaws.omics#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.omics#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.omics#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.omics#RequestTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.omics#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.omics#ServiceQuotaExceededException"
+        },
+        {
+          "target": "com.amazonaws.omics#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.omics#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.omics#GetWorkflowRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.omics#GetWorkflowResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "workflows-"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/workflow/{id}"
+        },
+        "smithy.api#readonly": {},
+        "smithy.waiters#waitable": {
+          "WorkflowActive": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ACTIVE",
+                    "path": "status"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "CREATING",
+                    "path": "status"
+                  }
+                },
+                "state": "retry"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "UPDATING",
+                    "path": "status"
+                  }
+                },
+                "state": "retry"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "FAILED",
+                    "path": "status"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "documentation": "Wait until a workflow is active.",
+            "maxDelay": 30,
+            "minDelay": 3
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.omics#GetWorkflowRequest": {
+      "members": {
+        "export": {
+          "target": "com.amazonaws.omics#WorkflowExportList",
+          "traits": {
+            "smithy.api#httpQuery": "export"
+          }
+        },
+        "id": {
+          "target": "com.amazonaws.omics#WorkflowId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "type": {
+          "target": "com.amazonaws.omics#WorkflowType",
+          "traits": {
+            "smithy.api#httpQuery": "type"
+          }
+        },
+        "workflowOwnerId": {
+          "target": "com.amazonaws.omics#WorkflowOwnerId",
+          "traits": {
+            "smithy.api#httpQuery": "workflowOwnerId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#GetWorkflowResponse": {
+      "members": {
+        "accelerators": {
+          "target": "com.amazonaws.omics#Accelerators",
+          "traits": {}
+        },
+        "arn": {
+          "target": "com.amazonaws.omics#WorkflowArn",
+          "traits": {}
+        },
+        "containerRegistryMap": {
+          "target": "com.amazonaws.omics#ContainerRegistryMap",
+          "traits": {}
+        },
+        "creationTime": {
+          "target": "com.amazonaws.omics#WorkflowTimestamp",
+          "traits": {}
+        },
+        "definition": {
+          "target": "com.amazonaws.omics#WorkflowDefinition",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "definitionRepositoryDetails": {
+          "target": "com.amazonaws.omics#DefinitionRepositoryDetails",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.omics#WorkflowDescription",
+          "traits": {}
+        },
+        "digest": {
+          "target": "com.amazonaws.omics#WorkflowDigest",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "engine": {
+          "target": "com.amazonaws.omics#WorkflowEngine",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.omics#WorkflowId",
+          "traits": {}
+        },
+        "main": {
+          "target": "com.amazonaws.omics#WorkflowMain",
+          "traits": {}
+        },
+        "metadata": {
+          "target": "com.amazonaws.omics#WorkflowMetadata",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.omics#WorkflowName",
+          "traits": {}
+        },
+        "parameterTemplate": {
+          "target": "com.amazonaws.omics#WorkflowParameterTemplate",
+          "traits": {}
+        },
+        "profileParameterTemplates": {
+          "target": "com.amazonaws.omics#WorkflowProfileParameterTemplates",
+          "traits": {}
+        },
+        "profiles": {
+          "target": "com.amazonaws.omics#WorkflowProfileList",
+          "traits": {}
+        },
+        "readme": {
+          "target": "com.amazonaws.omics#ReadmeS3PresignedUrl",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "readmePath": {
+          "target": "com.amazonaws.omics#ReadmePath",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.omics#WorkflowStatus",
+          "traits": {}
+        },
+        "statusMessage": {
+          "target": "com.amazonaws.omics#WorkflowStatusMessage",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "storageCapacity": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 100000,
+              "min": 0
+            }
+          }
+        },
+        "storageType": {
+          "target": "com.amazonaws.omics#StorageType",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.omics#TagMap",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.omics#WorkflowType",
+          "traits": {}
+        },
+        "uuid": {
+          "target": "com.amazonaws.omics#WorkflowUuid",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#ImageMapping": {
+      "members": {
+        "destinationImage": {
+          "target": "com.amazonaws.omics#Uri",
+          "traits": {}
+        },
+        "sourceImage": {
+          "target": "com.amazonaws.omics#Uri",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#ImageMappingsList": {
+      "member": {
+        "target": "com.amazonaws.omics#ImageMapping"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.omics#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#Omics": {
+      "operations": [
+        {
+          "target": "com.amazonaws.omics#GetConfiguration"
+        },
+        {
+          "target": "com.amazonaws.omics#GetRunCache"
+        },
+        {
+          "target": "com.amazonaws.omics#GetRunGroup"
+        },
+        {
+          "target": "com.amazonaws.omics#GetWorkflow"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "omics",
+          "cloudTrailEventSource": "omics.amazonaws.com",
+          "sdkId": "Omics"
+        },
+        "aws.auth#sigv4": {
+          "name": "omics"
+        },
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon Omics",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://omics-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://omics-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://omics.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://omics.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2022-11-28"
+    },
+    "com.amazonaws.omics#ReadmePath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ReadmeS3PresignedUrl": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#RegistryMapping": {
+      "members": {
+        "ecrAccountId": {
+          "target": "com.amazonaws.omics#AwsAccountId",
+          "traits": {}
+        },
+        "ecrRepositoryPrefix": {
+          "target": "com.amazonaws.omics#EcrRepositoryPrefix",
+          "traits": {}
+        },
+        "upstreamRegistryUrl": {
+          "target": "com.amazonaws.omics#Uri",
+          "traits": {}
+        },
+        "upstreamRepositoryPrefix": {
+          "target": "com.amazonaws.omics#UpstreamRepositoryPrefix",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#RegistryMappingsList": {
+      "member": {
+        "target": "com.amazonaws.omics#RegistryMapping"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.omics#RequestTimeoutException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 408
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#RunCacheArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#RunCacheId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 18,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#RunCacheStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "name": "DELETED",
+            "value": "DELETED"
+          },
+          {
+            "name": "FAILED",
+            "value": "FAILED"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#RunCacheTimestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.omics#RunConfigurationsResponse": {
+      "members": {
+        "vpcConfig": {
+          "target": "com.amazonaws.omics#VpcConfigResponse",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#RunGroupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#RunGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 18,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#RunGroupName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#RunGroupTimestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.omics#S3UriForBucketOrObject": {
+      "traits": {
+        "smithy.api#pattern": "^s3://([a-z0-9][a-z0-9-.]{1,61}[a-z0-9])(/(.{0,1024}))?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#SecurityGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 4
+        },
+        "smithy.api#pattern": "^sg-[0-9a-f]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#SecurityGroupIds": {
+      "member": {
+        "target": "com.amazonaws.omics#SecurityGroupId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.omics#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#SourceReference": {
+      "members": {
+        "type": {
+          "target": "com.amazonaws.omics#SourceReferenceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "value": {
+          "target": "com.amazonaws.omics#SourceReferenceValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#SourceReferenceType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "BRANCH",
+            "value": "BRANCH"
+          },
+          {
+            "name": "TAG",
+            "value": "TAG"
+          },
+          {
+            "name": "COMMIT",
+            "value": "COMMIT"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#SourceReferenceValue": {
+      "type": "string"
+    },
+    "com.amazonaws.omics#StorageType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "STATIC",
+            "value": "STATIC"
+          },
+          {
+            "name": "DYNAMIC",
+            "value": "DYNAMIC"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#SubnetId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 8
+        },
+        "smithy.api#pattern": "^subnet-[0-9a-f]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#SubnetIds": {
+      "member": {
+        "target": "com.amazonaws.omics#SubnetId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.omics#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#TagMap": {
+      "key": {
+        "target": "com.amazonaws.omics#TagKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.omics#TagValue"
+      }
+    },
+    "com.amazonaws.omics#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#UpstreamRepositoryPrefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 30,
+          "min": 2
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#Uri": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 750,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#UserCustomDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#UserCustomName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#ValidationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.omics#VpcConfigResponse": {
+      "members": {
+        "securityGroupIds": {
+          "target": "com.amazonaws.omics#SecurityGroupIds",
+          "traits": {}
+        },
+        "subnetIds": {
+          "target": "com.amazonaws.omics#SubnetIds",
+          "traits": {}
+        },
+        "vpcId": {
+          "target": "com.amazonaws.omics#VpcId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#VpcId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 5
+        },
+        "smithy.api#pattern": "^vpc-[0-9a-f]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowDefinition": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowDigest": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowEngine": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "WDL",
+            "value": "WDL"
+          },
+          {
+            "name": "NEXTFLOW",
+            "value": "NEXTFLOW"
+          },
+          {
+            "name": "CWL",
+            "value": "CWL"
+          },
+          {
+            "name": "WDL_LENIENT",
+            "value": "WDL_LENIENT"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowExport": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "DEFINITION",
+            "value": "DEFINITION"
+          },
+          {
+            "name": "README",
+            "value": "README"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowExportList": {
+      "member": {
+        "target": "com.amazonaws.omics#WorkflowExport"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.omics#WorkflowId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 18,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowMain": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowMetadata": {
+      "key": {
+        "target": "com.amazonaws.omics#WorkflowMetadataKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.omics#WorkflowMetadataValue"
+      }
+    },
+    "com.amazonaws.omics#WorkflowMetadataKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowMetadataValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowOwnerId": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowParameter": {
+      "members": {
+        "description": {
+          "target": "com.amazonaws.omics#WorkflowParameterDescription",
+          "traits": {}
+        },
+        "optional": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.omics#WorkflowParameterDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowParameterTemplate": {
+      "key": {
+        "target": "com.amazonaws.omics#WorkflowParameterName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 2000,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.omics#WorkflowParameter"
+      }
+    },
+    "com.amazonaws.omics#WorkflowProfileList": {
+      "member": {
+        "target": "com.amazonaws.omics#WorkflowProfileName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.omics#WorkflowProfileName": {
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowProfileParameterTemplates": {
+      "key": {
+        "target": "com.amazonaws.omics#WorkflowProfileName"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.omics#WorkflowParameterTemplate"
+      }
+    },
+    "com.amazonaws.omics#WorkflowStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CREATING",
+            "value": "CREATING"
+          },
+          {
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "name": "UPDATING",
+            "value": "UPDATING"
+          },
+          {
+            "name": "DELETED",
+            "value": "DELETED"
+          },
+          {
+            "name": "FAILED",
+            "value": "FAILED"
+          },
+          {
+            "name": "INACTIVE",
+            "value": "INACTIVE"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowStatusMessage": {
+      "traits": {
+        "smithy.api#pattern": "^[\\p{L}||\\p{M}||\\p{Z}||\\p{S}||\\p{N}||\\p{P}]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowTimestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.omics#WorkflowType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "PRIVATE",
+            "value": "PRIVATE"
+          },
+          {
+            "name": "READY2RUN",
+            "value": "READY2RUN"
+          }
+        ],
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.omics#WorkflowUuid": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

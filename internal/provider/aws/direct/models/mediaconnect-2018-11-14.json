@@ -1,0 +1,1434 @@
+{
+  "shapes": {
+    "com.amazonaws.mediaconnect#BadRequestException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#Bridge": {
+      "members": {
+        "BridgeArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "bridgeArn",
+            "smithy.api#required": {}
+          }
+        },
+        "BridgeMessages": {
+          "target": "com.amazonaws.mediaconnect#__listOfMessageDetail",
+          "traits": {
+            "smithy.api#jsonName": "bridgeMessages"
+          }
+        },
+        "BridgeState": {
+          "target": "com.amazonaws.mediaconnect#BridgeState",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "bridgeState",
+            "smithy.api#required": {}
+          }
+        },
+        "EgressGatewayBridge": {
+          "target": "com.amazonaws.mediaconnect#EgressGatewayBridge",
+          "traits": {
+            "smithy.api#jsonName": "egressGatewayBridge"
+          }
+        },
+        "IngressGatewayBridge": {
+          "target": "com.amazonaws.mediaconnect#IngressGatewayBridge",
+          "traits": {
+            "smithy.api#jsonName": "ingressGatewayBridge"
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        },
+        "Outputs": {
+          "target": "com.amazonaws.mediaconnect#__listOfBridgeOutput",
+          "traits": {
+            "smithy.api#jsonName": "outputs"
+          }
+        },
+        "PlacementArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "placementArn",
+            "smithy.api#required": {}
+          }
+        },
+        "SourceFailoverConfig": {
+          "target": "com.amazonaws.mediaconnect#FailoverConfig",
+          "traits": {
+            "smithy.api#jsonName": "sourceFailoverConfig"
+          }
+        },
+        "Sources": {
+          "target": "com.amazonaws.mediaconnect#__listOfBridgeSource",
+          "traits": {
+            "smithy.api#jsonName": "sources"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#BridgeArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.mediaconnect#BridgeResource",
+          "service": "com.amazonaws.mediaconnect#MediaConnect",
+          "type": "AWS::MediaConnect::Bridge"
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mediaconnect#BridgeFlowOutput": {
+      "members": {
+        "FlowArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "flowArn",
+            "smithy.api#required": {}
+          }
+        },
+        "FlowSourceArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "flowSourceArn",
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#BridgeFlowSource": {
+      "members": {
+        "FlowArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "flowArn",
+            "smithy.api#required": {}
+          }
+        },
+        "FlowVpcInterfaceAttachment": {
+          "target": "com.amazonaws.mediaconnect#VpcInterfaceAttachment",
+          "traits": {
+            "smithy.api#jsonName": "flowVpcInterfaceAttachment"
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        },
+        "OutputArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "outputArn"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#BridgeNetworkOutput": {
+      "members": {
+        "IpAddress": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "ipAddress",
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        },
+        "NetworkName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "networkName",
+            "smithy.api#required": {}
+          }
+        },
+        "Port": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "port",
+            "smithy.api#required": {}
+          }
+        },
+        "Protocol": {
+          "target": "com.amazonaws.mediaconnect#Protocol",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "protocol",
+            "smithy.api#required": {}
+          }
+        },
+        "Ttl": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "ttl",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#BridgeNetworkSource": {
+      "members": {
+        "MulticastIp": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "multicastIp",
+            "smithy.api#required": {}
+          }
+        },
+        "MulticastSourceSettings": {
+          "target": "com.amazonaws.mediaconnect#MulticastSourceSettings",
+          "traits": {
+            "smithy.api#jsonName": "multicastSourceSettings"
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        },
+        "NetworkName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "networkName",
+            "smithy.api#required": {}
+          }
+        },
+        "Port": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "port",
+            "smithy.api#required": {}
+          }
+        },
+        "Protocol": {
+          "target": "com.amazonaws.mediaconnect#Protocol",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "protocol",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#BridgeOutput": {
+      "members": {
+        "FlowOutput": {
+          "target": "com.amazonaws.mediaconnect#BridgeFlowOutput",
+          "traits": {
+            "smithy.api#jsonName": "flowOutput"
+          }
+        },
+        "NetworkOutput": {
+          "target": "com.amazonaws.mediaconnect#BridgeNetworkOutput",
+          "traits": {
+            "smithy.api#jsonName": "networkOutput"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#BridgeSource": {
+      "members": {
+        "FlowSource": {
+          "target": "com.amazonaws.mediaconnect#BridgeFlowSource",
+          "traits": {
+            "smithy.api#jsonName": "flowSource"
+          }
+        },
+        "NetworkSource": {
+          "target": "com.amazonaws.mediaconnect#BridgeNetworkSource",
+          "traits": {
+            "smithy.api#jsonName": "networkSource"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#BridgeState": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "DEPLOYING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEPLOYING"
+          }
+        },
+        "STANDBY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDBY"
+          }
+        },
+        "STARTING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STARTING"
+          }
+        },
+        "START_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "START_FAILED"
+          }
+        },
+        "START_PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "START_PENDING"
+          }
+        },
+        "STOPPING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STOPPING"
+          }
+        },
+        "STOP_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STOP_FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconnect#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#DescribeBridge": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mediaconnect#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mediaconnect#DescribeBridgeRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediaconnect#DescribeBridgeResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to display the details of a bridge"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v1/bridges/{BridgeArn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediaconnect#DescribeBridgeRequest": {
+      "members": {
+        "BridgeArn": {
+          "target": "com.amazonaws.mediaconnect#BridgeArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#pattern": "^arn:.+:mediaconnect.+:bridge:.+$",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#DescribeBridgeResponse": {
+      "members": {
+        "Bridge": {
+          "target": "com.amazonaws.mediaconnect#Bridge",
+          "traits": {
+            "smithy.api#jsonName": "bridge"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#DescribeGateway": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mediaconnect#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mediaconnect#DescribeGatewayRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediaconnect#DescribeGatewayResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to display the details of a gateway including the gateway ARN, name, and CIDR blocks, as well as details about the networks"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v1/gateways/{GatewayArn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediaconnect#DescribeGatewayRequest": {
+      "members": {
+        "GatewayArn": {
+          "target": "com.amazonaws.mediaconnect#GatewayArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#pattern": "^arn:.+:mediaconnect.+:gateway:.+$",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#DescribeGatewayResponse": {
+      "members": {
+        "Gateway": {
+          "target": "com.amazonaws.mediaconnect#Gateway",
+          "traits": {
+            "smithy.api#jsonName": "gateway"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#EgressGatewayBridge": {
+      "members": {
+        "InstanceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "instanceId"
+          }
+        },
+        "MaxBitrate": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "maxBitrate",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#FailoverConfig": {
+      "members": {
+        "FailoverMode": {
+          "target": "com.amazonaws.mediaconnect#FailoverMode",
+          "traits": {
+            "smithy.api#jsonName": "failoverMode"
+          }
+        },
+        "RecoveryWindow": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#jsonName": "recoveryWindow"
+          }
+        },
+        "SourcePriority": {
+          "target": "com.amazonaws.mediaconnect#SourcePriority",
+          "traits": {
+            "smithy.api#jsonName": "sourcePriority"
+          }
+        },
+        "State": {
+          "target": "com.amazonaws.mediaconnect#State",
+          "traits": {
+            "smithy.api#jsonName": "state"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#FailoverMode": {
+      "members": {
+        "FAILOVER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILOVER"
+          }
+        },
+        "MERGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MERGE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconnect#ForbiddenException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#Gateway": {
+      "members": {
+        "EgressCidrBlocks": {
+          "target": "com.amazonaws.mediaconnect#__listOfString",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "egressCidrBlocks",
+            "smithy.api#required": {}
+          }
+        },
+        "GatewayArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "gatewayArn",
+            "smithy.api#required": {}
+          }
+        },
+        "GatewayMessages": {
+          "target": "com.amazonaws.mediaconnect#__listOfMessageDetail",
+          "traits": {
+            "smithy.api#jsonName": "gatewayMessages"
+          }
+        },
+        "GatewayState": {
+          "target": "com.amazonaws.mediaconnect#GatewayState",
+          "traits": {
+            "smithy.api#jsonName": "gatewayState"
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        },
+        "Networks": {
+          "target": "com.amazonaws.mediaconnect#__listOfGatewayNetwork",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "networks",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#GatewayArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.mediaconnect#GatewayResource",
+          "service": "com.amazonaws.mediaconnect#MediaConnect",
+          "type": "AWS::MediaConnect::Gateway"
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mediaconnect#GatewayNetwork": {
+      "members": {
+        "CidrBlock": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "cidrBlock",
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#GatewayState": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ERROR"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconnect#IngressGatewayBridge": {
+      "members": {
+        "InstanceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "instanceId"
+          }
+        },
+        "MaxBitrate": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "maxBitrate",
+            "smithy.api#required": {}
+          }
+        },
+        "MaxOutputs": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "maxOutputs",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#InternalServerErrorException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#MediaConnect": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mediaconnect#DescribeBridge"
+        },
+        {
+          "target": "com.amazonaws.mediaconnect#DescribeGateway"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "mediaconnect",
+          "cloudFormationName": "MediaConnect",
+          "sdkId": "MediaConnect"
+        },
+        "aws.api#tagEnabled": {},
+        "aws.auth#sigv4": {
+          "name": "mediaconnect"
+        },
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "maxAge": 86400
+        },
+        "smithy.api#suppress": [
+          "UnstableTrait.aws.api#tagEnabled"
+        ],
+        "smithy.api#title": "AWS MediaConnect",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediaconnect-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediaconnect-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediaconnect.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://mediaconnect.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-11-14"
+    },
+    "com.amazonaws.mediaconnect#MessageDetail": {
+      "members": {
+        "Code": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "code",
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "resourceName"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#MulticastSourceSettings": {
+      "members": {
+        "MulticastSourceIp": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "multicastSourceIp"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#NotFoundException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#Protocol": {
+      "members": {
+        "cdi": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "cdi",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "fujitsu_qos": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fujitsu-qos",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "ndi_speed_hq": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ndi-speed-hq",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "rist": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "rist",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "rtp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "rtp",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "rtp_fec": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "rtp-fec",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "srt_caller": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "srt-caller",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "srt_listener": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "srt-listener",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "st2110_jpegxs": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "st2110-jpegxs",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "udp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "udp",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "zixi_pull": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "zixi-pull",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        },
+        "zixi_push": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "zixi-push",
+            "smithy.api#suppress": [
+              "EnumShape"
+            ]
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconnect#ServiceUnavailableException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#SourcePriority": {
+      "members": {
+        "PrimarySource": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "primarySource"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#State": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediaconnect#TooManyRequestsException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#VpcInterfaceAttachment": {
+      "members": {
+        "VpcInterfaceName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "vpcInterfaceName"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#__listOfBridgeOutput": {
+      "member": {
+        "target": "com.amazonaws.mediaconnect#BridgeOutput"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediaconnect#__listOfBridgeSource": {
+      "member": {
+        "target": "com.amazonaws.mediaconnect#BridgeSource"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediaconnect#__listOfGatewayNetwork": {
+      "member": {
+        "target": "com.amazonaws.mediaconnect#GatewayNetwork"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediaconnect#__listOfMessageDetail": {
+      "member": {
+        "target": "com.amazonaws.mediaconnect#MessageDetail"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediaconnect#__listOfString": {
+      "member": {
+        "target": "smithy.api#String"
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

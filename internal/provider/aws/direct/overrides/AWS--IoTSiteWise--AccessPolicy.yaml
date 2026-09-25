@@ -1,0 +1,37 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoTSiteWise::AccessPolicy
+read:
+  model: iotsitewise/service/2019-12-02/iotsitewise-2019-12-02.json
+  operation: DescribeAccessPolicy
+  identifier:
+    AccessPolicyId: accessPolicyId
+properties:
+  AccessPolicyArn: accessPolicyArn
+  AccessPolicyId: accessPolicyId
+  AccessPolicyIdentity:
+    member: accessPolicyIdentity
+    properties:
+      IamRole:
+        member: iamRole
+        properties:
+          arn: arn
+      IamUser:
+        member: iamUser
+        properties:
+          arn: arn
+      User:
+        member: user
+        properties:
+          id: id
+  AccessPolicyPermission: accessPolicyPermission
+  AccessPolicyResource:
+    member: accessPolicyResource
+    properties:
+      Portal:
+        member: portal
+        properties:
+          id: id
+      Project:
+        member: project
+        properties:
+          id: id

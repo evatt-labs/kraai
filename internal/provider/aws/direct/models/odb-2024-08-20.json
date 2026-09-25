@@ -1,0 +1,1199 @@
+{
+  "shapes": {
+    "com.amazonaws.odb#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#CrossRegionS3RestoreSourcesAccess": {
+      "members": {
+        "ipv4Addresses": {
+          "target": "com.amazonaws.odb#StringList",
+          "traits": {}
+        },
+        "region": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ManagedResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#CrossRegionS3RestoreSourcesAccessList": {
+      "member": {
+        "target": "com.amazonaws.odb#CrossRegionS3RestoreSourcesAccess"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.odb#GetOdbNetwork": {
+      "errors": [
+        {
+          "target": "com.amazonaws.odb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.odb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.odb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.odb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.odb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.odb#GetOdbNetworkInput"
+      },
+      "output": {
+        "target": "com.amazonaws.odb#GetOdbNetworkOutput"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.odb#GetOdbNetworkInput": {
+      "members": {
+        "odbNetworkId": {
+          "target": "com.amazonaws.odb#ResourceIdOrArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#GetOdbNetworkOutput": {
+      "members": {
+        "odbNetwork": {
+          "target": "com.amazonaws.odb#OdbNetwork",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#GetOdbPeeringConnection": {
+      "errors": [
+        {
+          "target": "com.amazonaws.odb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.odb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.odb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.odb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.odb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.odb#GetOdbPeeringConnectionInput"
+      },
+      "output": {
+        "target": "com.amazonaws.odb#GetOdbPeeringConnectionOutput"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.odb#GetOdbPeeringConnectionInput": {
+      "members": {
+        "odbPeeringConnectionId": {
+          "target": "com.amazonaws.odb#ResourceIdOrArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#GetOdbPeeringConnectionOutput": {
+      "members": {
+        "odbPeeringConnection": {
+          "target": "com.amazonaws.odb#OdbPeeringConnection"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#KmsAccess": {
+      "members": {
+        "domainName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ipv4Addresses": {
+          "target": "com.amazonaws.odb#StringList",
+          "traits": {}
+        },
+        "kmsPolicyDocument": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ManagedResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ManagedResourceStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "DISABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLING"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ENABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.odb#ManagedS3BackupAccess": {
+      "members": {
+        "ipv4Addresses": {
+          "target": "com.amazonaws.odb#StringList",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ManagedResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ManagedServices": {
+      "members": {
+        "crossRegionS3RestoreSourcesAccess": {
+          "target": "com.amazonaws.odb#CrossRegionS3RestoreSourcesAccessList",
+          "traits": {}
+        },
+        "kmsAccess": {
+          "target": "com.amazonaws.odb#KmsAccess",
+          "traits": {}
+        },
+        "managedS3BackupAccess": {
+          "target": "com.amazonaws.odb#ManagedS3BackupAccess",
+          "traits": {}
+        },
+        "managedServicesIpv4Cidrs": {
+          "target": "com.amazonaws.odb#StringList",
+          "traits": {}
+        },
+        "resourceGatewayArn": {
+          "target": "com.amazonaws.odb#ResourceArn",
+          "traits": {}
+        },
+        "s3Access": {
+          "target": "com.amazonaws.odb#S3Access",
+          "traits": {}
+        },
+        "serviceNetworkArn": {
+          "target": "com.amazonaws.odb#ResourceArn",
+          "traits": {}
+        },
+        "serviceNetworkEndpoint": {
+          "target": "com.amazonaws.odb#ServiceNetworkEndpoint",
+          "traits": {}
+        },
+        "stsAccess": {
+          "target": "com.amazonaws.odb#StsAccess",
+          "traits": {}
+        },
+        "zeroEtlAccess": {
+          "target": "com.amazonaws.odb#ZeroEtlAccess",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#OciDnsForwardingConfig": {
+      "members": {
+        "domainName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "ociDnsListenerIp": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#OciDnsForwardingConfigList": {
+      "member": {
+        "target": "com.amazonaws.odb#OciDnsForwardingConfig"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.odb#Odb": {
+      "operations": [
+        {
+          "target": "com.amazonaws.odb#GetOdbNetwork"
+        },
+        {
+          "target": "com.amazonaws.odb#GetOdbPeeringConnection"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "odb",
+          "sdkId": "odb"
+        },
+        "aws.auth#sigv4": {
+          "name": "odb"
+        },
+        "aws.iam#disableConditionKeyInference": {},
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#title": "odb",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://odb-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://odb-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://odb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://odb.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2024-08-20"
+    },
+    "com.amazonaws.odb#OdbNetwork": {
+      "members": {
+        "availabilityZone": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "availabilityZoneId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "backupSubnetCidr": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "clientSubnetCidr": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#timestampFormat": "date-time"
+          }
+        },
+        "customDomainName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "defaultDnsPrefix": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "displayName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ec2PlacementGroupIds": {
+          "target": "com.amazonaws.odb#ResourceIdList",
+          "traits": {}
+        },
+        "managedServices": {
+          "target": "com.amazonaws.odb#ManagedServices",
+          "traits": {}
+        },
+        "ociDnsForwardingConfigs": {
+          "target": "com.amazonaws.odb#OciDnsForwardingConfigList",
+          "traits": {}
+        },
+        "ociNetworkAnchorId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "ociNetworkAnchorUrl": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ociResourceAnchorName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ociVcnId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255,
+              "min": 1
+            }
+          }
+        },
+        "ociVcnUrl": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "odbNetworkArn": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "odbNetworkId": {
+          "target": "com.amazonaws.odb#ResourceIdOrArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "peeredCidrs": {
+          "target": "com.amazonaws.odb#StringList",
+          "traits": {}
+        },
+        "percentProgress": {
+          "target": "smithy.api#Float",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ResourceStatus",
+          "traits": {}
+        },
+        "statusReason": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#OdbPeeringConnection": {
+      "members": {
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#timestampFormat": "date-time"
+          }
+        },
+        "displayName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "odbNetworkArn": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "odbPeeringConnectionArn": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "odbPeeringConnectionId": {
+          "target": "com.amazonaws.odb#ResourceIdOrArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "odbPeeringConnectionType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "peerNetworkArn": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "peerNetworkCidrs": {
+          "target": "com.amazonaws.odb#PeeredCidrList",
+          "traits": {}
+        },
+        "percentProgress": {
+          "target": "smithy.api#Float",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ResourceStatus",
+          "traits": {}
+        },
+        "statusReason": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#PeeredCidr": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 18,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?:(?:\\d|[01]?\\d\\d|2[0-4]\\d|25[0-5])\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d|\\d)\\/(?:[1-2][0-9]|3[0-2]|[1-9])$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.odb#PeeredCidrList": {
+      "member": {
+        "target": "com.amazonaws.odb#PeeredCidr"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.odb#ResourceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:(?:aws|aws-cn|aws-us-gov|aws-iso-{0,1}[a-z]{0,1}):[a-z0-9-]+:[a-z0-9-]*:[0-9]+:[a-z0-9-]+/[a-z0-9-_]{6,64}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.odb#ResourceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 6
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_~.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.odb#ResourceIdList": {
+      "member": {
+        "target": "com.amazonaws.odb#ResourceId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.odb#ResourceIdOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 6
+        },
+        "smithy.api#pattern": "^(arn:(?:aws|aws-cn|aws-us-gov|aws-iso-{0,1}[a-z]{0,1}):[a-z0-9-]+:[a-z0-9-]*:[0-9]+:[a-z0-9-]+/[a-zA-Z0-9_~.-]{6,64}|[a-zA-Z0-9_~.-]{6,64})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.odb#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ResourceStatus": {
+      "members": {
+        "AVAILABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AVAILABLE"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "MAINTENANCE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MAINTENANCE_IN_PROGRESS"
+          }
+        },
+        "PROVISIONING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVISIONING"
+          }
+        },
+        "TERMINATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TERMINATED"
+          }
+        },
+        "TERMINATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TERMINATING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.odb#S3Access": {
+      "members": {
+        "domainName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ipv4Addresses": {
+          "target": "com.amazonaws.odb#StringList",
+          "traits": {}
+        },
+        "s3PolicyDocument": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ManagedResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ServiceNetworkEndpoint": {
+      "members": {
+        "vpcEndpointId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "vpcEndpointType": {
+          "target": "com.amazonaws.odb#VpcEndpointType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#StringList": {
+      "member": {
+        "target": "smithy.api#String"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.odb#StsAccess": {
+      "members": {
+        "domainName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ipv4Addresses": {
+          "target": "com.amazonaws.odb#StringList",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ManagedResourceStatus",
+          "traits": {}
+        },
+        "stsPolicyDocument": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.odb#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.odb#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.odb#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.odb#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.odb#ValidationExceptionReason": {
+      "members": {
+        "CANNOT_PARSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "cannotParse"
+          }
+        },
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fieldValidationFailed"
+          }
+        },
+        "OTHER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "other"
+          }
+        },
+        "UNKNOWN_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unknownOperation"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.odb#VpcEndpointType": {
+      "members": {
+        "SERVICENETWORK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SERVICENETWORK"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.odb#ZeroEtlAccess": {
+      "members": {
+        "cidr": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.odb#ManagedResourceStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

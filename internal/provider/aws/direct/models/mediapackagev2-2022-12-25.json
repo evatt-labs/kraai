@@ -1,0 +1,1449 @@
+{
+  "shapes": {
+    "com.amazonaws.mediapackagev2#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#EntityTag": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\S]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mediapackagev2#GetChannelGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mediapackagev2#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.mediapackagev2#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.mediapackagev2#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mediapackagev2#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.mediapackagev2#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mediapackagev2#GetChannelGroupRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediapackagev2#GetChannelGroupResponse"
+      },
+      "traits": {
+        "aws.iam#actionPermissionDescription": "Grants permission to retrieve details of a channel group",
+        "smithy.api#http": {
+          "method": "GET",
+          "uri": "/channelGroup/{ChannelGroupName}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediapackagev2#GetChannelGroupRequest": {
+      "members": {
+        "ChannelGroupName": {
+          "target": "com.amazonaws.mediapackagev2#ResourceName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#GetChannelGroupResponse": {
+      "members": {
+        "Arn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ChannelGroupName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "CreatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.mediapackagev2#ResourceDescription",
+          "traits": {}
+        },
+        "ETag": {
+          "target": "com.amazonaws.mediapackagev2#EntityTag",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "EgressDomain": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ModifiedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.mediapackagev2#TagMap",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#jsonName": "tags"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#ResourceDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mediapackagev2#ResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mediapackagev2#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        },
+        "ResourceTypeNotFound": {
+          "target": "com.amazonaws.mediapackagev2#ResourceTypeNotFound",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#ResourceTypeNotFound": {
+      "members": {
+        "CHANNEL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CHANNEL"
+          }
+        },
+        "CHANNEL_GROUP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CHANNEL_GROUP"
+          }
+        },
+        "HARVEST_JOB": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HARVEST_JOB"
+          }
+        },
+        "ORIGIN_ENDPOINT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ORIGIN_ENDPOINT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackagev2#TagKey": {
+      "type": "string"
+    },
+    "com.amazonaws.mediapackagev2#TagMap": {
+      "key": {
+        "target": "com.amazonaws.mediapackagev2#TagKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.mediapackagev2#TagValue"
+      }
+    },
+    "com.amazonaws.mediapackagev2#TagValue": {
+      "type": "string"
+    },
+    "com.amazonaws.mediapackagev2#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        },
+        "ValidationExceptionType": {
+          "target": "com.amazonaws.mediapackagev2#ValidationExceptionType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#ValidationExceptionType": {
+      "members": {
+        "BATCH_GET_SECRET_VALUE_DENIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BATCH_GET_SECRET_VALUE_DENIED"
+          }
+        },
+        "CENC_IV_INCOMPATIBLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CENC_IV_INCOMPATIBLE"
+          }
+        },
+        "CERTIFICATE_ACCESS_DENIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CERTIFICATE_ACCESS_DENIED"
+          }
+        },
+        "CERTIFICATE_RESOURCE_NOT_FOUND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CERTIFICATE_RESOURCE_NOT_FOUND"
+          }
+        },
+        "CLIP_START_TIME_WITH_START_OR_END": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CLIP_START_TIME_WITH_START_OR_END"
+          }
+        },
+        "CMAF_CONTAINER_TYPE_WITH_MSS_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CMAF_CONTAINER_TYPE_WITH_MSS_MANIFEST"
+          }
+        },
+        "CMAF_EXCLUDE_SEGMENT_DRM_METADATA_INCOMPATIBLE_CONTAINER_TYPE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CMAF_EXCLUDE_SEGMENT_DRM_METADATA_INCOMPATIBLE_CONTAINER_TYPE"
+          }
+        },
+        "CONTAINER_TYPE_IMMUTABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTAINER_TYPE_IMMUTABLE"
+          }
+        },
+        "CONTENT_KEY_PERIOD_TIMING_REQUIRES_SPEKE_V2_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTENT_KEY_PERIOD_TIMING_REQUIRES_SPEKE_V2_1"
+          }
+        },
+        "CONTENT_KEY_PERIOD_TIMING_WITHOUT_KEY_ROTATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTENT_KEY_PERIOD_TIMING_WITHOUT_KEY_ROTATION"
+          }
+        },
+        "CUSTOM_AD_TYPES_INVALID_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CUSTOM_AD_TYPES_INVALID_CONFIGURATION"
+          }
+        },
+        "DASH_DVB_ATTRIBUTES_WITHOUT_DVB_DASH_PROFILE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DASH_DVB_ATTRIBUTES_WITHOUT_DVB_DASH_PROFILE"
+          }
+        },
+        "DECRYPT_SECRET_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DECRYPT_SECRET_FAILED"
+          }
+        },
+        "DESCRIBE_CERTIFICATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DESCRIBE_CERTIFICATE_FAILED"
+          }
+        },
+        "DESCRIBE_SECRET_DENIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DESCRIBE_SECRET_DENIED"
+          }
+        },
+        "DIRECT_MODE_WITH_TIMING_SOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DIRECT_MODE_WITH_TIMING_SOURCE"
+          }
+        },
+        "DRM_SIGNALING_MISMATCH_SEGMENT_ENCRYPTION_STATUS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DRM_SIGNALING_MISMATCH_SEGMENT_ENCRYPTION_STATUS"
+          }
+        },
+        "DRM_SYSTEMS_ENCRYPTION_METHOD_INCOMPATIBLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DRM_SYSTEMS_ENCRYPTION_METHOD_INCOMPATIBLE"
+          }
+        },
+        "DUPLICATED_SECRET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DUPLICATED_SECRET"
+          }
+        },
+        "ENCRYPTION_CONTRACT_SHARED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENCRYPTION_CONTRACT_SHARED"
+          }
+        },
+        "ENCRYPTION_CONTRACT_UNENCRYPTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENCRYPTION_CONTRACT_UNENCRYPTED"
+          }
+        },
+        "ENCRYPTION_CONTRACT_WITHOUT_AUDIO_RENDITION_INCOMPATIBLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENCRYPTION_CONTRACT_WITHOUT_AUDIO_RENDITION_INCOMPATIBLE"
+          }
+        },
+        "ENCRYPTION_CONTRACT_WITH_ISM_CONTAINER_INCOMPATIBLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENCRYPTION_CONTRACT_WITH_ISM_CONTAINER_INCOMPATIBLE"
+          }
+        },
+        "ENCRYPTION_METHOD_CONTAINER_TYPE_MISMATCH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENCRYPTION_METHOD_CONTAINER_TYPE_MISMATCH"
+          }
+        },
+        "END_TIME_EARLIER_THAN_START_TIME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "END_TIME_EARLIER_THAN_START_TIME"
+          }
+        },
+        "GET_SECRET_VALUE_DENIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GET_SECRET_VALUE_DENIED"
+          }
+        },
+        "HARVESTED_MANIFEST_HAS_START_END_FILTER_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HARVESTED_MANIFEST_HAS_START_END_FILTER_CONFIGURATION"
+          }
+        },
+        "HARVESTED_MANIFEST_NOT_FOUND_ON_ENDPOINT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HARVESTED_MANIFEST_NOT_FOUND_ON_ENDPOINT"
+          }
+        },
+        "HARVEST_JOB_CUSTOMER_ENDPOINT_READ_ACCESS_DENIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HARVEST_JOB_CUSTOMER_ENDPOINT_READ_ACCESS_DENIED"
+          }
+        },
+        "HARVEST_JOB_INELIGIBLE_FOR_CANCELLATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HARVEST_JOB_INELIGIBLE_FOR_CANCELLATION"
+          }
+        },
+        "HARVEST_JOB_S3_DESTINATION_MISSING_OR_INCOMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HARVEST_JOB_S3_DESTINATION_MISSING_OR_INCOMPLETE"
+          }
+        },
+        "HARVEST_JOB_UNABLE_TO_WRITE_TO_S3_DESTINATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HARVEST_JOB_UNABLE_TO_WRITE_TO_S3_DESTINATION"
+          }
+        },
+        "INCOMPATIBLE_DASH_COMPACTNESS_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INCOMPATIBLE_DASH_COMPACTNESS_CONFIGURATION"
+          }
+        },
+        "INCOMPATIBLE_DASH_PROFILE_DVB_DASH_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INCOMPATIBLE_DASH_PROFILE_DVB_DASH_CONFIGURATION"
+          }
+        },
+        "INCOMPATIBLE_XML_ENCODING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INCOMPATIBLE_XML_ENCODING"
+          }
+        },
+        "INVALID_ARN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_ARN"
+          }
+        },
+        "INVALID_CERTIFICATE_KEY_ALGORITHM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_CERTIFICATE_KEY_ALGORITHM"
+          }
+        },
+        "INVALID_CERTIFICATE_SIGNATURE_ALGORITHM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_CERTIFICATE_SIGNATURE_ALGORITHM"
+          }
+        },
+        "INVALID_CERTIFICATE_STATUS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_CERTIFICATE_STATUS"
+          }
+        },
+        "INVALID_DRM_SETTINGS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_DRM_SETTINGS"
+          }
+        },
+        "INVALID_HARVEST_JOB_DURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_HARVEST_JOB_DURATION"
+          }
+        },
+        "INVALID_MANIFEST_FILTER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_MANIFEST_FILTER"
+          }
+        },
+        "INVALID_PAGINATION_MAX_RESULTS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_PAGINATION_MAX_RESULTS"
+          }
+        },
+        "INVALID_PAGINATION_TOKEN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_PAGINATION_TOKEN"
+          }
+        },
+        "INVALID_POLICY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_POLICY"
+          }
+        },
+        "INVALID_ROLE_ARN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_ROLE_ARN"
+          }
+        },
+        "INVALID_SECRET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_SECRET"
+          }
+        },
+        "INVALID_SECRET_FORMAT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_SECRET_FORMAT"
+          }
+        },
+        "INVALID_SECRET_KEY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_SECRET_KEY"
+          }
+        },
+        "INVALID_SECRET_VALUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_SECRET_VALUE"
+          }
+        },
+        "INVALID_TIME_DELAY_SECONDS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INVALID_TIME_DELAY_SECONDS"
+          }
+        },
+        "ISM_CONTAINER_TYPE_WITH_DASH_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ISM_CONTAINER_TYPE_WITH_DASH_MANIFEST"
+          }
+        },
+        "ISM_CONTAINER_TYPE_WITH_HLS_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ISM_CONTAINER_TYPE_WITH_HLS_MANIFEST"
+          }
+        },
+        "ISM_CONTAINER_TYPE_WITH_LL_HLS_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ISM_CONTAINER_TYPE_WITH_LL_HLS_MANIFEST"
+          }
+        },
+        "ISM_CONTAINER_TYPE_WITH_SCTE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ISM_CONTAINER_TYPE_WITH_SCTE"
+          }
+        },
+        "ISM_CONTAINER_WITH_KEY_ROTATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ISM_CONTAINER_WITH_KEY_ROTATION"
+          }
+        },
+        "MALFORMED_SECRET_ARN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MALFORMED_SECRET_ARN"
+          }
+        },
+        "MANIFEST_DRM_SYSTEMS_INCOMPATIBLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANIFEST_DRM_SYSTEMS_INCOMPATIBLE"
+          }
+        },
+        "MANIFEST_NAME_COLLISION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANIFEST_NAME_COLLISION"
+          }
+        },
+        "MEMBER_DOES_NOT_MATCH_PATTERN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_DOES_NOT_MATCH_PATTERN"
+          }
+        },
+        "MEMBER_INVALID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_INVALID"
+          }
+        },
+        "MEMBER_INVALID_ENUM_VALUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_INVALID_ENUM_VALUE"
+          }
+        },
+        "MEMBER_MAX_LENGTH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_MAX_LENGTH"
+          }
+        },
+        "MEMBER_MAX_VALUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_MAX_VALUE"
+          }
+        },
+        "MEMBER_MIN_LENGTH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_MIN_LENGTH"
+          }
+        },
+        "MEMBER_MIN_VALUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_MIN_VALUE"
+          }
+        },
+        "MEMBER_MISSING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MEMBER_MISSING"
+          }
+        },
+        "MISSING_CERTIFICATE_DOMAIN_NAME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MISSING_CERTIFICATE_DOMAIN_NAME"
+          }
+        },
+        "MULTIVIEW_CHANNEL_POLICY_NOT_ALLOWED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_CHANNEL_POLICY_NOT_ALLOWED"
+          }
+        },
+        "MULTIVIEW_CONFIGURATION_NOT_ALLOWED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_CONFIGURATION_NOT_ALLOWED"
+          }
+        },
+        "MULTIVIEW_CONFIGURATION_REQUIRED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_CONFIGURATION_REQUIRED"
+          }
+        },
+        "MULTIVIEW_DUPLICATE_LAYOUT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_DUPLICATE_LAYOUT"
+          }
+        },
+        "MULTIVIEW_DUPLICATE_SOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_DUPLICATE_SOURCE"
+          }
+        },
+        "MULTIVIEW_INPUT_SWITCH_NOT_ALLOWED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_SWITCH_NOT_ALLOWED"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_FILTER_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_FILTER_CONFIGURATION"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_HARVEST_JOB": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_HARVEST_JOB"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_IFRAME_ONLY_STREAMS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_IFRAME_ONLY_STREAMS"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_ISM_CONTAINER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_ISM_CONTAINER"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_LL_HLS_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_LL_HLS_MANIFEST"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_MSS_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_MSS_MANIFEST"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_NON_EPOCH_LOCKED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_NON_EPOCH_LOCKED"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_SEGMENT_DURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_SEGMENT_DURATION"
+          }
+        },
+        "MULTIVIEW_INPUT_TYPE_WITH_START_TAG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INPUT_TYPE_WITH_START_TAG"
+          }
+        },
+        "MULTIVIEW_INVALID_TIME_DELAY_SECONDS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_INVALID_TIME_DELAY_SECONDS"
+          }
+        },
+        "MULTIVIEW_MANIFEST_WINDOW_TOO_LONG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_MANIFEST_WINDOW_TOO_LONG"
+          }
+        },
+        "MULTIVIEW_OUTPUT_HEADER_NOT_ALLOWED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_OUTPUT_HEADER_NOT_ALLOWED"
+          }
+        },
+        "MULTIVIEW_RESET_NOT_ALLOWED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_RESET_NOT_ALLOWED"
+          }
+        },
+        "MULTIVIEW_SCTE_REQUIRES_AVAILS_PERIOD_TRIGGER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_SCTE_REQUIRES_AVAILS_PERIOD_TRIGGER"
+          }
+        },
+        "MULTIVIEW_SOURCE_INVALID_INPUT_TYPE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_SOURCE_INVALID_INPUT_TYPE"
+          }
+        },
+        "MULTIVIEW_SOURCE_NON_EPOCH_LOCKED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_SOURCE_NON_EPOCH_LOCKED"
+          }
+        },
+        "MULTIVIEW_SOURCE_NOT_FOUND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_SOURCE_NOT_FOUND"
+          }
+        },
+        "MULTIVIEW_STARTOVER_WINDOW_NOT_ALLOWED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MULTIVIEW_STARTOVER_WINDOW_NOT_ALLOWED"
+          }
+        },
+        "NONE_MODE_WITH_TIMING_SOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE_MODE_WITH_TIMING_SOURCE"
+          }
+        },
+        "NON_EPOCH_LOCKED_WITH_FORCE_ENDPOINT_ERROR_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NON_EPOCH_LOCKED_WITH_FORCE_ENDPOINT_ERROR_CONFIGURATION"
+          }
+        },
+        "NUM_MANIFESTS_HIGH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NUM_MANIFESTS_HIGH"
+          }
+        },
+        "NUM_MANIFESTS_LOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NUM_MANIFESTS_LOW"
+          }
+        },
+        "ONLY_CMAF_INPUT_TYPE_ALLOW_FORCE_ENDPOINT_ERROR_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLY_CMAF_INPUT_TYPE_ALLOW_FORCE_ENDPOINT_ERROR_CONFIGURATION"
+          }
+        },
+        "ONLY_CMAF_INPUT_TYPE_ALLOW_MQCS_INPUT_SWITCHING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLY_CMAF_INPUT_TYPE_ALLOW_MQCS_INPUT_SWITCHING"
+          }
+        },
+        "ONLY_CMAF_INPUT_TYPE_ALLOW_MQCS_OUTPUT_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLY_CMAF_INPUT_TYPE_ALLOW_MQCS_OUTPUT_CONFIGURATION"
+          }
+        },
+        "ONLY_CMAF_INPUT_TYPE_ALLOW_OUTPUT_LOCKING_MODE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLY_CMAF_INPUT_TYPE_ALLOW_OUTPUT_LOCKING_MODE"
+          }
+        },
+        "ONLY_CMAF_INPUT_TYPE_ALLOW_PREFERRED_INPUT_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLY_CMAF_INPUT_TYPE_ALLOW_PREFERRED_INPUT_CONFIGURATION"
+          }
+        },
+        "ONLY_HLS_INPUT_TYPE_ALLOW_STREAM_NAME_OUTPUT_MODE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLY_HLS_INPUT_TYPE_ALLOW_STREAM_NAME_OUTPUT_MODE"
+          }
+        },
+        "ONLY_NON_EPOCH_LOCKED_ALLOW_OUTPUT_TIMESTAMP_MODE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLY_NON_EPOCH_LOCKED_ALLOW_OUTPUT_TIMESTAMP_MODE"
+          }
+        },
+        "OUTPUT_TIMESTAMP_MODE_IMMUTABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OUTPUT_TIMESTAMP_MODE_IMMUTABLE"
+          }
+        },
+        "PERIOD_TRIGGERS_NONE_SPECIFIED_WITH_ADDITIONAL_VALUES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PERIOD_TRIGGERS_NONE_SPECIFIED_WITH_ADDITIONAL_VALUES"
+          }
+        },
+        "RESOURCE_NOT_IN_SAME_REGION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESOURCE_NOT_IN_SAME_REGION"
+          }
+        },
+        "ROLE_ARN_INVALID_FORMAT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ROLE_ARN_INVALID_FORMAT"
+          }
+        },
+        "ROLE_ARN_LENGTH_OUT_OF_RANGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ROLE_ARN_LENGTH_OUT_OF_RANGE"
+          }
+        },
+        "ROLE_ARN_NOT_ASSUMABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ROLE_ARN_NOT_ASSUMABLE"
+          }
+        },
+        "SCTE_IN_MANIFESTS_INVALID_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SCTE_IN_MANIFESTS_INVALID_CONFIGURATION"
+          }
+        },
+        "SECRET_ARN_RESOURCE_NOT_FOUND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SECRET_ARN_RESOURCE_NOT_FOUND"
+          }
+        },
+        "SECRET_FROM_DIFFERENT_ACCOUNT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SECRET_FROM_DIFFERENT_ACCOUNT"
+          }
+        },
+        "SECRET_FROM_DIFFERENT_REGION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SECRET_FROM_DIFFERENT_REGION"
+          }
+        },
+        "SECRET_IS_NOT_ONE_KEY_VALUE_PAIR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SECRET_IS_NOT_ONE_KEY_VALUE_PAIR"
+          }
+        },
+        "SOURCE_DISRUPTIONS_ENABLED_INCORRECTLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SOURCE_DISRUPTIONS_ENABLED_INCORRECTLY"
+          }
+        },
+        "START_TAG_TIME_OFFSET_INVALID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "START_TAG_TIME_OFFSET_INVALID"
+          }
+        },
+        "STREAM_NAME_OUTPUT_MODE_IMMUTABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STREAM_NAME_OUTPUT_MODE_IMMUTABLE"
+          }
+        },
+        "TIMING_SOURCE_MISSING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TIMING_SOURCE_MISSING"
+          }
+        },
+        "TOO_MANY_IN_PROGRESS_HARVEST_JOBS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TOO_MANY_IN_PROGRESS_HARVEST_JOBS"
+          }
+        },
+        "TOO_MANY_SECRETS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TOO_MANY_SECRETS"
+          }
+        },
+        "TS_CONTAINER_TYPE_WITH_DASH_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TS_CONTAINER_TYPE_WITH_DASH_MANIFEST"
+          }
+        },
+        "TS_CONTAINER_TYPE_WITH_MSS_MANIFEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TS_CONTAINER_TYPE_WITH_MSS_MANIFEST"
+          }
+        },
+        "UPDATE_PERIOD_SMALLER_THAN_SEGMENT_DURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_PERIOD_SMALLER_THAN_SEGMENT_DURATION"
+          }
+        },
+        "URL_INVALID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_INVALID"
+          }
+        },
+        "URL_LINK_LOCAL_ADDRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_LINK_LOCAL_ADDRESS"
+          }
+        },
+        "URL_LOCAL_ADDRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_LOCAL_ADDRESS"
+          }
+        },
+        "URL_LOOPBACK_ADDRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_LOOPBACK_ADDRESS"
+          }
+        },
+        "URL_MULTICAST_ADDRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_MULTICAST_ADDRESS"
+          }
+        },
+        "URL_PORT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_PORT"
+          }
+        },
+        "URL_SCHEME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_SCHEME"
+          }
+        },
+        "URL_UNKNOWN_HOST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_UNKNOWN_HOST"
+          }
+        },
+        "URL_USER_INFO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "URL_USER_INFO"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackagev2#mediapackagev2": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mediapackagev2#GetChannelGroup"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "mediapackagev2",
+          "cloudFormationName": "MediaPackageV2",
+          "cloudTrailEventSource": "mediapackagev2.amazonaws.com",
+          "endpointPrefix": "mediapackagev2",
+          "sdkId": "MediaPackageV2"
+        },
+        "aws.auth#sigv4": {
+          "name": "mediapackagev2"
+        },
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "Authorization",
+            "Date",
+            "X-Amz-Date",
+            "X-Amz-Security-Token",
+            "X-Amz-Target",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-errormessage",
+            "x-amzn-trace-id",
+            "x-amz-apigw-id",
+            "date"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "AWS Elemental MediaPackage v2",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://mediapackagev2-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://mediapackagev2-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://mediapackagev2.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediapackagev2.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2022-12-25"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,645 @@
+{
+  "shapes": {
+    "com.amazonaws.bcmdashboards#AWSBCMDashboardsService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.bcmdashboards#GetScheduledReport"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "bcm-dashboards",
+          "endpointPrefix": "bcm-dashboards",
+          "sdkId": "BCM Dashboards"
+        },
+        "aws.auth#sigv4": {
+          "name": "bcm-dashboards"
+        },
+        "aws.endpoints#dualStackOnlyEndpoints": {},
+        "aws.endpoints#standardPartitionalEndpoints": {
+          "endpointPatternType": "service_region_dnsSuffix"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#title": "AWS Billing and Cost Management Dashboards",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4",
+                                  "signingRegion": "{PartitionResult#implicitGlobalRegion}"
+                                }
+                              ]
+                            },
+                            "url": "https://bcm-dashboards-fips.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4",
+                                  "signingRegion": "{PartitionResult#implicitGlobalRegion}"
+                                }
+                              ]
+                            },
+                            "url": "https://bcm-dashboards.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2025-08-18"
+    },
+    "com.amazonaws.bcmdashboards#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#DashboardArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z0-9]*:bcm-dashboards::[0-9]{12}:dashboard/(\\*|[-a-z0-9]+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bcmdashboards#DateTimeRange": {
+      "members": {
+        "endTime": {
+          "target": "com.amazonaws.bcmdashboards#DateTimeValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "startTime": {
+          "target": "com.amazonaws.bcmdashboards#DateTimeValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#DateTimeType": {
+      "members": {
+        "ABSOLUTE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ABSOLUTE"
+          }
+        },
+        "RELATIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RELATIVE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.bcmdashboards#DateTimeValue": {
+      "members": {
+        "type": {
+          "target": "com.amazonaws.bcmdashboards#DateTimeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "value": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!.* {2})[ a-zA-Z0-9.,!?;:@#$%&\\-_/\\\\]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bcmdashboards#GenericString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\S\\s]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bcmdashboards#GenericTimeStamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.bcmdashboards#GetScheduledReport": {
+      "errors": [
+        {
+          "target": "com.amazonaws.bcmdashboards#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.bcmdashboards#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.bcmdashboards#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.bcmdashboards#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.bcmdashboards#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.bcmdashboards#GetScheduledReportRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.bcmdashboards#GetScheduledReportResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.bcmdashboards#GetScheduledReportRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.bcmdashboards#ScheduledReportArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#GetScheduledReportResponse": {
+      "members": {
+        "scheduledReport": {
+          "target": "com.amazonaws.bcmdashboards#ScheduledReport",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#HealthStatus": {
+      "members": {
+        "lastRefreshedAt": {
+          "target": "com.amazonaws.bcmdashboards#GenericTimeStamp",
+          "traits": {}
+        },
+        "statusCode": {
+          "target": "com.amazonaws.bcmdashboards#HealthStatusCode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "statusReasons": {
+          "target": "com.amazonaws.bcmdashboards#StatusReasonList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#HealthStatusCode": {
+      "members": {
+        "HEALTHY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HEALTHY"
+          }
+        },
+        "UNHEALTHY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNHEALTHY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.bcmdashboards#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#ScheduleConfig": {
+      "members": {
+        "scheduleExpression": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {}
+        },
+        "scheduleExpressionTimeZone": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {}
+        },
+        "schedulePeriod": {
+          "target": "com.amazonaws.bcmdashboards#SchedulePeriod",
+          "traits": {}
+        },
+        "state": {
+          "target": "com.amazonaws.bcmdashboards#ScheduleState",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#SchedulePeriod": {
+      "members": {
+        "endTime": {
+          "target": "com.amazonaws.bcmdashboards#GenericTimeStamp",
+          "traits": {}
+        },
+        "startTime": {
+          "target": "com.amazonaws.bcmdashboards#GenericTimeStamp",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#ScheduleState": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.bcmdashboards#ScheduledReport": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.bcmdashboards#ScheduledReportArn",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.bcmdashboards#GenericTimeStamp",
+          "traits": {}
+        },
+        "dashboardArn": {
+          "target": "com.amazonaws.bcmdashboards#DashboardArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.bcmdashboards#Description",
+          "traits": {}
+        },
+        "healthStatus": {
+          "target": "com.amazonaws.bcmdashboards#HealthStatus",
+          "traits": {}
+        },
+        "lastExecutionAt": {
+          "target": "com.amazonaws.bcmdashboards#GenericTimeStamp",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.bcmdashboards#ScheduledReportName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "scheduleConfig": {
+          "target": "com.amazonaws.bcmdashboards#ScheduleConfig",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "scheduledReportExecutionRoleArn": {
+          "target": "com.amazonaws.bcmdashboards#ServiceRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "updatedAt": {
+          "target": "com.amazonaws.bcmdashboards#GenericTimeStamp",
+          "traits": {}
+        },
+        "widgetDateRangeOverride": {
+          "target": "com.amazonaws.bcmdashboards#DateTimeRange",
+          "traits": {}
+        },
+        "widgetIds": {
+          "target": "com.amazonaws.bcmdashboards#WidgetIdList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#ScheduledReportArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z0-9]*:bcm-dashboards::[0-9]{12}:scheduled-report/(\\*|[-a-z0-9]+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bcmdashboards#ScheduledReportName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 2
+        },
+        "smithy.api#pattern": "^(?!.* {2})[a-zA-Z][a-zA-Z0-9 _-]{0,48}[a-zA-Z0-9_-]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bcmdashboards#ServiceRoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z0-9]*:iam::[0-9]{12}:role/[a-zA-Z0-9+=,.@_/-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bcmdashboards#StatusReason": {
+      "members": {
+        "DASHBOARD_ACCESS_DENIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DASHBOARD_ACCESS_DENIED"
+          }
+        },
+        "DASHBOARD_NOT_FOUND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DASHBOARD_NOT_FOUND"
+          }
+        },
+        "DATA_SOURCE_ACCESS_DENIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DATA_SOURCE_ACCESS_DENIED"
+          }
+        },
+        "EXECUTION_ROLE_ASSUME_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXECUTION_ROLE_ASSUME_FAILED"
+          }
+        },
+        "EXECUTION_ROLE_INSUFFICIENT_PERMISSIONS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXECUTION_ROLE_INSUFFICIENT_PERMISSIONS"
+          }
+        },
+        "INTERNAL_FAILURE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTERNAL_FAILURE"
+          }
+        },
+        "WIDGET_ID_NOT_FOUND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WIDGET_ID_NOT_FOUND"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.bcmdashboards#StatusReasonList": {
+      "member": {
+        "target": "com.amazonaws.bcmdashboards#StatusReason"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.bcmdashboards#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bcmdashboards#WidgetIdList": {
+      "member": {
+        "target": "smithy.api#String"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1
+        }
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

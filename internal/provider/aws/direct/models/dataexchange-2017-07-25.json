@@ -1,0 +1,640 @@
+{
+  "shapes": {
+    "com.amazonaws.dataexchange#Arn": {
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#AssetType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "S3_SNAPSHOT",
+            "value": "S3_SNAPSHOT"
+          },
+          {
+            "name": "REDSHIFT_DATA_SHARE",
+            "value": "REDSHIFT_DATA_SHARE"
+          },
+          {
+            "name": "API_GATEWAY_API",
+            "value": "API_GATEWAY_API"
+          },
+          {
+            "name": "S3_DATA_ACCESS",
+            "value": "S3_DATA_ACCESS"
+          },
+          {
+            "name": "LAKE_FORMATION_DATA_PERMISSION",
+            "value": "LAKE_FORMATION_DATA_PERMISSION"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#DataExchange": {
+      "operations": [
+        {
+          "target": "com.amazonaws.dataexchange#GetDataSet"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "dataexchange",
+          "cloudTrailEventSource": "dataexchange.amazonaws.com",
+          "endpointPrefix": "dataexchange",
+          "sdkId": "DataExchange"
+        },
+        "aws.auth#sigv4": {
+          "name": "dataexchange"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS Data Exchange",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://dataexchange-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://dataexchange-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://dataexchange.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://dataexchange.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-07-25"
+    },
+    "com.amazonaws.dataexchange#Description": {
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#ExceptionCause": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "InsufficientS3BucketPolicy",
+            "value": "InsufficientS3BucketPolicy"
+          },
+          {
+            "name": "S3AccessDenied",
+            "value": "S3AccessDenied"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#GetDataSet": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dataexchange#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.dataexchange#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.dataexchange#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.dataexchange#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dataexchange#GetDataSetRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.dataexchange#GetDataSetResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v1/data-sets/{DataSetId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dataexchange#GetDataSetRequest": {
+      "members": {
+        "DataSetId": {
+          "target": "com.amazonaws.dataexchange#Id",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dataexchange#GetDataSetResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.dataexchange#Arn",
+          "traits": {}
+        },
+        "AssetType": {
+          "target": "com.amazonaws.dataexchange#AssetType",
+          "traits": {}
+        },
+        "CreatedAt": {
+          "target": "com.amazonaws.dataexchange#Timestamp",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.dataexchange#Description",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.dataexchange#Id",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.dataexchange#Name",
+          "traits": {}
+        },
+        "Origin": {
+          "target": "com.amazonaws.dataexchange#Origin",
+          "traits": {}
+        },
+        "OriginDetails": {
+          "target": "com.amazonaws.dataexchange#OriginDetails",
+          "traits": {}
+        },
+        "SourceId": {
+          "target": "com.amazonaws.dataexchange#Id",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.dataexchange#MapOf__string",
+          "traits": {}
+        },
+        "UpdatedAt": {
+          "target": "com.amazonaws.dataexchange#Timestamp",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dataexchange#Id": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z0-9]{30,40}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.dataexchange#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dataexchange#MapOf__string": {
+      "key": {
+        "target": "com.amazonaws.dataexchange#__string"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.dataexchange#__string"
+      }
+    },
+    "com.amazonaws.dataexchange#Name": {
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#Origin": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "OWNED",
+            "value": "OWNED"
+          },
+          {
+            "name": "ENTITLED",
+            "value": "ENTITLED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#OriginDetails": {
+      "members": {
+        "DataGrantId": {
+          "target": "com.amazonaws.dataexchange#__string",
+          "traits": {}
+        },
+        "ProductId": {
+          "target": "com.amazonaws.dataexchange#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dataexchange#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.dataexchange#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.dataexchange#__string",
+          "traits": {}
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.dataexchange#ResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dataexchange#ResourceType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "DATA_SET",
+            "value": "DATA_SET"
+          },
+          {
+            "name": "REVISION",
+            "value": "REVISION"
+          },
+          {
+            "name": "ASSET",
+            "value": "ASSET"
+          },
+          {
+            "name": "JOB",
+            "value": "JOB"
+          },
+          {
+            "name": "EVENT_ACTION",
+            "value": "EVENT_ACTION"
+          },
+          {
+            "name": "DATA_GRANT",
+            "value": "DATA_GRANT"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dataexchange#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.dataexchange#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dataexchange#Timestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.dataexchange#ValidationException": {
+      "members": {
+        "ExceptionCause": {
+          "target": "com.amazonaws.dataexchange#ExceptionCause",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.dataexchange#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dataexchange#__string": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

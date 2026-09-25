@@ -1,0 +1,1032 @@
+{
+  "shapes": {
+    "com.amazonaws.eventbridge#AWSEvents": {
+      "operations": [
+        {
+          "target": "com.amazonaws.eventbridge#DescribeEndpoint"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "events",
+          "cloudFormationName": "Events",
+          "cloudTrailEventSource": "events.amazonaws.com",
+          "endpointPrefix": "events",
+          "sdkId": "EventBridge"
+        },
+        "aws.auth#sigv4": {
+          "name": "events"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "Amazon EventBridge",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://events.amazonaws.com/doc/2015-10-07"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "EndpointId": {
+              "documentation": "Operation parameter for EndpointId",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Endpoint"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "fn": "not"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "assign": "PartitionResult",
+                  "fn": "aws.partition"
+                },
+                {
+                  "argv": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "PartitionResult"
+                        },
+                        "name"
+                      ],
+                      "fn": "getAttr"
+                    },
+                    "aws-us-gov"
+                  ],
+                  "fn": "stringEquals"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "UseFIPS"
+                    },
+                    true
+                  ],
+                  "fn": "booleanEquals"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "UseDualStack"
+                    },
+                    true
+                  ],
+                  "fn": "booleanEquals"
+                }
+              ],
+              "endpoint": {
+                "headers": {},
+                "properties": {},
+                "url": "https://events.{Region}.{PartitionResult#dualStackDnsSuffix}"
+              },
+              "type": "endpoint"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "EndpointId"
+                    }
+                  ],
+                  "fn": "isSet"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "assign": "PartitionResult",
+                  "fn": "aws.partition"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "EndpointId"
+                        },
+                        true
+                      ],
+                      "fn": "isValidHostLabel"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            false
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "Endpoint"
+                                }
+                              ],
+                              "fn": "isSet"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4a",
+                                  "signingName": "events",
+                                  "signingRegionSet": [
+                                    "*"
+                                  ]
+                                }
+                              ]
+                            },
+                            "url": {
+                              "ref": "Endpoint"
+                            }
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {
+                                      "authSchemes": [
+                                        {
+                                          "name": "sigv4a",
+                                          "signingName": "events",
+                                          "signingRegionSet": [
+                                            "*"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "url": "https://{EndpointId}.endpoint.events.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4a",
+                                  "signingName": "events",
+                                  "signingRegionSet": [
+                                    "*"
+                                  ]
+                                }
+                              ]
+                            },
+                            "url": "https://{EndpointId}.endpoint.events.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "error": "Invalid Configuration: FIPS is not supported with EventBridge multi-region endpoints.",
+                      "type": "error"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "EndpointId must be a valid host label.",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://events-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-east-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://events.us-gov-east-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "Region"
+                                    },
+                                    "us-gov-west-1"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://events.us-gov-west-1.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://events-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://events.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://events.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2015-10-07"
+    },
+    "com.amazonaws.eventbridge#DescribeEndpoint": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#DescribeEndpointRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#DescribeEndpointResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#DescribeEndpointRequest": {
+      "members": {
+        "HomeRegion": {
+          "target": "com.amazonaws.eventbridge#HomeRegion",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.eventbridge#EndpointName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#DescribeEndpointResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.eventbridge#EndpointArn",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.eventbridge#Timestamp",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.eventbridge#EndpointDescription",
+          "traits": {}
+        },
+        "EndpointId": {
+          "target": "com.amazonaws.eventbridge#EndpointId",
+          "traits": {}
+        },
+        "EndpointUrl": {
+          "target": "com.amazonaws.eventbridge#EndpointUrl",
+          "traits": {}
+        },
+        "EventBuses": {
+          "target": "com.amazonaws.eventbridge#EndpointEventBusList",
+          "traits": {}
+        },
+        "LastModifiedTime": {
+          "target": "com.amazonaws.eventbridge#Timestamp",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.eventbridge#EndpointName",
+          "traits": {}
+        },
+        "ReplicationConfig": {
+          "target": "com.amazonaws.eventbridge#ReplicationConfig",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.eventbridge#IamRoleArn",
+          "traits": {}
+        },
+        "RoutingConfig": {
+          "target": "com.amazonaws.eventbridge#RoutingConfig",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.eventbridge#EndpointState",
+          "traits": {}
+        },
+        "StateReason": {
+          "target": "com.amazonaws.eventbridge#EndpointStateReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#EndpointArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws([a-z]|\\-)*:events:([a-z]|\\d|\\-)*:([0-9]{12})?:endpoint\\/[/\\.\\-_A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#EndpointDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": ".*"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#EndpointEventBus": {
+      "members": {
+        "EventBusArn": {
+          "target": "com.amazonaws.eventbridge#NonPartnerEventBusArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#EndpointEventBusList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#EndpointEventBus"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 2,
+          "min": 2
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#EndpointId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9\\-]+[\\.][A-Za-z0-9\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#EndpointName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#EndpointState": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "UPDATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.eventbridge#EndpointStateReason": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": ".*"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#EndpointUrl": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(https://)?[\\.\\-a-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#FailoverConfig": {
+      "members": {
+        "Primary": {
+          "target": "com.amazonaws.eventbridge#Primary",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Secondary": {
+          "target": "com.amazonaws.eventbridge#Secondary",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#HealthCheck": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws([a-z]|\\-)*:route53:::healthcheck/[\\-a-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#HomeRegion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 9
+        },
+        "smithy.api#pattern": "^[\\-a-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#IamRoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[a-z-]*:iam::\\d{12}:role\\/[\\w+=,.@/-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#InternalException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#NonPartnerEventBusArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[a-z-]*:events:[a-z]+-[a-z-]+-\\d+:\\d{12}:event-bus/[\\w.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#Primary": {
+      "members": {
+        "HealthCheck": {
+          "target": "com.amazonaws.eventbridge#HealthCheck",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#ReplicationConfig": {
+      "members": {
+        "State": {
+          "target": "com.amazonaws.eventbridge#ReplicationState",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#ReplicationState": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.eventbridge#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#Route": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 9
+        },
+        "smithy.api#pattern": "^[\\-a-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#RoutingConfig": {
+      "members": {
+        "FailoverConfig": {
+          "target": "com.amazonaws.eventbridge#FailoverConfig",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#Secondary": {
+      "members": {
+        "Route": {
+          "target": "com.amazonaws.eventbridge#Route",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#Timestamp": {
+      "type": "timestamp"
+    }
+  },
+  "smithy": "2.0"
+}

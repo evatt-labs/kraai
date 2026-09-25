@@ -1,0 +1,21 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SSM::MaintenanceWindow
+read:
+  model: ssm/service/2014-11-06/ssm-2014-11-06.json
+  operation: GetMaintenanceWindow
+  identifier:
+    WindowId: WindowId
+properties:
+  AllowUnassociatedTargets: AllowUnassociatedTargets
+  Cutoff: Cutoff
+  Description: Description
+  Duration: Duration
+  EndDate: EndDate
+  Name: Name
+  Schedule: Schedule
+  ScheduleOffset: ScheduleOffset
+  ScheduleTimezone: ScheduleTimezone
+  StartDate: StartDate
+  WindowId: WindowId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

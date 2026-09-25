@@ -1,0 +1,30 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CleanRoomsML::ConfiguredModelAlgorithm
+read:
+  model: cleanroomsml/service/2023-09-06/cleanroomsml-2023-09-06.json
+  operation: GetConfiguredModelAlgorithm
+  identifier:
+    ConfiguredModelAlgorithmArn: configuredModelAlgorithmArn
+properties:
+  ConfiguredModelAlgorithmArn: configuredModelAlgorithmArn
+  Description: description
+  InferenceContainerConfig:
+    member: inferenceContainerConfig
+    properties:
+      ImageUri: imageUri
+  KmsKeyArn: kmsKeyArn
+  Name: name
+  RoleArn: roleArn
+  TrainingContainerConfig:
+    member: trainingContainerConfig
+    properties:
+      Arguments: arguments
+      Entrypoint: entrypoint
+      ImageUri: imageUri
+      MetricDefinitions:
+        member: metricDefinitions
+        properties:
+          Name: name
+          Regex: regex
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

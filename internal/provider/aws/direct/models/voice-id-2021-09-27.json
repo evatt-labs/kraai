@@ -1,0 +1,689 @@
+{
+  "shapes": {
+    "com.amazonaws.voiceid#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.voiceid#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#Arn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:voiceid.+:[0-9]{12}:domain/[a-zA-Z0-9]{22}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#DescribeDomain": {
+      "errors": [
+        {
+          "target": "com.amazonaws.voiceid#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.voiceid#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.voiceid#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.voiceid#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.voiceid#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.voiceid#DescribeDomainRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.voiceid#DescribeDomainResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.voiceid#DescribeDomainRequest": {
+      "members": {
+        "DomainId": {
+          "target": "com.amazonaws.voiceid#DomainId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#DescribeDomainResponse": {
+      "members": {
+        "Domain": {
+          "target": "com.amazonaws.voiceid#Domain",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#suppress": [
+              "UnstableTrait"
+            ]
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-%@]*)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#Domain": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.voiceid#Arn",
+          "traits": {}
+        },
+        "CreatedAt": {
+          "target": "com.amazonaws.voiceid#Timestamp",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.voiceid#Description",
+          "traits": {}
+        },
+        "DomainId": {
+          "target": "com.amazonaws.voiceid#DomainId",
+          "traits": {}
+        },
+        "DomainStatus": {
+          "target": "com.amazonaws.voiceid#DomainStatus",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.voiceid#DomainName",
+          "traits": {}
+        },
+        "ServerSideEncryptionConfiguration": {
+          "target": "com.amazonaws.voiceid#ServerSideEncryptionConfiguration",
+          "traits": {}
+        },
+        "ServerSideEncryptionUpdateDetails": {
+          "target": "com.amazonaws.voiceid#ServerSideEncryptionUpdateDetails",
+          "traits": {}
+        },
+        "UpdatedAt": {
+          "target": "com.amazonaws.voiceid#Timestamp",
+          "traits": {}
+        },
+        "WatchlistDetails": {
+          "target": "com.amazonaws.voiceid#WatchlistDetails",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#DomainId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 22
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9]{22}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#DomainName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#DomainStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "name": "PENDING",
+            "value": "PENDING"
+          },
+          {
+            "name": "SUSPENDED",
+            "value": "SUSPENDED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.voiceid#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#KmsKeyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.voiceid#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.voiceid#ResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#ResourceType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "BATCH_JOB",
+            "value": "BATCH_JOB"
+          },
+          {
+            "name": "COMPLIANCE_CONSENT",
+            "value": "COMPLIANCE_CONSENT"
+          },
+          {
+            "name": "DOMAIN",
+            "value": "DOMAIN"
+          },
+          {
+            "name": "FRAUDSTER",
+            "value": "FRAUDSTER"
+          },
+          {
+            "name": "SESSION",
+            "value": "SESSION"
+          },
+          {
+            "name": "SPEAKER",
+            "value": "SPEAKER"
+          },
+          {
+            "name": "WATCHLIST",
+            "value": "WATCHLIST"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#ServerSideEncryptionConfiguration": {
+      "members": {
+        "KmsKeyId": {
+          "target": "com.amazonaws.voiceid#KmsKeyId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#ServerSideEncryptionUpdateDetails": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.voiceid#String",
+          "traits": {}
+        },
+        "OldKmsKeyId": {
+          "target": "com.amazonaws.voiceid#KmsKeyId",
+          "traits": {}
+        },
+        "UpdateStatus": {
+          "target": "com.amazonaws.voiceid#ServerSideEncryptionUpdateStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#ServerSideEncryptionUpdateStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "IN_PROGRESS",
+            "value": "IN_PROGRESS"
+          },
+          {
+            "name": "COMPLETED",
+            "value": "COMPLETED"
+          },
+          {
+            "name": "FAILED",
+            "value": "FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#String": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.voiceid#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.voiceid#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.voiceid#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.voiceid#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#VoiceID": {
+      "operations": [
+        {
+          "target": "com.amazonaws.voiceid#DescribeDomain"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "voiceid",
+          "cloudFormationName": "VoiceID",
+          "cloudTrailEventSource": "voiceid.amazonaws.com",
+          "endpointPrefix": "voiceid",
+          "sdkId": "Voice ID"
+        },
+        "aws.auth#sigv4": {
+          "name": "voiceid"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#title": "Amazon Voice ID",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://voiceid-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://voiceid-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://voiceid.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://voiceid.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2021-09-27"
+    },
+    "com.amazonaws.voiceid#WatchlistDetails": {
+      "members": {
+        "DefaultWatchlistId": {
+          "target": "com.amazonaws.voiceid#WatchlistId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#WatchlistId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 22
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9]{22}$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

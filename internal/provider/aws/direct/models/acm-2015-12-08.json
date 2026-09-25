@@ -1,0 +1,549 @@
+{
+  "shapes": {
+    "com.amazonaws.acm#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.acm#ServiceErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AccessDenied",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#AcmeEndpointArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[a-z-]*:acm:[a-z0-9-]+:[0-9]{12}:acme-endpoint/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.acm#AcmeExternalAccountBinding": {
+      "members": {
+        "AcmeEndpointArn": {
+          "target": "com.amazonaws.acm#AcmeEndpointArn",
+          "traits": {}
+        },
+        "AcmeExternalAccountBindingArn": {
+          "target": "com.amazonaws.acm#AcmeExternalAccountBindingArn",
+          "traits": {}
+        },
+        "CreatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "ExpiresAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "LastUsedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "RevokedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.acm#RoleArn",
+          "traits": {}
+        },
+        "UpdatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.acm#AcmeExternalAccountBindingArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[a-z-]*:acm:[a-z0-9-]+:[0-9]{12}:acme-endpoint/[a-zA-Z0-9-]+/acme-external-account-binding/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.acm#AvailabilityErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.acm#CertificateManager": {
+      "operations": [
+        {
+          "target": "com.amazonaws.acm#DescribeAcmeExternalAccountBinding"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "acm",
+          "cloudFormationName": "CertificateManager",
+          "cloudTrailEventSource": "acm.amazonaws.com",
+          "endpointPrefix": "acm",
+          "sdkId": "ACM"
+        },
+        "aws.auth#sigv4": {
+          "name": "acm"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "AWS Certificate Manager",
+        "smithy.rules#clientContextParams": {
+          "ServiceType": {
+            "documentation": "The service type: ACM or ACM-ACME. Injected via @staticContextParams.",
+            "type": "string"
+          }
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send requests.",
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region to send requests to.",
+              "required": true,
+              "type": "string"
+            },
+            "ServiceType": {
+              "documentation": "The service type: ACM or ACM-ACME. Injected via @staticContextParams.",
+              "required": true,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "Use dual-stack endpoints.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "Use FIPS endpoints.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "documentation": "Use custom endpoint if provided",
+              "endpoint": {
+                "url": "{Endpoint}"
+              },
+              "type": "endpoint"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "assign": "PartitionResult",
+                  "fn": "aws.partition"
+                }
+              ],
+              "documentation": "Resolve partition for region",
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "ServiceType"
+                        },
+                        "ACM-ACME"
+                      ],
+                      "fn": "stringEquals"
+                    }
+                  ],
+                  "documentation": "ACME operations",
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Endpoint"
+                            }
+                          ],
+                          "fn": "isSet"
+                        }
+                      ],
+                      "documentation": "ACME with custom endpoint",
+                      "endpoint": {
+                        "url": "{Endpoint}"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "aws"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "documentation": "ACME operations are only available in commercial AWS partitions",
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "documentation": "FIPS endpoints are not available for ACME operations",
+                          "error": "FIPS endpoints are not available for ACME operations",
+                          "type": "error"
+                        },
+                        {
+                          "conditions": [],
+                          "documentation": "ACME standard",
+                          "endpoint": {
+                            "url": "https://acm-acme.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "documentation": "ACME operations are only available in commercial AWS partitions",
+                      "error": "ACME operations are only available in commercial AWS partitions",
+                      "type": "error"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "documentation": "ACM operations",
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "documentation": "ACM FIPS + DualStack",
+                      "endpoint": {
+                        "url": "https://acm-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "documentation": "ACM FIPS only",
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "name"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                "aws-us-gov"
+                              ],
+                              "fn": "stringEquals"
+                            }
+                          ],
+                          "documentation": "ACM FIPS GovCloud",
+                          "endpoint": {
+                            "url": "https://acm.{Region}.amazonaws.com"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "documentation": "ACM FIPS standard",
+                          "endpoint": {
+                            "url": "https://acm-fips.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "documentation": "ACM DualStack only",
+                      "endpoint": {
+                        "url": "https://acm.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [],
+                      "documentation": "ACM standard",
+                      "endpoint": {
+                        "url": "https://acm.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "documentation": "Fallback error if region is not set",
+              "error": "Region must be set to resolve an endpoint.",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2015-12-08"
+    },
+    "com.amazonaws.acm#CoralAvailabilityThrottledResource": {
+      "type": "string"
+    },
+    "com.amazonaws.acm#CoralAvailabilityThrottlingReason": {
+      "type": "string"
+    },
+    "com.amazonaws.acm#DescribeAcmeExternalAccountBinding": {
+      "errors": [
+        {
+          "target": "com.amazonaws.acm#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.acm#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.acm#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.acm#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.acm#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.acm#DescribeAcmeExternalAccountBindingRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.acm#DescribeAcmeExternalAccountBindingResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {},
+        "smithy.rules#staticContextParams": {
+          "ServiceType": {
+            "value": "ACM-ACME"
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.acm#DescribeAcmeExternalAccountBindingRequest": {
+      "members": {
+        "AcmeExternalAccountBindingArn": {
+          "target": "com.amazonaws.acm#AcmeExternalAccountBindingArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
+        "smithy.api#references": []
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#DescribeAcmeExternalAccountBindingResponse": {
+      "members": {
+        "ExternalAccountBinding": {
+          "target": "com.amazonaws.acm#AcmeExternalAccountBinding",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws[a-z-]*:iam::[0-9]{12}:role/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.acm#ServiceErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.acm#String": {
+      "type": "string"
+    },
+    "com.amazonaws.acm#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#AvailabilityErrorMessage"
+        },
+        "throttlingReasons": {
+          "target": "com.amazonaws.acm#ThrottlingReasonList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "Throttling",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#ThrottlingReason": {
+      "members": {
+        "reason": {
+          "target": "com.amazonaws.acm#CoralAvailabilityThrottlingReason",
+          "traits": {}
+        },
+        "resource": {
+          "target": "com.amazonaws.acm#CoralAvailabilityThrottledResource",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.acm#ThrottlingReasonList": {
+      "member": {
+        "target": "com.amazonaws.acm#ThrottlingReason"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.acm#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#ValidationExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ValidationError",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#ValidationExceptionMessage": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

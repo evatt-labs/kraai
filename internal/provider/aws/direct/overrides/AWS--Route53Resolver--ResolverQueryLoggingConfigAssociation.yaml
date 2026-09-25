@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53Resolver::ResolverQueryLoggingConfigAssociation
+read:
+  model: route53resolver/service/2018-04-01/route53resolver-2018-04-01.json
+  operation: GetResolverQueryLogConfigAssociation
+  identifier:
+    Id: ResolverQueryLogConfigAssociationId
+  response: ResolverQueryLogConfigAssociation
+properties:
+  CreationTime: CreationTime
+  Error: Error
+  ErrorMessage: ErrorMessage
+  Id: Id
+  ResolverQueryLogConfigId: ResolverQueryLogConfigId
+  ResourceId: ResourceId
+  Status: Status

@@ -1,0 +1,146 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaPackage::PackagingConfiguration
+read:
+  model: mediapackage-vod/service/2018-11-07/mediapackage-vod-2018-11-07.json
+  operation: DescribePackagingConfiguration
+  identifier:
+    Id: Id
+properties:
+  Arn: Arn
+  CmafPackage:
+    member: CmafPackage
+    properties:
+      Encryption:
+        member: Encryption
+        properties:
+          SpekeKeyProvider:
+            member: SpekeKeyProvider
+            properties:
+              EncryptionContractConfiguration:
+                member: EncryptionContractConfiguration
+                properties:
+                  PresetSpeke20Audio: PresetSpeke20Audio
+                  PresetSpeke20Video: PresetSpeke20Video
+              RoleArn: RoleArn
+              SystemIds: SystemIds
+              Url: Url
+      HlsManifests:
+        member: HlsManifests
+        properties:
+          AdMarkers: AdMarkers
+          IncludeIframeOnlyStream: IncludeIframeOnlyStream
+          ManifestName: ManifestName
+          ProgramDateTimeIntervalSeconds: ProgramDateTimeIntervalSeconds
+          RepeatExtXKey: RepeatExtXKey
+          StreamSelection:
+            member: StreamSelection
+            properties:
+              MaxVideoBitsPerSecond: MaxVideoBitsPerSecond
+              MinVideoBitsPerSecond: MinVideoBitsPerSecond
+              StreamOrder: StreamOrder
+      IncludeEncoderConfigurationInSegments: IncludeEncoderConfigurationInSegments
+      SegmentDurationSeconds: SegmentDurationSeconds
+  DashPackage:
+    member: DashPackage
+    properties:
+      DashManifests:
+        member: DashManifests
+        properties:
+          ManifestLayout: ManifestLayout
+          ManifestName: ManifestName
+          MinBufferTimeSeconds: MinBufferTimeSeconds
+          Profile: Profile
+          ScteMarkersSource: ScteMarkersSource
+          StreamSelection:
+            member: StreamSelection
+            properties:
+              MaxVideoBitsPerSecond: MaxVideoBitsPerSecond
+              MinVideoBitsPerSecond: MinVideoBitsPerSecond
+              StreamOrder: StreamOrder
+      Encryption:
+        member: Encryption
+        properties:
+          SpekeKeyProvider:
+            member: SpekeKeyProvider
+            properties:
+              EncryptionContractConfiguration:
+                member: EncryptionContractConfiguration
+                properties:
+                  PresetSpeke20Audio: PresetSpeke20Audio
+                  PresetSpeke20Video: PresetSpeke20Video
+              RoleArn: RoleArn
+              SystemIds: SystemIds
+              Url: Url
+      IncludeEncoderConfigurationInSegments: IncludeEncoderConfigurationInSegments
+      IncludeIframeOnlyStream: IncludeIframeOnlyStream
+      PeriodTriggers: PeriodTriggers
+      SegmentDurationSeconds: SegmentDurationSeconds
+      SegmentTemplateFormat: SegmentTemplateFormat
+  HlsPackage:
+    member: HlsPackage
+    properties:
+      Encryption:
+        member: Encryption
+        properties:
+          ConstantInitializationVector: ConstantInitializationVector
+          EncryptionMethod: EncryptionMethod
+          SpekeKeyProvider:
+            member: SpekeKeyProvider
+            properties:
+              EncryptionContractConfiguration:
+                member: EncryptionContractConfiguration
+                properties:
+                  PresetSpeke20Audio: PresetSpeke20Audio
+                  PresetSpeke20Video: PresetSpeke20Video
+              RoleArn: RoleArn
+              SystemIds: SystemIds
+              Url: Url
+      HlsManifests:
+        member: HlsManifests
+        properties:
+          AdMarkers: AdMarkers
+          IncludeIframeOnlyStream: IncludeIframeOnlyStream
+          ManifestName: ManifestName
+          ProgramDateTimeIntervalSeconds: ProgramDateTimeIntervalSeconds
+          RepeatExtXKey: RepeatExtXKey
+          StreamSelection:
+            member: StreamSelection
+            properties:
+              MaxVideoBitsPerSecond: MaxVideoBitsPerSecond
+              MinVideoBitsPerSecond: MinVideoBitsPerSecond
+              StreamOrder: StreamOrder
+      IncludeDvbSubtitles: IncludeDvbSubtitles
+      SegmentDurationSeconds: SegmentDurationSeconds
+      UseAudioRenditionGroup: UseAudioRenditionGroup
+  Id: Id
+  MssPackage:
+    member: MssPackage
+    properties:
+      Encryption:
+        member: Encryption
+        properties:
+          SpekeKeyProvider:
+            member: SpekeKeyProvider
+            properties:
+              EncryptionContractConfiguration:
+                member: EncryptionContractConfiguration
+                properties:
+                  PresetSpeke20Audio: PresetSpeke20Audio
+                  PresetSpeke20Video: PresetSpeke20Video
+              RoleArn: RoleArn
+              SystemIds: SystemIds
+              Url: Url
+      MssManifests:
+        member: MssManifests
+        properties:
+          ManifestName: ManifestName
+          StreamSelection:
+            member: StreamSelection
+            properties:
+              MaxVideoBitsPerSecond: MaxVideoBitsPerSecond
+              MinVideoBitsPerSecond: MinVideoBitsPerSecond
+              StreamOrder: StreamOrder
+      SegmentDurationSeconds: SegmentDurationSeconds
+  PackagingGroupId: PackagingGroupId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

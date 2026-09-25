@@ -1,0 +1,12 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SecurityHub::FindingAggregator
+read:
+  model: securityhub/service/2018-10-26/securityhub-2018-10-26.json
+  operation: GetFindingAggregator
+  identifier:
+    FindingAggregatorArn: FindingAggregatorArn
+properties:
+  FindingAggregationRegion: FindingAggregationRegion
+  FindingAggregatorArn: FindingAggregatorArn
+  RegionLinkingMode: RegionLinkingMode
+  Regions: Regions

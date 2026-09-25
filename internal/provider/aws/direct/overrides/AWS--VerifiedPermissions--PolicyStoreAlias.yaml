@@ -1,0 +1,10 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::VerifiedPermissions::PolicyStoreAlias
+read:
+  model: verifiedpermissions/service/2021-12-01/verifiedpermissions-2021-12-01.json
+  operation: GetPolicyStoreAlias
+  identifier:
+    AliasName: aliasName
+properties:
+  AliasName: aliasName
+  PolicyStoreId: policyStoreId

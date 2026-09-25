@@ -1,0 +1,36 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataSync::LocationSMB
+read:
+  model: datasync/service/2018-11-09/datasync-2018-11-09.json
+  operation: DescribeLocationSmb
+  identifier:
+    LocationArn: LocationArn
+properties:
+  AgentArns: AgentArns
+  AuthenticationType: AuthenticationType
+  CmkSecretConfig:
+    member: CmkSecretConfig
+    properties:
+      KmsKeyArn: KmsKeyArn
+      SecretArn: SecretArn
+  CustomSecretConfig:
+    member: CustomSecretConfig
+    properties:
+      SecretAccessRoleArn: SecretAccessRoleArn
+      SecretArn: SecretArn
+  DnsIpAddresses: DnsIpAddresses
+  Domain: Domain
+  KerberosPrincipal: KerberosPrincipal
+  LocationArn: LocationArn
+  LocationUri: LocationUri
+  ManagedSecretConfig:
+    member: ManagedSecretConfig
+    properties:
+      SecretArn: SecretArn
+  MountOptions:
+    member: MountOptions
+    properties:
+      Version: Version
+  User: User
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

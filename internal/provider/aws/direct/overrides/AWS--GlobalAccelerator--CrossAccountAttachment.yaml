@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::GlobalAccelerator::CrossAccountAttachment
+read:
+  model: global-accelerator/service/2018-08-08/global-accelerator-2018-08-08.json
+  operation: DescribeCrossAccountAttachment
+  identifier:
+    AttachmentArn: AttachmentArn
+  response: CrossAccountAttachment
+properties:
+  AttachmentArn: AttachmentArn
+  Name: Name
+  Principals: Principals
+  Resources:
+    member: Resources
+    properties:
+      Cidr: Cidr
+      EndpointId: EndpointId
+      Region: Region
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,162 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Logs::Transformer
+read:
+  model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
+  operation: GetTransformer
+  identifier:
+    LogGroupIdentifier: logGroupIdentifier
+properties:
+  LogGroupIdentifier: logGroupIdentifier
+  TransformerConfig:
+    member: transformerConfig
+    properties:
+      AddKeys:
+        member: addKeys
+        properties:
+          Entries:
+            member: entries
+            properties:
+              Key: key
+              OverwriteIfExists: overwriteIfExists
+              Value: value
+      CopyValue:
+        member: copyValue
+        properties:
+          Entries:
+            member: entries
+            properties:
+              OverwriteIfExists: overwriteIfExists
+              Source: source
+              Target: target
+      Csv:
+        member: csv
+        properties:
+          Columns: columns
+          Delimiter: delimiter
+          QuoteCharacter: quoteCharacter
+          Source: source
+      DateTimeConverter:
+        member: dateTimeConverter
+        properties:
+          Locale: locale
+          MatchPatterns: matchPatterns
+          Source: source
+          SourceTimezone: sourceTimezone
+          Target: target
+          TargetFormat: targetFormat
+          TargetTimezone: targetTimezone
+      DeleteKeys:
+        member: deleteKeys
+        properties:
+          WithKeys: withKeys
+      Grok:
+        member: grok
+        properties:
+          Match: match
+          Source: source
+      ListToMap:
+        member: listToMap
+        properties:
+          Flatten: flatten
+          FlattenedElement: flattenedElement
+          Key: key
+          Source: source
+          Target: target
+          ValueKey: valueKey
+      LowerCaseString:
+        member: lowerCaseString
+        properties:
+          WithKeys: withKeys
+      MoveKeys:
+        member: moveKeys
+        properties:
+          Entries:
+            member: entries
+            properties:
+              OverwriteIfExists: overwriteIfExists
+              Source: source
+              Target: target
+      ParseCloudfront:
+        member: parseCloudfront
+        properties:
+          Source: source
+      ParseJSON:
+        member: parseJSON
+        properties:
+          Destination: destination
+          Source: source
+      ParseKeyValue:
+        member: parseKeyValue
+        properties:
+          Destination: destination
+          FieldDelimiter: fieldDelimiter
+          KeyPrefix: keyPrefix
+          KeyValueDelimiter: keyValueDelimiter
+          NonMatchValue: nonMatchValue
+          OverwriteIfExists: overwriteIfExists
+          Source: source
+      ParsePostgres:
+        member: parsePostgres
+        properties:
+          Source: source
+      ParseRoute53:
+        member: parseRoute53
+        properties:
+          Source: source
+      ParseToOCSF:
+        member: parseToOCSF
+        properties:
+          EventSource: eventSource
+          MappingVersion: mappingVersion
+          OcsfVersion: ocsfVersion
+          Source: source
+      ParseVPC:
+        member: parseVPC
+        properties:
+          Source: source
+      ParseWAF:
+        member: parseWAF
+        properties:
+          Source: source
+      RenameKeys:
+        member: renameKeys
+        properties:
+          Entries:
+            member: entries
+            properties:
+              Key: key
+              OverwriteIfExists: overwriteIfExists
+              RenameTo: renameTo
+      SplitString:
+        member: splitString
+        properties:
+          Entries:
+            member: entries
+            properties:
+              Delimiter: delimiter
+              Source: source
+      SubstituteString:
+        member: substituteString
+        properties:
+          Entries:
+            member: entries
+            properties:
+              From: from
+              Source: source
+              To: to
+      TrimString:
+        member: trimString
+        properties:
+          WithKeys: withKeys
+      TypeConverter:
+        member: typeConverter
+        properties:
+          Entries:
+            member: entries
+            properties:
+              Key: key
+              Type: type
+      UpperCaseString:
+        member: upperCaseString
+        properties:
+          WithKeys: withKeys

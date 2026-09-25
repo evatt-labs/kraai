@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53RecoveryControl::ControlPanel
+read:
+  model: route53-recovery-control-config/service/2020-11-02/route53-recovery-control-config-2020-11-02.json
+  operation: DescribeControlPanel
+  identifier:
+    ControlPanelArn: ControlPanelArn
+  response: ControlPanel
+properties:
+  ClusterArn: ClusterArn
+  ControlPanelArn: ControlPanelArn
+  DefaultControlPanel: DefaultControlPanel
+  Name: Name
+  RoutingControlCount: RoutingControlCount
+  Status: Status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

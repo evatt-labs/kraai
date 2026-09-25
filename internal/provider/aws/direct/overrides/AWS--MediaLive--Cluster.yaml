@@ -1,0 +1,26 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaLive::Cluster
+read:
+  model: medialive/service/2017-10-14/medialive-2017-10-14.json
+  operation: DescribeCluster
+  identifier:
+    Id: ClusterId
+properties:
+  Arn: Arn
+  ChannelIds: ChannelIds
+  ClusterType: ClusterType
+  Id: Id
+  InstanceRoleArn: InstanceRoleArn
+  Name: Name
+  NetworkSettings:
+    member: NetworkSettings
+    properties:
+      DefaultRoute: DefaultRoute
+      InterfaceMappings:
+        member: InterfaceMappings
+        properties:
+          LogicalInterfaceName: LogicalInterfaceName
+          NetworkId: NetworkId
+  State: State
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

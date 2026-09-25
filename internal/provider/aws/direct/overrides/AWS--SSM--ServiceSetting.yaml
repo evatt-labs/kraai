@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SSM::ServiceSetting
+read:
+  model: ssm/service/2014-11-06/ssm-2014-11-06.json
+  operation: GetServiceSetting
+  identifier:
+    Arn: SettingId
+  response: ServiceSetting
+properties:
+  Arn: ARN
+  LastModifiedDate: LastModifiedDate
+  LastModifiedUser: LastModifiedUser
+  SettingId: SettingId
+  SettingValue: SettingValue
+  Status: Status

@@ -1,0 +1,101 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::LicenseManager::LicenseAssetRuleSet
+read:
+  model: license-manager/service/2018-08-01/license-manager-2018-08-01.json
+  operation: GetLicenseAssetRuleset
+  identifier:
+    LicenseAssetRulesetArn: LicenseAssetRulesetArn
+  response: LicenseAssetRuleset
+properties:
+  Description: Description
+  LicenseAssetRulesetArn: LicenseAssetRulesetArn
+  Name: Name
+  Rules:
+    member: Rules
+    properties:
+      RuleStatement:
+        member: RuleStatement
+        properties:
+          InstanceRuleStatement:
+            member: InstanceRuleStatement
+            properties:
+              AndRuleStatement:
+                member: AndRuleStatement
+                properties:
+                  MatchingRuleStatements:
+                    member: MatchingRuleStatements
+                    properties:
+                      Constraint: Constraint
+                      KeyToMatch: KeyToMatch
+                      ValueToMatch: ValueToMatch
+              MatchingRuleStatement:
+                member: MatchingRuleStatement
+                properties:
+                  Constraint: Constraint
+                  KeyToMatch: KeyToMatch
+                  ValueToMatch: ValueToMatch
+              OrRuleStatement:
+                member: OrRuleStatement
+                properties:
+                  MatchingRuleStatements:
+                    member: MatchingRuleStatements
+                    properties:
+                      Constraint: Constraint
+                      KeyToMatch: KeyToMatch
+                      ValueToMatch: ValueToMatch
+          LicenseConfigurationRuleStatement:
+            member: LicenseConfigurationRuleStatement
+            properties:
+              AndRuleStatement:
+                member: AndRuleStatement
+                properties:
+                  MatchingRuleStatements:
+                    member: MatchingRuleStatements
+                    properties:
+                      Constraint: Constraint
+                      KeyToMatch: KeyToMatch
+                      ValueToMatch: ValueToMatch
+              MatchingRuleStatement:
+                member: MatchingRuleStatement
+                properties:
+                  Constraint: Constraint
+                  KeyToMatch: KeyToMatch
+                  ValueToMatch: ValueToMatch
+              OrRuleStatement:
+                member: OrRuleStatement
+                properties:
+                  MatchingRuleStatements:
+                    member: MatchingRuleStatements
+                    properties:
+                      Constraint: Constraint
+                      KeyToMatch: KeyToMatch
+                      ValueToMatch: ValueToMatch
+          LicenseRuleStatement:
+            member: LicenseRuleStatement
+            properties:
+              AndRuleStatement:
+                member: AndRuleStatement
+                properties:
+                  MatchingRuleStatements:
+                    member: MatchingRuleStatements
+                    properties:
+                      Constraint: Constraint
+                      KeyToMatch: KeyToMatch
+                      ValueToMatch: ValueToMatch
+              MatchingRuleStatement:
+                member: MatchingRuleStatement
+                properties:
+                  Constraint: Constraint
+                  KeyToMatch: KeyToMatch
+                  ValueToMatch: ValueToMatch
+              OrRuleStatement:
+                member: OrRuleStatement
+                properties:
+                  MatchingRuleStatements:
+                    member: MatchingRuleStatements
+                    properties:
+                      Constraint: Constraint
+                      KeyToMatch: KeyToMatch
+                      ValueToMatch: ValueToMatch
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

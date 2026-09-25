@@ -1,0 +1,743 @@
+{
+  "shapes": {
+    "com.amazonaws.opensearchserverless#ConfigDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#GetSecurityConfig": {
+      "errors": [
+        {
+          "target": "com.amazonaws.opensearchserverless#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.opensearchserverless#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.opensearchserverless#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.opensearchserverless#GetSecurityConfigRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.opensearchserverless#GetSecurityConfigResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.opensearchserverless#GetSecurityConfigRequest": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.opensearchserverless#SecurityConfigId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#GetSecurityConfigResponse": {
+      "members": {
+        "securityConfigDetail": {
+          "target": "com.amazonaws.opensearchserverless#SecurityConfigDetail",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#IamFederationConfigOptions": {
+      "members": {
+        "groupAttribute": {
+          "target": "com.amazonaws.opensearchserverless#iamFederationGroupAttribute",
+          "traits": {}
+        },
+        "userAttribute": {
+          "target": "com.amazonaws.opensearchserverless#iamFederationUserAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#IamIdentityCenterApplicationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 10
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso::\\d{12}:application/(sso)?ins-[a-zA-Z0-9-.]{16}/apl-[a-zA-Z0-9]{16}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#IamIdentityCenterConfigOptions": {
+      "members": {
+        "applicationArn": {
+          "target": "com.amazonaws.opensearchserverless#IamIdentityCenterApplicationArn",
+          "traits": {}
+        },
+        "applicationDescription": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "applicationName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "groupAttribute": {
+          "target": "com.amazonaws.opensearchserverless#IamIdentityCenterGroupAttribute",
+          "traits": {}
+        },
+        "instanceArn": {
+          "target": "com.amazonaws.opensearchserverless#IamIdentityCenterInstanceArn",
+          "traits": {}
+        },
+        "userAttribute": {
+          "target": "com.amazonaws.opensearchserverless#IamIdentityCenterUserAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#IamIdentityCenterGroupAttribute": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "Group ID",
+            "name": "GroupId",
+            "value": "GroupId"
+          },
+          {
+            "documentation": "Group Name",
+            "name": "GroupName",
+            "value": "GroupName"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#IamIdentityCenterInstanceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 10
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#IamIdentityCenterUserAttribute": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "User ID",
+            "name": "UserId",
+            "value": "UserId"
+          },
+          {
+            "documentation": "User Name",
+            "name": "UserName",
+            "value": "UserName"
+          },
+          {
+            "documentation": "Email",
+            "name": "Email",
+            "value": "Email"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#OpenSearchServerless": {
+      "operations": [
+        {
+          "target": "com.amazonaws.opensearchserverless#GetSecurityConfig"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "aoss",
+          "sdkId": "OpenSearchServerless"
+        },
+        "aws.auth#sigv4": {
+          "name": "aoss"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#cors": {},
+        "smithy.api#title": "OpenSearch Service Serverless",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://aoss-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://aoss-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://aoss.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://aoss.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2021-11-01"
+    },
+    "com.amazonaws.opensearchserverless#PolicyVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 20
+        },
+        "smithy.api#pattern": "^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#SamlConfigOptions": {
+      "members": {
+        "groupAttribute": {
+          "target": "com.amazonaws.opensearchserverless#samlGroupAttribute",
+          "traits": {}
+        },
+        "metadata": {
+          "target": "com.amazonaws.opensearchserverless#samlMetadata",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "openSearchServerlessEntityId": {
+          "target": "com.amazonaws.opensearchserverless#openSearchServerlessEntityId",
+          "traits": {}
+        },
+        "sessionTimeout": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#range": {
+              "max": 720,
+              "min": 5
+            }
+          }
+        },
+        "userAttribute": {
+          "target": "com.amazonaws.opensearchserverless#samlUserAttribute",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#SecurityConfigDetail": {
+      "members": {
+        "configVersion": {
+          "target": "com.amazonaws.opensearchserverless#PolicyVersion",
+          "traits": {}
+        },
+        "createdDate": {
+          "target": "smithy.api#Long",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.opensearchserverless#ConfigDescription",
+          "traits": {}
+        },
+        "iamFederationOptions": {
+          "target": "com.amazonaws.opensearchserverless#IamFederationConfigOptions",
+          "traits": {}
+        },
+        "iamIdentityCenterOptions": {
+          "target": "com.amazonaws.opensearchserverless#IamIdentityCenterConfigOptions",
+          "traits": {}
+        },
+        "id": {
+          "target": "com.amazonaws.opensearchserverless#SecurityConfigId",
+          "traits": {}
+        },
+        "lastModifiedDate": {
+          "target": "smithy.api#Long",
+          "traits": {}
+        },
+        "samlOptions": {
+          "target": "com.amazonaws.opensearchserverless#SamlConfigOptions",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.opensearchserverless#SecurityConfigType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#SecurityConfigId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#SecurityConfigType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "saml provider",
+            "name": "saml",
+            "value": "saml"
+          },
+          {
+            "documentation": "iam identity center",
+            "name": "iamidentitycenter",
+            "value": "iamidentitycenter"
+          },
+          {
+            "documentation": "iam federation",
+            "name": "iamfederation",
+            "value": "iamfederation"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#ValidationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#iamFederationGroupAttribute": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z][A-Za-z0-9_.:/=+\\-@]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#iamFederationUserAttribute": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z][A-Za-z0-9_.:/=+\\-@]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#openSearchServerlessEntityId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^aws:opensearch:[0-9]{12}:*"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#samlGroupAttribute": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "[\\w+=,.@-]+"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#samlMetadata": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 51200,
+          "min": 1
+        },
+        "smithy.api#pattern": "[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]+"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#samlUserAttribute": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "[\\w+=,.@-]+"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

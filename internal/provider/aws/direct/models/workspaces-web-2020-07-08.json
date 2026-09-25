@@ -1,0 +1,1783 @@
+{
+  "shapes": {
+    "com.amazonaws.workspacesweb#ARN": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[\\w+=\\/,.@-]+:[a-zA-Z0-9\\-]+:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:[a-zA-Z]+(\\/[a-fA-F0-9\\-]{36})+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#AWSErmineControlPlaneService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.workspacesweb#GetBrowserSettings"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#GetDataProtectionSettings"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#GetIdentityProvider"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#GetIpAccessSettings"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#GetNetworkSettings"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#GetUserAccessLoggingSettings"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "workspaces-web",
+          "cloudFormationName": "WorkSpacesWeb",
+          "cloudTrailEventSource": "workspaces-web.amazonaws.com",
+          "endpointPrefix": "workspaces-web",
+          "sdkId": "WorkSpaces Web"
+        },
+        "aws.api#tagEnabled": {},
+        "aws.auth#sigv4": {
+          "name": "workspaces-web"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon WorkSpaces Web",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://workspaces-web-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://workspaces-web-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://workspaces-web.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://workspaces-web.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-07-08"
+    },
+    "com.amazonaws.workspacesweb#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#ArnList": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#ARN"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#BlockedCategories": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#Category"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#uniqueItems": {}
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#BrowserPolicy": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 131072,
+          "min": 2
+        },
+        "smithy.api#pattern": "^\\{[\\S\\s]*\\}\\s*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#BrowserSettings": {
+      "members": {
+        "additionalEncryptionContext": {
+          "target": "com.amazonaws.workspacesweb#EncryptionContextMap",
+          "traits": {}
+        },
+        "associatedPortalArns": {
+          "target": "com.amazonaws.workspacesweb#ArnList",
+          "traits": {}
+        },
+        "browserPolicy": {
+          "target": "com.amazonaws.workspacesweb#BrowserPolicy",
+          "traits": {}
+        },
+        "browserSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "browserSettingsArn"
+          }
+        },
+        "customerManagedKey": {
+          "target": "com.amazonaws.workspacesweb#keyArn",
+          "traits": {}
+        },
+        "webContentFilteringPolicy": {
+          "target": "com.amazonaws.workspacesweb#WebContentFilteringPolicy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#BuiltInPatternId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[_\\-\\d\\w]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#Category": {
+      "members": {
+        "CHAT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Chat"
+          }
+        },
+        "CRIMINAL_ACTIVITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CriminalActivity"
+          }
+        },
+        "CULTS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Cults"
+          }
+        },
+        "DOWNLOAD_SITES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DownloadSites"
+          }
+        },
+        "GAMBLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gambling"
+          }
+        },
+        "GAMES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Games"
+          }
+        },
+        "GENERATIVE_AI": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GenerativeAI"
+          }
+        },
+        "HACKING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Hacking"
+          }
+        },
+        "HATE_AND_INTOLERANCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HateAndIntolerance"
+          }
+        },
+        "ILLEGAL_DRUG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IllegalDrug"
+          }
+        },
+        "ILLEGAL_SOFTWARE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IllegalSoftware"
+          }
+        },
+        "IMAGE_SHARING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ImageSharing"
+          }
+        },
+        "INSTANT_MESSAGING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InstantMessaging"
+          }
+        },
+        "NUDITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Nudity"
+          }
+        },
+        "PARKED_DOMAINS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ParkedDomains"
+          }
+        },
+        "PEER_TO_PEER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PeerToPeer"
+          }
+        },
+        "PORNOGRAPHY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Pornography"
+          }
+        },
+        "PROFESSIONAL_NETWORK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ProfessionalNetwork"
+          }
+        },
+        "SCHOOL_CHEATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SchoolCheating"
+          }
+        },
+        "SELF_HARM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SelfHarm"
+          }
+        },
+        "SEX_EDUCATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SexEducation"
+          }
+        },
+        "SOCIAL_NETWORKING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SocialNetworking"
+          }
+        },
+        "STREAMING_MEDIA_AND_DOWNLOADS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "StreamingMediaAndDownloads"
+          }
+        },
+        "TASTELESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Tasteless"
+          }
+        },
+        "VIOLENCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Violence"
+          }
+        },
+        "WEAPONS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Weapons"
+          }
+        },
+        "WEB_BASED_EMAIL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WebBasedEmail"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.workspacesweb#ConfidenceLevel": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.workspacesweb#CustomPattern": {
+      "members": {
+        "keywordRegex": {
+          "target": "com.amazonaws.workspacesweb#Regex",
+          "traits": {}
+        },
+        "patternDescription": {
+          "target": "com.amazonaws.workspacesweb#DescriptionSafe",
+          "traits": {}
+        },
+        "patternName": {
+          "target": "com.amazonaws.workspacesweb#PatternName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "patternRegex": {
+          "target": "com.amazonaws.workspacesweb#Regex",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#DataProtectionSettings": {
+      "members": {
+        "additionalEncryptionContext": {
+          "target": "com.amazonaws.workspacesweb#EncryptionContextMap",
+          "traits": {}
+        },
+        "associatedPortalArns": {
+          "target": "com.amazonaws.workspacesweb#ArnList",
+          "traits": {}
+        },
+        "creationDate": {
+          "target": "com.amazonaws.workspacesweb#Timestamp",
+          "traits": {}
+        },
+        "customerManagedKey": {
+          "target": "com.amazonaws.workspacesweb#keyArn",
+          "traits": {}
+        },
+        "dataProtectionSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "dataProtectionSettingsArn"
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.workspacesweb#DescriptionSafe",
+          "traits": {}
+        },
+        "displayName": {
+          "target": "com.amazonaws.workspacesweb#DisplayNameSafe",
+          "traits": {}
+        },
+        "inlineRedactionConfiguration": {
+          "target": "com.amazonaws.workspacesweb#InlineRedactionConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#DescriptionSafe": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[ _\\-\\d\\w]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#DisplayName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#DisplayNameSafe": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[ _\\-\\d\\w]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#EncryptionContextMap": {
+      "key": {
+        "target": "com.amazonaws.workspacesweb#StringType"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.workspacesweb#StringType"
+      }
+    },
+    "com.amazonaws.workspacesweb#ExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#FieldName": {
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#GetBrowserSettings": {
+      "errors": [
+        {
+          "target": "com.amazonaws.workspacesweb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.workspacesweb#GetBrowserSettingsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.workspacesweb#GetBrowserSettingsResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/browserSettings/{browserSettingsArn+}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.workspacesweb#GetBrowserSettingsRequest": {
+      "members": {
+        "browserSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetBrowserSettingsResponse": {
+      "members": {
+        "browserSettings": {
+          "target": "com.amazonaws.workspacesweb#BrowserSettings",
+          "traits": {
+            "smithy.api#nestedProperties": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetDataProtectionSettings": {
+      "errors": [
+        {
+          "target": "com.amazonaws.workspacesweb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.workspacesweb#GetDataProtectionSettingsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.workspacesweb#GetDataProtectionSettingsResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/dataProtectionSettings/{dataProtectionSettingsArn+}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.workspacesweb#GetDataProtectionSettingsRequest": {
+      "members": {
+        "dataProtectionSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetDataProtectionSettingsResponse": {
+      "members": {
+        "dataProtectionSettings": {
+          "target": "com.amazonaws.workspacesweb#DataProtectionSettings",
+          "traits": {
+            "smithy.api#nestedProperties": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetIdentityProvider": {
+      "errors": [
+        {
+          "target": "com.amazonaws.workspacesweb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.workspacesweb#GetIdentityProviderRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.workspacesweb#GetIdentityProviderResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/identityProviders/{identityProviderArn+}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.workspacesweb#GetIdentityProviderRequest": {
+      "members": {
+        "identityProviderArn": {
+          "target": "com.amazonaws.workspacesweb#SubresourceARN",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetIdentityProviderResponse": {
+      "members": {
+        "identityProvider": {
+          "target": "com.amazonaws.workspacesweb#IdentityProvider",
+          "traits": {
+            "smithy.api#nestedProperties": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetIpAccessSettings": {
+      "errors": [
+        {
+          "target": "com.amazonaws.workspacesweb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.workspacesweb#GetIpAccessSettingsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.workspacesweb#GetIpAccessSettingsResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/ipAccessSettings/{ipAccessSettingsArn+}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.workspacesweb#GetIpAccessSettingsRequest": {
+      "members": {
+        "ipAccessSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetIpAccessSettingsResponse": {
+      "members": {
+        "ipAccessSettings": {
+          "target": "com.amazonaws.workspacesweb#IpAccessSettings",
+          "traits": {
+            "smithy.api#nestedProperties": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetNetworkSettings": {
+      "errors": [
+        {
+          "target": "com.amazonaws.workspacesweb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.workspacesweb#GetNetworkSettingsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.workspacesweb#GetNetworkSettingsResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/networkSettings/{networkSettingsArn+}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.workspacesweb#GetNetworkSettingsRequest": {
+      "members": {
+        "networkSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetNetworkSettingsResponse": {
+      "members": {
+        "networkSettings": {
+          "target": "com.amazonaws.workspacesweb#NetworkSettings",
+          "traits": {
+            "smithy.api#nestedProperties": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetUserAccessLoggingSettings": {
+      "errors": [
+        {
+          "target": "com.amazonaws.workspacesweb#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.workspacesweb#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.workspacesweb#GetUserAccessLoggingSettingsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.workspacesweb#GetUserAccessLoggingSettingsResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/userAccessLoggingSettings/{userAccessLoggingSettingsArn+}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.workspacesweb#GetUserAccessLoggingSettingsRequest": {
+      "members": {
+        "userAccessLoggingSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GetUserAccessLoggingSettingsResponse": {
+      "members": {
+        "userAccessLoggingSettings": {
+          "target": "com.amazonaws.workspacesweb#UserAccessLoggingSettings",
+          "traits": {
+            "smithy.api#nestedProperties": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#GlobalInlineRedactionUrls": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#InlineRedactionUrl"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#IdentityProvider": {
+      "members": {
+        "identityProviderArn": {
+          "target": "com.amazonaws.workspacesweb#SubresourceARN",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "identityProviderArn"
+          }
+        },
+        "identityProviderDetails": {
+          "target": "com.amazonaws.workspacesweb#IdentityProviderDetails",
+          "traits": {}
+        },
+        "identityProviderName": {
+          "target": "com.amazonaws.workspacesweb#IdentityProviderName",
+          "traits": {}
+        },
+        "identityProviderType": {
+          "target": "com.amazonaws.workspacesweb#IdentityProviderType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#IdentityProviderDetails": {
+      "key": {
+        "target": "com.amazonaws.workspacesweb#StringType"
+      },
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.workspacesweb#StringType"
+      }
+    },
+    "com.amazonaws.workspacesweb#IdentityProviderName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^_][\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}][^_]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#IdentityProviderType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "SAML",
+            "value": "SAML"
+          },
+          {
+            "name": "Facebook",
+            "value": "Facebook"
+          },
+          {
+            "name": "Google",
+            "value": "Google"
+          },
+          {
+            "name": "LoginWithAmazon",
+            "value": "LoginWithAmazon"
+          },
+          {
+            "name": "SignInWithApple",
+            "value": "SignInWithApple"
+          },
+          {
+            "name": "OIDC",
+            "value": "OIDC"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#InlineRedactionConfiguration": {
+      "members": {
+        "globalConfidenceLevel": {
+          "target": "com.amazonaws.workspacesweb#ConfidenceLevel",
+          "traits": {}
+        },
+        "globalEnforcedUrls": {
+          "target": "com.amazonaws.workspacesweb#GlobalInlineRedactionUrls",
+          "traits": {}
+        },
+        "globalExemptUrls": {
+          "target": "com.amazonaws.workspacesweb#GlobalInlineRedactionUrls",
+          "traits": {}
+        },
+        "inlineRedactionPatterns": {
+          "target": "com.amazonaws.workspacesweb#InlineRedactionPatterns",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#InlineRedactionPattern": {
+      "members": {
+        "builtInPatternId": {
+          "target": "com.amazonaws.workspacesweb#BuiltInPatternId",
+          "traits": {}
+        },
+        "confidenceLevel": {
+          "target": "com.amazonaws.workspacesweb#ConfidenceLevel",
+          "traits": {}
+        },
+        "customPattern": {
+          "target": "com.amazonaws.workspacesweb#CustomPattern",
+          "traits": {}
+        },
+        "enforcedUrls": {
+          "target": "com.amazonaws.workspacesweb#InlineRedactionUrls",
+          "traits": {}
+        },
+        "exemptUrls": {
+          "target": "com.amazonaws.workspacesweb#InlineRedactionUrls",
+          "traits": {}
+        },
+        "redactionPlaceHolder": {
+          "target": "com.amazonaws.workspacesweb#RedactionPlaceHolder",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#InlineRedactionPatterns": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#InlineRedactionPattern"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 150,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#InlineRedactionUrl": {
+      "traits": {
+        "smithy.api#pattern": "^((([a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(\\*|[\\w%._\\-\\+~#=@]+)?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?)|(\\*|[\\w%._\\-\\+~#=@]+\\.[\\w%._\\-\\+~#=@]+)(?::(\\d{1,5}))?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?|(([a-zA-Z][a-zA-Z0-9+.-]*):(\\/\\/)?\\*))$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#InlineRedactionUrls": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#InlineRedactionUrl"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage"
+        },
+        "retryAfterSeconds": {
+          "target": "com.amazonaws.workspacesweb#RetryAfterSeconds",
+          "traits": {
+            "smithy.api#default": 0,
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#IpAccessSettings": {
+      "members": {
+        "additionalEncryptionContext": {
+          "target": "com.amazonaws.workspacesweb#EncryptionContextMap",
+          "traits": {}
+        },
+        "associatedPortalArns": {
+          "target": "com.amazonaws.workspacesweb#ArnList",
+          "traits": {}
+        },
+        "creationDate": {
+          "target": "com.amazonaws.workspacesweb#Timestamp",
+          "traits": {}
+        },
+        "customerManagedKey": {
+          "target": "com.amazonaws.workspacesweb#keyArn",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.workspacesweb#Description",
+          "traits": {}
+        },
+        "displayName": {
+          "target": "com.amazonaws.workspacesweb#DisplayName",
+          "traits": {}
+        },
+        "ipAccessSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "ipAccessSettingsArn"
+          }
+        },
+        "ipRules": {
+          "target": "com.amazonaws.workspacesweb#IpRuleList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#IpRange": {
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#IpRule": {
+      "members": {
+        "description": {
+          "target": "com.amazonaws.workspacesweb#Description",
+          "traits": {}
+        },
+        "ipRange": {
+          "target": "com.amazonaws.workspacesweb#IpRange",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#IpRuleList": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#IpRule"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#KinesisStreamArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[\\w+=/,.@-]+:kinesis:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:stream/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#NetworkSettings": {
+      "members": {
+        "associatedPortalArns": {
+          "target": "com.amazonaws.workspacesweb#ArnList",
+          "traits": {}
+        },
+        "networkSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "networkSettingsArn"
+          }
+        },
+        "securityGroupIds": {
+          "target": "com.amazonaws.workspacesweb#SecurityGroupIdList",
+          "traits": {}
+        },
+        "subnetIds": {
+          "target": "com.amazonaws.workspacesweb#SubnetIdList",
+          "traits": {}
+        },
+        "vpcId": {
+          "target": "com.amazonaws.workspacesweb#VpcId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#PatternName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[_\\-\\d\\w]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#QuotaCode": {
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#RedactionPlaceHolder": {
+      "members": {
+        "redactionPlaceHolderText": {
+          "target": "com.amazonaws.workspacesweb#RedactionPlaceHolderText",
+          "traits": {}
+        },
+        "redactionPlaceHolderType": {
+          "target": "com.amazonaws.workspacesweb#RedactionPlaceHolderType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#RedactionPlaceHolderText": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[*_\\-\\d\\w]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#RedactionPlaceHolderType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CUSTOM_TEXT",
+            "value": "CustomText"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#Regex": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 300,
+          "min": 0
+        },
+        "smithy.api#pattern": "^\\/((?:[^\\n])+)\\/([gimsuyvd]{0,8})$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#ResourceId": {
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage"
+        },
+        "resourceId": {
+          "target": "com.amazonaws.workspacesweb#ResourceId",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.workspacesweb#ResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#ResourceType": {
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#RetryAfterSeconds": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.workspacesweb#SecurityGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w+\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#SecurityGroupIdList": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#SecurityGroupId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#ServiceCode": {
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#StringType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 131072,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\s\\S]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#SubnetId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 1
+        },
+        "smithy.api#pattern": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#SubnetIdList": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#SubnetId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 2
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#SubresourceARN": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[\\w+=\\/,.@-]+:[a-zA-Z0-9\\-]+:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:[a-zA-Z]+(\\/[a-fA-F0-9\\-]{36}){2,}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage"
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.workspacesweb#QuotaCode",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "com.amazonaws.workspacesweb#RetryAfterSeconds",
+          "traits": {
+            "smithy.api#default": 0,
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.workspacesweb#ServiceCode",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.workspacesweb#UrlPattern": {
+      "traits": {
+        "smithy.api#pattern": "^((([a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(\\*|[\\w%._\\-\\+~#=@]+)?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?)|(\\*|[\\w%._\\-\\+~#=@]+\\.[\\w%._\\-\\+~#=@]+)(?::(\\d{1,5}))?(\\/[^@\\s]*)?(?:\\?([^*\\s]+(?:\\*?)))?|(([a-zA-Z][a-zA-Z0-9+.-]*):(\\/\\/)?\\*))$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#UrlPatternList": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#UrlPattern"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#UserAccessLoggingSettings": {
+      "members": {
+        "associatedPortalArns": {
+          "target": "com.amazonaws.workspacesweb#ArnList",
+          "traits": {}
+        },
+        "kinesisStreamArn": {
+          "target": "com.amazonaws.workspacesweb#KinesisStreamArn",
+          "traits": {}
+        },
+        "userAccessLoggingSettingsArn": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "userAccessLoggingSettingsArn"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.workspacesweb#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage"
+        },
+        "reason": {
+          "target": "com.amazonaws.workspacesweb#ValidationExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.workspacesweb#FieldName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.workspacesweb#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesweb#ValidationExceptionReason": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "UNKNOWN_OPERATION",
+            "value": "unknownOperation"
+          },
+          {
+            "name": "CANNOT_PARSE",
+            "value": "cannotParse"
+          },
+          {
+            "name": "FIELD_VALIDATION_FAILED",
+            "value": "fieldValidationFailed"
+          },
+          {
+            "name": "OTHER",
+            "value": "other"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#VpcId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^vpc-[0-9a-z]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.workspacesweb#WebContentFilteringPolicy": {
+      "members": {
+        "allowedUrls": {
+          "target": "com.amazonaws.workspacesweb#UrlPatternList",
+          "traits": {}
+        },
+        "blockedCategories": {
+          "target": "com.amazonaws.workspacesweb#BlockedCategories",
+          "traits": {}
+        },
+        "blockedUrls": {
+          "target": "com.amazonaws.workspacesweb#UrlPatternList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesweb#keyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[\\w+=\\/,.@-]+:kms:[a-zA-Z0-9\\-]*:[a-zA-Z0-9]{1,12}:key\\/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

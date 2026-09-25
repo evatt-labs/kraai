@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaConnect::Gateway
+read:
+  model: mediaconnect/service/2018-11-14/mediaconnect-2018-11-14.json
+  operation: DescribeGateway
+  identifier:
+    GatewayArn: GatewayArn
+  response: Gateway
+properties:
+  EgressCidrBlocks: EgressCidrBlocks
+  GatewayArn: GatewayArn
+  GatewayState: GatewayState
+  Name: Name
+  Networks:
+    member: Networks
+    properties:
+      CidrBlock: CidrBlock
+      Name: Name

@@ -1,0 +1,28 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::NetworkFirewall::ContainerAssociation
+read:
+  model: network-firewall/service/2020-11-12/network-firewall-2020-11-12.json
+  operation: DescribeContainerAssociation
+  identifier:
+    ContainerAssociationArn: ContainerAssociationArn
+properties:
+  ContainerAssociationArn: ContainerAssociationArn
+  ContainerAssociationName: ContainerAssociationName
+  ContainerMonitoringConfigurations:
+    member: ContainerMonitoringConfigurations
+    properties:
+      AttributeFilters:
+        member: AttributeFilters
+        properties:
+          Key: Key
+          Value: Value
+      ClusterArn: ClusterArn
+  Description: Description
+  ResolvedCidrCount: ResolvedCidrCount
+  Status: Status
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  Type: Type

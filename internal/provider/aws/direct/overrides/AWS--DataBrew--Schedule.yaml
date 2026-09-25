@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataBrew::Schedule
+read:
+  model: databrew/service/2017-07-25/databrew-2017-07-25.json
+  operation: DescribeSchedule
+  identifier:
+    Name: Name
+properties:
+  CronExpression: CronExpression
+  JobNames: JobNames
+  Name: Name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

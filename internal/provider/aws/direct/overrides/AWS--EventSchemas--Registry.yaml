@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::EventSchemas::Registry
+read:
+  model: schemas/service/2019-12-02/schemas-2019-12-02.json
+  operation: DescribeRegistry
+  identifier:
+    RegistryArn: RegistryName
+properties:
+  Description: Description
+  RegistryArn: RegistryArn
+  RegistryName: RegistryName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

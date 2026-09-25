@@ -1,0 +1,61 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ImageBuilder::LifecyclePolicy
+read:
+  model: imagebuilder/service/2019-12-02/imagebuilder-2019-12-02.json
+  operation: GetLifecyclePolicy
+  identifier:
+    Arn: lifecyclePolicyArn
+  response: lifecyclePolicy
+properties:
+  Arn: arn
+  Description: description
+  ExecutionRole: executionRole
+  Name: name
+  PolicyDetails:
+    member: policyDetails
+    properties:
+      Action:
+        member: action
+        properties:
+          IncludeResources:
+            member: includeResources
+            properties:
+              Amis: amis
+              Containers: containers
+              Snapshots: snapshots
+          Type: type
+      ExclusionRules:
+        member: exclusionRules
+        properties:
+          Amis:
+            member: amis
+            properties:
+              IsPublic: isPublic
+              LastLaunched:
+                member: lastLaunched
+                properties:
+                  Unit: unit
+                  Value: value
+              Regions: regions
+              SharedAccounts: sharedAccounts
+              TagMap: tagMap
+          TagMap: tagMap
+      Filter:
+        member: filter
+        properties:
+          RetainAtLeast: retainAtLeast
+          Type: type
+          Unit: unit
+          Value: value
+  ResourceSelection:
+    member: resourceSelection
+    properties:
+      Recipes:
+        member: recipes
+        properties:
+          Name: name
+          SemanticVersion: semanticVersion
+      TagMap: tagMap
+  ResourceType: resourceType
+  Status: status
+  Tags: tags

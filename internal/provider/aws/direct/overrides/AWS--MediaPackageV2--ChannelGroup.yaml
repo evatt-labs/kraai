@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaPackageV2::ChannelGroup
+read:
+  model: mediapackagev2/service/2022-12-25/mediapackagev2-2022-12-25.json
+  operation: GetChannelGroup
+  identifier:
+    Arn: ChannelGroupName
+properties:
+  Arn: Arn
+  ChannelGroupName: ChannelGroupName
+  CreatedAt: CreatedAt
+  Description: Description
+  EgressDomain: EgressDomain
+  ModifiedAt: ModifiedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

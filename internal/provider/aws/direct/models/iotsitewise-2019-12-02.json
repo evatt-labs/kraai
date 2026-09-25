@@ -1,0 +1,1664 @@
+{
+  "shapes": {
+    "com.amazonaws.iotsitewise#ARN": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-cn|-us-gov)?:[a-zA-Z0-9-:\\/_\\.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#AWSIoTSiteWise": {
+      "operations": [
+        {
+          "target": "com.amazonaws.iotsitewise#DescribeAccessPolicy"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#DescribeComputationModel"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#DescribeDashboard"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#DescribePortal"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "iotsitewise",
+          "cloudFormationName": "IoTSiteWise",
+          "cloudTrailEventSource": "iotsitewise.amazonaws.com",
+          "endpointPrefix": "iotsitewise",
+          "sdkId": "IoTSiteWise"
+        },
+        "aws.auth#sigv4": {
+          "name": "iotsitewise"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS IoT SiteWise",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://iotsitewise-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://iotsitewise-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://iotsitewise.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://iotsitewise.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2019-12-02"
+    },
+    "com.amazonaws.iotsitewise#ActionDefinition": {
+      "members": {
+        "actionDefinitionId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "actionName": {
+          "target": "com.amazonaws.iotsitewise#Name",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "actionType": {
+          "target": "com.amazonaws.iotsitewise#Name",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ActionDefinitions": {
+      "member": {
+        "target": "com.amazonaws.iotsitewise#ActionDefinition"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotsitewise#Alarms": {
+      "members": {
+        "alarmRoleArn": {
+          "target": "com.amazonaws.iotsitewise#IamArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "notificationLambdaArn": {
+          "target": "com.amazonaws.iotsitewise#ARN",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#AssetModelPropertyBindingValue": {
+      "members": {
+        "assetModelId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "propertyId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#AssetPropertyBindingValue": {
+      "members": {
+        "assetId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "propertyId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#AuthMode": {
+      "members": {
+        "IAM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IAM"
+          }
+        },
+        "SSO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SSO"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#BindingValueList": {
+      "member": {
+        "target": "com.amazonaws.iotsitewise#ComputationModelDataBindingValue"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotsitewise#ComputationModelAnomalyDetectionConfiguration": {
+      "members": {
+        "inputProperties": {
+          "target": "com.amazonaws.iotsitewise#InputProperties",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resultProperty": {
+          "target": "com.amazonaws.iotsitewise#ResultProperty",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ComputationModelConfiguration": {
+      "members": {
+        "anomalyDetection": {
+          "target": "com.amazonaws.iotsitewise#ComputationModelAnomalyDetectionConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ComputationModelDataBinding": {
+      "key": {
+        "target": "com.amazonaws.iotsitewise#ComputationModelDataBindingVariable"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.iotsitewise#ComputationModelDataBindingValue"
+      }
+    },
+    "com.amazonaws.iotsitewise#ComputationModelDataBindingValue": {
+      "members": {
+        "assetModelProperty": {
+          "target": "com.amazonaws.iotsitewise#AssetModelPropertyBindingValue",
+          "traits": {}
+        },
+        "assetProperty": {
+          "target": "com.amazonaws.iotsitewise#AssetPropertyBindingValue",
+          "traits": {}
+        },
+        "list": {
+          "target": "com.amazonaws.iotsitewise#BindingValueList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ComputationModelDataBindingVariable": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ComputationModelState": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#ComputationModelStatus": {
+      "members": {
+        "error": {
+          "target": "com.amazonaws.iotsitewise#ErrorDetails"
+        },
+        "state": {
+          "target": "com.amazonaws.iotsitewise#ComputationModelState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ComputationModelVersionFilter": {
+      "traits": {
+        "smithy.api#pattern": "^(LATEST|ACTIVE|[1-9]{1}\\d{0,9})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#DashboardDefinition": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 204800,
+          "min": 0
+        },
+        "smithy.api#pattern": "^.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#DescribeAccessPolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotsitewise#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotsitewise#DescribeAccessPolicyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotsitewise#DescribeAccessPolicyResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "monitor."
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/access-policies/{accessPolicyId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotsitewise#DescribeAccessPolicyRequest": {
+      "members": {
+        "accessPolicyId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DescribeAccessPolicyResponse": {
+      "members": {
+        "accessPolicyArn": {
+          "target": "com.amazonaws.iotsitewise#ARN",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "accessPolicyCreationDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "accessPolicyId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "accessPolicyIdentity": {
+          "target": "com.amazonaws.iotsitewise#Identity",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "accessPolicyLastUpdateDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "accessPolicyPermission": {
+          "target": "com.amazonaws.iotsitewise#Permission",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "accessPolicyResource": {
+          "target": "com.amazonaws.iotsitewise#Resource",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DescribeComputationModel": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotsitewise#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotsitewise#DescribeComputationModelRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotsitewise#DescribeComputationModelResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "api."
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/computation-models/{computationModelId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotsitewise#DescribeComputationModelRequest": {
+      "members": {
+        "computationModelId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelVersion": {
+          "target": "com.amazonaws.iotsitewise#ComputationModelVersionFilter",
+          "traits": {
+            "smithy.api#httpQuery": "computationModelVersion"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DescribeComputationModelResponse": {
+      "members": {
+        "actionDefinitions": {
+          "target": "com.amazonaws.iotsitewise#ActionDefinitions",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelArn": {
+          "target": "com.amazonaws.iotsitewise#ARN",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelConfiguration": {
+          "target": "com.amazonaws.iotsitewise#ComputationModelConfiguration",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelCreationDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelDataBinding": {
+          "target": "com.amazonaws.iotsitewise#ComputationModelDataBinding",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelDescription": {
+          "target": "com.amazonaws.iotsitewise#RestrictedDescription",
+          "traits": {}
+        },
+        "computationModelId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelLastUpdateDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelName": {
+          "target": "com.amazonaws.iotsitewise#RestrictedName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelStatus": {
+          "target": "com.amazonaws.iotsitewise#ComputationModelStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "computationModelVersion": {
+          "target": "com.amazonaws.iotsitewise#Version",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DescribeDashboard": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotsitewise#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotsitewise#DescribeDashboardRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotsitewise#DescribeDashboardResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "monitor."
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/dashboards/{dashboardId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotsitewise#DescribeDashboardRequest": {
+      "members": {
+        "dashboardId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DescribeDashboardResponse": {
+      "members": {
+        "dashboardArn": {
+          "target": "com.amazonaws.iotsitewise#ARN",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "dashboardCreationDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "dashboardDefinition": {
+          "target": "com.amazonaws.iotsitewise#DashboardDefinition",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "dashboardDescription": {
+          "target": "com.amazonaws.iotsitewise#Description",
+          "traits": {}
+        },
+        "dashboardId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "dashboardLastUpdateDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "dashboardName": {
+          "target": "com.amazonaws.iotsitewise#Name",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "projectId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DescribePortal": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotsitewise#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotsitewise#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotsitewise#DescribePortalRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotsitewise#DescribePortalResponse"
+      },
+      "traits": {
+        "smithy.api#endpoint": {
+          "hostPrefix": "monitor."
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/portals/{portalId}"
+        },
+        "smithy.waiters#waitable": {
+          "PortalActive": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ACTIVE",
+                    "path": "portalStatus.state"
+                  }
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 3
+          },
+          "PortalNotExists": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "errorType": "ResourceNotFoundException"
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 3
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotsitewise#DescribePortalRequest": {
+      "members": {
+        "portalId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DescribePortalResponse": {
+      "members": {
+        "alarms": {
+          "target": "com.amazonaws.iotsitewise#Alarms",
+          "traits": {}
+        },
+        "notificationSenderEmail": {
+          "target": "com.amazonaws.iotsitewise#Email",
+          "traits": {}
+        },
+        "portalArn": {
+          "target": "com.amazonaws.iotsitewise#ARN",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalAuthMode": {
+          "target": "com.amazonaws.iotsitewise#AuthMode",
+          "traits": {}
+        },
+        "portalClientId": {
+          "target": "com.amazonaws.iotsitewise#PortalClientId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalContactEmail": {
+          "target": "com.amazonaws.iotsitewise#Email",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalCreationDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalDescription": {
+          "target": "com.amazonaws.iotsitewise#Description",
+          "traits": {}
+        },
+        "portalId": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalLastUpdateDate": {
+          "target": "com.amazonaws.iotsitewise#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalLogoImageLocation": {
+          "target": "com.amazonaws.iotsitewise#ImageLocation",
+          "traits": {}
+        },
+        "portalName": {
+          "target": "com.amazonaws.iotsitewise#Name",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalStartUrl": {
+          "target": "com.amazonaws.iotsitewise#Url",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalStatus": {
+          "target": "com.amazonaws.iotsitewise#PortalStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "portalType": {
+          "target": "com.amazonaws.iotsitewise#PortalType",
+          "traits": {}
+        },
+        "portalTypeConfiguration": {
+          "target": "com.amazonaws.iotsitewise#PortalTypeConfiguration",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.iotsitewise#IamArn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#DetailedError": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.iotsitewise#DetailedErrorCode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "message": {
+          "target": "com.amazonaws.iotsitewise#DetailedErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#DetailedErrorCode": {
+      "members": {
+        "INCOMPATIBLE_COMPUTE_LOCATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INCOMPATIBLE_COMPUTE_LOCATION"
+          }
+        },
+        "INCOMPATIBLE_FORWARDING_CONFIGURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INCOMPATIBLE_FORWARDING_CONFIGURATION"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#DetailedErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#DetailedErrors": {
+      "member": {
+        "target": "com.amazonaws.iotsitewise#DetailedError"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotsitewise#Email": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_\\-\\.\\+]+@[a-zA-Z0-9_\\-\\.\\+]+\\.[a-zA-Z]{2,}$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ErrorCode": {
+      "members": {
+        "INTERNAL_FAILURE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTERNAL_FAILURE"
+          }
+        },
+        "VALIDATION_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VALIDATION_ERROR"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#ErrorDetails": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.iotsitewise#ErrorCode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "details": {
+          "target": "com.amazonaws.iotsitewise#DetailedErrors",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#GroupIdentity": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.iotsitewise#IdentityId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#IAMRoleIdentity": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.iotsitewise#IamArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#IAMUserIdentity": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.iotsitewise#IamArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ID": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 36
+        },
+        "smithy.api#pattern": "^(?!00000000-0000-0000-0000-000000000000)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#IamArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-cn|-us-gov)?:[a-zA-Z0-9-:\\/_\\.\\+=,@]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#Identity": {
+      "members": {
+        "group": {
+          "target": "com.amazonaws.iotsitewise#GroupIdentity",
+          "traits": {}
+        },
+        "iamRole": {
+          "target": "com.amazonaws.iotsitewise#IAMRoleIdentity",
+          "traits": {}
+        },
+        "iamUser": {
+          "target": "com.amazonaws.iotsitewise#IAMUserIdentity",
+          "traits": {}
+        },
+        "user": {
+          "target": "com.amazonaws.iotsitewise#UserIdentity",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#IdentityId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ImageLocation": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "url": {
+          "target": "com.amazonaws.iotsitewise#Url",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#InputProperties": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 67,
+          "min": 4
+        },
+        "smithy.api#pattern": "^\\$\\{[a-z][a-z0-9_]*\\}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#InternalFailureException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#InvalidRequestException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#MonitorErrorCode": {
+      "members": {
+        "INTERNAL_FAILURE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTERNAL_FAILURE"
+          }
+        },
+        "LIMIT_EXCEEDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LIMIT_EXCEEDED"
+          }
+        },
+        "VALIDATION_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VALIDATION_ERROR"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#MonitorErrorDetails": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.iotsitewise#MonitorErrorCode",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.iotsitewise#MonitorErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#MonitorErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#Name": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#Permission": {
+      "members": {
+        "ADMINISTRATOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADMINISTRATOR"
+          }
+        },
+        "VIEWER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VIEWER"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#PortalClientId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[!-~]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#PortalResource": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#PortalState": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#PortalStatus": {
+      "members": {
+        "error": {
+          "target": "com.amazonaws.iotsitewise#MonitorErrorDetails",
+          "traits": {}
+        },
+        "state": {
+          "target": "com.amazonaws.iotsitewise#PortalState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#PortalTools": {
+      "member": {
+        "target": "com.amazonaws.iotsitewise#Name"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotsitewise#PortalType": {
+      "members": {
+        "SITEWISE_PORTAL_V1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SITEWISE_PORTAL_V1"
+          }
+        },
+        "SITEWISE_PORTAL_V2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SITEWISE_PORTAL_V2"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotsitewise#PortalTypeConfiguration": {
+      "key": {
+        "target": "com.amazonaws.iotsitewise#PortalTypeKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.iotsitewise#PortalTypeEntry"
+      }
+    },
+    "com.amazonaws.iotsitewise#PortalTypeEntry": {
+      "members": {
+        "portalTools": {
+          "target": "com.amazonaws.iotsitewise#PortalTools",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#PortalTypeKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ProjectResource": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.iotsitewise#ID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#Resource": {
+      "members": {
+        "portal": {
+          "target": "com.amazonaws.iotsitewise#PortalResource",
+          "traits": {}
+        },
+        "project": {
+          "target": "com.amazonaws.iotsitewise#ProjectResource",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#RestrictedDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9 _\\-#$*!@]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#RestrictedName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9 _\\-#$*!@.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ResultProperty": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 67,
+          "min": 4
+        },
+        "smithy.api#pattern": "^\\$\\{[a-z][a-z0-9_]*\\}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.iotsitewise#Url": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(http|https)\\://\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#UserIdentity": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.iotsitewise#IdentityId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#Version": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(0|([1-9]{1}\\d*))$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

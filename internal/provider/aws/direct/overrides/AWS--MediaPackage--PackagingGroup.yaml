@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaPackage::PackagingGroup
+read:
+  model: mediapackage-vod/service/2018-11-07/mediapackage-vod-2018-11-07.json
+  operation: DescribePackagingGroup
+  identifier:
+    Id: Id
+properties:
+  Arn: Arn
+  Authorization:
+    member: Authorization
+    properties:
+      CdnIdentifierSecret: CdnIdentifierSecret
+      SecretsRoleArn: SecretsRoleArn
+  DomainName: DomainName
+  EgressAccessLogs:
+    member: EgressAccessLogs
+    properties:
+      LogGroupName: LogGroupName
+  Id: Id
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

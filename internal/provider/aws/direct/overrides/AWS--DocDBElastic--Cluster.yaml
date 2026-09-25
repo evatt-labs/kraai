@@ -1,0 +1,25 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DocDBElastic::Cluster
+read:
+  model: docdb-elastic/service/2022-11-28/docdb-elastic-2022-11-28.json
+  operation: GetCluster
+  identifier:
+    ClusterArn: clusterArn
+  response: cluster
+properties:
+  AdminUserName: adminUserName
+  AuthType: authType
+  BackupRetentionPeriod: backupRetentionPeriod
+  ClusterArn: clusterArn
+  ClusterEndpoint: clusterEndpoint
+  ClusterName: clusterName
+  KmsKeyId: kmsKeyId
+  PreferredBackupWindow: preferredBackupWindow
+  PreferredMaintenanceWindow: preferredMaintenanceWindow
+  ShardCapacity: shardCapacity
+  ShardCount: shardCount
+  ShardInstanceCount: shardInstanceCount
+  SubnetIds: subnetIds
+  VpcSecurityGroupIds: vpcSecurityGroupIds
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,807 @@
+{
+  "shapes": {
+    "com.amazonaws.signer#AccessDeniedException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^[0-9]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.signer#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.signer#CertificateArn": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#DisplayName": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#EncryptionAlgorithm": {
+      "members": {
+        "ECDSA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ECDSA"
+          }
+        },
+        "RSA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RSA"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.signer#ErrorCode": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#GetSigningProfile": {
+      "errors": [
+        {
+          "target": "com.amazonaws.signer#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.signer#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.signer#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.signer#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.signer#GetSigningProfileRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.signer#GetSigningProfileResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/signing-profiles/{profileName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.signer#GetSigningProfileRequest": {
+      "members": {
+        "profileName": {
+          "target": "com.amazonaws.signer#ProfileName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "profileOwner": {
+          "target": "com.amazonaws.signer#AccountId",
+          "traits": {
+            "smithy.api#httpQuery": "profileOwner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#GetSigningProfileResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.signer#String",
+          "traits": {}
+        },
+        "overrides": {
+          "target": "com.amazonaws.signer#SigningPlatformOverrides",
+          "traits": {}
+        },
+        "platformDisplayName": {
+          "target": "com.amazonaws.signer#DisplayName",
+          "traits": {}
+        },
+        "platformId": {
+          "target": "com.amazonaws.signer#PlatformId",
+          "traits": {}
+        },
+        "profileName": {
+          "target": "com.amazonaws.signer#ProfileName",
+          "traits": {}
+        },
+        "profileVersion": {
+          "target": "com.amazonaws.signer#ProfileVersion",
+          "traits": {}
+        },
+        "profileVersionArn": {
+          "target": "com.amazonaws.signer#Arn",
+          "traits": {}
+        },
+        "revocationRecord": {
+          "target": "com.amazonaws.signer#SigningProfileRevocationRecord"
+        },
+        "signatureValidityPeriod": {
+          "target": "com.amazonaws.signer#SignatureValidityPeriod"
+        },
+        "signingMaterial": {
+          "target": "com.amazonaws.signer#SigningMaterial",
+          "traits": {}
+        },
+        "signingParameters": {
+          "target": "com.amazonaws.signer#SigningParameters",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.signer#SigningProfileStatus",
+          "traits": {}
+        },
+        "statusReason": {
+          "target": "com.amazonaws.signer#String",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.signer#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#HashAlgorithm": {
+      "members": {
+        "SHA1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHA1"
+          }
+        },
+        "SHA256": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHA256"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.signer#ImageFormat": {
+      "members": {
+        "JSON": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "JSON"
+          }
+        },
+        "JSONDetached": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "JSONDetached"
+          }
+        },
+        "JSONEmbedded": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "JSONEmbedded"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.signer#Integer": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.signer#InternalServiceErrorException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#PlatformId": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#ProfileName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 2
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_]{2,}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.signer#ProfileVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 10
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9]{10}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.signer#ResourceNotFoundException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#SignatureValidityPeriod": {
+      "members": {
+        "type": {
+          "target": "com.amazonaws.signer#ValidityType",
+          "traits": {}
+        },
+        "value": {
+          "target": "com.amazonaws.signer#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.signer#SigningConfigurationOverrides": {
+      "members": {
+        "encryptionAlgorithm": {
+          "target": "com.amazonaws.signer#EncryptionAlgorithm",
+          "traits": {}
+        },
+        "hashAlgorithm": {
+          "target": "com.amazonaws.signer#HashAlgorithm",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.signer#SigningMaterial": {
+      "members": {
+        "certificateArn": {
+          "target": "com.amazonaws.signer#CertificateArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.signer#SigningParameterKey": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#SigningParameterValue": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#SigningParameters": {
+      "key": {
+        "target": "com.amazonaws.signer#SigningParameterKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.signer#SigningParameterValue"
+      }
+    },
+    "com.amazonaws.signer#SigningPlatformOverrides": {
+      "members": {
+        "signingConfiguration": {
+          "target": "com.amazonaws.signer#SigningConfigurationOverrides",
+          "traits": {}
+        },
+        "signingImageFormat": {
+          "target": "com.amazonaws.signer#ImageFormat",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.signer#SigningProfileRevocationRecord": {
+      "members": {
+        "revocationEffectiveFrom": {
+          "target": "com.amazonaws.signer#Timestamp",
+          "traits": {}
+        },
+        "revokedAt": {
+          "target": "com.amazonaws.signer#Timestamp",
+          "traits": {}
+        },
+        "revokedBy": {
+          "target": "com.amazonaws.signer#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.signer#SigningProfileStatus": {
+      "members": {
+        "Active": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Active"
+          }
+        },
+        "Canceled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Canceled"
+          }
+        },
+        "Revoked": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Revoked"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.signer#String": {
+      "type": "string"
+    },
+    "com.amazonaws.signer#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!aws:)[a-zA-Z+-=._:/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.signer#TagMap": {
+      "key": {
+        "target": "com.amazonaws.signer#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.signer#TagValue"
+      }
+    },
+    "com.amazonaws.signer#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.signer#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.signer#TooManyRequestsException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#ValidityType": {
+      "members": {
+        "DAYS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DAYS"
+          }
+        },
+        "MONTHS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MONTHS"
+          }
+        },
+        "YEARS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "YEARS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.signer#WallabyService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.signer#GetSigningProfile"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "signer",
+          "cloudFormationName": "Signer",
+          "cloudTrailEventSource": "signer.amazonaws.com",
+          "endpointPrefix": "signer",
+          "sdkId": "signer"
+        },
+        "aws.auth#sigv4": {
+          "name": "signer"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS Signer",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://signer-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://signer-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://signer.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://signer.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-08-25"
+    }
+  },
+  "smithy": "2.0"
+}

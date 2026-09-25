@@ -1,0 +1,27 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Transfer::Certificate
+read:
+  model: transfer/service/2018-11-05/transfer-2018-11-05.json
+  operation: DescribeCertificate
+  identifier:
+    CertificateId: CertificateId
+  response: Certificate
+properties:
+  ActiveDate: ActiveDate
+  Arn: Arn
+  Certificate: Certificate
+  CertificateChain: CertificateChain
+  CertificateId: CertificateId
+  Description: Description
+  InactiveDate: InactiveDate
+  NotAfterDate: NotAfterDate
+  NotBeforeDate: NotBeforeDate
+  Serial: Serial
+  Status: Status
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  Type: Type
+  Usage: Usage

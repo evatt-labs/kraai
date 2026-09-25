@@ -1,0 +1,43 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataSync::LocationHDFS
+read:
+  model: datasync/service/2018-11-09/datasync-2018-11-09.json
+  operation: DescribeLocationHdfs
+  identifier:
+    LocationArn: LocationArn
+properties:
+  AgentArns: AgentArns
+  AuthenticationType: AuthenticationType
+  BlockSize: BlockSize
+  CmkSecretConfig:
+    member: CmkSecretConfig
+    properties:
+      KmsKeyArn: KmsKeyArn
+      SecretArn: SecretArn
+  CustomSecretConfig:
+    member: CustomSecretConfig
+    properties:
+      SecretAccessRoleArn: SecretAccessRoleArn
+      SecretArn: SecretArn
+  KerberosPrincipal: KerberosPrincipal
+  KmsKeyProviderUri: KmsKeyProviderUri
+  LocationArn: LocationArn
+  LocationUri: LocationUri
+  ManagedSecretConfig:
+    member: ManagedSecretConfig
+    properties:
+      SecretArn: SecretArn
+  NameNodes:
+    member: NameNodes
+    properties:
+      Hostname: Hostname
+      Port: Port
+  QopConfiguration:
+    member: QopConfiguration
+    properties:
+      DataTransferProtection: DataTransferProtection
+      RpcProtection: RpcProtection
+  ReplicationFactor: ReplicationFactor
+  SimpleUser: SimpleUser
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically
