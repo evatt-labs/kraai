@@ -94,17 +94,43 @@ func TestAMatchThatIsNotTheTagWalks(t *testing.T) {
 	}
 }
 
-// A lookup that may lead to a mutation never trusts the index: given one
-// that has not caught up with a create, it still finds the resource.
-func TestAMutatingLookupNeverTrustsTheIndex(t *testing.T) {
+// A lookup that may lead to a mutation never trusts the index's miss:
+// given one that has not caught up with a resource, it walks the listed
+// instances and finds it rather than creating a duplicate.
+func TestAMutatingLookupWalksOnAnIndexMiss(t *testing.T) {
 	stale := taskDefinitions(nil, nil)
 	id, _, found, err := taskDefinitionType(stale).resolve(context.Background(),
 		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
 	if err != nil || !found || id != tdWanted {
 		t.Fatalf("resolve = %q, %v, %v, want the resource the index missed", id, found, err)
 	}
-	if stale.taggedCalls != 0 {
-		t.Fatalf("the index was queried %d times outside a read-only run", stale.taggedCalls)
+	if stale.listCalls != 1 {
+		t.Fatalf("listed %d times, want the walk once", stale.listCalls)
+	}
+}
+
+// A mutating lookup takes an index hit, confirmed by a read, without
+// listing the type: the walk is only for a miss.
+func TestAMutatingLookupTakesAnIndexHit(t *testing.T) {
+	fc := taskDefinitions([]string{tdWanted}, nil)
+	id, _, found, err := taskDefinitionType(fc).resolve(context.Background(),
+		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
+	if err != nil || !found || id != tdWanted {
+		t.Fatalf("resolve = %q, %v, %v", id, found, err)
+	}
+	if fc.listCalls != 0 {
+		t.Fatalf("listed the type %d times on an index hit", fc.listCalls)
+	}
+}
+
+// An index hit that is gone by the time it is read is a miss, and a
+// mutating lookup walks rather than concluding the resource is absent.
+func TestAMutatingLookupWalksPastAGoneHit(t *testing.T) {
+	fc := taskDefinitions([]string{tdGone}, nil)
+	id, _, found, err := taskDefinitionType(fc).resolve(context.Background(),
+		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
+	if err != nil || !found || id != tdWanted || fc.listCalls != 1 {
+		t.Fatalf("resolve = %q, %v, %v after %d lists", id, found, err, fc.listCalls)
 	}
 }
 
