@@ -83,11 +83,14 @@ func validateSecretRef(raw string) error {
 	// pin, so a label there would never match the numeric marker and
 	// would plan an Update forever. Not supported until that check can
 	// resolve a label the metadata-only way it resolves a Secrets Manager
-	// stage.
+	// stage. The number must also be spelled the way SSM reports it
+	// ("3", never "03" or "+3"): the pin is compared as text against the
+	// marker apply writes from the response.
 	if ref.Scheme == schemeSSM && ref.Version != "" {
-		if _, err := strconv.Atoi(ref.Version); err != nil {
+		n, err := strconv.ParseInt(ref.Version, 10, 64)
+		if err != nil || n < 1 || strconv.FormatInt(n, 10) != ref.Version {
 			return kerrors.Validation(
-				"secret reference %q: aws-ssm's ?version= must be a parameter version number, got %q", raw, ref.Version)
+				"secret reference %q: aws-ssm's ?version= must be a parameter version number (1 or greater, no sign or leading zeros), got %q", raw, ref.Version)
 		}
 	}
 	return nil
