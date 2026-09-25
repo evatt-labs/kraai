@@ -33,6 +33,19 @@ func (s *cfnSchema) writeOnly(name string) bool {
 	return false
 }
 
+// writeOnlyAt reports whether the nested property at the dotted path, such
+// as SecurityGroupIngress.SourceSecurityGroupName, is write-only: a pointer
+// matches with its array steps, /*, left out.
+func (s *cfnSchema) writeOnlyAt(path string) bool {
+	for _, p := range s.WriteOnlyPointers {
+		p = strings.ReplaceAll(strings.TrimPrefix(p, "/properties/"), "/*", "")
+		if strings.ReplaceAll(p, "/", ".") == path {
+			return true
+		}
+	}
+	return false
+}
+
 // resolve follows p's $ref into the schema's definitions.
 func (s *cfnSchema) resolve(p cfnProperty) cfnProperty {
 	for range 8 {

@@ -169,7 +169,7 @@
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
-      "subsetSha256": "65e14c7680feeddc456272bf58837c8a8cfc4ab4aff751b32a1695dcfdd0c7ef"
+      "subsetSha256": "3beeacd4460f408d16403f42a6682ba8410754421d480e4a0e2cb44f6029d695"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
@@ -897,6 +897,11 @@
       "file": "schemas/AWS--DocDBElastic--ClusterSnapshot.json",
       "sourceSha256": "0e43f2f422942e8f013fbde3305c1219db4bfc1e4bc847e3de9e186d19f63991",
       "subsetSha256": "f68e6ea32e74c9986b38d74f319097fa79a40e9738a489fbd551a5fc6c579ee9"
+    },
+    "AWS::EC2::SecurityGroup": {
+      "file": "schemas/AWS--EC2--SecurityGroup.json",
+      "sourceSha256": "27ae37729524cc52f1cbb251b9801e2a906b82b216137db9b89abb9e4d41e90b",
+      "subsetSha256": "e6baba717cd2b3ead773ec56eed5d1c5055bcaf61f67b5fde1e6d2a5ec45d40b"
     },
     "AWS::EC2::Subnet": {
       "file": "schemas/AWS--EC2--Subnet.json",

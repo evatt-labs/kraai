@@ -22,9 +22,28 @@ services:
       - binding: RT
         type: AWS::EC2::RouteTable
         properties: { VpcId: "${VPC.VpcId}" }
+      - binding: PEER
+        type: AWS::EC2::SecurityGroup
+        properties: { GroupDescription: kraai integration peer, VpcId: "${VPC.VpcId}" }
       - binding: SG
         type: AWS::EC2::SecurityGroup
-        properties: { GroupDescription: kraai integration, VpcId: "${VPC.VpcId}" }
+        # One rule of each source and destination kind, so a direct read's
+        # rules can be compared with Cloud Control's on every shape. The
+        # prefix lists are the AWS-managed S3 and DynamoDB lists.
+        properties:
+          GroupDescription: kraai integration
+          VpcId: "${VPC.VpcId}"
+          SecurityGroupIngress:
+            - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 10.94.0.0/16, Description: https from the vpc }
+            - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIpv6: "::/0" }
+            - { IpProtocol: tcp, FromPort: 8080, ToPort: 8080, SourceSecurityGroupId: "${PEER.GroupId}" }
+            - { IpProtocol: tcp, FromPort: 443, ToPort: 443, SourcePrefixListId: pl-63a5400a }
+            - { IpProtocol: "-1", CidrIp: 10.94.1.0/24 }
+          SecurityGroupEgress:
+            - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: https out }
+            - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIpv6: "::/0" }
+            - { IpProtocol: tcp, FromPort: 5432, ToPort: 5432, DestinationSecurityGroupId: "${PEER.GroupId}" }
+            - { IpProtocol: tcp, FromPort: 443, ToPort: 443, DestinationPrefixListId: pl-02cd2c6b }
 
       # Types whose identifier is their ARN. A target group with no load
       # balancer is free.

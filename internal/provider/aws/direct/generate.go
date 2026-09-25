@@ -199,6 +199,13 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	if f.Transform != "" {
 		fmt.Fprintf(b, ", Transform: %q", f.Transform)
 	}
+	if len(f.Where) > 0 {
+		b.WriteString(", Where: []Match{")
+		for _, m := range f.Where {
+			fmt.Fprintf(b, "{Member: %q, Equals: %q}, ", m.Member, m.Equals)
+		}
+		b.WriteString("}")
+	}
 	if f.Root {
 		b.WriteString(", Root: true")
 	}

@@ -6,6 +6,12 @@
           "target": "com.amazonaws.ec2#DescribeNetworkAcls"
         },
         {
+          "target": "com.amazonaws.ec2#DescribeSecurityGroupRules"
+        },
+        {
+          "target": "com.amazonaws.ec2#DescribeSecurityGroups"
+        },
+        {
           "target": "com.amazonaws.ec2#DescribeSubnets"
         }
       ],
@@ -493,6 +499,201 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ec2#DescribeSecurityGroupRules": {
+      "input": {
+        "target": "com.amazonaws.ec2#DescribeSecurityGroupRulesRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#DescribeSecurityGroupRulesResult"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "NextToken",
+          "items": "SecurityGroupRules",
+          "outputToken": "NextToken",
+          "pageSize": "MaxResults"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DescribeSecurityGroupRulesMaxResults": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ec2#DescribeSecurityGroupRulesRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {}
+        },
+        "Filters": {
+          "target": "com.amazonaws.ec2#FilterList",
+          "traits": {
+            "smithy.api#xmlName": "Filter"
+          }
+        },
+        "MaxResults": {
+          "target": "com.amazonaws.ec2#DescribeSecurityGroupRulesMaxResults",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        },
+        "SecurityGroupRuleIds": {
+          "target": "com.amazonaws.ec2#SecurityGroupRuleIdList",
+          "traits": {
+            "smithy.api#xmlName": "SecurityGroupRuleId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DescribeSecurityGroupRulesResult": {
+      "members": {
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NextToken",
+            "smithy.api#xmlName": "nextToken"
+          }
+        },
+        "SecurityGroupRules": {
+          "target": "com.amazonaws.ec2#SecurityGroupRuleList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SecurityGroupRuleSet",
+            "smithy.api#xmlName": "securityGroupRuleSet"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DescribeSecurityGroups": {
+      "input": {
+        "target": "com.amazonaws.ec2#DescribeSecurityGroupsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#DescribeSecurityGroupsResult"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "NextToken",
+          "items": "SecurityGroups",
+          "outputToken": "NextToken",
+          "pageSize": "MaxResults"
+        },
+        "smithy.api#suppress": [
+          "WaitableTraitInvalidErrorType"
+        ],
+        "smithy.waiters#waitable": {
+          "SecurityGroupExists": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "booleanEquals",
+                    "expected": "true",
+                    "path": "length(SecurityGroups[].GroupId) > `0`"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "errorType": "InvalidGroup.NotFound"
+                },
+                "state": "retry"
+              }
+            ],
+            "minDelay": 5
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DescribeSecurityGroupsMaxResults": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ec2#DescribeSecurityGroupsRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "Filters": {
+          "target": "com.amazonaws.ec2#FilterList",
+          "traits": {
+            "smithy.api#xmlName": "Filter"
+          }
+        },
+        "GroupIds": {
+          "target": "com.amazonaws.ec2#GroupIdStringList",
+          "traits": {
+            "smithy.api#xmlName": "GroupId"
+          }
+        },
+        "GroupNames": {
+          "target": "com.amazonaws.ec2#GroupNameStringList",
+          "traits": {
+            "smithy.api#xmlName": "GroupName"
+          }
+        },
+        "MaxResults": {
+          "target": "com.amazonaws.ec2#DescribeSecurityGroupsMaxResults",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DescribeSecurityGroupsResult": {
+      "members": {
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NextToken",
+            "smithy.api#xmlName": "nextToken"
+          }
+        },
+        "SecurityGroups": {
+          "target": "com.amazonaws.ec2#SecurityGroupList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SecurityGroupInfo",
+            "smithy.api#xmlName": "securityGroupInfo"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ec2#DescribeSubnets": {
       "input": {
         "target": "com.amazonaws.ec2#DescribeSubnetsRequest"
@@ -618,6 +819,24 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ec2#GroupIdStringList": {
+      "member": {
+        "target": "com.amazonaws.ec2#SecurityGroupId",
+        "traits": {
+          "smithy.api#xmlName": "groupId"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#GroupNameStringList": {
+      "member": {
+        "target": "com.amazonaws.ec2#SecurityGroupName",
+        "traits": {
+          "smithy.api#xmlName": "GroupName"
+        }
+      },
+      "type": "list"
+    },
     "com.amazonaws.ec2#HostnameType": {
       "members": {
         "ip_name": {
@@ -658,6 +877,99 @@
     "com.amazonaws.ec2#Integer": {
       "type": "integer"
     },
+    "com.amazonaws.ec2#IpPermission": {
+      "members": {
+        "FromPort": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "FromPort",
+            "smithy.api#xmlName": "fromPort"
+          }
+        },
+        "IpProtocol": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IpProtocol",
+            "smithy.api#xmlName": "ipProtocol"
+          }
+        },
+        "IpRanges": {
+          "target": "com.amazonaws.ec2#IpRangeList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IpRanges",
+            "smithy.api#xmlName": "ipRanges"
+          }
+        },
+        "Ipv6Ranges": {
+          "target": "com.amazonaws.ec2#Ipv6RangeList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Ipv6Ranges",
+            "smithy.api#xmlName": "ipv6Ranges"
+          }
+        },
+        "PrefixListIds": {
+          "target": "com.amazonaws.ec2#PrefixListIdList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PrefixListIds",
+            "smithy.api#xmlName": "prefixListIds"
+          }
+        },
+        "ToPort": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "ToPort",
+            "smithy.api#xmlName": "toPort"
+          }
+        },
+        "UserIdGroupPairs": {
+          "target": "com.amazonaws.ec2#UserIdGroupPairList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Groups",
+            "smithy.api#xmlName": "groups"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#IpPermissionList": {
+      "member": {
+        "target": "com.amazonaws.ec2#IpPermission",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#IpRange": {
+      "members": {
+        "CidrIp": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CidrIp",
+            "smithy.api#xmlName": "cidrIp"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Description",
+            "smithy.api#xmlName": "description"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#IpRangeList": {
+      "member": {
+        "target": "com.amazonaws.ec2#IpRange",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
     "com.amazonaws.ec2#IpSource": {
       "members": {
         "amazon": {
@@ -697,6 +1009,35 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.ec2#Ipv6Range": {
+      "members": {
+        "CidrIpv6": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CidrIpv6",
+            "smithy.api#xmlName": "cidrIpv6"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Description",
+            "smithy.api#xmlName": "description"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#Ipv6RangeList": {
+      "member": {
+        "target": "com.amazonaws.ec2#Ipv6Range",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
     },
     "com.amazonaws.ec2#NetworkAcl": {
       "members": {
@@ -901,6 +1242,38 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ec2#PrefixListId": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Description",
+            "smithy.api#xmlName": "description"
+          }
+        },
+        "PrefixListId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PrefixListId",
+            "smithy.api#xmlName": "prefixListId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#PrefixListIdList": {
+      "member": {
+        "target": "com.amazonaws.ec2#PrefixListId",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#PrefixListResourceId": {
+      "type": "string"
+    },
     "com.amazonaws.ec2#PrivateDnsNameOptionsOnLaunch": {
       "members": {
         "EnableResourceNameDnsAAAARecord": {
@@ -928,6 +1301,47 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ec2#ReferencedSecurityGroup": {
+      "members": {
+        "GroupId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupId",
+            "smithy.api#xmlName": "groupId"
+          }
+        },
+        "PeeringStatus": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PeeringStatus",
+            "smithy.api#xmlName": "peeringStatus"
+          }
+        },
+        "UserId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "UserId",
+            "smithy.api#xmlName": "userId"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#xmlName": "vpcId"
+          }
+        },
+        "VpcPeeringConnectionId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcPeeringConnectionId",
+            "smithy.api#xmlName": "vpcPeeringConnectionId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.ec2#RuleAction": {
       "members": {
         "allow": {
@@ -944,6 +1358,215 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.ec2#SecurityGroup": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupDescription",
+            "smithy.api#xmlName": "groupDescription"
+          }
+        },
+        "GroupId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupId",
+            "smithy.api#xmlName": "groupId"
+          }
+        },
+        "GroupName": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupName",
+            "smithy.api#xmlName": "groupName"
+          }
+        },
+        "IpPermissions": {
+          "target": "com.amazonaws.ec2#IpPermissionList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IpPermissions",
+            "smithy.api#xmlName": "ipPermissions"
+          }
+        },
+        "IpPermissionsEgress": {
+          "target": "com.amazonaws.ec2#IpPermissionList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IpPermissionsEgress",
+            "smithy.api#xmlName": "ipPermissionsEgress"
+          }
+        },
+        "OwnerId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "OwnerId",
+            "smithy.api#xmlName": "ownerId"
+          }
+        },
+        "SecurityGroupArn": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SecurityGroupArn",
+            "smithy.api#xmlName": "securityGroupArn"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "TagSet",
+            "smithy.api#xmlName": "tagSet"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#xmlName": "vpcId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#SecurityGroupId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#SecurityGroupList": {
+      "member": {
+        "target": "com.amazonaws.ec2#SecurityGroup",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#SecurityGroupName": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#SecurityGroupRule": {
+      "members": {
+        "CidrIpv4": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CidrIpv4",
+            "smithy.api#xmlName": "cidrIpv4"
+          }
+        },
+        "CidrIpv6": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CidrIpv6",
+            "smithy.api#xmlName": "cidrIpv6"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Description",
+            "smithy.api#xmlName": "description"
+          }
+        },
+        "FromPort": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "FromPort",
+            "smithy.api#xmlName": "fromPort"
+          }
+        },
+        "GroupId": {
+          "target": "com.amazonaws.ec2#SecurityGroupId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupId",
+            "smithy.api#xmlName": "groupId"
+          }
+        },
+        "GroupOwnerId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupOwnerId",
+            "smithy.api#xmlName": "groupOwnerId"
+          }
+        },
+        "IpProtocol": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IpProtocol",
+            "smithy.api#xmlName": "ipProtocol"
+          }
+        },
+        "IsEgress": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IsEgress",
+            "smithy.api#xmlName": "isEgress"
+          }
+        },
+        "PrefixListId": {
+          "target": "com.amazonaws.ec2#PrefixListResourceId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PrefixListId",
+            "smithy.api#xmlName": "prefixListId"
+          }
+        },
+        "ReferencedGroupInfo": {
+          "target": "com.amazonaws.ec2#ReferencedSecurityGroup",
+          "traits": {
+            "aws.protocols#ec2QueryName": "ReferencedGroupInfo",
+            "smithy.api#xmlName": "referencedGroupInfo"
+          }
+        },
+        "SecurityGroupRuleArn": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SecurityGroupRuleArn",
+            "smithy.api#xmlName": "securityGroupRuleArn"
+          }
+        },
+        "SecurityGroupRuleId": {
+          "target": "com.amazonaws.ec2#SecurityGroupRuleId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SecurityGroupRuleId",
+            "smithy.api#xmlName": "securityGroupRuleId"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "TagSet",
+            "smithy.api#xmlName": "tagSet"
+          }
+        },
+        "ToPort": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "ToPort",
+            "smithy.api#xmlName": "toPort"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#SecurityGroupRuleId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#SecurityGroupRuleIdList": {
+      "member": {
+        "target": "com.amazonaws.ec2#String",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#SecurityGroupRuleList": {
+      "member": {
+        "target": "com.amazonaws.ec2#SecurityGroupRule",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
     },
     "com.amazonaws.ec2#String": {
       "type": "string"
@@ -1308,6 +1931,70 @@
     "com.amazonaws.ec2#TagList": {
       "member": {
         "target": "com.amazonaws.ec2#Tag",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#UserIdGroupPair": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Description",
+            "smithy.api#xmlName": "description"
+          }
+        },
+        "GroupId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupId",
+            "smithy.api#xmlName": "groupId"
+          }
+        },
+        "GroupName": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GroupName",
+            "smithy.api#xmlName": "groupName"
+          }
+        },
+        "PeeringStatus": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PeeringStatus",
+            "smithy.api#xmlName": "peeringStatus"
+          }
+        },
+        "UserId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "UserId",
+            "smithy.api#xmlName": "userId"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#xmlName": "vpcId"
+          }
+        },
+        "VpcPeeringConnectionId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcPeeringConnectionId",
+            "smithy.api#xmlName": "vpcPeeringConnectionId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#UserIdGroupPairList": {
+      "member": {
+        "target": "com.amazonaws.ec2#UserIdGroupPair",
         "traits": {
           "smithy.api#xmlName": "item"
         }

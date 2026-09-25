@@ -41,7 +41,6 @@ properties:
             member: MountOptions
             properties:
               Version: Version
-          Password: Password
           User: User
   SecurityGroupArns: SecurityGroupArns
   StorageVirtualMachineArn: StorageVirtualMachineArn

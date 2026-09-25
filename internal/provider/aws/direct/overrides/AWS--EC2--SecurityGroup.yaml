@@ -1,0 +1,58 @@
+type: AWS::EC2::SecurityGroup
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeSecurityGroups
+  identifier:
+    Id: GroupIds
+  # DescribeSecurityGroups filters by a list of ids and answers with a list.
+  response: SecurityGroups[]
+properties:
+  GroupDescription: Description
+  GroupId: GroupId
+  GroupName: GroupName
+  Id: GroupId
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  VpcId: VpcId
+also:
+  # Cloud Control reports one rule per source or destination, the shape
+  # DescribeSecurityGroupRules answers in; DescribeSecurityGroups nests
+  # several ranges under each permission.
+  - operation: DescribeSecurityGroupRules
+    input:
+      Filters:
+        - Name: group-id
+          Values: ["{Id}"]
+    properties:
+      SecurityGroupEgress:
+        member: SecurityGroupRules
+        where:
+          IsEgress: "true"
+        properties:
+          CidrIp: CidrIpv4
+          CidrIpv6: CidrIpv6
+          Description: Description
+          DestinationPrefixListId: PrefixListId
+          DestinationSecurityGroupId: ReferencedGroupInfo.GroupId
+          FromPort: FromPort
+          IpProtocol: IpProtocol
+          ToPort: ToPort
+      SecurityGroupIngress:
+        member: SecurityGroupRules
+        where:
+          IsEgress: "false"
+        properties:
+          CidrIp: CidrIpv4
+          CidrIpv6: CidrIpv6
+          Description: Description
+          FromPort: FromPort
+          IpProtocol: IpProtocol
+          SourcePrefixListId: PrefixListId
+          SourceSecurityGroupId: ReferencedGroupInfo.GroupId
+          SourceSecurityGroupOwnerId: ReferencedGroupInfo.UserId
+          ToPort: ToPort
+absentIds:
+  - sg-0a1b2c3d4e5f60718

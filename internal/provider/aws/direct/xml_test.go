@@ -481,3 +481,38 @@ func TestTranslateAMemberPath(t *testing.T) {
 		t.Fatalf("translate = %v", got)
 	}
 }
+
+// ec2Query: a security group's rules come from one list, split by
+// direction, with a referenced group read through its nested structure.
+func TestReadSecurityGroupSplitsRulesByDirection(t *testing.T) {
+	client, forms := xmlServerBy(t, map[string]string{
+		"DescribeSecurityGroups": `<DescribeSecurityGroupsResponse><securityGroupInfo><item>
+<groupId>sg-1</groupId><groupName>web</groupName><groupDescription>d</groupDescription><vpcId>vpc-1</vpcId>
+</item></securityGroupInfo></DescribeSecurityGroupsResponse>`,
+		"DescribeSecurityGroupRules": `<DescribeSecurityGroupRulesResponse><securityGroupRuleSet>
+<item><isEgress>false</isEgress><ipProtocol>tcp</ipProtocol><fromPort>443</fromPort><toPort>443</toPort><cidrIpv6>::/0</cidrIpv6><description>https</description></item>
+<item><isEgress>true</isEgress><ipProtocol>-1</ipProtocol><fromPort>-1</fromPort><toPort>-1</toPort><cidrIpv4>0.0.0.0/0</cidrIpv4></item>
+<item><isEgress>false</isEgress><ipProtocol>-1</ipProtocol><fromPort>-1</fromPort><toPort>-1</toPort><referencedGroupInfo><groupId>sg-2</groupId><userId>123</userId></referencedGroupInfo></item>
+</securityGroupRuleSet></DescribeSecurityGroupRulesResponse>`,
+	})
+	got, err := client.Read(context.Background(), "AWS::EC2::SecurityGroup", map[string]string{"Id": "sg-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]any{
+		"Id": "sg-1", "GroupId": "sg-1", "GroupName": "web", "GroupDescription": "d", "VpcId": "vpc-1",
+		"SecurityGroupIngress": []any{
+			map[string]any{"IpProtocol": "tcp", "FromPort": json.Number("443"), "ToPort": json.Number("443"), "CidrIpv6": "::/0", "Description": "https"},
+			map[string]any{"IpProtocol": "-1", "FromPort": json.Number("-1"), "ToPort": json.Number("-1"), "SourceSecurityGroupId": "sg-2", "SourceSecurityGroupOwnerId": "123"},
+		},
+		"SecurityGroupEgress": []any{
+			map[string]any{"IpProtocol": "-1", "FromPort": json.Number("-1"), "ToPort": json.Number("-1"), "CidrIp": "0.0.0.0/0"},
+		},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Read = %#v\nwant   %#v", got, want)
+	}
+	if f := (*forms)[1]; f.Get("Filter.1.Name") != "group-id" || f.Get("Filter.1.Value.1") != "sg-1" {
+		t.Fatalf("rules request = %v", f)
+	}
+}
