@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SES::CustomVerificationEmailTemplate
+read:
+  model: ses/service/2010-12-01/ses-2010-12-01.json
+  operation: GetCustomVerificationEmailTemplate
+  identifier:
+    TemplateName: TemplateName
+properties:
+  FailureRedirectionURL: FailureRedirectionURL
+  FromEmailAddress: FromEmailAddress
+  SuccessRedirectionURL: SuccessRedirectionURL
+  TemplateContent: TemplateContent
+  TemplateName: TemplateName
+  TemplateSubject: TemplateSubject
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

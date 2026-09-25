@@ -1,0 +1,25 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CloudFormation::ChangeSet
+read:
+  model: cloudformation/service/2010-05-15/cloudformation-2010-05-15.json
+  operation: DescribeChangeSet
+  identifier:
+    ChangeSetId: ChangeSetName
+properties:
+  Capabilities: Capabilities
+  ChangeSetId: ChangeSetId
+  ChangeSetName: ChangeSetName
+  CreationTime: CreationTime
+  DeploymentMode: DeploymentMode
+  Description: Description
+  ImportExistingResources: ImportExistingResources
+  IncludeNestedStacks: IncludeNestedStacks
+  NotificationARNs: NotificationARNs
+  OnStackFailure: OnStackFailure
+  StackId: StackId
+  StackName: StackName
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value

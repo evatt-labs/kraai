@@ -1,0 +1,9 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CloudFormation::ModuleDefaultVersion
+read:
+  model: cloudformation/service/2010-05-15/cloudformation-2010-05-15.json
+  operation: DescribeType
+  identifier:
+    Arn: Arn
+properties:
+  Arn: Arn
