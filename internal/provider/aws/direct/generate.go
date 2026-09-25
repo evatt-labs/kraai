@@ -2,8 +2,10 @@ package direct
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/format"
+	"io/fs"
 	"strconv"
 )
 
@@ -12,6 +14,10 @@ import (
 // bytes, which a test holds the checked-in file to.
 func Generate() ([]byte, error) {
 	readers, err := Compile()
+	if err != nil {
+		return nil, err
+	}
+	proven, err := provenTypes(files)
 	if err != nil {
 		return nil, err
 	}
@@ -24,6 +30,12 @@ func Generate() ([]byte, error) {
 		field(&b, "Type", r.Type)
 		field(&b, "Protocol", r.Protocol)
 		field(&b, "SigningName", r.SigningName)
+		if r.Complete {
+			b.WriteString("Complete: true,\n")
+		}
+		if r.Complete && proven[r.Type] {
+			b.WriteString("Production: true,\n")
+		}
 		field(&b, "Host", r.Host)
 		field(&b, "SigningRegion", r.SigningRegion)
 		field(&b, "Target", r.Target)
@@ -175,4 +187,24 @@ func Readers() []Reader {
 		out = append(out, readers[typeName])
 	}
 	return out
+}
+
+// provenTypes is every type whose recorded evidence shows parity on the
+// instances read and on the identifiers probed as absent.
+func provenTypes(files fs.FS) (map[string]bool, error) {
+	raw, err := fs.ReadFile(files, "evidence/parity.json")
+	if err != nil {
+		return nil, err
+	}
+	var evidence Evidence
+	if err := json.Unmarshal(raw, &evidence); err != nil {
+		return nil, err
+	}
+	out := map[string]bool{}
+	for _, e := range evidence.Types {
+		if e.Outcome == "parity" && e.Absence == "parity" {
+			out[e.Type] = true
+		}
+	}
+	return out, nil
 }
