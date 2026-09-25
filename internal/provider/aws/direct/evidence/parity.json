@@ -558,6 +558,26 @@
       "compared": []
     },
     {
+      "type": "AWS::EC2::SecurityGroup",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 4,
+      "compared": [
+        "GroupDescription",
+        "GroupId",
+        "GroupName",
+        "Id",
+        "SecurityGroupEgress",
+        "SecurityGroupIngress",
+        "Tags",
+        "VpcId"
+      ],
+      "absence": "parity",
+      "probed": 1
+    },
+    {
       "type": "AWS::EC2::Subnet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",

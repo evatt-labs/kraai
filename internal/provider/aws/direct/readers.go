@@ -1934,6 +1934,7 @@ var readers = map[string]Reader{
 		Protocol:    "ec2Query",
 		SigningName: "ec2",
 		Complete:    true,
+		Production:  true,
 		Host:        "ec2.{region}.amazonaws.com",
 		Action:      "DescribeSecurityGroups",
 		Version:     "2016-11-15",
