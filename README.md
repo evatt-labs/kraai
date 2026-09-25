@@ -309,6 +309,12 @@ encrypted under a customer-managed KMS key needs `kms:Decrypt` on that key
 too, added by hand: kraai has no way to learn the key's ARN without a call
 this command does not make.
 
+Upgrading from a release without the version marker: re-run
+`kraai iam-policy` and apply the new policy before the next `plan`, which
+otherwise fails on the `Describe` calls the old policy never granted. The
+first `apply` after upgrading redeploys every function with a secret-backed
+variable once, to write its marker.
+
 The packaging step honours `.gitignore`, so build output and virtualenvs stay
 out of the artifact. `include:` re-adds what the artifact genuinely needs.
 `.env` and `.git` are excluded unconditionally and cannot be re-added.
