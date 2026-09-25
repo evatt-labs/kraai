@@ -10,7 +10,6 @@ import (
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
-	"github.com/evatt-labs/kraai/internal/resource"
 )
 
 const typeECSTaskDefinition = "AWS::ECS::TaskDefinition"
@@ -29,11 +28,12 @@ func arnIsIdentifier(arn string) string { return arn }
 // arn:aws:ec2:us-east-1:123456789012:subnet/subnet-0abc ends with subnet-0abc.
 func lastPathSegment(arn string) string { return arn[strings.LastIndex(arn, "/")+1:] }
 
-// indexedTypes are the types a read-only lookup finds through the tagging
-// API. Each was checked against a real account, with integration/aws-free
-// applied: every tagged instance was in the index, the identifier read from
-// each ARN was found by GetResource, and every instance the index omitted
-// carried no tags. A task definition revision that has been deregistered
+// indexedTypes are the types a lookup finds through the tagging API: a
+// plan by it alone, a command that mutates by it before walking the type.
+// Each was checked against a real account, with integration/aws-free
+// applied: every tagged instance was in the index, the identifier read
+// from each ARN was found by GetResource, and every instance the index
+// omitted carried no tags. A task definition revision that has been deregistered
 // keeps its tags and its place in the index, and GetResource reports it
 // not found.
 var indexedTypes = map[string]indexEntry{
@@ -82,13 +82,15 @@ func (c *Client) TaggedResources(ctx context.Context, name, tagType string) ([]s
 	return nil, kerrors.New("finding %s resources tagged %s=%s: more than %d pages", tagType, identityTagKey, name, maxListPages)
 }
 
-// indexed returns the candidates the tagging API reports carrying name, in
-// place of listing the type, when ctx is read-only, the type is indexed and
-// its match is the identity tag alone. ok is false otherwise, or if the
-// index cannot be read, and the caller walks the listed instances instead.
+// indexed returns the candidates the tagging API reports carrying name,
+// when the type is indexed and its match is the identity tag alone. ok is
+// false otherwise, or if the index cannot be read, and the caller walks the
+// listed instances instead. The index is eventually consistent: a hit,
+// confirmed by a read, is always right, but a miss may be a resource
+// created moments ago, which only a read-only context may accept.
 func (r *resourceType) indexed(ctx context.Context, name string) (candidates []string, ok bool) {
 	entry, indexed := indexedTypes[r.typeName]
-	if !resource.ReadOnly(ctx) || !indexed || !r.matchIsTag {
+	if !indexed || !r.matchIsTag {
 		return nil, false
 	}
 	arns, err := r.client.TaggedResources(ctx, name, entry.tagType)

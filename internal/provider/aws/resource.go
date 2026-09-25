@@ -238,7 +238,15 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 
 	if resourceModel == nil && ref.Match == "" {
 		if candidates, ok := r.indexed(ctx, name); ok {
-			return r.firstMatch(ctx, name, candidates)
+			id, props, found, err := r.firstMatch(ctx, name, candidates)
+			// A plan accepts the index's miss: at worst it shows one create
+			// that apply's own plan, under the lock, corrects. A command
+			// that mutates walks every listed instance before it concludes
+			// a resource is absent, or it could create a duplicate or leave
+			// one standing.
+			if err != nil || found || resource.ReadOnly(ctx) {
+				return id, props, found, err
+			}
 		}
 	}
 
