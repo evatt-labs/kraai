@@ -1,0 +1,17 @@
+type: AWS::EC2::InternetGateway
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeInternetGateways
+  identifier:
+    InternetGatewayId: InternetGatewayIds
+  # DescribeInternetGateways filters by a list of ids and answers with a list.
+  response: InternetGateways[]
+properties:
+  InternetGatewayId: InternetGatewayId
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+absentIds:
+  - igw-0a1b2c3d4e5f60718

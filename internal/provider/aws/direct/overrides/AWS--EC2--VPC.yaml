@@ -1,0 +1,111 @@
+type: AWS::EC2::VPC
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeVpcs
+  identifier:
+    VpcId: VpcIds
+  # DescribeVpcs filters by a list of ids and answers with a list.
+  response: Vpcs[]
+properties:
+  CidrBlock: CidrBlock
+  CidrBlockAssociations:
+    member: CidrBlockAssociationSet[].AssociationId
+  InstanceTenancy: InstanceTenancy
+  Ipv6CidrBlocks:
+    member: Ipv6CidrBlockAssociationSet[].Ipv6CidrBlock
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  VpcEncryptionControl:
+    member: EncryptionControl
+    properties:
+      Mode: Mode
+      ResourceExclusions:
+        member: ResourceExclusions
+        properties:
+          EgressOnlyInternetGateway:
+            member: EgressOnlyInternetGateway
+            properties:
+              State: State
+              StateMessage: StateMessage
+          ElasticFileSystem:
+            member: ElasticFileSystem
+            properties:
+              State: State
+              StateMessage: StateMessage
+          InternetGateway:
+            member: InternetGateway
+            properties:
+              State: State
+              StateMessage: StateMessage
+          Lambda:
+            member: Lambda
+            properties:
+              State: State
+              StateMessage: StateMessage
+          NatGateway:
+            member: NatGateway
+            properties:
+              State: State
+              StateMessage: StateMessage
+          VirtualPrivateGateway:
+            member: VirtualPrivateGateway
+            properties:
+              State: State
+              StateMessage: StateMessage
+          VpcLattice:
+            member: VpcLattice
+            properties:
+              State: State
+              StateMessage: StateMessage
+          VpcPeering:
+            member: VpcPeering
+            properties:
+              State: State
+              StateMessage: StateMessage
+      State: State
+      StateMessage: StateMessage
+      VpcEncryptionControlId: VpcEncryptionControlId
+      VpcId: VpcId
+  VpcId: VpcId
+also:
+  # The read handler finds the default network ACL and security group by
+  # filtering on the VPC, and reads each DNS attribute in its own call.
+  - operation: DescribeNetworkAcls
+    input:
+      Filters:
+        - Name: vpc-id
+          Values: ["{VpcId}"]
+        - Name: default
+          Values: ["true"]
+    response: NetworkAcls[]
+    properties:
+      DefaultNetworkAcl: NetworkAclId
+  - operation: DescribeSecurityGroups
+    input:
+      Filters:
+        - Name: vpc-id
+          Values: ["{VpcId}"]
+        - Name: group-name
+          Values: ["default"]
+    response: SecurityGroups[]
+    properties:
+      DefaultSecurityGroup: GroupId
+  - operation: DescribeVpcAttribute
+    identifier:
+      VpcId: VpcId
+    input:
+      Attribute: enableDnsSupport
+    properties:
+      EnableDnsSupport: EnableDnsSupport.Value
+  - operation: DescribeVpcAttribute
+    identifier:
+      VpcId: VpcId
+    input:
+      Attribute: enableDnsHostnames
+    properties:
+      EnableDnsHostnames: EnableDnsHostnames.Value
+absentIds:
+  - vpc-0a1b2c3d4e5f60718

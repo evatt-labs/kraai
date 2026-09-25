@@ -5,7 +5,13 @@ services:
       # Network: the EC2 types a plan finds by tag.
       - binding: VPC
         type: AWS::EC2::VPC
-        properties: { CidrBlock: 10.94.0.0/16 }
+        # Encryption controls are billed only for a VPC holding a network
+        # interface, which nothing here creates.
+        properties: { CidrBlock: 10.94.0.0/16, VpcEncryptionControl: { Mode: monitor } }
+      - binding: IPV6
+        type: AWS::EC2::VPCCidrBlock
+        properties: { VpcId: "${VPC.VpcId}", AmazonProvidedIpv6CidrBlock: true }
+        match: [VpcId, AmazonProvidedIpv6CidrBlock]
       - binding: IGW
         type: AWS::EC2::InternetGateway
         properties: {}

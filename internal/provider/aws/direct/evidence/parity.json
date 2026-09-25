@@ -558,6 +558,20 @@
       "compared": []
     },
     {
+      "type": "AWS::EC2::InternetGateway",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "InternetGatewayId",
+        "Tags"
+      ],
+      "absence": "parity",
+      "probed": 1
+    },
+    {
       "type": "AWS::EC2::SecurityGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -597,6 +611,29 @@
         "PrivateDnsNameOptionsOnLaunch",
         "SubnetId",
         "Tags",
+        "VpcId"
+      ],
+      "absence": "parity",
+      "probed": 1
+    },
+    {
+      "type": "AWS::EC2::VPC",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "CidrBlock",
+        "CidrBlockAssociations",
+        "DefaultNetworkAcl",
+        "DefaultSecurityGroup",
+        "EnableDnsHostnames",
+        "EnableDnsSupport",
+        "InstanceTenancy",
+        "Ipv6CidrBlocks",
+        "Tags",
+        "VpcEncryptionControl",
         "VpcId"
       ],
       "absence": "parity",
