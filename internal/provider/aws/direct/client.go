@@ -543,10 +543,16 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 			v = r.translate(w, nested, f.Fields)
 		}
 	case "list":
-		if items, ok := v.([]any); ok && len(f.Fields) > 0 {
+		if items, ok := v.([]any); ok && (len(f.Fields) > 0 || len(f.Where) > 0) {
 			translated := make([]any, 0, len(items))
 			for _, item := range items {
-				if nested, ok := item.(map[string]any); ok {
+				if nested, ok := item.(map[string]any); ok && w.keeps(f.Where, func(member string) (string, bool) {
+					got, ok := nested[member]
+					if !ok || got == nil {
+						return "", false
+					}
+					return fmt.Sprint(got), true
+				}) {
 					translated = append(translated, r.translate(w, nested, f.Fields))
 				}
 			}
@@ -636,6 +642,18 @@ func substitute(v any, identifier map[string]string) any {
 type walk struct {
 	vars map[string]string
 	errs []error
+}
+
+// keeps reports whether a list element passes every match, reading each
+// member's text through get.
+func (w *walk) keeps(where []Match, get func(member string) (string, bool)) bool {
+	for _, m := range where {
+		got, ok := get(m.Member)
+		if !ok || got != substitute(m.Equals, w.vars) {
+			return false
+		}
+	}
+	return true
 }
 
 // selects reports whether a list element whose Where member is got passes

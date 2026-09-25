@@ -125,18 +125,21 @@ func proposeWith(model *smithyModel, schema *cfnSchema, o Override) (Override, e
 }
 
 func proposeFields(model *smithyModel, schema *cfnSchema, props map[string]cfnProperty, structure string) (map[string]Mapping, map[string]string) {
-	return proposeNested(model, schema, props, structure, map[string]bool{})
+	return proposeNested(model, schema, props, structure, "", map[string]bool{})
 }
 
 // proposeNested is proposeFields with the structures already being
 // descended through, so a recursive shape is skipped for a person to map
 // rather than followed forever.
-func proposeNested(model *smithyModel, schema *cfnSchema, props map[string]cfnProperty, structure string, open map[string]bool) (map[string]Mapping, map[string]string) {
+func proposeNested(model *smithyModel, schema *cfnSchema, props map[string]cfnProperty, structure, at string, open map[string]bool) (map[string]Mapping, map[string]string) {
 	open[structure] = true
 	defer delete(open, structure)
 	mapped, skipped := map[string]Mapping{}, map[string]string{}
 	shape := model.Shapes[structure]
 	for name, prop := range props {
+		if at != "" && schema.writeOnlyAt(at+name) {
+			continue
+		}
 		var found string
 		for member, m := range shape.Members {
 			if normalize(member) == normalize(name) && compatible(schema.types(prop), model.Shapes[m.Target].Type, m.Target) {
@@ -163,7 +166,7 @@ func proposeNested(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				skipped[name] = "TODO: " + nestedStructure + " is recursive"
 				continue
 			}
-			mapping.Properties, mapping.Skip = proposeNested(model, schema, nested, nestedStructure, open)
+			mapping.Properties, mapping.Skip = proposeNested(model, schema, nested, nestedStructure, at+name+".", open)
 		}
 		mapped[name] = mapping
 	}

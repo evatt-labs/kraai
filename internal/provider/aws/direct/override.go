@@ -98,6 +98,10 @@ type Mapping struct {
 	// Transform names a function applied to the value read: arnResource,
 	// an ARN's resource part.
 	Transform string `yaml:"transform,omitempty"`
+	// Where keeps, of a list of structures, only the elements whose member
+	// equals the value, such as the ingress rules of a list holding both
+	// directions. {Property} stands for an identifier property's value.
+	Where map[string]string `yaml:"where,omitempty"`
 }
 
 // UnmarshalYAML accepts a bare member name for a mapping with no nested
@@ -119,7 +123,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" {
+	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 {
 		return m.Member, nil
 	}
 	type plain Mapping

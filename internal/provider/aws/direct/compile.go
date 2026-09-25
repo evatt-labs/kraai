@@ -97,6 +97,12 @@ type Step struct {
 	Where, Equals string
 }
 
+// Match is a member of a list element and the value it must equal, with
+// {Property} standing for that identifier property's value.
+type Match struct {
+	Member, Equals string
+}
+
 // selection matches a path step that selects one element of a list, such
 // as Associations[SubnetId={SubnetId}].
 var selection = regexp.MustCompile(`^([A-Za-z0-9]+)\[([A-Za-z0-9]+)=(.+)\]$`)
@@ -134,6 +140,9 @@ type Field struct {
 	Via []Step
 	// Transform is applied to the value read; see Mapping.Transform.
 	Transform string
+	// Where keeps, of a list of structures, the elements matching every
+	// Match; see Mapping.Where.
+	Where []Match
 	// Root reads the member from the operation's whole output rather than
 	// the resource, for a value carried beside it.
 	Root bool
@@ -545,10 +554,16 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 					}
 				}
 			}
+			for _, m := range f.Where {
+				for _, p := range placeholders(m.Equals) {
+					if !want[p] {
+						fail("%s filters by {%s}, which is not the primary identifier", f.Property, p)
+					}
+				}
+			}
 			checkSelections(f.Fields)
 		}
 	}
-	checkSelections(r.Fields)
 	if len(rootMapped) > 0 {
 		if payload != "" {
 			fail("a $. mapping reads the output, but the body is the payload %s", payload)
@@ -563,6 +578,7 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 		r.Fields = append(r.Fields, root...)
 		sort.Slice(r.Fields, func(i, j int) bool { return r.Fields[i].Property < r.Fields[j].Property })
 	}
+	checkSelections(r.Fields)
 
 	for _, member := range sortedKeys(o.Read.Absent) {
 		m, ok := model.Shapes[resource].Members[member]
@@ -774,15 +790,62 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		}
 		switch {
 		case nested != nil && nestedStructure != "":
+			for child := range nested {
+				if schema.writeOnlyAt(strings.TrimPrefix(at, "$.") + name + "." + child) {
+					delete(nested, child)
+				}
+			}
 			f.Fields = compileFields(model, schema, nested, nestedStructure, mapping.Properties, mapping.Skip, at+name+".", fail)
 		case len(mapping.Properties) > 0 || len(mapping.Skip) > 0:
 			fail("%s%s maps nested properties, but it is not a structure on both sides", at, name)
 		case nested != nil || nestedStructure != "":
 			fail("%s%s is a structure on one side only", at, name)
 		}
+		if len(mapping.Where) > 0 {
+			f.Where = compileWhere(model, f, nestedStructure, mapping.Where, at+name, fail)
+		}
 		fields = append(fields, f)
 	}
 	return fields
+}
+
+// compileWhere checks that a where filters a list of structures by scalar
+// members of its elements, each against a value the member can hold.
+func compileWhere(model *smithyModel, f Field, element string, where map[string]string, at string, fail func(string, ...any)) []Match {
+	if f.Kind != "list" || element == "" {
+		fail("%s filters with where, but it is not a list of structures", at)
+		return nil
+	}
+	var matches []Match
+	for _, member := range sortedKeys(where) {
+		value := where[member]
+		m, ok := model.Shapes[element].Members[member]
+		if !ok {
+			fail("%s filters by %s, which %s does not have", at, member, element)
+			continue
+		}
+		if m.Traits["smithy.api#jsonName"] != nil {
+			fail("%s filters by %s, whose jsonName a where does not follow", at, member)
+		}
+		target := model.Shapes[m.Target]
+		switch t := targetType(target.Type, m.Target); {
+		case strings.Contains(value, "{"):
+		case t == "boolean":
+			if value != "true" && value != "false" {
+				fail("%s filters boolean %s by %q, not true or false", at, member, value)
+			}
+		case kindOf(target.Type, m.Target) != "scalar":
+			fail("%s filters by %s, which is %s, not a scalar", at, member, t)
+		case target.Type == "enum" || t == "string":
+			if reason := fixedValue(model, m.Target, value); reason != "" {
+				fail("%s filters by %s, which %s", at, member, reason)
+			}
+		default:
+			fail("%s filters by %s, which is %s; only strings, enums and booleans can be matched", at, member, t)
+		}
+		matches = append(matches, Match{Member: member, Equals: value})
+	}
+	return matches
 }
 
 // partitionValues are the aws partition's values for the rule set
@@ -1220,6 +1283,9 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 		case "list":
 			f.Item = itemName(m, target)
 			el := ref(target.Member)
+			for j, w := range f.Where {
+				f.Where[j].Member = xmlName(w.Member, model.Shapes[el].Members[w.Member])
+			}
 			switch elShape := model.Shapes[el]; {
 			case elShape.Type == "structure":
 				xmlFields(model, el, f.Fields, at+f.Property+".", fail)

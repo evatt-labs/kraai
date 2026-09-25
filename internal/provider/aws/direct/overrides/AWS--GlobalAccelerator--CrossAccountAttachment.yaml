@@ -15,6 +15,5 @@ properties:
     properties:
       Cidr: Cidr
       EndpointId: EndpointId
-      Region: Region
 skip:
   Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

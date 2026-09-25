@@ -213,6 +213,14 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 		}
 		list := make([]any, 0, len(items))
 		for _, item := range items {
+			if !w.keeps(f.Where, func(member string) (string, bool) {
+				if c := item.child(member); c != nil {
+					return c.text, true
+				}
+				return "", false
+			}) {
+				continue
+			}
 			if len(f.Fields) > 0 {
 				list = append(list, translateXML(w, item, f.Fields))
 			} else {
