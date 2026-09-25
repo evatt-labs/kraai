@@ -1,0 +1,577 @@
+{
+  "shapes": {
+    "com.amazonaws.workspacesinstances#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#BillingConfiguration": {
+      "members": {
+        "BillingMode": {
+          "target": "com.amazonaws.workspacesinstances#BillingMode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#BillingMode": {
+      "members": {
+        "HOURLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HOURLY"
+          }
+        },
+        "MONTHLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MONTHLY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.workspacesinstances#EC2InstanceError": {
+      "members": {
+        "EC2ErrorCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "EC2ErrorMessage": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "EC2ExceptionType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#EC2InstanceErrors": {
+      "member": {
+        "target": "com.amazonaws.workspacesinstances#EC2InstanceError"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesinstances#EC2ManagedInstance": {
+      "members": {
+        "InstanceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#EUCMIFrontendAPIService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.workspacesinstances#GetWorkspaceInstance"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "workspaces-instances",
+          "cloudFormationName": "WorkspacesInstances",
+          "cloudTrailEventSource": "workspaces-instances.amazonaws.com",
+          "sdkId": "Workspaces Instances"
+        },
+        "aws.auth#sigv4": {
+          "name": "workspaces-instances"
+        },
+        "aws.endpoints#dualStackOnlyEndpoints": {},
+        "aws.endpoints#standardRegionalEndpoints": {},
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#title": "Amazon Workspaces Instances",
+        "smithy.protocols#rpcv2Cbor": {},
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://workspaces-instances-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://workspaces-instances.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2022-07-26"
+    },
+    "com.amazonaws.workspacesinstances#GetWorkspaceInstance": {
+      "errors": [
+        {
+          "target": "com.amazonaws.workspacesinstances#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.workspacesinstances#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.workspacesinstances#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.workspacesinstances#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.workspacesinstances#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.workspacesinstances#GetWorkspaceInstanceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.workspacesinstances#GetWorkspaceInstanceResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to get details for a specific workspace managed instance in your account"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.workspacesinstances#GetWorkspaceInstanceRequest": {
+      "members": {
+        "WorkspaceInstanceId": {
+          "target": "com.amazonaws.workspacesinstances#WorkspaceInstanceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#GetWorkspaceInstanceResponse": {
+      "members": {
+        "BillingConfiguration": {
+          "target": "com.amazonaws.workspacesinstances#BillingConfiguration",
+          "traits": {}
+        },
+        "EC2InstanceErrors": {
+          "target": "com.amazonaws.workspacesinstances#EC2InstanceErrors",
+          "traits": {}
+        },
+        "EC2ManagedInstance": {
+          "target": "com.amazonaws.workspacesinstances#EC2ManagedInstance",
+          "traits": {}
+        },
+        "ProvisionState": {
+          "target": "com.amazonaws.workspacesinstances#ProvisionStateEnum",
+          "traits": {}
+        },
+        "WorkspaceInstanceErrors": {
+          "target": "com.amazonaws.workspacesinstances#WorkspaceInstanceErrors",
+          "traits": {}
+        },
+        "WorkspaceInstanceId": {
+          "target": "com.amazonaws.workspacesinstances#WorkspaceInstanceId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RetryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#ProvisionStateEnum": {
+      "members": {
+        "ALLOCATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALLOCATED"
+          }
+        },
+        "ALLOCATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALLOCATING"
+          }
+        },
+        "DEALLOCATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEALLOCATED"
+          }
+        },
+        "DEALLOCATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEALLOCATING"
+          }
+        },
+        "ERROR_ALLOCATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ERROR_ALLOCATING"
+          }
+        },
+        "ERROR_DEALLOCATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ERROR_DEALLOCATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.workspacesinstances#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "QuotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "RetryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "ServiceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#ValidationException": {
+      "members": {
+        "FieldList": {
+          "target": "com.amazonaws.workspacesinstances#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Reason": {
+          "target": "com.amazonaws.workspacesinstances#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#ValidationExceptionField": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Reason": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.workspacesinstances#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesinstances#ValidationExceptionReason": {
+      "members": {
+        "CANNOT_PARSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CANNOT_PARSE"
+          }
+        },
+        "DEPENDENCY_FAILURE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEPENDENCY_FAILURE"
+          }
+        },
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FIELD_VALIDATION_FAILED"
+          }
+        },
+        "OTHER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OTHER"
+          }
+        },
+        "UNKNOWN_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNKNOWN_OPERATION"
+          }
+        },
+        "UNSUPPORTED_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNSUPPORTED_OPERATION"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.workspacesinstances#WorkspaceInstanceError": {
+      "members": {
+        "ErrorCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ErrorMessage": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#WorkspaceInstanceErrors": {
+      "member": {
+        "target": "com.amazonaws.workspacesinstances#WorkspaceInstanceError"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.workspacesinstances#WorkspaceInstanceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 70,
+          "min": 15
+        },
+        "smithy.api#pattern": "^wsinst-[0-9a-zA-Z]{8,63}$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

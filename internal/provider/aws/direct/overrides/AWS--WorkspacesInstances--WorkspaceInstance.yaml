@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WorkspacesInstances::WorkspaceInstance
+read:
+  model: workspaces-instances/service/2022-07-26/workspaces-instances-2022-07-26.json
+  operation: GetWorkspaceInstance
+  identifier:
+    WorkspaceInstanceId: WorkspaceInstanceId
+properties:
+  EC2ManagedInstance:
+    member: EC2ManagedInstance
+    properties:
+      InstanceId: InstanceId
+  ProvisionState: ProvisionState
+  WorkspaceInstanceId: WorkspaceInstanceId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

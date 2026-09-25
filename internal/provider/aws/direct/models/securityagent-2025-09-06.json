@@ -1,0 +1,285 @@
+{
+  "shapes": {
+    "com.amazonaws.securityagent#ApplicationDomain": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.securityagent#ApplicationId": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.securityagent#DefaultKmsKeyId": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.securityagent#GetApplication": {
+      "input": {
+        "target": "com.amazonaws.securityagent#GetApplicationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.securityagent#GetApplicationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetApplication"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.securityagent#GetApplicationRequest": {
+      "members": {
+        "applicationId": {
+          "target": "com.amazonaws.securityagent#ApplicationId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityagent#GetApplicationResponse": {
+      "members": {
+        "applicationId": {
+          "target": "com.amazonaws.securityagent#ApplicationId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "applicationName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "defaultKmsKeyId": {
+          "target": "com.amazonaws.securityagent#DefaultKmsKeyId",
+          "traits": {}
+        },
+        "domain": {
+          "target": "com.amazonaws.securityagent#ApplicationDomain",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "idcConfiguration": {
+          "target": "com.amazonaws.securityagent#IdCConfiguration",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.securityagent#RoleArn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityagent#IdCApplicationArn": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.securityagent#IdCConfiguration": {
+      "members": {
+        "idcApplicationArn": {
+          "target": "com.amazonaws.securityagent#IdCApplicationArn",
+          "traits": {}
+        },
+        "idcInstanceArn": {
+          "target": "com.amazonaws.securityagent#IdCInstanceArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.securityagent#IdCInstanceArn": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.securityagent#RoleArn": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.securityagent#SecurityAgent": {
+      "operations": [
+        {
+          "target": "com.amazonaws.securityagent#GetApplication"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "securityagent",
+          "cloudTrailEventSource": "securityagent.amazonaws.com",
+          "sdkId": "SecurityAgent"
+        },
+        "aws.auth#sigv4": {
+          "name": "securityagent"
+        },
+        "aws.endpoints#dualStackOnlyEndpoints": {},
+        "aws.endpoints#standardRegionalEndpoints": {},
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "AWS Security Agent",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://securityagent-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://securityagent.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2025-09-06"
+    }
+  },
+  "smithy": "2.0"
+}

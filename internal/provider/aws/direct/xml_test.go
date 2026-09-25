@@ -41,7 +41,7 @@ func xmlServer(t *testing.T, status int, body string) (*Client, *[]url.Values) {
 		HTTP:        srv.Client(),
 		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region:      "us-east-1",
-		Endpoint:    func(string, string) string { return srv.URL },
+		Endpoint:    func(string) string { return srv.URL },
 		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
 	}, &forms
 }
@@ -251,5 +251,112 @@ func TestCompileRefusesUnderXML(t *testing.T) {
 				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
 			}
 		})
+	}
+}
+
+const cachePolicies = "AWS::CloudFront::CachePolicy"
+
+const cachePolicyXML = `<?xml version="1.0"?>
+<CachePolicy xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/">
+  <Id>cp-1</Id>
+  <LastModifiedTime>1970-01-01T00:00:00Z</LastModifiedTime>
+  <CachePolicyConfig>
+    <Name>Managed-CachingOptimized</Name>
+    <MinTTL>1</MinTTL>
+    <ParametersInCacheKeyAndForwardedToOrigin>
+      <EnableAcceptEncodingGzip>true</EnableAcceptEncodingGzip>
+      <HeadersConfig>
+        <HeaderBehavior>whitelist</HeaderBehavior>
+        <Headers><Quantity>2</Quantity><Items><Name>Host</Name><Name>Origin</Name></Items></Headers>
+      </HeadersConfig>
+      <CookiesConfig><CookieBehavior>none</CookieBehavior><Cookies><Quantity>0</Quantity></Cookies></CookiesConfig>
+    </ParametersInCacheKeyAndForwardedToOrigin>
+  </CachePolicyConfig>
+</CachePolicy>`
+
+// restXml: a GET with the identifier in the path, the body the payload
+// itself, and lists read through their Quantity and Items wrapper.
+func TestReadRestXML(t *testing.T) {
+	var got []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		got = append(got, r.Method+" "+r.URL.EscapedPath()+" body="+string(raw))
+		_, _ = io.WriteString(w, cachePolicyXML)
+	}))
+	t.Cleanup(srv.Close)
+	client := &Client{
+		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
+		Now: func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
+	}
+	read, err := client.Read(context.Background(), cachePolicies, map[string]string{"Id": "cp/1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]any{
+		"Id": "cp-1", "LastModifiedTime": "1970-01-01T00:00:00Z",
+		"CachePolicyConfig": map[string]any{
+			"Name": "Managed-CachingOptimized", "MinTTL": json.Number("1"),
+			"ParametersInCacheKeyAndForwardedToOrigin": map[string]any{
+				"EnableAcceptEncodingGzip": true,
+				"HeadersConfig":            map[string]any{"HeaderBehavior": "whitelist", "Headers": []any{"Host", "Origin"}},
+				"CookiesConfig":            map[string]any{"CookieBehavior": "none"},
+			},
+		},
+	}
+	if !reflect.DeepEqual(read, want) {
+		t.Fatalf("Read = %#v\nwant   %#v", read, want)
+	}
+	if want := []string{"GET /2020-05-31/cache-policy/cp%2F1 body="}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("requests = %v, want %v", got, want)
+	}
+}
+
+func TestReadRestXMLError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(404)
+		_, _ = io.WriteString(w, `<ErrorResponse><Error><Type>Sender</Type><Code>NoSuchCachePolicy</Code><Message>gone</Message></Error></ErrorResponse>`)
+	}))
+	t.Cleanup(srv.Close)
+	client := &Client{
+		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
+	}
+	_, err := client.Read(context.Background(), cachePolicies, map[string]string{"Id": "x"})
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) || apiErr.Code != "NoSuchCachePolicy" || apiErr.Status != 404 {
+		t.Fatalf("error = %#v", err)
+	}
+}
+
+func TestCompileRefusesAMemberPath(t *testing.T) {
+	const file = "AWS--CloudFront--CachePolicy.yaml"
+	cases := map[string]struct {
+		old, replacement, want string
+	}{
+		"a step that is not a member":     {"Headers: Headers.Items", "Headers: Nope.Items", "Nope is not a structure member"},
+		"a step that is not a structure":  {"Headers: Headers.Items", "Headers: HeaderBehavior.Items", "HeaderBehavior is not a structure member"},
+		"a last step the structure lacks": {"Headers: Headers.Items", "Headers: Headers.Names", "maps to Headers.Names, which"},
+		"a path to the wrong type":        {"Headers: Headers.Items", "Headers: Headers.Quantity", "Headers is [array] in the schema, but Headers.Quantity is integer"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, err := compileAll(edit(t, file, c.old, c.replacement))
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
+			}
+		})
+	}
+}
+
+// Under a JSON protocol a member path is walked through the objects too.
+func TestTranslateAMemberPath(t *testing.T) {
+	r := Reader{Protocol: "restJson1"}
+	got := r.translate(map[string]any{"Headers": map[string]any{"Quantity": 1, "Items": []any{"Host"}}}, []Field{
+		{Property: "Headers", Member: "Items", Kind: "list", Via: []string{"Headers"}},
+		{Property: "Absent", Member: "Items", Kind: "list", Via: []string{"Nothing"}},
+	})
+	if !reflect.DeepEqual(got, map[string]any{"Headers": []any{"Host"}}) {
+		t.Fatalf("translate = %v", got)
 	}
 }

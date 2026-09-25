@@ -43,7 +43,7 @@ func serve(t *testing.T, status int, header http.Header, response string) (*Clie
 		HTTP:        srv.Client(),
 		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region:      "us-east-1",
-		Endpoint:    func(string, string) string { return srv.URL },
+		Endpoint:    func(string) string { return srv.URL },
 		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
 	}, got
 }
@@ -220,22 +220,33 @@ func TestJSONNameUnderAWSJSONIsRefused(t *testing.T) {
 	t.Fatal("no CodeDeploy override")
 }
 
-// The request is sent to the endpoint prefix and signed for the signing
-// name, which differ for some services.
-func TestSigningNameAndEndpointPrefixAreKeptApart(t *testing.T) {
-	readers["Test::Split::Names"] = Reader{
-		Type: "Test::Split::Names", Protocol: "awsJson1_1", SigningName: "signer", EndpointPrefix: "endpoint",
-		Target: "Svc.Get", Identifier: []Binding{{Property: "Id", Member: "Id", Location: "body"}},
-	}
-	t.Cleanup(func() { delete(readers, "Test::Split::Names") })
-	client, got := serve(t, 200, nil, `{}`)
-	var prefix string
-	inner := client.Endpoint
-	client.Endpoint = func(p, region string) string { prefix = p; return inner(p, region) }
-	if _, err := client.Read(context.Background(), "Test::Split::Names", map[string]string{"Id": "x"}); err != nil {
-		t.Fatal(err)
-	}
-	if prefix != "endpoint" || !strings.Contains(got.auth, "/us-east-1/signer/aws4_request") {
-		t.Fatalf("endpoint prefix %q, Authorization %q", prefix, got.auth)
+// The request is sent to the reader's host in the client's region and
+// signed for the signing name, which differ for some services; a global
+// endpoint is signed for its own region, not the client's.
+func TestHostAndSigningAreKeptApart(t *testing.T) {
+	for name, c := range map[string]struct {
+		host, signingRegion, wantHost, wantScope string
+	}{
+		"regional": {"endpoint.{region}.amazonaws.com", "", "endpoint.eu-west-1.amazonaws.com", "/eu-west-1/signer/aws4_request"},
+		"global":   {"endpoint.amazonaws.com", "us-east-1", "endpoint.amazonaws.com", "/us-east-1/signer/aws4_request"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			readers["Test::Split::Names"] = Reader{
+				Type: "Test::Split::Names", Protocol: "awsJson1_1", SigningName: "signer", Host: c.host, SigningRegion: c.signingRegion,
+				Target: "Svc.Get", Identifier: []Binding{{Property: "Id", Member: "Id", Location: "body"}},
+			}
+			t.Cleanup(func() { delete(readers, "Test::Split::Names") })
+			client, got := serve(t, 200, nil, `{}`)
+			client.Region = "eu-west-1"
+			var host string
+			inner := client.Endpoint
+			client.Endpoint = func(h string) string { host = h; return inner(h) }
+			if _, err := client.Read(context.Background(), "Test::Split::Names", map[string]string{"Id": "x"}); err != nil {
+				t.Fatal(err)
+			}
+			if host != c.wantHost || !strings.Contains(got.auth, c.wantScope) {
+				t.Fatalf("host %q, Authorization %q", host, got.auth)
+			}
+		})
 	}
 }

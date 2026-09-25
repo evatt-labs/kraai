@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SecurityAgent::Application
+read:
+  model: securityagent/service/2025-09-06/securityagent-2025-09-06.json
+  operation: GetApplication
+  identifier:
+    ApplicationId: applicationId
+properties:
+  ApplicationId: applicationId
+  ApplicationName: applicationName
+  DefaultKmsKeyId: defaultKmsKeyId
+  Domain: domain
+  IdCConfiguration:
+    member: idcConfiguration
+    properties:
+      IdCApplicationArn: idcApplicationArn
+      IdCInstanceArn: idcInstanceArn
+  RoleArn: roleArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

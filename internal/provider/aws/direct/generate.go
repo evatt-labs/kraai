@@ -24,7 +24,8 @@ func Generate() ([]byte, error) {
 		field(&b, "Type", r.Type)
 		field(&b, "Protocol", r.Protocol)
 		field(&b, "SigningName", r.SigningName)
-		field(&b, "EndpointPrefix", r.EndpointPrefix)
+		field(&b, "Host", r.Host)
+		field(&b, "SigningRegion", r.SigningRegion)
 		field(&b, "Target", r.Target)
 		field(&b, "Method", r.Method)
 		field(&b, "URI", r.URI)
@@ -112,6 +113,9 @@ func fields(b *bytes.Buffer, fs []Field) {
 	b.WriteString("Fields: []Field{\n")
 	for _, f := range fs {
 		fmt.Fprintf(b, "{Property: %q, Member: %q, Kind: %q", f.Property, f.Member, f.Kind)
+		if len(f.Via) > 0 {
+			fmt.Fprintf(b, ", Via: %#v", f.Via)
+		}
 		if f.JSONName != "" {
 			fmt.Fprintf(b, ", JSONName: %q", f.JSONName)
 		}

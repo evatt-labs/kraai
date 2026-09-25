@@ -86,8 +86,17 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	// A file without the joined header was written or edited by a person.
+	// A file without the joined header was written or edited by a person;
+	// one with it is this tool's, and is removed with -write once its type
+	// no longer joins.
+	stillJoined := map[string]bool{}
+	for _, j := range joined {
+		if j.Override != nil {
+			stillJoined[j.Type] = true
+		}
+	}
 	reviewed := map[string]bool{}
+	removed := 0
 	existing, err := filepath.Glob("overrides/*.yaml")
 	if err != nil {
 		return err
@@ -97,8 +106,15 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		if !bytes.HasPrefix(raw, []byte(joinedHeader)) {
-			reviewed[strings.ReplaceAll(strings.TrimSuffix(filepath.Base(name), ".yaml"), "--", "::")] = true
+		typeName := strings.ReplaceAll(strings.TrimSuffix(filepath.Base(name), ".yaml"), "--", "::")
+		switch {
+		case !bytes.HasPrefix(raw, []byte(joinedHeader)):
+			reviewed[typeName] = true
+		case *write && !stillJoined[typeName]:
+			if err := os.Remove(name); err != nil {
+				return err
+			}
+			removed++
 		}
 	}
 
@@ -144,7 +160,7 @@ func run() error {
 		fmt.Printf("  %5d  %s\n", byReason[r], r)
 	}
 	if *write {
-		fmt.Printf("wrote %d overrides\n", written)
+		fmt.Printf("wrote %d overrides, removed %d that no longer join\n", written, removed)
 	}
 	return nil
 }

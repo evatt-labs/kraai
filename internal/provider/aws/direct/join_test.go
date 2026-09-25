@@ -19,8 +19,11 @@ func widgetModel(cfnName, signingName string) map[string]any {
 			"com.example#Widgets": map[string]any{
 				"type": "service",
 				"traits": map[string]any{
-					"aws.api#service":          map[string]any{"sdkId": cfnName, "arnNamespace": signingName, "cloudFormationName": cfnName, "endpointPrefix": signingName},
-					"aws.auth#sigv4":           map[string]any{"name": signingName},
+					"aws.api#service": map[string]any{"sdkId": cfnName, "arnNamespace": signingName, "cloudFormationName": cfnName, "endpointPrefix": signingName},
+					"aws.auth#sigv4":  map[string]any{"name": signingName},
+					"smithy.rules#endpointRuleSet": map[string]any{"rules": []any{map[string]any{
+						"type": "endpoint", "endpoint": map[string]any{"url": "https://" + signingName + ".{Region}.{PartitionResult#dnsSuffix}"},
+					}}},
 					"aws.protocols#awsJson1_1": map[string]any{},
 				},
 			},
@@ -154,10 +157,10 @@ func TestJoinRefuses(t *testing.T) {
 			}}}
 			s["properties"].(map[string]any)["Node"] = map[string]any{"$ref": "#/definitions/Node"}
 		}, want: "unmatched properties: Node.Child"},
-		"a service with no endpoint": {model: func(m map[string]any) {
+		"a service with no endpoint rule set": {model: func(m map[string]any) {
 			svc := m["shapes"].(map[string]any)["com.example#Widgets"].(map[string]any)
-			delete(svc["traits"].(map[string]any)["aws.api#service"].(map[string]any), "endpointPrefix")
-		}, want: "does not compile: the service declares no signing name or endpoint prefix"},
+			delete(svc["traits"].(map[string]any), "smithy.rules#endpointRuleSet")
+		}, want: "does not compile: no endpoint this client can form: the model has no endpoint rule set"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -205,32 +208,64 @@ func TestJoinPicksTheModelNamingTheService(t *testing.T) {
 	}
 }
 
-func TestRuleSetHost(t *testing.T) {
-	rule := func(urls ...string) json.RawMessage {
-		var rules []any
-		for _, u := range urls {
-			rules = append(rules, map[string]any{"type": "endpoint", "endpoint": map[string]any{"url": u}})
+func TestEndpointOf(t *testing.T) {
+	type ep struct{ url, signing string }
+	rules := func(eps ...ep) json.RawMessage {
+		var list []any
+		for _, e := range eps {
+			endpoint := map[string]any{"url": e.url}
+			if e.signing != "" {
+				endpoint["properties"] = map[string]any{"authSchemes": []any{map[string]any{"name": "sigv4", "signingRegion": e.signing}}}
+			}
+			list = append(list, map[string]any{"type": "endpoint", "endpoint": endpoint})
 		}
-		raw, _ := json.Marshal(map[string]any{"rules": []any{map[string]any{"type": "tree", "rules": rules}}})
+		raw, _ := json.Marshal(map[string]any{"rules": []any{map[string]any{"type": "tree", "rules": list}}})
 		return raw
 	}
-	const std, fips = "https://widgets.{Region}.{PartitionResult#dnsSuffix}", "https://widgets-fips.{Region}.{PartitionResult#dnsSuffix}"
+	regional := ep{"https://widgets.{Region}.{PartitionResult#dnsSuffix}", ""}
 	cases := map[string]struct {
-		rules json.RawMessage
-		want  string
+		rules                  json.RawMessage
+		host, signing, refused string
 	}{
-		"one standard host":          {rule(std), "widgets"},
-		"a standard and a fips":      {rule(fips, std), "widgets"},
-		"a dual-stack host":          {rule(std, "https://widgets.{Region}.{PartitionResult#dualStackDnsSuffix}"), "widgets"},
-		"two standard hosts":         {rule(std, "https://search-widgets.{Region}.{PartitionResult#dnsSuffix}"), ""},
-		"only fips":                  {rule(fips), ""},
-		"no rules":                   {nil, ""},
-		"a host outside the pattern": {rule("https://widgets.amazonaws.com"), ""},
+		"regional":                    {rules(regional), "widgets.{region}.amazonaws.com", "", ""},
+		"regional with a dotted host": {rules(ep{"https://api.widgets.{Region}.{PartitionResult#dnsSuffix}", ""}), "api.widgets.{region}.amazonaws.com", "", ""},
+		"regional beside fips, dual-stack and other partitions": {rules(
+			regional, ep{"https://widgets-fips.{Region}.{PartitionResult#dnsSuffix}", ""},
+			ep{"https://widgets.{Region}.{PartitionResult#dualStackDnsSuffix}", ""}, ep{"https://widgets.us-gov-west-1.amazonaws.com", ""},
+			ep{"https://widgets.cn-north-1.amazonaws.com.cn", ""},
+		), "widgets.{region}.amazonaws.com", "", ""},
+		"regional beside one region's literal of the same form": {rules(regional, ep{"https://widgets.us-east-1.amazonaws.com", ""}), "widgets.{region}.amazonaws.com", "", ""},
+		"global":                               {rules(ep{"https://widgets.{PartitionResult#dnsSuffix}", "{PartitionResult#implicitGlobalRegion}"}), "widgets.amazonaws.com", "us-east-1", ""},
+		"global in the implicit region":        {rules(ep{"https://widgets.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dnsSuffix}", "us-east-1"}), "widgets.us-east-1.amazonaws.com", "us-east-1", ""},
+		"a global form signed elsewhere":       {rules(ep{"https://widgets.{PartitionResult#dnsSuffix}", "us-west-2"}), "", "", `is signed for "us-west-2"`},
+		"regional and global both":             {rules(regional, ep{"https://widgets.{PartitionResult#dnsSuffix}", "us-east-1"}), "", "", "2 standard endpoints"},
+		"a literal the form would not produce": {rules(regional, ep{"https://widgets.amazonaws.com", ""}), "", "", "2 standard endpoints [widgets.amazonaws.com widgets.{region}.amazonaws.com]"},
+		"only one region's literal":            {rules(ep{"https://widgets.us-west-2.amazonaws.com", ""}), "", "", `widgets.us-west-2.amazonaws.com is signed for ""`},
+		"only fips":                            {rules(ep{"https://widgets-fips.{Region}.{PartitionResult#dnsSuffix}", ""}), "", "", "0 standard endpoints"},
+		"regional spelled with the suffix":     {rules(ep{"https://widgets.{Region}.amazonaws.com", ""}, regional), "widgets.{region}.amazonaws.com", "", ""},
+		"dual-stack only": {rules(ep{"https://widgets.{Region}.{PartitionResult#dualStackDnsSuffix}", ""},
+			ep{"https://widgets-fips.{Region}.{PartitionResult#dualStackDnsSuffix}", ""}), "widgets.{region}.api.aws", "", ""},
+		"dual-stack beside a standard form": {rules(regional, ep{"https://widgets.{Region}.{PartitionResult#dualStackDnsSuffix}", ""}), "widgets.{region}.amazonaws.com", "", ""},
+		"a name that merely contains iso":   {rules(ep{"https://api.deviceadvisor.{Region}.{PartitionResult#dnsSuffix}", ""}), "api.deviceadvisor.{region}.amazonaws.com", "", ""},
+		"fips in a later label":             {rules(regional, ep{"https://api.widgets-fips.{Region}.{PartitionResult#dnsSuffix}", ""}), "widgets.{region}.amazonaws.com", "", ""},
+		"another partition's literal": {rules(regional, ep{"https://widgets.us-gov.amazonaws.com", ""},
+			ep{"https://widgets.cn-north-1.amazonaws.com.cn", ""}), "widgets.{region}.amazonaws.com", "", ""},
+		"global beside another partition's global": {rules(ep{"https://widgets.{PartitionResult#dnsSuffix}", "us-east-1"},
+			ep{"https://widgets.us-gov.amazonaws.com", "us-gov-west-1"}), "widgets.amazonaws.com", "us-east-1", ""},
+		"a form that needs a parameter": {rules(regional, ep{"https://{AccountId}.widgets.{Region}.{PartitionResult#dnsSuffix}", ""}), "widgets.{region}.amazonaws.com", "", ""},
+		"no rule set":                   {nil, "", "", "no endpoint rule set"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := ruleSetHost(c.rules); got != c.want {
-				t.Fatalf("ruleSetHost = %q, want %q", got, c.want)
+			host, signing, reason := endpointOf(c.rules)
+			if c.refused != "" {
+				if !strings.Contains(reason, c.refused) || host != "" {
+					t.Fatalf("endpointOf = %q, %q, %q; want refused with %q", host, signing, reason, c.refused)
+				}
+				return
+			}
+			if host != c.host || signing != c.signing || reason != "" {
+				t.Fatalf("endpointOf = %q, %q, %q; want %q, %q", host, signing, reason, c.host, c.signing)
 			}
 		})
 	}
@@ -430,6 +465,35 @@ func TestCompileRefusesAListIdentifierUnderRestJSON(t *testing.T) {
 	o.Read.Identifier = map[string]string{"WidgetId": "WidgetIds"}
 	_, errs := compileWidget(t, m, o)
 	if !containsErr(errs, "which restJson1 would not send as a body") {
+		t.Fatalf("errors = %v", errs)
+	}
+}
+
+// A restXml identifier must bind to the path, query or a header: this
+// client serializes no XML body.
+func TestCompileRefusesARestXMLBodyIdentifier(t *testing.T) {
+	m := restJSONWidget()
+	shapes := m["shapes"].(map[string]any)
+	traits := shapes["com.example#Widgets"].(map[string]any)["traits"].(map[string]any)
+	delete(traits, "aws.protocols#restJson1")
+	traits["aws.protocols#restXml"] = map[string]any{}
+	delete(shapes["com.example#GetWidgetRequest"].(map[string]any)["members"].(map[string]any)["WidgetId"].(map[string]any)["traits"].(map[string]any), "smithy.api#httpLabel")
+	_, errs := compileWidget(t, m, widgetOverride("Widget"))
+	if !containsErr(errs, "a body member, and this client sends no XML body") {
+		t.Fatalf("errors = %v", errs)
+	}
+}
+
+// A member path does not follow a jsonName, so one through such a member
+// is refused rather than read from the wrong key.
+func TestCompileRefusesAPathThroughAJSONName(t *testing.T) {
+	m := restJSONWidget()
+	members := m["shapes"].(map[string]any)["com.example#Widget"].(map[string]any)["members"].(map[string]any)
+	members["Node"].(map[string]any)["traits"] = map[string]any{"smithy.api#jsonName": "node"}
+	o := widgetOverride("Widget")
+	o.Properties["Name"] = Mapping{Member: "Node.Label"}
+	_, errs := compileWidget(t, m, o)
+	if !containsErr(errs, "Name maps through Node, whose jsonName a path does not follow") {
 		t.Fatalf("errors = %v", errs)
 	}
 }

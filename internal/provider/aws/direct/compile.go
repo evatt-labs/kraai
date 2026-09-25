@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"regexp"
 	"sort"
 	"strings"
 )
@@ -13,10 +12,13 @@ import (
 // Reader is a compiled override: everything a client needs to read one
 // type, resolved against the model, so nothing is looked up at run time.
 type Reader struct {
-	Type           string
-	Protocol       string
-	SigningName    string
-	EndpointPrefix string
+	Type        string
+	Protocol    string
+	SigningName string
+	// Host is the endpoint's host, with {region} standing for the client's
+	// region in a regional one; SigningRegion, when set, is the region a
+	// global endpoint is signed for.
+	Host, SigningRegion string
 	// Target is the X-Amz-Target header of an awsJson protocol.
 	Target string
 	// Method and URI are the HTTP binding of a restJson1 operation.
@@ -83,6 +85,10 @@ type Binding struct {
 type Field struct {
 	Property string
 	Member   string
+	// Via is the path of structures on the wire from the enclosing one to
+	// the one holding Member, for a property the API wraps, such as a list
+	// inside a Quantity and Items structure.
+	Via []string
 	// JSONName is the member's jsonName trait, when it has one.
 	JSONName string
 	// Kind is scalar, timestamp, structure, list or map. A structure's
@@ -96,10 +102,22 @@ type Field struct {
 	XMLName, Item, Scalar string
 }
 
-var protocols = map[string]bool{"awsJson1_0": true, "awsJson1_1": true, "restJson1": true, "awsQuery": true, "ec2Query": true}
+var protocols = map[string]bool{"awsJson1_0": true, "awsJson1_1": true, "restJson1": true, "awsQuery": true, "ec2Query": true, "restXml": true}
 
 // isXML reports whether protocol answers in XML.
-func isXML(protocol string) bool { return protocol == "awsQuery" || protocol == "ec2Query" }
+func isXML(protocol string) bool {
+	return protocol == "awsQuery" || protocol == "ec2Query" || protocol == "restXml"
+}
+
+// isQuery reports whether protocol sends its input as a form.
+func isQuery(protocol string) bool { return protocol == "awsQuery" || protocol == "ec2Query" }
+
+// isREST reports whether protocol binds its input and output to HTTP.
+func isREST(protocol string) bool { return protocol == "restJson1" || protocol == "restXml" }
+
+// isAWSJSON reports whether protocol is one of the awsJson protocols,
+// whose specifications say nothing of jsonName.
+func isAWSJSON(protocol string) bool { return strings.HasPrefix(protocol, "awsJson") }
 
 type smithyShape struct {
 	Type    string                     `json:"type"`
@@ -193,20 +211,19 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		fail("the service speaks no protocol this package supports")
 	}
 	var sigv4 struct{ Name string }
-	var api struct{ EndpointPrefix string }
 	_ = json.Unmarshal(svc.Traits["aws.auth#sigv4"], &sigv4)
-	_ = json.Unmarshal(svc.Traits["aws.api#service"], &api)
-	if api.EndpointPrefix == "" {
-		api.EndpointPrefix = ruleSetHost(svc.Traits["smithy.rules#endpointRuleSet"])
+	r.SigningName = sigv4.Name
+	if r.SigningName == "" {
+		fail("the service declares no signing name")
 	}
-	r.SigningName, r.EndpointPrefix = sigv4.Name, api.EndpointPrefix
-	if r.SigningName == "" || r.EndpointPrefix == "" {
-		fail("the service declares no signing name or endpoint prefix")
+	var reason string
+	if r.Host, r.SigningRegion, reason = endpointOf(svc.Traits["smithy.rules#endpointRuleSet"]); reason != "" {
+		fail("no endpoint this client can form: %s", reason)
 	}
 
 	op := model.Shapes[namespace+o.Read.Operation]
 	switch r.Protocol {
-	case "restJson1":
+	case "restJson1", "restXml":
 		var http struct{ Method, URI string }
 		if err := json.Unmarshal(op.Traits["smithy.api#http"], &http); err != nil || http.Method == "" {
 			fail("%s has no HTTP binding", o.Read.Operation)
@@ -249,13 +266,13 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			}
 			b.List = true
 		}
-		if isXML(r.Protocol) {
+		if isQuery(r.Protocol) {
 			b.Location, b.Name = "form", queryKey(&model, r.Protocol, member, m)
 		}
-		if r.Protocol == "restJson1" && b.List {
-			fail("identifier binds %s to the list %s, which restJson1 would not send as a body", property, member)
+		if isREST(r.Protocol) && b.List {
+			fail("identifier binds %s to the list %s, which %s would not send as a body", property, member, r.Protocol)
 		}
-		if r.Protocol == "restJson1" {
+		if isREST(r.Protocol) {
 			switch {
 			case m.Traits["smithy.api#httpLabel"] != nil:
 				b.Location = "label"
@@ -266,6 +283,9 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 				b.Location = "header"
 				_ = json.Unmarshal(m.Traits["smithy.api#httpHeader"], &b.Name)
 			}
+		}
+		if r.Protocol == "restXml" && b.Location == "body" {
+			fail("identifier binds %s to %s, a body member, and this client sends no XML body", property, member)
 		}
 		r.Identifier = append(r.Identifier, b)
 	}
@@ -282,11 +302,11 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 
 	// The response path, to the structure holding the resource.
 	resource := ref(op.Output)
-	// Under restJson1 an output member may be bound to a header or the
-	// status code, which the client never reads, or be the whole body, in
-	// which case the body is not wrapped in it.
+	// Under a REST protocol an output member may be bound to a header or
+	// the status code, which the client never reads, or be the whole body,
+	// in which case the body is not wrapped in it.
 	payload := ""
-	if r.Protocol == "restJson1" {
+	if isREST(r.Protocol) {
 		for name, m := range model.Shapes[resource].Members {
 			if m.Traits["smithy.api#httpPayload"] != nil {
 				payload = name
@@ -306,7 +326,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			}
 			var jsonName string
 			_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &jsonName)
-			if jsonName != "" && r.Protocol != "restJson1" {
+			if jsonName != "" && isAWSJSON(r.Protocol) {
 				fail("response path member %s has a jsonName, which %s is not known to honour", step, r.Protocol)
 			}
 			next := m.Target
@@ -333,7 +353,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	} else if payload != "" {
 		fail("the body is the payload %s, so the response path must start at it", payload)
 	}
-	if r.Protocol == "restJson1" && o.Read.Response == "" {
+	if isREST(r.Protocol) && o.Read.Response == "" {
 		for _, name := range sortedKeys(o.Properties) {
 			m := model.Shapes[resource].Members[o.Properties[name].Member]
 			for _, trait := range []string{"smithy.api#httpHeader", "smithy.api#httpPrefixHeaders", "smithy.api#httpResponseCode"} {
@@ -366,8 +386,8 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 
 	// The awsJson specifications say nothing of jsonName, so a member
 	// carrying one could be named either way on the wire; refuse rather
-	// than read nothing.
-	if r.Protocol != "restJson1" {
+	// than read nothing. The XML protocols name elements by xmlName.
+	if isAWSJSON(r.Protocol) {
 		for _, b := range r.Identifier {
 			if b.JSONName != "" {
 				fail("identifier member %s has a jsonName, which %s is not known to honour", b.Member, r.Protocol)
@@ -430,12 +450,33 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s is neither mapped nor skipped", at, name)
 			continue
 		}
-		m, ok := shape.Members[mapping.Member]
+		// A dotted member is a path through structures to the one mapped.
+		steps := strings.Split(mapping.Member, ".")
+		holder, via, walked := structure, []string{}, true
+		for _, step := range steps[:len(steps)-1] {
+			pm, ok := model.Shapes[holder].Members[step]
+			if !ok || model.Shapes[pm.Target].Type != "structure" {
+				fail("%s%s maps to %s, but %s is not a structure member of %s", at, name, mapping.Member, step, holder)
+				walked = false
+				break
+			}
+			if pm.Traits["smithy.api#jsonName"] != nil {
+				fail("%s%s maps through %s, whose jsonName a path does not follow", at, name, step)
+			}
+			via, holder = append(via, step), pm.Target
+		}
+		if !walked {
+			continue
+		}
+		m, ok := model.Shapes[holder].Members[steps[len(steps)-1]]
 		if !ok {
 			fail("%s%s maps to %s, which %s does not have", at, name, mapping.Member, structure)
 			continue
 		}
-		f := Field{Property: name, Member: mapping.Member}
+		f := Field{Property: name, Member: steps[len(steps)-1]}
+		if len(via) > 0 {
+			f.Via = via
+		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]
 		types := schema.types(prop)
@@ -467,29 +508,66 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 	return fields
 }
 
-// standardHost matches a rule set's standard endpoint: neither FIPS nor
-// dual-stack, in the region's own partition.
-var standardHost = regexp.MustCompile(`^https://([a-z0-9-]+)\.\{Region\}\.\{PartitionResult#dnsSuffix\}$`)
+// partitionValues are the aws partition's values for the rule set
+// variables a standard endpoint URL uses.
+var partitionValues = strings.NewReplacer(
+	"{PartitionResult#dnsSuffix}", "amazonaws.com",
+	"{PartitionResult#dualStackDnsSuffix}", "api.aws",
+	"{PartitionResult#implicitGlobalRegion}", "us-east-1",
+	"{Region}", "{region}",
+)
 
-// ruleSetHost is the endpoint prefix a service's endpoint rule set implies,
-// for a model that declares none: the one non-FIPS standard host its rules
-// name, or "" when they name none or several.
-func ruleSetHost(ruleSet json.RawMessage) string {
+// otherPartitionRegions prefix the regions of partitions other than aws,
+// which a literal host under amazonaws.com can still name.
+var otherPartitionRegions = []string{"us-gov", "cn-", "us-iso", "eu-iso", "eusc-"}
+
+// endpointOf reads the one standard endpoint a service's rule set gives
+// for the aws partition from its URLs as written, rather than evaluating
+// its conditions. It returns the host, {region} standing for the client's
+// region when regional, and the region a global endpoint is signed for; or
+// why no single endpoint is there to form.
+//
+// A URL is set aside when it is FIPS, in another partition, or depends on
+// a parameter this client never sets. An amazonaws.com host is preferred
+// to an api.aws one, which some services give only in dual-stack form; a
+// literal host for one region that the regional form produces anyway is
+// not a second endpoint.
+func endpointOf(ruleSet json.RawMessage) (host, signingRegion, reason string) {
 	var tree any
-	if json.Unmarshal(ruleSet, &tree) != nil {
-		return ""
+	if json.Unmarshal(ruleSet, &tree) != nil || tree == nil {
+		return "", "", "the model has no endpoint rule set"
 	}
-	hosts := map[string]bool{}
+	type candidate struct{ host, signingRegion string }
+	tiers := map[string]map[candidate]bool{"amazonaws.com": {}, "api.aws": {}}
 	var walk func(any)
 	walk = func(v any) {
 		switch t := v.(type) {
 		case map[string]any:
-			for k, child := range t {
-				if url, ok := child.(string); ok && k == "url" {
-					if m := standardHost.FindStringSubmatch(url); m != nil && !strings.HasSuffix(m[1], "-fips") {
-						hosts[m[1]] = true
+			if t["type"] == "endpoint" {
+				endpoint, _ := t["endpoint"].(map[string]any)
+				url, _ := endpoint["url"].(string)
+				var signing string
+				if props, ok := endpoint["properties"].(map[string]any); ok {
+					if schemes, ok := props["authSchemes"].([]any); ok && len(schemes) > 0 {
+						scheme, _ := schemes[0].(map[string]any)
+						signing, _ = scheme["signingRegion"].(string)
 					}
 				}
+				h, ok := strings.CutPrefix(partitionValues.Replace(url), "https://")
+				if ok && !strings.ContainsAny(strings.ReplaceAll(h, "{region}", ""), "{}/") &&
+					!fips(h) && !otherPartition(h) {
+					c := candidate{host: h}
+					if !strings.Contains(h, "{region}") {
+						c.signingRegion = partitionValues.Replace(signing)
+					}
+					for suffix, tier := range tiers {
+						if strings.HasSuffix(h, "."+suffix) {
+							tier[c] = true
+						}
+					}
+				}
+			}
+			for _, child := range t {
 				walk(child)
 			}
 		case []any:
@@ -499,10 +577,61 @@ func ruleSetHost(ruleSet json.RawMessage) string {
 		}
 	}
 	walk(tree)
-	if len(hosts) != 1 {
-		return ""
+	found := tiers["amazonaws.com"]
+	if len(found) == 0 {
+		found = tiers["api.aws"]
 	}
-	return sortedKeys(hosts)[0]
+	// A regional form accounts for any literal it produces for one region.
+	for c := range found {
+		prefix, suffix, regional := strings.Cut(c.host, ".{region}.")
+		if !regional {
+			continue
+		}
+		for other := range found {
+			rest, ok := strings.CutPrefix(other.host, prefix+".")
+			if ok && strings.HasSuffix(rest, "."+suffix) && !strings.Contains(strings.TrimSuffix(rest, "."+suffix), ".") && other != c {
+				delete(found, other)
+			}
+		}
+	}
+	if len(found) != 1 {
+		hosts := make([]string, 0, len(found))
+		for c := range found {
+			hosts = append(hosts, c.host)
+		}
+		sort.Strings(hosts)
+		return "", "", fmt.Sprintf("the rule set gives %d standard endpoints %v", len(found), hosts)
+	}
+	for c := range found {
+		host, signingRegion = c.host, c.signingRegion
+	}
+	if !strings.Contains(host, "{region}") && signingRegion != "us-east-1" {
+		return "", "", fmt.Sprintf("the global endpoint %s is signed for %q, not us-east-1", host, signingRegion)
+	}
+	return host, signingRegion, ""
+}
+
+// fips reports whether any label of host names a FIPS endpoint.
+func fips(host string) bool {
+	for label := range strings.SplitSeq(host, ".") {
+		if label == "fips" || strings.HasSuffix(label, "-fips") {
+			return true
+		}
+	}
+	return false
+}
+
+// otherPartition reports whether any label of host is another
+// partition's region.
+func otherPartition(host string) bool {
+	for label := range strings.SplitSeq(host, ".") {
+		for _, prefix := range otherPartitionRegions {
+			if strings.HasPrefix(label, prefix) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func ref(m *smithyMember) string {
@@ -623,10 +752,14 @@ func queryKey(model *smithyModel, protocol, member string, m smithyMember) strin
 // what the XML reader cannot type without the model: a list of lists, and
 // a map of anything but scalars.
 func xmlFields(model *smithyModel, structure string, fields []Field, at string, fail func(string, ...any)) {
-	shape := model.Shapes[structure]
 	for i := range fields {
 		f := &fields[i]
-		m := shape.Members[f.Member]
+		holder := structure
+		for j, step := range f.Via {
+			pm := model.Shapes[holder].Members[step]
+			f.Via[j], holder = xmlName(step, pm), pm.Target
+		}
+		m := model.Shapes[holder].Members[f.Member]
 		f.XMLName = xmlName(f.Member, m)
 		target := model.Shapes[m.Target]
 		switch f.Kind {

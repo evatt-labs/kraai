@@ -1,0 +1,41 @@
+type: AWS::CloudFront::CachePolicy
+read:
+  model: cloudfront/service/2020-05-31/cloudfront-2020-05-31.json
+  operation: GetCachePolicy
+  identifier:
+    Id: Id
+  response: CachePolicy
+properties:
+  CachePolicyConfig:
+    member: CachePolicyConfig
+    properties:
+      Comment: Comment
+      DefaultTTL: DefaultTTL
+      MaxTTL: MaxTTL
+      MinTTL: MinTTL
+      Name: Name
+      ParametersInCacheKeyAndForwardedToOrigin:
+        member: ParametersInCacheKeyAndForwardedToOrigin
+        properties:
+          CookiesConfig:
+            member: CookiesConfig
+            properties:
+              CookieBehavior: CookieBehavior
+              # The API wraps the list in a Quantity and Items structure.
+              Cookies: Cookies.Items
+          EnableAcceptEncodingBrotli: EnableAcceptEncodingBrotli
+          EnableAcceptEncodingGzip: EnableAcceptEncodingGzip
+          HeadersConfig:
+            member: HeadersConfig
+            properties:
+              HeaderBehavior: HeaderBehavior
+              # The API wraps the list in a Quantity and Items structure.
+              Headers: Headers.Items
+          QueryStringsConfig:
+            member: QueryStringsConfig
+            properties:
+              QueryStringBehavior: QueryStringBehavior
+              # The API wraps the list in a Quantity and Items structure.
+              QueryStrings: QueryStrings.Items
+  Id: Id
+  LastModifiedTime: LastModifiedTime

@@ -34,7 +34,7 @@ func pages(t *testing.T, respond func(token string) (int, string)) (*Client, *[]
 		HTTP:        srv.Client(),
 		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region:      "us-east-1",
-		Endpoint:    func(string, string) string { return srv.URL },
+		Endpoint:    func(string) string { return srv.URL },
 		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
 	}, &seen
 }
@@ -164,7 +164,7 @@ func bodyPages(t *testing.T, respond func(token string) (int, string)) (*Client,
 		HTTP:        srv.Client(),
 		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region:      "us-east-1",
-		Endpoint:    func(string, string) string { return srv.URL },
+		Endpoint:    func(string) string { return srv.URL },
 		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
 	}, &seen
 }

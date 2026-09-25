@@ -121,6 +121,16 @@ func (r Reader) readXML(body []byte) (map[string]any, error) {
 func translateXML(n *xmlNode, fields []Field) map[string]any {
 	out := map[string]any{}
 	for _, f := range fields {
+		holder := n
+		for _, step := range f.Via {
+			if holder = holder.child(step); holder == nil {
+				break
+			}
+		}
+		if holder == nil {
+			continue
+		}
+		n := holder
 		switch f.Kind {
 		case "structure":
 			if c := n.child(f.XMLName); c != nil {
