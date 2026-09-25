@@ -11,6 +11,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/resource"
 )
 
 // LockStoreAssembler returns the store holding the manifest's environment
@@ -23,6 +24,11 @@ type LockStoreAssembler func(ctx context.Context, m *manifest.Manifest) (lock.St
 // apply should take, so a live run is never broken from under it; short
 // enough that an environment is not stuck for a day after a crash.
 const leaseDuration = 2 * time.Hour
+
+// indexLag bounds how long the tagging index a lookup reads may take to
+// show a resource after it is created. The index documents no bound;
+// integration runs see seconds. An hour leaves a wide margin.
+const indexLag = time.Hour
 
 // leaseRenewal is how often a held lease is renewed: often enough that
 // a renewal failing for a transient reason is retried several times
@@ -58,11 +64,51 @@ func guard(
 		}
 		return nil, nil, nil, err
 	}
+	settled, err := settledIndex(ctx, store, envName)
+	if err != nil {
+		_ = lease.Release(context.WithoutCancel(ctx))
+		return nil, nil, nil, err
+	}
+	if settled {
+		ctx = resource.WithSettledIndex(ctx)
+	}
 	guarded, stop := lock.Keep(ctx, lease, leaseDuration, leaseRenewal)
 	return guarded, store, func() {
 		stop()
 		_ = lease.Release(context.WithoutCancel(ctx))
 	}, nil
+}
+
+// settledIndex reports whether the last mutating run against envName
+// started longer ago than indexLag: only then may this run's lookups take
+// the index's miss as absence. No record, or one without a start, is
+// never settled.
+func settledIndex(ctx context.Context, store lock.Store, envName string) (bool, error) {
+	status, found, err := store.ReadStatus(ctx, envName)
+	if err != nil {
+		return false, err
+	}
+	return found && !status.StartedAt.IsZero() && time.Since(status.StartedAt) > indexLag, nil
+}
+
+// recordStart records, under the lock, that a mutating run is about to
+// make its first change, so the next run knows the index may not have
+// caught up with it. Called immediately before the mutation, not when the
+// lock is taken: a run refused before it changes anything leaves no
+// record. A nil store records nothing.
+func recordStart(ctx context.Context, store lock.Store, envName string, m *manifest.Manifest) error {
+	if store == nil {
+		return nil
+	}
+	status, found, err := store.ReadStatus(ctx, envName)
+	if err != nil {
+		return err
+	}
+	if !found {
+		status = lock.Status{Environment: envName, Kind: m.Environment.Kind}
+	}
+	status.StartedAt = time.Now().UTC()
+	return store.WriteStatus(ctx, status)
 }
 
 // lockLost reports a run stopped because its lock could no longer be
@@ -85,6 +131,12 @@ func recordStatus(ctx context.Context, store lock.Store, envName string, m *mani
 	if store == nil {
 		return nil
 	}
+	// The start guard recorded is kept: it is what the next run's lookups
+	// are judged by.
+	started, _, err := store.ReadStatus(ctx, envName)
+	if err != nil {
+		return err
+	}
 	now := time.Now().UTC()
 	status := lock.Status{
 		Environment: envName,
@@ -92,6 +144,7 @@ func recordStatus(ctx context.Context, store lock.Store, envName string, m *mani
 		AppliedAt:   now,
 		Holder:      env.Holder(),
 		Outcome:     outcome,
+		StartedAt:   started.StartedAt,
 	}
 	if ttl := m.Environment.TTLDuration(); ttl > 0 && m.Environment.Kind == manifest.EnvironmentKindEphemeral {
 		deadline := now.Add(ttl)

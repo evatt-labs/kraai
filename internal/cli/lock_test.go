@@ -74,6 +74,10 @@ func TestApplyLocksAndRecordsStatus(t *testing.T) {
 	if status.AppliedAt.Before(before.Add(-time.Second)) {
 		t.Fatalf("AppliedAt %s predates the run", status.AppliedAt)
 	}
+	// The start the run recorded before mutating survives the final record.
+	if status.StartedAt.Before(before.Add(-time.Second)) || status.StartedAt.After(status.AppliedAt) {
+		t.Fatalf("StartedAt %s, AppliedAt %s", status.StartedAt, status.AppliedAt)
+	}
 }
 
 func TestApplyWithoutATTLRecordsNoDeadline(t *testing.T) {

@@ -41,6 +41,10 @@ type ccAPI interface {
 	// TaggedResources returns the ARN of every resource of tagType carrying
 	// kraai's identity tag with value name; see Client.TaggedResources.
 	TaggedResources(ctx context.Context, name, tagType string) ([]string, error)
+	// Created reports whether this client has created an instance of
+	// typeName, which an index could not have seen yet; see
+	// Client.Created.
+	Created(typeName string) bool
 }
 
 // ownsFunc reports whether a found instance is this account's and kraai's
@@ -241,10 +245,13 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 			id, props, found, err := r.firstMatch(ctx, name, candidates)
 			// A plan accepts the index's miss: at worst it shows one create
 			// that apply's own plan, under the lock, corrects. A command
-			// that mutates walks every listed instance before it concludes
-			// a resource is absent, or it could create a duplicate or leave
-			// one standing.
-			if err != nil || found || resource.ReadOnly(ctx) {
+			// that mutates accepts it only when no run has touched the
+			// environment for longer than the index can lag, and this run
+			// has created nothing of the type; otherwise it walks every
+			// listed instance before it concludes a resource is absent, or
+			// it could create a duplicate or leave one standing.
+			settled := resource.SettledIndex(ctx) && !r.client.Created(r.typeName)
+			if err != nil || found || resource.ReadOnly(ctx) || settled {
 				return id, props, found, err
 			}
 		}

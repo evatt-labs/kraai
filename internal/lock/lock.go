@@ -6,8 +6,9 @@
 // Neither is state in the sense the architecture forbids. Nothing here is
 // consulted to decide what a resource should look like; the manifest stays
 // the only source of that. A lock says who is working on an environment
-// now, a status record says when it was last applied and when it should be
-// reaped, and losing either costs a retry or a manual sweep, never a wrong
+// now, a status record says when it was last applied, when a mutating run
+// last started and when the environment should be reaped, and losing
+// either costs a retry, a slower lookup or a manual sweep, never a wrong
 // resource.
 //
 // Where a lock lives is the provider's business. A Store is expected to be
@@ -49,6 +50,13 @@ type Status struct {
 	// Outcome is the apply's summary line: how many created, failed and
 	// so on, for a status reader with no access to the run's own output.
 	Outcome string `json:"outcome"`
+	// StartedAt is when the latest mutating run against the environment
+	// started, written under its lock before its first mutation. A
+	// lookup trusts a lagging index's miss only when this is older than
+	// the index's lag: nothing else creates the resources the index is
+	// asked about. Zero, as a record written before it existed has it,
+	// trusts nothing.
+	StartedAt time.Time `json:"startedAt,omitzero"`
 }
 
 // Store holds locks and status records for environments.

@@ -30,6 +30,8 @@ type fakeClient struct {
 	listErr    error
 	getCalls   []string
 	listCalls  int
+	// created is what Created reports.
+	created map[string]bool
 	// listModels records the resourceModel passed to every ListResources
 	// call, in order, so a test can assert a parent-scoped type's request
 	// actually carried the right scope (or that a non-parent-scoped type's
@@ -76,6 +78,8 @@ type fakeClient struct {
 	taggedCalls int
 	taggedTypes []string
 }
+
+func (f *fakeClient) Created(typeName string) bool { return f.created[typeName] }
 
 func (f *fakeClient) TaggedResources(_ context.Context, name, tagType string) ([]string, error) {
 	f.taggedCalls++
