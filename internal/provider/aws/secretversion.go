@@ -175,10 +175,20 @@ func (c *Client) currentSSMParameterVersion(ctx context.Context, name string) (s
 }
 
 // describeSSMParameterVersion is currentSSMParameterVersion with absence
-// reported as exists=false rather than an error. It follows NextToken:
-// DescribeParameters may return an empty page and a token even for an
-// exact-name filter, and an empty first page is not proof of absence.
+// reported as exists=false rather than an error.
 func (c *Client) describeSSMParameterVersion(ctx context.Context, name string) (version string, exists bool, err error) {
+	meta, err := c.describeSSMParameter(ctx, name)
+	if err != nil || meta == nil {
+		return "", false, err
+	}
+	return strconv.FormatInt(meta.Version, 10), true, nil
+}
+
+// describeSSMParameter reads name's metadata, nil when it does not exist. It
+// follows NextToken: DescribeParameters may return an empty page and a token
+// even for an exact-name filter, and an empty first page is not proof of
+// absence.
+func (c *Client) describeSSMParameter(ctx context.Context, name string) (*ssmtypes.ParameterMetadata, error) {
 	pages := ssm.NewDescribeParametersPaginator(c.ssm, &ssm.DescribeParametersInput{
 		ParameterFilters: []ssmtypes.ParameterStringFilter{
 			{Key: aws.String("Name"), Option: aws.String("Equals"), Values: []string{name}},
@@ -187,13 +197,13 @@ func (c *Client) describeSSMParameterVersion(ctx context.Context, name string) (
 	for pages.HasMorePages() {
 		out, err := pages.NextPage(ctx)
 		if err != nil {
-			return "", false, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing SSM parameter %q", name)
+			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing SSM parameter %q", name)
 		}
 		if len(out.Parameters) > 0 {
-			return strconv.FormatInt(out.Parameters[0].Version, 10), true, nil
+			return &out.Parameters[0], nil
 		}
 	}
-	return "", false, nil
+	return nil, nil
 }
 
 // currentSecretsManagerVersion reads the version id currently carrying

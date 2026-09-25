@@ -209,26 +209,17 @@ func newSecretParameterResource(client *Client) *secretParameterResource {
 // type must never hold that, not even encrypted, outside the one call
 // Secrets' producer makes at the moment of use.
 //
-// foreign resource in a globally unique namespace (S3 bucket names); an SSM
-// parameter name is unique per account and region, so no other account can
-// ever hold the name this type derives, and there is no "owns" question to
-// ask. The entry-tag check below is this type's own, narrower ownership
-// check: not "is this ours", but "which entry is this".
-//
-//nolint:gocritic // this package's byName ownership rule guards against a
+// This package's byName ownership rule guards against a foreign resource in
+// a globally unique namespace (S3 bucket names); an SSM parameter name is
+// unique per account and region, so no other account can ever hold the name
+// this type derives, and there is no "owns" question to ask. The entry-tag
+// check below is this type's own, narrower ownership check: not "is this
+// ours", but "which entry is this".
 func (r *secretParameterResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
-	out, err := r.client.ssm.DescribeParameters(ctx, &ssm.DescribeParametersInput{
-		ParameterFilters: []ssmtypes.ParameterStringFilter{
-			{Key: aws.String("Name"), Option: aws.String("Equals"), Values: []string{ref.Name}},
-		},
-	})
-	if err != nil {
-		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing SSM parameter %q", ref.Name)
+	meta, err := r.client.describeSSMParameter(ctx, ref.Name)
+	if err != nil || meta == nil {
+		return nil, err
 	}
-	if len(out.Parameters) == 0 {
-		return nil, nil
-	}
-	meta := out.Parameters[0]
 
 	entry, err := r.entryTag(ctx, ref.Name)
 	if err != nil {
@@ -423,15 +414,11 @@ func (r *secretParameterResource) Secrets(state *resource.State) map[string]reso
 // one keeps that tag, written once at Create, the only way a parameter this
 // package manages ever gets it.
 func (c *Client) SetSecretParameter(ctx context.Context, name, value string) error {
-	described, err := c.ssm.DescribeParameters(ctx, &ssm.DescribeParametersInput{
-		ParameterFilters: []ssmtypes.ParameterStringFilter{
-			{Key: aws.String("Name"), Option: aws.String("Equals"), Values: []string{name}},
-		},
-	})
+	meta, err := c.describeSSMParameter(ctx, name)
 	if err != nil {
-		return kerrors.Wrap(err, kerrors.CodeUnexpected, "describing SSM parameter %q", name)
+		return err
 	}
-	if len(described.Parameters) == 0 {
+	if meta == nil {
 		return kerrors.Validation(
 			"SSM parameter %q does not exist yet; run `kraai apply` first to create it", name)
 	}

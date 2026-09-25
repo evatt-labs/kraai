@@ -343,6 +343,31 @@ func TestSecretParameterResource_Get_ListTagsErrorPropagates(t *testing.T) {
 	}
 }
 
+// TestSecretParameterResource_Get_FollowsNextToken: an empty first page with
+// a NextToken is not absence. Reading it as absence plans a create for a
+// parameter that exists.
+func TestSecretParameterResource_Get_FollowsNextToken(t *testing.T) {
+	f := &fakeSSM{
+		describeParametersPages: [][]ssmtypes.ParameterMetadata{nil, nil, {{Type: ssmtypes.ParameterTypeSecureString, Version: 4}}},
+		tags:                    []ssmtypes.Tag{{Key: aws.String(secretEntryTagKey), Value: aws.String("pepper_key")}},
+	}
+	r := newSecretParameterResource(&Client{ssm: f})
+
+	state, err := r.Get(context.Background(), resource.Ref{Name: "/dev/api/secrets/pepper_key"})
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if state == nil {
+		t.Fatal("Get = nil, want the parameter from the third page")
+	}
+	if state.Attributes["Version"] != int64(4) {
+		t.Errorf("Version = %v, want 4", state.Attributes["Version"])
+	}
+	if len(f.describeParametersIn) != 3 {
+		t.Errorf("DescribeParameters called %d times, want 3", len(f.describeParametersIn))
+	}
+}
+
 // --- Diff --------------------------------------------------------------
 
 func TestSecretParameterResource_Diff(t *testing.T) {
@@ -644,6 +669,18 @@ func TestClient_SetSecretParameter_RefusesToCreate(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "kraai apply") {
 		t.Errorf("error %q does not point at the fix", err)
+	}
+}
+
+func TestClient_SetSecretParameter_FollowsNextToken(t *testing.T) {
+	f := &fakeSSM{describeParametersPages: [][]ssmtypes.ParameterMetadata{nil, {{Type: ssmtypes.ParameterTypeSecureString}}}}
+	c := &Client{ssm: f}
+
+	if err := c.SetSecretParameter(context.Background(), "/dev/api/secrets/x", "value"); err != nil {
+		t.Fatalf("SetSecretParameter: %v, want the parameter on the second page found", err)
+	}
+	if len(f.putParameterIn) != 1 {
+		t.Fatalf("PutParameter called %d times, want 1", len(f.putParameterIn))
 	}
 }
 
