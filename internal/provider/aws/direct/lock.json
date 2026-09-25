@@ -21,6 +21,11 @@
       "sourceSha256": "e270383d2bb6dd822f4f617cbf2dc32112beb5c766b5b345cbfd253ff1af6e4a",
       "subsetSha256": "b379e066497ed8af47ef9ad00b828da8ffb7491a9a1da66f0affd1a7051471e9"
     },
+    "ecs/service/2014-11-13/ecs-2014-11-13.json": {
+      "file": "models/ecs-2014-11-13.json",
+      "sourceSha256": "039c1877a9b6b6997819988c4f8f7e9f063bcfe6afa6c431d2da45fc8422eace",
+      "subsetSha256": "aef3d74a33f143a56112c79aecef03dc3cd4c25ea12acbe0fe4f0690c648b5f9"
+    },
     "xray/service/2016-04-12/xray-2016-04-12.json": {
       "file": "models/xray-2016-04-12.json",
       "sourceSha256": "ab1a0cfc7a244eb934542d67949631b6b353d1165e263e8cd2dcaff84c9f554c",
@@ -47,6 +52,11 @@
       "file": "schemas/AWS--CodeDeploy--DeploymentConfig.json",
       "sourceSha256": "1558b45944010952a8dc76874c42bd96ffb99f750292e3dade34ab7a03ab33bb",
       "subsetSha256": "3fd56969264aecf8dbcc5ff4da608e4b12ab1bb9cb95ae74b73436f0aeb8a662"
+    },
+    "AWS::ECS::TaskDefinition": {
+      "file": "schemas/AWS--ECS--TaskDefinition.json",
+      "sourceSha256": "d0cdd2e998ae30211bb754fa3ec54cc9780bd14842e4108620ed4d53a7ee8762",
+      "subsetSha256": "e7d1b0a9cb0d41e914bbc7d78b63e0cddd37bd61b2ba030f84441639b2ca7eb4"
     },
     "AWS::XRay::Group": {
       "file": "schemas/AWS--XRay--Group.json",

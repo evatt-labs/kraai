@@ -2,6 +2,7 @@ package direct
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -135,6 +136,99 @@ func TestCompileRefusesAList(t *testing.T) {
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			_, err := compileAll(edit(t, bedrock, c.old, c.replacement))
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
+			}
+		})
+	}
+}
+
+// bodyPages is pages for an awsJson protocol, which carries the page token
+// in the request body rather than the query.
+func bodyPages(t *testing.T, respond func(token string) (int, string)) (*Client, *[]string) {
+	t.Helper()
+	var seen []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		seen = append(seen, r.Header.Get("X-Amz-Target")+" "+string(raw))
+		var in struct {
+			NextToken string `json:"nextToken"`
+		}
+		_ = json.Unmarshal(raw, &in)
+		status, body := respond(in.NextToken)
+		w.WriteHeader(status)
+		_, _ = io.WriteString(w, body)
+	}))
+	t.Cleanup(srv.Close)
+	return &Client{
+		HTTP:        srv.Client(),
+		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region:      "us-east-1",
+		Endpoint:    func(string, string) string { return srv.URL },
+		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
+	}, &seen
+}
+
+const taskDefinitions = "AWS::ECS::TaskDefinition"
+
+// A list of strings lists the identifiers themselves, every page read.
+func TestListOfIdentifiers(t *testing.T) {
+	client, seen := bodyPages(t, func(token string) (int, string) {
+		switch token {
+		case "":
+			return 200, `{"taskDefinitionArns":["a","b"],"nextToken":"t1"}`
+		case "t1":
+			return 200, `{"taskDefinitionArns":["c"]}`
+		}
+		return 500, `{}`
+	})
+	ids, err := client.List(context.Background(), taskDefinitions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(ids, []string{"a", "b", "c"}) {
+		t.Fatalf("List = %v", ids)
+	}
+	want := []string{
+		`AmazonEC2ContainerServiceV20141113.ListTaskDefinitions {"status":"ACTIVE"}`,
+		`AmazonEC2ContainerServiceV20141113.ListTaskDefinitions {"nextToken":"t1","status":"ACTIVE"}`,
+	}
+	if !reflect.DeepEqual(*seen, want) {
+		t.Fatalf("requests = %v, want %v", *seen, want)
+	}
+}
+
+// An identifier that is not a non-empty string fails the list, as a
+// structure item without its member does.
+func TestListOfIdentifiersFailsClosed(t *testing.T) {
+	for name, body := range map[string]string{
+		"an empty identifier": `{"taskDefinitionArns":["a",""]}`,
+		"a non-string item":   `{"taskDefinitionArns":["a",{"arn":"b"}]}`,
+		"a null identifier":   `{"taskDefinitionArns":["a",null]}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			client, _ := bodyPages(t, func(string) (int, string) { return 200, body })
+			if ids, err := client.List(context.Background(), taskDefinitions); err == nil {
+				t.Fatalf("List = %v, want an error", ids)
+			}
+		})
+	}
+}
+
+func TestCompileRefusesAListItem(t *testing.T) {
+	cases := map[string]struct {
+		file, old, replacement, want string
+	}{
+		"an item member on a list of strings": {"AWS--ECS--TaskDefinition.yaml",
+			"operation: ListTaskDefinitions\n", "operation: ListTaskDefinitions\n  item: taskDefinitionArn\n",
+			"items are strings, so the list names no item member"},
+		"no item member on a list of structures": {"AWS--Bedrock--IntelligentPromptRouter.yaml",
+			"  item: promptRouterArn\n", "",
+			"must name the item member carrying PromptRouterArn"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, err := compileAll(edit(t, c.file, c.old, c.replacement))
 			if err == nil || !strings.Contains(err.Error(), c.want) {
 				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
 			}

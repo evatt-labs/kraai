@@ -3,7 +3,7 @@
     {
       "type": "AWS::AppConfig::DeploymentStrategy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-24",
+      "date": "2026-09-25",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 4,
@@ -21,7 +21,7 @@
     {
       "type": "AWS::AppRunner::AutoScalingConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-24",
+      "date": "2026-09-25",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
@@ -57,7 +57,7 @@
     {
       "type": "AWS::CodeDeploy::DeploymentConfig",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-24",
+      "date": "2026-09-25",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 17,
@@ -69,9 +69,32 @@
       ]
     },
     {
+      "type": "AWS::ECS::TaskDefinition",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 20,
+      "compared": [
+        "ContainerDefinitions",
+        "Cpu",
+        "ExecutionRoleArn",
+        "Family",
+        "InferenceAccelerators",
+        "Memory",
+        "NetworkMode",
+        "PlacementConstraints",
+        "RequiresCompatibilities",
+        "RuntimePlatform",
+        "TaskDefinitionArn",
+        "TaskRoleArn",
+        "Volumes"
+      ]
+    },
+    {
       "type": "AWS::XRay::Group",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-24",
+      "date": "2026-09-25",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,

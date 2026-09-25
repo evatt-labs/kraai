@@ -43,7 +43,7 @@ type Lister struct {
 	// token, and the list of items.
 	NextToken, Items []string
 	// Item is the wire member of each item carrying Property, the primary
-	// identifier.
+	// identifier; empty when each item is the identifier itself.
 	Item, Property string
 }
 

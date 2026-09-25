@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"math/big"
 	"sort"
 )
@@ -19,10 +20,14 @@ type Difference struct {
 }
 
 // Compare returns where viaCloudControl and direct disagree, sorted by
-// property. It applies exactly two normalizations, both declared here:
+// property. It applies exactly four normalizations, all declared here:
 //
 //   - numbers compare by value, so 100 equals 100.0;
-//   - a property the type's override skips is not compared, at any depth.
+//   - a property the type's override skips is not compared, at any depth;
+//   - an array the type's schema marks insertionOrder false compares as a
+//     multiset, as CloudFormation defines it;
+//   - an empty array or map equals an absent one. A scalar is never
+//     forgiven this way: "" and absent differ.
 //
 // Nothing else is forgiven: a property one read has and the other lacks is
 // a difference.
@@ -40,6 +45,10 @@ func Compare(typeName string, viaCloudControl, direct map[string]any) ([]Differe
 	if skip == nil {
 		return nil, fmt.Errorf("%s has no override", typeName)
 	}
+	shape, err := schemaShape(typeName)
+	if err != nil {
+		return nil, err
+	}
 	a, err := canonicalValue(viaCloudControl)
 	if err != nil {
 		return nil, err
@@ -48,6 +57,7 @@ func Compare(typeName string, viaCloudControl, direct map[string]any) ([]Differe
 	if err != nil {
 		return nil, err
 	}
+	a, b = normalizeValue(a, shape), normalizeValue(b, shape)
 	var out []Difference
 	diff("", a, b, skip, &out)
 	sort.Slice(out, func(i, j int) bool { return out[i].Property < out[j].Property })
@@ -164,4 +174,112 @@ type TypeEvidence struct {
 	Differing []string `json:"differing,omitempty"`
 	// Note says why an instance was not compared, without naming it.
 	Note string `json:"note,omitempty"`
+}
+
+// shape is where a type's schema declares an array unordered, nested as
+// its properties nest; an array's own shape describes its items.
+type shape struct {
+	unordered bool
+	props     map[string]*shape
+}
+
+// schemaShape reads typeName's locked schema into a shape.
+func schemaShape(typeName string) (*shape, error) {
+	lock, err := loadLock(files)
+	if err != nil {
+		return nil, err
+	}
+	locked, ok := lock.Schemas[typeName]
+	if !ok {
+		return nil, fmt.Errorf("%s has no locked schema", typeName)
+	}
+	raw, err := fs.ReadFile(files, locked.File)
+	if err != nil {
+		return nil, err
+	}
+	var schema cfnSchema
+	if err := json.Unmarshal(raw, &schema); err != nil {
+		return nil, err
+	}
+	return shapeOf(&schema, cfnProperty{Properties: schema.Properties}, 0), nil
+}
+
+func shapeOf(s *cfnSchema, p cfnProperty, depth int) *shape {
+	p = s.resolve(p)
+	out := &shape{}
+	if depth > 16 {
+		return out
+	}
+	if p.Items != nil {
+		out.unordered = p.InsertionOrder != nil && !*p.InsertionOrder
+		out.props = shapeOf(s, *p.Items, depth+1).props
+		return out
+	}
+	for name, child := range p.Properties {
+		if out.props == nil {
+			out.props = map[string]*shape{}
+		}
+		out.props[name] = shapeOf(s, child, depth+1)
+	}
+	return out
+}
+
+// normalizeValue applies Compare's schema-driven normalizations to v: empty
+// arrays and maps are dropped, and an unordered array is sorted by each
+// element's normalized JSON.
+func normalizeValue(v any, sh *shape) any {
+	if sh == nil {
+		sh = &shape{}
+	}
+	switch t := v.(type) {
+	case map[string]any:
+		out := make(map[string]any, len(t))
+		for k, child := range t {
+			n := normalizeValue(child, sh.props[k])
+			if isEmptyCollection(n) {
+				continue
+			}
+			out[k] = n
+		}
+		return out
+	case []any:
+		items := &shape{props: sh.props}
+		out := make([]any, len(t))
+		for i, child := range t {
+			out[i] = normalizeValue(child, items)
+		}
+		if sh.unordered {
+			keys := make([]string, len(out))
+			for i, item := range out {
+				raw, _ := json.Marshal(item)
+				keys[i] = string(raw)
+			}
+			sort.Sort(byKey{keys, out})
+		}
+		return out
+	}
+	return v
+}
+
+func isEmptyCollection(v any) bool {
+	switch t := v.(type) {
+	case []any:
+		return len(t) == 0
+	case map[string]any:
+		return len(t) == 0
+	}
+	return false
+}
+
+// byKey sorts items by keys, moving both together.
+type byKey struct {
+	keys  []string
+	items []any
+}
+
+func (b byKey) Len() int           { return len(b.keys) }
+func (b byKey) Less(i, j int) bool { return b.keys[i] < b.keys[j] }
+func (b byKey) Swap(i, j int) {
+	b.keys[i], b.keys[j] = b.keys[j], b.keys[i]
+	b.items[i], b.items[j] = b.items[j], b.items[i]
 }

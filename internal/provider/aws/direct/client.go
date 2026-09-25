@@ -113,8 +113,11 @@ func (c *Client) List(ctx context.Context, typeName string) ([]string, error) {
 			return nil, fmt.Errorf("the %s list response carries %s, but not as a list", typeName, strings.Join(l.Items, "."))
 		}
 		for _, item := range list {
-			obj, _ := item.(map[string]any)
-			id, _ := obj[l.Item].(string)
+			id, _ := item.(string)
+			if l.Item != "" {
+				obj, _ := item.(map[string]any)
+				id, _ = obj[l.Item].(string)
+			}
 			if id == "" {
 				return nil, fmt.Errorf("the %s list returned an item without its %s", typeName, l.Item)
 			}

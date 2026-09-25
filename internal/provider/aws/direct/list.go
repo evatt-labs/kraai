@@ -148,19 +148,35 @@ func compileList(model *smithyModel, r *Reader, o Override, service, namespace s
 		fail("list operation %s's items %s is not a list in its output", o.List.Operation, page.Items)
 		return nil
 	}
-	item := model.Shapes[ref(model.Shapes[listShape].Member)]
-	if item.Type != "structure" {
-		fail("list operation %s's items are not structures", o.List.Operation)
-		return nil
-	}
-
-	// The item member must carry what the read is addressed by: the one
-	// primary identifier, through the member the read binds it to.
 	if len(r.Identifier) != 1 {
 		fail("a list is supported only for a type with a single primary identifier")
 		return nil
 	}
 	l.Property = r.Identifier[0].Property
+	itemTarget := ref(model.Shapes[listShape].Member)
+	item := model.Shapes[itemTarget]
+
+	// A list of strings lists the identifiers themselves. Nothing ties
+	// those strings to the read's binding the way a named item member
+	// does, since both are plain strings in the model; the override's
+	// review and read parity are what vouch for it.
+	if targetType(item.Type, itemTarget) == "string" {
+		if o.List.Item != "" {
+			fail("list operation %s's items are strings, so the list names no item member, not %s", o.List.Operation, o.List.Item)
+		}
+		return l
+	}
+	if item.Type != "structure" {
+		fail("list operation %s's items are neither structures nor strings", o.List.Operation)
+		return nil
+	}
+	if o.List.Item == "" {
+		fail("list operation %s's items are structures, so the list must name the item member carrying %s", o.List.Operation, l.Property)
+		return nil
+	}
+
+	// The item member must carry what the read is addressed by: the one
+	// primary identifier, through the member the read binds it to.
 	m, ok := item.Members[o.List.Item]
 	if !ok {
 		fail("list item member %s is not in the items %s lists", o.List.Item, o.List.Operation)

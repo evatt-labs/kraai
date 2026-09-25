@@ -9,6 +9,7 @@
 // pinned model commit, into a checked-in subset whose hashes lock.json
 // records, so generating needs neither the network nor credentials.
 //
-// Nothing outside this package uses it yet: Cloud Control remains the path
-// every lookup takes.
+// Outside this package only lists are used: a type with a direct list is
+// listed through it on every lookup, never through Cloud Control. Reads and
+// every mutation still go through Cloud Control.
 package direct

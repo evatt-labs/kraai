@@ -44,8 +44,9 @@ type Read struct {
 type List struct {
 	Operation string `yaml:"operation"`
 	// Item is the member of each listed item carrying the primary
-	// identifier; it must be the member the read binds it to.
-	Item string `yaml:"item"`
+	// identifier; it must be the member the read binds it to. Omitted when
+	// each listed item is the identifier itself, a list of strings.
+	Item string `yaml:"item,omitempty"`
 	// Input fixes input members to a value on every call, such as a filter
 	// that would otherwise default to excluding what kraai created.
 	Input map[string]string `yaml:"input,omitempty"`
