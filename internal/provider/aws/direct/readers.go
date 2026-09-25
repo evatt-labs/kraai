@@ -1124,6 +1124,7 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "ChangeSetId", Member: "ChangeSetName", Location: "form", Name: "ChangeSetName"},
 		},
+		PageToken: []string{"NextToken"},
 		Fields: []Field{
 			{Property: "Capabilities", Member: "Capabilities", Kind: "list", XMLName: "Capabilities", Item: "member", Scalar: "string"},
 			{Property: "ChangeSetId", Member: "ChangeSetId", Kind: "scalar", XMLName: "ChangeSetId", Scalar: "string"},
@@ -1939,7 +1940,8 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "SubnetId", Member: "SubnetIds", Location: "form", Name: "SubnetId.1", List: true},
 		},
-		Response: []Step{{Name: "subnetSet", List: true, Item: "item"}},
+		PageToken: []string{"nextToken"},
+		Response:  []Step{{Name: "subnetSet", List: true, Item: "item"}},
 		Fields: []Field{
 			{Property: "AssignIpv6AddressOnCreation", Member: "AssignIpv6AddressOnCreation", Kind: "scalar", XMLName: "assignIpv6AddressOnCreation", Scalar: "boolean"},
 			{Property: "AvailabilityZone", Member: "AvailabilityZone", Kind: "scalar", XMLName: "availabilityZone", Scalar: "string"},
@@ -1983,7 +1985,8 @@ var readers = map[string]Reader{
 					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Name", Value: "association.subnet-id"},
 					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Value.1", Value: "{SubnetId}"},
 				},
-				Response: []Step{{Name: "networkAclSet", List: true, Item: "item"}},
+				PageToken: []string{"nextToken"},
+				Response:  []Step{{Name: "networkAclSet", List: true, Item: "item"}},
 				Fields: []Field{
 					{Property: "NetworkAclAssociationId", Member: "NetworkAclAssociationId", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "subnetId", Equals: "{SubnetId}"}}, XMLName: "networkAclAssociationId", Scalar: "string"},
 				},
@@ -2494,7 +2497,8 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "TargetGroupArn", Member: "TargetGroupArns", Location: "form", Name: "TargetGroupArns.member.1", List: true},
 		},
-		Response: []Step{{Name: "TargetGroups", List: true, Item: "member"}},
+		PageToken: []string{"NextMarker"},
+		Response:  []Step{{Name: "TargetGroups", List: true, Item: "member"}},
 		Fields: []Field{
 			{Property: "HealthCheckEnabled", Member: "HealthCheckEnabled", Kind: "scalar", XMLName: "HealthCheckEnabled", Scalar: "boolean"},
 			{Property: "HealthCheckIntervalSeconds", Member: "HealthCheckIntervalSeconds", Kind: "scalar", XMLName: "HealthCheckIntervalSeconds", Scalar: "number"},
