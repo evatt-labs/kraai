@@ -99,6 +99,30 @@ func (f *fakeDiffer) Diff(spec resource.Spec, state *resource.State) (resource.D
 	return f.diff(spec, state)
 }
 
+// fakeLiveDiffer implements LiveDiffer, and Differ too so a test can prove
+// decide prefers the live one and never calls the plain one when both are
+// present. diffLiveCalls and diffCalls count each separately.
+type fakeLiveDiffer struct {
+	*fakeResource
+	diffLive func(ctx context.Context, spec resource.Spec, state *resource.State) (resource.Difference, error)
+
+	diffLiveCalls int32
+	diffCalls     int32
+}
+
+func (f *fakeLiveDiffer) DiffLive(ctx context.Context, spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	atomic.AddInt32(&f.diffLiveCalls, 1)
+	return f.diffLive(ctx, spec, state)
+}
+
+// Diff must never run when DiffLive is present; it panics rather than
+// returning a plausible answer, so a bug that reaches it fails loudly
+// instead of merely planning the wrong action.
+func (f *fakeLiveDiffer) Diff(resource.Spec, *resource.State) (resource.Difference, error) {
+	atomic.AddInt32(&f.diffCalls, 1)
+	panic("plan.decide must call LiveDiffer.DiffLive, never Differ.Diff, when a type implements both")
+}
+
 // fakeValidator wraps a fakeResource to also implement SpecValidator, so
 // tests can exercise decide's unconditional validation pass — including on
 // the ActionCreate path, which is the exact case that was broken before

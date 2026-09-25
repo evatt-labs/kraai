@@ -173,6 +173,21 @@ func (i *instrumented) Diff(spec Spec, state *State) (Difference, error) {
 	return differ.Diff(spec, state)
 }
 
+// DiffLive forwards to the inner resource when it implements a live
+// comparison, and otherwise falls back to Diff.
+func (i *instrumented) DiffLive(ctx context.Context, spec Spec, state *State) (Difference, error) {
+	if live, ok := i.inner.(interface {
+		DiffLive(context.Context, Spec, *State) (Difference, error)
+	}); ok {
+		return live.DiffLive(ctx, spec, state)
+	}
+	// *instrumented always satisfies plan.LiveDiffer (this method is why),
+	// and decide asserts LiveDiffer before Differ, so falling back to Same
+	// here instead of Diff would silently disable comparison for every
+	// type that never opted into a live one.
+	return i.Diff(spec, state)
+}
+
 // ValidateSpec forwards to the inner resource when it can validate, and
 // otherwise reports no error. Structural for the same reason as Diff:
 // plan.SpecValidator lives in internal/plan.

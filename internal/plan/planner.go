@@ -892,10 +892,23 @@ func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex)
 		return action
 	}
 
-	// The assertion checks it.res's dynamic type, so this reaches Differ
-	// on the underlying resource without holding a resource.Resource.
-	if differ, ok := it.res.(Differ); ok {
-		difference, dErr := differ.Diff(evaluated, state)
+	// The assertions check it.res's dynamic type, so this reaches Differ or
+	// LiveDiffer on the underlying resource without holding a
+	// resource.Resource. LiveDiffer goes first: a type implementing both
+	// wants its live comparison to run, not the plain one beside it.
+	var (
+		difference resource.Difference
+		dErr       error
+		compared   bool
+	)
+	if liveDiffer, ok := it.res.(LiveDiffer); ok {
+		difference, dErr = liveDiffer.DiffLive(ctx, evaluated, state)
+		compared = true
+	} else if differ, ok := it.res.(Differ); ok {
+		difference, dErr = differ.Diff(evaluated, state)
+		compared = true
+	}
+	if compared {
 		if dErr != nil {
 			action.Kind = ActionFailed
 			action.Err = kerrors.Wrap(dErr, kerrors.CodeUnexpected,

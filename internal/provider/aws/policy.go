@@ -83,9 +83,11 @@ type SecretRefGrant struct {
 	Resource string
 }
 
-// SecretRefPolicyStatements returns one SecretRefGrant per ref, sorted and
-// without duplicates, naming exactly the ssm:GetParameter or
-// secretsmanager:GetSecretValue permission that reference needs.
+// SecretRefPolicyStatements returns every SecretRefGrant refs need, sorted
+// and without duplicates: ssm:GetParameter or secretsmanager:GetSecretValue
+// to resolve the value, exactly as before the version-diff feature existed,
+// plus the metadata-only grant that feature's plan-time check needs for the
+// same reference — ssm:DescribeParameters or secretsmanager:DescribeSecret.
 //
 // A Secrets Manager ARN carries a random six-character suffix Secrets
 // Manager assigns and never publishes back through this package's own
@@ -111,15 +113,17 @@ func (c *Client) SecretRefPolicyStatements(ctx context.Context, refs []secretref
 	seen := map[SecretRefGrant]bool{}
 	var grants []SecretRefGrant
 	for _, ref := range refs {
-		grant, err := secretRefGrant(ref, c.region, account)
+		refGrants, err := secretRefGrant(ref, c.region, account)
 		if err != nil {
 			return nil, err
 		}
-		if seen[grant] {
-			continue
+		for _, grant := range refGrants {
+			if seen[grant] {
+				continue
+			}
+			seen[grant] = true
+			grants = append(grants, grant)
 		}
-		seen[grant] = true
-		grants = append(grants, grant)
 	}
 	sort.Slice(grants, func(i, j int) bool {
 		if grants[i].Action != grants[j].Action {
@@ -187,7 +191,14 @@ func (c *Client) SecretsPolicyStatements(ctx context.Context, names []string) ([
 	return grants, nil
 }
 
-// secretRefGrant builds ref's own SecretRefGrant.
+// secretRefGrant builds every SecretRefGrant ref's own resolution needs:
+// the grant to read its value, exactly as before the version-diff feature
+// existed, plus the metadata-only grant that feature's plan-time check
+// needs for the same secret. ssm:DescribeParameters carries no per-parameter
+// resource element (see SecretsPolicyStatements), so it is granted on "*"
+// like every other DescribeParameters grant this package builds;
+// secretsmanager:DescribeSecret does accept a resource element, so it is
+// scoped to the same ARN as the GetSecretValue grant beside it.
 //
 // An unknown scheme is unreachable in normal operation: every caller
 // (decodeLambdaSettings, assemble.computeSecretRefs) parses a reference
@@ -197,20 +208,24 @@ func (c *Client) SecretsPolicyStatements(ctx context.Context, names []string) ([
 // this package — so it parses with secretref.Parse alone and this is the
 // first and only place that catches a path already shaped like an ARN
 // before it is embedded in a second, invalid one.
-func secretRefGrant(ref secretref.Ref, region, account string) (SecretRefGrant, error) {
+func secretRefGrant(ref secretref.Ref, region, account string) ([]SecretRefGrant, error) {
 	if strings.HasPrefix(ref.Path, "arn:") {
-		return SecretRefGrant{}, kerrors.Validation(
+		return nil, kerrors.Validation(
 			"secret reference %s: the path must be the secret's own name, not a full ARN", ref.String())
 	}
 	switch ref.Scheme {
 	case schemeSSM:
-		return SecretRefGrant{Action: "ssm:GetParameter", Resource: ssmParameterARN(region, account, ref.Path)}, nil
+		return []SecretRefGrant{
+			{Action: "ssm:GetParameter", Resource: ssmParameterARN(region, account, ref.Path)},
+			{Action: "ssm:DescribeParameters", Resource: "*"},
+		}, nil
 	case schemeSecretsManager:
-		return SecretRefGrant{
-			Action:   "secretsmanager:GetSecretValue",
-			Resource: fmt.Sprintf("arn:aws:secretsmanager:%s:%s:secret:%s-*", region, account, ref.Path),
+		arn := fmt.Sprintf("arn:aws:secretsmanager:%s:%s:secret:%s-*", region, account, ref.Path)
+		return []SecretRefGrant{
+			{Action: "secretsmanager:GetSecretValue", Resource: arn},
+			{Action: "secretsmanager:DescribeSecret", Resource: arn},
 		}, nil
 	default:
-		return SecretRefGrant{}, kerrors.Validation("unknown secret reference scheme %q in %s", ref.Scheme, ref.String())
+		return nil, kerrors.Validation("unknown secret reference scheme %q in %s", ref.Scheme, ref.String())
 	}
 }

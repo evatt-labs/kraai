@@ -346,7 +346,7 @@ func TestLambdaFunctionDiffIsSameForAnUnchangedDeploy(t *testing.T) {
 	spec := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"LOG_LEVEL": "info"}})
 	live := deployedFunction(t, dir, map[string]any{"LOG_LEVEL": "info"})
 
-	d, err := fn.Diff(spec, live)
+	d, err := fn.DiffLive(context.Background(), spec, live)
 	if err != nil || d != resource.Same {
 		t.Fatalf("Diff(unchanged) = %v, %v; want Same", d, err)
 	}
@@ -360,7 +360,7 @@ func TestLambdaFunctionDiffReportsARenameAsAReplace(t *testing.T) {
 	spec := baseLambdaSpec(t, dir, nil)
 	live := deployedFunction(t, dir, nil)
 	live.Attributes["FunctionName"] = "myenv-api-old"
-	if d, err := fn.Diff(spec, live); err != nil || d != resource.Immutable {
+	if d, err := fn.DiffLive(context.Background(), spec, live); err != nil || d != resource.Immutable {
 		t.Fatalf("Diff(renamed) = %v, %v; want Immutable", d, err)
 	}
 }
@@ -375,7 +375,7 @@ func TestLambdaFunctionDiffReportsChangedSource(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app v2\n"), 0o600); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
-	if d, err := fn.Diff(spec, live); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), spec, live); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(source changed) = %v, %v; want Mutable", d, err)
 	}
 
@@ -383,7 +383,7 @@ func TestLambdaFunctionDiffReportsChangedSource(t *testing.T) {
 	// which must read as changed rather than as unknowable.
 	untagged := deployedFunction(t, dir, nil)
 	delete(untagged.Attributes, "Tags")
-	if d, err := fn.Diff(spec, untagged); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), spec, untagged); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(no artifact tag) = %v, %v; want Mutable", d, err)
 	}
 }
@@ -392,7 +392,7 @@ func TestLambdaFunctionDiffReportsAChangedSetting(t *testing.T) {
 	fn, dir, _ := functionDiffFixture(t)
 	spec := baseLambdaSpec(t, dir, map[string]any{"memorySize": 1024})
 	live := deployedFunction(t, dir, nil)
-	if d, err := fn.Diff(spec, live); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), spec, live); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(memorySize changed) = %v, %v; want Mutable", d, err)
 	}
 }
@@ -404,30 +404,30 @@ func TestLambdaFunctionDiffReportsEnvironmentChanges(t *testing.T) {
 	fn, dir, _ := functionDiffFixture(t)
 
 	changed := baseLambdaSpec(t, dir, map[string]any{"env": map[string]any{"LOG_LEVEL": "debug"}})
-	if d, err := fn.Diff(changed, deployedFunction(t, dir, map[string]any{"LOG_LEVEL": "info"})); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), changed, deployedFunction(t, dir, map[string]any{"LOG_LEVEL": "info"})); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(literal changed) = %v, %v; want Mutable", d, err)
 	}
 
 	withQueue := baseLambdaSpec(t, dir, nil)
 	withQueue.Config["bindings"] = bindingsConfig(awsBinding("queues", "JOBS", "myenv-api-jobs"))
-	if d, err := fn.Diff(withQueue, deployedFunction(t, dir, nil)); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), withQueue, deployedFunction(t, dir, nil)); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(queue binding added) = %v, %v; want Mutable", d, err)
 	}
 	granted := deployedFunction(t, dir, map[string]any{"JOBS_QUEUE_URL": "https://sqs/jobs", "JOBS_QUEUE_ARN": "arn:jobs"})
-	if d, err := fn.Diff(withQueue, granted); err != nil || d != resource.Same {
+	if d, err := fn.DiffLive(context.Background(), withQueue, granted); err != nil || d != resource.Same {
 		t.Fatalf("Diff(queue binding present) = %v, %v; want Same", d, err)
 	}
 
 	withSecret := baseLambdaSpec(t, dir, map[string]any{"envSecrets": map[string]any{"DATABASE_URL": "DB.connection_uri"}})
-	if d, err := fn.Diff(withSecret, deployedFunction(t, dir, nil)); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), withSecret, deployedFunction(t, dir, nil)); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(secret variable missing) = %v, %v; want Mutable", d, err)
 	}
-	if d, err := fn.Diff(withSecret, deployedFunction(t, dir, map[string]any{"DATABASE_URL": "postgres://x"})); err != nil || d != resource.Same {
+	if d, err := fn.DiffLive(context.Background(), withSecret, deployedFunction(t, dir, map[string]any{"DATABASE_URL": "postgres://x"})); err != nil || d != resource.Same {
 		t.Fatalf("Diff(secret variable present) = %v, %v; want Same", d, err)
 	}
 
 	plain := baseLambdaSpec(t, dir, nil)
-	if d, err := fn.Diff(plain, deployedFunction(t, dir, map[string]any{"STALE": "x"})); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), plain, deployedFunction(t, dir, map[string]any{"STALE": "x"})); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(variable removed from manifest) = %v, %v; want Mutable", d, err)
 	}
 }
@@ -438,22 +438,22 @@ func TestLambdaFunctionDiffReportsJoiningOrLeavingANetwork(t *testing.T) {
 	joined := baseLambdaSpec(t, dir, nil)
 	joined.Config["bindings"] = bindingsConfig(awsBinding("network", "NET", "myenv-api-net"))
 	outside := deployedFunction(t, dir, nil)
-	if d, err := fn.Diff(joined, outside); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), joined, outside); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(network declared, function outside) = %v, %v; want Mutable", d, err)
 	}
 	inside := deployedFunction(t, dir, nil)
 	inside.Attributes["VpcConfig"] = map[string]any{"SubnetIds": []any{"subnet-1"}, "SecurityGroupIds": []any{"sg-1"}}
-	if d, err := fn.Diff(joined, inside); err != nil || d != resource.Same {
+	if d, err := fn.DiffLive(context.Background(), joined, inside); err != nil || d != resource.Same {
 		t.Fatalf("Diff(network declared, function inside) = %v, %v; want Same", d, err)
 	}
 
 	left := baseLambdaSpec(t, dir, nil)
-	if d, err := fn.Diff(left, inside); err != nil || d != resource.Mutable {
+	if d, err := fn.DiffLive(context.Background(), left, inside); err != nil || d != resource.Mutable {
 		t.Fatalf("Diff(network removed, function inside) = %v, %v; want Mutable", d, err)
 	}
 	detached := deployedFunction(t, dir, nil)
 	detached.Attributes["VpcConfig"] = map[string]any{"SubnetIds": []any{}, "SecurityGroupIds": []any{}}
-	if d, err := fn.Diff(left, detached); err != nil || d != resource.Same {
+	if d, err := fn.DiffLive(context.Background(), left, detached); err != nil || d != resource.Same {
 		t.Fatalf("Diff(no network, empty VpcConfig) = %v, %v; want Same", d, err)
 	}
 }

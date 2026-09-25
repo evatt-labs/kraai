@@ -286,6 +286,8 @@ type optionalResource struct {
 	secrets     map[string]Secret
 	differs     bool
 	diffErr     error
+	differsLive bool
+	diffLiveErr error
 	validateErr error
 	scope       string
 	notes       []string
@@ -307,6 +309,16 @@ func (o optionalResource) Diff(Spec, *State) (Difference, error) {
 	return Same, nil
 }
 
+func (o optionalResource) DiffLive(context.Context, Spec, *State) (Difference, error) {
+	if o.diffLiveErr != nil {
+		return Same, o.diffLiveErr
+	}
+	if o.differsLive {
+		return Immutable, nil
+	}
+	return Same, nil
+}
+
 func (o optionalResource) ValidateSpec(Spec) error { return o.validateErr }
 
 func (o optionalResource) Locate(Spec) (string, string, bool, error) {
@@ -323,6 +335,25 @@ func (o optionalResource) ResolveSecretRef(context.Context, secretref.Ref) (Secr
 
 // plainResource implements only the four required verbs.
 type plainResource struct{ Resource }
+
+// diffOnlyResource implements Diff but not DiffLive: a real resource type
+// this package's Lambda registration is not (every other type registered
+// through internal/provider/aws and internal/provider/neonresource). Used
+// to prove *instrumented.DiffLive falls back to the inner Diff rather than
+// answering Same, which would silently disable comparison for every such
+// type once decorated — decide always finds *instrumented satisfies
+// LiveDiffer and never reaches its Diff-only fallback path otherwise.
+type diffOnlyResource struct {
+	Resource
+	diffs bool
+}
+
+func (d diffOnlyResource) Diff(Spec, *State) (Difference, error) {
+	if d.diffs {
+		return Immutable, nil
+	}
+	return Same, nil
+}
 
 // decorate wraps r the way internal/assemble does in production.
 func decorate(t *testing.T, r Resource) Resource {
@@ -361,6 +392,11 @@ func TestInstrumentedForwardsOptionalInterfaces(t *testing.T) {
 		t.Error("decorated resource does not satisfy Differ; add a forwarder in otel.go")
 	}
 	if _, ok := decorated.(interface {
+		DiffLive(context.Context, Spec, *State) (Difference, error)
+	}); !ok {
+		t.Error("decorated resource does not satisfy LiveDiffer; add a forwarder in otel.go")
+	}
+	if _, ok := decorated.(interface {
 		ValidateSpec(Spec) error
 	}); !ok {
 		t.Error("decorated resource does not satisfy SpecValidator; add a forwarder in otel.go")
@@ -390,7 +426,7 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 	wantRefs := []secretref.Ref{{Scheme: "aws-ssm", Path: "/a/b"}}
 	wantSecret := Secret(func(context.Context) (string, error) { return "shh", nil })
 	inner := optionalResource{
-		secrets: want, differs: true, validateErr: boom, scope: `{"ApiId":"a1"}`, notes: []string{"n"},
+		secrets: want, differs: true, differsLive: true, validateErr: boom, scope: `{"ApiId":"a1"}`, notes: []string{"n"},
 		secretRefs: wantRefs, resolved: wantSecret,
 	}
 	decorated := decorate(t, inner)
@@ -411,6 +447,16 @@ func TestInstrumentedForwardsToInner(t *testing.T) {
 	}
 	if difference != Immutable {
 		t.Errorf("Diff() = %v, want the inner resource's Immutable", difference)
+	}
+
+	liveDifference, err := decorated.(interface {
+		DiffLive(context.Context, Spec, *State) (Difference, error)
+	}).DiffLive(context.Background(), Spec{}, &State{})
+	if err != nil {
+		t.Fatalf("DiffLive() error = %v", err)
+	}
+	if liveDifference != Immutable {
+		t.Errorf("DiffLive() = %v, want the inner resource's Immutable", liveDifference)
 	}
 
 	if err := decorated.(interface {
@@ -459,6 +505,26 @@ func TestInstrumentedLocateOnPlainResource(t *testing.T) {
 	}
 	if notes := decorated.(interface{ Notes(Spec) []string }).Notes(Spec{}); notes != nil {
 		t.Fatalf("Notes() on a plain resource = %v", notes)
+	}
+}
+
+// TestInstrumentedDiffLiveFallsBackToDiff proves *instrumented.DiffLive
+// reaches a Diff-only inner resource's real answer rather than the
+// not-implemented default (Same). Every decorated resource satisfies
+// LiveDiffer structurally (this method is why), so decide always prefers
+// it over Differ; without this fallback, a type that never opted into a
+// live comparison would silently stop reporting drift the moment it was
+// decorated, which is every real run.
+func TestInstrumentedDiffLiveFallsBackToDiff(t *testing.T) {
+	decorated := decorate(t, diffOnlyResource{diffs: true})
+	got, err := decorated.(interface {
+		DiffLive(context.Context, Spec, *State) (Difference, error)
+	}).DiffLive(context.Background(), Spec{}, &State{})
+	if err != nil {
+		t.Fatalf("DiffLive: %v", err)
+	}
+	if got != Immutable {
+		t.Fatalf("DiffLive() on a Diff-only resource = %v, want Immutable (the inner Diff's answer, not Same)", got)
 	}
 }
 

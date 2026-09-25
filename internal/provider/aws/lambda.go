@@ -225,14 +225,18 @@ func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
 // verbatim, plus settings.EnvSecrets resolved at the point of use — through
 // client's own backends for a secret reference, through spec.Secret for a
 // binding key, exactly as every envSecrets entry resolved before references
-// existed.
+// existed. Beside a value this version-diff feature can track (a
+// reference, or a binding key naming a manifest.CapabilitySecrets entry),
+// it also writes that value's marker variable (see secretVersionMarkerName)
+// carrying the store's own version, so a later plan can tell whether the
+// value is still current without ever reading it.
 //
 // Resolved in sorted order by environment variable name, rather than Go's
 // randomized map order, so a manifest with more than one entry behaves the
 // same on every run: which one fails first, and which ones were already
 // fetched before it did, is otherwise not reproducible.
 func resolveEnv(ctx context.Context, client *Client, spec resource.Spec, settings LambdaSettings) (map[string]any, error) {
-	env := make(map[string]any, len(settings.Env)+len(settings.EnvSecrets))
+	env := make(map[string]any, len(settings.Env)+2*len(settings.EnvSecrets))
 	for k, v := range settings.Env {
 		env[k] = v
 	}
@@ -244,11 +248,14 @@ func resolveEnv(ctx context.Context, client *Client, spec resource.Spec, setting
 	sort.Strings(envVars)
 
 	for _, envVar := range envVars {
-		value, err := resolveEnvSecret(ctx, client, spec, settings.EnvSecrets[envVar])
+		value, version, err := resolveEnvSecret(ctx, client, spec, settings.EnvSecrets[envVar])
 		if err != nil {
 			return nil, kerrors.Wrap(err, codeOf(err), "environment variable %q", envVar)
 		}
 		env[envVar] = value
+		if version != "" {
+			env[secretVersionMarkerName(envVar)] = version
+		}
 	}
 	return env, nil
 }
@@ -264,27 +271,55 @@ func codeOf(err error) kerrors.Code {
 	return kerrors.CodeUnexpected
 }
 
-// resolveEnvSecret resolves one envSecrets value. A value with a scheme is
-// a secret reference, resolved through client; any other value is a
-// binding key, resolved through spec.Secret as before references existed.
+// resolveEnvSecret resolves one envSecrets value to its live value and, for
+// a value this version-diff feature can track, the store's own version for
+// it: a reference (resolved through client, exactly as before this feature
+// existed) always carries one; a binding key naming a
+// manifest.CapabilitySecrets entry carries one too, fetched through a
+// separate metadata-only call and, deliberately, before the value itself —
+// see the ordering note below. Any other binding key (a database's
+// connection_uri, e.g.) is resolved through spec.Secret exactly as every
+// envSecrets entry resolved before this feature or references existed, and
+// returns an empty version: out of scope, nothing to compare.
+//
 // The returned error, wrapped by resolveEnv with only the environment
 // variable's name, keeps whatever kerrors.Code the failure already carries:
 // a missing reference is a validation error, but a throttled or otherwise
 // failed provider call is not, and neither this function nor its caller
 // should downgrade the second into the first.
-func resolveEnvSecret(ctx context.Context, client *Client, spec resource.Spec, raw string) (string, error) {
+//
+// Ordering for a binding key: the version is fetched before the value.
+// Under a rotation racing this apply, that means the marker can only
+// under-state freshness — a value written after a newer version replaced
+// the one the marker names — never over-state it. An under-stated marker
+// makes the next plan see it as stale and redeploy, wasteful but correct; an
+// over-stated one would mark an already-stale value as current and strand
+// it. A reference has no such ordering to get right: its version comes from
+// the very same call that returned its value, so the two can never
+// disagree.
+func resolveEnvSecret(ctx context.Context, client *Client, spec resource.Spec, raw string) (value, version string, err error) {
 	ref, isRef, err := secretref.Parse(raw)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	if !isRef {
-		return spec.Secret(ctx, raw)
+	if isRef {
+		return resolveVersionedURIRef(ctx, client, ref)
 	}
-	producer, err := client.resolveSecretRef(ref)
-	if err != nil {
-		return "", err
+
+	binding, entry, hasEntry := strings.Cut(raw, ".")
+	if hasEntry {
+		name, found, err := entryParameterName(spec, binding, entry)
+		if err != nil {
+			return "", "", err
+		}
+		if found {
+			if version, err = client.currentSSMParameterVersion(ctx, name); err != nil {
+				return "", "", err
+			}
+		}
 	}
-	return producer(ctx)
+	value, err = spec.Secret(ctx, raw)
+	return value, version, err
 }
 
 // addBindingEnv publishes what each of the service's AWS bindings resolved
@@ -399,15 +434,25 @@ func bindingVariables(spec resource.Spec) ([]bindingVariable, error) {
 	return out, nil
 }
 
-// Diff decides whether an existing function needs a redeploy from what a
-// plan can know: the manifest, the source on disk and the live function.
-// Compared in order: the declared properties through the generic comparison
-// (FunctionName is createOnly, so a difference there is a replace); the
-// artifact, by hashing the source and reading the hash the last deploy
-// recorded in the tags; the environment, where a literal variable must
-// match and a secret or binding variable must exist; and whether the
-// function is inside a VPC.
-func (l *lambdaFunctionResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+// DiffLive decides whether an existing function needs a redeploy from what
+// a plan can know: the manifest, the source on disk, the live function, and
+// — the one live call this type's comparison makes — the secret store's
+// own metadata for whichever secret-backed environment variables the
+// function declares. Compared in order: the declared properties through
+// the generic comparison (FunctionName is createOnly, so a difference there
+// is a replace); the artifact, by hashing the source and reading the hash
+// the last deploy recorded in the tags; the environment, where a literal
+// variable must match, a secret or binding variable must exist, and a
+// secret-backed one's version marker must match the store's current
+// version (environmentMatches); and whether the function is inside a VPC.
+//
+// Implements plan.LiveDiffer rather than plan.Differ: environmentMatches'
+// version check needs a call of its own beside spec and state, which Differ
+// has no context for. That call reads metadata only — DescribeParameters
+// or DescribeSecret, never GetParameter or GetSecretValue — the same
+// contract every other verb in this package that touches a secret honors:
+// a plan never resolves a live credential.
+func (l *lambdaFunctionResource) DiffLive(ctx context.Context, spec resource.Spec, state *resource.State) (resource.Difference, error) {
 	if state == nil {
 		return resource.Same, nil
 	}
@@ -430,7 +475,7 @@ func (l *lambdaFunctionResource) Diff(spec resource.Spec, state *resource.State)
 		return resource.Mutable, nil
 	}
 
-	same, err := environmentMatches(spec, declared.settings, state)
+	same, err := environmentMatches(ctx, l.client, spec, declared.settings, state)
 	if err != nil || !same {
 		return resource.Mutable, err
 	}
@@ -461,21 +506,39 @@ func tagValue(properties map[string]any, key string) string {
 
 // environmentMatches reports whether the live function's environment is the
 // one the spec would produce, as far as a plan can tell: every literal
-// variable carries its value, every secret or binding variable exists, and
-// nothing else does.
-func environmentMatches(spec resource.Spec, settings LambdaSettings, state *resource.State) (bool, error) {
+// variable carries its value; every secret or binding variable exists; a
+// secret-backed variable this feature tracks a version for also carries a
+// marker whose value matches the store's current one (expectedSecretVersion
+// — the one live call this makes, metadata only, never a decrypt); and
+// nothing else is present.
+func environmentMatches(ctx context.Context, client *Client, spec resource.Spec, settings LambdaSettings, state *resource.State) (bool, error) {
 	environment, _ := state.Attributes["Environment"].(map[string]any)
 	live, _ := environment["Variables"].(map[string]any)
 
-	expected := make(map[string]bool, len(settings.Env)+len(settings.EnvSecrets))
+	expected := make(map[string]bool, len(settings.Env)+2*len(settings.EnvSecrets))
 	for name, want := range settings.Env {
 		expected[name] = true
 		if got, _ := live[name].(string); got != want {
 			return false, nil
 		}
 	}
-	for name := range settings.EnvSecrets {
-		expected[name] = true
+	for envVar, raw := range settings.EnvSecrets {
+		expected[envVar] = true
+		version, found, err := expectedSecretVersion(ctx, client, spec, raw)
+		if errors.Is(err, errSecretNotYetCreated) {
+			return false, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		if !found {
+			continue
+		}
+		marker := secretVersionMarkerName(envVar)
+		expected[marker] = true
+		if got, _ := live[marker].(string); got != version {
+			return false, nil
+		}
 	}
 	variables, err := bindingVariables(spec)
 	if err != nil {

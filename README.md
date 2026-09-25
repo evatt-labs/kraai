@@ -198,16 +198,32 @@ argument, never logged). Either way, `plan` never reads a value and no
 later `apply` ever overwrites one — the entry's existence is what kraai
 reconciles, not its contents.
 
-**A changed secret value does not by itself reach a consuming function.**
-`apply` diffs a function's environment by whether each `envSecrets` variable
-is declared, not by the value it currently resolves to — plan never reads a
-value, so it has nothing to compare. Running `kraai secret set` after a
-function has already been deployed writes the new value to the parameter,
-but the function keeps whatever it last read until some other change to it
-triggers a redeploy (an unrelated setting, a new artifact, and so on). The
-same gap applies to a URI-scheme secret reference (`aws-ssm://…`) in
-`envSecrets`, since it is diffed the same way. (tracked in a follow-up
-issue)
+**A rotated or newly-set secret value reaches a consuming function on its
+next apply, even when nothing else about the function changed.** Alongside
+every secret-backed `envSecrets` variable, `apply` writes a second,
+non-secret environment variable — its *version marker*,
+`KRAAI_SECRET_VERSION_<VAR>` — carrying the store's own version for that
+value at the moment it was resolved: SSM's `Version`, read through
+`DescribeParameters` just before the value itself is resolved (a URI
+reference, below, takes its version from the same call that returned its
+value instead, so it costs no second call). `plan`
+compares the live marker to the store's current version through a
+metadata-only call — SSM `DescribeParameters` — that never decrypts
+anything; a mismatch, or a marker that is missing entirely (a function
+deployed before this existed), plans an `Update`, and the next `apply`
+re-resolves the value and rewrites the marker together, in the same call. A
+manifest cannot declare a plain `env:` or `envSecrets` variable named
+`KRAAI_SECRET_VERSION_<VAR>` for an existing `<VAR>`; `decodeLambdaSettings`
+refuses the collision at `plan`'s first pass.
+
+A reference (below) pinned to one immutable version — SSM's `?version=<n>`,
+or Secrets Manager's `?versionId=<id>` — is the one case with nothing to
+poll: the marker is that pinned value itself, `plan` compares against the
+literal from the manifest, and no call is made at all, since a pin never
+changes. Secrets Manager's other selector, `?version=<stage>` (including
+the default, `AWSCURRENT`), names a moving target — which version currently
+carries that label — so it is checked the same way an unpinned reference
+is, through `DescribeSecret`.
 
 The only store today is `aws-ssm`: one SSM Parameter Store `SecureString`
 per entry, named from the environment, service, binding and entry
@@ -220,7 +236,9 @@ to exactly the entries it reads; `kraai iam-policy` grants the operator
 `ssm:PutParameter`, `GetParameter`, `DeleteParameter` and
 `AddTagsToResource` scoped to the same entries, plus an unscoped
 `ssm:DescribeParameters` (SSM's own API takes no parameter name to scope
-that action to).
+that action to — the same grant the version marker's `plan`-time check
+reuses, so no policy change is needed for a `SECRETS.<entry>` binding
+specifically).
 
 `aws-secretsmanager` as a second store, importing a pre-existing parameter,
 and a per-entry KMS key are not supported yet.
@@ -248,7 +266,13 @@ name for the secret. Two backends resolve today:
   or `StringList` ignores the flag). `?version=<n>` selects a parameter
   version through SSM's own `name:version` syntax. A parameter's ARN is
   per-parameter, not per-version, so `?version=` narrows which value is
-  read without changing the `iam-policy` grant's `Resource`.
+  read without changing the `iam-policy` grant's `Resource`. It must be a
+  version number: SSM also accepts a parameter *label* in the same
+  position, but a label moves between versions the way a Secrets Manager
+  staging label does, and the version marker (above) treats any
+  `?version=` as an immutable pin — a label there would never match and
+  would plan an `Update` on every `plan`. A reference using one fails
+  validation instead.
 - `aws-secretsmanager` — a Secrets Manager secret, read with
   `GetSecretValue`. `?version=<stage>` selects a version stage
   (`AWSCURRENT` by default); `?versionId=<id>` selects a specific version by
@@ -269,18 +293,31 @@ before any resource is created, updated or deleted — using the operator's
 own AWS credentials (the same default credential chain every other AWS call
 here uses). A missing or inaccessible reference fails the whole run before
 anything is touched, and the failure names the reference, never the value.
-`kraai plan` never resolves a reference and makes no call toward a secret
-store: only `apply` does. The resolved value exists only for the moment
-`apply` builds the function's environment; it is never written to the
-manifest, a plan, a log, telemetry, or any error message.
+`kraai plan` never resolves a reference and never decrypts a value: only
+`apply` does. It does make one call per secret-backed variable that is not
+version-pinned — `DescribeParameters` or `DescribeSecret`, metadata only —
+to check the version marker above; the version numbers and ids that call
+returns are not secret and may appear in `plan --json` output, but the
+value itself is never written to the manifest, a plan, a log, telemetry, or
+any error message.
 
 `kraai iam-policy` grants exactly what a manifest's references need:
 `ssm:GetParameter` scoped to each `aws-ssm` reference's own parameter ARN,
 `secretsmanager:GetSecretValue` scoped to each `aws-secretsmanager`
-reference's own secret ARN — never `*`. A `SecureString` parameter
+reference's own secret ARN — never `*` — plus what the version marker
+above needs to check each reference at `plan` time without decrypting it:
+`ssm:DescribeParameters`, unscoped (SSM's own API takes no per-parameter
+resource element), and `secretsmanager:DescribeSecret`, scoped to the same
+secret ARN as its `GetSecretValue` grant. A `SecureString` parameter
 encrypted under a customer-managed KMS key needs `kms:Decrypt` on that key
 too, added by hand: kraai has no way to learn the key's ARN without a call
 this command does not make.
+
+Upgrading from a release without the version marker: re-run
+`kraai iam-policy` and apply the new policy before the next `plan`, which
+otherwise fails on the `Describe` calls the old policy never granted. The
+first `apply` after upgrading redeploys every function with a secret-backed
+variable once, to write its marker.
 
 The packaging step honours `.gitignore`, so build output and virtualenvs stay
 out of the artifact. `include:` re-adds what the artifact genuinely needs.

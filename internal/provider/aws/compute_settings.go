@@ -114,6 +114,25 @@ func decodeLambdaSettings(settings map[string]any) (LambdaSettings, error) {
 			return LambdaSettings{}, kerrors.Wrap(err, kerrors.CodeValidation, "envSecrets.%s", envVar)
 		}
 	}
+	// A manifest author's own variable must never collide with the marker
+	// resolveEnv writes beside a secret-backed one (secretVersionMarkerName):
+	// either would silently overwrite the other in the function's
+	// environment, and whichever lost would never be checked here again,
+	// the same "runs sometimes" failure this package's ValidateSpec
+	// checks exist to catch at a fresh environment's first plan.
+	for envVar := range s.EnvSecrets {
+		marker := secretVersionMarkerName(envVar)
+		if _, clash := s.Env[marker]; clash {
+			return LambdaSettings{}, kerrors.Validation(
+				"aws lambda compute settings: env.%s collides with the version marker kraai writes for envSecrets.%s; rename one",
+				marker, envVar)
+		}
+		if _, clash := s.EnvSecrets[marker]; clash {
+			return LambdaSettings{}, kerrors.Validation(
+				"aws lambda compute settings: envSecrets.%s collides with the version marker kraai writes for envSecrets.%s; rename one",
+				marker, envVar)
+		}
+	}
 	if arns, ok := settings["managedPolicyArns"].([]any); ok {
 		for _, a := range arns {
 			if str, ok := a.(string); ok && str != "" {
