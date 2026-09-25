@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strconv"
 	"strings"
@@ -141,28 +142,58 @@ func expectedSecretVersion(ctx context.Context, client *Client, spec resource.Sp
 	if err != nil || !found {
 		return "", false, err
 	}
-	version, err = client.currentSSMParameterVersion(ctx, name)
-	return version, true, err
+	version, exists, err := client.describeSSMParameterVersion(ctx, name)
+	if err != nil {
+		return "", false, err
+	}
+	if !exists {
+		// A secrets entry added in the same change that first reads it:
+		// this apply creates the parameter before the function, so the
+		// function needs an Update, not a failed plan.
+		return "", true, errSecretNotYetCreated
+	}
+	return version, true, nil
 }
+
+// errSecretNotYetCreated reports that a secrets entry's parameter does not
+// exist yet, which environmentMatches reads as a difference, not a failure.
+var errSecretNotYetCreated = errors.New("secrets entry parameter not yet created")
 
 // currentSSMParameterVersion reads name's current version through
 // DescribeParameters: metadata only, never GetParameter, so a plan-time
-// caller can use it without decrypting anything. The same call Get already
-// makes for a secrets binding's own parameter (secrets.go), reused here
-// for a parameter this package did not create — a URI reference's target.
+// caller can use it without decrypting anything. A missing parameter is a
+// validation error.
 func (c *Client) currentSSMParameterVersion(ctx context.Context, name string) (string, error) {
-	out, err := c.ssm.DescribeParameters(ctx, &ssm.DescribeParametersInput{
+	version, exists, err := c.describeSSMParameterVersion(ctx, name)
+	if err != nil {
+		return "", err
+	}
+	if !exists {
+		return "", kerrors.Validation("SSM parameter %q does not exist", name)
+	}
+	return version, nil
+}
+
+// describeSSMParameterVersion is currentSSMParameterVersion with absence
+// reported as exists=false rather than an error. It follows NextToken:
+// DescribeParameters may return an empty page and a token even for an
+// exact-name filter, and an empty first page is not proof of absence.
+func (c *Client) describeSSMParameterVersion(ctx context.Context, name string) (version string, exists bool, err error) {
+	pages := ssm.NewDescribeParametersPaginator(c.ssm, &ssm.DescribeParametersInput{
 		ParameterFilters: []ssmtypes.ParameterStringFilter{
 			{Key: aws.String("Name"), Option: aws.String("Equals"), Values: []string{name}},
 		},
 	})
-	if err != nil {
-		return "", kerrors.Wrap(err, kerrors.CodeUnexpected, "describing SSM parameter %q", name)
+	for pages.HasMorePages() {
+		out, err := pages.NextPage(ctx)
+		if err != nil {
+			return "", false, kerrors.Wrap(err, kerrors.CodeUnexpected, "describing SSM parameter %q", name)
+		}
+		if len(out.Parameters) > 0 {
+			return strconv.FormatInt(out.Parameters[0].Version, 10), true, nil
+		}
 	}
-	if len(out.Parameters) == 0 {
-		return "", kerrors.Validation("SSM parameter %q does not exist", name)
-	}
-	return strconv.FormatInt(out.Parameters[0].Version, 10), nil
+	return "", false, nil
 }
 
 // currentSecretsManagerVersion reads the version id currently carrying

@@ -168,6 +168,57 @@ func TestDiffLive_SecretsEntryMarker(t *testing.T) {
 	}
 }
 
+// TestDiffLive_NewSecretsEntryPlansUpdate covers a secrets entry added in
+// the same change that first reads it: its parameter does not exist until
+// this apply creates it, which must plan the function as an Update rather
+// than fail the plan.
+func TestDiffLive_NewSecretsEntryPlansUpdate(t *testing.T) {
+	fn, dir := versionDiffFixture(t, &fakeSSM{}, nil)
+	secretsBinding := awsBinding(manifest.CapabilitySecrets, "SECRETS", "myenv-api-secrets")
+	secretsBinding["entryNames"] = map[string]string{"pepper_key": "/myenv/api/secrets/pepper_key"}
+	spec := baseLambdaSpec(t, dir, map[string]any{"envSecrets": map[string]any{"PEPPER": "SECRETS.pepper_key"}})
+	spec.Config["bindings"] = bindingsConfig(secretsBinding)
+	live := deployedFunction(t, dir, map[string]any{})
+
+	d, err := fn.DiffLive(context.Background(), spec, live)
+	if err != nil || d != resource.Mutable {
+		t.Fatalf("DiffLive(entry not yet created) = %v, %v; want Mutable, nil", d, err)
+	}
+}
+
+// TestDiffLive_MissingReferenceStillFails is the new-entry test's
+// counterpart: a URI reference names a parameter kraai never creates, so
+// its absence is still a plan failure.
+func TestDiffLive_MissingReferenceStillFails(t *testing.T) {
+	fn, dir := versionDiffFixture(t, &fakeSSM{}, nil)
+	spec := baseLambdaSpec(t, dir, map[string]any{"envSecrets": map[string]any{"API_KEY": "aws-ssm:///kraai/prod/api_key"}})
+	live := deployedFunction(t, dir, map[string]any{"API_KEY": "x", "KRAAI_SECRET_VERSION_API_KEY": "1"})
+
+	if _, err := fn.DiffLive(context.Background(), spec, live); err == nil {
+		t.Fatal("DiffLive(missing reference) error = nil, want a does-not-exist error")
+	}
+}
+
+// TestCurrentSSMParameterVersion_FollowsNextToken: DescribeParameters may
+// answer an exact-name filter with an empty page and a NextToken. Reading
+// that first page as absence would fail the plan, or plan a spurious
+// Update for a secrets entry.
+func TestCurrentSSMParameterVersion_FollowsNextToken(t *testing.T) {
+	f := &fakeSSM{describeParametersPages: [][]ssmtypes.ParameterMetadata{nil, nil, {{Version: 7}}}}
+	client := &Client{ssm: f}
+
+	version, err := client.currentSSMParameterVersion(context.Background(), "/kraai/prod/api_key")
+	if err != nil {
+		t.Fatalf("currentSSMParameterVersion: %v", err)
+	}
+	if version != "7" {
+		t.Fatalf("version = %q, want 7 from the third page", version)
+	}
+	if len(f.describeParametersIn) != 3 {
+		t.Errorf("DescribeParameters called %d times, want 3", len(f.describeParametersIn))
+	}
+}
+
 // TestResolveEnv_WritesValueAndMarkerTogether proves apply's atomicity
 // requirement: a successful resolve writes both the value and its marker in
 // the same map, and a failed one writes neither.

@@ -525,6 +525,9 @@ func environmentMatches(ctx context.Context, client *Client, spec resource.Spec,
 	for envVar, raw := range settings.EnvSecrets {
 		expected[envVar] = true
 		version, found, err := expectedSecretVersion(ctx, client, spec, raw)
+		if errors.Is(err, errSecretNotYetCreated) {
+			return false, nil
+		}
 		if err != nil {
 			return false, err
 		}

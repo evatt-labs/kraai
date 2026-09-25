@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -34,7 +35,10 @@ type fakeSSM struct {
 
 	describeParameters    []ssmtypes.ParameterMetadata
 	describeParametersErr error
-	describeParametersIn  []*ssm.DescribeParametersInput
+	// describeParametersPages, when set, replaces describeParameters with
+	// one page per call, each but the last carrying a NextToken.
+	describeParametersPages [][]ssmtypes.ParameterMetadata
+	describeParametersIn    []*ssm.DescribeParametersInput
 
 	tags                []ssmtypes.Tag
 	listTagsErr         error
@@ -64,6 +68,17 @@ func (f *fakeSSM) DescribeParameters(
 	f.describeParametersIn = append(f.describeParametersIn, params)
 	if f.describeParametersErr != nil {
 		return nil, f.describeParametersErr
+	}
+	if f.describeParametersPages != nil {
+		page := 0
+		if params.NextToken != nil {
+			page, _ = strconv.Atoi(*params.NextToken)
+		}
+		out := &ssm.DescribeParametersOutput{Parameters: f.describeParametersPages[page]}
+		if page+1 < len(f.describeParametersPages) {
+			out.NextToken = aws.String(strconv.Itoa(page + 1))
+		}
+		return out, nil
 	}
 	return &ssm.DescribeParametersOutput{Parameters: f.describeParameters}, nil
 }
@@ -376,6 +391,20 @@ func TestValidateSecretRefSchemeInEnvSecrets(t *testing.T) {
 			t.Fatal("decodeLambdaSettings error = nil, want a non-numeric-version error: a label would never match the marker, planning an Update forever")
 		}
 		assertCode(t, err, kerrors.CodeValidation)
+	})
+
+	t.Run("aws-ssm version must be spelled as SSM reports it", func(t *testing.T) {
+		for _, pin := range []string{"03", "+3", "-1", "0"} {
+			settings := map[string]any{
+				"runtime": "python3.13", "architecture": "arm64",
+				"envSecrets": map[string]any{"X": "aws-ssm:///kraai/prod/x?version=" + pin},
+			}
+			_, err := decodeLambdaSettings(settings)
+			if err == nil {
+				t.Fatalf("decodeLambdaSettings(?version=%s) error = nil, want a validation error: the pin would never equal the marker apply writes, planning an Update forever", pin)
+			}
+			assertCode(t, err, kerrors.CodeValidation)
+		}
 	})
 
 	t.Run("aws-ssm version as a number is accepted", func(t *testing.T) {
