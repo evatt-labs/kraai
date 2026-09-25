@@ -86,6 +86,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if len(r.PageToken) > 0 {
+		fmt.Fprintf(b, "PageToken: %#v,\n", r.PageToken)
+	}
 	if len(r.Response) > 0 {
 		b.WriteString("Response: []Step{")
 		for _, st := range r.Response {

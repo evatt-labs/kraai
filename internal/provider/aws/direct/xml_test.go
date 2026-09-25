@@ -132,6 +132,25 @@ func TestReadEC2Query(t *testing.T) {
 	}
 }
 
+// An ec2Query read answered with a nextToken is incomplete, in the read and
+// in a further call alike.
+func TestReadEC2QueryPageTokenIsIncomplete(t *testing.T) {
+	emptySubnets := `<DescribeSubnetsResponse><subnetSet/><nextToken>t</nextToken></DescribeSubnetsResponse>`
+	pagedACLs := strings.Replace(networkACLsXML([2]string{"aclassoc-1", "subnet-1"}), "</networkAclSet>", "</networkAclSet><nextToken>t</nextToken>", 1)
+	for name, byAction := range map[string]map[string]string{
+		"read":    {"DescribeSubnets": emptySubnets, "DescribeNetworkAcls": networkACLsXML([2]string{"aclassoc-1", "subnet-1"})},
+		"further": {"DescribeSubnets": subnetXML, "DescribeNetworkAcls": pagedACLs},
+	} {
+		t.Run(name, func(t *testing.T) {
+			client, _ := xmlServerBy(t, byAction)
+			_, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "subnet-1"})
+			if err == nil || errors.Is(err, ErrAbsent) || !strings.Contains(err.Error(), "page token") {
+				t.Fatalf("Read = %v, want an incomplete-response error", err)
+			}
+		})
+	}
+}
+
 // A selection that finds two elements is an error, never the first of
 // them: the read must not guess which one Cloud Control would report.
 func TestReadAmbiguousSelectionFails(t *testing.T) {

@@ -100,6 +100,17 @@ func (r Reader) readXML(body []byte, w *walk) (map[string]any, error) {
 			return nil, fmt.Errorf("the %s response has no %s", r.Type, r.Wrapper)
 		}
 	}
+	if len(r.PageToken) > 0 {
+		token := node
+		for _, name := range r.PageToken {
+			if token = token.child(name); token == nil {
+				break
+			}
+		}
+		if token != nil && token.text != "" {
+			return nil, errIncomplete(r.Type)
+		}
+	}
 	root := node
 	for _, step := range r.Response {
 		if !step.List {

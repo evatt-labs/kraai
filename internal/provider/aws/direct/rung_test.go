@@ -103,6 +103,39 @@ func TestReadEmptyListStepIsAbsent(t *testing.T) {
 	}
 }
 
+// A paginated read answered with a page token is incomplete: an empty page
+// is not proof of absence, and a full one may not carry every property.
+func TestReadWithAPageTokenIsIncomplete(t *testing.T) {
+	m := listWidget()
+	shapes := m["shapes"].(map[string]any)
+	shapes["com.example#GetWidget"].(map[string]any)["traits"] = map[string]any{"smithy.api#paginated": map[string]any{"inputToken": "NextToken", "outputToken": "NextToken"}}
+	shapes["com.example#GetWidgetResponse"].(map[string]any)["members"].(map[string]any)["NextToken"] = map[string]any{"target": "smithy.api#String"}
+	o := widgetOverride("Widgets[]")
+	o.Read.Identifier = map[string]string{"WidgetId": "WidgetIds"}
+	r, errs := compileWidget(t, m, o)
+	if len(errs) > 0 {
+		t.Fatal(errs)
+	}
+	readers[r.Type] = r
+	t.Cleanup(func() { delete(readers, r.Type) })
+	for name, body := range map[string]string{
+		"empty page": `{"Widgets":[],"NextToken":"t"}`,
+		"full page":  `{"Widgets":[{"WidgetId":"w-1"}],"NextToken":"t"}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			client, _ := bodyPages(t, func(string) (int, string) { return 200, body })
+			_, err := client.Read(context.Background(), r.Type, map[string]string{"WidgetId": "w-1"})
+			if err == nil || errors.Is(err, ErrAbsent) || !strings.Contains(err.Error(), "page token") {
+				t.Fatalf("Read = %v, want an incomplete-response error", err)
+			}
+		})
+	}
+	client, _ := bodyPages(t, func(string) (int, string) { return 200, `{"Widgets":[{"WidgetId":"w-1"}],"NextToken":""}` })
+	if _, err := client.Read(context.Background(), r.Type, map[string]string{"WidgetId": "w-1"}); err != nil {
+		t.Fatalf("Read with an empty token = %v, want the widget", err)
+	}
+}
+
 func TestProbeListsAbsentIdentifiers(t *testing.T) {
 	m := listWidget()
 	shapes := m["shapes"].(map[string]any)

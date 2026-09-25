@@ -113,6 +113,9 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if err != nil {
 		return nil, err
 	}
+	if token, _ := at(out, r.PageToken); len(r.PageToken) > 0 && token != nil && token != "" {
+		return nil, errIncomplete(typeName)
+	}
 	root, _ := out.(map[string]any)
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
@@ -146,6 +149,12 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		return nil, err
 	}
 	return props, nil
+}
+
+// errIncomplete reports a read answered with one page of several, which
+// can neither prove absence nor carry every property.
+func errIncomplete(typeName string) error {
+	return fmt.Errorf("the %s read was answered with a page token, so the response is incomplete", typeName)
 }
 
 // ErrAbsent is Read's answer for an instance the service still returns

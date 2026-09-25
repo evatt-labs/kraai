@@ -47,6 +47,9 @@ type Reader struct {
 	// those it must read as absent: the only readers a lookup may use in
 	// place of Cloud Control.
 	Production bool
+	// PageToken is the wire path to the output's page token when the
+	// operation is paginated: a response carrying one is incomplete.
+	PageToken []string
 	// Response is the path from the output to the resource.
 	Response []Step
 	Fields   []Field
@@ -311,6 +314,33 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 		}
 	default:
 		r.Target = service[len(namespace):] + "." + o.Read.Operation
+	}
+
+	// A paginated operation may answer a filtered read with an empty page
+	// and a token; that page is not proof of absence.
+	if op.Traits["smithy.api#paginated"] != nil {
+		var page, own smithyPaginated
+		_ = json.Unmarshal(svc.Traits["smithy.api#paginated"], &page)
+		_ = json.Unmarshal(op.Traits["smithy.api#paginated"], &own)
+		if own.OutputToken != "" {
+			page.OutputToken = own.OutputToken
+		}
+		at := ref(op.Output)
+		for _, step := range strings.Split(page.OutputToken, ".") {
+			m, ok := model.Shapes[at].Members[step]
+			if !ok {
+				fail("%s's output token %s is not a member of its output", o.Read.Operation, page.OutputToken)
+				r.PageToken = nil
+				break
+			}
+			var jsonName string
+			_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &jsonName)
+			name := r.wire(step, jsonName)
+			if isXML(r.Protocol) {
+				name = xmlName(step, m)
+			}
+			r.PageToken, at = append(r.PageToken, name), m.Target
+		}
 	}
 
 	// The identifier: exactly the primary identifier, each bound to an
