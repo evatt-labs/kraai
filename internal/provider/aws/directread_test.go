@@ -13,6 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
 	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 
 	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 )
@@ -114,5 +116,29 @@ func TestGetResourceLeavesUnprovenTypesToCloudControl(t *testing.T) {
 	c, cc, directCalls := directClient(t, 200, `<never/>`)
 	if _, _, err := c.GetResource(context.Background(), subnet, "subnet-1"); err != nil || cc.gets.Load() != 1 || directCalls.Load() != 0 {
 		t.Fatalf("err %v, Cloud Control calls %d, direct calls %d", err, cc.gets.Load(), directCalls.Load())
+	}
+}
+
+// A fallback leaves an event on the read's span, naming the type and the
+// service's error code, so a direct path that always falls back shows up.
+func TestGetResourceRecordsAFallback(t *testing.T) {
+	spans := tracetest.NewSpanRecorder()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(spans))
+	ctx, span := tp.Tracer("test").Start(context.Background(), "read")
+	c, _, _ := directClient(t, 429, `{"__type":"ThrottlingException"}`)
+	if _, _, err := c.GetResource(ctx, taskDefinition, "arn:td"); err != nil {
+		t.Fatal(err)
+	}
+	span.End()
+	events := spans.Ended()[0].Events()
+	if len(events) != 1 || events[0].Name != "direct read fell back to Cloud Control" {
+		t.Fatalf("events = %v", events)
+	}
+	attrs := map[string]string{}
+	for _, a := range events[0].Attributes {
+		attrs[string(a.Key)] = a.Value.AsString()
+	}
+	if want := map[string]string{"kraai.type": taskDefinition, "kraai.fallback_reason": "ThrottlingException"}; !reflect.DeepEqual(attrs, want) {
+		t.Fatalf("attributes = %v, want %v", attrs, want)
 	}
 }

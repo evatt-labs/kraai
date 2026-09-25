@@ -33,7 +33,7 @@ func Generate() ([]byte, error) {
 		if r.Complete {
 			b.WriteString("Complete: true,\n")
 		}
-		if r.Complete && proven[r.Type] {
+		if r.Complete && proven[r.Type] && len(r.Identifier) == 1 {
 			b.WriteString("Production: true,\n")
 		}
 		field(&b, "Host", r.Host)

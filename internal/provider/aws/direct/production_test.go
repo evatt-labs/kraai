@@ -54,8 +54,8 @@ func TestProductionReadersAreCompleteAndProven(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, r := range Readers() {
-		if r.Production && (!r.Complete || !proven[r.Type]) {
-			t.Errorf("%s is a production reader, but complete=%v proven=%v", r.Type, r.Complete, proven[r.Type])
+		if r.Production && (!r.Complete || !proven[r.Type] || len(r.Identifier) != 1) {
+			t.Errorf("%s is a production reader, but complete=%v proven=%v identifiers=%d", r.Type, r.Complete, proven[r.Type], len(r.Identifier))
 		}
 		if CanRead(r.Type) != r.Production {
 			t.Errorf("CanRead(%s) disagrees with Production", r.Type)

@@ -36,10 +36,11 @@ type Reader struct {
 	// Complete is true when the override skips no property at any depth,
 	// so a read carries everything Cloud Control's does.
 	Complete bool
-	// Production is true when the reader is Complete and its recorded
-	// evidence shows parity with Cloud Control both on the instances it
-	// reads and on those it must read as absent: the only readers a
-	// lookup may use in place of Cloud Control.
+	// Production is true when the reader is Complete, has the single
+	// identifier a Cloud Control read gives it, and its recorded evidence
+	// shows parity with Cloud Control both on the instances it reads and on
+	// those it must read as absent: the only readers a lookup may use in
+	// place of Cloud Control.
 	Production bool
 	// Response is the path from the output to the resource.
 	Response []Step
