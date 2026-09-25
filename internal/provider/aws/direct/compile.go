@@ -21,9 +21,12 @@ type Reader struct {
 	Target string
 	// Method and URI are the HTTP binding of a restJson1 operation.
 	Method, URI string
-	Identifier  []Binding
-	// Response is the wire path from the output to the resource.
-	Response []string
+	// Action and Version are the form parameters of a query protocol, and
+	// Wrapper the element awsQuery wraps its output in.
+	Action, Version, Wrapper string
+	Identifier               []Binding
+	// Response is the path from the output to the resource.
+	Response []Step
 	Fields   []Field
 	// List lists every instance, when the type's override names a list.
 	List *Lister
@@ -48,14 +51,28 @@ type Lister struct {
 	Item, Property string
 }
 
+// Step is one member of a response path: its name on the wire and, when
+// it is a list, that the list must hold exactly the one resource read.
+type Step struct {
+	Name string
+	List bool
+	// Item is the element each list item is wrapped in, under an XML
+	// protocol; empty when the list is flattened.
+	Item string
+}
+
 // Binding places one primary identifier property in the request.
 type Binding struct {
 	Property string
 	Member   string
-	// Location is label, query, header or body.
+	// Location is label, query, header, form or body.
 	Location string
-	// Name is the query parameter or header name, when Location is one.
+	// Name is the query parameter, header or form key, when Location is
+	// one.
 	Name string
+	// List sends the value as a list of one, for an input that filters by
+	// a list of identifiers.
+	List bool
 	// JSONName is the member's jsonName trait, when it has one.
 	JSONName string
 	// Value is a fixed input's value.
@@ -72,12 +89,21 @@ type Field struct {
 	// Fields are its own; a list's are those of each structure element.
 	Kind   string
 	Fields []Field
+	// XMLName, Item and Scalar read the field under an XML protocol: its
+	// element, the element wrapping each list item (empty when the list is
+	// flattened), and how to type a scalar, a list's scalar items or a
+	// map's values: string, number, boolean or timestamp.
+	XMLName, Item, Scalar string
 }
 
-var protocols = map[string]bool{"awsJson1_0": true, "awsJson1_1": true, "restJson1": true}
+var protocols = map[string]bool{"awsJson1_0": true, "awsJson1_1": true, "restJson1": true, "awsQuery": true, "ec2Query": true}
+
+// isXML reports whether protocol answers in XML.
+func isXML(protocol string) bool { return protocol == "awsQuery" || protocol == "ec2Query" }
 
 type smithyShape struct {
 	Type    string                     `json:"type"`
+	Version string                     `json:"version"`
 	Traits  map[string]json.RawMessage `json:"traits"`
 	Members map[string]smithyMember    `json:"members"`
 	Member  *smithyMember              `json:"member"`
@@ -186,6 +212,11 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			fail("%s has no HTTP binding", o.Read.Operation)
 		}
 		r.Method, r.URI = http.Method, http.URI
+	case "awsQuery", "ec2Query":
+		r.Action, r.Version = o.Read.Operation, svc.Version
+		if r.Protocol == "awsQuery" {
+			r.Wrapper = o.Read.Operation + "Result"
+		}
 	default:
 		r.Target = service[len(namespace):] + "." + o.Read.Operation
 	}
@@ -211,6 +242,19 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		bound[member] = true
 		b := Binding{Property: property, Member: member, Location: "body"}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &b.JSONName)
+		if target := model.Shapes[m.Target]; targetType(target.Type, m.Target) == "list" {
+			el := ref(target.Member)
+			if targetType(model.Shapes[el].Type, el) != "string" {
+				fail("identifier binds %s to %s, a list of something other than strings", property, member)
+			}
+			b.List = true
+		}
+		if isXML(r.Protocol) {
+			b.Location, b.Name = "form", queryKey(&model, r.Protocol, member, m)
+		}
+		if r.Protocol == "restJson1" && b.List {
+			fail("identifier binds %s to the list %s, which restJson1 would not send as a body", property, member)
+		}
 		if r.Protocol == "restJson1" {
 			switch {
 			case m.Traits["smithy.api#httpLabel"] != nil:
@@ -251,6 +295,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	}
 	if o.Read.Response != "" {
 		for i, step := range strings.Split(o.Read.Response, ".") {
+			step, list := strings.CutSuffix(step, "[]")
 			m, ok := model.Shapes[resource].Members[step]
 			if !ok {
 				fail("response path %s: %s has no member %s", o.Read.Response, resource, step)
@@ -264,10 +309,26 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			if jsonName != "" && r.Protocol != "restJson1" {
 				fail("response path member %s has a jsonName, which %s is not known to honour", step, r.Protocol)
 			}
-			if i > 0 || step != payload {
-				r.Response = append(r.Response, r.wire(step, jsonName))
+			next := m.Target
+			st := Step{Name: r.wire(step, jsonName), List: list}
+			if isXML(r.Protocol) {
+				st.Name = xmlName(step, m)
 			}
-			resource = m.Target
+			if list {
+				listShape := model.Shapes[m.Target]
+				if targetType(listShape.Type, m.Target) != "list" {
+					fail("response path %s: %s is not a list", o.Read.Response, step)
+					break
+				}
+				next = ref(listShape.Member)
+				if isXML(r.Protocol) {
+					st.Item = itemName(m, listShape)
+				}
+			}
+			if i > 0 || step != payload {
+				r.Response = append(r.Response, st)
+			}
+			resource = next
 		}
 	} else if payload != "" {
 		fail("the body is the payload %s, so the response path must start at it", payload)
@@ -293,8 +354,13 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		}
 	}
 	r.Fields = compileFields(&model, &schema, readable, resource, o.Properties, o.Skip, "", fail)
+	if isXML(r.Protocol) {
+		xmlFields(&model, resource, r.Fields, "", fail)
+	}
 
-	if o.List != nil {
+	if o.List != nil && isXML(r.Protocol) {
+		fail("a list under %s is not supported yet", r.Protocol)
+	} else if o.List != nil {
 		r.List = compileList(&model, &r, o, service, namespace, fail)
 	}
 
@@ -502,3 +568,102 @@ func sortedKeys[V any](m map[string]V) []string {
 }
 
 func sortedSet(m map[string]bool) []string { return sortedKeys(m) }
+
+// xmlName is the element a structure member is read from under an XML
+// protocol: its xmlName trait, or its own name.
+func xmlName(member string, m smithyMember) string {
+	var name string
+	if json.Unmarshal(m.Traits["smithy.api#xmlName"], &name) == nil && name != "" {
+		return name
+	}
+	return member
+}
+
+// itemName is the element wrapping each item of the list m targets, or ""
+// when m is flattened and its items repeat under m's own element.
+func itemName(m smithyMember, list smithyShape) string {
+	if m.Traits["smithy.api#xmlFlattened"] != nil {
+		return ""
+	}
+	if list.Member != nil {
+		var name string
+		if json.Unmarshal(list.Member.Traits["smithy.api#xmlName"], &name) == nil && name != "" {
+			return name
+		}
+	}
+	return "member"
+}
+
+// queryKey is the form key an input member is sent under: under ec2Query
+// its ec2QueryName, or its xmlName or own name capitalized; under awsQuery
+// its xmlName or own name. A list sends its one item at index 1, under
+// awsQuery inside the list's item element unless flattened.
+func queryKey(model *smithyModel, protocol, member string, m smithyMember) string {
+	key := xmlName(member, m)
+	if protocol == "ec2Query" {
+		var name string
+		if json.Unmarshal(m.Traits["aws.protocols#ec2QueryName"], &name) != nil || name == "" {
+			name = strings.ToUpper(key[:1]) + key[1:]
+		}
+		key = name
+	}
+	list := model.Shapes[m.Target]
+	if targetType(list.Type, m.Target) != "list" {
+		return key
+	}
+	if protocol == "awsQuery" {
+		if item := itemName(m, list); item != "" {
+			key += "." + item
+		}
+	}
+	return key + ".1"
+}
+
+// xmlFields fills in how each compiled field is read from XML, and refuses
+// what the XML reader cannot type without the model: a list of lists, and
+// a map of anything but scalars.
+func xmlFields(model *smithyModel, structure string, fields []Field, at string, fail func(string, ...any)) {
+	shape := model.Shapes[structure]
+	for i := range fields {
+		f := &fields[i]
+		m := shape.Members[f.Member]
+		f.XMLName = xmlName(f.Member, m)
+		target := model.Shapes[m.Target]
+		switch f.Kind {
+		case "scalar", "timestamp":
+			f.Scalar = scalarOf(target.Type, m.Target)
+		case "structure":
+			xmlFields(model, m.Target, f.Fields, at+f.Property+".", fail)
+		case "list":
+			f.Item = itemName(m, target)
+			el := ref(target.Member)
+			switch elShape := model.Shapes[el]; {
+			case elShape.Type == "structure":
+				xmlFields(model, el, f.Fields, at+f.Property+".", fail)
+			case kindOf(elShape.Type, el) == "scalar" || kindOf(elShape.Type, el) == "timestamp":
+				f.Scalar = scalarOf(elShape.Type, el)
+			default:
+				fail("%s%s is a list of %s, which XML cannot be read into", at, f.Property, targetType(elShape.Type, el))
+			}
+		case "map":
+			value := ref(target.Value)
+			if m.Traits["smithy.api#xmlFlattened"] != nil || kindOf(model.Shapes[value].Type, value) != "scalar" {
+				fail("%s%s is a flattened map or a map of other than scalars, which XML cannot be read into", at, f.Property)
+				continue
+			}
+			f.Scalar = scalarOf(model.Shapes[value].Type, value)
+		}
+	}
+}
+
+// scalarOf is how an XML reader types a scalar's text.
+func scalarOf(shapeType, target string) string {
+	switch t := targetType(shapeType, target); t {
+	case "integer", "long", "short", "byte", "intenum", "float", "double", "bigdecimal", "biginteger":
+		return "number"
+	case "boolean", "timestamp":
+		return t
+	default:
+		return "string"
+	}
+}

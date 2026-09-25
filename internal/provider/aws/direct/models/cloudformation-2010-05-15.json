@@ -1,0 +1,2676 @@
+{
+  "shapes": {
+    "com.amazonaws.cloudformation#AfterContext": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#AfterValue": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#AfterValueFrom": {
+      "members": {
+        "TEMPLATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TEMPLATE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#Arn": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#AttributeChangeType": {
+      "members": {
+        "Add": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Add"
+          }
+        },
+        "Modify": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Modify"
+          }
+        },
+        "Remove": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Remove"
+          }
+        },
+        "SyncWithActual": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SyncWithActual"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#AutoUpdate": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#BeforeContext": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#BeforeValue": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#BeforeValueFrom": {
+      "members": {
+        "ACTUAL_STATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTUAL_STATE"
+          }
+        },
+        "PREVIOUS_DEPLOYMENT_STATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PREVIOUS_DEPLOYMENT_STATE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#CFNRegistryException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CFNRegistryException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#Capabilities": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#Capability"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#Capability": {
+      "members": {
+        "CAPABILITY_AUTO_EXPAND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CAPABILITY_AUTO_EXPAND"
+          }
+        },
+        "CAPABILITY_IAM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CAPABILITY_IAM"
+          }
+        },
+        "CAPABILITY_NAMED_IAM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CAPABILITY_NAMED_IAM"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#CausingEntity": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#Change": {
+      "members": {
+        "HookInvocationCount": {
+          "target": "com.amazonaws.cloudformation#HookInvocationCount",
+          "traits": {}
+        },
+        "ResourceChange": {
+          "target": "com.amazonaws.cloudformation#ResourceChange",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.cloudformation#ChangeType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ChangeAction": {
+      "members": {
+        "Add": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Add"
+          }
+        },
+        "Dynamic": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Dynamic"
+          }
+        },
+        "Import": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Import"
+          }
+        },
+        "Modify": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Modify"
+          }
+        },
+        "Remove": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Remove"
+          }
+        },
+        "SyncWithActual": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SyncWithActual"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#ChangeSetId": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:[-a-zA-Z0-9:/]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ChangeSetName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z][-a-zA-Z0-9]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ChangeSetNameOrId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z][-a-zA-Z0-9]*|arn:[-a-zA-Z0-9:/]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ChangeSetNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ChangeSetNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ChangeSetStatus": {
+      "members": {
+        "CREATE_COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_COMPLETE"
+          }
+        },
+        "CREATE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_IN_PROGRESS"
+          }
+        },
+        "CREATE_PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_PENDING"
+          }
+        },
+        "DELETE_COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_COMPLETE"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_IN_PROGRESS"
+          }
+        },
+        "DELETE_PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_PENDING"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#ChangeSetStatusReason": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ChangeSource": {
+      "members": {
+        "Automatic": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Automatic"
+          }
+        },
+        "DirectModification": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DirectModification"
+          }
+        },
+        "NoModification": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NoModification"
+          }
+        },
+        "ParameterReference": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ParameterReference"
+          }
+        },
+        "ResourceAttribute": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ResourceAttribute"
+          }
+        },
+        "ResourceReference": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ResourceReference"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#ChangeType": {
+      "members": {
+        "Resource": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Resource"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#Changes": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#Change"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#CloudFormation": {
+      "operations": [
+        {
+          "target": "com.amazonaws.cloudformation#DescribeChangeSet"
+        },
+        {
+          "target": "com.amazonaws.cloudformation#DescribeGeneratedTemplate"
+        },
+        {
+          "target": "com.amazonaws.cloudformation#DescribeType"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "cloudformation",
+          "cloudFormationName": "CloudFormation",
+          "cloudTrailEventSource": "cloudformation.amazonaws.com",
+          "endpointPrefix": "cloudformation",
+          "sdkId": "CloudFormation"
+        },
+        "aws.auth#sigv4": {
+          "name": "cloudformation"
+        },
+        "aws.protocols#awsQuery": {},
+        "smithy.api#title": "AWS CloudFormation",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://cloudformation.amazonaws.com/doc/2010-05-15/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://cloudformation-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://cloudformation.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://cloudformation-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://cloudformation.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://cloudformation.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2010-05-15"
+    },
+    "com.amazonaws.cloudformation#ConfigurationSchema": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 60000,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\s\\S]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#CreationTime": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.cloudformation#DeploymentConfig": {
+      "members": {
+        "DisableRollback": {
+          "target": "com.amazonaws.cloudformation#DisableRollback",
+          "traits": {}
+        },
+        "Mode": {
+          "target": "com.amazonaws.cloudformation#DeploymentConfigMode",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#DeploymentConfigMode": {
+      "members": {
+        "EXPRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXPRESS"
+          }
+        },
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#DeploymentMode": {
+      "members": {
+        "REVERT_DRIFT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REVERT_DRIFT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#DeprecatedStatus": {
+      "members": {
+        "DEPRECATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEPRECATED"
+          }
+        },
+        "LIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LIVE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#DescribeChangeSet": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudformation#ChangeSetNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudformation#DescribeChangeSetInput"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudformation#DescribeChangeSetOutput"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "NextToken",
+          "items": "Changes",
+          "outputToken": "NextToken"
+        },
+        "smithy.api#suppress": [
+          "WaitableTraitInvalidErrorType"
+        ],
+        "smithy.waiters#waitable": {
+          "ChangeSetCreateComplete": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "CREATE_COMPLETE",
+                    "path": "Status"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "FAILED",
+                    "path": "Status"
+                  }
+                },
+                "state": "failure"
+              },
+              {
+                "matcher": {
+                  "errorType": "ValidationError"
+                },
+                "state": "failure"
+              }
+            ],
+            "documentation": "Wait until change set status is CREATE_COMPLETE.",
+            "minDelay": 30
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.cloudformation#DescribeChangeSetInput": {
+      "members": {
+        "ChangeSetName": {
+          "target": "com.amazonaws.cloudformation#ChangeSetNameOrId",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "IncludePropertyValues": {
+          "target": "com.amazonaws.cloudformation#IncludePropertyValues",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.cloudformation#NextToken",
+          "traits": {}
+        },
+        "StackName": {
+          "target": "com.amazonaws.cloudformation#StackNameOrId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#DescribeChangeSetOutput": {
+      "members": {
+        "Capabilities": {
+          "target": "com.amazonaws.cloudformation#Capabilities",
+          "traits": {}
+        },
+        "ChangeSetId": {
+          "target": "com.amazonaws.cloudformation#ChangeSetId",
+          "traits": {}
+        },
+        "ChangeSetName": {
+          "target": "com.amazonaws.cloudformation#ChangeSetName",
+          "traits": {}
+        },
+        "Changes": {
+          "target": "com.amazonaws.cloudformation#Changes",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.cloudformation#CreationTime",
+          "traits": {}
+        },
+        "DeploymentConfig": {
+          "target": "com.amazonaws.cloudformation#DeploymentConfig",
+          "traits": {}
+        },
+        "DeploymentMode": {
+          "target": "com.amazonaws.cloudformation#DeploymentMode",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.cloudformation#Description",
+          "traits": {}
+        },
+        "ExecutionStatus": {
+          "target": "com.amazonaws.cloudformation#ExecutionStatus",
+          "traits": {}
+        },
+        "ImportExistingResources": {
+          "target": "com.amazonaws.cloudformation#ImportExistingResources",
+          "traits": {}
+        },
+        "IncludeNestedStacks": {
+          "target": "com.amazonaws.cloudformation#IncludeNestedStacks",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.cloudformation#NextToken",
+          "traits": {}
+        },
+        "NotificationARNs": {
+          "target": "com.amazonaws.cloudformation#NotificationARNs",
+          "traits": {}
+        },
+        "OnStackFailure": {
+          "target": "com.amazonaws.cloudformation#OnStackFailure",
+          "traits": {}
+        },
+        "Parameters": {
+          "target": "com.amazonaws.cloudformation#Parameters",
+          "traits": {}
+        },
+        "ParentChangeSetId": {
+          "target": "com.amazonaws.cloudformation#ChangeSetId",
+          "traits": {}
+        },
+        "RollbackConfiguration": {
+          "target": "com.amazonaws.cloudformation#RollbackConfiguration",
+          "traits": {}
+        },
+        "RootChangeSetId": {
+          "target": "com.amazonaws.cloudformation#ChangeSetId",
+          "traits": {}
+        },
+        "StackDriftStatus": {
+          "target": "com.amazonaws.cloudformation#StackDriftStatus",
+          "traits": {}
+        },
+        "StackId": {
+          "target": "com.amazonaws.cloudformation#StackId",
+          "traits": {}
+        },
+        "StackName": {
+          "target": "com.amazonaws.cloudformation#StackName",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.cloudformation#ChangeSetStatus",
+          "traits": {}
+        },
+        "StatusReason": {
+          "target": "com.amazonaws.cloudformation#ChangeSetStatusReason",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.cloudformation#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#DescribeGeneratedTemplate": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudformation#DescribeGeneratedTemplateInput"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudformation#DescribeGeneratedTemplateOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudformation#DescribeGeneratedTemplateInput": {
+      "members": {
+        "GeneratedTemplateName": {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#DescribeGeneratedTemplateOutput": {
+      "members": {
+        "CreationTime": {
+          "target": "com.amazonaws.cloudformation#CreationTime",
+          "traits": {}
+        },
+        "GeneratedTemplateId": {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateId",
+          "traits": {}
+        },
+        "GeneratedTemplateName": {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateName",
+          "traits": {}
+        },
+        "LastUpdatedTime": {
+          "target": "com.amazonaws.cloudformation#LastUpdatedTime",
+          "traits": {}
+        },
+        "Progress": {
+          "target": "com.amazonaws.cloudformation#TemplateProgress",
+          "traits": {}
+        },
+        "Resources": {
+          "target": "com.amazonaws.cloudformation#ResourceDetails",
+          "traits": {}
+        },
+        "StackId": {
+          "target": "com.amazonaws.cloudformation#StackId",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateStatus",
+          "traits": {}
+        },
+        "StatusReason": {
+          "target": "com.amazonaws.cloudformation#TemplateStatusReason",
+          "traits": {}
+        },
+        "TemplateConfiguration": {
+          "target": "com.amazonaws.cloudformation#TemplateConfiguration",
+          "traits": {}
+        },
+        "TotalWarnings": {
+          "target": "com.amazonaws.cloudformation#TotalWarnings",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#DescribeType": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudformation#CFNRegistryException"
+        },
+        {
+          "target": "com.amazonaws.cloudformation#TypeNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudformation#DescribeTypeInput"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudformation#DescribeTypeOutput"
+      },
+      "traits": {
+        "smithy.api#idempotent": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.cloudformation#DescribeTypeInput": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.cloudformation#TypeArn",
+          "traits": {}
+        },
+        "PublicVersionNumber": {
+          "target": "com.amazonaws.cloudformation#PublicVersionNumber",
+          "traits": {}
+        },
+        "PublisherId": {
+          "target": "com.amazonaws.cloudformation#PublisherId",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.cloudformation#RegistryType",
+          "traits": {}
+        },
+        "TypeName": {
+          "target": "com.amazonaws.cloudformation#TypeName",
+          "traits": {}
+        },
+        "VersionId": {
+          "target": "com.amazonaws.cloudformation#TypeVersionId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#DescribeTypeOutput": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.cloudformation#TypeArn",
+          "traits": {}
+        },
+        "AutoUpdate": {
+          "target": "com.amazonaws.cloudformation#AutoUpdate",
+          "traits": {}
+        },
+        "ConfigurationSchema": {
+          "target": "com.amazonaws.cloudformation#ConfigurationSchema",
+          "traits": {}
+        },
+        "DefaultVersionId": {
+          "target": "com.amazonaws.cloudformation#TypeVersionId",
+          "traits": {}
+        },
+        "DeprecatedStatus": {
+          "target": "com.amazonaws.cloudformation#DeprecatedStatus",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.cloudformation#Description",
+          "traits": {}
+        },
+        "DocumentationUrl": {
+          "target": "com.amazonaws.cloudformation#OptionalSecureUrl",
+          "traits": {}
+        },
+        "ExecutionRoleArn": {
+          "target": "com.amazonaws.cloudformation#RoleARN2",
+          "traits": {}
+        },
+        "IsActivated": {
+          "target": "com.amazonaws.cloudformation#IsActivated",
+          "traits": {}
+        },
+        "IsDefaultVersion": {
+          "target": "com.amazonaws.cloudformation#IsDefaultVersion",
+          "traits": {}
+        },
+        "LastUpdated": {
+          "target": "com.amazonaws.cloudformation#Timestamp",
+          "traits": {}
+        },
+        "LatestPublicVersion": {
+          "target": "com.amazonaws.cloudformation#PublicVersionNumber",
+          "traits": {}
+        },
+        "LoggingConfig": {
+          "target": "com.amazonaws.cloudformation#LoggingConfig",
+          "traits": {}
+        },
+        "OriginalTypeArn": {
+          "target": "com.amazonaws.cloudformation#TypeArn",
+          "traits": {}
+        },
+        "OriginalTypeName": {
+          "target": "com.amazonaws.cloudformation#TypeName",
+          "traits": {}
+        },
+        "ProvisioningType": {
+          "target": "com.amazonaws.cloudformation#ProvisioningType",
+          "traits": {}
+        },
+        "PublicVersionNumber": {
+          "target": "com.amazonaws.cloudformation#PublicVersionNumber",
+          "traits": {}
+        },
+        "PublisherId": {
+          "target": "com.amazonaws.cloudformation#PublisherId",
+          "traits": {}
+        },
+        "RequiredActivatedTypes": {
+          "target": "com.amazonaws.cloudformation#RequiredActivatedTypes",
+          "traits": {}
+        },
+        "Schema": {
+          "target": "com.amazonaws.cloudformation#TypeSchema",
+          "traits": {}
+        },
+        "SourceUrl": {
+          "target": "com.amazonaws.cloudformation#OptionalSecureUrl",
+          "traits": {}
+        },
+        "TimeCreated": {
+          "target": "com.amazonaws.cloudformation#Timestamp",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.cloudformation#RegistryType",
+          "traits": {}
+        },
+        "TypeName": {
+          "target": "com.amazonaws.cloudformation#TypeName",
+          "traits": {}
+        },
+        "TypeTestsStatus": {
+          "target": "com.amazonaws.cloudformation#TypeTestsStatus",
+          "traits": {}
+        },
+        "TypeTestsStatusDescription": {
+          "target": "com.amazonaws.cloudformation#TypeTestsStatusDescription",
+          "traits": {}
+        },
+        "Visibility": {
+          "target": "com.amazonaws.cloudformation#Visibility",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#DisableRollback": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#DriftIgnoredReason": {
+      "members": {
+        "MANAGED_BY_AWS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANAGED_BY_AWS"
+          }
+        },
+        "SENSITIVE_PROPERTY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SENSITIVE_PROPERTY"
+          }
+        },
+        "WRITE_ONLY_PROPERTY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WRITE_ONLY_PROPERTY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#ErrorMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#EvaluationType": {
+      "members": {
+        "Dynamic": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Dynamic"
+          }
+        },
+        "Static": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Static"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#ExecutionStatus": {
+      "members": {
+        "AVAILABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AVAILABLE"
+          }
+        },
+        "EXECUTE_COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXECUTE_COMPLETE"
+          }
+        },
+        "EXECUTE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXECUTE_FAILED"
+          }
+        },
+        "EXECUTE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXECUTE_IN_PROGRESS"
+          }
+        },
+        "OBSOLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OBSOLETE"
+          }
+        },
+        "UNAVAILABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNAVAILABLE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#GeneratedTemplateDeletionPolicy": {
+      "members": {
+        "DELETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE"
+          }
+        },
+        "RETAIN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RETAIN"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#GeneratedTemplateId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#GeneratedTemplateName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#GeneratedTemplateNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "GeneratedTemplateNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#GeneratedTemplateResourceStatus": {
+      "members": {
+        "COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COMPLETE"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_PROGRESS"
+          }
+        },
+        "PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#GeneratedTemplateStatus": {
+      "members": {
+        "COMPLETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COMPLETE"
+          }
+        },
+        "CREATE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_IN_PROGRESS"
+          }
+        },
+        "CREATE_PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_PENDING"
+          }
+        },
+        "DELETE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_IN_PROGRESS"
+          }
+        },
+        "DELETE_PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_PENDING"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "UPDATE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_IN_PROGRESS"
+          }
+        },
+        "UPDATE_PENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_PENDING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#GeneratedTemplateUpdateReplacePolicy": {
+      "members": {
+        "DELETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE"
+          }
+        },
+        "RETAIN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RETAIN"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#HookInvocationCount": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#ImportExistingResources": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#IncludeNestedStacks": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#IncludePropertyValues": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#IsActivated": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#IsDefaultVersion": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#LastUpdatedTime": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.cloudformation#LiveResourceDrift": {
+      "members": {
+        "ActualValue": {
+          "target": "com.amazonaws.cloudformation#ResourceDriftActualValue",
+          "traits": {}
+        },
+        "DriftDetectionTimestamp": {
+          "target": "com.amazonaws.cloudformation#Timestamp",
+          "traits": {}
+        },
+        "PreviousValue": {
+          "target": "com.amazonaws.cloudformation#ResourceDriftPreviousValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#LogGroupName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#LoggingConfig": {
+      "members": {
+        "LogGroupName": {
+          "target": "com.amazonaws.cloudformation#LogGroupName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "LogRoleArn": {
+          "target": "com.amazonaws.cloudformation#RoleARN2",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#LogicalIdHierarchy": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#LogicalResourceId": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ModuleInfo": {
+      "members": {
+        "LogicalIdHierarchy": {
+          "target": "com.amazonaws.cloudformation#LogicalIdHierarchy",
+          "traits": {}
+        },
+        "TypeHierarchy": {
+          "target": "com.amazonaws.cloudformation#TypeHierarchy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#MonitoringTimeInMinutes": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 180,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#NextToken": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#NotificationARN": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#NotificationARNs": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#NotificationARN"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#OnStackFailure": {
+      "members": {
+        "DELETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE"
+          }
+        },
+        "DO_NOTHING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DO_NOTHING"
+          }
+        },
+        "ROLLBACK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ROLLBACK"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#OptionalSecureUrl": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#Parameter": {
+      "members": {
+        "ParameterKey": {
+          "target": "com.amazonaws.cloudformation#ParameterKey",
+          "traits": {}
+        },
+        "ParameterValue": {
+          "target": "com.amazonaws.cloudformation#ParameterValue",
+          "traits": {}
+        },
+        "ResolvedValue": {
+          "target": "com.amazonaws.cloudformation#ParameterValue",
+          "traits": {}
+        },
+        "UsePreviousValue": {
+          "target": "com.amazonaws.cloudformation#UsePreviousValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ParameterKey": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ParameterValue": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#Parameters": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#Parameter"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#PhysicalResourceId": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#PolicyAction": {
+      "members": {
+        "Delete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Delete"
+          }
+        },
+        "ReplaceAndDelete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ReplaceAndDelete"
+          }
+        },
+        "ReplaceAndRetain": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ReplaceAndRetain"
+          }
+        },
+        "ReplaceAndSnapshot": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ReplaceAndSnapshot"
+          }
+        },
+        "Retain": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Retain"
+          }
+        },
+        "Snapshot": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Snapshot"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#PreviousDeploymentContext": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#PropertyDescription": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#PropertyName": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#PropertyPath": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ProvisioningType": {
+      "members": {
+        "FULLY_MUTABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FULLY_MUTABLE"
+          }
+        },
+        "IMMUTABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IMMUTABLE"
+          }
+        },
+        "NON_PROVISIONABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NON_PROVISIONABLE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#PublicVersionNumber": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 5
+        },
+        "smithy.api#pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(.*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#PublisherId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z]{12,40}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#RegistryType": {
+      "members": {
+        "HOOK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HOOK"
+          }
+        },
+        "MODULE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MODULE"
+          }
+        },
+        "RESOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESOURCE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#Replacement": {
+      "members": {
+        "Conditional": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Conditional"
+          }
+        },
+        "False": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "False"
+          }
+        },
+        "True": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "True"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#RequiredActivatedType": {
+      "members": {
+        "OriginalTypeName": {
+          "target": "com.amazonaws.cloudformation#TypeName",
+          "traits": {}
+        },
+        "PublisherId": {
+          "target": "com.amazonaws.cloudformation#PublisherId",
+          "traits": {}
+        },
+        "SupportedMajorVersions": {
+          "target": "com.amazonaws.cloudformation#SupportedMajorVersions",
+          "traits": {}
+        },
+        "TypeNameAlias": {
+          "target": "com.amazonaws.cloudformation#TypeName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#RequiredActivatedTypes": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#RequiredActivatedType"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#RequiredProperty": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#RequiresRecreation": {
+      "members": {
+        "Always": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Always"
+          }
+        },
+        "Conditionally": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Conditionally"
+          }
+        },
+        "Never": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Never"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#ResourceAttribute": {
+      "members": {
+        "CreationPolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CreationPolicy"
+          }
+        },
+        "DeletionPolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DeletionPolicy"
+          }
+        },
+        "Metadata": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Metadata"
+          }
+        },
+        "Properties": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Properties"
+          }
+        },
+        "Tags": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Tags"
+          }
+        },
+        "UpdatePolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UpdatePolicy"
+          }
+        },
+        "UpdateReplacePolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UpdateReplacePolicy"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#ResourceChange": {
+      "members": {
+        "Action": {
+          "target": "com.amazonaws.cloudformation#ChangeAction",
+          "traits": {}
+        },
+        "AfterContext": {
+          "target": "com.amazonaws.cloudformation#AfterContext",
+          "traits": {}
+        },
+        "BeforeContext": {
+          "target": "com.amazonaws.cloudformation#BeforeContext",
+          "traits": {}
+        },
+        "ChangeSetId": {
+          "target": "com.amazonaws.cloudformation#ChangeSetId",
+          "traits": {}
+        },
+        "Details": {
+          "target": "com.amazonaws.cloudformation#ResourceChangeDetails",
+          "traits": {}
+        },
+        "LogicalResourceId": {
+          "target": "com.amazonaws.cloudformation#LogicalResourceId",
+          "traits": {}
+        },
+        "ModuleInfo": {
+          "target": "com.amazonaws.cloudformation#ModuleInfo",
+          "traits": {}
+        },
+        "PhysicalResourceId": {
+          "target": "com.amazonaws.cloudformation#PhysicalResourceId",
+          "traits": {}
+        },
+        "PolicyAction": {
+          "target": "com.amazonaws.cloudformation#PolicyAction",
+          "traits": {}
+        },
+        "PreviousDeploymentContext": {
+          "target": "com.amazonaws.cloudformation#PreviousDeploymentContext",
+          "traits": {}
+        },
+        "Replacement": {
+          "target": "com.amazonaws.cloudformation#Replacement",
+          "traits": {}
+        },
+        "ResourceDriftIgnoredAttributes": {
+          "target": "com.amazonaws.cloudformation#ResourceDriftIgnoredAttributes",
+          "traits": {}
+        },
+        "ResourceDriftStatus": {
+          "target": "com.amazonaws.cloudformation#StackResourceDriftStatus",
+          "traits": {}
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.cloudformation#ResourceType",
+          "traits": {}
+        },
+        "Scope": {
+          "target": "com.amazonaws.cloudformation#Scope",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ResourceChangeDetail": {
+      "members": {
+        "CausingEntity": {
+          "target": "com.amazonaws.cloudformation#CausingEntity",
+          "traits": {}
+        },
+        "ChangeSource": {
+          "target": "com.amazonaws.cloudformation#ChangeSource",
+          "traits": {}
+        },
+        "Evaluation": {
+          "target": "com.amazonaws.cloudformation#EvaluationType",
+          "traits": {}
+        },
+        "Target": {
+          "target": "com.amazonaws.cloudformation#ResourceTargetDefinition",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ResourceChangeDetails": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#ResourceChangeDetail"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#ResourceDetail": {
+      "members": {
+        "LogicalResourceId": {
+          "target": "com.amazonaws.cloudformation#LogicalResourceId",
+          "traits": {}
+        },
+        "ResourceIdentifier": {
+          "target": "com.amazonaws.cloudformation#ResourceIdentifierProperties",
+          "traits": {}
+        },
+        "ResourceStatus": {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateResourceStatus",
+          "traits": {}
+        },
+        "ResourceStatusReason": {
+          "target": "com.amazonaws.cloudformation#ResourceStatusReason",
+          "traits": {}
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.cloudformation#ResourceType",
+          "traits": {}
+        },
+        "Warnings": {
+          "target": "com.amazonaws.cloudformation#WarningDetails",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ResourceDetails": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#ResourceDetail"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#ResourceDriftActualValue": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ResourceDriftIgnoredAttribute": {
+      "members": {
+        "Path": {
+          "target": "com.amazonaws.cloudformation#ResourcePropertyPath",
+          "traits": {}
+        },
+        "Reason": {
+          "target": "com.amazonaws.cloudformation#DriftIgnoredReason",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ResourceDriftIgnoredAttributes": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#ResourceDriftIgnoredAttribute"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#ResourceDriftPreviousValue": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ResourceIdentifierProperties": {
+      "key": {
+        "target": "com.amazonaws.cloudformation#ResourceIdentifierPropertyKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.cloudformation#ResourceIdentifierPropertyValue"
+      }
+    },
+    "com.amazonaws.cloudformation#ResourceIdentifierPropertyKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ResourceIdentifierPropertyValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ResourcePropertyPath": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ResourceStatusReason": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ResourceTargetDefinition": {
+      "members": {
+        "AfterValue": {
+          "target": "com.amazonaws.cloudformation#AfterValue",
+          "traits": {}
+        },
+        "AfterValueFrom": {
+          "target": "com.amazonaws.cloudformation#AfterValueFrom",
+          "traits": {}
+        },
+        "Attribute": {
+          "target": "com.amazonaws.cloudformation#ResourceAttribute",
+          "traits": {}
+        },
+        "AttributeChangeType": {
+          "target": "com.amazonaws.cloudformation#AttributeChangeType",
+          "traits": {}
+        },
+        "BeforeValue": {
+          "target": "com.amazonaws.cloudformation#BeforeValue",
+          "traits": {}
+        },
+        "BeforeValueFrom": {
+          "target": "com.amazonaws.cloudformation#BeforeValueFrom",
+          "traits": {}
+        },
+        "Drift": {
+          "target": "com.amazonaws.cloudformation#LiveResourceDrift",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.cloudformation#PropertyName",
+          "traits": {}
+        },
+        "Path": {
+          "target": "com.amazonaws.cloudformation#ResourcePropertyPath",
+          "traits": {}
+        },
+        "RequiresRecreation": {
+          "target": "com.amazonaws.cloudformation#RequiresRecreation",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ResourceType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#ResourcesFailed": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#ResourcesPending": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#ResourcesProcessing": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#ResourcesSucceeded": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#RoleARN2": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:.+:iam::[0-9]{12}:role/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#RollbackConfiguration": {
+      "members": {
+        "MonitoringTimeInMinutes": {
+          "target": "com.amazonaws.cloudformation#MonitoringTimeInMinutes",
+          "traits": {}
+        },
+        "RollbackTriggers": {
+          "target": "com.amazonaws.cloudformation#RollbackTriggers",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#RollbackTrigger": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.cloudformation#Arn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.cloudformation#Type",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#RollbackTriggers": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#RollbackTrigger"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#Scope": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#ResourceAttribute"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#StackDriftStatus": {
+      "members": {
+        "DRIFTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DRIFTED"
+          }
+        },
+        "IN_SYNC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_SYNC"
+          }
+        },
+        "NOT_CHECKED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_CHECKED"
+          }
+        },
+        "UNKNOWN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNKNOWN"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#StackId": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#StackName": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#StackNameOrId": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-zA-Z][-a-zA-Z0-9]*)|(arn:\\b(aws|aws-us-gov|aws-cn)\\b:[-a-zA-Z0-9:/._+]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#StackResourceDriftStatus": {
+      "members": {
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "IN_SYNC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_SYNC"
+          }
+        },
+        "MODIFIED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MODIFIED"
+          }
+        },
+        "NOT_CHECKED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_CHECKED"
+          }
+        },
+        "UNKNOWN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNKNOWN"
+          }
+        },
+        "UNSUPPORTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNSUPPORTED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#SupportedMajorVersion": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 65535,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#SupportedMajorVersions": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#SupportedMajorVersion"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.cloudformation#TagKey",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.cloudformation#TagValue",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#Tags": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#Tag"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#TemplateConfiguration": {
+      "members": {
+        "DeletionPolicy": {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateDeletionPolicy",
+          "traits": {}
+        },
+        "UpdateReplacePolicy": {
+          "target": "com.amazonaws.cloudformation#GeneratedTemplateUpdateReplacePolicy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#TemplateProgress": {
+      "members": {
+        "ResourcesFailed": {
+          "target": "com.amazonaws.cloudformation#ResourcesFailed",
+          "traits": {}
+        },
+        "ResourcesPending": {
+          "target": "com.amazonaws.cloudformation#ResourcesPending",
+          "traits": {}
+        },
+        "ResourcesProcessing": {
+          "target": "com.amazonaws.cloudformation#ResourcesProcessing",
+          "traits": {}
+        },
+        "ResourcesSucceeded": {
+          "target": "com.amazonaws.cloudformation#ResourcesSucceeded",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#TemplateStatusReason": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.cloudformation#TotalWarnings": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudformation#Type": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#TypeArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:aws[A-Za-z0-9-]{0,64}:cloudformation:[A-Za-z0-9-]{1,64}:([0-9]{12})?:type/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#TypeHierarchy": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#TypeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 204,
+          "min": 10
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}(::MODULE){0,1}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#TypeNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TypeNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#TypeSchema": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 16777216,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#TypeTestsStatus": {
+      "members": {
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_PROGRESS"
+          }
+        },
+        "NOT_TESTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NOT_TESTED"
+          }
+        },
+        "PASSED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PASSED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#TypeTestsStatusDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\s\\S]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#TypeVersionId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudformation#UsePreviousValue": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudformation#Visibility": {
+      "members": {
+        "PRIVATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRIVATE"
+          }
+        },
+        "PUBLIC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PUBLIC"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudformation#WarningDetail": {
+      "members": {
+        "Properties": {
+          "target": "com.amazonaws.cloudformation#WarningProperties",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.cloudformation#WarningType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#WarningDetails": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#WarningDetail"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#WarningProperties": {
+      "member": {
+        "target": "com.amazonaws.cloudformation#WarningProperty"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudformation#WarningProperty": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.cloudformation#PropertyDescription",
+          "traits": {}
+        },
+        "PropertyPath": {
+          "target": "com.amazonaws.cloudformation#PropertyPath",
+          "traits": {}
+        },
+        "Required": {
+          "target": "com.amazonaws.cloudformation#RequiredProperty",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#WarningType": {
+      "members": {
+        "EXCLUDED_PROPERTIES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXCLUDED_PROPERTIES"
+          }
+        },
+        "EXCLUDED_RESOURCES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXCLUDED_RESOURCES"
+          }
+        },
+        "MUTUALLY_EXCLUSIVE_PROPERTIES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MUTUALLY_EXCLUSIVE_PROPERTIES"
+          }
+        },
+        "MUTUALLY_EXCLUSIVE_TYPES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MUTUALLY_EXCLUSIVE_TYPES"
+          }
+        },
+        "UNSUPPORTED_PROPERTIES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNSUPPORTED_PROPERTIES"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

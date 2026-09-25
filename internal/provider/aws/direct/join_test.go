@@ -1,6 +1,7 @@
 package direct
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"strings"
@@ -334,11 +335,101 @@ func TestCompileResponsePathJSONName(t *testing.T) {
 	if len(errs) > 0 {
 		t.Fatal(errs)
 	}
-	if !reflect.DeepEqual(r.Response, []string{"widget"}) {
+	if !reflect.DeepEqual(r.Response, []Step{{Name: "widget"}}) {
 		t.Fatalf("response path = %v, want [widget]", r.Response)
 	}
 	_, errs = compileWidget(t, named(widgetModel("Widgets", "widgets")), widgetOverride("Widget"))
 	if !containsErr(errs, "response path member Widget has a jsonName") {
+		t.Fatalf("errors = %v", errs)
+	}
+}
+
+// listWidget is widgetModel read the way EC2's Describe calls are: by a
+// list of ids, answered with a list.
+func listWidget() map[string]any {
+	m := widgetModel("Widgets", "widgets")
+	shapes := m["shapes"].(map[string]any)
+	shapes["com.example#WidgetIds"] = map[string]any{"type": "list", "member": map[string]any{"target": "smithy.api#String"}}
+	shapes["com.example#WidgetList"] = map[string]any{"type": "list", "member": map[string]any{"target": "com.example#Widget"}}
+	shapes["com.example#GetWidgetRequest"].(map[string]any)["members"] = map[string]any{"WidgetIds": map[string]any{"target": "com.example#WidgetIds"}}
+	shapes["com.example#GetWidgetResponse"].(map[string]any)["members"] = map[string]any{"Widgets": map[string]any{"target": "com.example#WidgetList"}}
+	return m
+}
+
+func TestProposeKeepsAPresetIdentifierAndListPath(t *testing.T) {
+	var model smithyModel
+	var schema cfnSchema
+	if err := json.Unmarshal(encode(t, listWidget()), &model); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(encode(t, widgetSchema()), &schema); err != nil {
+		t.Fatal(err)
+	}
+	o, err := proposeWith(&model, &schema, Override{
+		Type: "AWS::Widgets::Widget",
+		Read: Read{Model: "widgets.json", Operation: "GetWidget", Identifier: map[string]string{"WidgetId": "WidgetIds"}, Response: "Widgets[]"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(o.Read.Identifier, map[string]string{"WidgetId": "WidgetIds"}) || o.Read.Response != "Widgets[]" {
+		t.Fatalf("read = %+v", o.Read)
+	}
+	if o.Properties["Name"].Member != "Name" || o.Properties["Size"].Member != "Size" {
+		t.Fatalf("properties = %v, want the list item's members", o.Properties)
+	}
+}
+
+// Under a JSON protocol a list identifier is sent as a list of one, and
+// the answer must list exactly the one instance read.
+func TestReadJSONListStep(t *testing.T) {
+	o := widgetOverride("Widgets[]")
+	o.Read.Identifier = map[string]string{"WidgetId": "WidgetIds"}
+	r, errs := compileWidget(t, listWidget(), o)
+	if len(errs) > 0 {
+		t.Fatal(errs)
+	}
+	if !r.Identifier[0].List || !reflect.DeepEqual(r.Response, []Step{{Name: "Widgets", List: true}}) {
+		t.Fatalf("reader = %+v", r)
+	}
+	readers[r.Type] = r
+	t.Cleanup(func() { delete(readers, r.Type) })
+
+	for name, c := range map[string]struct {
+		body    string
+		wantErr bool
+	}{
+		"one":  {`{"Widgets":[{"WidgetId":"w-1","Name":"a"}]}`, false},
+		"none": {`{"Widgets":[]}`, true},
+		"two":  {`{"Widgets":[{"WidgetId":"w-1"},{"WidgetId":"w-2"}]}`, true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			client, seen := bodyPages(t, func(string) (int, string) { return 200, c.body })
+			got, err := client.Read(context.Background(), r.Type, map[string]string{"WidgetId": "w-1"})
+			if c.wantErr != (err != nil) {
+				t.Fatalf("Read = %v, %v", got, err)
+			}
+			if !strings.HasSuffix((*seen)[0], `{"WidgetIds":["w-1"]}`) {
+				t.Fatalf("request = %s", (*seen)[0])
+			}
+			if !c.wantErr && !reflect.DeepEqual(got, map[string]any{"WidgetId": "w-1", "Name": "a"}) {
+				t.Fatalf("Read = %v", got)
+			}
+		})
+	}
+}
+
+func TestCompileRefusesAListIdentifierUnderRestJSON(t *testing.T) {
+	m := restJSONWidget()
+	shapes := m["shapes"].(map[string]any)
+	shapes["com.example#WidgetIds"] = map[string]any{"type": "list", "member": map[string]any{"target": "smithy.api#String"}}
+	shapes["com.example#GetWidgetRequest"].(map[string]any)["members"] = map[string]any{
+		"WidgetIds": map[string]any{"target": "com.example#WidgetIds", "traits": map[string]any{"smithy.api#httpQuery": "ids"}},
+	}
+	o := widgetOverride("Widget")
+	o.Read.Identifier = map[string]string{"WidgetId": "WidgetIds"}
+	_, errs := compileWidget(t, m, o)
+	if !containsErr(errs, "which restJson1 would not send as a body") {
 		t.Fatalf("errors = %v", errs)
 	}
 }

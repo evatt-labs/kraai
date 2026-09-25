@@ -1,0 +1,26 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CloudFormation::GeneratedTemplate
+read:
+  model: cloudformation/service/2010-05-15/cloudformation-2010-05-15.json
+  operation: DescribeGeneratedTemplate
+  identifier:
+    GeneratedTemplateId: GeneratedTemplateName
+properties:
+  CreationTime: CreationTime
+  GeneratedTemplateId: GeneratedTemplateId
+  GeneratedTemplateName: GeneratedTemplateName
+  LastUpdatedTime: LastUpdatedTime
+  Progress:
+    member: Progress
+    properties:
+      ResourcesFailed: ResourcesFailed
+      ResourcesPending: ResourcesPending
+      ResourcesProcessing: ResourcesProcessing
+      ResourcesSucceeded: ResourcesSucceeded
+  Status: Status
+  TemplateConfiguration:
+    member: TemplateConfiguration
+    properties:
+      DeletionPolicy: DeletionPolicy
+      UpdateReplacePolicy: UpdateReplacePolicy
+  TotalWarnings: TotalWarnings

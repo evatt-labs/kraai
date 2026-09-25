@@ -1,0 +1,1002 @@
+{
+  "shapes": {
+    "com.amazonaws.ec2#AmazonEC2": {
+      "operations": [
+        {
+          "target": "com.amazonaws.ec2#DescribeSubnets"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "ec2",
+          "cloudFormationName": "EC2",
+          "cloudTrailEventSource": "ec2.amazonaws.com",
+          "endpointPrefix": "ec2",
+          "sdkId": "EC2"
+        },
+        "aws.auth#sigv4": {
+          "name": "ec2"
+        },
+        "aws.protocols#ec2Query": {},
+        "smithy.api#title": "Amazon Elastic Compute Cloud",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://ec2.amazonaws.com/doc/2016-11-15"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ec2-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ec2.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ec2-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ec2.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://ec2.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2016-11-15"
+    },
+    "com.amazonaws.ec2#BlockPublicAccessMode": {
+      "members": {
+        "block_bidirectional": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "block-bidirectional"
+          }
+        },
+        "block_ingress": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "block-ingress"
+          }
+        },
+        "off": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "off"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#BlockPublicAccessStates": {
+      "members": {
+        "InternetGatewayBlockMode": {
+          "target": "com.amazonaws.ec2#BlockPublicAccessMode",
+          "traits": {
+            "aws.protocols#ec2QueryName": "InternetGatewayBlockMode",
+            "smithy.api#xmlName": "internetGatewayBlockMode"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#Boolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.ec2#CoipPoolId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#DescribeSubnets": {
+      "input": {
+        "target": "com.amazonaws.ec2#DescribeSubnetsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#DescribeSubnetsResult"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "NextToken",
+          "items": "Subnets",
+          "outputToken": "NextToken",
+          "pageSize": "MaxResults"
+        },
+        "smithy.waiters#waitable": {
+          "SubnetAvailable": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "allStringEquals",
+                    "expected": "available",
+                    "path": "Subnets[].State"
+                  }
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 15
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DescribeSubnetsMaxResults": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ec2#DescribeSubnetsRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "Filters": {
+          "target": "com.amazonaws.ec2#FilterList",
+          "traits": {
+            "smithy.api#xmlName": "Filter"
+          }
+        },
+        "MaxResults": {
+          "target": "com.amazonaws.ec2#DescribeSubnetsMaxResults",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        },
+        "SubnetIds": {
+          "target": "com.amazonaws.ec2#SubnetIdStringList",
+          "traits": {
+            "smithy.api#xmlName": "SubnetId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DescribeSubnetsResult": {
+      "members": {
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NextToken",
+            "smithy.api#xmlName": "nextToken"
+          }
+        },
+        "Subnets": {
+          "target": "com.amazonaws.ec2#SubnetList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SubnetSet",
+            "smithy.api#xmlName": "subnetSet"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#Filter": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        },
+        "Values": {
+          "target": "com.amazonaws.ec2#ValueStringList",
+          "traits": {
+            "smithy.api#xmlName": "Value"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#FilterList": {
+      "member": {
+        "target": "com.amazonaws.ec2#Filter",
+        "traits": {
+          "smithy.api#xmlName": "Filter"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#HostnameType": {
+      "members": {
+        "ip_name": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ip-name"
+          }
+        },
+        "resource_name": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "resource-name"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#Integer": {
+      "type": "integer"
+    },
+    "com.amazonaws.ec2#IpSource": {
+      "members": {
+        "amazon": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "amazon"
+          }
+        },
+        "byoip": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "byoip"
+          }
+        },
+        "none": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "none"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#Ipv6AddressAttribute": {
+      "members": {
+        "private": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "private"
+          }
+        },
+        "public": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "public"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#PrivateDnsNameOptionsOnLaunch": {
+      "members": {
+        "EnableResourceNameDnsAAAARecord": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "EnableResourceNameDnsAAAARecord",
+            "smithy.api#xmlName": "enableResourceNameDnsAAAARecord"
+          }
+        },
+        "EnableResourceNameDnsARecord": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "EnableResourceNameDnsARecord",
+            "smithy.api#xmlName": "enableResourceNameDnsARecord"
+          }
+        },
+        "HostnameType": {
+          "target": "com.amazonaws.ec2#HostnameType",
+          "traits": {
+            "aws.protocols#ec2QueryName": "HostnameType",
+            "smithy.api#xmlName": "hostnameType"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#String": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#Subnet": {
+      "members": {
+        "AssignIpv6AddressOnCreation": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssignIpv6AddressOnCreation",
+            "smithy.api#xmlName": "assignIpv6AddressOnCreation"
+          }
+        },
+        "AvailabilityZone": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AvailabilityZone",
+            "smithy.api#xmlName": "availabilityZone"
+          }
+        },
+        "AvailabilityZoneId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AvailabilityZoneId",
+            "smithy.api#xmlName": "availabilityZoneId"
+          }
+        },
+        "AvailableIpAddressCount": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AvailableIpAddressCount",
+            "smithy.api#xmlName": "availableIpAddressCount"
+          }
+        },
+        "BlockPublicAccessStates": {
+          "target": "com.amazonaws.ec2#BlockPublicAccessStates",
+          "traits": {
+            "aws.protocols#ec2QueryName": "BlockPublicAccessStates",
+            "smithy.api#xmlName": "blockPublicAccessStates"
+          }
+        },
+        "CidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CidrBlock",
+            "smithy.api#xmlName": "cidrBlock"
+          }
+        },
+        "CustomerOwnedIpv4Pool": {
+          "target": "com.amazonaws.ec2#CoipPoolId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CustomerOwnedIpv4Pool",
+            "smithy.api#xmlName": "customerOwnedIpv4Pool"
+          }
+        },
+        "DefaultForAz": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DefaultForAz",
+            "smithy.api#xmlName": "defaultForAz"
+          }
+        },
+        "EnableDns64": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "EnableDns64",
+            "smithy.api#xmlName": "enableDns64"
+          }
+        },
+        "EnableLniAtDeviceIndex": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "EnableLniAtDeviceIndex",
+            "smithy.api#xmlName": "enableLniAtDeviceIndex"
+          }
+        },
+        "Ipv6CidrBlockAssociationSet": {
+          "target": "com.amazonaws.ec2#SubnetIpv6CidrBlockAssociationSet",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Ipv6CidrBlockAssociationSet",
+            "smithy.api#xmlName": "ipv6CidrBlockAssociationSet"
+          }
+        },
+        "Ipv6Native": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Ipv6Native",
+            "smithy.api#xmlName": "ipv6Native"
+          }
+        },
+        "MapCustomerOwnedIpOnLaunch": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "MapCustomerOwnedIpOnLaunch",
+            "smithy.api#xmlName": "mapCustomerOwnedIpOnLaunch"
+          }
+        },
+        "MapPublicIpOnLaunch": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "MapPublicIpOnLaunch",
+            "smithy.api#xmlName": "mapPublicIpOnLaunch"
+          }
+        },
+        "OutpostArn": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "OutpostArn",
+            "smithy.api#xmlName": "outpostArn"
+          }
+        },
+        "OwnerId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "OwnerId",
+            "smithy.api#xmlName": "ownerId"
+          }
+        },
+        "PrivateDnsNameOptionsOnLaunch": {
+          "target": "com.amazonaws.ec2#PrivateDnsNameOptionsOnLaunch",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PrivateDnsNameOptionsOnLaunch",
+            "smithy.api#xmlName": "privateDnsNameOptionsOnLaunch"
+          }
+        },
+        "State": {
+          "target": "com.amazonaws.ec2#SubnetState",
+          "traits": {
+            "aws.protocols#ec2QueryName": "State",
+            "smithy.api#xmlName": "state"
+          }
+        },
+        "SubnetArn": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SubnetArn",
+            "smithy.api#xmlName": "subnetArn"
+          }
+        },
+        "SubnetId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SubnetId",
+            "smithy.api#xmlName": "subnetId"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "TagSet",
+            "smithy.api#xmlName": "tagSet"
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Type",
+            "smithy.api#xmlName": "type"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#xmlName": "vpcId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#SubnetCidrAssociationId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#SubnetCidrBlockState": {
+      "members": {
+        "State": {
+          "target": "com.amazonaws.ec2#SubnetCidrBlockStateCode",
+          "traits": {
+            "aws.protocols#ec2QueryName": "State",
+            "smithy.api#xmlName": "state"
+          }
+        },
+        "StatusMessage": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "StatusMessage",
+            "smithy.api#xmlName": "statusMessage"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#SubnetCidrBlockStateCode": {
+      "members": {
+        "associated": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "associated"
+          }
+        },
+        "associating": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "associating"
+          }
+        },
+        "disassociated": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "disassociated"
+          }
+        },
+        "disassociating": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "disassociating"
+          }
+        },
+        "failed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "failed"
+          }
+        },
+        "failing": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "failing"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#SubnetId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#SubnetIdStringList": {
+      "member": {
+        "target": "com.amazonaws.ec2#SubnetId",
+        "traits": {
+          "smithy.api#xmlName": "SubnetId"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#SubnetIpv6CidrBlockAssociation": {
+      "members": {
+        "AssociationId": {
+          "target": "com.amazonaws.ec2#SubnetCidrAssociationId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssociationId",
+            "smithy.api#xmlName": "associationId"
+          }
+        },
+        "IpSource": {
+          "target": "com.amazonaws.ec2#IpSource",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IpSource",
+            "smithy.api#xmlName": "ipSource"
+          }
+        },
+        "Ipv6AddressAttribute": {
+          "target": "com.amazonaws.ec2#Ipv6AddressAttribute",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Ipv6AddressAttribute",
+            "smithy.api#xmlName": "ipv6AddressAttribute"
+          }
+        },
+        "Ipv6CidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Ipv6CidrBlock",
+            "smithy.api#xmlName": "ipv6CidrBlock"
+          }
+        },
+        "Ipv6CidrBlockState": {
+          "target": "com.amazonaws.ec2#SubnetCidrBlockState",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Ipv6CidrBlockState",
+            "smithy.api#xmlName": "ipv6CidrBlockState"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#SubnetIpv6CidrBlockAssociationSet": {
+      "member": {
+        "target": "com.amazonaws.ec2#SubnetIpv6CidrBlockAssociation",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#SubnetList": {
+      "member": {
+        "target": "com.amazonaws.ec2#Subnet",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#SubnetState": {
+      "members": {
+        "available": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "available"
+          }
+        },
+        "failed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "failed"
+          }
+        },
+        "failed_insufficient_capacity": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "failed-insufficient-capacity"
+          }
+        },
+        "pending": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "pending"
+          }
+        },
+        "unavailable": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unavailable"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Key",
+            "smithy.api#xmlName": "key"
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Value",
+            "smithy.api#xmlName": "value"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#TagList": {
+      "member": {
+        "target": "com.amazonaws.ec2#Tag",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#ValueStringList": {
+      "member": {
+        "target": "com.amazonaws.ec2#String",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

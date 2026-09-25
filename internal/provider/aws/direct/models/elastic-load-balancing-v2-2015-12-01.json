@@ -1,0 +1,792 @@
+{
+  "shapes": {
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroups": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#LoadBalancerNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupsOutput"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "Marker",
+          "items": "TargetGroups",
+          "outputToken": "NextMarker"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupsInput": {
+      "members": {
+        "LoadBalancerArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#LoadBalancerArn",
+          "traits": {}
+        },
+        "Marker": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Marker",
+          "traits": {}
+        },
+        "Names": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNames",
+          "traits": {}
+        },
+        "PageSize": {
+          "target": "com.amazonaws.elasticloadbalancingv2#PageSize",
+          "traits": {}
+        },
+        "TargetGroupArns": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArns",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupsOutput": {
+      "members": {
+        "NextMarker": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Marker",
+          "traits": {}
+        },
+        "TargetGroups": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroups",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ElasticLoadBalancing_v10": {
+      "operations": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroups"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "elasticloadbalancing",
+          "cloudFormationName": "ElasticLoadBalancingV2",
+          "cloudTrailEventSource": "elasticloadbalancing.amazonaws.com",
+          "docId": "elasticloadbalancingv2-2015-12-01",
+          "endpointPrefix": "elasticloadbalancing",
+          "sdkId": "Elastic Load Balancing v2"
+        },
+        "aws.auth#sigv4": {
+          "name": "elasticloadbalancing"
+        },
+        "aws.protocols#awsQuery": {},
+        "smithy.api#title": "Elastic Load Balancing",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://elasticloadbalancing.amazonaws.com/doc/2015-12-01/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://elasticloadbalancing-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://elasticloadbalancing.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://elasticloadbalancing-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://elasticloadbalancing.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://elasticloadbalancing.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2015-12-01"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ErrorDescription": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#GrpcCode": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#HealthCheckEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.elasticloadbalancingv2#HealthCheckIntervalSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 300,
+          "min": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#HealthCheckPort": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#HealthCheckThresholdCount": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 2
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#HealthCheckTimeoutSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 120,
+          "min": 2
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#HttpCode": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#LoadBalancerArn": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#LoadBalancerArns": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#LoadBalancerArn"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#LoadBalancerNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "LoadBalancerNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#Marker": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#Matcher": {
+      "members": {
+        "GrpcCode": {
+          "target": "com.amazonaws.elasticloadbalancingv2#GrpcCode",
+          "traits": {}
+        },
+        "HttpCode": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HttpCode",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#PageSize": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 400,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#Path": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#Port": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 65535,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ProtocolEnum": {
+      "members": {
+        "GENEVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GENEVE"
+          }
+        },
+        "HTTP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTP"
+          }
+        },
+        "HTTPS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTPS"
+          }
+        },
+        "QUIC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "QUIC"
+          }
+        },
+        "TCP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TCP"
+          }
+        },
+        "TCP_QUIC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TCP_QUIC"
+          }
+        },
+        "TCP_UDP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TCP_UDP"
+          }
+        },
+        "TLS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS"
+          }
+        },
+        "UDP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UDP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ProtocolVersion": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetControlPort": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 65535,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroup": {
+      "members": {
+        "HealthCheckEnabled": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckEnabled",
+          "traits": {}
+        },
+        "HealthCheckIntervalSeconds": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckIntervalSeconds",
+          "traits": {}
+        },
+        "HealthCheckPath": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Path",
+          "traits": {}
+        },
+        "HealthCheckPort": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckPort",
+          "traits": {}
+        },
+        "HealthCheckProtocol": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ProtocolEnum",
+          "traits": {}
+        },
+        "HealthCheckTimeoutSeconds": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckTimeoutSeconds",
+          "traits": {}
+        },
+        "HealthyThresholdCount": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckThresholdCount",
+          "traits": {}
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupIpAddressTypeEnum",
+          "traits": {}
+        },
+        "LoadBalancerArns": {
+          "target": "com.amazonaws.elasticloadbalancingv2#LoadBalancerArns",
+          "traits": {}
+        },
+        "Matcher": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Matcher",
+          "traits": {}
+        },
+        "Port": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Port",
+          "traits": {}
+        },
+        "Protocol": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ProtocolEnum",
+          "traits": {}
+        },
+        "ProtocolVersion": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ProtocolVersion",
+          "traits": {}
+        },
+        "TargetControlPort": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetControlPort",
+          "traits": {}
+        },
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {}
+        },
+        "TargetGroupName": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupName",
+          "traits": {}
+        },
+        "TargetType": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetTypeEnum",
+          "traits": {}
+        },
+        "UnhealthyThresholdCount": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckThresholdCount",
+          "traits": {}
+        },
+        "VpcId": {
+          "target": "com.amazonaws.elasticloadbalancingv2#VpcId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupArn": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupArns": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupIpAddressTypeEnum": {
+      "members": {
+        "IPV4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipv4"
+          }
+        },
+        "IPV6": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipv6"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupName": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupNames": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TargetGroupNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroups": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TargetGroup"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetTypeEnum": {
+      "members": {
+        "ALB": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "alb"
+          }
+        },
+        "INSTANCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "instance"
+          }
+        },
+        "IP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ip"
+          }
+        },
+        "LAMBDA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "lambda"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#VpcId": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

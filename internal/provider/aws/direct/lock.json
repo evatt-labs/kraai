@@ -96,6 +96,11 @@
       "sourceSha256": "b5864764e76291c93dc4157a489771d073a8c6cbffecdd4e453a5149237b2937",
       "subsetSha256": "b24002382cb105cb671702b8aed742898d908e0b1bf9860cde75ee990eeaa72e"
     },
+    "cloudformation/service/2010-05-15/cloudformation-2010-05-15.json": {
+      "file": "models/cloudformation-2010-05-15.json",
+      "sourceSha256": "9992e8206bda7e3c3bb34886f99ca4e07acc12fa24542b788bf03759ad9e6a9c",
+      "subsetSha256": "62c80d1de4690c0bbf907c8e167028dc983cd5703304b3b900871ac601caa46d"
+    },
     "cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json": {
       "file": "models/cloudwatch-logs-2014-03-28.json",
       "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
@@ -156,10 +161,20 @@
       "sourceSha256": "a096d665ac8fdd8fe7d2bbe636cc9b5e12e41f2df97f2bf30bf7018ec8fd94f5",
       "subsetSha256": "464a214f97d23d25a5f08313661e9621fb652a4cc93f34e21f95fc4a602b262c"
     },
+    "ec2/service/2016-11-15/ec2-2016-11-15.json": {
+      "file": "models/ec2-2016-11-15.json",
+      "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
+      "subsetSha256": "6d3590ddeb4c567dd2c31203dacacb1b3c6476ea8dd3785d503a250c2fcfadac"
+    },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
       "sourceSha256": "039c1877a9b6b6997819988c4f8f7e9f063bcfe6afa6c431d2da45fc8422eace",
       "subsetSha256": "3786b00cbb780f0b457932e0a8e192b1c0d07b62e5d0fe4a43faeab098a60ccc"
+    },
+    "elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json": {
+      "file": "models/elastic-load-balancing-v2-2015-12-01.json",
+      "sourceSha256": "b8e2667dc02196215c863ecab13f2aecd8d9520262c85de1edbe80fd95e74d2f",
+      "subsetSha256": "5f3b6adca4a799647403333bc83687c777b4ac174ca2398fc0345c0aad6b1260"
     },
     "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
       "file": "models/elementalinference-2018-11-14.json",
@@ -205,6 +220,11 @@
       "file": "models/greengrassv2-2020-11-30.json",
       "sourceSha256": "e0c324d26e877ff05a37ef087a68def9d29b0736941f9a263e2182fd0d4ad608",
       "subsetSha256": "0f0758774bcd1e5a059e533887e7f4d2bd95513b8b014812b588c8e59c7563c8"
+    },
+    "iam/service/2010-05-08/iam-2010-05-08.json": {
+      "file": "models/iam-2010-05-08.json",
+      "sourceSha256": "c1f74d3eda269e4fa2f00b57d57ed19c0e0a6d7fc7c70d4e351e319d178430f9",
+      "subsetSha256": "351b41c7de39179e4d8003c2e803b88169e78ad734ca5b43232df26bac4ee7ba"
     },
     "imagebuilder/service/2019-12-02/imagebuilder-2019-12-02.json": {
       "file": "models/imagebuilder-2019-12-02.json",
@@ -511,6 +531,11 @@
       "sourceSha256": "8156815ba7a3e4cb6b369234bb7e75698c3ba9962eac3b76f407cd55274fc7d7",
       "subsetSha256": "acbb54bc05b0c2c924948b225f5e9bd3f175c41e0c2cd7acb93a306711967e75"
     },
+    "ses/service/2010-12-01/ses-2010-12-01.json": {
+      "file": "models/ses-2010-12-01.json",
+      "sourceSha256": "eb061a201fd24d227bc701e9a188146c1ccf39faae04fef37df2110bfbd152d3",
+      "subsetSha256": "ec09882f03ae727c95371737d9f3ef4bef5d913fe0ab09b7c41817f59aa7127a"
+    },
     "sesv2/service/2019-09-27/sesv2-2019-09-27.json": {
       "file": "models/sesv2-2019-09-27.json",
       "sourceSha256": "b6ee9e6b19642fedddae1fd4b5c6235d88c5b4ce6b244f21c0b57f721d12a233",
@@ -743,6 +768,21 @@
       "sourceSha256": "bc5caeaa09dc4aa37184291ce0b18b6cb589ba4d1466f144e5392425f6279e30",
       "subsetSha256": "967ce2b86962aa471a6f043932aa1684869790562b9809ffa49bec67ec992aaa"
     },
+    "AWS::CloudFormation::ChangeSet": {
+      "file": "schemas/AWS--CloudFormation--ChangeSet.json",
+      "sourceSha256": "fff39e02fc9eca142b5f75ab791df1eb24e7e392aeafa433b81fd3a6013541fa",
+      "subsetSha256": "1cb70a73342e85d7ea1cadac6785715c5a42682a6a407bd14de889063a84a464"
+    },
+    "AWS::CloudFormation::GeneratedTemplate": {
+      "file": "schemas/AWS--CloudFormation--GeneratedTemplate.json",
+      "sourceSha256": "4cc52e4ac3d9ac7a6d2a9135daef127d541bba54850f3604e1b5f41fe05afaf5",
+      "subsetSha256": "3510847e9b574593185abfbc7935fe881dcdf049288cd7b236c7ab42c9b3647b"
+    },
+    "AWS::CloudFormation::ModuleDefaultVersion": {
+      "file": "schemas/AWS--CloudFormation--ModuleDefaultVersion.json",
+      "sourceSha256": "8bbc83a71a9428439591e00f5d62e25da9caaf66db51c355f5ff49c7d26da857",
+      "subsetSha256": "8bb7ccfae278a97cd5d0659d08ec9726708e272c63a0f47f236bc2a0d1caa9dc"
+    },
     "AWS::CodeConnections::Connection": {
       "file": "schemas/AWS--CodeConnections--Connection.json",
       "sourceSha256": "3a6470c12ad8d7cb3ad45717dbd1cb1267634309f1ea2981ab9420e162bbff55",
@@ -848,6 +888,11 @@
       "sourceSha256": "0e43f2f422942e8f013fbde3305c1219db4bfc1e4bc847e3de9e186d19f63991",
       "subsetSha256": "f68e6ea32e74c9986b38d74f319097fa79a40e9738a489fbd551a5fc6c579ee9"
     },
+    "AWS::EC2::Subnet": {
+      "file": "schemas/AWS--EC2--Subnet.json",
+      "sourceSha256": "eb72b504512cd3eb92948347491c5afbe17397779e365286998b09c5ef880c28",
+      "subsetSha256": "939c211ef04d2839cc8ec24912e0a914356ebe062f1566babcd852b0a1f8fc41"
+    },
     "AWS::ECS::DaemonTaskDefinition": {
       "file": "schemas/AWS--ECS--DaemonTaskDefinition.json",
       "sourceSha256": "cfff3d2810fb1c5340ab813a0f7b9fcebbaedb990be0ac2b9b8d71718b684fc3",
@@ -862,6 +907,11 @@
       "file": "schemas/AWS--EMR--SecurityConfiguration.json",
       "sourceSha256": "738f3d02c65d7c621359ac44459712a331e34c37e160df0a765a8e861d86c6e7",
       "subsetSha256": "2d82a3fc1875b4dc739d918314d6297f91b428d3587fe7d54b806fecc15c07d7"
+    },
+    "AWS::ElasticLoadBalancingV2::TargetGroup": {
+      "file": "schemas/AWS--ElasticLoadBalancingV2--TargetGroup.json",
+      "sourceSha256": "571a5f140e428d7758ae00d093c92e030199834669d26f18f4b55b5eff1fbdf1",
+      "subsetSha256": "2b5ef07edfa1dde0e335c12023d8bf94d7395607af41d9816dcdde32b2658362"
     },
     "AWS::ElementalInference::Dictionary": {
       "file": "schemas/AWS--ElementalInference--Dictionary.json",
@@ -942,6 +992,11 @@
       "file": "schemas/AWS--HealthImaging--Datastore.json",
       "sourceSha256": "073fbcde11c74388e665abd6a5f55aa1dc7580f0dc23ac29adf6b146609b4152",
       "subsetSha256": "beab0793e4538682755228255e8a7c8d4e04a1982938b189a346f87a42d32d39"
+    },
+    "AWS::IAM::ServiceLinkedRole": {
+      "file": "schemas/AWS--IAM--ServiceLinkedRole.json",
+      "sourceSha256": "7e58f2ade27fcea5227ec6fb4e7bcb875652b5313a87dd992bca90b49cd9cb67",
+      "subsetSha256": "c64b088908c81395388747e2b462c85c1335b77e3b6bf4cb07e28a02c16ae0a7"
     },
     "AWS::IVS::Channel": {
       "file": "schemas/AWS--IVS--Channel.json",
@@ -1512,6 +1567,11 @@
       "file": "schemas/AWS--SES--ContactList.json",
       "sourceSha256": "c8434b7570c4931b5239680234efaeaa076647176caf4032e2d43b6ca88ce73d",
       "subsetSha256": "c587ad28d19dac90c289b53e42e1cffd5cf1cd11cb003cd5554103f72e4ab863"
+    },
+    "AWS::SES::CustomVerificationEmailTemplate": {
+      "file": "schemas/AWS--SES--CustomVerificationEmailTemplate.json",
+      "sourceSha256": "d8f8ab1fad5d79608fe897b15efee268093a73ffbf3024ad4c25cf7353100989",
+      "subsetSha256": "65a6dbef2c9c02db912f554b628ea2702949c58b9ed886790936e2a0efa5521f"
     },
     "AWS::SES::MailManagerAddressList": {
       "file": "schemas/AWS--SES--MailManagerAddressList.json",

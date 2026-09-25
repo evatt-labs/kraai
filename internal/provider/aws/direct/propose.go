@@ -54,24 +54,28 @@ func proposeWith(model *smithyModel, schema *cfnSchema, o Override) (Override, e
 			op = s
 		}
 	}
-	input := model.Shapes[ref(op.Input)]
-	o.Read.Identifier = map[string]string{}
-	for _, pointer := range schema.PrimaryIdentifier {
-		property := strings.TrimPrefix(pointer, "/properties/")
-		for member := range input.Members {
-			if normalize(member) == normalize(property) {
-				o.Read.Identifier[property] = member
-			}
-		}
-		if _, ok := o.Read.Identifier[property]; !ok && len(schema.PrimaryIdentifier) == 1 {
-			var required []string
-			for member, m := range input.Members {
-				if m.Traits["smithy.api#required"] != nil {
-					required = append(required, member)
+	// An identifier the override already binds is kept; otherwise one is
+	// drafted by name, or as the single required input member.
+	if len(o.Read.Identifier) == 0 {
+		input := model.Shapes[ref(op.Input)]
+		o.Read.Identifier = map[string]string{}
+		for _, pointer := range schema.PrimaryIdentifier {
+			property := strings.TrimPrefix(pointer, "/properties/")
+			for member := range input.Members {
+				if normalize(member) == normalize(property) {
+					o.Read.Identifier[property] = member
 				}
 			}
-			if len(required) == 1 {
-				o.Read.Identifier[property] = required[0]
+			if _, ok := o.Read.Identifier[property]; !ok && len(schema.PrimaryIdentifier) == 1 {
+				var required []string
+				for member, m := range input.Members {
+					if m.Traits["smithy.api#required"] != nil {
+						required = append(required, member)
+					}
+				}
+				if len(required) == 1 {
+					o.Read.Identifier[property] = required[0]
+				}
 			}
 		}
 	}
@@ -83,11 +87,15 @@ func proposeWith(model *smithyModel, schema *cfnSchema, o Override) (Override, e
 	resource := ref(op.Output)
 	if o.Read.Response != "" {
 		for step := range strings.SplitSeq(o.Read.Response, ".") {
+			step, list := strings.CutSuffix(step, "[]")
 			m, ok := model.Shapes[resource].Members[step]
 			if !ok {
 				return o, fmt.Errorf("response path %s: %s has no member %s", o.Read.Response, resource, step)
 			}
 			resource = m.Target
+			if list {
+				resource = ref(model.Shapes[resource].Member)
+			}
 		}
 	} else {
 		var path []string
