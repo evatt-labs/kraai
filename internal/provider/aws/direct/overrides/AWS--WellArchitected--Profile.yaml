@@ -1,0 +1,23 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WellArchitected::Profile
+read:
+  model: wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json
+  operation: GetProfile
+  identifier:
+    ProfileArn: ProfileArn
+  response: Profile
+properties:
+  CreatedAt: CreatedAt
+  Owner: Owner
+  ProfileArn: ProfileArn
+  ProfileDescription: ProfileDescription
+  ProfileName: ProfileName
+  ProfileQuestions:
+    member: ProfileQuestions
+    properties:
+      QuestionId: QuestionId
+      SelectedChoiceIds: SelectedChoiceIds
+  ProfileVersion: ProfileVersion
+  UpdatedAt: UpdatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

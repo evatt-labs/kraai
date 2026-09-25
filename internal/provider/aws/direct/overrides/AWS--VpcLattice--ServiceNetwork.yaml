@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::VpcLattice::ServiceNetwork
+read:
+  model: vpc-lattice/service/2022-11-30/vpc-lattice-2022-11-30.json
+  operation: GetServiceNetwork
+  identifier:
+    Arn: serviceNetworkIdentifier
+properties:
+  Arn: arn
+  AuthType: authType
+  CreatedAt: createdAt
+  Id: id
+  LastUpdatedAt: lastUpdatedAt
+  Name: name
+  SharingConfig:
+    member: sharingConfig
+    properties:
+      enabled: enabled
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

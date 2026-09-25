@@ -1,0 +1,19 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WellArchitected::ReviewTemplate
+read:
+  model: wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json
+  operation: GetReviewTemplate
+  identifier:
+    TemplateArn: TemplateArn
+  response: ReviewTemplate
+properties:
+  Description: Description
+  Lenses: Lenses
+  Notes: Notes
+  Owner: Owner
+  TemplateArn: TemplateArn
+  TemplateName: TemplateName
+  UpdateStatus: UpdateStatus
+  UpdatedAt: UpdatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,23 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoTSiteWise::ComputationModel
+read:
+  model: iotsitewise/service/2019-12-02/iotsitewise-2019-12-02.json
+  operation: DescribeComputationModel
+  identifier:
+    ComputationModelId: computationModelId
+properties:
+  ComputationModelArn: computationModelArn
+  ComputationModelConfiguration:
+    member: computationModelConfiguration
+    properties:
+      AnomalyDetection:
+        member: anomalyDetection
+        properties:
+          InputProperties: inputProperties
+          ResultProperty: resultProperty
+  ComputationModelDataBinding: computationModelDataBinding
+  ComputationModelDescription: computationModelDescription
+  ComputationModelId: computationModelId
+  ComputationModelName: computationModelName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

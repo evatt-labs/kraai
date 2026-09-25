@@ -1,0 +1,740 @@
+{
+  "shapes": {
+    "com.amazonaws.novaact#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#AmazonNovaAgentsDataPlane": {
+      "operations": [
+        {
+          "target": "com.amazonaws.novaact#GetWorkflowDefinition"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "nova-act",
+          "endpointPrefix": "nova-act",
+          "sdkId": "Nova Act"
+        },
+        "aws.auth#sigv4": {
+          "name": "nova-act"
+        },
+        "aws.endpoints#standardRegionalEndpoints": {},
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Nova Act Service",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://nova-act-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://nova-act-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://nova-act.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://nova-act.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2025-08-22"
+    },
+    "com.amazonaws.novaact#DateTimestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.novaact#GetWorkflowDefinition": {
+      "errors": [
+        {
+          "target": "com.amazonaws.novaact#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.novaact#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.novaact#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.novaact#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.novaact#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.novaact#GetWorkflowDefinitionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.novaact#GetWorkflowDefinitionResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/workflow-definitions/{workflowDefinitionName}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.novaact#GetWorkflowDefinitionRequest": {
+      "members": {
+        "workflowDefinitionName": {
+          "target": "com.amazonaws.novaact#WorkflowDefinitionName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#GetWorkflowDefinitionResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.novaact#WorkflowDefinitionArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "com.amazonaws.novaact#DateTimestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.novaact#WorkflowDescription",
+          "traits": {}
+        },
+        "exportConfig": {
+          "target": "com.amazonaws.novaact#WorkflowExportConfig",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.novaact#WorkflowDefinitionName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.novaact#WorkflowDefinitionStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.novaact#InternalServerExceptionReason",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#InternalServerExceptionReason": {
+      "members": {
+        "INVALID_MODEL_GENERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InvalidModelGeneration"
+          }
+        },
+        "TOKEN_LIMIT_EXCEEDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RequestTokenLimitExceeded"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.novaact#NonBlankString": {
+      "traits": {
+        "smithy.api#pattern": "^[\\s\\S]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.novaact#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#S3BucketName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.novaact#S3KeyPrefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9!\\-_.*'()]+(?:/[a-zA-Z0-9!\\-_.*'()]+)*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.novaact#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.novaact#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.novaact#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.novaact#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.novaact#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.novaact#ValidationExceptionReason": {
+      "members": {
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FieldValidationFailed"
+          }
+        },
+        "GUARDRAIL_INTERVENED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GuardrailIntervened"
+          }
+        },
+        "INVALID_STATUS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InvalidStatus"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.novaact#WorkflowDefinitionArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov):nova-act:[a-z0-9-]+:[0-9]{12}:workflow-definition/[a-zA-Z0-9_-]{1,40}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.novaact#WorkflowDefinitionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_-]{1,40}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.novaact#WorkflowDefinitionStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.novaact#WorkflowDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4000,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.novaact#WorkflowExportConfig": {
+      "members": {
+        "s3BucketName": {
+          "target": "com.amazonaws.novaact#S3BucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "s3KeyPrefix": {
+          "target": "com.amazonaws.novaact#S3KeyPrefix",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,35 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoTWireless::ServiceProfile
+read:
+  model: iot-wireless/service/2020-11-22/iot-wireless-2020-11-22.json
+  operation: GetServiceProfile
+  identifier:
+    Id: Id
+properties:
+  Arn: Arn
+  Id: Id
+  LoRaWAN:
+    member: LoRaWAN
+    properties:
+      AddGwMetadata: AddGwMetadata
+      ChannelMask: ChannelMask
+      DevStatusReqFreq: DevStatusReqFreq
+      DlBucketSize: DlBucketSize
+      DlRate: DlRate
+      DlRatePolicy: DlRatePolicy
+      DrMax: DrMax
+      DrMin: DrMin
+      HrAllowed: HrAllowed
+      MinGwDiversity: MinGwDiversity
+      NwkGeoLoc: NwkGeoLoc
+      PrAllowed: PrAllowed
+      RaAllowed: RaAllowed
+      ReportDevStatusBattery: ReportDevStatusBattery
+      ReportDevStatusMargin: ReportDevStatusMargin
+      TargetPer: TargetPer
+      UlBucketSize: UlBucketSize
+      UlRate: UlRate
+      UlRatePolicy: UlRatePolicy
+  Name: Name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

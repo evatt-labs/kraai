@@ -1,0 +1,10 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::EMR::SecurityConfiguration
+read:
+  model: emr/service/2009-03-31/emr-2009-03-31.json
+  operation: DescribeSecurityConfiguration
+  identifier:
+    Name: Name
+properties:
+  Name: Name
+  SecurityConfiguration: SecurityConfiguration

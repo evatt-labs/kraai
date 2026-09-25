@@ -64,7 +64,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	}
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
-		out = obj[r.wire(step, "")]
+		out = obj[step]
 	}
 	obj, ok := out.(map[string]any)
 	if !ok {

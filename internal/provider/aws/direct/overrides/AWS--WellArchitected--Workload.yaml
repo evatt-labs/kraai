@@ -1,0 +1,31 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WellArchitected::Workload
+read:
+  model: wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json
+  operation: GetWorkload
+  identifier:
+    WorkloadArn: WorkloadId
+  response: Workload
+properties:
+  AccountIds: AccountIds
+  ArchitecturalDesign: ArchitecturalDesign
+  AwsRegions: AwsRegions
+  Description: Description
+  DiscoveryConfig:
+    member: DiscoveryConfig
+    properties:
+      TrustedAdvisorIntegrationStatus: TrustedAdvisorIntegrationStatus
+      WorkloadResourceDefinition: WorkloadResourceDefinition
+  Environment: Environment
+  ImprovementStatus: ImprovementStatus
+  Industry: Industry
+  IndustryType: IndustryType
+  Lenses: Lenses
+  NonAwsRegions: NonAwsRegions
+  Notes: Notes
+  ReviewOwner: ReviewOwner
+  WorkloadArn: WorkloadArn
+  WorkloadId: WorkloadId
+  WorkloadName: WorkloadName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

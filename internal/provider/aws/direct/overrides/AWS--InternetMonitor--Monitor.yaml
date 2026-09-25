@@ -1,0 +1,46 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::InternetMonitor::Monitor
+read:
+  model: internetmonitor/service/2021-06-03/internetmonitor-2021-06-03.json
+  operation: GetMonitor
+  identifier:
+    MonitorName: MonitorName
+properties:
+  CreatedAt: CreatedAt
+  HealthEventsConfig:
+    member: HealthEventsConfig
+    properties:
+      AvailabilityLocalHealthEventsConfig:
+        member: AvailabilityLocalHealthEventsConfig
+        properties:
+          HealthScoreThreshold: HealthScoreThreshold
+          MinTrafficImpact: MinTrafficImpact
+          Status: Status
+      AvailabilityScoreThreshold: AvailabilityScoreThreshold
+      PerformanceLocalHealthEventsConfig:
+        member: PerformanceLocalHealthEventsConfig
+        properties:
+          HealthScoreThreshold: HealthScoreThreshold
+          MinTrafficImpact: MinTrafficImpact
+          Status: Status
+      PerformanceScoreThreshold: PerformanceScoreThreshold
+  InternetMeasurementsLogDelivery:
+    member: InternetMeasurementsLogDelivery
+    properties:
+      S3Config:
+        member: S3Config
+        properties:
+          BucketName: BucketName
+          BucketPrefix: BucketPrefix
+          LogDeliveryStatus: LogDeliveryStatus
+  MaxCityNetworksToMonitor: MaxCityNetworksToMonitor
+  ModifiedAt: ModifiedAt
+  MonitorArn: MonitorArn
+  MonitorName: MonitorName
+  ProcessingStatus: ProcessingStatus
+  ProcessingStatusInfo: ProcessingStatusInfo
+  Resources: Resources
+  Status: Status
+  TrafficPercentageToMonitor: TrafficPercentageToMonitor
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

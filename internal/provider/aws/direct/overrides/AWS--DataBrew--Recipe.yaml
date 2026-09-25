@@ -1,0 +1,26 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataBrew::Recipe
+read:
+  model: databrew/service/2017-07-25/databrew-2017-07-25.json
+  operation: DescribeRecipe
+  identifier:
+    Name: Name
+properties:
+  Description: Description
+  Name: Name
+  Steps:
+    member: Steps
+    properties:
+      Action:
+        member: Action
+        properties:
+          Operation: Operation
+          Parameters: Parameters
+      ConditionExpressions:
+        member: ConditionExpressions
+        properties:
+          Condition: Condition
+          TargetColumn: TargetColumn
+          Value: Value
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

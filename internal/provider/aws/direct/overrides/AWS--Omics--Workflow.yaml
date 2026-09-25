@@ -1,0 +1,39 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Omics::Workflow
+read:
+  model: omics/service/2022-11-28/omics-2022-11-28.json
+  operation: GetWorkflow
+  identifier:
+    Id: id
+properties:
+  Accelerators: accelerators
+  Arn: arn
+  ContainerRegistryMap:
+    member: containerRegistryMap
+    properties:
+      ImageMappings:
+        member: imageMappings
+        properties:
+          DestinationImage: destinationImage
+          SourceImage: sourceImage
+      RegistryMappings:
+        member: registryMappings
+        properties:
+          EcrAccountId: ecrAccountId
+          EcrRepositoryPrefix: ecrRepositoryPrefix
+          UpstreamRegistryUrl: upstreamRegistryUrl
+          UpstreamRepositoryPrefix: upstreamRepositoryPrefix
+  CreationTime: creationTime
+  Description: description
+  Engine: engine
+  Id: id
+  Main: main
+  Name: name
+  ParameterTemplate: parameterTemplate
+  Status: status
+  StorageCapacity: storageCapacity
+  StorageType: storageType
+  Tags: tags
+  Type: type
+  Uuid: uuid
+  readmePath: readmePath

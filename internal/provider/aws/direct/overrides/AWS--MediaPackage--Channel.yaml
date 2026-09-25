@@ -1,0 +1,31 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaPackage::Channel
+read:
+  model: mediapackage/service/2017-10-12/mediapackage-2017-10-12.json
+  operation: DescribeChannel
+  identifier:
+    Id: Id
+properties:
+  Arn: Arn
+  Description: Description
+  EgressAccessLogs:
+    member: EgressAccessLogs
+    properties:
+      LogGroupName: LogGroupName
+  HlsIngest:
+    member: HlsIngest
+    properties:
+      ingestEndpoints:
+        member: IngestEndpoints
+        properties:
+          Id: Id
+          Password: Password
+          Url: Url
+          Username: Username
+  Id: Id
+  IngressAccessLogs:
+    member: IngressAccessLogs
+    properties:
+      LogGroupName: LogGroupName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

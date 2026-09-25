@@ -1,0 +1,21 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Chime::SipMediaApplication
+read:
+  model: chime-sdk-voice/service/2022-08-03/chime-sdk-voice-2022-08-03.json
+  operation: GetSipMediaApplication
+  identifier:
+    SipMediaApplicationArn: SipMediaApplicationId
+  response: SipMediaApplication
+properties:
+  AwsRegion: AwsRegion
+  CreatedTimestamp: CreatedTimestamp
+  Endpoints:
+    member: Endpoints
+    properties:
+      LambdaArn: LambdaArn
+  Name: Name
+  SipMediaApplicationArn: SipMediaApplicationArn
+  SipMediaApplicationId: SipMediaApplicationId
+  UpdatedTimestamp: UpdatedTimestamp
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

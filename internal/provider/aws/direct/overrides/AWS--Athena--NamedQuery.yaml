@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Athena::NamedQuery
+read:
+  model: athena/service/2017-05-18/athena-2017-05-18.json
+  operation: GetNamedQuery
+  identifier:
+    NamedQueryId: NamedQueryId
+  response: NamedQuery
+properties:
+  Database: Database
+  Description: Description
+  Name: Name
+  NamedQueryId: NamedQueryId
+  QueryString: QueryString
+  WorkGroup: WorkGroup

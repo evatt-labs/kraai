@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::LicenseManager::Grant
+read:
+  model: license-manager/service/2018-08-01/license-manager-2018-08-01.json
+  operation: GetGrant
+  identifier:
+    GrantArn: GrantArn
+  response: Grant
+properties:
+  GrantArn: GrantArn
+  GrantName: GrantName
+  HomeRegion: HomeRegion
+  LicenseArn: LicenseArn
+  Version: Version
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

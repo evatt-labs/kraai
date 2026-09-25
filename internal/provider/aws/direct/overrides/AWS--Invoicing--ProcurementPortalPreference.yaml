@@ -1,0 +1,58 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Invoicing::ProcurementPortalPreference
+read:
+  model: invoicing/service/2024-12-01/invoicing-2024-12-01.json
+  operation: GetProcurementPortalPreference
+  identifier:
+    ProcurementPortalPreferenceArn: ProcurementPortalPreferenceArn
+  response: ProcurementPortalPreference
+properties:
+  AwsAccountId: AwsAccountId
+  BuyerDomain: BuyerDomain
+  BuyerIdentifier: BuyerIdentifier
+  Contacts:
+    member: Contacts
+    properties:
+      Email: Email
+      Name: Name
+  CreateDate: CreateDate
+  EinvoiceDeliveryEnabled: EinvoiceDeliveryEnabled
+  EinvoiceDeliveryPreference:
+    member: EinvoiceDeliveryPreference
+    properties:
+      ConnectionTestingMethod: ConnectionTestingMethod
+      EinvoiceDeliveryActivationDate: EinvoiceDeliveryActivationDate
+      EinvoiceDeliveryAttachmentTypes: EinvoiceDeliveryAttachmentTypes
+      EinvoiceDeliveryDocumentTypes: EinvoiceDeliveryDocumentTypes
+      Protocol: Protocol
+      PurchaseOrderDataSources:
+        member: PurchaseOrderDataSources
+        properties:
+          EinvoiceDeliveryDocumentType: EinvoiceDeliveryDocumentType
+          PurchaseOrderDataSourceType: PurchaseOrderDataSourceType
+  EinvoiceDeliveryPreferenceStatus: EinvoiceDeliveryPreferenceStatus
+  LastUpdateDate: LastUpdateDate
+  ProcurementPortalInstanceEndpoint: ProcurementPortalInstanceEndpoint
+  ProcurementPortalName: ProcurementPortalName
+  ProcurementPortalPreferenceArn: ProcurementPortalPreferenceArn
+  PurchaseOrderRetrievalEnabled: PurchaseOrderRetrievalEnabled
+  PurchaseOrderRetrievalEndpoint: PurchaseOrderRetrievalEndpoint
+  PurchaseOrderRetrievalPreferenceStatus: PurchaseOrderRetrievalPreferenceStatus
+  Selector:
+    member: Selector
+    properties:
+      InvoiceUnitArns: InvoiceUnitArns
+  SupplierDomain: SupplierDomain
+  SupplierIdentifier: SupplierIdentifier
+  TestEnvPreference:
+    member: TestEnvPreference
+    properties:
+      BuyerDomain: BuyerDomain
+      BuyerIdentifier: BuyerIdentifier
+      ProcurementPortalInstanceEndpoint: ProcurementPortalInstanceEndpoint
+      ProcurementPortalSharedSecret: ProcurementPortalSharedSecret
+      SupplierDomain: SupplierDomain
+      SupplierIdentifier: SupplierIdentifier
+  Version: Version
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

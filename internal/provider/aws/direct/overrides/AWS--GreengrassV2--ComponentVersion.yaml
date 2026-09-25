@@ -1,0 +1,12 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::GreengrassV2::ComponentVersion
+read:
+  model: greengrassv2/service/2020-11-30/greengrassv2-2020-11-30.json
+  operation: DescribeComponent
+  identifier:
+    Arn: arn
+properties:
+  Arn: arn
+  ComponentName: componentName
+  ComponentVersion: componentVersion
+  Tags: tags

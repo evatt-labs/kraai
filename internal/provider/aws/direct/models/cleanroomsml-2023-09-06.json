@@ -1,0 +1,1126 @@
+{
+  "shapes": {
+    "com.amazonaws.cleanroomsml#AWSStarkControlService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.cleanroomsml#GetConfiguredModelAlgorithm"
+        },
+        {
+          "target": "com.amazonaws.cleanroomsml#GetTrainingDataset"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "cleanrooms-ml",
+          "cloudTrailEventSource": "cleanrooms-ml.amazonaws.com",
+          "sdkId": "CleanRoomsML"
+        },
+        "aws.auth#sigv4": {
+          "name": "cleanrooms-ml"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "AWS Clean Rooms ML",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://cleanrooms-ml-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://cleanrooms-ml-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://cleanrooms-ml.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://cleanrooms-ml.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2023-09-06"
+    },
+    "com.amazonaws.cleanroomsml#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^[0-9]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#AlgorithmImage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#ColumnName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_](([a-zA-Z0-9_ ]+-)*([a-zA-Z0-9_ ]+))?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#ColumnSchema": {
+      "members": {
+        "columnName": {
+          "target": "com.amazonaws.cleanroomsml#ColumnName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "columnTypes": {
+          "target": "com.amazonaws.cleanroomsml#ColumnTypeList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#ColumnType": {
+      "members": {
+        "CATEGORICAL_FEATURE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CATEGORICAL_FEATURE"
+          }
+        },
+        "ITEM_ID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ITEM_ID"
+          }
+        },
+        "NUMERICAL_FEATURE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NUMERICAL_FEATURE"
+          }
+        },
+        "TIMESTAMP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TIMESTAMP"
+          }
+        },
+        "USER_ID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "USER_ID"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cleanroomsml#ColumnTypeList": {
+      "member": {
+        "target": "com.amazonaws.cleanroomsml#ColumnType"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cleanroomsml#ConfiguredModelAlgorithmArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.cleanroomsml#ConfiguredModelAlgorithm",
+          "service": "com.amazonaws.cleanroomsml#AWSStarkControlService"
+        },
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z]*:cleanrooms-ml:[-a-z0-9]+:[0-9]{12}:configured-model-algorithm/[-a-zA-Z0-9_/.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#ContainerArgument": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#ContainerArguments": {
+      "member": {
+        "target": "com.amazonaws.cleanroomsml#ContainerArgument"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cleanroomsml#ContainerConfig": {
+      "members": {
+        "arguments": {
+          "target": "com.amazonaws.cleanroomsml#ContainerArguments",
+          "traits": {}
+        },
+        "entrypoint": {
+          "target": "com.amazonaws.cleanroomsml#ContainerEntrypoint",
+          "traits": {}
+        },
+        "imageUri": {
+          "target": "com.amazonaws.cleanroomsml#AlgorithmImage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "metricDefinitions": {
+          "target": "com.amazonaws.cleanroomsml#MetricDefinitionList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#ContainerEntrypoint": {
+      "member": {
+        "target": "com.amazonaws.cleanroomsml#ContainerEntrypointString"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cleanroomsml#ContainerEntrypointString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#DataSource": {
+      "members": {
+        "glueDataSource": {
+          "target": "com.amazonaws.cleanroomsml#GlueDataSource",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#Dataset": {
+      "members": {
+        "inputConfig": {
+          "target": "com.amazonaws.cleanroomsml#DatasetInputConfig",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "type": {
+          "target": "com.amazonaws.cleanroomsml#DatasetType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#DatasetInputConfig": {
+      "members": {
+        "dataSource": {
+          "target": "com.amazonaws.cleanroomsml#DataSource",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "schema": {
+          "target": "com.amazonaws.cleanroomsml#DatasetSchemaList",
+          "traits": {
+            "smithy.api#length": {
+              "max": 100,
+              "min": 1
+            },
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#DatasetList": {
+      "member": {
+        "target": "com.amazonaws.cleanroomsml#Dataset"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cleanroomsml#DatasetSchemaList": {
+      "member": {
+        "target": "com.amazonaws.cleanroomsml#ColumnSchema"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cleanroomsml#DatasetType": {
+      "members": {
+        "INTERACTIONS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTERACTIONS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cleanroomsml#GetConfiguredModelAlgorithm": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cleanroomsml#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.cleanroomsml#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cleanroomsml#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.cleanroomsml#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cleanroomsml#GetConfiguredModelAlgorithmRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cleanroomsml#GetConfiguredModelAlgorithmResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/configured-model-algorithms/{configuredModelAlgorithmArn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.cleanroomsml#GetConfiguredModelAlgorithmRequest": {
+      "members": {
+        "configuredModelAlgorithmArn": {
+          "target": "com.amazonaws.cleanroomsml#ConfiguredModelAlgorithmArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#GetConfiguredModelAlgorithmResponse": {
+      "members": {
+        "configuredModelAlgorithmArn": {
+          "target": "com.amazonaws.cleanroomsml#ConfiguredModelAlgorithmArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#timestampFormat": "date-time"
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.cleanroomsml#ResourceDescription",
+          "traits": {}
+        },
+        "inferenceContainerConfig": {
+          "target": "com.amazonaws.cleanroomsml#InferenceContainerConfig",
+          "traits": {}
+        },
+        "kmsKeyArn": {
+          "target": "com.amazonaws.cleanroomsml#KmsKeyArn",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.cleanroomsml#NameString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "roleArn": {
+          "target": "com.amazonaws.cleanroomsml#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.cleanroomsml#TagMap",
+          "traits": {}
+        },
+        "trainingContainerConfig": {
+          "target": "com.amazonaws.cleanroomsml#ContainerConfig",
+          "traits": {}
+        },
+        "updateTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#timestampFormat": "date-time"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#GetTrainingDataset": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cleanroomsml#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.cleanroomsml#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cleanroomsml#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.cleanroomsml#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cleanroomsml#GetTrainingDatasetRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cleanroomsml#GetTrainingDatasetResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/training-dataset/{trainingDatasetArn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.cleanroomsml#GetTrainingDatasetRequest": {
+      "members": {
+        "trainingDatasetArn": {
+          "target": "com.amazonaws.cleanroomsml#TrainingDatasetArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#GetTrainingDatasetResponse": {
+      "members": {
+        "createTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#timestampFormat": "date-time"
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.cleanroomsml#ResourceDescription",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.cleanroomsml#NameString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "roleArn": {
+          "target": "com.amazonaws.cleanroomsml#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.cleanroomsml#TrainingDatasetStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.cleanroomsml#TagMap",
+          "traits": {}
+        },
+        "trainingData": {
+          "target": "com.amazonaws.cleanroomsml#DatasetList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "trainingDatasetArn": {
+          "target": "com.amazonaws.cleanroomsml#TrainingDatasetArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "updateTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#timestampFormat": "date-time"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#GlueDataSource": {
+      "members": {
+        "catalogId": {
+          "target": "com.amazonaws.cleanroomsml#AccountId",
+          "traits": {}
+        },
+        "databaseName": {
+          "target": "com.amazonaws.cleanroomsml#GlueDatabaseName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tableName": {
+          "target": "com.amazonaws.cleanroomsml#GlueTableName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#GlueDatabaseName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_](([a-zA-Z0-9_]+-)*([a-zA-Z0-9_]+))?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#GlueTableName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_](([a-zA-Z0-9_ ]+-)*([a-zA-Z0-9_ ]+))?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#IamRoleArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::IAM::Role"
+        },
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z]*:iam::[0-9]{12}:role/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#InferenceContainerConfig": {
+      "members": {
+        "imageUri": {
+          "target": "com.amazonaws.cleanroomsml#AlgorithmImage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#KmsKeyArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::KMS::Key"
+        },
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z]*:kms:[-a-z0-9]+:[0-9]{12}:key/.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#MetricDefinition": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.cleanroomsml#MetricName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "regex": {
+          "target": "com.amazonaws.cleanroomsml#MetricRegex",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#MetricDefinitionList": {
+      "member": {
+        "target": "com.amazonaws.cleanroomsml#MetricDefinition"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cleanroomsml#MetricName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#MetricRegex": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#NameString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!\\s*$)[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDBFF-\\uDC00\\uDFFF\\t]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#ResourceDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255
+        },
+        "smithy.api#pattern": "^[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDBFF-\\uDC00\\uDFFF\\t\\r\\n]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#TagMap": {
+      "key": {
+        "target": "com.amazonaws.cleanroomsml#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.cleanroomsml#TagValue"
+      }
+    },
+    "com.amazonaws.cleanroomsml#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#TrainingDatasetArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.cleanroomsml#TrainingDataset",
+          "service": "com.amazonaws.cleanroomsml#AWSStarkControlService"
+        },
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z]*:cleanrooms-ml:[-a-z0-9]+:[0-9]{12}:training-dataset/[-a-zA-Z0-9_/.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cleanroomsml#TrainingDatasetStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cleanroomsml#ValidationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

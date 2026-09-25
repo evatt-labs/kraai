@@ -6,7 +6,7 @@
 // checked-in subset and lock.json. Needs the network and, for the schemas,
 // AWS credentials; everything downstream of it needs neither.
 //
-//	go run extract.go [-commit SHA] [-region us-east-1]
+//	go run extract.go [-commit SHA] [-region us-east-1] [-models DIR] [-schemas DIR]
 package main
 
 import (
@@ -67,6 +67,8 @@ func run() error {
 	var (
 		commit = flag.String("commit", "", "api-models-aws commit to read; defaults to the one lock.json records")
 		region = flag.String("region", "us-east-1", "region whose CloudFormation registry to read")
+		local  = flag.String("models", "", "the models/ directory of an api-models-aws checkout at the commit, read instead of fetching")
+		cached = flag.String("schemas", "", "a directory of raw CloudFormation schemas, read instead of calling DescribeType; the one join_main read")
 	)
 	flag.Parse()
 	if *commit == "" {
@@ -110,7 +112,12 @@ func run() error {
 	}
 	sort.Strings(models)
 	for _, model := range models {
-		raw, err := fetch(fmt.Sprintf("https://raw.githubusercontent.com/aws/api-models-aws/%s/models/%s", *commit, model))
+		var raw []byte
+		if *local != "" {
+			raw, err = os.ReadFile(filepath.Join(*local, filepath.FromSlash(model)))
+		} else {
+			raw, err = fetch(fmt.Sprintf("https://raw.githubusercontent.com/aws/api-models-aws/%s/models/%s", *commit, model))
+		}
 		if err != nil {
 			return err
 		}
@@ -126,22 +133,32 @@ func run() error {
 	}
 
 	ctx := context.Background()
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(*region))
-	if err != nil {
-		return err
-	}
-	cf := cloudformation.NewFromConfig(cfg)
-	for _, o := range overrides {
-		described, err := cf.DescribeType(ctx, &cloudformation.DescribeTypeInput{
-			Type: cftypes.RegistryTypeResource, TypeName: aws.String(o.Type),
-		})
+	var cf *cloudformation.Client
+	if *cached == "" {
+		cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(*region))
 		if err != nil {
-			return fmt.Errorf("%s: %w", o.Type, err)
+			return err
 		}
-		if described.Schema == nil {
-			return fmt.Errorf("%s: DescribeType returned no schema", o.Type)
+		cf = cloudformation.NewFromConfig(cfg)
+	}
+	for _, o := range overrides {
+		var raw []byte
+		if *cached != "" {
+			if raw, err = os.ReadFile(filepath.Join(*cached, strings.ReplaceAll(o.Type, "::", "--")+".json")); err != nil {
+				return err
+			}
+		} else {
+			described, err := cf.DescribeType(ctx, &cloudformation.DescribeTypeInput{
+				Type: cftypes.RegistryTypeResource, TypeName: aws.String(o.Type),
+			})
+			if err != nil {
+				return fmt.Errorf("%s: %w", o.Type, err)
+			}
+			if described.Schema == nil {
+				return fmt.Errorf("%s: DescribeType returned no schema", o.Type)
+			}
+			raw = []byte(*described.Schema)
 		}
-		raw := []byte(*described.Schema)
 		pretty, err := canonical(raw)
 		if err != nil {
 			return fmt.Errorf("%s: %w", o.Type, err)
@@ -247,6 +264,14 @@ func subsetModel(raw []byte, operations []string) ([]byte, error) {
 	for k, v := range stripDocs(shapes[service].(map[string]any)) {
 		if k != "operations" && k != "resources" {
 			svc[k] = v
+		}
+	}
+	// Endpoint tests, the decision-diagram form of the rules and IAM
+	// condition keys are large and read by nothing generated from the
+	// subset; the rule set stays, for a model with no endpoint prefix.
+	if traits, ok := svc["traits"].(map[string]any); ok {
+		for _, t := range []string{"smithy.rules#endpointTests", "smithy.rules#endpointBdd", "aws.iam#defineConditionKeys"} {
+			delete(traits, t)
 		}
 	}
 	svc["operations"] = opIDs

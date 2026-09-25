@@ -1,0 +1,41 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SSM::Association
+read:
+  model: ssm/service/2014-11-06/ssm-2014-11-06.json
+  operation: DescribeAssociation
+  identifier:
+    AssociationId: AssociationId
+  response: AssociationDescription
+properties:
+  ApplyOnlyAtCronInterval: ApplyOnlyAtCronInterval
+  AssociationDispatchAssumeRole: AssociationDispatchAssumeRole
+  AssociationId: AssociationId
+  AssociationName: AssociationName
+  AutomationTargetParameterName: AutomationTargetParameterName
+  CalendarNames: CalendarNames
+  ComplianceSeverity: ComplianceSeverity
+  DocumentVersion: DocumentVersion
+  InstanceId: InstanceId
+  MaxConcurrency: MaxConcurrency
+  MaxErrors: MaxErrors
+  Name: Name
+  OutputLocation:
+    member: OutputLocation
+    properties:
+      S3Location:
+        member: S3Location
+        properties:
+          OutputS3BucketName: OutputS3BucketName
+          OutputS3KeyPrefix: OutputS3KeyPrefix
+          OutputS3Region: OutputS3Region
+  Parameters: Parameters
+  ScheduleExpression: ScheduleExpression
+  ScheduleOffset: ScheduleOffset
+  SyncCompliance: SyncCompliance
+  Targets:
+    member: Targets
+    properties:
+      Key: Key
+      Values: Values
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

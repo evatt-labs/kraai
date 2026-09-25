@@ -1,0 +1,21 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::GameLift::Alias
+read:
+  model: gamelift/service/2015-10-01/gamelift-2015-10-01.json
+  operation: DescribeAlias
+  identifier:
+    AliasId: AliasId
+  response: Alias
+properties:
+  AliasArn: AliasArn
+  AliasId: AliasId
+  Description: Description
+  Name: Name
+  RoutingStrategy:
+    member: RoutingStrategy
+    properties:
+      FleetId: FleetId
+      Message: Message
+      Type: Type
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

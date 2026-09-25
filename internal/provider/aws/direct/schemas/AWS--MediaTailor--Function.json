@@ -1,0 +1,253 @@
+{
+  "additionalProperties": false,
+  "createOnlyProperties": [
+    "/properties/FunctionId"
+  ],
+  "definitions": {
+    "CustomOutputConfiguration": {
+      "additionalProperties": false,
+      "description": "Configuration for custom output functions.",
+      "properties": {
+        "Output": {
+          "$ref": "#/definitions/StringMap",
+          "description": "A map of output key-value pairs that define the custom output."
+        },
+        "Runtime": {
+          "$ref": "#/definitions/RuntimeType",
+          "description": "The runtime environment for the function expression language."
+        }
+      },
+      "required": [
+        "Runtime"
+      ],
+      "type": "object"
+    },
+    "FunctionRef": {
+      "additionalProperties": false,
+      "description": "A reference to a function with an optional run condition.",
+      "properties": {
+        "FunctionId": {
+          "description": "The identifier of the function to execute.",
+          "type": "string"
+        },
+        "RunCondition": {
+          "description": "A conditional expression that determines whether this function should execute.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "FunctionType": {
+      "enum": [
+        "HTTP_REQUEST",
+        "CUSTOM_OUTPUT",
+        "SEQUENTIAL_EXECUTOR"
+      ],
+      "type": "string"
+    },
+    "HttpRequestConfiguration": {
+      "additionalProperties": false,
+      "description": "Configuration for HTTP request functions.",
+      "properties": {
+        "Body": {
+          "description": "The body of the HTTP request.",
+          "type": "string"
+        },
+        "Headers": {
+          "$ref": "#/definitions/StringMap",
+          "description": "A map of HTTP headers to include in the request."
+        },
+        "MethodType": {
+          "$ref": "#/definitions/MethodType",
+          "description": "The HTTP method type for the request."
+        },
+        "Output": {
+          "$ref": "#/definitions/StringMap",
+          "description": "A map of output key-value pairs. Keys must start with session., temp., avail., scte., or be a valid adsRequest directive."
+        },
+        "RequestTimeoutMilliseconds": {
+          "description": "The timeout in milliseconds for the HTTP request. Maximum value is 2000.",
+          "type": "integer"
+        },
+        "Runtime": {
+          "$ref": "#/definitions/RuntimeType",
+          "description": "The runtime environment for the function expression language."
+        },
+        "Url": {
+          "description": "The URL endpoint for the HTTP request.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "Runtime",
+        "MethodType",
+        "RequestTimeoutMilliseconds",
+        "Url"
+      ],
+      "type": "object"
+    },
+    "MethodType": {
+      "enum": [
+        "GET",
+        "POST"
+      ],
+      "type": "string"
+    },
+    "RuntimeType": {
+      "enum": [
+        "JSONATA"
+      ],
+      "type": "string"
+    },
+    "SequentialExecutorConfiguration": {
+      "additionalProperties": false,
+      "description": "Configuration for sequential executor functions.",
+      "properties": {
+        "FunctionList": {
+          "description": "The list of functions to execute sequentially.",
+          "insertionOrder": true,
+          "items": {
+            "$ref": "#/definitions/FunctionRef"
+          },
+          "type": "array"
+        },
+        "Output": {
+          "$ref": "#/definitions/StringMap",
+          "description": "A map of output key-value pairs that define the final output from sequential execution."
+        },
+        "Runtime": {
+          "$ref": "#/definitions/RuntimeType",
+          "description": "The runtime environment for the function expression language."
+        },
+        "TimeoutMilliseconds": {
+          "description": "The timeout in milliseconds for the entire sequential execution chain.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Runtime",
+        "FunctionList",
+        "TimeoutMilliseconds"
+      ],
+      "type": "object"
+    },
+    "StringMap": {
+      "additionalProperties": false,
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Tag": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Value",
+        "Key"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Resource Type definition for AWS::MediaTailor::Function",
+  "handlers": {
+    "create": {
+      "permissions": [
+        "mediatailor:PutFunction",
+        "mediatailor:GetFunction",
+        "mediatailor:TagResource"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "mediatailor:DeleteFunction",
+        "mediatailor:GetFunction"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "mediatailor:ListFunctions"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "mediatailor:GetFunction"
+      ]
+    },
+    "update": {
+      "permissions": [
+        "mediatailor:PutFunction",
+        "mediatailor:GetFunction",
+        "mediatailor:TagResource",
+        "mediatailor:UntagResource"
+      ]
+    }
+  },
+  "primaryIdentifier": [
+    "/properties/FunctionId"
+  ],
+  "properties": {
+    "Arn": {
+      "description": "The ARN of the function.",
+      "type": "string"
+    },
+    "CustomOutputConfiguration": {
+      "$ref": "#/definitions/CustomOutputConfiguration"
+    },
+    "Description": {
+      "description": "A description of the function.",
+      "type": "string"
+    },
+    "FunctionId": {
+      "description": "The unique identifier for the function.",
+      "type": "string"
+    },
+    "FunctionType": {
+      "$ref": "#/definitions/FunctionType",
+      "description": "The type of the function. Determines which configuration object is used."
+    },
+    "HttpRequestConfiguration": {
+      "$ref": "#/definitions/HttpRequestConfiguration"
+    },
+    "SequentialExecutorConfiguration": {
+      "$ref": "#/definitions/SequentialExecutorConfiguration"
+    },
+    "Tags": {
+      "description": "The tags to assign to the function resource.",
+      "insertionOrder": false,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "readOnlyProperties": [
+    "/properties/Arn"
+  ],
+  "required": [
+    "FunctionId",
+    "FunctionType"
+  ],
+  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-mediatailor.git",
+  "tagging": {
+    "cloudFormationSystemTags": true,
+    "permissions": [
+      "mediatailor:TagResource",
+      "mediatailor:UntagResource"
+    ],
+    "tagOnCreate": true,
+    "tagProperty": "/properties/Tags",
+    "tagUpdatable": true,
+    "taggable": true
+  },
+  "typeName": "AWS::MediaTailor::Function"
+}

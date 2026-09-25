@@ -1,0 +1,1735 @@
+{
+  "shapes": {
+    "com.amazonaws.ivs#AccessDeniedException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#AmazonInteractiveVideoService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.ivs#GetChannel"
+        },
+        {
+          "target": "com.amazonaws.ivs#GetPlaybackKeyPair"
+        },
+        {
+          "target": "com.amazonaws.ivs#GetPlaybackRestrictionPolicy"
+        },
+        {
+          "target": "com.amazonaws.ivs#GetRecordingConfiguration"
+        },
+        {
+          "target": "com.amazonaws.ivs#GetStreamKey"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "ivs",
+          "cloudFormationName": "IVS",
+          "cloudTrailEventSource": "ivs.amazonaws.com",
+          "sdkId": "ivs"
+        },
+        "aws.auth#sigv4": {
+          "name": "ivs"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "Content-Type",
+            "X-Api-Key",
+            "X-Amz-Content-Sha256",
+            "X-Amz-User-Agent",
+            "amz-sdk-invocation-id",
+            "amz-sdk-request"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-errormessage",
+            "x-amzn-trace-id",
+            "x-amzn-requestid",
+            "x-amz-apigw-id",
+            "date"
+          ]
+        },
+        "smithy.api#title": "Amazon Interactive Video Service",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ivs-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ivs-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://ivs.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://ivs.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-07-14"
+    },
+    "com.amazonaws.ivs#Channel": {
+      "members": {
+        "adConfigurationArn": {
+          "target": "com.amazonaws.ivs#ChannelAdConfigurationArn",
+          "traits": {}
+        },
+        "arn": {
+          "target": "com.amazonaws.ivs#ChannelArn",
+          "traits": {}
+        },
+        "authorized": {
+          "target": "com.amazonaws.ivs#IsAuthorized",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "containerFormat": {
+          "target": "com.amazonaws.ivs#ContainerFormat",
+          "traits": {}
+        },
+        "ingestEndpoint": {
+          "target": "com.amazonaws.ivs#IngestEndpoint",
+          "traits": {}
+        },
+        "insecureIngest": {
+          "target": "com.amazonaws.ivs#InsecureIngest",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "latencyMode": {
+          "target": "com.amazonaws.ivs#ChannelLatencyMode",
+          "traits": {}
+        },
+        "multitrackInputConfiguration": {
+          "target": "com.amazonaws.ivs#MultitrackInputConfiguration",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.ivs#ChannelName",
+          "traits": {}
+        },
+        "playbackRestrictionPolicyArn": {
+          "target": "com.amazonaws.ivs#ChannelPlaybackRestrictionPolicyArn",
+          "traits": {}
+        },
+        "playbackUrl": {
+          "target": "com.amazonaws.ivs#PlaybackURL",
+          "traits": {}
+        },
+        "preset": {
+          "target": "com.amazonaws.ivs#TranscodePreset",
+          "traits": {}
+        },
+        "recordingConfigurationArn": {
+          "target": "com.amazonaws.ivs#ChannelRecordingConfigurationArn",
+          "traits": {}
+        },
+        "srt": {
+          "target": "com.amazonaws.ivs#Srt",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ivs#Tags",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.ivs#ChannelType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#ChannelAdConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^^$|^arn:aws:ivs:[a-z0-9-]+:[0-9]+:ad-configuration/[a-zA-Z0-9-]+$$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ChannelArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:channel/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ChannelLatencyMode": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "NormalLatency",
+            "value": "NORMAL"
+          },
+          {
+            "name": "LowLatency",
+            "value": "LOW"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ChannelName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ChannelPlaybackRestrictionPolicyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^^$|^arn:aws:ivs:[a-z0-9-]+:[0-9]+:playback-restriction-policy/[a-zA-Z0-9-]+$$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ChannelRecordingConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^^$|^arn:aws:ivs:[a-z0-9-]+:[0-9]+:recording-configuration/[a-zA-Z0-9-]+$$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ChannelType": {
+      "members": {
+        "AdvancedHDChannelType": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADVANCED_HD"
+          }
+        },
+        "AdvancedSDChannelType": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADVANCED_SD"
+          }
+        },
+        "BasicChannelType": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BASIC"
+          }
+        },
+        "StandardChannelType": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ivs#ContainerFormat": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "TS",
+            "value": "TS"
+          },
+          {
+            "name": "FragmentedMP4",
+            "value": "FRAGMENTED_MP4"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#DestinationConfiguration": {
+      "members": {
+        "s3": {
+          "target": "com.amazonaws.ivs#S3DestinationConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetChannel": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivs#GetChannelRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivs#GetChannelResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetChannel"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivs#GetChannelRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#ChannelArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetChannelResponse": {
+      "members": {
+        "channel": {
+          "target": "com.amazonaws.ivs#Channel",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetPlaybackKeyPair": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivs#GetPlaybackKeyPairRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivs#GetPlaybackKeyPairResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetPlaybackKeyPair"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivs#GetPlaybackKeyPairRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#PlaybackKeyPairArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetPlaybackKeyPairResponse": {
+      "members": {
+        "keyPair": {
+          "target": "com.amazonaws.ivs#PlaybackKeyPair",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetPlaybackRestrictionPolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivs#PendingVerification"
+        },
+        {
+          "target": "com.amazonaws.ivs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivs#GetPlaybackRestrictionPolicyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivs#GetPlaybackRestrictionPolicyResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetPlaybackRestrictionPolicy"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivs#GetPlaybackRestrictionPolicyRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetPlaybackRestrictionPolicyResponse": {
+      "members": {
+        "playbackRestrictionPolicy": {
+          "target": "com.amazonaws.ivs#PlaybackRestrictionPolicy",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetRecordingConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivs#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivs#GetRecordingConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivs#GetRecordingConfigurationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetRecordingConfiguration"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivs#GetRecordingConfigurationRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#RecordingConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetRecordingConfigurationResponse": {
+      "members": {
+        "recordingConfiguration": {
+          "target": "com.amazonaws.ivs#RecordingConfiguration",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetStreamKey": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ivs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ivs#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ivs#GetStreamKeyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ivs#GetStreamKeyResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetStreamKey"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ivs#GetStreamKeyRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#StreamKeyArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#GetStreamKeyResponse": {
+      "members": {
+        "streamKey": {
+          "target": "com.amazonaws.ivs#StreamKey",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#IngestEndpoint": {
+      "type": "string"
+    },
+    "com.amazonaws.ivs#InsecureIngest": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ivs#InternalServerException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#IsAuthorized": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ivs#IsMultitrackInputEnabled": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.ivs#MultitrackInputConfiguration": {
+      "members": {
+        "enabled": {
+          "target": "com.amazonaws.ivs#IsMultitrackInputEnabled",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "maximumResolution": {
+          "target": "com.amazonaws.ivs#MultitrackMaximumResolution",
+          "traits": {}
+        },
+        "policy": {
+          "target": "com.amazonaws.ivs#MultitrackPolicy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#MultitrackMaximumResolution": {
+      "members": {
+        "FULL_HD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FULL_HD"
+          }
+        },
+        "HD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HD"
+          }
+        },
+        "SD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ivs#MultitrackPolicy": {
+      "members": {
+        "ALLOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALLOW"
+          }
+        },
+        "REQUIRE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REQUIRE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ivs#PendingVerification": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#PlaybackKeyPair": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#PlaybackKeyPairArn",
+          "traits": {}
+        },
+        "fingerprint": {
+          "target": "com.amazonaws.ivs#PlaybackKeyPairFingerprint",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.ivs#PlaybackKeyPairName",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ivs#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#PlaybackKeyPairArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:playback-key/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#PlaybackKeyPairFingerprint": {
+      "type": "string"
+    },
+    "com.amazonaws.ivs#PlaybackKeyPairName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicy": {
+      "members": {
+        "allowedCountries": {
+          "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedCountryList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "allowedOrigins": {
+          "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedOriginList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "arn": {
+          "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "enableStrictOriginEnforcement": {
+          "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyEnableStrictOriginEnforcement",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyName",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ivs#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedCountry": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2,
+          "min": 2
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedCountryList": {
+      "member": {
+        "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedCountry"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedOrigin": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedOriginList": {
+      "member": {
+        "target": "com.amazonaws.ivs#PlaybackRestrictionPolicyAllowedOrigin"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:playback-restriction-policy/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicyEnableStrictOriginEnforcement": {
+      "type": "boolean"
+    },
+    "com.amazonaws.ivs#PlaybackRestrictionPolicyName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#PlaybackURL": {
+      "type": "string"
+    },
+    "com.amazonaws.ivs#RecordingConfiguration": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#RecordingConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "destinationConfiguration": {
+          "target": "com.amazonaws.ivs#DestinationConfiguration",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.ivs#RecordingConfigurationName",
+          "traits": {}
+        },
+        "recordingReconnectWindowSeconds": {
+          "target": "com.amazonaws.ivs#RecordingReconnectWindowSeconds",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "renditionConfiguration": {
+          "target": "com.amazonaws.ivs#RenditionConfiguration",
+          "traits": {}
+        },
+        "state": {
+          "target": "com.amazonaws.ivs#RecordingConfigurationState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.ivs#Tags",
+          "traits": {}
+        },
+        "thumbnailConfiguration": {
+          "target": "com.amazonaws.ivs#ThumbnailConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#RecordingConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:recording-configuration/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#RecordingConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#RecordingConfigurationState": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "Creating",
+            "value": "CREATING"
+          },
+          {
+            "name": "CreateFailed",
+            "value": "CREATE_FAILED"
+          },
+          {
+            "name": "Active",
+            "value": "ACTIVE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#RecordingMode": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "Disabled",
+            "value": "DISABLED"
+          },
+          {
+            "name": "Interval",
+            "value": "INTERVAL"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#RecordingReconnectWindowSeconds": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 300,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ivs#RenditionConfiguration": {
+      "members": {
+        "renditionSelection": {
+          "target": "com.amazonaws.ivs#RenditionConfigurationRenditionSelection",
+          "traits": {}
+        },
+        "renditions": {
+          "target": "com.amazonaws.ivs#RenditionConfigurationRenditionList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#RenditionConfigurationRendition": {
+      "members": {
+        "FULL_HD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FULL_HD"
+          }
+        },
+        "HD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HD"
+          }
+        },
+        "LOWEST_RESOLUTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LOWEST_RESOLUTION"
+          }
+        },
+        "SD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ivs#RenditionConfigurationRenditionList": {
+      "member": {
+        "target": "com.amazonaws.ivs#RenditionConfigurationRendition"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ivs#RenditionConfigurationRenditionSelection": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ALL",
+            "value": "ALL"
+          },
+          {
+            "name": "NONE",
+            "value": "NONE"
+          },
+          {
+            "name": "CUSTOM",
+            "value": "CUSTOM"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ResourceNotFoundException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#S3DestinationBucketName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-z0-9-.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#S3DestinationConfiguration": {
+      "members": {
+        "bucketName": {
+          "target": "com.amazonaws.ivs#S3DestinationBucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#Srt": {
+      "members": {
+        "endpoint": {
+          "target": "com.amazonaws.ivs#SrtEndpoint",
+          "traits": {}
+        },
+        "passphrase": {
+          "target": "com.amazonaws.ivs#SrtPassphrase",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#SrtEndpoint": {
+      "type": "string"
+    },
+    "com.amazonaws.ivs#SrtPassphrase": {
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#StreamKey": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.ivs#StreamKeyArn",
+          "traits": {}
+        },
+        "channelArn": {
+          "target": "com.amazonaws.ivs#ChannelArn",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ivs#Tags",
+          "traits": {}
+        },
+        "value": {
+          "target": "com.amazonaws.ivs#StreamKeyValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#StreamKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws:ivs:[a-z0-9-]+:[0-9]+:stream-key/[a-zA-Z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#StreamKeyValue": {
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#String": {
+      "type": "string"
+    },
+    "com.amazonaws.ivs#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#Tags": {
+      "key": {
+        "target": "com.amazonaws.ivs#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.ivs#TagValue"
+      }
+    },
+    "com.amazonaws.ivs#TargetIntervalSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 60,
+          "min": 1
+        }
+      },
+      "type": "long"
+    },
+    "com.amazonaws.ivs#ThumbnailConfiguration": {
+      "members": {
+        "recordingMode": {
+          "target": "com.amazonaws.ivs#RecordingMode",
+          "traits": {}
+        },
+        "resolution": {
+          "target": "com.amazonaws.ivs#ThumbnailConfigurationResolution",
+          "traits": {}
+        },
+        "storage": {
+          "target": "com.amazonaws.ivs#ThumbnailConfigurationStorageList",
+          "traits": {}
+        },
+        "targetIntervalSeconds": {
+          "target": "com.amazonaws.ivs#TargetIntervalSeconds",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#ThumbnailConfigurationResolution": {
+      "members": {
+        "FULL_HD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FULL_HD"
+          }
+        },
+        "HD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HD"
+          }
+        },
+        "LOWEST_RESOLUTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LOWEST_RESOLUTION"
+          }
+        },
+        "SD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ivs#ThumbnailConfigurationStorage": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "SEQUENTIAL",
+            "value": "SEQUENTIAL"
+          },
+          {
+            "name": "LATEST",
+            "value": "LATEST"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ivs#ThumbnailConfigurationStorageList": {
+      "member": {
+        "target": "com.amazonaws.ivs#ThumbnailConfigurationStorage"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ivs#TranscodePreset": {
+      "members": {
+        "ConstrainedBandwidthTranscodePreset": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONSTRAINED_BANDWIDTH_DELIVERY"
+          }
+        },
+        "HigherBandwidthTranscodePreset": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HIGHER_BANDWIDTH_DELIVERY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ivs#ValidationException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#errorMessage": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

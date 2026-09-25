@@ -4,6 +4,15 @@
       "operations": [
         {
           "target": "com.amazonaws.apprunner#DescribeAutoScalingConfiguration"
+        },
+        {
+          "target": "com.amazonaws.apprunner#DescribeObservabilityConfiguration"
+        },
+        {
+          "target": "com.amazonaws.apprunner#DescribeVpcConnector"
+        },
+        {
+          "target": "com.amazonaws.apprunner#DescribeVpcIngressConnection"
         }
       ],
       "traits": {
@@ -21,194 +30,6 @@
         "smithy.api#title": "AWS App Runner",
         "smithy.api#xmlNamespace": {
           "uri": "http://apprunner.amazonaws.com/doc/2020-05-15/"
-        },
-        "smithy.rules#endpointBdd": {
-          "conditions": [
-            {
-              "argv": [
-                {
-                  "ref": "Endpoint"
-                }
-              ],
-              "fn": "isSet"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "Region"
-                }
-              ],
-              "fn": "isSet"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "Region"
-                }
-              ],
-              "assign": "PartitionResult",
-              "fn": "aws.partition"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "UseFIPS"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "UseDualStack"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "argv": [
-                    {
-                      "ref": "PartitionResult"
-                    },
-                    "supportsDualStack"
-                  ],
-                  "fn": "getAttr"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "argv": [
-                    {
-                      "ref": "PartitionResult"
-                    },
-                    "supportsFIPS"
-                  ],
-                  "fn": "getAttr"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            }
-          ],
-          "nodeCount": 13,
-          "nodes": "/////wAAAAH/////AAAAAAAAAAwAAAADAAAAAQAAAAQF9eELAAAAAgAAAAUF9eELAAAAAwAAAAgAAAAGAAAABAAAAAcF9eEKAAAABQX14QgF9eEJAAAABAAAAAoAAAAJAAAABgX14QYF9eEHAAAABQAAAAsF9eEFAAAABgX14QQF9eEFAAAAAwX14QEAAAANAAAABAX14QIF9eED",
-          "parameters": {
-            "Endpoint": {
-              "builtIn": "SDK::Endpoint",
-              "documentation": "Override the endpoint used to send this request",
-              "required": false,
-              "type": "string"
-            },
-            "Region": {
-              "builtIn": "AWS::Region",
-              "documentation": "The AWS region used to dispatch the request.",
-              "required": false,
-              "type": "string"
-            },
-            "UseDualStack": {
-              "builtIn": "AWS::UseDualStack",
-              "default": false,
-              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
-              "required": true,
-              "type": "boolean"
-            },
-            "UseFIPS": {
-              "builtIn": "AWS::UseFIPS",
-              "default": false,
-              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
-              "required": true,
-              "type": "boolean"
-            }
-          },
-          "results": [
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": {
-                  "ref": "Endpoint"
-                }
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://apprunner-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://apprunner-fips.{Region}.{PartitionResult#dnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "FIPS is enabled but this partition does not support FIPS",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://apprunner.{Region}.{PartitionResult#dualStackDnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "DualStack is enabled but this partition does not support DualStack",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://apprunner.{Region}.{PartitionResult#dnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: Missing Region",
-              "type": "error"
-            }
-          ],
-          "root": 2,
-          "version": "1.1"
         },
         "smithy.rules#endpointRuleSet": {
           "parameters": {
@@ -523,354 +344,6 @@
             }
           ],
           "version": "1.0"
-        },
-        "smithy.rules#endpointTests": {
-          "testCases": [
-            {
-              "documentation": "For region ap-northeast-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.ap-northeast-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-northeast-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region eu-west-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.eu-west-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "eu-west-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-2 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-east-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-2",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-east-2 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-east-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-2",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-west-2 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-west-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-west-2",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-west-2 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-west-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-west-2",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.cn-north-1.api.amazonwebservices.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.cn-north-1.amazonaws.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.cn-north-1.api.amazonwebservices.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.cn-north-1.amazonaws.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-gov-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-gov-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-gov-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-gov-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-iso-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-iso-east-1.c2s.ic.gov"
-                }
-              },
-              "params": {
-                "Region": "us-iso-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-iso-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-iso-east-1.c2s.ic.gov"
-                }
-              },
-              "params": {
-                "Region": "us-iso-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-isob-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner-fips.us-isob-east-1.sc2s.sgov.gov"
-                }
-              },
-              "params": {
-                "Region": "us-isob-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-isob-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://apprunner.us-isob-east-1.sc2s.sgov.gov"
-                }
-              },
-              "params": {
-                "Region": "us-isob-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with region set and fips disabled and dualstack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://example.com"
-                }
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with region not set and fips disabled and dualstack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://example.com"
-                }
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with fips enabled and dualstack disabled",
-              "expect": {
-                "error": "Invalid Configuration: FIPS and custom endpoint are not supported"
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For custom endpoint with fips disabled and dualstack enabled",
-              "expect": {
-                "error": "Invalid Configuration: Dualstack and custom endpoint are not supported"
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "Missing region",
-              "expect": {
-                "error": "Invalid Configuration: Missing Region"
-              }
-            }
-          ],
-          "version": "1.0"
         }
       },
       "type": "service",
@@ -970,6 +443,22 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.apprunner#Boolean": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.apprunner#CustomerAccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^[0-9]{12}$"
+      },
+      "type": "string"
+    },
     "com.amazonaws.apprunner#DescribeAutoScalingConfiguration": {
       "errors": [
         {
@@ -1019,6 +508,163 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.apprunner#DescribeObservabilityConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apprunner#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.apprunner#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.apprunner#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apprunner#DescribeObservabilityConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.apprunner#DescribeObservabilityConfigurationResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.apprunner#DescribeObservabilityConfigurationRequest": {
+      "members": {
+        "ObservabilityConfigurationArn": {
+          "target": "com.amazonaws.apprunner#AppRunnerResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#DescribeObservabilityConfigurationResponse": {
+      "members": {
+        "ObservabilityConfiguration": {
+          "target": "com.amazonaws.apprunner#ObservabilityConfiguration",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#DescribeVpcConnector": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apprunner#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.apprunner#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.apprunner#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apprunner#DescribeVpcConnectorRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.apprunner#DescribeVpcConnectorResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.apprunner#DescribeVpcConnectorRequest": {
+      "members": {
+        "VpcConnectorArn": {
+          "target": "com.amazonaws.apprunner#AppRunnerResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#DescribeVpcConnectorResponse": {
+      "members": {
+        "VpcConnector": {
+          "target": "com.amazonaws.apprunner#VpcConnector",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#DescribeVpcIngressConnection": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apprunner#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.apprunner#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.apprunner#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apprunner#DescribeVpcIngressConnectionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.apprunner#DescribeVpcIngressConnectionResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.apprunner#DescribeVpcIngressConnectionRequest": {
+      "members": {
+        "VpcIngressConnectionArn": {
+          "target": "com.amazonaws.apprunner#AppRunnerResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#DescribeVpcIngressConnectionResponse": {
+      "members": {
+        "VpcIngressConnection": {
+          "target": "com.amazonaws.apprunner#VpcIngressConnection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#DomainName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9*.-]{1,255}$"
+      },
+      "type": "string"
+    },
     "com.amazonaws.apprunner#ErrorMessage": {
       "traits": {
         "smithy.api#length": {
@@ -1030,6 +676,26 @@
     },
     "com.amazonaws.apprunner#HasAssociatedService": {
       "type": "boolean"
+    },
+    "com.amazonaws.apprunner#IngressVpcConfiguration": {
+      "members": {
+        "VpcEndpointId": {
+          "target": "com.amazonaws.apprunner#String",
+          "traits": {}
+        },
+        "VpcId": {
+          "target": "com.amazonaws.apprunner#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#Integer": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
     },
     "com.amazonaws.apprunner#InternalServiceErrorException": {
       "members": {
@@ -1078,6 +744,75 @@
     "com.amazonaws.apprunner#MinSize": {
       "type": "integer"
     },
+    "com.amazonaws.apprunner#ObservabilityConfiguration": {
+      "members": {
+        "CreatedAt": {
+          "target": "com.amazonaws.apprunner#Timestamp",
+          "traits": {}
+        },
+        "DeletedAt": {
+          "target": "com.amazonaws.apprunner#Timestamp",
+          "traits": {}
+        },
+        "Latest": {
+          "target": "com.amazonaws.apprunner#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "ObservabilityConfigurationArn": {
+          "target": "com.amazonaws.apprunner#AppRunnerResourceArn",
+          "traits": {}
+        },
+        "ObservabilityConfigurationName": {
+          "target": "com.amazonaws.apprunner#ObservabilityConfigurationName",
+          "traits": {}
+        },
+        "ObservabilityConfigurationRevision": {
+          "target": "com.amazonaws.apprunner#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.apprunner#ObservabilityConfigurationStatus",
+          "traits": {}
+        },
+        "TraceConfiguration": {
+          "target": "com.amazonaws.apprunner#TraceConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#ObservabilityConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 32,
+          "min": 4
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9][A-Za-z0-9\\-_]{3,31}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.apprunner#ObservabilityConfigurationStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "INACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INACTIVE"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.apprunner#ResourceNotFoundException": {
       "members": {
         "Message": {
@@ -1094,8 +829,219 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.apprunner#String": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 51200,
+          "min": 0
+        },
+        "smithy.api#pattern": ".*"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.apprunner#StringList": {
+      "member": {
+        "target": "com.amazonaws.apprunner#String"
+      },
+      "type": "list"
+    },
     "com.amazonaws.apprunner#Timestamp": {
       "type": "timestamp"
+    },
+    "com.amazonaws.apprunner#TraceConfiguration": {
+      "members": {
+        "Vendor": {
+          "target": "com.amazonaws.apprunner#TracingVendor",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#TracingVendor": {
+      "members": {
+        "AWSXRAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWSXRAY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.apprunner#VpcConnector": {
+      "members": {
+        "CreatedAt": {
+          "target": "com.amazonaws.apprunner#Timestamp",
+          "traits": {}
+        },
+        "DeletedAt": {
+          "target": "com.amazonaws.apprunner#Timestamp",
+          "traits": {}
+        },
+        "SecurityGroups": {
+          "target": "com.amazonaws.apprunner#StringList",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.apprunner#VpcConnectorStatus",
+          "traits": {}
+        },
+        "Subnets": {
+          "target": "com.amazonaws.apprunner#StringList",
+          "traits": {}
+        },
+        "VpcConnectorArn": {
+          "target": "com.amazonaws.apprunner#AppRunnerResourceArn",
+          "traits": {}
+        },
+        "VpcConnectorName": {
+          "target": "com.amazonaws.apprunner#VpcConnectorName",
+          "traits": {}
+        },
+        "VpcConnectorRevision": {
+          "target": "com.amazonaws.apprunner#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#VpcConnectorName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 4
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9][A-Za-z0-9\\-_]{3,39}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.apprunner#VpcConnectorStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "INACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INACTIVE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.apprunner#VpcIngressConnection": {
+      "members": {
+        "AccountId": {
+          "target": "com.amazonaws.apprunner#CustomerAccountId",
+          "traits": {}
+        },
+        "CreatedAt": {
+          "target": "com.amazonaws.apprunner#Timestamp",
+          "traits": {}
+        },
+        "DeletedAt": {
+          "target": "com.amazonaws.apprunner#Timestamp",
+          "traits": {}
+        },
+        "DomainName": {
+          "target": "com.amazonaws.apprunner#DomainName",
+          "traits": {}
+        },
+        "IngressVpcConfiguration": {
+          "target": "com.amazonaws.apprunner#IngressVpcConfiguration",
+          "traits": {}
+        },
+        "ServiceArn": {
+          "target": "com.amazonaws.apprunner#AppRunnerResourceArn",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.apprunner#VpcIngressConnectionStatus",
+          "traits": {}
+        },
+        "VpcIngressConnectionArn": {
+          "target": "com.amazonaws.apprunner#AppRunnerResourceArn",
+          "traits": {}
+        },
+        "VpcIngressConnectionName": {
+          "target": "com.amazonaws.apprunner#VpcIngressConnectionName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#VpcIngressConnectionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 4
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9][A-Za-z0-9\\-_]{3,39}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.apprunner#VpcIngressConnectionStatus": {
+      "members": {
+        "AVAILABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AVAILABLE"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "FAILED_CREATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED_CREATION"
+          }
+        },
+        "FAILED_DELETION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED_DELETION"
+          }
+        },
+        "FAILED_UPDATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED_UPDATE"
+          }
+        },
+        "PENDING_CREATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_CREATION"
+          }
+        },
+        "PENDING_DELETION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_DELETION"
+          }
+        },
+        "PENDING_UPDATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_UPDATE"
+          }
+        }
+      },
+      "type": "enum"
     }
   },
   "smithy": "2.0"

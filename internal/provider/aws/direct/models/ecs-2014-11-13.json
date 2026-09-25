@@ -16,6 +16,9 @@
     "com.amazonaws.ecs#AmazonEC2ContainerServiceV20141113": {
       "operations": [
         {
+          "target": "com.amazonaws.ecs#DescribeDaemonTaskDefinition"
+        },
+        {
           "target": "com.amazonaws.ecs#DescribeTaskDefinition"
         },
         {
@@ -35,158 +38,6 @@
         "aws.auth#sigv4": {
           "name": "ecs"
         },
-        "aws.iam#defineConditionKeys": {
-          "aws:RequestTag/${TagKey}": {
-            "documentation": "Filters access by the tags that are passed in the request",
-            "externalDocumentation": "${DocHomeURL}IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-requesttag",
-            "type": "String"
-          },
-          "aws:ResourceTag/${TagKey}": {
-            "documentation": "Filters access by the tag key-value pairs attached to the resource",
-            "externalDocumentation": "${DocHomeURL}IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-resourcetag",
-            "type": "String"
-          },
-          "aws:TagKeys": {
-            "documentation": "Filters access by the tag keys that are passed in the request",
-            "externalDocumentation": "${DocHomeURL}IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-tagkeys",
-            "type": "ArrayOfString"
-          },
-          "ecs:CreateAction": {
-            "documentation": "Filters access by the name of a resource-creating API action",
-            "externalDocumentation": "${DocHomeURL}IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-createaction",
-            "type": "String"
-          },
-          "ecs:ResourceTag/${TagKey}": {
-            "documentation": "Filters access by the tag key-value pairs attached to the resource",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies",
-            "type": "String"
-          },
-          "ecs:account-setting": {
-            "documentation": "Filters access by the Amazon ECS account setting name",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:auto-assign-public-ip": {
-            "documentation": "Filters access by the public IP assignment configuration of your Amazon ECS task or Amazon ECS service that uses awsvpc network mode",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "Bool"
-          },
-          "ecs:capacity-provider": {
-            "documentation": "Filters access by the ARN of an Amazon ECS capacity provider",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ArrayOfARN"
-          },
-          "ecs:cluster": {
-            "documentation": "Filters access by the ARN of an Amazon ECS cluster",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:compute-compatibility": {
-            "documentation": "Filters access by the required compatibilities field provided in the request",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ArrayOfString"
-          },
-          "ecs:container-instances": {
-            "documentation": "Filters access by the ARN of an Amazon ECS container instance",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:container-name": {
-            "documentation": "Filters access by the name of an Amazon ECS container which is defined in the ECS task definition",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:daemon": {
-            "documentation": "Filters access by the ARN of an Amazon ECS daemon",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:daemon-task-definition": {
-            "documentation": "Filters access by the ARN of an Amazon ECS daemon task definition",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:enable-ebs-volumes": {
-            "documentation": "Filters access by the Amazon ECS managed Amazon EBS volume capability of your ECS task or service",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:enable-ecs-managed-tags": {
-            "documentation": "Filters access by the enableECSManagedTags configuration of your Amazon ECS task or Amazon ECS service",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "Bool"
-          },
-          "ecs:enable-execute-command": {
-            "documentation": "Filters access by the execute-command capability of your Amazon ECS task or Amazon ECS service",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:enable-service-connect": {
-            "documentation": "Filters access by the enable field value in the Service Connect configuration",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:enable-vpc-lattice": {
-            "documentation": "Filters access by the VPC lattice capability of your Amazon ECS service",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:fargate-ephemeral-storage-kms-key": {
-            "documentation": "Filters access by the AWS KMS key id provided in the request",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:instance-metadata-tags-propagation": {
-            "documentation": "Filters access by the instance metadata tags propagation setting of your Amazon ECS capacity provider",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "Bool"
-          },
-          "ecs:namespace": {
-            "documentation": "Filters access by the ARN of AWS Cloud Map namespace which is defined in the Service Connect Configuration",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:privileged": {
-            "documentation": "Filters access by the privileged field provided in the request",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:propagate-tags": {
-            "documentation": "Filters access by the tag propagation configuration of your Amazon ECS task or Amazon ECS service",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "String"
-          },
-          "ecs:service": {
-            "documentation": "Filters access by the ARN of an Amazon ECS service",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:subnet": {
-            "documentation": "Filters access by the subnet configuration of your Amazon ECS task or Amazon ECS service that uses awsvpc network mode",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ArrayOfString"
-          },
-          "ecs:task": {
-            "documentation": "Filters access by the ARN of an Amazon ECS task",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:task-cpu": {
-            "documentation": "Filters access by the task cpu, as an integer with 1024 = 1 vCPU, provided in the request",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "Numeric"
-          },
-          "ecs:task-definition": {
-            "documentation": "Filters access by the ARN of an Amazon ECS task definition",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "ARN"
-          },
-          "ecs:task-memory": {
-            "documentation": "Filters access by the task memory, as an integer representing MiB, provided in the request",
-            "relativeDocumentation": "security_iam_service-with-iam.html#security_iam_service-with-iam-id-based-policies-conditionkeys",
-            "type": "Numeric"
-          }
-        },
         "aws.iam#disableConditionKeyInference": {},
         "aws.iam#supportedPrincipalTypes": [
           "Root",
@@ -198,194 +49,6 @@
         "smithy.api#title": "Amazon EC2 Container Service",
         "smithy.api#xmlNamespace": {
           "uri": "http://ecs.amazonaws.com/doc/2014-11-13/"
-        },
-        "smithy.rules#endpointBdd": {
-          "conditions": [
-            {
-              "argv": [
-                {
-                  "ref": "Endpoint"
-                }
-              ],
-              "fn": "isSet"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "Region"
-                }
-              ],
-              "fn": "isSet"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "Region"
-                }
-              ],
-              "assign": "PartitionResult",
-              "fn": "aws.partition"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "UseFIPS"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "UseDualStack"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "argv": [
-                    {
-                      "ref": "PartitionResult"
-                    },
-                    "supportsDualStack"
-                  ],
-                  "fn": "getAttr"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "argv": [
-                    {
-                      "ref": "PartitionResult"
-                    },
-                    "supportsFIPS"
-                  ],
-                  "fn": "getAttr"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            }
-          ],
-          "nodeCount": 13,
-          "nodes": "/////wAAAAH/////AAAAAAAAAAwAAAADAAAAAQAAAAQF9eELAAAAAgAAAAUF9eELAAAAAwAAAAgAAAAGAAAABAAAAAcF9eEKAAAABQX14QgF9eEJAAAABAAAAAoAAAAJAAAABgX14QYF9eEHAAAABQAAAAsF9eEFAAAABgX14QQF9eEFAAAAAwX14QEAAAANAAAABAX14QIF9eED",
-          "parameters": {
-            "Endpoint": {
-              "builtIn": "SDK::Endpoint",
-              "documentation": "Override the endpoint used to send this request",
-              "required": false,
-              "type": "string"
-            },
-            "Region": {
-              "builtIn": "AWS::Region",
-              "documentation": "The AWS region used to dispatch the request.",
-              "required": false,
-              "type": "string"
-            },
-            "UseDualStack": {
-              "builtIn": "AWS::UseDualStack",
-              "default": false,
-              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
-              "required": true,
-              "type": "boolean"
-            },
-            "UseFIPS": {
-              "builtIn": "AWS::UseFIPS",
-              "default": false,
-              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
-              "required": true,
-              "type": "boolean"
-            }
-          },
-          "results": [
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": {
-                  "ref": "Endpoint"
-                }
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://ecs-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://ecs-fips.{Region}.{PartitionResult#dnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "FIPS is enabled but this partition does not support FIPS",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://ecs.{Region}.{PartitionResult#dualStackDnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "DualStack is enabled but this partition does not support DualStack",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://ecs.{Region}.{PartitionResult#dnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: Missing Region",
-              "type": "error"
-            }
-          ],
-          "root": 2,
-          "version": "1.1"
         },
         "smithy.rules#endpointRuleSet": {
           "parameters": {
@@ -697,640 +360,6 @@
               "conditions": [],
               "error": "Invalid Configuration: Missing Region",
               "type": "error"
-            }
-          ],
-          "version": "1.0"
-        },
-        "smithy.rules#endpointTests": {
-          "testCases": [
-            {
-              "documentation": "For region af-south-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.af-south-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "af-south-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-northeast-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-northeast-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-northeast-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-northeast-2 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-northeast-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-northeast-2",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-northeast-3 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-northeast-3.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-northeast-3",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-south-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-south-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-south-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-southeast-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-southeast-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-southeast-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-southeast-2 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-southeast-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-southeast-2",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ap-southeast-3 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ap-southeast-3.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ap-southeast-3",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region ca-central-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.ca-central-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "ca-central-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region eu-central-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.eu-central-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "eu-central-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region eu-north-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.eu-north-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "eu-north-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region eu-south-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.eu-south-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "eu-south-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region eu-west-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.eu-west-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "eu-west-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region eu-west-2 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.eu-west-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "eu-west-2",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region eu-west-3 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.eu-west-3.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "eu-west-3",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region me-south-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.me-south-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "me-south-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region sa-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.sa-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "sa-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-2 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-east-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-2",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-east-2 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-east-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-2",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-west-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-west-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-west-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-west-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-west-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-west-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-west-2 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-west-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-west-2",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-west-2 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-west-2.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-west-2",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.cn-north-1.amazonaws.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region cn-northwest-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.cn-northwest-1.amazonaws.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-northwest-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.cn-north-1.api.amazonwebservices.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.cn-north-1.amazonaws.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.cn-north-1.api.amazonwebservices.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-gov-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-gov-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-gov-west-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-gov-west-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-west-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-gov-west-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-gov-west-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-west-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-gov-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-gov-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-iso-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-iso-east-1.c2s.ic.gov"
-                }
-              },
-              "params": {
-                "Region": "us-iso-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-iso-west-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-iso-west-1.c2s.ic.gov"
-                }
-              },
-              "params": {
-                "Region": "us-iso-west-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-iso-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-iso-east-1.c2s.ic.gov"
-                }
-              },
-              "params": {
-                "Region": "us-iso-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-isob-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs.us-isob-east-1.sc2s.sgov.gov"
-                }
-              },
-              "params": {
-                "Region": "us-isob-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-isob-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://ecs-fips.us-isob-east-1.sc2s.sgov.gov"
-                }
-              },
-              "params": {
-                "Region": "us-isob-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For custom endpoint with region set and fips disabled and dualstack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://example.com"
-                }
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with region not set and fips disabled and dualstack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://example.com"
-                }
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with fips enabled and dualstack disabled",
-              "expect": {
-                "error": "Invalid Configuration: FIPS and custom endpoint are not supported"
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For custom endpoint with fips disabled and dualstack enabled",
-              "expect": {
-                "error": "Invalid Configuration: Dualstack and custom endpoint are not supported"
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "Missing region",
-              "expect": {
-                "error": "Invalid Configuration: Missing Region"
-              }
             }
           ],
           "version": "1.0"
@@ -1709,6 +738,423 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DaemonContainerDefinition": {
+      "members": {
+        "command": {
+          "target": "com.amazonaws.ecs#StringList",
+          "traits": {}
+        },
+        "cpu": {
+          "target": "com.amazonaws.ecs#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "dependsOn": {
+          "target": "com.amazonaws.ecs#ContainerDependencies",
+          "traits": {}
+        },
+        "entryPoint": {
+          "target": "com.amazonaws.ecs#StringList",
+          "traits": {}
+        },
+        "environment": {
+          "target": "com.amazonaws.ecs#EnvironmentVariables",
+          "traits": {}
+        },
+        "environmentFiles": {
+          "target": "com.amazonaws.ecs#EnvironmentFiles",
+          "traits": {}
+        },
+        "essential": {
+          "target": "com.amazonaws.ecs#BoxedBoolean",
+          "traits": {}
+        },
+        "firelensConfiguration": {
+          "target": "com.amazonaws.ecs#FirelensConfiguration",
+          "traits": {}
+        },
+        "healthCheck": {
+          "target": "com.amazonaws.ecs#HealthCheck",
+          "traits": {}
+        },
+        "image": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "interactive": {
+          "target": "com.amazonaws.ecs#BoxedBoolean",
+          "traits": {}
+        },
+        "linuxParameters": {
+          "target": "com.amazonaws.ecs#DaemonLinuxParameters",
+          "traits": {}
+        },
+        "logConfiguration": {
+          "target": "com.amazonaws.ecs#LogConfiguration",
+          "traits": {}
+        },
+        "memory": {
+          "target": "com.amazonaws.ecs#BoxedInteger",
+          "traits": {}
+        },
+        "memoryReservation": {
+          "target": "com.amazonaws.ecs#BoxedInteger",
+          "traits": {}
+        },
+        "mountPoints": {
+          "target": "com.amazonaws.ecs#MountPointList",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "privileged": {
+          "target": "com.amazonaws.ecs#BoxedBoolean",
+          "traits": {}
+        },
+        "pseudoTerminal": {
+          "target": "com.amazonaws.ecs#BoxedBoolean",
+          "traits": {}
+        },
+        "readonlyRootFilesystem": {
+          "target": "com.amazonaws.ecs#BoxedBoolean",
+          "traits": {}
+        },
+        "repositoryCredentials": {
+          "target": "com.amazonaws.ecs#RepositoryCredentials",
+          "traits": {}
+        },
+        "restartPolicy": {
+          "target": "com.amazonaws.ecs#ContainerRestartPolicy",
+          "traits": {}
+        },
+        "secrets": {
+          "target": "com.amazonaws.ecs#SecretList",
+          "traits": {}
+        },
+        "startTimeout": {
+          "target": "com.amazonaws.ecs#BoxedInteger",
+          "traits": {}
+        },
+        "stopTimeout": {
+          "target": "com.amazonaws.ecs#BoxedInteger",
+          "traits": {}
+        },
+        "systemControls": {
+          "target": "com.amazonaws.ecs#SystemControls",
+          "traits": {}
+        },
+        "ulimits": {
+          "target": "com.amazonaws.ecs#UlimitList",
+          "traits": {}
+        },
+        "user": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "workingDirectory": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DaemonContainerDefinitionList": {
+      "member": {
+        "target": "com.amazonaws.ecs#DaemonContainerDefinition"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ecs#DaemonIpcMode": {
+      "members": {
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "none"
+          }
+        },
+        "SHARED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "shared"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ecs#DaemonLinuxParameters": {
+      "members": {
+        "capabilities": {
+          "target": "com.amazonaws.ecs#KernelCapabilities",
+          "traits": {}
+        },
+        "devices": {
+          "target": "com.amazonaws.ecs#DevicesList",
+          "traits": {}
+        },
+        "initProcessEnabled": {
+          "target": "com.amazonaws.ecs#BoxedBoolean",
+          "traits": {}
+        },
+        "tmpfs": {
+          "target": "com.amazonaws.ecs#TmpfsList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DaemonPidMode": {
+      "members": {
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "none"
+          }
+        },
+        "SHARED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "shared"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ecs#DaemonTaskDefinition": {
+      "members": {
+        "containerDefinitions": {
+          "target": "com.amazonaws.ecs#DaemonContainerDefinitionList",
+          "traits": {}
+        },
+        "cpu": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "daemonTaskDefinitionArn": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "deleteRequestedAt": {
+          "target": "com.amazonaws.ecs#Timestamp",
+          "traits": {}
+        },
+        "executionRoleArn": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "family": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "ipcMode": {
+          "target": "com.amazonaws.ecs#DaemonIpcMode",
+          "traits": {}
+        },
+        "memory": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "pidMode": {
+          "target": "com.amazonaws.ecs#DaemonPidMode",
+          "traits": {}
+        },
+        "registeredAt": {
+          "target": "com.amazonaws.ecs#Timestamp",
+          "traits": {}
+        },
+        "registeredBy": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "revision": {
+          "target": "com.amazonaws.ecs#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.ecs#DaemonTaskDefinitionStatus",
+          "traits": {}
+        },
+        "taskRoleArn": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "volumes": {
+          "target": "com.amazonaws.ecs#DaemonVolumeList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DaemonTaskDefinitionStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETE_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_IN_PROGRESS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ecs#DaemonVolume": {
+      "members": {
+        "host": {
+          "target": "com.amazonaws.ecs#HostVolumeProperties",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DaemonVolumeList": {
+      "member": {
+        "target": "com.amazonaws.ecs#DaemonVolume"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ecs#DescribeDaemonTaskDefinition": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ecs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClientException"
+        },
+        {
+          "target": "com.amazonaws.ecs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ServerException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ecs#DescribeDaemonTaskDefinitionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ecs#DescribeDaemonTaskDefinitionResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to describe a daemon task definition",
+          "resources": {
+            "required": {
+              "daemon-task-definition": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        },
+        "smithy.api#readonly": {},
+        "smithy.waiters#waitable": {
+          "DaemonTaskDefinitionActive": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ACTIVE",
+                    "path": "daemonTaskDefinition.status"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETE_IN_PROGRESS",
+                    "path": "daemonTaskDefinition.status"
+                  }
+                },
+                "state": "failure"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETED",
+                    "path": "daemonTaskDefinition.status"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "minDelay": 15
+          },
+          "DaemonTaskDefinitionDeleted": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETED",
+                    "path": "daemonTaskDefinition.status"
+                  }
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 15
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ecs#DescribeDaemonTaskDefinitionRequest": {
+      "members": {
+        "daemonTaskDefinition": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DescribeDaemonTaskDefinitionResponse": {
+      "members": {
+        "daemonTaskDefinition": {
+          "target": "com.amazonaws.ecs#DaemonTaskDefinition",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
       "type": "structure"
     },
     "com.amazonaws.ecs#DescribeTaskDefinition": {

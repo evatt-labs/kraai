@@ -1,0 +1,27 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::M2::Environment
+read:
+  model: m2/service/2021-04-28/m2-2021-04-28.json
+  operation: GetEnvironment
+  identifier:
+    EnvironmentArn: environmentId
+properties:
+  Description: description
+  EngineType: engineType
+  EngineVersion: engineVersion
+  EnvironmentArn: environmentArn
+  EnvironmentId: environmentId
+  HighAvailabilityConfig:
+    member: highAvailabilityConfig
+    properties:
+      DesiredCapacity: desiredCapacity
+  InstanceType: instanceType
+  KmsKeyId: kmsKeyId
+  Name: name
+  NetworkType: networkType
+  PreferredMaintenanceWindow: preferredMaintenanceWindow
+  PubliclyAccessible: publiclyAccessible
+  SecurityGroupIds: securityGroupIds
+  StorageConfigurations: storageConfigurations
+  SubnetIds: subnetIds
+  Tags: tags

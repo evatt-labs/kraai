@@ -1,0 +1,11 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Glue::CustomEntityType
+read:
+  model: glue/service/2017-03-31/glue-2017-03-31.json
+  operation: GetCustomEntityType
+  identifier:
+    Name: Name
+properties:
+  ContextWords: ContextWords
+  Name: Name
+  RegexString: RegexString

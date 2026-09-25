@@ -1,0 +1,24 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Backup::RestoreTestingPlan
+read:
+  model: backup/service/2018-11-15/backup-2018-11-15.json
+  operation: GetRestoreTestingPlan
+  identifier:
+    RestoreTestingPlanName: RestoreTestingPlanName
+  response: RestoreTestingPlan
+properties:
+  RecoveryPointSelection:
+    member: RecoveryPointSelection
+    properties:
+      Algorithm: Algorithm
+      ExcludeVaults: ExcludeVaults
+      IncludeVaults: IncludeVaults
+      RecoveryPointTypes: RecoveryPointTypes
+      SelectionWindowDays: SelectionWindowDays
+  RestoreTestingPlanArn: RestoreTestingPlanArn
+  RestoreTestingPlanName: RestoreTestingPlanName
+  ScheduleExpression: ScheduleExpression
+  ScheduleExpressionTimezone: ScheduleExpressionTimezone
+  StartWindowHours: StartWindowHours
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

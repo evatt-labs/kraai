@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Proton::ServiceTemplate
+read:
+  model: proton/service/2020-07-20/proton-2020-07-20.json
+  operation: GetServiceTemplate
+  identifier:
+    Arn: name
+  response: serviceTemplate
+properties:
+  Arn: arn
+  Description: description
+  DisplayName: displayName
+  EncryptionKey: encryptionKey
+  Name: name
+  PipelineProvisioning: pipelineProvisioning
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

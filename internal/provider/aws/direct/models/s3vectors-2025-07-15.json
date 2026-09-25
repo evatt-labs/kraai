@@ -1,0 +1,357 @@
+{
+  "shapes": {
+    "com.amazonaws.s3vectors#EncryptionConfiguration": {
+      "members": {
+        "kmsKeyArn": {
+          "target": "com.amazonaws.s3vectors#KmsKeyArn",
+          "traits": {}
+        },
+        "sseType": {
+          "target": "com.amazonaws.s3vectors#SseType",
+          "traits": {
+            "smithy.api#default": "AES256"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#ExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.s3vectors#GetVectorBucket": {
+      "errors": [
+        {
+          "target": "com.amazonaws.s3vectors#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.s3vectors#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.s3vectors#GetVectorBucketInput"
+      },
+      "output": {
+        "target": "com.amazonaws.s3vectors#GetVectorBucketOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/GetVectorBucket"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3vectors#GetVectorBucketInput": {
+      "members": {
+        "vectorBucketArn": {
+          "target": "com.amazonaws.s3vectors#VectorBucketArn",
+          "traits": {}
+        },
+        "vectorBucketName": {
+          "target": "com.amazonaws.s3vectors#VectorBucketName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#GetVectorBucketOutput": {
+      "members": {
+        "vectorBucket": {
+          "target": "com.amazonaws.s3vectors#VectorBucket",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(arn:aws[-a-z0-9]*:kms:[-a-z0-9]*:[0-9]{12}:key/.+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.s3vectors#NotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#S3Vectors": {
+      "errors": [
+        {
+          "target": "com.amazonaws.s3vectors#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.s3vectors#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.s3vectors#RequestTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.s3vectors#TooManyRequestsException"
+        },
+        {
+          "target": "com.amazonaws.s3vectors#ValidationException"
+        }
+      ],
+      "operations": [
+        {
+          "target": "com.amazonaws.s3vectors#GetVectorBucket"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "s3vectors",
+          "endpointPrefix": "s3vectors",
+          "sdkId": "S3Vectors"
+        },
+        "aws.auth#sigv4": {
+          "name": "s3vectors"
+        },
+        "aws.endpoints#dualStackOnlyEndpoints": {},
+        "aws.endpoints#standardRegionalEndpoints": {},
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon S3 Vectors",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://s3vectors-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://s3vectors.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2025-07-15"
+    },
+    "com.amazonaws.s3vectors#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#SseType": {
+      "members": {
+        "AES256": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AES256"
+          }
+        },
+        "AWS_KMS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "aws:kms"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3vectors#VectorBucket": {
+      "members": {
+        "creationTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "encryptionConfiguration": {
+          "target": "com.amazonaws.s3vectors#EncryptionConfiguration",
+          "traits": {}
+        },
+        "vectorBucketArn": {
+          "target": "com.amazonaws.s3vectors#VectorBucketArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "vectorBucketName": {
+          "target": "com.amazonaws.s3vectors#VectorBucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#VectorBucketArn": {
+      "traits": {
+        "aws.api#arnReference": {},
+        "smithy.api#pattern": "^arn:aws[-a-z0-9]*:s3vectors:[a-z0-9-]+:[0-9]{12}:bucket/[a-z0-9][a-z0-9-.]{1,61}[a-z0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.s3vectors#VectorBucketName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        }
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

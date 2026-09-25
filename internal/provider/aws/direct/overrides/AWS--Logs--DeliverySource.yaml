@@ -1,0 +1,19 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Logs::DeliverySource
+read:
+  model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
+  operation: GetDeliverySource
+  identifier:
+    Name: name
+  response: deliverySource
+properties:
+  Arn: arn
+  DeliverySourceConfiguration: deliverySourceConfiguration
+  LogType: logType
+  Name: name
+  ResourceArns: resourceArns
+  Service: service
+  Status: status
+  StatusReason: statusReason
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

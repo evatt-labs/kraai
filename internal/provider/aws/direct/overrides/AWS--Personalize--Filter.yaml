@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Personalize::Filter
+read:
+  model: personalize/service/2018-05-22/personalize-2018-05-22.json
+  operation: DescribeFilter
+  identifier:
+    FilterArn: filterArn
+  response: filter
+properties:
+  CreationDateTime: creationDateTime
+  DatasetGroupArn: datasetGroupArn
+  FilterArn: filterArn
+  FilterExpression: filterExpression
+  LastUpdatedDateTime: lastUpdatedDateTime
+  Name: name
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,605 @@
+{
+  "shapes": {
+    "com.amazonaws.rolesanywhere#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rolesanywhere#AttributeMapping": {
+      "members": {
+        "certificateField": {
+          "target": "com.amazonaws.rolesanywhere#CertificateField",
+          "traits": {}
+        },
+        "mappingRules": {
+          "target": "com.amazonaws.rolesanywhere#MappingRules",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rolesanywhere#AttributeMappings": {
+      "member": {
+        "target": "com.amazonaws.rolesanywhere#AttributeMapping"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rolesanywhere#CertificateField": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "x509Subject",
+            "value": "x509Subject"
+          },
+          {
+            "name": "x509Issuer",
+            "value": "x509Issuer"
+          },
+          {
+            "name": "x509SAN",
+            "value": "x509SAN"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.rolesanywhere#GetProfile": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rolesanywhere#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.rolesanywhere#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rolesanywhere#ScalarProfileRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.rolesanywhere#ProfileDetailResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "GET",
+          "uri": "/profile/{profileId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.rolesanywhere#ManagedPolicyList": {
+      "member": {
+        "target": "smithy.api#String",
+        "traits": {
+          "smithy.api#length": {
+            "max": 200,
+            "min": 1
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rolesanywhere#MappingRule": {
+      "members": {
+        "specifier": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 60
+            },
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rolesanywhere#MappingRules": {
+      "member": {
+        "target": "com.amazonaws.rolesanywhere#MappingRule"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rolesanywhere#ProfileArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:rolesanywhere(:.*){2}(:profile.*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.rolesanywhere#ProfileDetail": {
+      "members": {
+        "acceptRoleSessionName": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        },
+        "attributeMappings": {
+          "target": "com.amazonaws.rolesanywhere#AttributeMappings",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#timestampFormat": "date-time"
+          }
+        },
+        "createdBy": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "durationSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        },
+        "enabled": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        },
+        "managedPolicyArns": {
+          "target": "com.amazonaws.rolesanywhere#ManagedPolicyList",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.rolesanywhere#ResourceName",
+          "traits": {}
+        },
+        "profileArn": {
+          "target": "com.amazonaws.rolesanywhere#ProfileArn",
+          "traits": {}
+        },
+        "profileId": {
+          "target": "com.amazonaws.rolesanywhere#Uuid",
+          "traits": {}
+        },
+        "requireInstanceProperties": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        },
+        "roleArns": {
+          "target": "com.amazonaws.rolesanywhere#RoleArnList",
+          "traits": {}
+        },
+        "sessionPolicy": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "updatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#timestampFormat": "date-time"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rolesanywhere#ProfileDetailResponse": {
+      "members": {
+        "profile": {
+          "target": "com.amazonaws.rolesanywhere#ProfileDetail",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rolesanywhere#ResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[ a-zA-Z0-9-_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.rolesanywhere#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rolesanywhere#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:iam(:.*){2}(:role.*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.rolesanywhere#RoleArnList": {
+      "member": {
+        "target": "com.amazonaws.rolesanywhere#RoleArn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 250,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rolesanywhere#RolesAnywhere": {
+      "operations": [
+        {
+          "target": "com.amazonaws.rolesanywhere#GetProfile"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "rolesanywhere",
+          "cloudFormationName": "RolesAnywhere",
+          "sdkId": "RolesAnywhere"
+        },
+        "aws.auth#sigv4": {
+          "name": "rolesanywhere"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "IAM Roles Anywhere",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://rolesanywhere-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://rolesanywhere-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://rolesanywhere.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://rolesanywhere.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-05-10"
+    },
+    "com.amazonaws.rolesanywhere#ScalarProfileRequest": {
+      "members": {
+        "profileId": {
+          "target": "com.amazonaws.rolesanywhere#Uuid",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rolesanywhere#Uuid": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 36
+        },
+        "smithy.api#pattern": "[a-f0-9]{8}-([a-z0-9]{4}-){3}[a-z0-9]{12}"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

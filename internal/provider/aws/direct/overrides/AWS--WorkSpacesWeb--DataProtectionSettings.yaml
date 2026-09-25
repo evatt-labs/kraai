@@ -1,0 +1,43 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WorkSpacesWeb::DataProtectionSettings
+read:
+  model: workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json
+  operation: GetDataProtectionSettings
+  identifier:
+    DataProtectionSettingsArn: dataProtectionSettingsArn
+  response: dataProtectionSettings
+properties:
+  AdditionalEncryptionContext: additionalEncryptionContext
+  AssociatedPortalArns: associatedPortalArns
+  CreationDate: creationDate
+  CustomerManagedKey: customerManagedKey
+  DataProtectionSettingsArn: dataProtectionSettingsArn
+  Description: description
+  DisplayName: displayName
+  InlineRedactionConfiguration:
+    member: inlineRedactionConfiguration
+    properties:
+      GlobalConfidenceLevel: globalConfidenceLevel
+      GlobalEnforcedUrls: globalEnforcedUrls
+      GlobalExemptUrls: globalExemptUrls
+      InlineRedactionPatterns:
+        member: inlineRedactionPatterns
+        properties:
+          BuiltInPatternId: builtInPatternId
+          ConfidenceLevel: confidenceLevel
+          CustomPattern:
+            member: customPattern
+            properties:
+              KeywordRegex: keywordRegex
+              PatternDescription: patternDescription
+              PatternName: patternName
+              PatternRegex: patternRegex
+          EnforcedUrls: enforcedUrls
+          ExemptUrls: exemptUrls
+          RedactionPlaceHolder:
+            member: redactionPlaceHolder
+            properties:
+              RedactionPlaceHolderText: redactionPlaceHolderText
+              RedactionPlaceHolderType: redactionPlaceHolderType
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

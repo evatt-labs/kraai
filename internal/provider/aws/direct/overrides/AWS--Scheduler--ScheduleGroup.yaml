@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Scheduler::ScheduleGroup
+read:
+  model: scheduler/service/2021-06-30/scheduler-2021-06-30.json
+  operation: GetScheduleGroup
+  identifier:
+    Name: Name
+properties:
+  Arn: Arn
+  CreationDate: CreationDate
+  LastModificationDate: LastModificationDate
+  Name: Name
+  State: State
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

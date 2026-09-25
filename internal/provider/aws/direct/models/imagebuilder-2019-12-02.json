@@ -1,0 +1,1001 @@
+{
+  "shapes": {
+    "com.amazonaws.imagebuilder#AccountId": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#AccountList": {
+      "member": {
+        "target": "com.amazonaws.imagebuilder#AccountId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1536,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.imagebuilder#Boolean": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.imagebuilder#CallRateLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#ClientException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#DateTimeTimestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.imagebuilder#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#ForbiddenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#GetLifecyclePolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.imagebuilder#CallRateLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.imagebuilder#ClientException"
+        },
+        {
+          "target": "com.amazonaws.imagebuilder#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.imagebuilder#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.imagebuilder#ServiceException"
+        },
+        {
+          "target": "com.amazonaws.imagebuilder#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.imagebuilder#GetLifecyclePolicyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.imagebuilder#GetLifecyclePolicyResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/GetLifecyclePolicy"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.imagebuilder#GetLifecyclePolicyRequest": {
+      "members": {
+        "lifecyclePolicyArn": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyArn",
+          "traits": {
+            "smithy.api#httpQuery": "lifecyclePolicyArn",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#GetLifecyclePolicyResponse": {
+      "members": {
+        "lifecyclePolicy": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicy",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#InvalidRequestException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicy": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyArn",
+          "traits": {}
+        },
+        "dateCreated": {
+          "target": "com.amazonaws.imagebuilder#DateTimeTimestamp",
+          "traits": {}
+        },
+        "dateLastRun": {
+          "target": "com.amazonaws.imagebuilder#DateTimeTimestamp",
+          "traits": {}
+        },
+        "dateUpdated": {
+          "target": "com.amazonaws.imagebuilder#DateTimeTimestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.imagebuilder#NonEmptyString",
+          "traits": {}
+        },
+        "executionRole": {
+          "target": "com.amazonaws.imagebuilder#RoleNameOrArn",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.imagebuilder#ResourceName",
+          "traits": {}
+        },
+        "policyDetails": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetails",
+          "traits": {}
+        },
+        "resourceSelection": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyResourceSelection",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyResourceType",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyStatus",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.imagebuilder#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:aws(?:-[a-z]+)*:imagebuilder:[a-z]{2,}(?:-[a-z]+)+-[0-9]+:(?:[0-9]{12}|aws):lifecycle-policy/[a-z0-9-_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetail": {
+      "members": {
+        "action": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailAction",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "exclusionRules": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRules",
+          "traits": {}
+        },
+        "filter": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilter",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailAction": {
+      "members": {
+        "includeResources": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailActionIncludeResources",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailActionType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailActionIncludeResources": {
+      "members": {
+        "amis": {
+          "target": "com.amazonaws.imagebuilder#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "containers": {
+          "target": "com.amazonaws.imagebuilder#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "snapshots": {
+          "target": "com.amazonaws.imagebuilder#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailActionType": {
+      "members": {
+        "DELETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE"
+          }
+        },
+        "DEPRECATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEPRECATE"
+          }
+        },
+        "DISABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRules": {
+      "members": {
+        "amis": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRulesAmis",
+          "traits": {}
+        },
+        "tagMap": {
+          "target": "com.amazonaws.imagebuilder#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRulesAmis": {
+      "members": {
+        "isPublic": {
+          "target": "com.amazonaws.imagebuilder#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "lastLaunched": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRulesAmisLastLaunched",
+          "traits": {}
+        },
+        "regions": {
+          "target": "com.amazonaws.imagebuilder#StringList",
+          "traits": {}
+        },
+        "sharedAccounts": {
+          "target": "com.amazonaws.imagebuilder#AccountList",
+          "traits": {}
+        },
+        "tagMap": {
+          "target": "com.amazonaws.imagebuilder#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRulesAmisLastLaunched": {
+      "members": {
+        "unit": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyTimeUnit",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "value": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailExclusionRulesAmisLastLaunchedValue": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 365,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilter": {
+      "members": {
+        "retainAtLeast": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilterRetainAtLeast",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilterType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "unit": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyTimeUnit",
+          "traits": {}
+        },
+        "value": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilterValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilterRetainAtLeast": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilterType": {
+      "members": {
+        "AGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AGE"
+          }
+        },
+        "COUNT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COUNT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetailFilterValue": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyDetails": {
+      "member": {
+        "target": "com.amazonaws.imagebuilder#LifecyclePolicyDetail"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyResourceSelection": {
+      "members": {
+        "recipes": {
+          "target": "com.amazonaws.imagebuilder#LifecyclePolicyResourceSelectionRecipes",
+          "traits": {}
+        },
+        "tagMap": {
+          "target": "com.amazonaws.imagebuilder#TagMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyResourceSelectionRecipe": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.imagebuilder#ResourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "semanticVersion": {
+          "target": "com.amazonaws.imagebuilder#WildcardVersionNumber",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyResourceSelectionRecipes": {
+      "member": {
+        "target": "com.amazonaws.imagebuilder#LifecyclePolicyResourceSelectionRecipe"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyResourceType": {
+      "members": {
+        "AMI_IMAGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AMI_IMAGE"
+          }
+        },
+        "CONTAINER_IMAGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONTAINER_IMAGE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.imagebuilder#LifecyclePolicyTimeUnit": {
+      "members": {
+        "DAYS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DAYS"
+          }
+        },
+        "MONTHS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MONTHS"
+          }
+        },
+        "WEEKS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WEEKS"
+          }
+        },
+        "YEARS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "YEARS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.imagebuilder#NonEmptyString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#ResourceName": {
+      "traits": {
+        "smithy.api#pattern": "^[-_A-Za-z-0-9][-_A-Za-z0-9 ]{1,126}[-_A-Za-z-0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#RoleNameOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?:arn:aws(?:-[a-z]+)*:iam::[0-9]{12}:role/)?[a-zA-Z_0-9+=,.@\\-_/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#ServiceException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#StringList": {
+      "member": {
+        "target": "com.amazonaws.imagebuilder#NonEmptyString"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.imagebuilder#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!aws:)[a-zA-Z0-9\\s_.:/=+\\-@]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#TagMap": {
+      "key": {
+        "target": "com.amazonaws.imagebuilder#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.imagebuilder#TagValue"
+      }
+    },
+    "com.amazonaws.imagebuilder#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#WildcardVersionNumber": {
+      "traits": {
+        "smithy.api#pattern": "^(?:[0-9]+|x)\\.(?:[0-9]+|x)\\.(?:[0-9]+|x)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.imagebuilder#imagebuilder": {
+      "operations": [
+        {
+          "target": "com.amazonaws.imagebuilder#GetLifecyclePolicy"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "imagebuilder",
+          "cloudFormationName": "Imagebuilder",
+          "cloudTrailEventSource": "imagebuilder.amazonaws.com",
+          "endpointPrefix": "imagebuilder",
+          "sdkId": "imagebuilder"
+        },
+        "aws.auth#sigv4": {
+          "name": "imagebuilder"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "EC2 Image Builder",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://imagebuilder-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://imagebuilder.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://imagebuilder-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://imagebuilder.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://imagebuilder.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2019-12-02"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,861 @@
+{
+  "shapes": {
+    "com.amazonaws.mgn#ARN": {
+      "traits": {
+        "aws.api#arnReference": {},
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#AccessDeniedException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#AccountID": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "[0-9]{12,}"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#ApplicationMigrationService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mgn#GetNetworkMigrationDefinition"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "mgn",
+          "awsProductName": "mgn",
+          "cloudTrailEventSource": "mgn.amazonaws.com",
+          "sdkId": "mgn"
+        },
+        "aws.auth#sigv4": {
+          "name": "mgn"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id",
+            "x-amz-apigw-id"
+          ]
+        },
+        "smithy.api#title": "Application Migration Service",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mgn-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mgn-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mgn.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://mgn.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-02-26"
+    },
+    "com.amazonaws.mgn#Cidr": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 18,
+          "min": 9
+        },
+        "smithy.api#pattern": "^((25[0-4]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\/(1[6-9]|2[0-8])$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#CidrMapping": {
+      "members": {
+        "originalCidr": {
+          "target": "com.amazonaws.mgn#Cidr",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "updatedCidr": {
+          "target": "com.amazonaws.mgn#Cidr",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#CidrMappingsList": {
+      "member": {
+        "target": "com.amazonaws.mgn#CidrMapping"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mgn#GetNetworkMigrationDefinition": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mgn#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.mgn#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mgn#GetNetworkMigrationDefinitionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mgn#NetworkMigrationDefinition"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "POST",
+          "uri": "/network-migration/GetNetworkMigrationDefinition"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mgn#GetNetworkMigrationDefinitionRequest": {
+      "members": {
+        "networkMigrationDefinitionID": {
+          "target": "com.amazonaws.mgn#NetworkMigrationDefinitionID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#LargeBoundedString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 65536,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#NetworkMigrationDefinition": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.mgn#ARN",
+          "traits": {}
+        },
+        "cidrMappings": {
+          "target": "com.amazonaws.mgn#CidrMappingsList",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.mgn#NetworkMigrationDefinitionDescription",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.mgn#NetworkMigrationDefinitionName",
+          "traits": {}
+        },
+        "networkMigrationDefinitionID": {
+          "target": "com.amazonaws.mgn#NetworkMigrationDefinitionID",
+          "traits": {}
+        },
+        "scopeTags": {
+          "target": "com.amazonaws.mgn#ScopeTagsMap",
+          "traits": {}
+        },
+        "sourceConfigurations": {
+          "target": "com.amazonaws.mgn#SourceConfigurationList",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.mgn#TagsMap",
+          "traits": {}
+        },
+        "targetDeployment": {
+          "target": "com.amazonaws.mgn#TargetDeployment",
+          "traits": {}
+        },
+        "targetNetwork": {
+          "target": "com.amazonaws.mgn#TargetNetwork",
+          "traits": {}
+        },
+        "targetS3Configuration": {
+          "target": "com.amazonaws.mgn#TargetS3Configuration",
+          "traits": {}
+        },
+        "updatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {}
+        },
+        "vpcProvisioningStrategy": {
+          "target": "com.amazonaws.mgn#VpcProvisioningStrategy",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.mgn#NetworkMigrationDefinitionResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#NetworkMigrationDefinitionDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 600,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\x00]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#NetworkMigrationDefinitionID": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 21,
+          "min": 21
+        },
+        "smithy.api#pattern": "^nmd-[0-9a-zA-Z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#NetworkMigrationDefinitionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^\\s\\x00]( *[^\\s\\x00])*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#ResourceNotFoundException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "resourceId": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#S3BucketName": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z0-9.\\-_]{1,255}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#S3KeyName": {
+      "traits": {
+        "smithy.api#pattern": "^[^\\x00]{1,1024}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#ScopeTagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!aws:)[a-zA-Z0-9\\s+\\-=._:/@]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#ScopeTagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9\\s+\\-=._:/@]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#ScopeTagsMap": {
+      "key": {
+        "target": "com.amazonaws.mgn#ScopeTagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.mgn#ScopeTagValue"
+      }
+    },
+    "com.amazonaws.mgn#SourceConfiguration": {
+      "members": {
+        "sourceEnvironment": {
+          "target": "com.amazonaws.mgn#SourceEnvironment",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "sourceS3Configuration": {
+          "target": "com.amazonaws.mgn#SourceS3Configuration",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#SourceConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.mgn#SourceConfiguration"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 2,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mgn#SourceEnvironment": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "NSX",
+            "value": "NSX"
+          },
+          {
+            "name": "VSPHERE",
+            "value": "VSPHERE"
+          },
+          {
+            "name": "FORTIGATE_FIREWALL",
+            "value": "FORTIGATE_FIREWALL"
+          },
+          {
+            "name": "PALO_ALTO_FIREWALL",
+            "value": "PALO_ALTO_FIREWALL"
+          },
+          {
+            "name": "CISCO_ACI",
+            "value": "CISCO_ACI"
+          },
+          {
+            "name": "LOGICAL_MODEL",
+            "value": "LOGICAL_MODEL"
+          },
+          {
+            "name": "MODELIZE_IT",
+            "value": "MODELIZE_IT"
+          },
+          {
+            "name": "AWS_DISCOVERY_COLLECTOR",
+            "value": "AWS_DISCOVERY_COLLECTOR"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#SourceS3Configuration": {
+      "members": {
+        "s3Bucket": {
+          "target": "com.amazonaws.mgn#S3BucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "s3BucketOwner": {
+          "target": "com.amazonaws.mgn#AccountID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "s3Key": {
+          "target": "com.amazonaws.mgn#S3KeyName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#TagsMap": {
+      "key": {
+        "target": "com.amazonaws.mgn#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.mgn#TagValue"
+      }
+    },
+    "com.amazonaws.mgn#TargetDeployment": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "SINGLE_ACCOUNT",
+            "value": "SINGLE_ACCOUNT"
+          },
+          {
+            "name": "MULTI_ACCOUNT",
+            "value": "MULTI_ACCOUNT"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#TargetNetwork": {
+      "members": {
+        "inboundCidr": {
+          "target": "com.amazonaws.mgn#Cidr",
+          "traits": {}
+        },
+        "inspectionCidr": {
+          "target": "com.amazonaws.mgn#Cidr",
+          "traits": {}
+        },
+        "outboundCidr": {
+          "target": "com.amazonaws.mgn#Cidr",
+          "traits": {}
+        },
+        "topology": {
+          "target": "com.amazonaws.mgn#TargetNetworkTopology",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#TargetNetworkTopology": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ISOLATED_VPC",
+            "value": "ISOLATED_VPC"
+          },
+          {
+            "name": "HUB_AND_SPOKE",
+            "value": "HUB_AND_SPOKE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mgn#TargetS3Configuration": {
+      "members": {
+        "s3Bucket": {
+          "target": "com.amazonaws.mgn#S3BucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "s3BucketOwner": {
+          "target": "com.amazonaws.mgn#AccountID",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#VpcProvisioningStrategy": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CREATE_NEW",
+            "value": "CREATE_NEW"
+          },
+          {
+            "name": "USE_EXISTING",
+            "value": "USE_EXISTING"
+          }
+        ]
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

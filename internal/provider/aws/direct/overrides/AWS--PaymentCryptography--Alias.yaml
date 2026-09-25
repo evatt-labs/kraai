@@ -1,0 +1,11 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::PaymentCryptography::Alias
+read:
+  model: payment-cryptography/service/2021-09-14/payment-cryptography-2021-09-14.json
+  operation: GetAlias
+  identifier:
+    AliasName: AliasName
+  response: Alias
+properties:
+  AliasName: AliasName
+  KeyArn: KeyArn

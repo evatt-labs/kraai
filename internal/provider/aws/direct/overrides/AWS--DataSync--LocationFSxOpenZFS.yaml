@@ -1,0 +1,23 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataSync::LocationFSxOpenZFS
+read:
+  model: datasync/service/2018-11-09/datasync-2018-11-09.json
+  operation: DescribeLocationFsxOpenZfs
+  identifier:
+    LocationArn: LocationArn
+properties:
+  LocationArn: LocationArn
+  LocationUri: LocationUri
+  Protocol:
+    member: Protocol
+    properties:
+      NFS:
+        member: NFS
+        properties:
+          MountOptions:
+            member: MountOptions
+            properties:
+              Version: Version
+  SecurityGroupArns: SecurityGroupArns
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

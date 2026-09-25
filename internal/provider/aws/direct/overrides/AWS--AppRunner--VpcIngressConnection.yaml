@@ -1,0 +1,19 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::AppRunner::VpcIngressConnection
+read:
+  model: apprunner/service/2020-05-15/apprunner-2020-05-15.json
+  operation: DescribeVpcIngressConnection
+  identifier:
+    VpcIngressConnectionArn: VpcIngressConnectionArn
+  response: VpcIngressConnection
+properties:
+  DomainName: DomainName
+  IngressVpcConfiguration:
+    member: IngressVpcConfiguration
+    properties:
+      VpcEndpointId: VpcEndpointId
+      VpcId: VpcId
+  ServiceArn: ServiceArn
+  Status: Status
+  VpcIngressConnectionArn: VpcIngressConnectionArn
+  VpcIngressConnectionName: VpcIngressConnectionName

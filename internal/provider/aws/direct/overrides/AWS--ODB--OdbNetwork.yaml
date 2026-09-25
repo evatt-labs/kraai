@@ -1,0 +1,71 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ODB::OdbNetwork
+read:
+  model: odb/service/2024-08-20/odb-2024-08-20.json
+  operation: GetOdbNetwork
+  identifier:
+    OdbNetworkArn: odbNetworkId
+  response: odbNetwork
+properties:
+  AvailabilityZone: availabilityZone
+  AvailabilityZoneId: availabilityZoneId
+  BackupSubnetCidr: backupSubnetCidr
+  ClientSubnetCidr: clientSubnetCidr
+  CustomDomainName: customDomainName
+  DisplayName: displayName
+  Ec2PlacementGroupIds: ec2PlacementGroupIds
+  ManagedServices:
+    member: managedServices
+    properties:
+      CrossRegionS3RestoreSourcesAccess:
+        member: crossRegionS3RestoreSourcesAccess
+        properties:
+          Ipv4Addresses: ipv4Addresses
+          Region: region
+          Status: status
+      KmsAccess:
+        member: kmsAccess
+        properties:
+          DomainName: domainName
+          Ipv4Addresses: ipv4Addresses
+          KmsPolicyDocument: kmsPolicyDocument
+          Status: status
+      ManagedS3BackupAccess:
+        member: managedS3BackupAccess
+        properties:
+          Ipv4Addresses: ipv4Addresses
+          Status: status
+      ManagedServicesIpv4Cidrs: managedServicesIpv4Cidrs
+      ResourceGatewayArn: resourceGatewayArn
+      S3Access:
+        member: s3Access
+        properties:
+          DomainName: domainName
+          Ipv4Addresses: ipv4Addresses
+          S3PolicyDocument: s3PolicyDocument
+          Status: status
+      ServiceNetworkArn: serviceNetworkArn
+      ServiceNetworkEndpoint:
+        member: serviceNetworkEndpoint
+        properties:
+          VpcEndpointId: vpcEndpointId
+          VpcEndpointType: vpcEndpointType
+      StsAccess:
+        member: stsAccess
+        properties:
+          DomainName: domainName
+          Ipv4Addresses: ipv4Addresses
+          Status: status
+          StsPolicyDocument: stsPolicyDocument
+      ZeroEtlAccess:
+        member: zeroEtlAccess
+        properties:
+          Cidr: cidr
+          Status: status
+  OciNetworkAnchorId: ociNetworkAnchorId
+  OciResourceAnchorName: ociResourceAnchorName
+  OciVcnUrl: ociVcnUrl
+  OdbNetworkArn: odbNetworkArn
+  OdbNetworkId: odbNetworkId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

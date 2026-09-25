@@ -1,0 +1,21 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IVSChat::Room
+read:
+  model: ivschat/service/2020-07-14/ivschat-2020-07-14.json
+  operation: GetRoom
+  identifier:
+    Arn: identifier
+properties:
+  Arn: arn
+  Id: id
+  LoggingConfigurationIdentifiers: loggingConfigurationIdentifiers
+  MaximumMessageLength: maximumMessageLength
+  MaximumMessageRatePerSecond: maximumMessageRatePerSecond
+  MessageReviewHandler:
+    member: messageReviewHandler
+    properties:
+      FallbackResult: fallbackResult
+      Uri: uri
+  Name: name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

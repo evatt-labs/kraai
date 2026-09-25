@@ -1,0 +1,1206 @@
+{
+  "shapes": {
+    "com.amazonaws.entityresolution#AWSVeniceService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.entityresolution#GetIdNamespace"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#GetSchemaMapping"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "entityresolution",
+          "cloudTrailEventSource": "entityresolution.amazonaws.com",
+          "sdkId": "EntityResolution"
+        },
+        "aws.auth#sigv4": {
+          "name": "entityresolution"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "AWS EntityResolution",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://entityresolution-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://entityresolution-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://entityresolution.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://entityresolution.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-05-10"
+    },
+    "com.amazonaws.entityresolution#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.entityresolution#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#AttributeMatchingModel": {
+      "members": {
+        "MANY_TO_MANY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANY_TO_MANY"
+          }
+        },
+        "ONE_TO_ONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONE_TO_ONE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.entityresolution#AttributeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255
+        },
+        "smithy.api#pattern": "^[a-zA-Z_0-9- ]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#EntityName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z_0-9-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#EntityNameOrIdNamespaceArn": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z_0-9-=+/]*$|^arn:(aws|aws-us-gov|aws-cn):entityresolution:[a-z]{2}-[a-z]{1,10}-[0-9]:[0-9]{12}:(idnamespace/[a-zA-Z_0-9-]{1,255})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#ErrorMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#GetIdNamespace": {
+      "errors": [
+        {
+          "target": "com.amazonaws.entityresolution#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.entityresolution#GetIdNamespaceInput"
+      },
+      "output": {
+        "target": "com.amazonaws.entityresolution#GetIdNamespaceOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/idnamespaces/{idNamespaceName}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.entityresolution#GetIdNamespaceInput": {
+      "members": {
+        "idNamespaceName": {
+          "target": "com.amazonaws.entityresolution#EntityNameOrIdNamespaceArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#GetIdNamespaceOutput": {
+      "members": {
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.entityresolution#Description",
+          "traits": {}
+        },
+        "idMappingWorkflowProperties": {
+          "target": "com.amazonaws.entityresolution#IdNamespaceIdMappingWorkflowPropertiesList",
+          "traits": {}
+        },
+        "idNamespaceArn": {
+          "target": "com.amazonaws.entityresolution#IdNamespaceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "idNamespaceName": {
+          "target": "com.amazonaws.entityresolution#EntityName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "inputSourceConfig": {
+          "target": "com.amazonaws.entityresolution#IdNamespaceInputSourceConfig",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.entityresolution#RoleArn",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.entityresolution#TagMap",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.entityresolution#IdNamespaceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "updatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#GetSchemaMapping": {
+      "errors": [
+        {
+          "target": "com.amazonaws.entityresolution#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.entityresolution#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.entityresolution#GetSchemaMappingInput"
+      },
+      "output": {
+        "target": "com.amazonaws.entityresolution#GetSchemaMappingOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/schemas/{schemaName}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.entityresolution#GetSchemaMappingInput": {
+      "members": {
+        "schemaName": {
+          "target": "com.amazonaws.entityresolution#EntityName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#GetSchemaMappingOutput": {
+      "members": {
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.entityresolution#Description",
+          "traits": {}
+        },
+        "hasWorkflows": {
+          "target": "smithy.api#Boolean",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "mappedInputFields": {
+          "target": "com.amazonaws.entityresolution#SchemaInputAttributes",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "schemaArn": {
+          "target": "com.amazonaws.entityresolution#SchemaMappingArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "schemaName": {
+          "target": "com.amazonaws.entityresolution#EntityName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.entityresolution#TagMap",
+          "traits": {}
+        },
+        "updatedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#IdMappingType": {
+      "members": {
+        "PROVIDER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVIDER"
+          }
+        },
+        "RULE_BASED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RULE_BASED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.entityresolution#IdMappingWorkflowRuleDefinitionType": {
+      "members": {
+        "SOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SOURCE"
+          }
+        },
+        "TARGET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TARGET"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.entityresolution#IdMappingWorkflowRuleDefinitionTypeList": {
+      "member": {
+        "target": "com.amazonaws.entityresolution#IdMappingWorkflowRuleDefinitionType"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.entityresolution#IdNamespaceArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov|aws-cn):entityresolution:[a-z]{2}-[a-z]{1,10}-[0-9]:[0-9]{12}:(idnamespace/[a-zA-Z_0-9-]{1,255})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#IdNamespaceIdMappingWorkflowProperties": {
+      "members": {
+        "idMappingType": {
+          "target": "com.amazonaws.entityresolution#IdMappingType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "providerProperties": {
+          "target": "com.amazonaws.entityresolution#NamespaceProviderProperties",
+          "traits": {}
+        },
+        "ruleBasedProperties": {
+          "target": "com.amazonaws.entityresolution#NamespaceRuleBasedProperties",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#IdNamespaceIdMappingWorkflowPropertiesList": {
+      "member": {
+        "target": "com.amazonaws.entityresolution#IdNamespaceIdMappingWorkflowProperties"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.entityresolution#IdNamespaceInputSource": {
+      "members": {
+        "inputSourceARN": {
+          "target": "com.amazonaws.entityresolution#InputSourceARN",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "schemaName": {
+          "target": "com.amazonaws.entityresolution#EntityName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#IdNamespaceInputSourceConfig": {
+      "member": {
+        "target": "com.amazonaws.entityresolution#IdNamespaceInputSource"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.entityresolution#IdNamespaceType": {
+      "members": {
+        "SOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SOURCE"
+          }
+        },
+        "TARGET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TARGET"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.entityresolution#InputSourceARN": {
+      "traits": {
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov|aws-cn):entityresolution:[a-z]{2}-[a-z]{1,10}-[0-9]:[0-9]{12}:(idnamespace/[a-zA-Z_0-9-]{1,255})$|^arn:(aws|aws-us-gov|aws-cn):entityresolution:[a-z]{2}-[a-z]{1,10}-[0-9]:[0-9]{12}:(matchingworkflow/[a-zA-Z_0-9-]{1,255})$|^arn:(aws|aws-us-gov|aws-cn):glue:[a-z]{2}-[a-z]{1,10}-[0-9]:[0-9]{12}:(table/[a-zA-Z_0-9-]{1,255}/[a-zA-Z_0-9-]{1,255})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.entityresolution#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#MatchingKeys": {
+      "member": {
+        "target": "com.amazonaws.entityresolution#AttributeName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.entityresolution#NamespaceProviderProperties": {
+      "members": {
+        "providerConfiguration": {
+          "target": "smithy.api#Document",
+          "traits": {}
+        },
+        "providerServiceArn": {
+          "target": "com.amazonaws.entityresolution#ProviderServiceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#NamespaceRuleBasedProperties": {
+      "members": {
+        "attributeMatchingModel": {
+          "target": "com.amazonaws.entityresolution#AttributeMatchingModel",
+          "traits": {}
+        },
+        "recordMatchingModels": {
+          "target": "com.amazonaws.entityresolution#RecordMatchingModelList",
+          "traits": {}
+        },
+        "ruleDefinitionTypes": {
+          "target": "com.amazonaws.entityresolution#IdMappingWorkflowRuleDefinitionTypeList",
+          "traits": {}
+        },
+        "rules": {
+          "target": "com.amazonaws.entityresolution#RuleList",
+          "traits": {
+            "smithy.api#length": {
+              "max": 25,
+              "min": 1
+            }
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#ProviderServiceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov|aws-cn):(entityresolution):([a-z]{2}-[a-z]{1,10}-[0-9])::providerservice/([a-zA-Z0-9_-]{1,255})/([a-zA-Z0-9_-]{1,255})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#RecordMatchingModel": {
+      "members": {
+        "MANY_SOURCE_TO_ONE_TARGET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANY_SOURCE_TO_ONE_TARGET"
+          }
+        },
+        "ONE_SOURCE_TO_ONE_TARGET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONE_SOURCE_TO_ONE_TARGET"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.entityresolution#RecordMatchingModelList": {
+      "member": {
+        "target": "com.amazonaws.entityresolution#RecordMatchingModel"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.entityresolution#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.entityresolution#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 32
+        },
+        "smithy.api#pattern": "^arn:aws:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#Rule": {
+      "members": {
+        "matchingKeys": {
+          "target": "com.amazonaws.entityresolution#MatchingKeys",
+          "traits": {
+            "smithy.api#length": {
+              "max": 15
+            },
+            "smithy.api#required": {}
+          }
+        },
+        "ruleName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 255
+            },
+            "smithy.api#pattern": "^[a-zA-Z_0-9- ]*$",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#RuleList": {
+      "member": {
+        "target": "com.amazonaws.entityresolution#Rule"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.entityresolution#SchemaAttributeType": {
+      "members": {
+        "ADDRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS"
+          }
+        },
+        "ADDRESS_CITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS_CITY"
+          }
+        },
+        "ADDRESS_COUNTRY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS_COUNTRY"
+          }
+        },
+        "ADDRESS_POSTALCODE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS_POSTALCODE"
+          }
+        },
+        "ADDRESS_STATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS_STATE"
+          }
+        },
+        "ADDRESS_STREET1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS_STREET1"
+          }
+        },
+        "ADDRESS_STREET2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS_STREET2"
+          }
+        },
+        "ADDRESS_STREET3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADDRESS_STREET3"
+          }
+        },
+        "DATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DATE"
+          }
+        },
+        "EMAIL_ADDRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EMAIL_ADDRESS"
+          }
+        },
+        "IPV4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IPV4"
+          }
+        },
+        "IPV6": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IPV6"
+          }
+        },
+        "MAID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MAID"
+          }
+        },
+        "NAME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NAME"
+          }
+        },
+        "NAME_FIRST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NAME_FIRST"
+          }
+        },
+        "NAME_LAST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NAME_LAST"
+          }
+        },
+        "NAME_MIDDLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NAME_MIDDLE"
+          }
+        },
+        "PHONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PHONE"
+          }
+        },
+        "PHONE_COUNTRYCODE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PHONE_COUNTRYCODE"
+          }
+        },
+        "PHONE_NUMBER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PHONE_NUMBER"
+          }
+        },
+        "PROVIDER_ID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVIDER_ID"
+          }
+        },
+        "STRING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STRING"
+          }
+        },
+        "UNIQUE_ID": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNIQUE_ID"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.entityresolution#SchemaInputAttribute": {
+      "members": {
+        "fieldName": {
+          "target": "com.amazonaws.entityresolution#AttributeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "groupName": {
+          "target": "com.amazonaws.entityresolution#AttributeName",
+          "traits": {}
+        },
+        "hashed": {
+          "target": "smithy.api#Boolean",
+          "traits": {}
+        },
+        "matchKey": {
+          "target": "com.amazonaws.entityresolution#AttributeName",
+          "traits": {}
+        },
+        "subType": {
+          "target": "com.amazonaws.entityresolution#AttributeName",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.entityresolution#SchemaAttributeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#SchemaInputAttributes": {
+      "member": {
+        "target": "com.amazonaws.entityresolution#SchemaInputAttribute"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 60,
+          "min": 2
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.entityresolution#SchemaMappingArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov|aws-cn):entityresolution:[a-z]{2}-[a-z]{1,10}-[0-9]:[0-9]{12}:(schemamapping/[a-zA-Z_0-9-]{1,255})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#TagMap": {
+      "key": {
+        "target": "com.amazonaws.entityresolution#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.entityresolution#TagValue"
+      }
+    },
+    "com.amazonaws.entityresolution#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.entityresolution#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.entityresolution#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.entityresolution#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.entityresolution#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

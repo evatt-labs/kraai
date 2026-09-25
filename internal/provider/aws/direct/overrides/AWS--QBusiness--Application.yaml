@@ -1,0 +1,47 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::QBusiness::Application
+read:
+  model: qbusiness/service/2023-11-27/qbusiness-2023-11-27.json
+  operation: GetApplication
+  identifier:
+    ApplicationId: applicationId
+properties:
+  ApplicationArn: applicationArn
+  ApplicationId: applicationId
+  AttachmentsConfiguration:
+    member: attachmentsConfiguration
+    properties:
+      AttachmentsControlMode: attachmentsControlMode
+  AutoSubscriptionConfiguration:
+    member: autoSubscriptionConfiguration
+    properties:
+      AutoSubscribe: autoSubscribe
+      DefaultSubscriptionType: defaultSubscriptionType
+  ClientIdsForOIDC: clientIdsForOIDC
+  CreatedAt: createdAt
+  Description: description
+  DisplayName: displayName
+  EncryptionConfiguration:
+    member: encryptionConfiguration
+    properties:
+      KmsKeyId: kmsKeyId
+  IamIdentityProviderArn: iamIdentityProviderArn
+  IdentityCenterApplicationArn: identityCenterApplicationArn
+  IdentityType: identityType
+  PersonalizationConfiguration:
+    member: personalizationConfiguration
+    properties:
+      PersonalizationControlMode: personalizationControlMode
+  QAppsConfiguration:
+    member: qAppsConfiguration
+    properties:
+      QAppsControlMode: qAppsControlMode
+  QuickSightConfiguration:
+    member: quickSightConfiguration
+    properties:
+      ClientNamespace: clientNamespace
+  RoleArn: roleArn
+  Status: status
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

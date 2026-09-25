@@ -1,0 +1,46 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::Project
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeProject
+  identifier:
+    ProjectArn: ProjectName
+properties:
+  CreationTime: CreationTime
+  ProjectArn: ProjectArn
+  ProjectDescription: ProjectDescription
+  ProjectId: ProjectId
+  ProjectName: ProjectName
+  ProjectStatus: ProjectStatus
+  ServiceCatalogProvisionedProductDetails:
+    member: ServiceCatalogProvisionedProductDetails
+    properties:
+      ProvisionedProductId: ProvisionedProductId
+      ProvisionedProductStatusMessage: ProvisionedProductStatusMessage
+  ServiceCatalogProvisioningDetails:
+    member: ServiceCatalogProvisioningDetails
+    properties:
+      PathId: PathId
+      ProductId: ProductId
+      ProvisioningArtifactId: ProvisioningArtifactId
+      ProvisioningParameters:
+        member: ProvisioningParameters
+        properties:
+          Key: Key
+          Value: Value
+  TemplateProviderDetails:
+    member: TemplateProviderDetails
+    properties:
+      CfnTemplateProviderDetail:
+        member: CfnTemplateProviderDetail
+        properties:
+          Parameters:
+            member: Parameters
+            properties:
+              Key: Key
+              Value: Value
+          RoleARN: RoleARN
+          TemplateName: TemplateName
+          TemplateURL: TemplateURL
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

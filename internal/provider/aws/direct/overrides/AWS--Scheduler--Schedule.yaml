@@ -1,0 +1,97 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Scheduler::Schedule
+read:
+  model: scheduler/service/2021-06-30/scheduler-2021-06-30.json
+  operation: GetSchedule
+  identifier:
+    Name: Name
+properties:
+  Arn: Arn
+  Description: Description
+  EndDate: EndDate
+  FlexibleTimeWindow:
+    member: FlexibleTimeWindow
+    properties:
+      MaximumWindowInMinutes: MaximumWindowInMinutes
+      Mode: Mode
+  GroupName: GroupName
+  KmsKeyArn: KmsKeyArn
+  Name: Name
+  ScheduleExpression: ScheduleExpression
+  ScheduleExpressionTimezone: ScheduleExpressionTimezone
+  StartDate: StartDate
+  State: State
+  Target:
+    member: Target
+    properties:
+      Arn: Arn
+      DeadLetterConfig:
+        member: DeadLetterConfig
+        properties:
+          Arn: Arn
+      EcsParameters:
+        member: EcsParameters
+        properties:
+          CapacityProviderStrategy:
+            member: CapacityProviderStrategy
+            properties:
+              Base: base
+              CapacityProvider: capacityProvider
+              Weight: weight
+          EnableECSManagedTags: EnableECSManagedTags
+          EnableExecuteCommand: EnableExecuteCommand
+          Group: Group
+          LaunchType: LaunchType
+          NetworkConfiguration:
+            member: NetworkConfiguration
+            properties:
+              AwsvpcConfiguration:
+                member: awsvpcConfiguration
+                properties:
+                  AssignPublicIp: AssignPublicIp
+                  SecurityGroups: SecurityGroups
+                  Subnets: Subnets
+          PlacementConstraints:
+            member: PlacementConstraints
+            properties:
+              Expression: expression
+              Type: type
+          PlacementStrategy:
+            member: PlacementStrategy
+            properties:
+              Field: field
+              Type: type
+          PlatformVersion: PlatformVersion
+          PropagateTags: PropagateTags
+          ReferenceId: ReferenceId
+          Tags: Tags
+          TaskCount: TaskCount
+          TaskDefinitionArn: TaskDefinitionArn
+      EventBridgeParameters:
+        member: EventBridgeParameters
+        properties:
+          DetailType: DetailType
+          Source: Source
+      Input: Input
+      KinesisParameters:
+        member: KinesisParameters
+        properties:
+          PartitionKey: PartitionKey
+      RetryPolicy:
+        member: RetryPolicy
+        properties:
+          MaximumEventAgeInSeconds: MaximumEventAgeInSeconds
+          MaximumRetryAttempts: MaximumRetryAttempts
+      RoleArn: RoleArn
+      SageMakerPipelineParameters:
+        member: SageMakerPipelineParameters
+        properties:
+          PipelineParameterList:
+            member: PipelineParameterList
+            properties:
+              Name: Name
+              Value: Value
+      SqsParameters:
+        member: SqsParameters
+        properties:
+          MessageGroupId: MessageGroupId

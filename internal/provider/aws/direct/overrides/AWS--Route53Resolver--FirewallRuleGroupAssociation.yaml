@@ -1,0 +1,24 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53Resolver::FirewallRuleGroupAssociation
+read:
+  model: route53resolver/service/2018-04-01/route53resolver-2018-04-01.json
+  operation: GetFirewallRuleGroupAssociation
+  identifier:
+    Id: FirewallRuleGroupAssociationId
+  response: FirewallRuleGroupAssociation
+properties:
+  Arn: Arn
+  CreationTime: CreationTime
+  CreatorRequestId: CreatorRequestId
+  FirewallRuleGroupId: FirewallRuleGroupId
+  Id: Id
+  ManagedOwnerName: ManagedOwnerName
+  ModificationTime: ModificationTime
+  MutationProtection: MutationProtection
+  Name: Name
+  Priority: Priority
+  Status: Status
+  StatusMessage: StatusMessage
+  VpcId: VpcId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

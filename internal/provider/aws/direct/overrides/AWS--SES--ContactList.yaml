@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SES::ContactList
+read:
+  model: sesv2/service/2019-09-27/sesv2-2019-09-27.json
+  operation: GetContactList
+  identifier:
+    ContactListName: ContactListName
+properties:
+  ContactListName: ContactListName
+  Description: Description
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  Topics:
+    member: Topics
+    properties:
+      DefaultSubscriptionStatus: DefaultSubscriptionStatus
+      Description: Description
+      DisplayName: DisplayName
+      TopicName: TopicName

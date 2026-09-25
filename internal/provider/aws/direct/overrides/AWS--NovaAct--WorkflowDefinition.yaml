@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::NovaAct::WorkflowDefinition
+read:
+  model: nova-act/service/2025-08-22/nova-act-2025-08-22.json
+  operation: GetWorkflowDefinition
+  identifier:
+    Arn: workflowDefinitionName
+properties:
+  Arn: arn
+  CreatedAt: createdAt
+  Description: description
+  ExportConfig:
+    member: exportConfig
+    properties:
+      S3BucketName: s3BucketName
+      S3KeyPrefix: s3KeyPrefix
+  Name: name
+  Status: status

@@ -1,0 +1,52 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Pipes::Pipe
+read:
+  model: pipes/service/2015-10-07/pipes-2015-10-07.json
+  operation: DescribePipe
+  identifier:
+    Name: Name
+properties:
+  Arn: Arn
+  CreationTime: CreationTime
+  CurrentState: CurrentState
+  Description: Description
+  DesiredState: DesiredState
+  Enrichment: Enrichment
+  EnrichmentParameters:
+    member: EnrichmentParameters
+    properties:
+      HttpParameters:
+        member: HttpParameters
+        properties:
+          HeaderParameters: HeaderParameters
+          PathParameterValues: PathParameterValues
+          QueryStringParameters: QueryStringParameters
+      InputTemplate: InputTemplate
+  KmsKeyIdentifier: KmsKeyIdentifier
+  LastModifiedTime: LastModifiedTime
+  LogConfiguration:
+    member: LogConfiguration
+    properties:
+      CloudwatchLogsLogDestination:
+        member: CloudwatchLogsLogDestination
+        properties:
+          LogGroupArn: LogGroupArn
+      FirehoseLogDestination:
+        member: FirehoseLogDestination
+        properties:
+          DeliveryStreamArn: DeliveryStreamArn
+      IncludeExecutionData: IncludeExecutionData
+      Level: Level
+      S3LogDestination:
+        member: S3LogDestination
+        properties:
+          BucketName: BucketName
+          BucketOwner: BucketOwner
+          OutputFormat: OutputFormat
+          Prefix: Prefix
+  Name: Name
+  RoleArn: RoleArn
+  Source: Source
+  StateReason: StateReason
+  Tags: Tags
+  Target: Target

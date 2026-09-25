@@ -1,0 +1,19 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Bedrock::AutomatedReasoningPolicy
+read:
+  model: bedrock/service/2023-04-20/bedrock-2023-04-20.json
+  operation: GetAutomatedReasoningPolicy
+  identifier:
+    PolicyArn: policyArn
+properties:
+  CreatedAt: createdAt
+  DefinitionHash: definitionHash
+  Description: description
+  KmsKeyArn: kmsKeyArn
+  Name: name
+  PolicyArn: policyArn
+  PolicyId: policyId
+  UpdatedAt: updatedAt
+  Version: version
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

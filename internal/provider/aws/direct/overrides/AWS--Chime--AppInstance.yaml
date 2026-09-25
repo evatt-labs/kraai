@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Chime::AppInstance
+read:
+  model: chime-sdk-identity/service/2021-04-20/chime-sdk-identity-2021-04-20.json
+  operation: DescribeAppInstance
+  identifier:
+    AppInstanceArn: AppInstanceArn
+  response: AppInstance
+properties:
+  AppInstanceArn: AppInstanceArn
+  CreatedTimestamp: CreatedTimestamp
+  LastUpdatedTimestamp: LastUpdatedTimestamp
+  Metadata: Metadata
+  Name: Name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

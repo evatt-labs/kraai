@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WorkSpacesWeb::IdentityProvider
+read:
+  model: workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json
+  operation: GetIdentityProvider
+  identifier:
+    IdentityProviderArn: identityProviderArn
+  response: identityProvider
+properties:
+  IdentityProviderArn: identityProviderArn
+  IdentityProviderDetails: identityProviderDetails
+  IdentityProviderName: identityProviderName
+  IdentityProviderType: identityProviderType
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

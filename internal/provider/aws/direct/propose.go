@@ -43,7 +43,11 @@ func propose(files fs.FS, o Override) (Override, error) {
 	if err != nil {
 		return o, err
 	}
+	return proposeWith(&model, &schema, o)
+}
 
+// proposeWith is propose against a model and schema already loaded.
+func proposeWith(model *smithyModel, schema *cfnSchema, o Override) (Override, error) {
 	var op smithyShape
 	for id, s := range model.Shapes {
 		if s.Type == "operation" && strings.HasSuffix(id, "#"+o.Read.Operation) {
@@ -108,11 +112,20 @@ func propose(files fs.FS, o Override) (Override, error) {
 			readable[name] = p
 		}
 	}
-	o.Properties, o.Skip = proposeFields(&model, &schema, readable, resource)
+	o.Properties, o.Skip = proposeFields(model, schema, readable, resource)
 	return o, nil
 }
 
 func proposeFields(model *smithyModel, schema *cfnSchema, props map[string]cfnProperty, structure string) (map[string]Mapping, map[string]string) {
+	return proposeNested(model, schema, props, structure, map[string]bool{})
+}
+
+// proposeNested is proposeFields with the structures already being
+// descended through, so a recursive shape is skipped for a person to map
+// rather than followed forever.
+func proposeNested(model *smithyModel, schema *cfnSchema, props map[string]cfnProperty, structure string, open map[string]bool) (map[string]Mapping, map[string]string) {
+	open[structure] = true
+	defer delete(open, structure)
 	mapped, skipped := map[string]Mapping{}, map[string]string{}
 	shape := model.Shapes[structure]
 	for name, prop := range props {
@@ -138,7 +151,11 @@ func proposeFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			}
 		}
 		if nested := schema.nested(prop); nested != nil && nestedStructure != "" {
-			mapping.Properties, mapping.Skip = proposeFields(model, schema, nested, nestedStructure)
+			if open[nestedStructure] {
+				skipped[name] = "TODO: " + nestedStructure + " is recursive"
+				continue
+			}
+			mapping.Properties, mapping.Skip = proposeNested(model, schema, nested, nestedStructure, open)
 		}
 		mapped[name] = mapping
 	}

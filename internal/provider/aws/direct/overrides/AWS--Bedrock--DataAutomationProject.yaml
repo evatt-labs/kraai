@@ -1,0 +1,220 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Bedrock::DataAutomationProject
+read:
+  model: bedrock-data-automation/service/2023-07-26/bedrock-data-automation-2023-07-26.json
+  operation: GetDataAutomationProject
+  identifier:
+    ProjectArn: projectArn
+  response: project
+properties:
+  CreationTime: creationTime
+  CustomOutputConfiguration:
+    member: customOutputConfiguration
+    properties:
+      Blueprints:
+        member: blueprints
+        properties:
+          BlueprintArn: blueprintArn
+          BlueprintStage: blueprintStage
+          BlueprintVersion: blueprintVersion
+  KmsEncryptionContext: kmsEncryptionContext
+  KmsKeyId: kmsKeyId
+  LastModifiedTime: lastModifiedTime
+  OverrideConfiguration:
+    member: overrideConfiguration
+    properties:
+      Audio:
+        member: audio
+        properties:
+          LanguageConfiguration:
+            member: languageConfiguration
+            properties:
+              GenerativeOutputLanguage: generativeOutputLanguage
+              IdentifyMultipleLanguages: identifyMultipleLanguages
+              InputLanguages: inputLanguages
+          ModalityProcessing:
+            member: modalityProcessing
+            properties:
+              State: state
+          SensitiveDataConfiguration:
+            member: sensitiveDataConfiguration
+            properties:
+              DetectionMode: detectionMode
+              DetectionScope: detectionScope
+              PiiEntitiesConfiguration:
+                member: piiEntitiesConfiguration
+                properties:
+                  PiiEntityTypes: piiEntityTypes
+                  RedactionMaskMode: redactionMaskMode
+      Document:
+        member: document
+        properties:
+          ModalityProcessing:
+            member: modalityProcessing
+            properties:
+              State: state
+          SensitiveDataConfiguration:
+            member: sensitiveDataConfiguration
+            properties:
+              DetectionMode: detectionMode
+              DetectionScope: detectionScope
+              PiiEntitiesConfiguration:
+                member: piiEntitiesConfiguration
+                properties:
+                  PiiEntityTypes: piiEntityTypes
+                  RedactionMaskMode: redactionMaskMode
+          Splitter:
+            member: splitter
+            properties:
+              State: state
+      Image:
+        member: image
+        properties:
+          ModalityProcessing:
+            member: modalityProcessing
+            properties:
+              State: state
+          SensitiveDataConfiguration:
+            member: sensitiveDataConfiguration
+            properties:
+              DetectionMode: detectionMode
+              DetectionScope: detectionScope
+              PiiEntitiesConfiguration:
+                member: piiEntitiesConfiguration
+                properties:
+                  PiiEntityTypes: piiEntityTypes
+                  RedactionMaskMode: redactionMaskMode
+      ModalityRouting:
+        member: modalityRouting
+        properties:
+          jpeg: jpeg
+          mov: mov
+          mp4: mp4
+          png: png
+      Video:
+        member: video
+        properties:
+          ModalityProcessing:
+            member: modalityProcessing
+            properties:
+              State: state
+          SensitiveDataConfiguration:
+            member: sensitiveDataConfiguration
+            properties:
+              DetectionMode: detectionMode
+              DetectionScope: detectionScope
+              PiiEntitiesConfiguration:
+                member: piiEntitiesConfiguration
+                properties:
+                  PiiEntityTypes: piiEntityTypes
+                  RedactionMaskMode: redactionMaskMode
+  ProjectArn: projectArn
+  ProjectDescription: projectDescription
+  ProjectName: projectName
+  ProjectStage: projectStage
+  ProjectType: projectType
+  StandardOutputConfiguration:
+    member: standardOutputConfiguration
+    properties:
+      Audio:
+        member: audio
+        properties:
+          Extraction:
+            member: extraction
+            properties:
+              Category:
+                member: category
+                properties:
+                  State: state
+                  TypeConfiguration:
+                    member: typeConfiguration
+                    properties:
+                      Transcript:
+                        member: transcript
+                        properties:
+                          ChannelLabeling:
+                            member: channelLabeling
+                            properties:
+                              State: state
+                          SpeakerLabeling:
+                            member: speakerLabeling
+                            properties:
+                              State: state
+                  Types: types
+          GenerativeField:
+            member: generativeField
+            properties:
+              State: state
+              Types: types
+      Document:
+        member: document
+        properties:
+          Extraction:
+            member: extraction
+            properties:
+              BoundingBox:
+                member: boundingBox
+                properties:
+                  State: state
+              Granularity:
+                member: granularity
+                properties:
+                  Types: types
+          GenerativeField:
+            member: generativeField
+            properties:
+              State: state
+          OutputFormat:
+            member: outputFormat
+            properties:
+              AdditionalFileFormat:
+                member: additionalFileFormat
+                properties:
+                  State: state
+              TextFormat:
+                member: textFormat
+                properties:
+                  Types: types
+      Image:
+        member: image
+        properties:
+          Extraction:
+            member: extraction
+            properties:
+              BoundingBox:
+                member: boundingBox
+                properties:
+                  State: state
+              Category:
+                member: category
+                properties:
+                  State: state
+                  Types: types
+          GenerativeField:
+            member: generativeField
+            properties:
+              State: state
+              Types: types
+      Video:
+        member: video
+        properties:
+          Extraction:
+            member: extraction
+            properties:
+              BoundingBox:
+                member: boundingBox
+                properties:
+                  State: state
+              Category:
+                member: category
+                properties:
+                  State: state
+                  Types: types
+          GenerativeField:
+            member: generativeField
+            properties:
+              State: state
+              Types: types
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

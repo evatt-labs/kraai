@@ -1,0 +1,1380 @@
+{
+  "shapes": {
+    "com.amazonaws.mediatailor#AccessConfiguration": {
+      "members": {
+        "AccessType": {
+          "target": "com.amazonaws.mediatailor#AccessType",
+          "traits": {}
+        },
+        "SecretsManagerAccessTokenConfiguration": {
+          "target": "com.amazonaws.mediatailor#SecretsManagerAccessTokenConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#AccessType": {
+      "members": {
+        "AUTODETECT_SIGV4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTODETECT_SIGV4"
+          }
+        },
+        "S3_SIGV4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "S3_SIGV4"
+          }
+        },
+        "SECRETS_MANAGER_ACCESS_TOKEN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SECRETS_MANAGER_ACCESS_TOKEN"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediatailor#AdMarkupType": {
+      "members": {
+        "DATERANGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DATERANGE"
+          }
+        },
+        "SCTE35_ENHANCED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SCTE35_ENHANCED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediatailor#Audiences": {
+      "member": {
+        "target": "smithy.api#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediatailor#AwsServiceRequestConfiguration": {
+      "members": {
+        "Body": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "Headers": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "MethodType": {
+          "target": "com.amazonaws.mediatailor#MethodType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Output": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "RequestTimeoutMilliseconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Runtime": {
+          "target": "com.amazonaws.mediatailor#RuntimeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TargetRegion": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#length": {
+              "max": 256,
+              "min": 1
+            },
+            "smithy.api#required": {}
+          }
+        },
+        "TargetService": {
+          "target": "com.amazonaws.mediatailor#AwsTargetService",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Url": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#AwsTargetService": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mediatailor#ChannelState": {
+      "members": {
+        "RUNNING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RUNNING"
+          }
+        },
+        "STOPPED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STOPPED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediatailor#ConcurrentExecutorConfiguration": {
+      "members": {
+        "FunctionList": {
+          "target": "com.amazonaws.mediatailor#__listOfFunctionsRef",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MaxConcurrency": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Output": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Runtime": {
+          "target": "com.amazonaws.mediatailor#RuntimeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TimeoutMilliseconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#CustomOutputConfiguration": {
+      "members": {
+        "Output": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "Runtime": {
+          "target": "com.amazonaws.mediatailor#RuntimeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#DashPlaylistSettings": {
+      "members": {
+        "ManifestWindowSeconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {}
+        },
+        "MinBufferTimeSeconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {}
+        },
+        "MinUpdatePeriodSeconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {}
+        },
+        "SuggestedPresentationDelaySeconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#DefaultSegmentDeliveryConfiguration": {
+      "members": {
+        "BaseUrl": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#DescribeChannel": {
+      "input": {
+        "target": "com.amazonaws.mediatailor#DescribeChannelRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediatailor#DescribeChannelResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to retrieve the channel with the specified channel name",
+          "relativeDocumentation": "channel-channelname.html",
+          "resources": {
+            "required": {
+              "channel": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/channel/{ChannelName}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediatailor#DescribeChannelRequest": {
+      "members": {
+        "ChannelName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#DescribeChannelResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "Audiences": {
+          "target": "com.amazonaws.mediatailor#Audiences",
+          "traits": {}
+        },
+        "ChannelName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "ChannelState": {
+          "target": "com.amazonaws.mediatailor#ChannelState",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.mediatailor#__timestampUnix",
+          "traits": {}
+        },
+        "FillerSlate": {
+          "target": "com.amazonaws.mediatailor#SlateSource",
+          "traits": {}
+        },
+        "LastModifiedTime": {
+          "target": "com.amazonaws.mediatailor#__timestampUnix",
+          "traits": {}
+        },
+        "LogConfiguration": {
+          "target": "com.amazonaws.mediatailor#LogConfigurationForChannel",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Outputs": {
+          "target": "com.amazonaws.mediatailor#ResponseOutputs",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#unstable": {}
+          }
+        },
+        "PlaybackMode": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#unstable": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "Tier": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#unstable": {}
+          }
+        },
+        "TimeShiftConfiguration": {
+          "target": "com.amazonaws.mediatailor#TimeShiftConfiguration",
+          "traits": {}
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#DescribeSourceLocation": {
+      "input": {
+        "target": "com.amazonaws.mediatailor#DescribeSourceLocationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediatailor#DescribeSourceLocationResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to retrieve the source location with the specified source location name",
+          "relativeDocumentation": "sourcelocation-sourcelocationname.html",
+          "resources": {
+            "required": {
+              "sourceLocation": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/sourceLocation/{SourceLocationName}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediatailor#DescribeSourceLocationRequest": {
+      "members": {
+        "SourceLocationName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#DescribeSourceLocationResponse": {
+      "members": {
+        "AccessConfiguration": {
+          "target": "com.amazonaws.mediatailor#AccessConfiguration",
+          "traits": {}
+        },
+        "Arn": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.mediatailor#__timestampUnix",
+          "traits": {}
+        },
+        "DefaultSegmentDeliveryConfiguration": {
+          "target": "com.amazonaws.mediatailor#DefaultSegmentDeliveryConfiguration",
+          "traits": {}
+        },
+        "HttpConfiguration": {
+          "target": "com.amazonaws.mediatailor#HttpConfiguration",
+          "traits": {}
+        },
+        "LastModifiedTime": {
+          "target": "com.amazonaws.mediatailor#__timestampUnix",
+          "traits": {}
+        },
+        "SegmentDeliveryConfigurations": {
+          "target": "com.amazonaws.mediatailor#__listOfSegmentDeliveryConfiguration",
+          "traits": {}
+        },
+        "SourceLocationName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#FunctionRef": {
+      "members": {
+        "Alias": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "FunctionId": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "RunCondition": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#FunctionType": {
+      "members": {
+        "AWS_SERVICE_REQUEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_SERVICE_REQUEST"
+          }
+        },
+        "CONCURRENT_EXECUTOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONCURRENT_EXECUTOR"
+          }
+        },
+        "CUSTOM_OUTPUT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CUSTOM_OUTPUT"
+          }
+        },
+        "HTTP_REQUEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTP_REQUEST"
+          }
+        },
+        "SEQUENTIAL_EXECUTOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SEQUENTIAL_EXECUTOR"
+          }
+        },
+        "VAST_REQUEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VAST_REQUEST"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediatailor#GetFunction": {
+      "input": {
+        "target": "com.amazonaws.mediatailor#GetFunctionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediatailor#GetFunctionResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/function/{FunctionId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediatailor#GetFunctionRequest": {
+      "members": {
+        "FunctionId": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.mediatailor#FunctionResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#GetFunctionResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "AwsServiceRequestConfiguration": {
+          "target": "com.amazonaws.mediatailor#AwsServiceRequestConfiguration",
+          "traits": {}
+        },
+        "ConcurrentExecutorConfiguration": {
+          "target": "com.amazonaws.mediatailor#ConcurrentExecutorConfiguration",
+          "traits": {}
+        },
+        "CustomOutputConfiguration": {
+          "target": "com.amazonaws.mediatailor#CustomOutputConfiguration",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "FunctionId": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "FunctionType": {
+          "target": "com.amazonaws.mediatailor#FunctionType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "HttpRequestConfiguration": {
+          "target": "com.amazonaws.mediatailor#HttpRequestConfiguration",
+          "traits": {}
+        },
+        "SequentialExecutorConfiguration": {
+          "target": "com.amazonaws.mediatailor#SequentialExecutorConfiguration",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "VastRequestConfiguration": {
+          "target": "com.amazonaws.mediatailor#VastRequestConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.mediatailor#FunctionResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#HlsPlaylistSettings": {
+      "members": {
+        "AdMarkupType": {
+          "target": "com.amazonaws.mediatailor#adMarkupTypes",
+          "traits": {}
+        },
+        "ManifestWindowSeconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#HttpConfiguration": {
+      "members": {
+        "BaseUrl": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#HttpRequestConfiguration": {
+      "members": {
+        "Body": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "Headers": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "MethodType": {
+          "target": "com.amazonaws.mediatailor#MethodType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Output": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "RequestTimeoutMilliseconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Runtime": {
+          "target": "com.amazonaws.mediatailor#RuntimeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Url": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#LogConfigurationForChannel": {
+      "members": {
+        "LogTypes": {
+          "target": "com.amazonaws.mediatailor#LogTypes",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#LogType": {
+      "members": {
+        "AS_RUN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AS_RUN"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediatailor#LogTypes": {
+      "member": {
+        "target": "com.amazonaws.mediatailor#LogType"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediatailor#MediaTailor": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mediatailor#DescribeChannel"
+        },
+        {
+          "target": "com.amazonaws.mediatailor#DescribeSourceLocation"
+        },
+        {
+          "target": "com.amazonaws.mediatailor#GetFunction"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "mediatailor",
+          "cloudFormationName": "MediaTailor",
+          "cloudTrailEventSource": "mediatailor.amazonaws.com",
+          "endpointPrefix": "api.mediatailor",
+          "sdkId": "MediaTailor"
+        },
+        "aws.api#tagEnabled": {},
+        "aws.auth#sigv4": {
+          "name": "mediatailor"
+        },
+        "aws.endpoints#standardRegionalEndpoints": {
+          "partitionSpecialCases": {
+            "aws": [
+              {
+                "dualStack": true,
+                "endpoint": "https://mediatailor.{region}.{dualStackDnsSuffix}"
+              }
+            ]
+          }
+        },
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "Authorization",
+            "Date",
+            "X-Amz-Date",
+            "X-Amz-Security-Token",
+            "X-Amz-Target",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-errormessage",
+            "x-amzn-trace-id",
+            "x-amz-apigw-id",
+            "date"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "AWS MediaTailor",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "name"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                "aws"
+                              ],
+                              "fn": "stringEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://mediatailor.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://api.mediatailor-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://api.mediatailor-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://api.mediatailor.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://api.mediatailor.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-04-23"
+    },
+    "com.amazonaws.mediatailor#MethodType": {
+      "members": {
+        "GET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GET"
+          }
+        },
+        "POST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "POST"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediatailor#ResponseOutputItem": {
+      "members": {
+        "DashPlaylistSettings": {
+          "target": "com.amazonaws.mediatailor#DashPlaylistSettings",
+          "traits": {}
+        },
+        "DualStackPlaybackUrl": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "HlsPlaylistSettings": {
+          "target": "com.amazonaws.mediatailor#HlsPlaylistSettings",
+          "traits": {}
+        },
+        "ManifestName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "PlaybackUrl": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SourceGroup": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#ResponseOutputs": {
+      "member": {
+        "target": "com.amazonaws.mediatailor#ResponseOutputItem"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediatailor#RuntimeType": {
+      "members": {
+        "JSONATA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "JSONATA"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediatailor#SecretsManagerAccessTokenConfiguration": {
+      "members": {
+        "HeaderName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "SecretArn": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "SecretStringKey": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#SegmentDeliveryConfiguration": {
+      "members": {
+        "BaseUrl": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#SequentialExecutorConfiguration": {
+      "members": {
+        "FunctionList": {
+          "target": "com.amazonaws.mediatailor#__listOfFunctionsRef",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Output": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "Runtime": {
+          "target": "com.amazonaws.mediatailor#RuntimeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TimeoutMilliseconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#SlateSource": {
+      "members": {
+        "SourceLocationName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "VodSourceName": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#TimeShiftConfiguration": {
+      "members": {
+        "MaxTimeDelaySeconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#VastRequestConfiguration": {
+      "members": {
+        "Body": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {}
+        },
+        "Headers": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "MethodType": {
+          "target": "com.amazonaws.mediatailor#MethodType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Output": {
+          "target": "com.amazonaws.mediatailor#__mapOf__string",
+          "traits": {}
+        },
+        "RequestTimeoutMilliseconds": {
+          "target": "com.amazonaws.mediatailor#__integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Runtime": {
+          "target": "com.amazonaws.mediatailor#RuntimeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Url": {
+          "target": "com.amazonaws.mediatailor#__string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediatailor#__integer": {
+      "type": "integer"
+    },
+    "com.amazonaws.mediatailor#__listOfFunctionsRef": {
+      "member": {
+        "target": "com.amazonaws.mediatailor#FunctionRef"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediatailor#__listOfSegmentDeliveryConfiguration": {
+      "member": {
+        "target": "com.amazonaws.mediatailor#SegmentDeliveryConfiguration"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediatailor#__mapOf__string": {
+      "key": {
+        "target": "com.amazonaws.mediatailor#__string"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.mediatailor#__string"
+      }
+    },
+    "com.amazonaws.mediatailor#__string": {
+      "type": "string"
+    },
+    "com.amazonaws.mediatailor#__timestampUnix": {
+      "traits": {
+        "smithy.api#timestampFormat": "epoch-seconds"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.mediatailor#adMarkupTypes": {
+      "member": {
+        "target": "com.amazonaws.mediatailor#AdMarkupType"
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

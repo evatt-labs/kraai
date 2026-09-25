@@ -1,0 +1,648 @@
+{
+  "shapes": {
+    "com.amazonaws.appsync#AWSDeepdishControlPlaneService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.appsync#GetDomainName"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "appsync",
+          "cloudFormationName": "AppSync",
+          "cloudTrailEventSource": "appsync.amazonaws.com",
+          "endpointPrefix": "appsync",
+          "sdkId": "AppSync"
+        },
+        "aws.auth#sigv4": {
+          "name": "appsync"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS AppSync",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://appsync.amazonaws.com"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://appsync-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://appsync-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://appsync.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://appsync.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-07-25"
+    },
+    "com.amazonaws.appsync#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#BadRequestDetail": {
+      "members": {
+        "codeErrors": {
+          "target": "com.amazonaws.appsync#CodeErrors",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#BadRequestException": {
+      "members": {
+        "detail": {
+          "target": "com.amazonaws.appsync#BadRequestDetail"
+        },
+        "message": {
+          "target": "com.amazonaws.appsync#ErrorMessage"
+        },
+        "reason": {
+          "target": "com.amazonaws.appsync#BadRequestReason"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#BadRequestReason": {
+      "members": {
+        "CODE_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CODE_ERROR"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.appsync#CertificateArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z-]*:(acm|iam):[a-z0-9-]*:\\d{12}:(certificate|server-certificate)/[0-9A-Za-z_/-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.appsync#CodeError": {
+      "members": {
+        "errorType": {
+          "target": "com.amazonaws.appsync#String",
+          "traits": {}
+        },
+        "location": {
+          "target": "com.amazonaws.appsync#CodeErrorLocation",
+          "traits": {}
+        },
+        "value": {
+          "target": "com.amazonaws.appsync#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#CodeErrorColumn": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.appsync#CodeErrorLine": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.appsync#CodeErrorLocation": {
+      "members": {
+        "column": {
+          "target": "com.amazonaws.appsync#CodeErrorColumn",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "line": {
+          "target": "com.amazonaws.appsync#CodeErrorLine",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "span": {
+          "target": "com.amazonaws.appsync#CodeErrorSpan",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#CodeErrorSpan": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.appsync#CodeErrors": {
+      "member": {
+        "target": "com.amazonaws.appsync#CodeError"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.appsync#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        },
+        "smithy.api#pattern": "^.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.appsync#DomainName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 253,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(\\*[\\w\\d-]*\\.)?([\\w\\d-]+\\.)+[\\w\\d-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.appsync#DomainNameConfig": {
+      "members": {
+        "appsyncDomainName": {
+          "target": "com.amazonaws.appsync#String",
+          "traits": {}
+        },
+        "certificateArn": {
+          "target": "com.amazonaws.appsync#CertificateArn",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.appsync#Description",
+          "traits": {}
+        },
+        "domainName": {
+          "target": "com.amazonaws.appsync#DomainName",
+          "traits": {}
+        },
+        "domainNameArn": {
+          "target": "com.amazonaws.appsync#String",
+          "traits": {}
+        },
+        "hostedZoneId": {
+          "target": "com.amazonaws.appsync#String",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.appsync#TagMap"
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.appsync#GetDomainName": {
+      "errors": [
+        {
+          "target": "com.amazonaws.appsync#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.appsync#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.appsync#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.appsync#NotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.appsync#GetDomainNameRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.appsync#GetDomainNameResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v1/domainnames/{domainName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.appsync#GetDomainNameRequest": {
+      "members": {
+        "domainName": {
+          "target": "com.amazonaws.appsync#DomainName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#GetDomainNameResponse": {
+      "members": {
+        "domainNameConfig": {
+          "target": "com.amazonaws.appsync#DomainNameConfig",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#InternalFailureException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#NotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#String": {
+      "type": "string"
+    },
+    "com.amazonaws.appsync#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(?!aws:)[ a-zA-Z+-=._:/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.appsync#TagMap": {
+      "key": {
+        "target": "com.amazonaws.appsync#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.appsync#TagValue"
+      }
+    },
+    "com.amazonaws.appsync#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\s\\w+-=\\.:/@]*$"
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IVS::PublicKey
+read:
+  model: ivs-realtime/service/2020-07-14/ivs-realtime-2020-07-14.json
+  operation: GetPublicKey
+  identifier:
+    Arn: arn
+  response: publicKey
+properties:
+  Arn: arn
+  Fingerprint: fingerprint
+  Name: name
+  PublicKeyMaterial: publicKeyMaterial
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

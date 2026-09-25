@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::AppIntegrations::EventIntegration
+read:
+  model: appintegrations/service/2020-07-29/appintegrations-2020-07-29.json
+  operation: GetEventIntegration
+  identifier:
+    Name: Name
+properties:
+  Description: Description
+  EventBridgeBus: EventBridgeBus
+  EventFilter:
+    member: EventFilter
+    properties:
+      Source: Source
+  EventIntegrationArn: EventIntegrationArn
+  Name: Name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

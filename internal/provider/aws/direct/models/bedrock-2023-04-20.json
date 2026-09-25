@@ -15,6 +15,9 @@
     "com.amazonaws.bedrock#AmazonBedrockControlPlaneService": {
       "operations": [
         {
+          "target": "com.amazonaws.bedrock#GetAutomatedReasoningPolicy"
+        },
+        {
           "target": "com.amazonaws.bedrock#GetPromptRouter"
         },
         {
@@ -36,194 +39,6 @@
         ],
         "smithy.api#httpBearerAuth": {},
         "smithy.api#title": "Amazon Bedrock",
-        "smithy.rules#endpointBdd": {
-          "conditions": [
-            {
-              "argv": [
-                {
-                  "ref": "Endpoint"
-                }
-              ],
-              "fn": "isSet"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "Region"
-                }
-              ],
-              "fn": "isSet"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "Region"
-                }
-              ],
-              "assign": "PartitionResult",
-              "fn": "aws.partition"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "UseFIPS"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "ref": "UseDualStack"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "argv": [
-                    {
-                      "ref": "PartitionResult"
-                    },
-                    "supportsDualStack"
-                  ],
-                  "fn": "getAttr"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            },
-            {
-              "argv": [
-                {
-                  "argv": [
-                    {
-                      "ref": "PartitionResult"
-                    },
-                    "supportsFIPS"
-                  ],
-                  "fn": "getAttr"
-                },
-                true
-              ],
-              "fn": "booleanEquals"
-            }
-          ],
-          "nodeCount": 13,
-          "nodes": "/////wAAAAH/////AAAAAAAAAAwAAAADAAAAAQAAAAQF9eELAAAAAgAAAAUF9eELAAAAAwAAAAgAAAAGAAAABAAAAAcF9eEKAAAABQX14QgF9eEJAAAABAAAAAoAAAAJAAAABgX14QYF9eEHAAAABQAAAAsF9eEFAAAABgX14QQF9eEFAAAAAwX14QEAAAANAAAABAX14QIF9eED",
-          "parameters": {
-            "Endpoint": {
-              "builtIn": "SDK::Endpoint",
-              "documentation": "Override the endpoint used to send this request",
-              "required": false,
-              "type": "string"
-            },
-            "Region": {
-              "builtIn": "AWS::Region",
-              "documentation": "The AWS region used to dispatch the request.",
-              "required": false,
-              "type": "string"
-            },
-            "UseDualStack": {
-              "builtIn": "AWS::UseDualStack",
-              "default": false,
-              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
-              "required": true,
-              "type": "boolean"
-            },
-            "UseFIPS": {
-              "builtIn": "AWS::UseFIPS",
-              "default": false,
-              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
-              "required": true,
-              "type": "boolean"
-            }
-          },
-          "results": [
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": {
-                  "ref": "Endpoint"
-                }
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://bedrock-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://bedrock-fips.{Region}.{PartitionResult#dnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "FIPS is enabled but this partition does not support FIPS",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://bedrock.{Region}.{PartitionResult#dualStackDnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "DualStack is enabled but this partition does not support DualStack",
-              "type": "error"
-            },
-            {
-              "conditions": [],
-              "endpoint": {
-                "headers": {},
-                "properties": {},
-                "url": "https://bedrock.{Region}.{PartitionResult#dnsSuffix}"
-              },
-              "type": "endpoint"
-            },
-            {
-              "conditions": [],
-              "error": "Invalid Configuration: Missing Region",
-              "type": "error"
-            }
-          ],
-          "root": 2,
-          "version": "1.1"
-        },
         "smithy.rules#endpointRuleSet": {
           "parameters": {
             "Endpoint": {
@@ -573,280 +388,175 @@
             }
           ],
           "version": "1.0"
-        },
-        "smithy.rules#endpointTests": {
-          "testCases": [
-            {
-              "documentation": "For region us-east-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.us-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.us-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.us-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.us-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.cn-north-1.api.amazonwebservices.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.cn-north-1.amazonaws.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.cn-north-1.api.amazonwebservices.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region cn-north-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.cn-north-1.amazonaws.com.cn"
-                }
-              },
-              "params": {
-                "Region": "cn-north-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.us-gov-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": true,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.us-gov-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack enabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.us-gov-east-1.api.aws"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-gov-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.us-gov-east-1.amazonaws.com"
-                }
-              },
-              "params": {
-                "Region": "us-gov-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-iso-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.us-iso-east-1.c2s.ic.gov"
-                }
-              },
-              "params": {
-                "Region": "us-iso-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-iso-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.us-iso-east-1.c2s.ic.gov"
-                }
-              },
-              "params": {
-                "Region": "us-iso-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For region us-isob-east-1 with FIPS enabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock-fips.us-isob-east-1.sc2s.sgov.gov"
-                }
-              },
-              "params": {
-                "Region": "us-isob-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For region us-isob-east-1 with FIPS disabled and DualStack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://bedrock.us-isob-east-1.sc2s.sgov.gov"
-                }
-              },
-              "params": {
-                "Region": "us-isob-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with region set and fips disabled and dualstack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://example.com"
-                }
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with region not set and fips disabled and dualstack disabled",
-              "expect": {
-                "endpoint": {
-                  "url": "https://example.com"
-                }
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "UseDualStack": false,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "For custom endpoint with fips enabled and dualstack disabled",
-              "expect": {
-                "error": "Invalid Configuration: FIPS and custom endpoint are not supported"
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": false,
-                "UseFIPS": true
-              }
-            },
-            {
-              "documentation": "For custom endpoint with fips disabled and dualstack enabled",
-              "expect": {
-                "error": "Invalid Configuration: Dualstack and custom endpoint are not supported"
-              },
-              "params": {
-                "Endpoint": "https://example.com",
-                "Region": "us-east-1",
-                "UseDualStack": true,
-                "UseFIPS": false
-              }
-            },
-            {
-              "documentation": "Missing region",
-              "expect": {
-                "error": "Invalid Configuration: Missing Region"
-              }
-            }
-          ],
-          "version": "1.0"
         }
       },
       "type": "service",
       "version": "2023-04-20"
+    },
+    "com.amazonaws.bedrock#AutomatedReasoningPolicyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:bedrock:[a-z0-9-]{1,20}:[0-9]{12}:automated-reasoning-policy/[a-z0-9]{12}(:([1-9][0-9]{0,11}))?$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrock#AutomatedReasoningPolicyDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024
+        },
+        "smithy.api#pattern": "^[\\s\\S]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrock#AutomatedReasoningPolicyHash": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 128
+        },
+        "smithy.api#pattern": "^[0-9a-z]{128}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrock#AutomatedReasoningPolicyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-z0-9]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrock#AutomatedReasoningPolicyName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z-_ ]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrock#AutomatedReasoningPolicyVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12
+        },
+        "smithy.api#pattern": "^([1-9][0-9]{0,11})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrock#GetAutomatedReasoningPolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.bedrock#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.bedrock#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.bedrock#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.bedrock#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.bedrock#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.bedrock#GetAutomatedReasoningPolicyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.bedrock#GetAutomatedReasoningPolicyResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/automated-reasoning-policies/{policyArn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.bedrock#GetAutomatedReasoningPolicyRequest": {
+      "members": {
+        "policyArn": {
+          "target": "com.amazonaws.bedrock#AutomatedReasoningPolicyArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrock#GetAutomatedReasoningPolicyResponse": {
+      "members": {
+        "createdAt": {
+          "target": "com.amazonaws.bedrock#Timestamp",
+          "traits": {}
+        },
+        "definitionHash": {
+          "target": "com.amazonaws.bedrock#AutomatedReasoningPolicyHash",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.bedrock#AutomatedReasoningPolicyDescription",
+          "traits": {}
+        },
+        "kmsKeyArn": {
+          "target": "com.amazonaws.bedrock#KmsKeyArn",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.bedrock#AutomatedReasoningPolicyName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "policyArn": {
+          "target": "com.amazonaws.bedrock#AutomatedReasoningPolicyArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "policyId": {
+          "target": "com.amazonaws.bedrock#AutomatedReasoningPolicyId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "updatedAt": {
+          "target": "com.amazonaws.bedrock#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "version": {
+          "target": "com.amazonaws.bedrock#AutomatedReasoningPolicyVersion",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.bedrock#GetPromptRouter": {
       "errors": [
@@ -970,6 +680,16 @@
         "smithy.api#httpError": 500
       },
       "type": "structure"
+    },
+    "com.amazonaws.bedrock#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:kms:[a-zA-Z0-9-]*:[0-9]{12}:key/[a-zA-Z0-9-]{36}$"
+      },
+      "type": "string"
     },
     "com.amazonaws.bedrock#ListPromptRouters": {
       "errors": [

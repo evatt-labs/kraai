@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::M2::Application
+read:
+  model: m2/service/2021-04-28/m2-2021-04-28.json
+  operation: GetApplication
+  identifier:
+    ApplicationArn: applicationId
+properties:
+  ApplicationArn: applicationArn
+  ApplicationId: applicationId
+  Description: description
+  EngineType: engineType
+  KmsKeyId: kmsKeyId
+  Name: name
+  RoleArn: roleArn
+  Tags: tags

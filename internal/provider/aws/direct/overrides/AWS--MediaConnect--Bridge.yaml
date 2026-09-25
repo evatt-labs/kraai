@@ -1,0 +1,67 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaConnect::Bridge
+read:
+  model: mediaconnect/service/2018-11-14/mediaconnect-2018-11-14.json
+  operation: DescribeBridge
+  identifier:
+    BridgeArn: BridgeArn
+  response: Bridge
+properties:
+  BridgeArn: BridgeArn
+  BridgeState: BridgeState
+  EgressGatewayBridge:
+    member: EgressGatewayBridge
+    properties:
+      MaxBitrate: MaxBitrate
+  IngressGatewayBridge:
+    member: IngressGatewayBridge
+    properties:
+      MaxBitrate: MaxBitrate
+      MaxOutputs: MaxOutputs
+  Name: Name
+  Outputs:
+    member: Outputs
+    properties:
+      NetworkOutput:
+        member: NetworkOutput
+        properties:
+          IpAddress: IpAddress
+          Name: Name
+          NetworkName: NetworkName
+          Port: Port
+          Protocol: Protocol
+          Ttl: Ttl
+  PlacementArn: PlacementArn
+  SourceFailoverConfig:
+    member: SourceFailoverConfig
+    properties:
+      FailoverMode: FailoverMode
+      SourcePriority:
+        member: SourcePriority
+        properties:
+          PrimarySource: PrimarySource
+      State: State
+  Sources:
+    member: Sources
+    properties:
+      FlowSource:
+        member: FlowSource
+        properties:
+          FlowArn: FlowArn
+          FlowVpcInterfaceAttachment:
+            member: FlowVpcInterfaceAttachment
+            properties:
+              VpcInterfaceName: VpcInterfaceName
+          Name: Name
+      NetworkSource:
+        member: NetworkSource
+        properties:
+          MulticastIp: MulticastIp
+          MulticastSourceSettings:
+            member: MulticastSourceSettings
+            properties:
+              MulticastSourceIp: MulticastSourceIp
+          Name: Name
+          NetworkName: NetworkName
+          Port: Port
+          Protocol: Protocol

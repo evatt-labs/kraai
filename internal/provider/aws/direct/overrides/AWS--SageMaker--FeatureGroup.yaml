@@ -1,0 +1,58 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::FeatureGroup
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeFeatureGroup
+  identifier:
+    FeatureGroupName: FeatureGroupName
+properties:
+  CreationTime: CreationTime
+  Description: Description
+  EventTimeFeatureName: EventTimeFeatureName
+  FeatureDefinitions:
+    member: FeatureDefinitions
+    properties:
+      FeatureName: FeatureName
+      FeatureType: FeatureType
+  FeatureGroupName: FeatureGroupName
+  FeatureGroupStatus: FeatureGroupStatus
+  OfflineStoreConfig:
+    member: OfflineStoreConfig
+    properties:
+      DataCatalogConfig:
+        member: DataCatalogConfig
+        properties:
+          Catalog: Catalog
+          Database: Database
+          TableName: TableName
+      DisableGlueTableCreation: DisableGlueTableCreation
+      S3StorageConfig:
+        member: S3StorageConfig
+        properties:
+          KmsKeyId: KmsKeyId
+          S3Uri: S3Uri
+      TableFormat: TableFormat
+  OnlineStoreConfig:
+    member: OnlineStoreConfig
+    properties:
+      EnableOnlineStore: EnableOnlineStore
+      SecurityConfig:
+        member: SecurityConfig
+        properties:
+          KmsKeyId: KmsKeyId
+      StorageType: StorageType
+      TtlDuration:
+        member: TtlDuration
+        properties:
+          Unit: Unit
+          Value: Value
+  RecordIdentifierFeatureName: RecordIdentifierFeatureName
+  RoleArn: RoleArn
+  ThroughputConfig:
+    member: ThroughputConfig
+    properties:
+      ProvisionedReadCapacityUnits: ProvisionedReadCapacityUnits
+      ProvisionedWriteCapacityUnits: ProvisionedWriteCapacityUnits
+      ThroughputMode: ThroughputMode
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

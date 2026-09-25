@@ -1,0 +1,49 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataSync::LocationFSxONTAP
+read:
+  model: datasync/service/2018-11-09/datasync-2018-11-09.json
+  operation: DescribeLocationFsxOntap
+  identifier:
+    LocationArn: LocationArn
+properties:
+  FsxFilesystemArn: FsxFilesystemArn
+  LocationArn: LocationArn
+  LocationUri: LocationUri
+  Protocol:
+    member: Protocol
+    properties:
+      NFS:
+        member: NFS
+        properties:
+          MountOptions:
+            member: MountOptions
+            properties:
+              Version: Version
+      SMB:
+        member: SMB
+        properties:
+          CmkSecretConfig:
+            member: CmkSecretConfig
+            properties:
+              KmsKeyArn: KmsKeyArn
+              SecretArn: SecretArn
+          CustomSecretConfig:
+            member: CustomSecretConfig
+            properties:
+              SecretAccessRoleArn: SecretAccessRoleArn
+              SecretArn: SecretArn
+          Domain: Domain
+          ManagedSecretConfig:
+            member: ManagedSecretConfig
+            properties:
+              SecretArn: SecretArn
+          MountOptions:
+            member: MountOptions
+            properties:
+              Version: Version
+          Password: Password
+          User: User
+  SecurityGroupArns: SecurityGroupArns
+  StorageVirtualMachineArn: StorageVirtualMachineArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

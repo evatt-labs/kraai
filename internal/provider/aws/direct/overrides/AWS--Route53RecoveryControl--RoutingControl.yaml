@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53RecoveryControl::RoutingControl
+read:
+  model: route53-recovery-control-config/service/2020-11-02/route53-recovery-control-config-2020-11-02.json
+  operation: DescribeRoutingControl
+  identifier:
+    RoutingControlArn: RoutingControlArn
+  response: RoutingControl
+properties:
+  ControlPanelArn: ControlPanelArn
+  Name: Name
+  RoutingControlArn: RoutingControlArn
+  Status: Status

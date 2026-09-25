@@ -1,0 +1,35 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaTailor::SourceLocation
+read:
+  model: mediatailor/service/2018-04-23/mediatailor-2018-04-23.json
+  operation: DescribeSourceLocation
+  identifier:
+    SourceLocationName: SourceLocationName
+properties:
+  AccessConfiguration:
+    member: AccessConfiguration
+    properties:
+      AccessType: AccessType
+      SecretsManagerAccessTokenConfiguration:
+        member: SecretsManagerAccessTokenConfiguration
+        properties:
+          HeaderName: HeaderName
+          SecretArn: SecretArn
+          SecretStringKey: SecretStringKey
+  Arn: Arn
+  DefaultSegmentDeliveryConfiguration:
+    member: DefaultSegmentDeliveryConfiguration
+    properties:
+      BaseUrl: BaseUrl
+  HttpConfiguration:
+    member: HttpConfiguration
+    properties:
+      BaseUrl: BaseUrl
+  SegmentDeliveryConfigurations:
+    member: SegmentDeliveryConfigurations
+    properties:
+      BaseUrl: BaseUrl
+      Name: Name
+  SourceLocationName: SourceLocationName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

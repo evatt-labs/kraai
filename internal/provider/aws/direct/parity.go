@@ -164,8 +164,10 @@ type TypeEvidence struct {
 	SmithyCommit string `json:"smithyCommit"`
 	Date         string `json:"date"`
 	Region       string `json:"region"`
-	// Outcome is parity, differs, or oracle-unavailable when Cloud Control
-	// could not read the instances itself, which proves nothing either way.
+	// Outcome is parity; differs; direct-unreadable when the direct read
+	// failed; or, proving nothing either way, oracle-unavailable when Cloud
+	// Control could not read the instances, unlisted when it could not list
+	// them, and no-instances when the account had none.
 	Outcome   string `json:"outcome"`
 	Instances int    `json:"instances"`
 	// Compared is every property compared on at least one instance.
@@ -282,4 +284,32 @@ func (b byKey) Less(i, j int) bool { return b.keys[i] < b.keys[j] }
 func (b byKey) Swap(i, j int) {
 	b.keys[i], b.keys[j] = b.keys[j], b.keys[i]
 	b.items[i], b.items[j] = b.items[j], b.items[i]
+}
+
+// inconclusive is every outcome that proves nothing either way.
+var inconclusive = map[string]bool{"no-instances": true, "unlisted": true, "oracle-unavailable": true}
+
+// MergeEvidence is prior updated by run. A type run this time takes its new
+// record, unless that record is inconclusive and prior holds one that is
+// not: an account that happens to have no instances today does not undo
+// what an earlier run showed. A type not run keeps its prior record, and a
+// type with no reader any more is dropped.
+func MergeEvidence(prior, run Evidence, readers map[string]bool) Evidence {
+	byType := map[string]TypeEvidence{}
+	for _, e := range prior.Types {
+		if readers[e.Type] {
+			byType[e.Type] = e
+		}
+	}
+	for _, e := range run.Types {
+		if old, ok := byType[e.Type]; ok && inconclusive[e.Outcome] && !inconclusive[old.Outcome] {
+			continue
+		}
+		byType[e.Type] = e
+	}
+	var out Evidence
+	for _, typeName := range sortedKeys(byType) {
+		out.Types = append(out.Types, byType[typeName])
+	}
+	return out
 }

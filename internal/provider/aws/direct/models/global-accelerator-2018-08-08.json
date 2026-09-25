@@ -1,0 +1,539 @@
+{
+  "shapes": {
+    "com.amazonaws.globalaccelerator#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#Attachment": {
+      "members": {
+        "AttachmentArn": {
+          "target": "com.amazonaws.globalaccelerator#GenericString",
+          "traits": {}
+        },
+        "CreatedTime": {
+          "target": "com.amazonaws.globalaccelerator#Timestamp",
+          "traits": {}
+        },
+        "LastModifiedTime": {
+          "target": "com.amazonaws.globalaccelerator#Timestamp",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.globalaccelerator#AttachmentName",
+          "traits": {}
+        },
+        "Principals": {
+          "target": "com.amazonaws.globalaccelerator#Principals",
+          "traits": {}
+        },
+        "Resources": {
+          "target": "com.amazonaws.globalaccelerator#Resources",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#AttachmentName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\S\\s]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.globalaccelerator#AttachmentNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#DescribeCrossAccountAttachment": {
+      "errors": [
+        {
+          "target": "com.amazonaws.globalaccelerator#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.globalaccelerator#AttachmentNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.globalaccelerator#InternalServiceErrorException"
+        },
+        {
+          "target": "com.amazonaws.globalaccelerator#InvalidArgumentException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.globalaccelerator#DescribeCrossAccountAttachmentRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.globalaccelerator#DescribeCrossAccountAttachmentResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.globalaccelerator#DescribeCrossAccountAttachmentRequest": {
+      "members": {
+        "AttachmentArn": {
+          "target": "com.amazonaws.globalaccelerator#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#DescribeCrossAccountAttachmentResponse": {
+      "members": {
+        "CrossAccountAttachment": {
+          "target": "com.amazonaws.globalaccelerator#Attachment",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.globalaccelerator#GenericString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.globalaccelerator#GlobalAccelerator_V20180706": {
+      "operations": [
+        {
+          "target": "com.amazonaws.globalaccelerator#DescribeCrossAccountAttachment"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "globalaccelerator",
+          "cloudFormationName": "GlobalAccelerator",
+          "cloudTrailEventSource": "globalaccelerator.amazonaws.com",
+          "docId": "globalaccelerator-2018-08-08",
+          "endpointPrefix": "globalaccelerator",
+          "sdkId": "Global Accelerator"
+        },
+        "aws.auth#sigv4": {
+          "name": "globalaccelerator"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "AWS Global Accelerator",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://globalaccelerator-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://globalaccelerator-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://globalaccelerator.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://globalaccelerator.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-08-08"
+    },
+    "com.amazonaws.globalaccelerator#InternalServiceErrorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#InvalidArgumentException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#Principal": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(^\\d{12}$|arn:.*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.globalaccelerator#Principals": {
+      "member": {
+        "target": "com.amazonaws.globalaccelerator#Principal"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.globalaccelerator#Resource": {
+      "members": {
+        "Cidr": {
+          "target": "com.amazonaws.globalaccelerator#GenericString",
+          "traits": {}
+        },
+        "EndpointId": {
+          "target": "com.amazonaws.globalaccelerator#GenericString",
+          "traits": {
+            "smithy.api#addedDefault": {},
+            "smithy.api#default": ""
+          }
+        },
+        "Region": {
+          "target": "com.amazonaws.globalaccelerator#GenericString",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#Resources": {
+      "member": {
+        "target": "com.amazonaws.globalaccelerator#Resource"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.globalaccelerator#Timestamp": {
+      "type": "timestamp"
+    }
+  },
+  "smithy": "2.0"
+}

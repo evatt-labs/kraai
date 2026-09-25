@@ -1,0 +1,21 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Route53Resolver::FirewallDomainList
+read:
+  model: route53resolver/service/2018-04-01/route53resolver-2018-04-01.json
+  operation: GetFirewallDomainList
+  identifier:
+    Id: FirewallDomainListId
+  response: FirewallDomainList
+properties:
+  Arn: Arn
+  CreationTime: CreationTime
+  CreatorRequestId: CreatorRequestId
+  DomainCount: DomainCount
+  Id: Id
+  ManagedOwnerName: ManagedOwnerName
+  ModificationTime: ModificationTime
+  Name: Name
+  Status: Status
+  StatusMessage: StatusMessage
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

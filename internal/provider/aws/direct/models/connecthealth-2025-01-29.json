@@ -1,0 +1,466 @@
+{
+  "shapes": {
+    "com.amazonaws.connecthealth#ConnectHealth": {
+      "operations": [
+        {
+          "target": "com.amazonaws.connecthealth#GetDomain"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "health-agent",
+          "cloudTrailEventSource": "health-agent.amazonaws.com",
+          "endpointPrefix": "health-agent",
+          "sdkId": "ConnectHealth"
+        },
+        "aws.auth#sigv4": {
+          "name": "health-agent"
+        },
+        "aws.endpoints#dualStackOnlyEndpoints": {},
+        "aws.endpoints#standardRegionalEndpoints": {},
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {
+          "eventStreamHttp": [
+            "h2"
+          ],
+          "http": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "content-length",
+            "authorization",
+            "x-amz-date",
+            "x-amz-security-token",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-api-key"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id",
+            "Access-Control-Allow-Origin"
+          ],
+          "maxAge": 86400,
+          "origin": "*"
+        },
+        "smithy.api#title": "Connect Health",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://health-agent-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://health-agent.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2025-01-29"
+    },
+    "com.amazonaws.connecthealth#DomainArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:aws:health-agent:[a-z0-9-]+:[0-9]{12}:domain/(hai-|dom-)[a-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.connecthealth#DomainId": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::HealthAgent::Domain"
+        },
+        "smithy.api#length": {
+          "max": 25,
+          "min": 20
+        },
+        "smithy.api#pattern": "^(hai-|dom-)[a-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.connecthealth#DomainName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.connecthealth#DomainStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.connecthealth#EncryptionContext": {
+      "members": {
+        "encryptionType": {
+          "target": "com.amazonaws.connecthealth#EncryptionType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "kmsKeyArn": {
+          "target": "com.amazonaws.connecthealth#KmsKeyArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.connecthealth#EncryptionType": {
+      "members": {
+        "AWS_OWNED_KEY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_OWNED_KEY"
+          }
+        },
+        "CUSTOMER_MANAGED_KEY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CUSTOMER_MANAGED_KEY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.connecthealth#GetDomain": {
+      "errors": [
+        {
+          "target": "com.amazonaws.connecthealth#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.connecthealth#GetDomainInput"
+      },
+      "output": {
+        "target": "com.amazonaws.connecthealth#GetDomainOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "method": "GET",
+          "uri": "/domain/{domainId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.connecthealth#GetDomainInput": {
+      "members": {
+        "domainId": {
+          "target": "com.amazonaws.connecthealth#DomainId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.connecthealth#GetDomainOutput": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.connecthealth#DomainArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "domainId": {
+          "target": "com.amazonaws.connecthealth#DomainId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "encryptionContext": {
+          "target": "com.amazonaws.connecthealth#EncryptionContext",
+          "traits": {}
+        },
+        "kmsKeyArn": {
+          "target": "com.amazonaws.connecthealth#KmsKeyArn",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.connecthealth#DomainName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.connecthealth#DomainStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.connecthealth#TagMap",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        },
+        "webAppConfiguration": {
+          "target": "com.amazonaws.connecthealth#WebAppConfiguration",
+          "traits": {}
+        },
+        "webAppUrl": {
+          "target": "com.amazonaws.connecthealth#WebAppUrl",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.connecthealth#KmsKeyArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:aws:kms:[a-z0-9-]+:[0-9]{12}:key/[a-f0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.connecthealth#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.connecthealth#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.connecthealth#TagMap": {
+      "key": {
+        "target": "com.amazonaws.connecthealth#TagKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.connecthealth#TagValue"
+      }
+    },
+    "com.amazonaws.connecthealth#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.connecthealth#WebAppConfiguration": {
+      "members": {
+        "ehrRole": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 2048,
+              "min": 1
+            },
+            "smithy.api#pattern": "^arn:aws:iam::[0-9]{12}:role/.+$",
+            "smithy.api#required": {}
+          }
+        },
+        "idcApplicationId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 256,
+              "min": 1
+            },
+            "smithy.api#required": {}
+          }
+        },
+        "idcRegion": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#length": {
+              "max": 64,
+              "min": 1
+            },
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.connecthealth#WebAppUrl": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,19 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::HealthAgent::Domain
+read:
+  model: connecthealth/service/2025-01-29/connecthealth-2025-01-29.json
+  operation: GetDomain
+  identifier:
+    Arn: domainId
+properties:
+  Arn: arn
+  CreatedAt: createdAt
+  DomainId: domainId
+  EncryptionContext:
+    member: encryptionContext
+    properties:
+      EncryptionType: encryptionType
+  Name: name
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

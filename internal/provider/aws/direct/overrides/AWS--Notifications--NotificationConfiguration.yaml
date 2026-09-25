@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Notifications::NotificationConfiguration
+read:
+  model: notifications/service/2018-05-10/notifications-2018-05-10.json
+  operation: GetNotificationConfiguration
+  identifier:
+    Arn: arn
+properties:
+  AggregationDuration: aggregationDuration
+  Arn: arn
+  CreationTime: creationTime
+  Description: description
+  Name: name
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

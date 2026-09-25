@@ -1,0 +1,81 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::PCS::Cluster
+read:
+  model: pcs/service/2023-02-10/pcs-2023-02-10.json
+  operation: GetCluster
+  identifier:
+    Arn: clusterIdentifier
+  response: cluster
+properties:
+  Arn: arn
+  Endpoints:
+    member: endpoints
+    properties:
+      Ipv6Address: ipv6Address
+      Port: port
+      PrivateIpAddress: privateIpAddress
+      PublicIpAddress: publicIpAddress
+      Type: type
+  ErrorInfo:
+    member: errorInfo
+    properties:
+      Code: code
+      Message: message
+  Id: id
+  Name: name
+  Networking:
+    member: networking
+    properties:
+      NetworkType: networkType
+      SecurityGroupIds: securityGroupIds
+      SubnetIds: subnetIds
+  Scheduler:
+    member: scheduler
+    properties:
+      Type: type
+      Version: version
+  Size: size
+  SlurmConfiguration:
+    member: slurmConfiguration
+    properties:
+      Accounting:
+        member: accounting
+        properties:
+          DefaultPurgeTimeInDays: defaultPurgeTimeInDays
+          Mode: mode
+      AuthKey:
+        member: authKey
+        properties:
+          SecretArn: secretArn
+          SecretVersion: secretVersion
+      CgroupCustomSettings:
+        member: cgroupCustomSettings
+        properties:
+          ParameterName: parameterName
+          ParameterValue: parameterValue
+      JwtAuth:
+        member: jwtAuth
+        properties:
+          JwtKey:
+            member: jwtKey
+            properties:
+              SecretArn: secretArn
+              SecretVersion: secretVersion
+      ScaleDownIdleTimeInSeconds: scaleDownIdleTimeInSeconds
+      SlurmCustomSettings:
+        member: slurmCustomSettings
+        properties:
+          ParameterName: parameterName
+          ParameterValue: parameterValue
+      SlurmRest:
+        member: slurmRest
+        properties:
+          Mode: mode
+      SlurmdbdCustomSettings:
+        member: slurmdbdCustomSettings
+        properties:
+          ParameterName: parameterName
+          ParameterValue: parameterValue
+  Status: status
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

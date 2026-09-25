@@ -1,0 +1,965 @@
+{
+  "shapes": {
+    "com.amazonaws.qbusiness#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#ApplicationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1284,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#ApplicationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 36
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{35}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#ApplicationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#ApplicationStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#AppliedAttachmentsConfiguration": {
+      "members": {
+        "attachmentsControlMode": {
+          "target": "com.amazonaws.qbusiness#AttachmentsControlMode",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#AttachmentsControlMode": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#AutoSubscriptionConfiguration": {
+      "members": {
+        "autoSubscribe": {
+          "target": "com.amazonaws.qbusiness#AutoSubscriptionStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "defaultSubscriptionType": {
+          "target": "com.amazonaws.qbusiness#SubscriptionType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#AutoSubscriptionStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#ClientIdForOIDC": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_.:/()*?=-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#ClientIdsForOIDC": {
+      "member": {
+        "target": "com.amazonaws.qbusiness#ClientIdForOIDC"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.qbusiness#ClientNamespace": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9._-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\s\\S]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#EncryptionConfiguration": {
+      "members": {
+        "kmsKeyId": {
+          "target": "com.amazonaws.qbusiness#KmsKeyId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#ErrorCode": {
+      "members": {
+        "INTERNAL_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InternalError"
+          }
+        },
+        "INVALID_REQUEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InvalidRequest"
+          }
+        },
+        "RESOURCE_INACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ResourceInactive"
+          }
+        },
+        "RESOURCE_NOT_FOUND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ResourceNotFound"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#ErrorDetail": {
+      "members": {
+        "errorCode": {
+          "target": "com.amazonaws.qbusiness#ErrorCode",
+          "traits": {}
+        },
+        "errorMessage": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#ErrorMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\s\\S]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#ExpertQ": {
+      "operations": [
+        {
+          "target": "com.amazonaws.qbusiness#GetApplication"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "qbusiness",
+          "cloudFormationName": "QBusiness",
+          "cloudTrailEventSource": "qbusiness.amazonaws.com",
+          "sdkId": "QBusiness"
+        },
+        "aws.auth#sigv4": {
+          "name": "qbusiness"
+        },
+        "aws.protocols#restJson1": {
+          "eventStreamHttp": [
+            "h2"
+          ],
+          "http": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "smithy.api#title": "QBusiness",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            true,
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "supportsDualStack"
+                              ],
+                              "fn": "getAttr"
+                            }
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://qbusiness-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://qbusiness.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://qbusiness-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://qbusiness.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2023-11-27"
+    },
+    "com.amazonaws.qbusiness#GetApplication": {
+      "errors": [
+        {
+          "target": "com.amazonaws.qbusiness#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.qbusiness#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.qbusiness#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.qbusiness#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.qbusiness#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.qbusiness#GetApplicationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.qbusiness#GetApplicationResponse"
+      },
+      "traits": {
+        "aws.iam#requiredActions": [
+          "qbusiness:ListTagsForResource"
+        ],
+        "smithy.api#http": {
+          "method": "GET",
+          "uri": "/applications/{applicationId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.qbusiness#GetApplicationRequest": {
+      "members": {
+        "applicationId": {
+          "target": "com.amazonaws.qbusiness#ApplicationId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#GetApplicationResponse": {
+      "members": {
+        "applicationArn": {
+          "target": "com.amazonaws.qbusiness#ApplicationArn",
+          "traits": {}
+        },
+        "applicationId": {
+          "target": "com.amazonaws.qbusiness#ApplicationId",
+          "traits": {}
+        },
+        "attachmentsConfiguration": {
+          "target": "com.amazonaws.qbusiness#AppliedAttachmentsConfiguration",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "autoSubscriptionConfiguration": {
+          "target": "com.amazonaws.qbusiness#AutoSubscriptionConfiguration",
+          "traits": {}
+        },
+        "clientIdsForOIDC": {
+          "target": "com.amazonaws.qbusiness#ClientIdsForOIDC",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.qbusiness#Timestamp",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.qbusiness#Description",
+          "traits": {}
+        },
+        "displayName": {
+          "target": "com.amazonaws.qbusiness#ApplicationName",
+          "traits": {}
+        },
+        "encryptionConfiguration": {
+          "target": "com.amazonaws.qbusiness#EncryptionConfiguration",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "create-and-read"
+          }
+        },
+        "error": {
+          "target": "com.amazonaws.qbusiness#ErrorDetail",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "iamIdentityProviderArn": {
+          "target": "com.amazonaws.qbusiness#IAMIdentityProviderArn",
+          "traits": {}
+        },
+        "identityCenterApplicationArn": {
+          "target": "com.amazonaws.qbusiness#IdcApplicationArn",
+          "traits": {}
+        },
+        "identityType": {
+          "target": "com.amazonaws.qbusiness#IdentityType",
+          "traits": {}
+        },
+        "personalizationConfiguration": {
+          "target": "com.amazonaws.qbusiness#PersonalizationConfiguration",
+          "traits": {}
+        },
+        "qAppsConfiguration": {
+          "target": "com.amazonaws.qbusiness#QAppsConfiguration",
+          "traits": {}
+        },
+        "quickSightConfiguration": {
+          "target": "com.amazonaws.qbusiness#QuickSightConfiguration",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.qbusiness#RoleArn",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.qbusiness#ApplicationStatus",
+          "traits": {}
+        },
+        "updatedAt": {
+          "target": "com.amazonaws.qbusiness#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#IAMIdentityProviderArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9-\\.]{1,63}:iam::\\d{12}:(oidc-provider|saml-provider)/[a-zA-Z0-9_\\.\\/@\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#IdcApplicationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1224,
+          "min": 10
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9-\\.]{1,63}:sso::\\d{12}:application/(sso)?ins-[a-zA-Z0-9-.]{16}/apl-[a-zA-Z0-9]{16}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#IdentityType": {
+      "members": {
+        "ANONYMOUS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ANONYMOUS"
+          }
+        },
+        "AWS_IAM_IDC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_IAM_IDC"
+          }
+        },
+        "AWS_IAM_IDP_OIDC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_IAM_IDP_OIDC"
+          }
+        },
+        "AWS_IAM_IDP_SAML": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_IAM_IDP_SAML"
+          }
+        },
+        "AWS_QUICKSIGHT_IDP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_QUICKSIGHT_IDP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#KmsKeyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#PersonalizationConfiguration": {
+      "members": {
+        "personalizationControlMode": {
+          "target": "com.amazonaws.qbusiness#PersonalizationControlMode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#PersonalizationControlMode": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#QAppsConfiguration": {
+      "members": {
+        "qAppsControlMode": {
+          "target": "com.amazonaws.qbusiness#QAppsControlMode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#QAppsControlMode": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#QuickSightConfiguration": {
+      "members": {
+        "clientNamespace": {
+          "target": "com.amazonaws.qbusiness#ClientNamespace",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1284,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#String": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.qbusiness#SubscriptionType": {
+      "members": {
+        "Q_BUSINESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Q_BUSINESS"
+          }
+        },
+        "Q_LITE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Q_LITE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.qbusiness#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.qbusiness#ValidationException": {
+      "members": {
+        "fields": {
+          "target": "com.amazonaws.qbusiness#ValidationExceptionFields",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.qbusiness#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#ValidationExceptionFields": {
+      "member": {
+        "target": "com.amazonaws.qbusiness#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.qbusiness#ValidationExceptionReason": {
+      "members": {
+        "CANNOT_PARSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CANNOT_PARSE"
+          }
+        },
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FIELD_VALIDATION_FAILED"
+          }
+        },
+        "UNKNOWN_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNKNOWN_OPERATION"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

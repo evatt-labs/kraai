@@ -1,0 +1,1737 @@
+{
+  "shapes": {
+    "com.amazonaws.licensemanager#AWSLicenseManager": {
+      "operations": [
+        {
+          "target": "com.amazonaws.licensemanager#GetGrant"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#GetLicense"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#GetLicenseAssetGroup"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#GetLicenseAssetRuleset"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "license-manager",
+          "cloudFormationName": "LicenseManager",
+          "cloudTrailEventSource": "license-manager.amazonaws.com",
+          "endpointPrefix": "license-manager",
+          "sdkId": "License Manager"
+        },
+        "aws.auth#sigv4": {
+          "name": "license-manager"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "AWS License Manager",
+        "smithy.api#xmlNamespace": {
+          "uri": "https://license-manager.amazonaws.com/doc/2018_08_01"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://license-manager-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://license-manager-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://license-manager.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://license-manager.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-08-01"
+    },
+    "com.amazonaws.licensemanager#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServiceAccessDenied",
+          "httpResponseCode": 401
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#ActivationOverrideBehavior": {
+      "members": {
+        "ALL_GRANTS_PERMITTED_BY_ISSUER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALL_GRANTS_PERMITTED_BY_ISSUER"
+          }
+        },
+        "DISTRIBUTED_GRANTS_ONLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISTRIBUTED_GRANTS_ONLY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.licensemanager#AllowedOperation": {
+      "members": {
+        "CHECKOUT_BORROW_LICENSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CheckoutBorrowLicense"
+          }
+        },
+        "CHECKOUT_LICENSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CheckoutLicense"
+          }
+        },
+        "CHECK_IN_LICENSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CheckInLicense"
+          }
+        },
+        "CREATE_GRANT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CreateGrant"
+          }
+        },
+        "CREATE_TOKEN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CreateToken"
+          }
+        },
+        "EXTEND_CONSUMPTION_LICENSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ExtendConsumptionLicense"
+          }
+        },
+        "LIST_PURCHASED_LICENSES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ListPurchasedLicenses"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.licensemanager#AllowedOperationList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#AllowedOperation"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 8,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#AndRuleStatement": {
+      "members": {
+        "MatchingRuleStatements": {
+          "target": "com.amazonaws.licensemanager#MatchingRuleStatementList",
+          "traits": {}
+        },
+        "ScriptRuleStatements": {
+          "target": "com.amazonaws.licensemanager#ScriptRuleStatementList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:aws[a-zA-Z-]*:[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,1023}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.licensemanager#AuthorizationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AuthorizationFailure",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#BorrowConfiguration": {
+      "members": {
+        "AllowEarlyCheckIn": {
+          "target": "com.amazonaws.licensemanager#BoxBoolean",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MaxTimeToLiveInMinutes": {
+          "target": "com.amazonaws.licensemanager#BoxInteger",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#BoxBoolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.licensemanager#BoxInteger": {
+      "type": "integer"
+    },
+    "com.amazonaws.licensemanager#ConsumptionConfiguration": {
+      "members": {
+        "BorrowConfiguration": {
+          "target": "com.amazonaws.licensemanager#BorrowConfiguration",
+          "traits": {}
+        },
+        "ProvisionalConfiguration": {
+          "target": "com.amazonaws.licensemanager#ProvisionalConfiguration",
+          "traits": {}
+        },
+        "RenewType": {
+          "target": "com.amazonaws.licensemanager#RenewType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#DateTime": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.licensemanager#DatetimeRange": {
+      "members": {
+        "Begin": {
+          "target": "com.amazonaws.licensemanager#ISO8601DateTime",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "End": {
+          "target": "com.amazonaws.licensemanager#ISO8601DateTime",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#Entitlement": {
+      "members": {
+        "AllowCheckIn": {
+          "target": "com.amazonaws.licensemanager#BoxBoolean",
+          "traits": {}
+        },
+        "MaxCount": {
+          "target": "com.amazonaws.licensemanager#Long",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Overage": {
+          "target": "com.amazonaws.licensemanager#BoxBoolean",
+          "traits": {}
+        },
+        "Unit": {
+          "target": "com.amazonaws.licensemanager#EntitlementUnit",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#EntitlementList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#Entitlement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#EntitlementUnit": {
+      "members": {
+        "BITS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bits"
+          }
+        },
+        "BITS_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bits/Second"
+          }
+        },
+        "BYTES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bytes"
+          }
+        },
+        "BYTES_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bytes/Second"
+          }
+        },
+        "COUNT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Count"
+          }
+        },
+        "COUNT_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Count/Second"
+          }
+        },
+        "GIGABITS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabits"
+          }
+        },
+        "GIGABITS_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabits/Second"
+          }
+        },
+        "GIGABYTES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabytes"
+          }
+        },
+        "GIGABYTES_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabytes/Second"
+          }
+        },
+        "KILOBITS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobits"
+          }
+        },
+        "KILOBITS_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobits/Second"
+          }
+        },
+        "KILOBYTES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobytes"
+          }
+        },
+        "KILOBYTES_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobytes/Second"
+          }
+        },
+        "MEGABITS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabits"
+          }
+        },
+        "MEGABITS_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabits/Second"
+          }
+        },
+        "MEGABYTES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabytes"
+          }
+        },
+        "MEGABYTES_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabytes/Second"
+          }
+        },
+        "MICROSECONDS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Microseconds"
+          }
+        },
+        "MILLISECONDS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Milliseconds"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "None"
+          }
+        },
+        "PERCENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Percent"
+          }
+        },
+        "SECONDS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Seconds"
+          }
+        },
+        "TERABITS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabits"
+          }
+        },
+        "TERABITS_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabits/Second"
+          }
+        },
+        "TERABYTES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabytes"
+          }
+        },
+        "TERABYTES_PER_SECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabytes/Second"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.licensemanager#GetGrant": {
+      "errors": [
+        {
+          "target": "com.amazonaws.licensemanager#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#AuthorizationException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#RateLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ResourceLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ServerInternalException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.licensemanager#GetGrantRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.licensemanager#GetGrantResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.licensemanager#GetGrantRequest": {
+      "members": {
+        "GrantArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GetGrantResponse": {
+      "members": {
+        "Grant": {
+          "target": "com.amazonaws.licensemanager#Grant",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GetLicense": {
+      "errors": [
+        {
+          "target": "com.amazonaws.licensemanager#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#AuthorizationException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#RateLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ServerInternalException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.licensemanager#GetLicenseRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.licensemanager#GetLicenseResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.licensemanager#GetLicenseAssetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.licensemanager#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#AuthorizationException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#RateLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ServerInternalException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.licensemanager#GetLicenseAssetGroupRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.licensemanager#GetLicenseAssetGroupResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.licensemanager#GetLicenseAssetGroupRequest": {
+      "members": {
+        "LicenseAssetGroupArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GetLicenseAssetGroupResponse": {
+      "members": {
+        "LicenseAssetGroup": {
+          "target": "com.amazonaws.licensemanager#LicenseAssetGroup",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GetLicenseAssetRuleset": {
+      "errors": [
+        {
+          "target": "com.amazonaws.licensemanager#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#AuthorizationException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#RateLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ServerInternalException"
+        },
+        {
+          "target": "com.amazonaws.licensemanager#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.licensemanager#GetLicenseAssetRulesetRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.licensemanager#GetLicenseAssetRulesetResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.licensemanager#GetLicenseAssetRulesetRequest": {
+      "members": {
+        "LicenseAssetRulesetArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GetLicenseAssetRulesetResponse": {
+      "members": {
+        "LicenseAssetRuleset": {
+          "target": "com.amazonaws.licensemanager#LicenseAssetRuleset",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GetLicenseRequest": {
+      "members": {
+        "LicenseArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GetLicenseResponse": {
+      "members": {
+        "License": {
+          "target": "com.amazonaws.licensemanager#License",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#Grant": {
+      "members": {
+        "GrantArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "GrantName": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "GrantStatus": {
+          "target": "com.amazonaws.licensemanager#GrantStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "GrantedOperations": {
+          "target": "com.amazonaws.licensemanager#AllowedOperationList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "GranteePrincipalArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "HomeRegion": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "LicenseArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Options": {
+          "target": "com.amazonaws.licensemanager#Options",
+          "traits": {}
+        },
+        "ParentArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StatusReason": {
+          "target": "com.amazonaws.licensemanager#StatusReasonMessage",
+          "traits": {}
+        },
+        "Version": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#GrantStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "FAILED_WORKFLOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED_WORKFLOW"
+          }
+        },
+        "PENDING_ACCEPT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_ACCEPT"
+          }
+        },
+        "PENDING_DELETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_DELETE"
+          }
+        },
+        "PENDING_WORKFLOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_WORKFLOW"
+          }
+        },
+        "REJECTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REJECTED"
+          }
+        },
+        "WORKFLOW_COMPLETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WORKFLOW_COMPLETED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.licensemanager#ISO8601DateTime": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])T(2[0-3]|[0-1][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z|[+-](?:2[ 0-3]|[0-1][0-9]):[0-5][0-9])+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.licensemanager#InstanceRuleStatement": {
+      "members": {
+        "AndRuleStatement": {
+          "target": "com.amazonaws.licensemanager#AndRuleStatement",
+          "traits": {}
+        },
+        "MatchingRuleStatement": {
+          "target": "com.amazonaws.licensemanager#MatchingRuleStatement",
+          "traits": {}
+        },
+        "OrRuleStatement": {
+          "target": "com.amazonaws.licensemanager#OrRuleStatement",
+          "traits": {}
+        },
+        "ScriptRuleStatement": {
+          "target": "com.amazonaws.licensemanager#ScriptRuleStatement",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#InvalidParameterValueException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidParameterValueProvided",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#IssuerDetails": {
+      "members": {
+        "KeyFingerprint": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "SignKey": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#License": {
+      "members": {
+        "Beneficiary": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "ConsumptionConfiguration": {
+          "target": "com.amazonaws.licensemanager#ConsumptionConfiguration",
+          "traits": {}
+        },
+        "CreateTime": {
+          "target": "com.amazonaws.licensemanager#ISO8601DateTime",
+          "traits": {}
+        },
+        "Entitlements": {
+          "target": "com.amazonaws.licensemanager#EntitlementList",
+          "traits": {}
+        },
+        "HomeRegion": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "Issuer": {
+          "target": "com.amazonaws.licensemanager#IssuerDetails",
+          "traits": {}
+        },
+        "LicenseArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {}
+        },
+        "LicenseMetadata": {
+          "target": "com.amazonaws.licensemanager#MetadataList",
+          "traits": {}
+        },
+        "LicenseName": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "ProductName": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "ProductSKU": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.licensemanager#LicenseStatus",
+          "traits": {}
+        },
+        "Validity": {
+          "target": "com.amazonaws.licensemanager#DatetimeRange",
+          "traits": {}
+        },
+        "Version": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetGroup": {
+      "members": {
+        "AssociatedLicenseAssetRulesetARNs": {
+          "target": "com.amazonaws.licensemanager#LicenseAssetRulesetArnList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "LatestResourceDiscoveryTime": {
+          "target": "com.amazonaws.licensemanager#DateTime",
+          "traits": {}
+        },
+        "LatestUsageAnalysisTime": {
+          "target": "com.amazonaws.licensemanager#DateTime",
+          "traits": {}
+        },
+        "LicenseAssetGroupArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "LicenseAssetGroupConfigurations": {
+          "target": "com.amazonaws.licensemanager#LicenseAssetGroupConfigurationList",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Properties": {
+          "target": "com.amazonaws.licensemanager#LicenseAssetGroupPropertyList",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.licensemanager#LicenseAssetGroupStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StatusMessage": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetGroupConfiguration": {
+      "members": {
+        "UsageDimension": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetGroupConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#LicenseAssetGroupConfiguration"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetGroupProperty": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetGroupPropertyList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#LicenseAssetGroupProperty"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetGroupStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetRule": {
+      "members": {
+        "RuleStatement": {
+          "target": "com.amazonaws.licensemanager#RuleStatement",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetRuleList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#LicenseAssetRule"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetRuleset": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "LicenseAssetRulesetArn": {
+          "target": "com.amazonaws.licensemanager#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Rules": {
+          "target": "com.amazonaws.licensemanager#LicenseAssetRuleList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseAssetRulesetArnList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#Arn"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#LicenseConfigurationRuleStatement": {
+      "members": {
+        "AndRuleStatement": {
+          "target": "com.amazonaws.licensemanager#AndRuleStatement",
+          "traits": {}
+        },
+        "MatchingRuleStatement": {
+          "target": "com.amazonaws.licensemanager#MatchingRuleStatement",
+          "traits": {}
+        },
+        "OrRuleStatement": {
+          "target": "com.amazonaws.licensemanager#OrRuleStatement",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseRuleStatement": {
+      "members": {
+        "AndRuleStatement": {
+          "target": "com.amazonaws.licensemanager#AndRuleStatement",
+          "traits": {}
+        },
+        "MatchingRuleStatement": {
+          "target": "com.amazonaws.licensemanager#MatchingRuleStatement",
+          "traits": {}
+        },
+        "OrRuleStatement": {
+          "target": "com.amazonaws.licensemanager#OrRuleStatement",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#LicenseStatus": {
+      "members": {
+        "AVAILABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AVAILABLE"
+          }
+        },
+        "DEACTIVATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEACTIVATED"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "EXPIRED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXPIRED"
+          }
+        },
+        "PENDING_AVAILABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_AVAILABLE"
+          }
+        },
+        "PENDING_DELETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_DELETE"
+          }
+        },
+        "SUSPENDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUSPENDED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.licensemanager#Long": {
+      "type": "long"
+    },
+    "com.amazonaws.licensemanager#MatchingRuleStatement": {
+      "members": {
+        "Constraint": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "KeyToMatch": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ValueToMatch": {
+          "target": "com.amazonaws.licensemanager#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#MatchingRuleStatementList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#MatchingRuleStatement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#Message": {
+      "type": "string"
+    },
+    "com.amazonaws.licensemanager#Metadata": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        },
+        "Value": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#MetadataList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#Metadata"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#Options": {
+      "members": {
+        "ActivationOverrideBehavior": {
+          "target": "com.amazonaws.licensemanager#ActivationOverrideBehavior",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#OrRuleStatement": {
+      "members": {
+        "MatchingRuleStatements": {
+          "target": "com.amazonaws.licensemanager#MatchingRuleStatementList",
+          "traits": {}
+        },
+        "ScriptRuleStatements": {
+          "target": "com.amazonaws.licensemanager#ScriptRuleStatementList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#ProvisionalConfiguration": {
+      "members": {
+        "MaxTimeToLiveInMinutes": {
+          "target": "com.amazonaws.licensemanager#BoxInteger",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#RateLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RateLimitExceeded",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#RenewType": {
+      "members": {
+        "MONTHLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Monthly"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "None"
+          }
+        },
+        "WEEKLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Weekly"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.licensemanager#ResourceLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#RuleStatement": {
+      "members": {
+        "InstanceRuleStatement": {
+          "target": "com.amazonaws.licensemanager#InstanceRuleStatement",
+          "traits": {}
+        },
+        "LicenseConfigurationRuleStatement": {
+          "target": "com.amazonaws.licensemanager#LicenseConfigurationRuleStatement",
+          "traits": {}
+        },
+        "LicenseRuleStatement": {
+          "target": "com.amazonaws.licensemanager#LicenseRuleStatement",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#ScriptRuleStatement": {
+      "members": {
+        "KeyToMatch": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Script": {
+          "target": "com.amazonaws.licensemanager#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#ScriptRuleStatementList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#ScriptRuleStatement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#ServerInternalException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InternalError",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#StatusReasonMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 400,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\s\\S]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.licensemanager#String": {
+      "type": "string"
+    },
+    "com.amazonaws.licensemanager#StringList": {
+      "member": {
+        "target": "com.amazonaws.licensemanager#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.licensemanager#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

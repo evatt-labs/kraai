@@ -1,0 +1,1013 @@
+{
+  "shapes": {
+    "com.amazonaws.pinpoint#Alignment": {
+      "members": {
+        "CENTER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CENTER"
+          }
+        },
+        "LEFT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LEFT"
+          }
+        },
+        "RIGHT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RIGHT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pinpoint#BadRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#ButtonAction": {
+      "members": {
+        "CLOSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CLOSE"
+          }
+        },
+        "DEEP_LINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEEP_LINK"
+          }
+        },
+        "LINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LINK"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pinpoint#DefaultButtonConfiguration": {
+      "members": {
+        "BackgroundColor": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "BorderRadius": {
+          "target": "com.amazonaws.pinpoint#__integer",
+          "traits": {}
+        },
+        "ButtonAction": {
+          "target": "com.amazonaws.pinpoint#ButtonAction",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Link": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "Text": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TextColor": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#ForbiddenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#GetInAppTemplate": {
+      "errors": [
+        {
+          "target": "com.amazonaws.pinpoint#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.pinpoint#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.pinpoint#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.pinpoint#MethodNotAllowedException"
+        },
+        {
+          "target": "com.amazonaws.pinpoint#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.pinpoint#PayloadTooLargeException"
+        },
+        {
+          "target": "com.amazonaws.pinpoint#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.pinpoint#GetInAppTemplateRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.pinpoint#GetInAppTemplateResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v1/templates/{TemplateName}/inapp"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.pinpoint#GetInAppTemplateRequest": {
+      "members": {
+        "TemplateName": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#httpQuery": "version"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#GetInAppTemplateResponse": {
+      "members": {
+        "InAppTemplateResponse": {
+          "target": "com.amazonaws.pinpoint#InAppTemplateResponse",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#InAppMessageBodyConfig": {
+      "members": {
+        "Alignment": {
+          "target": "com.amazonaws.pinpoint#Alignment",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Body": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TextColor": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#InAppMessageButton": {
+      "members": {
+        "Android": {
+          "target": "com.amazonaws.pinpoint#OverrideButtonConfiguration",
+          "traits": {}
+        },
+        "DefaultConfig": {
+          "target": "com.amazonaws.pinpoint#DefaultButtonConfiguration",
+          "traits": {}
+        },
+        "IOS": {
+          "target": "com.amazonaws.pinpoint#OverrideButtonConfiguration",
+          "traits": {}
+        },
+        "Web": {
+          "target": "com.amazonaws.pinpoint#OverrideButtonConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#InAppMessageContent": {
+      "members": {
+        "BackgroundColor": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "BodyConfig": {
+          "target": "com.amazonaws.pinpoint#InAppMessageBodyConfig",
+          "traits": {}
+        },
+        "HeaderConfig": {
+          "target": "com.amazonaws.pinpoint#InAppMessageHeaderConfig",
+          "traits": {}
+        },
+        "ImageUrl": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "PrimaryBtn": {
+          "target": "com.amazonaws.pinpoint#InAppMessageButton",
+          "traits": {}
+        },
+        "SecondaryBtn": {
+          "target": "com.amazonaws.pinpoint#InAppMessageButton",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#InAppMessageHeaderConfig": {
+      "members": {
+        "Alignment": {
+          "target": "com.amazonaws.pinpoint#Alignment",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Header": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TextColor": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#InAppTemplateResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "Content": {
+          "target": "com.amazonaws.pinpoint#ListOfInAppMessageContent",
+          "traits": {}
+        },
+        "CreationDate": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "CustomConfig": {
+          "target": "com.amazonaws.pinpoint#MapOf__string",
+          "traits": {}
+        },
+        "LastModifiedDate": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Layout": {
+          "target": "com.amazonaws.pinpoint#Layout",
+          "traits": {}
+        },
+        "TemplateDescription": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "TemplateName": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TemplateType": {
+          "target": "com.amazonaws.pinpoint#TemplateType",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.pinpoint#MapOf__string",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#InternalServerErrorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#Layout": {
+      "members": {
+        "BOTTOM_BANNER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BOTTOM_BANNER"
+          }
+        },
+        "CAROUSEL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CAROUSEL"
+          }
+        },
+        "MIDDLE_BANNER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MIDDLE_BANNER"
+          }
+        },
+        "MOBILE_FEED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MOBILE_FEED"
+          }
+        },
+        "OVERLAYS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OVERLAYS"
+          }
+        },
+        "TOP_BANNER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TOP_BANNER"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pinpoint#ListOfInAppMessageContent": {
+      "member": {
+        "target": "com.amazonaws.pinpoint#InAppMessageContent"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pinpoint#MapOf__string": {
+      "key": {
+        "target": "com.amazonaws.pinpoint#__string"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.pinpoint#__string"
+      }
+    },
+    "com.amazonaws.pinpoint#MethodNotAllowedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 405
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#NotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#OverrideButtonConfiguration": {
+      "members": {
+        "ButtonAction": {
+          "target": "com.amazonaws.pinpoint#ButtonAction",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Link": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#PayloadTooLargeException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 413
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#Pinpoint": {
+      "operations": [
+        {
+          "target": "com.amazonaws.pinpoint#GetInAppTemplate"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "mobiletargeting",
+          "cloudFormationName": "Pinpoint",
+          "cloudTrailEventSource": "pinpoint.amazonaws.com",
+          "endpointPrefix": "pinpoint",
+          "sdkId": "Pinpoint"
+        },
+        "aws.auth#sigv4": {
+          "name": "mobiletargeting"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#auth": [
+          "aws.auth#sigv4"
+        ],
+        "smithy.api#title": "Amazon Pinpoint",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://pinpoint-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://pinpoint-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://pinpoint.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "us-east-1"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://pinpoint.us-east-1.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "us-west-2"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://pinpoint.us-west-2.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "us-gov-west-1"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://pinpoint.us-gov-west-1.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            "aws",
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            }
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://pinpoint.{Region}.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            "aws-us-gov",
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            }
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://pinpoint.{Region}.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://pinpoint.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2016-12-01"
+    },
+    "com.amazonaws.pinpoint#TemplateType": {
+      "members": {
+        "EMAIL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EMAIL"
+          }
+        },
+        "INAPP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INAPP"
+          }
+        },
+        "PUSH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PUSH"
+          }
+        },
+        "SMS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SMS"
+          }
+        },
+        "VOICE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VOICE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.pinpoint#TooManyRequestsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pinpoint#__integer": {
+      "type": "integer"
+    },
+    "com.amazonaws.pinpoint#__string": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

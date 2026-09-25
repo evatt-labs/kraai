@@ -1,0 +1,15 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Cases::Domain
+read:
+  model: connectcases/service/2022-10-03/connectcases-2022-10-03.json
+  operation: GetDomain
+  identifier:
+    DomainArn: domainId
+properties:
+  CreatedTime: createdTime
+  DomainArn: domainArn
+  DomainId: domainId
+  DomainStatus: domainStatus
+  Name: name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

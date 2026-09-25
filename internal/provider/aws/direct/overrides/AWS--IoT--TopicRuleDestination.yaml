@@ -1,0 +1,31 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoT::TopicRuleDestination
+read:
+  model: iot/service/2015-05-28/iot-2015-05-28.json
+  operation: GetTopicRuleDestination
+  identifier:
+    Arn: arn
+  response: topicRuleDestination
+properties:
+  Arn: arn
+  HttpUrlProperties:
+    member: httpUrlProperties
+    properties:
+      ConfirmationUrl: confirmationUrl
+  InfluxDBProperties:
+    member: influxDBProperties
+    properties:
+      Endpoint: endpoint
+      InfluxDBVersion: influxDBVersion
+      SecretId: secretId
+      SecretKey: secretKey
+      SecretType: secretType
+  Status: status
+  StatusReason: statusReason
+  VpcProperties:
+    member: vpcProperties
+    properties:
+      RoleArn: roleArn
+      SecurityGroups: securityGroups
+      SubnetIds: subnetIds
+      VpcId: vpcId

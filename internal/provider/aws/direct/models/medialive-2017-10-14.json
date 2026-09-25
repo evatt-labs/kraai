@@ -1,0 +1,1134 @@
+{
+  "shapes": {
+    "com.amazonaws.medialive#BadGatewayException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 502
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#BadRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#ClusterNetworkSettings": {
+      "members": {
+        "DefaultRoute": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "defaultRoute"
+          }
+        },
+        "InterfaceMappings": {
+          "target": "com.amazonaws.medialive#__listOfInterfaceMapping",
+          "traits": {
+            "smithy.api#jsonName": "interfaceMappings"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#ClusterState": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.medialive#ClusterType": {
+      "members": {
+        "ON_PREMISES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ON_PREMISES"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.medialive#DescribeCluster": {
+      "errors": [
+        {
+          "target": "com.amazonaws.medialive#BadGatewayException"
+        },
+        {
+          "target": "com.amazonaws.medialive#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.medialive#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.medialive#GatewayTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.medialive#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.medialive#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.medialive#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.medialive#DescribeClusterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.medialive#DescribeClusterResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/prod/clusters/{ClusterId}"
+        },
+        "smithy.waiters#waitable": {
+          "ClusterCreated": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ACTIVE",
+                    "path": "State"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "CREATING",
+                    "path": "State"
+                  }
+                },
+                "state": "retry"
+              },
+              {
+                "matcher": {
+                  "errorType": "InternalServerErrorException"
+                },
+                "state": "retry"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "CREATE_FAILED",
+                    "path": "State"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "documentation": "Wait until a cluster has been created",
+            "minDelay": 3
+          },
+          "ClusterDeleted": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETED",
+                    "path": "State"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETING",
+                    "path": "State"
+                  }
+                },
+                "state": "retry"
+              },
+              {
+                "matcher": {
+                  "errorType": "InternalServerErrorException"
+                },
+                "state": "retry"
+              }
+            ],
+            "documentation": "Wait until a cluster has been deleted",
+            "minDelay": 5
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.medialive#DescribeClusterRequest": {
+      "members": {
+        "ClusterId": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#DescribeClusterResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "ChannelIds": {
+          "target": "com.amazonaws.medialive#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "channelIds"
+          }
+        },
+        "ClusterType": {
+          "target": "com.amazonaws.medialive#ClusterType",
+          "traits": {
+            "smithy.api#jsonName": "clusterType"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "InstanceRoleArn": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "instanceRoleArn"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "NetworkSettings": {
+          "target": "com.amazonaws.medialive#ClusterNetworkSettings",
+          "traits": {
+            "smithy.api#jsonName": "networkSettings"
+          }
+        },
+        "State": {
+          "target": "com.amazonaws.medialive#ClusterState",
+          "traits": {
+            "smithy.api#jsonName": "state"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#DescribeNetwork": {
+      "errors": [
+        {
+          "target": "com.amazonaws.medialive#BadGatewayException"
+        },
+        {
+          "target": "com.amazonaws.medialive#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.medialive#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.medialive#GatewayTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.medialive#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.medialive#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.medialive#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.medialive#DescribeNetworkRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.medialive#DescribeNetworkResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/prod/networks/{NetworkId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.medialive#DescribeNetworkRequest": {
+      "members": {
+        "NetworkId": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#DescribeNetworkResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "AssociatedClusterIds": {
+          "target": "com.amazonaws.medialive#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "associatedClusterIds"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "IpPools": {
+          "target": "com.amazonaws.medialive#__listOfIpPool",
+          "traits": {
+            "smithy.api#jsonName": "ipPools"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "Routes": {
+          "target": "com.amazonaws.medialive#__listOfRoute",
+          "traits": {
+            "smithy.api#jsonName": "routes"
+          }
+        },
+        "State": {
+          "target": "com.amazonaws.medialive#NetworkState",
+          "traits": {
+            "smithy.api#jsonName": "state"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#DescribeSdiSource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.medialive#BadGatewayException"
+        },
+        {
+          "target": "com.amazonaws.medialive#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.medialive#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.medialive#GatewayTimeoutException"
+        },
+        {
+          "target": "com.amazonaws.medialive#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.medialive#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.medialive#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.medialive#DescribeSdiSourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.medialive#DescribeSdiSourceResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/prod/sdiSources/{SdiSourceId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.medialive#DescribeSdiSourceRequest": {
+      "members": {
+        "SdiSourceId": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#DescribeSdiSourceResponse": {
+      "members": {
+        "SdiSource": {
+          "target": "com.amazonaws.medialive#SdiSource",
+          "traits": {
+            "smithy.api#jsonName": "sdiSource"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#ForbiddenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#GatewayTimeoutException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 504
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#InterfaceMapping": {
+      "members": {
+        "LogicalInterfaceName": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "logicalInterfaceName"
+          }
+        },
+        "NetworkId": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "networkId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#InternalServerErrorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#IpPool": {
+      "members": {
+        "Cidr": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "cidr"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#MediaLive": {
+      "operations": [
+        {
+          "target": "com.amazonaws.medialive#DescribeCluster"
+        },
+        {
+          "target": "com.amazonaws.medialive#DescribeNetwork"
+        },
+        {
+          "target": "com.amazonaws.medialive#DescribeSdiSource"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "medialive",
+          "cloudFormationName": "MediaLive",
+          "cloudTrailEventSource": "medialive.amazonaws.com",
+          "endpointPrefix": "medialive",
+          "sdkId": "MediaLive"
+        },
+        "aws.auth#sigv4": {
+          "name": "medialive"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#auth": [
+          "aws.auth#sigv4"
+        ],
+        "smithy.api#title": "AWS Elemental MediaLive",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://medialive-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://medialive-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://medialive.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://medialive.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-10-14"
+    },
+    "com.amazonaws.medialive#NetworkState": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "IDLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IDLE"
+          }
+        },
+        "IN_USE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_USE"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.medialive#NotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#Route": {
+      "members": {
+        "Cidr": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "cidr"
+          }
+        },
+        "Gateway": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "gateway"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#SdiSource": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "Inputs": {
+          "target": "com.amazonaws.medialive#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "inputs"
+          }
+        },
+        "Mode": {
+          "target": "com.amazonaws.medialive#SdiSourceMode",
+          "traits": {
+            "smithy.api#jsonName": "mode"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "State": {
+          "target": "com.amazonaws.medialive#SdiSourceState",
+          "traits": {
+            "smithy.api#jsonName": "state"
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.medialive#SdiSourceType",
+          "traits": {
+            "smithy.api#jsonName": "type"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#SdiSourceMode": {
+      "members": {
+        "INTERLEAVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTERLEAVE"
+          }
+        },
+        "QUADRANT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "QUADRANT"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.medialive#SdiSourceState": {
+      "members": {
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "IDLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IDLE"
+          }
+        },
+        "IN_USE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_USE"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.medialive#SdiSourceType": {
+      "members": {
+        "QUAD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "QUAD"
+          }
+        },
+        "SINGLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SINGLE"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.medialive#TooManyRequestsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#__listOfInterfaceMapping": {
+      "member": {
+        "target": "com.amazonaws.medialive#InterfaceMapping"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.medialive#__listOfIpPool": {
+      "member": {
+        "target": "com.amazonaws.medialive#IpPool"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.medialive#__listOfRoute": {
+      "member": {
+        "target": "com.amazonaws.medialive#Route"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.medialive#__listOf__string": {
+      "member": {
+        "target": "com.amazonaws.medialive#__string"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.medialive#__string": {
+      "traits": {},
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

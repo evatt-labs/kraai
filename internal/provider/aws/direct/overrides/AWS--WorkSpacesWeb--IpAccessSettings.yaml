@@ -1,0 +1,23 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::WorkSpacesWeb::IpAccessSettings
+read:
+  model: workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json
+  operation: GetIpAccessSettings
+  identifier:
+    IpAccessSettingsArn: ipAccessSettingsArn
+  response: ipAccessSettings
+properties:
+  AdditionalEncryptionContext: additionalEncryptionContext
+  AssociatedPortalArns: associatedPortalArns
+  CreationDate: creationDate
+  CustomerManagedKey: customerManagedKey
+  Description: description
+  DisplayName: displayName
+  IpAccessSettingsArn: ipAccessSettingsArn
+  IpRules:
+    member: ipRules
+    properties:
+      Description: description
+      IpRange: ipRange
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

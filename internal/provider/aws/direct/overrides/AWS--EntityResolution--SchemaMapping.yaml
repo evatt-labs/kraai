@@ -1,0 +1,25 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::EntityResolution::SchemaMapping
+read:
+  model: entityresolution/service/2018-05-10/entityresolution-2018-05-10.json
+  operation: GetSchemaMapping
+  identifier:
+    SchemaName: schemaName
+properties:
+  CreatedAt: createdAt
+  Description: description
+  HasWorkflows: hasWorkflows
+  MappedInputFields:
+    member: mappedInputFields
+    properties:
+      FieldName: fieldName
+      GroupName: groupName
+      Hashed: hashed
+      MatchKey: matchKey
+      SubType: subType
+      Type: type
+  SchemaArn: schemaArn
+  SchemaName: schemaName
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

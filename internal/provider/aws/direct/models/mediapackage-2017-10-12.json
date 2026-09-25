@@ -1,0 +1,1789 @@
+{
+  "shapes": {
+    "com.amazonaws.mediapackage#AdMarkers": {
+      "members": {
+        "DATERANGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DATERANGE"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "PASSTHROUGH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PASSTHROUGH"
+          }
+        },
+        "SCTE35_ENHANCED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SCTE35_ENHANCED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#AdTriggers": {
+      "member": {
+        "target": "com.amazonaws.mediapackage#__AdTriggersElement"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.mediapackage#AdsOnDeliveryRestrictions": {
+      "members": {
+        "BOTH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BOTH"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "RESTRICTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESTRICTED"
+          }
+        },
+        "UNRESTRICTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNRESTRICTED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#Authorization": {
+      "members": {
+        "CdnIdentifierSecret": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "cdnIdentifierSecret",
+            "smithy.api#required": {}
+          }
+        },
+        "SecretsRoleArn": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "secretsRoleArn",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#CmafEncryption": {
+      "members": {
+        "ConstantInitializationVector": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "constantInitializationVector"
+          }
+        },
+        "EncryptionMethod": {
+          "target": "com.amazonaws.mediapackage#CmafEncryptionMethod",
+          "traits": {
+            "smithy.api#jsonName": "encryptionMethod"
+          }
+        },
+        "KeyRotationIntervalSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "keyRotationIntervalSeconds"
+          }
+        },
+        "SpekeKeyProvider": {
+          "target": "com.amazonaws.mediapackage#SpekeKeyProvider",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "spekeKeyProvider",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#CmafEncryptionMethod": {
+      "members": {
+        "AES_CTR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AES_CTR"
+          }
+        },
+        "SAMPLE_AES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAMPLE_AES"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#CmafPackage": {
+      "members": {
+        "Encryption": {
+          "target": "com.amazonaws.mediapackage#CmafEncryption",
+          "traits": {
+            "smithy.api#jsonName": "encryption"
+          }
+        },
+        "HlsManifests": {
+          "target": "com.amazonaws.mediapackage#__listOfHlsManifest",
+          "traits": {
+            "smithy.api#jsonName": "hlsManifests"
+          }
+        },
+        "SegmentDurationSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "segmentDurationSeconds"
+          }
+        },
+        "SegmentPrefix": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "segmentPrefix"
+          }
+        },
+        "StreamSelection": {
+          "target": "com.amazonaws.mediapackage#StreamSelection",
+          "traits": {
+            "smithy.api#jsonName": "streamSelection"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#DashEncryption": {
+      "members": {
+        "KeyRotationIntervalSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "keyRotationIntervalSeconds"
+          }
+        },
+        "SpekeKeyProvider": {
+          "target": "com.amazonaws.mediapackage#SpekeKeyProvider",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "spekeKeyProvider",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#DashPackage": {
+      "members": {
+        "AdTriggers": {
+          "target": "com.amazonaws.mediapackage#AdTriggers",
+          "traits": {
+            "smithy.api#jsonName": "adTriggers"
+          }
+        },
+        "AdsOnDeliveryRestrictions": {
+          "target": "com.amazonaws.mediapackage#AdsOnDeliveryRestrictions",
+          "traits": {
+            "smithy.api#jsonName": "adsOnDeliveryRestrictions"
+          }
+        },
+        "Encryption": {
+          "target": "com.amazonaws.mediapackage#DashEncryption",
+          "traits": {
+            "smithy.api#jsonName": "encryption"
+          }
+        },
+        "IncludeIframeOnlyStream": {
+          "target": "com.amazonaws.mediapackage#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "includeIframeOnlyStream"
+          }
+        },
+        "ManifestLayout": {
+          "target": "com.amazonaws.mediapackage#ManifestLayout",
+          "traits": {
+            "smithy.api#jsonName": "manifestLayout"
+          }
+        },
+        "ManifestWindowSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "manifestWindowSeconds"
+          }
+        },
+        "MinBufferTimeSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "minBufferTimeSeconds"
+          }
+        },
+        "MinUpdatePeriodSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "minUpdatePeriodSeconds"
+          }
+        },
+        "PeriodTriggers": {
+          "target": "com.amazonaws.mediapackage#__listOf__PeriodTriggersElement",
+          "traits": {
+            "smithy.api#jsonName": "periodTriggers"
+          }
+        },
+        "Profile": {
+          "target": "com.amazonaws.mediapackage#Profile",
+          "traits": {
+            "smithy.api#jsonName": "profile"
+          }
+        },
+        "SegmentDurationSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "segmentDurationSeconds"
+          }
+        },
+        "SegmentTemplateFormat": {
+          "target": "com.amazonaws.mediapackage#SegmentTemplateFormat",
+          "traits": {
+            "smithy.api#jsonName": "segmentTemplateFormat"
+          }
+        },
+        "StreamSelection": {
+          "target": "com.amazonaws.mediapackage#StreamSelection",
+          "traits": {
+            "smithy.api#jsonName": "streamSelection"
+          }
+        },
+        "SuggestedPresentationDelaySeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "suggestedPresentationDelaySeconds"
+          }
+        },
+        "UtcTiming": {
+          "target": "com.amazonaws.mediapackage#UtcTiming",
+          "traits": {
+            "smithy.api#jsonName": "utcTiming"
+          }
+        },
+        "UtcTimingUri": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "utcTimingUri"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#DescribeChannel": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mediapackage#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#TooManyRequestsException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#UnprocessableEntityException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mediapackage#DescribeChannelRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediapackage#DescribeChannelResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/channels/{Id}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediapackage#DescribeChannelRequest": {
+      "members": {
+        "Id": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#DescribeChannelResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "CreatedAt": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "createdAt"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "EgressAccessLogs": {
+          "target": "com.amazonaws.mediapackage#EgressAccessLogs",
+          "traits": {
+            "smithy.api#jsonName": "egressAccessLogs"
+          }
+        },
+        "HlsIngest": {
+          "target": "com.amazonaws.mediapackage#HlsIngest",
+          "traits": {
+            "smithy.api#jsonName": "hlsIngest"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "IngressAccessLogs": {
+          "target": "com.amazonaws.mediapackage#IngressAccessLogs",
+          "traits": {
+            "smithy.api#jsonName": "ingressAccessLogs"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.mediapackage#Tags",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#DescribeOriginEndpoint": {
+      "errors": [
+        {
+          "target": "com.amazonaws.mediapackage#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#InternalServerErrorException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#TooManyRequestsException"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#UnprocessableEntityException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.mediapackage#DescribeOriginEndpointRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.mediapackage#DescribeOriginEndpointResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/origin_endpoints/{Id}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.mediapackage#DescribeOriginEndpointRequest": {
+      "members": {
+        "Id": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#DescribeOriginEndpointResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "arn"
+          }
+        },
+        "Authorization": {
+          "target": "com.amazonaws.mediapackage#Authorization",
+          "traits": {
+            "smithy.api#jsonName": "authorization"
+          }
+        },
+        "ChannelId": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "channelId"
+          }
+        },
+        "CmafPackage": {
+          "target": "com.amazonaws.mediapackage#CmafPackage",
+          "traits": {
+            "smithy.api#jsonName": "cmafPackage"
+          }
+        },
+        "CreatedAt": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "createdAt"
+          }
+        },
+        "DashPackage": {
+          "target": "com.amazonaws.mediapackage#DashPackage",
+          "traits": {
+            "smithy.api#jsonName": "dashPackage"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "HlsPackage": {
+          "target": "com.amazonaws.mediapackage#HlsPackage",
+          "traits": {
+            "smithy.api#jsonName": "hlsPackage"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "ManifestName": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "manifestName"
+          }
+        },
+        "MssPackage": {
+          "target": "com.amazonaws.mediapackage#MssPackage",
+          "traits": {
+            "smithy.api#jsonName": "mssPackage"
+          }
+        },
+        "Origination": {
+          "target": "com.amazonaws.mediapackage#Origination",
+          "traits": {
+            "smithy.api#jsonName": "origination"
+          }
+        },
+        "StartoverWindowSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "startoverWindowSeconds"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.mediapackage#Tags",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "TimeDelaySeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "timeDelaySeconds"
+          }
+        },
+        "Url": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "url"
+          }
+        },
+        "Whitelist": {
+          "target": "com.amazonaws.mediapackage#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "whitelist"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#EgressAccessLogs": {
+      "members": {
+        "LogGroupName": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "logGroupName"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#EncryptionContractConfiguration": {
+      "members": {
+        "PresetSpeke20Audio": {
+          "target": "com.amazonaws.mediapackage#PresetSpeke20Audio",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "presetSpeke20Audio",
+            "smithy.api#required": {}
+          }
+        },
+        "PresetSpeke20Video": {
+          "target": "com.amazonaws.mediapackage#PresetSpeke20Video",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "presetSpeke20Video",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#EncryptionMethod": {
+      "members": {
+        "AES_128": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AES_128"
+          }
+        },
+        "SAMPLE_AES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAMPLE_AES"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#ForbiddenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#HlsEncryption": {
+      "members": {
+        "ConstantInitializationVector": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "constantInitializationVector"
+          }
+        },
+        "EncryptionMethod": {
+          "target": "com.amazonaws.mediapackage#EncryptionMethod",
+          "traits": {
+            "smithy.api#jsonName": "encryptionMethod"
+          }
+        },
+        "KeyRotationIntervalSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "keyRotationIntervalSeconds"
+          }
+        },
+        "RepeatExtXKey": {
+          "target": "com.amazonaws.mediapackage#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "repeatExtXKey"
+          }
+        },
+        "SpekeKeyProvider": {
+          "target": "com.amazonaws.mediapackage#SpekeKeyProvider",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "spekeKeyProvider",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#HlsIngest": {
+      "members": {
+        "IngestEndpoints": {
+          "target": "com.amazonaws.mediapackage#__listOfIngestEndpoint",
+          "traits": {
+            "smithy.api#jsonName": "ingestEndpoints"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#HlsManifest": {
+      "members": {
+        "AdMarkers": {
+          "target": "com.amazonaws.mediapackage#AdMarkers",
+          "traits": {
+            "smithy.api#jsonName": "adMarkers"
+          }
+        },
+        "AdTriggers": {
+          "target": "com.amazonaws.mediapackage#AdTriggers",
+          "traits": {
+            "smithy.api#jsonName": "adTriggers"
+          }
+        },
+        "AdsOnDeliveryRestrictions": {
+          "target": "com.amazonaws.mediapackage#AdsOnDeliveryRestrictions",
+          "traits": {
+            "smithy.api#jsonName": "adsOnDeliveryRestrictions"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "id",
+            "smithy.api#required": {}
+          }
+        },
+        "IncludeIframeOnlyStream": {
+          "target": "com.amazonaws.mediapackage#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "includeIframeOnlyStream"
+          }
+        },
+        "ManifestName": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "manifestName"
+          }
+        },
+        "PlaylistType": {
+          "target": "com.amazonaws.mediapackage#PlaylistType",
+          "traits": {
+            "smithy.api#jsonName": "playlistType"
+          }
+        },
+        "PlaylistWindowSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "playlistWindowSeconds"
+          }
+        },
+        "ProgramDateTimeIntervalSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "programDateTimeIntervalSeconds"
+          }
+        },
+        "Url": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "url"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#HlsPackage": {
+      "members": {
+        "AdMarkers": {
+          "target": "com.amazonaws.mediapackage#AdMarkers",
+          "traits": {
+            "smithy.api#jsonName": "adMarkers"
+          }
+        },
+        "AdTriggers": {
+          "target": "com.amazonaws.mediapackage#AdTriggers",
+          "traits": {
+            "smithy.api#jsonName": "adTriggers"
+          }
+        },
+        "AdsOnDeliveryRestrictions": {
+          "target": "com.amazonaws.mediapackage#AdsOnDeliveryRestrictions",
+          "traits": {
+            "smithy.api#jsonName": "adsOnDeliveryRestrictions"
+          }
+        },
+        "Encryption": {
+          "target": "com.amazonaws.mediapackage#HlsEncryption",
+          "traits": {
+            "smithy.api#jsonName": "encryption"
+          }
+        },
+        "IncludeDvbSubtitles": {
+          "target": "com.amazonaws.mediapackage#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "includeDvbSubtitles"
+          }
+        },
+        "IncludeIframeOnlyStream": {
+          "target": "com.amazonaws.mediapackage#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "includeIframeOnlyStream"
+          }
+        },
+        "PlaylistType": {
+          "target": "com.amazonaws.mediapackage#PlaylistType",
+          "traits": {
+            "smithy.api#jsonName": "playlistType"
+          }
+        },
+        "PlaylistWindowSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "playlistWindowSeconds"
+          }
+        },
+        "ProgramDateTimeIntervalSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "programDateTimeIntervalSeconds"
+          }
+        },
+        "SegmentDurationSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "segmentDurationSeconds"
+          }
+        },
+        "StreamSelection": {
+          "target": "com.amazonaws.mediapackage#StreamSelection",
+          "traits": {
+            "smithy.api#jsonName": "streamSelection"
+          }
+        },
+        "UseAudioRenditionGroup": {
+          "target": "com.amazonaws.mediapackage#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "useAudioRenditionGroup"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#IngestEndpoint": {
+      "members": {
+        "Id": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "id"
+          }
+        },
+        "Password": {
+          "target": "com.amazonaws.mediapackage#SensitiveString",
+          "traits": {
+            "smithy.api#jsonName": "password"
+          }
+        },
+        "Url": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "url"
+          }
+        },
+        "Username": {
+          "target": "com.amazonaws.mediapackage#SensitiveString",
+          "traits": {
+            "smithy.api#jsonName": "username"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#IngressAccessLogs": {
+      "members": {
+        "LogGroupName": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "logGroupName"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#InternalServerErrorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#ManifestLayout": {
+      "members": {
+        "COMPACT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COMPACT"
+          }
+        },
+        "DRM_TOP_LEVEL_COMPACT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DRM_TOP_LEVEL_COMPACT"
+          }
+        },
+        "FULL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FULL"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#MediaPackage": {
+      "operations": [
+        {
+          "target": "com.amazonaws.mediapackage#DescribeChannel"
+        },
+        {
+          "target": "com.amazonaws.mediapackage#DescribeOriginEndpoint"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "mediapackage",
+          "cloudFormationName": "MediaPackage",
+          "cloudTrailEventSource": "mediapackage.amazonaws.com",
+          "endpointPrefix": "mediapackage",
+          "sdkId": "MediaPackage"
+        },
+        "aws.auth#sigv4": {
+          "name": "mediapackage"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#auth": [
+          "aws.auth#sigv4"
+        ],
+        "smithy.api#title": "AWS Elemental MediaPackage",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediapackage-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediapackage-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://mediapackage.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://mediapackage.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2017-10-12"
+    },
+    "com.amazonaws.mediapackage#MssEncryption": {
+      "members": {
+        "SpekeKeyProvider": {
+          "target": "com.amazonaws.mediapackage#SpekeKeyProvider",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "spekeKeyProvider",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#MssPackage": {
+      "members": {
+        "Encryption": {
+          "target": "com.amazonaws.mediapackage#MssEncryption",
+          "traits": {
+            "smithy.api#jsonName": "encryption"
+          }
+        },
+        "ManifestWindowSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "manifestWindowSeconds"
+          }
+        },
+        "SegmentDurationSeconds": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "segmentDurationSeconds"
+          }
+        },
+        "StreamSelection": {
+          "target": "com.amazonaws.mediapackage#StreamSelection",
+          "traits": {
+            "smithy.api#jsonName": "streamSelection"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#NotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#Origination": {
+      "members": {
+        "ALLOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALLOW"
+          }
+        },
+        "DENY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DENY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#PlaylistType": {
+      "members": {
+        "EVENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EVENT"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "VOD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VOD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#PresetSpeke20Audio": {
+      "members": {
+        "PRESET_AUDIO_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-AUDIO-1"
+          }
+        },
+        "PRESET_AUDIO_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-AUDIO-2"
+          }
+        },
+        "PRESET_AUDIO_3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-AUDIO-3"
+          }
+        },
+        "SHARED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHARED"
+          }
+        },
+        "UNENCRYPTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNENCRYPTED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#PresetSpeke20Video": {
+      "members": {
+        "PRESET_VIDEO_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-1"
+          }
+        },
+        "PRESET_VIDEO_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-2"
+          }
+        },
+        "PRESET_VIDEO_3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-3"
+          }
+        },
+        "PRESET_VIDEO_4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-4"
+          }
+        },
+        "PRESET_VIDEO_5": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-5"
+          }
+        },
+        "PRESET_VIDEO_6": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-6"
+          }
+        },
+        "PRESET_VIDEO_7": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-7"
+          }
+        },
+        "PRESET_VIDEO_8": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRESET-VIDEO-8"
+          }
+        },
+        "SHARED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHARED"
+          }
+        },
+        "UNENCRYPTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UNENCRYPTED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#Profile": {
+      "members": {
+        "DVB_DASH_2014": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DVB_DASH_2014"
+          }
+        },
+        "HBBTV_1_5": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HBBTV_1_5"
+          }
+        },
+        "HYBRIDCAST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HYBRIDCAST"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#SegmentTemplateFormat": {
+      "members": {
+        "NUMBER_WITH_DURATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NUMBER_WITH_DURATION"
+          }
+        },
+        "NUMBER_WITH_TIMELINE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NUMBER_WITH_TIMELINE"
+          }
+        },
+        "TIME_WITH_TIMELINE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TIME_WITH_TIMELINE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#SensitiveString": {
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.mediapackage#ServiceUnavailableException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#SpekeKeyProvider": {
+      "members": {
+        "CertificateArn": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "certificateArn"
+          }
+        },
+        "EncryptionContractConfiguration": {
+          "target": "com.amazonaws.mediapackage#EncryptionContractConfiguration",
+          "traits": {
+            "smithy.api#jsonName": "encryptionContractConfiguration"
+          }
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "resourceId",
+            "smithy.api#required": {}
+          }
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "roleArn",
+            "smithy.api#required": {}
+          }
+        },
+        "SystemIds": {
+          "target": "com.amazonaws.mediapackage#__listOf__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "systemIds",
+            "smithy.api#required": {}
+          }
+        },
+        "Url": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "url",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#StreamOrder": {
+      "members": {
+        "ORIGINAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ORIGINAL"
+          }
+        },
+        "VIDEO_BITRATE_ASCENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VIDEO_BITRATE_ASCENDING"
+          }
+        },
+        "VIDEO_BITRATE_DESCENDING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VIDEO_BITRATE_DESCENDING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#StreamSelection": {
+      "members": {
+        "MaxVideoBitsPerSecond": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "maxVideoBitsPerSecond"
+          }
+        },
+        "MinVideoBitsPerSecond": {
+          "target": "com.amazonaws.mediapackage#__integer",
+          "traits": {
+            "smithy.api#jsonName": "minVideoBitsPerSecond"
+          }
+        },
+        "StreamOrder": {
+          "target": "com.amazonaws.mediapackage#StreamOrder",
+          "traits": {
+            "smithy.api#jsonName": "streamOrder"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#Tags": {
+      "key": {
+        "target": "com.amazonaws.mediapackage#__string"
+      },
+      "traits": {},
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.mediapackage#__string"
+      }
+    },
+    "com.amazonaws.mediapackage#TooManyRequestsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#UnprocessableEntityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediapackage#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 422
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackage#UtcTiming": {
+      "members": {
+        "HTTP_HEAD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTP-HEAD"
+          }
+        },
+        "HTTP_ISO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTP-ISO"
+          }
+        },
+        "HTTP_XSDATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTP-XSDATE"
+          }
+        },
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#__AdTriggersElement": {
+      "members": {
+        "BREAK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BREAK"
+          }
+        },
+        "DISTRIBUTOR_ADVERTISEMENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISTRIBUTOR_ADVERTISEMENT"
+          }
+        },
+        "DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY"
+          }
+        },
+        "DISTRIBUTOR_PLACEMENT_OPPORTUNITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISTRIBUTOR_PLACEMENT_OPPORTUNITY"
+          }
+        },
+        "PROVIDER_ADVERTISEMENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVIDER_ADVERTISEMENT"
+          }
+        },
+        "PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY"
+          }
+        },
+        "PROVIDER_PLACEMENT_OPPORTUNITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVIDER_PLACEMENT_OPPORTUNITY"
+          }
+        },
+        "SPLICE_INSERT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SPLICE_INSERT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#__PeriodTriggersElement": {
+      "members": {
+        "ADS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ADS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.mediapackage#__boolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.mediapackage#__integer": {
+      "type": "integer"
+    },
+    "com.amazonaws.mediapackage#__listOfHlsManifest": {
+      "member": {
+        "target": "com.amazonaws.mediapackage#HlsManifest"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediapackage#__listOfIngestEndpoint": {
+      "member": {
+        "target": "com.amazonaws.mediapackage#IngestEndpoint"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediapackage#__listOf__PeriodTriggersElement": {
+      "member": {
+        "target": "com.amazonaws.mediapackage#__PeriodTriggersElement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediapackage#__listOf__string": {
+      "member": {
+        "target": "com.amazonaws.mediapackage#__string"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mediapackage#__string": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoT::SoftwarePackage
+read:
+  model: iot/service/2015-05-28/iot-2015-05-28.json
+  operation: GetPackage
+  identifier:
+    PackageName: packageName
+properties:
+  Description: description
+  PackageArn: packageArn
+  PackageName: packageName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

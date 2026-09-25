@@ -1,0 +1,306 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::ModelPackage
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeModelPackage
+  identifier:
+    ModelPackageArn: ModelPackageName
+properties:
+  AdditionalInferenceSpecifications:
+    member: AdditionalInferenceSpecifications
+    properties:
+      Containers:
+        member: Containers
+        properties:
+          ContainerHostname: ContainerHostname
+          Environment: Environment
+          Framework: Framework
+          FrameworkVersion: FrameworkVersion
+          Image: Image
+          ImageDigest: ImageDigest
+          ModelDataSource:
+            member: ModelDataSource
+            properties:
+              S3DataSource:
+                member: S3DataSource
+                properties:
+                  CompressionType: CompressionType
+                  ModelAccessConfig:
+                    member: ModelAccessConfig
+                    properties:
+                      AcceptEula: AcceptEula
+                  S3DataType: S3DataType
+                  S3Uri: S3Uri
+          ModelDataUrl: ModelDataUrl
+          ModelInput:
+            member: ModelInput
+            properties:
+              DataInputConfig: DataInputConfig
+          NearestModelName: NearestModelName
+      Description: Description
+      Name: Name
+      SupportedContentTypes: SupportedContentTypes
+      SupportedRealtimeInferenceInstanceTypes: SupportedRealtimeInferenceInstanceTypes
+      SupportedResponseMIMETypes: SupportedResponseMIMETypes
+      SupportedTransformInstanceTypes: SupportedTransformInstanceTypes
+  ApprovalDescription: ApprovalDescription
+  CertifyForMarketplace: CertifyForMarketplace
+  CreationTime: CreationTime
+  CustomerMetadataProperties: CustomerMetadataProperties
+  Domain: Domain
+  DriftCheckBaselines:
+    member: DriftCheckBaselines
+    properties:
+      Bias:
+        member: Bias
+        properties:
+          ConfigFile:
+            member: ConfigFile
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          PostTrainingConstraints:
+            member: PostTrainingConstraints
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          PreTrainingConstraints:
+            member: PreTrainingConstraints
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+      Explainability:
+        member: Explainability
+        properties:
+          ConfigFile:
+            member: ConfigFile
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          Constraints:
+            member: Constraints
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+      ModelDataQuality:
+        member: ModelDataQuality
+        properties:
+          Constraints:
+            member: Constraints
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          Statistics:
+            member: Statistics
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+      ModelQuality:
+        member: ModelQuality
+        properties:
+          Constraints:
+            member: Constraints
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          Statistics:
+            member: Statistics
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+  InferenceSpecification:
+    member: InferenceSpecification
+    properties:
+      Containers:
+        member: Containers
+        properties:
+          ContainerHostname: ContainerHostname
+          Environment: Environment
+          Framework: Framework
+          FrameworkVersion: FrameworkVersion
+          Image: Image
+          ImageDigest: ImageDigest
+          ModelDataSource:
+            member: ModelDataSource
+            properties:
+              S3DataSource:
+                member: S3DataSource
+                properties:
+                  CompressionType: CompressionType
+                  ModelAccessConfig:
+                    member: ModelAccessConfig
+                    properties:
+                      AcceptEula: AcceptEula
+                  S3DataType: S3DataType
+                  S3Uri: S3Uri
+          ModelDataUrl: ModelDataUrl
+          ModelInput:
+            member: ModelInput
+            properties:
+              DataInputConfig: DataInputConfig
+          NearestModelName: NearestModelName
+      SupportedContentTypes: SupportedContentTypes
+      SupportedRealtimeInferenceInstanceTypes: SupportedRealtimeInferenceInstanceTypes
+      SupportedResponseMIMETypes: SupportedResponseMIMETypes
+      SupportedTransformInstanceTypes: SupportedTransformInstanceTypes
+  LastModifiedTime: LastModifiedTime
+  MetadataProperties:
+    member: MetadataProperties
+    properties:
+      CommitId: CommitId
+      GeneratedBy: GeneratedBy
+      ProjectId: ProjectId
+      Repository: Repository
+  ModelApprovalStatus: ModelApprovalStatus
+  ModelCard:
+    member: ModelCard
+    properties:
+      ModelCardContent: ModelCardContent
+      ModelCardStatus: ModelCardStatus
+  ModelMetrics:
+    member: ModelMetrics
+    properties:
+      Bias:
+        member: Bias
+        properties:
+          PostTrainingReport:
+            member: PostTrainingReport
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          PreTrainingReport:
+            member: PreTrainingReport
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          Report:
+            member: Report
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+      Explainability:
+        member: Explainability
+        properties:
+          Report:
+            member: Report
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+      ModelDataQuality:
+        member: ModelDataQuality
+        properties:
+          Constraints:
+            member: Constraints
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          Statistics:
+            member: Statistics
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+      ModelQuality:
+        member: ModelQuality
+        properties:
+          Constraints:
+            member: Constraints
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+          Statistics:
+            member: Statistics
+            properties:
+              ContentDigest: ContentDigest
+              ContentType: ContentType
+              S3Uri: S3Uri
+  ModelPackageArn: ModelPackageArn
+  ModelPackageDescription: ModelPackageDescription
+  ModelPackageGroupName: ModelPackageGroupName
+  ModelPackageName: ModelPackageName
+  ModelPackageStatus: ModelPackageStatus
+  ModelPackageStatusDetails:
+    member: ModelPackageStatusDetails
+    properties:
+      ValidationStatuses:
+        member: ValidationStatuses
+        properties:
+          FailureReason: FailureReason
+          Name: Name
+          Status: Status
+  ModelPackageVersion: ModelPackageVersion
+  SamplePayloadUrl: SamplePayloadUrl
+  SecurityConfig:
+    member: SecurityConfig
+    properties:
+      KmsKeyId: KmsKeyId
+  SkipModelValidation: SkipModelValidation
+  SourceAlgorithmSpecification:
+    member: SourceAlgorithmSpecification
+    properties:
+      SourceAlgorithms:
+        member: SourceAlgorithms
+        properties:
+          AlgorithmName: AlgorithmName
+          ModelDataUrl: ModelDataUrl
+  SourceUri: SourceUri
+  Task: Task
+  ValidationSpecification:
+    member: ValidationSpecification
+    properties:
+      ValidationProfiles:
+        member: ValidationProfiles
+        properties:
+          ProfileName: ProfileName
+          TransformJobDefinition:
+            member: TransformJobDefinition
+            properties:
+              BatchStrategy: BatchStrategy
+              Environment: Environment
+              MaxConcurrentTransforms: MaxConcurrentTransforms
+              MaxPayloadInMB: MaxPayloadInMB
+              TransformInput:
+                member: TransformInput
+                properties:
+                  CompressionType: CompressionType
+                  ContentType: ContentType
+                  DataSource:
+                    member: DataSource
+                    properties:
+                      S3DataSource:
+                        member: S3DataSource
+                        properties:
+                          S3DataType: S3DataType
+                          S3Uri: S3Uri
+                  SplitType: SplitType
+              TransformOutput:
+                member: TransformOutput
+                properties:
+                  Accept: Accept
+                  AssembleWith: AssembleWith
+                  KmsKeyId: KmsKeyId
+                  S3OutputPath: S3OutputPath
+              TransformResources:
+                member: TransformResources
+                properties:
+                  InstanceCount: InstanceCount
+                  InstanceType: InstanceType
+                  VolumeKmsKeyId: VolumeKmsKeyId
+      ValidationRole: ValidationRole
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,800 @@
+{
+  "shapes": {
+    "com.amazonaws.notifications#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.notifications#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#AggregationDuration": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "Aggregate notifications for long periods of time (12 hours)",
+            "name": "LONG",
+            "value": "LONG"
+          },
+          {
+            "documentation": "Aggregate notifications for short periods of time (5 mins)",
+            "name": "SHORT",
+            "value": "SHORT"
+          },
+          {
+            "documentation": "Do not aggregate notifications sourced from a notification configuration",
+            "name": "NONE",
+            "value": "NONE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#CreationTime": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.notifications#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.notifications#EventRuleArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.notifications#EventRule",
+          "service": "com.amazonaws.notifications#Notifications"
+        },
+        "smithy.api#pattern": "^arn:[a-z-]{3,10}:notifications::[0-9]{12}:configuration/[a-z0-9]{27}/rule/[a-z0-9]{27}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#EventRuleEventPattern": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#EventRuleStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "EventRule is processing events. Any call can be executed.",
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "documentation": "EventRule is in a bad state and may not be processing events. Any call can be executed.",
+            "name": "INACTIVE",
+            "value": "INACTIVE"
+          },
+          {
+            "documentation": "This EventRule is being created. Only GET/LIST calls can be executed.",
+            "name": "CREATING",
+            "value": "CREATING"
+          },
+          {
+            "documentation": "This EventRule is being updated. Only GET/LIST calls can be executed.",
+            "name": "UPDATING",
+            "value": "UPDATING"
+          },
+          {
+            "documentation": "This EventRule is being deleted. Only GET/LIST calls can be executed.",
+            "name": "DELETING",
+            "value": "DELETING"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#EventRuleStatusReason": {
+      "type": "string"
+    },
+    "com.amazonaws.notifications#EventRuleStatusSummary": {
+      "members": {
+        "reason": {
+          "target": "com.amazonaws.notifications#EventRuleStatusReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.notifications#EventRuleStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#EventType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-zA-Z0-9 \\-\\(\\)])+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#GetEventRule": {
+      "errors": [
+        {
+          "target": "com.amazonaws.notifications#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.notifications#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.notifications#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.notifications#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.notifications#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.notifications#GetEventRuleRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.notifications#GetEventRuleResponse"
+      },
+      "traits": {
+        "aws.api#controlPlane": {},
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to get an EventRule"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/event-rules/{arn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.notifications#GetEventRuleRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.notifications#EventRuleArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#GetEventRuleResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.notifications#EventRuleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "creationTime": {
+          "target": "com.amazonaws.notifications#CreationTime",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "eventPattern": {
+          "target": "com.amazonaws.notifications#EventRuleEventPattern",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "eventType": {
+          "target": "com.amazonaws.notifications#EventType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "managedRules": {
+          "target": "com.amazonaws.notifications#ManagedRuleArns",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "notificationConfigurationArn": {
+          "target": "com.amazonaws.notifications#NotificationConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "regions": {
+          "target": "com.amazonaws.notifications#Regions",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "source": {
+          "target": "com.amazonaws.notifications#Source",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "statusSummaryByRegion": {
+          "target": "com.amazonaws.notifications#StatusSummaryByRegion",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#GetNotificationConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.notifications#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.notifications#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.notifications#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.notifications#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.notifications#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.notifications#GetNotificationConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.notifications#GetNotificationConfigurationResponse"
+      },
+      "traits": {
+        "aws.api#controlPlane": {},
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to get a NotificationConfiguration"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/notification-configurations/{arn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.notifications#GetNotificationConfigurationRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.notifications#NotificationConfigurationArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#GetNotificationConfigurationResponse": {
+      "members": {
+        "aggregationDuration": {
+          "target": "com.amazonaws.notifications#AggregationDuration",
+          "traits": {}
+        },
+        "arn": {
+          "target": "com.amazonaws.notifications#NotificationConfigurationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "creationTime": {
+          "target": "com.amazonaws.notifications#CreationTime",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.notifications#NotificationConfigurationDescription",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.notifications#NotificationConfigurationName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.notifications#NotificationConfigurationStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "subtype": {
+          "target": "com.amazonaws.notifications#NotificationConfigurationSubtype",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.notifications#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#ManagedRuleArn": {
+      "traits": {
+        "aws.api#arnReference": {},
+        "smithy.api#pattern": "^arn:[a-z-]{3,10}:events:[a-z-\\d]{2,25}:\\d{12}:rule\\/[a-zA-Z-\\d]{1,1024}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#ManagedRuleArns": {
+      "member": {
+        "target": "com.amazonaws.notifications#ManagedRuleArn"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.notifications#NotificationConfigurationArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.notifications#NotificationConfiguration",
+          "service": "com.amazonaws.notifications#Notifications"
+        },
+        "smithy.api#pattern": "^arn:[a-z-]{3,10}:notifications::[0-9]{12}:configuration/[a-z0-9]{27}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#NotificationConfigurationDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\u0001-\\u001F\\u007F-\\u009F]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#NotificationConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9_\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#NotificationConfigurationStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "All of the EventRules are in ACTIVE Status. Any call can be executed.",
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "documentation": "Some EventRules are in ACTIVE Status and some are INACTIVE. Any call can be executed.",
+            "name": "PARTIALLY_ACTIVE",
+            "value": "PARTIALLY_ACTIVE"
+          },
+          {
+            "documentation": "All of the EventRules are in INACTIVE Status. Any call can be executed.",
+            "name": "INACTIVE",
+            "value": "INACTIVE"
+          },
+          {
+            "documentation": "This NotificationConfiguration is being deleted. Only GET/LIST calls can be executed.",
+            "name": "DELETING",
+            "value": "DELETING"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#NotificationConfigurationSubtype": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "documentation": "Notification configuration created by the account",
+            "name": "ACCOUNT",
+            "value": "ACCOUNT"
+          },
+          {
+            "documentation": "Notification configuration managed by an administrator account",
+            "name": "ADMIN_MANAGED",
+            "value": "ADMIN_MANAGED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#Notifications": {
+      "operations": [
+        {
+          "target": "com.amazonaws.notifications#GetEventRule"
+        },
+        {
+          "target": "com.amazonaws.notifications#GetNotificationConfiguration"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "notifications",
+          "cloudTrailEventSource": "notifications.amazonaws.com",
+          "endpointPrefix": "notifications",
+          "sdkId": "Notifications"
+        },
+        "aws.auth#sigv4": {
+          "name": "notifications"
+        },
+        "aws.endpoints#dualStackOnlyEndpoints": {},
+        "aws.endpoints#standardRegionalEndpoints": {},
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "AWS User Notifications",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://notifications-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://notifications.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-05-10"
+    },
+    "com.amazonaws.notifications#QuotaCode": {
+      "type": "string"
+    },
+    "com.amazonaws.notifications#Region": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 25,
+          "min": 2
+        },
+        "smithy.api#pattern": "^([a-z]{1,4})-([a-z]{1,15}-)+([0-9])$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#Regions": {
+      "member": {
+        "target": "com.amazonaws.notifications#Region"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.notifications#ResourceId": {
+      "type": "string"
+    },
+    "com.amazonaws.notifications#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.notifications#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.notifications#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#ServiceCode": {
+      "type": "string"
+    },
+    "com.amazonaws.notifications#Source": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 1
+        },
+        "smithy.api#pattern": "^aws.([a-z0-9\\-])+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.notifications#StatusSummaryByRegion": {
+      "key": {
+        "target": "com.amazonaws.notifications#Region"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.notifications#EventRuleStatusSummary"
+      }
+    },
+    "com.amazonaws.notifications#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.notifications#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.notifications#QuotaCode",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.notifications#ServiceCode",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.notifications#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.notifications#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.notifications#ValidationExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.notifications#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.notifications#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.notifications#ValidationExceptionReason": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "FIELD_VALIDATION_FAILED",
+            "value": "fieldValidationFailed"
+          },
+          {
+            "name": "OTHER",
+            "value": "other"
+          }
+        ]
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

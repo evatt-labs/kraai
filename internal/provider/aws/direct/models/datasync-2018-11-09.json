@@ -1,0 +1,1737 @@
+{
+  "shapes": {
+    "com.amazonaws.datasync#AgentArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:agent/agent-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#AgentArnList": {
+      "member": {
+        "target": "com.amazonaws.datasync#AgentArn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 8,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.datasync#CmkSecretConfig": {
+      "members": {
+        "KmsKeyArn": {
+          "target": "com.amazonaws.datasync#KmsKeyArn",
+          "traits": {}
+        },
+        "SecretArn": {
+          "target": "com.amazonaws.datasync#SecretArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#CustomSecretConfig": {
+      "members": {
+        "SecretAccessRoleArn": {
+          "target": "com.amazonaws.datasync#IamRoleArnOrEmptyString",
+          "traits": {}
+        },
+        "SecretArn": {
+          "target": "com.amazonaws.datasync#SecretArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationEfs": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationEfsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationEfsResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationEfsRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationEfsResponse": {
+      "members": {
+        "AccessPointArn": {
+          "target": "com.amazonaws.datasync#EfsAccessPointArn",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "Ec2Config": {
+          "target": "com.amazonaws.datasync#Ec2Config"
+        },
+        "FileSystemAccessRoleArn": {
+          "target": "com.amazonaws.datasync#IamRoleArn",
+          "traits": {}
+        },
+        "InTransitEncryption": {
+          "target": "com.amazonaws.datasync#EfsInTransitEncryption",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxLustre": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxLustreRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxLustreResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxLustreRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxLustreResponse": {
+      "members": {
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "SecurityGroupArns": {
+          "target": "com.amazonaws.datasync#Ec2SecurityGroupArnList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxOntap": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxOntapRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxOntapResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxOntapRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxOntapResponse": {
+      "members": {
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "FsxFilesystemArn": {
+          "target": "com.amazonaws.datasync#FsxFilesystemArn",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "Protocol": {
+          "target": "com.amazonaws.datasync#FsxProtocol"
+        },
+        "SecurityGroupArns": {
+          "target": "com.amazonaws.datasync#Ec2SecurityGroupArnList",
+          "traits": {}
+        },
+        "StorageVirtualMachineArn": {
+          "target": "com.amazonaws.datasync#StorageVirtualMachineArn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxOpenZfs": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxOpenZfsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxOpenZfsResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxOpenZfsRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxOpenZfsResponse": {
+      "members": {
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "Protocol": {
+          "target": "com.amazonaws.datasync#FsxProtocol",
+          "traits": {}
+        },
+        "SecurityGroupArns": {
+          "target": "com.amazonaws.datasync#Ec2SecurityGroupArnList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxWindows": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxWindowsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationFsxWindowsResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxWindowsRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationFsxWindowsResponse": {
+      "members": {
+        "CmkSecretConfig": {
+          "target": "com.amazonaws.datasync#CmkSecretConfig",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "CustomSecretConfig": {
+          "target": "com.amazonaws.datasync#CustomSecretConfig",
+          "traits": {}
+        },
+        "Domain": {
+          "target": "com.amazonaws.datasync#SmbDomain",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "ManagedSecretConfig": {
+          "target": "com.amazonaws.datasync#ManagedSecretConfig",
+          "traits": {}
+        },
+        "SecurityGroupArns": {
+          "target": "com.amazonaws.datasync#Ec2SecurityGroupArnList",
+          "traits": {}
+        },
+        "User": {
+          "target": "com.amazonaws.datasync#SmbUser",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationHdfs": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationHdfsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationHdfsResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationHdfsRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationHdfsResponse": {
+      "members": {
+        "AgentArns": {
+          "target": "com.amazonaws.datasync#AgentArnList",
+          "traits": {}
+        },
+        "AuthenticationType": {
+          "target": "com.amazonaws.datasync#HdfsAuthenticationType",
+          "traits": {}
+        },
+        "BlockSize": {
+          "target": "com.amazonaws.datasync#HdfsBlockSize",
+          "traits": {}
+        },
+        "CmkSecretConfig": {
+          "target": "com.amazonaws.datasync#CmkSecretConfig",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "CustomSecretConfig": {
+          "target": "com.amazonaws.datasync#CustomSecretConfig",
+          "traits": {}
+        },
+        "KerberosPrincipal": {
+          "target": "com.amazonaws.datasync#KerberosPrincipal",
+          "traits": {}
+        },
+        "KmsKeyProviderUri": {
+          "target": "com.amazonaws.datasync#KmsKeyProviderUri",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "ManagedSecretConfig": {
+          "target": "com.amazonaws.datasync#ManagedSecretConfig",
+          "traits": {}
+        },
+        "NameNodes": {
+          "target": "com.amazonaws.datasync#HdfsNameNodeList",
+          "traits": {}
+        },
+        "QopConfiguration": {
+          "target": "com.amazonaws.datasync#QopConfiguration",
+          "traits": {}
+        },
+        "ReplicationFactor": {
+          "target": "com.amazonaws.datasync#HdfsReplicationFactor",
+          "traits": {}
+        },
+        "SimpleUser": {
+          "target": "com.amazonaws.datasync#HdfsUser",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationNfs": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationNfsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationNfsResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationNfsRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationNfsResponse": {
+      "members": {
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "MountOptions": {
+          "target": "com.amazonaws.datasync#NfsMountOptions",
+          "traits": {}
+        },
+        "OnPremConfig": {
+          "target": "com.amazonaws.datasync#OnPremConfig"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationS3": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationS3Request"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationS3Response"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationS3Request": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationS3Response": {
+      "members": {
+        "AgentArns": {
+          "target": "com.amazonaws.datasync#AgentArnList",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "S3Config": {
+          "target": "com.amazonaws.datasync#S3Config"
+        },
+        "S3StorageClass": {
+          "target": "com.amazonaws.datasync#S3StorageClass",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationSmb": {
+      "errors": [
+        {
+          "target": "com.amazonaws.datasync#InternalException"
+        },
+        {
+          "target": "com.amazonaws.datasync#InvalidRequestException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.datasync#DescribeLocationSmbRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.datasync#DescribeLocationSmbResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.datasync#DescribeLocationSmbRequest": {
+      "members": {
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DescribeLocationSmbResponse": {
+      "members": {
+        "AgentArns": {
+          "target": "com.amazonaws.datasync#AgentArnList",
+          "traits": {}
+        },
+        "AuthenticationType": {
+          "target": "com.amazonaws.datasync#SmbAuthenticationType",
+          "traits": {}
+        },
+        "CmkSecretConfig": {
+          "target": "com.amazonaws.datasync#CmkSecretConfig",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.datasync#Time",
+          "traits": {}
+        },
+        "CustomSecretConfig": {
+          "target": "com.amazonaws.datasync#CustomSecretConfig",
+          "traits": {}
+        },
+        "DnsIpAddresses": {
+          "target": "com.amazonaws.datasync#DnsIpList",
+          "traits": {}
+        },
+        "Domain": {
+          "target": "com.amazonaws.datasync#SmbDomain",
+          "traits": {}
+        },
+        "KerberosPrincipal": {
+          "target": "com.amazonaws.datasync#KerberosPrincipal",
+          "traits": {}
+        },
+        "LocationArn": {
+          "target": "com.amazonaws.datasync#LocationArn",
+          "traits": {}
+        },
+        "LocationUri": {
+          "target": "com.amazonaws.datasync#LocationUri",
+          "traits": {}
+        },
+        "ManagedSecretConfig": {
+          "target": "com.amazonaws.datasync#ManagedSecretConfig",
+          "traits": {}
+        },
+        "MountOptions": {
+          "target": "com.amazonaws.datasync#SmbMountOptions",
+          "traits": {}
+        },
+        "User": {
+          "target": "com.amazonaws.datasync#SmbUser",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#DnsIpList": {
+      "member": {
+        "target": "com.amazonaws.datasync#ServerIpAddress"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 2,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.datasync#Ec2Config": {
+      "members": {
+        "SecurityGroupArns": {
+          "target": "com.amazonaws.datasync#Ec2SecurityGroupArnList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SubnetArn": {
+          "target": "com.amazonaws.datasync#Ec2SubnetArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#Ec2SecurityGroupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):ec2:[a-z\\-0-9]*:[0-9]{12}:security-group/sg-[a-f0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#Ec2SecurityGroupArnList": {
+      "member": {
+        "target": "com.amazonaws.datasync#Ec2SecurityGroupArn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.datasync#Ec2SubnetArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):ec2:[a-z\\-0-9]*:[0-9]{12}:subnet/subnet-[a-f0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#EfsAccessPointArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):elasticfilesystem:[a-z\\-0-9]+:[0-9]{12}:access-point/fsap-[0-9a-f]{8,40}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#EfsInTransitEncryption": {
+      "members": {
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "TLS1_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS1_2"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#FmrsService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationEfs"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationFsxLustre"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationFsxOntap"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationFsxOpenZfs"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationFsxWindows"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationHdfs"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationNfs"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationS3"
+        },
+        {
+          "target": "com.amazonaws.datasync#DescribeLocationSmb"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "datasync",
+          "cloudFormationName": "DataSync",
+          "cloudTrailEventSource": "datasync.amazonaws.com",
+          "endpointPrefix": "datasync",
+          "sdkId": "DataSync"
+        },
+        "aws.auth#sigv4": {
+          "name": "datasync"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "AWS DataSync",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://datasync-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://datasync-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://datasync.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://datasync.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-11-09"
+    },
+    "com.amazonaws.datasync#FsxFilesystemArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):fsx:[a-z\\-0-9]+:[0-9]{12}:file-system/fs-[0-9a-f]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#FsxProtocol": {
+      "members": {
+        "NFS": {
+          "target": "com.amazonaws.datasync#FsxProtocolNfs",
+          "traits": {}
+        },
+        "SMB": {
+          "target": "com.amazonaws.datasync#FsxProtocolSmb",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#FsxProtocolNfs": {
+      "members": {
+        "MountOptions": {
+          "target": "com.amazonaws.datasync#NfsMountOptions"
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#FsxProtocolSmb": {
+      "members": {
+        "CmkSecretConfig": {
+          "target": "com.amazonaws.datasync#CmkSecretConfig",
+          "traits": {}
+        },
+        "CustomSecretConfig": {
+          "target": "com.amazonaws.datasync#CustomSecretConfig",
+          "traits": {}
+        },
+        "Domain": {
+          "target": "com.amazonaws.datasync#SmbDomain",
+          "traits": {}
+        },
+        "ManagedSecretConfig": {
+          "target": "com.amazonaws.datasync#ManagedSecretConfig",
+          "traits": {}
+        },
+        "MountOptions": {
+          "target": "com.amazonaws.datasync#SmbMountOptions"
+        },
+        "Password": {
+          "target": "com.amazonaws.datasync#SmbPassword",
+          "traits": {
+            "smithy.api#addedDefault": {},
+            "smithy.api#default": ""
+          }
+        },
+        "User": {
+          "target": "com.amazonaws.datasync#SmbUser",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#HdfsAuthenticationType": {
+      "members": {
+        "KERBEROS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KERBEROS"
+          }
+        },
+        "SIMPLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SIMPLE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#HdfsBlockSize": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1073741824,
+          "min": 1048576
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.datasync#HdfsDataTransferProtection": {
+      "members": {
+        "AUTHENTICATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTHENTICATION"
+          }
+        },
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "INTEGRITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTEGRITY"
+          }
+        },
+        "PRIVACY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRIVACY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#HdfsNameNode": {
+      "members": {
+        "Hostname": {
+          "target": "com.amazonaws.datasync#HdfsServerHostname",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Port": {
+          "target": "com.amazonaws.datasync#HdfsServerPort",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#HdfsNameNodeList": {
+      "member": {
+        "target": "com.amazonaws.datasync#HdfsNameNode"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.datasync#HdfsReplicationFactor": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 512,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.datasync#HdfsRpcProtection": {
+      "members": {
+        "AUTHENTICATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTHENTICATION"
+          }
+        },
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "INTEGRITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTEGRITY"
+          }
+        },
+        "PRIVACY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PRIVACY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#HdfsServerHostname": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(([a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9\\-]*[A-Za-z0-9])$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#HdfsServerPort": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 65536,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.datasync#HdfsUser": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[_.A-Za-z0-9][-_.A-Za-z0-9]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#IamRoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):iam::[0-9]{12}:role/.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#IamRoleArnOrEmptyString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):iam::[0-9]{12}:role/[a-zA-Z0-9+=,.@_/-]+|)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#InternalException": {
+      "members": {
+        "errorCode": {
+          "target": "com.amazonaws.datasync#string"
+        },
+        "message": {
+          "target": "com.amazonaws.datasync#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#InvalidRequestException": {
+      "members": {
+        "datasyncErrorCode": {
+          "target": "com.amazonaws.datasync#string"
+        },
+        "errorCode": {
+          "target": "com.amazonaws.datasync#string"
+        },
+        "message": {
+          "target": "com.amazonaws.datasync#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#KerberosPrincipal": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^.+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):kms:[a-z\\-0-9]+:[0-9]{12}:key/.*|)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#KmsKeyProviderUri": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^kms:\\/\\/http[s]?@(([a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9\\-]*[A-Za-z0-9])(;(([a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9\\-]*[A-Za-z0-9]))*:[0-9]{1,5}\\/kms$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#LocationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):datasync:[a-z\\-0-9]+:[0-9]{12}:location/loc-[0-9a-z]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#LocationUri": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4360,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(efs|nfs|s3|smb|hdfs|fsx[a-z0-9-]+)://[a-zA-Z0-9.:/\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#ManagedSecretConfig": {
+      "members": {
+        "SecretArn": {
+          "target": "com.amazonaws.datasync#SecretArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#NfsMountOptions": {
+      "members": {
+        "Version": {
+          "target": "com.amazonaws.datasync#NfsVersion",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#NfsVersion": {
+      "members": {
+        "AUTOMATIC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTOMATIC"
+          }
+        },
+        "NFS3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NFS3"
+          }
+        },
+        "NFS4_0": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NFS4_0"
+          }
+        },
+        "NFS4_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NFS4_1"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#OnPremConfig": {
+      "members": {
+        "AgentArns": {
+          "target": "com.amazonaws.datasync#AgentArnList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#QopConfiguration": {
+      "members": {
+        "DataTransferProtection": {
+          "target": "com.amazonaws.datasync#HdfsDataTransferProtection",
+          "traits": {}
+        },
+        "RpcProtection": {
+          "target": "com.amazonaws.datasync#HdfsRpcProtection",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#S3Config": {
+      "members": {
+        "BucketAccessRoleArn": {
+          "target": "com.amazonaws.datasync#IamRoleArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#S3StorageClass": {
+      "members": {
+        "DEEP_ARCHIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEEP_ARCHIVE"
+          }
+        },
+        "GLACIER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GLACIER"
+          }
+        },
+        "GLACIER_INSTANT_RETRIEVAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GLACIER_INSTANT_RETRIEVAL"
+          }
+        },
+        "INTELLIGENT_TIERING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTELLIGENT_TIERING"
+          }
+        },
+        "ONEZONE_IA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONEZONE_IA"
+          }
+        },
+        "OUTPOSTS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OUTPOSTS"
+          }
+        },
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        },
+        "STANDARD_IA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD_IA"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#SecretArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):secretsmanager:[a-z\\-0-9]+:[0-9]{12}:secret:.*|)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#ServerIpAddress": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 39,
+          "min": 7
+        },
+        "smithy.api#pattern": "^\\A((25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))\\z$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#SmbAuthenticationType": {
+      "members": {
+        "KERBEROS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KERBEROS"
+          }
+        },
+        "NTLM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NTLM"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#SmbDomain": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 253,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9]((\\.|-+)?[A-Za-z0-9]){0,252}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#SmbMountOptions": {
+      "members": {
+        "Version": {
+          "target": "com.amazonaws.datasync#SmbVersion",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.datasync#SmbPassword": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 104,
+          "min": 0
+        },
+        "smithy.api#pattern": "^.{0,104}$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#SmbUser": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 104,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\x22\\x5B\\x5D/\\\\:;|=,+*?\\x3C\\x3E]{1,104}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#SmbVersion": {
+      "members": {
+        "AUTOMATIC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AUTOMATIC"
+          }
+        },
+        "SMB1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SMB1"
+          }
+        },
+        "SMB2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SMB2"
+          }
+        },
+        "SMB2_0": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SMB2_0"
+          }
+        },
+        "SMB3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SMB3"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.datasync#StorageVirtualMachineArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 162,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-eusc|aws-iso|aws-iso-b):fsx:[a-z\\-0-9]+:[0-9]{12}:storage-virtual-machine/fs-[0-9a-f]+/svm-[0-9a-f]{17,}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.datasync#Time": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.datasync#string": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

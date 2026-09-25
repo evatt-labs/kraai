@@ -1,0 +1,31 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::TrialComponent
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeTrialComponent
+  identifier:
+    TrialComponentArn: TrialComponentName
+properties:
+  CreationTime: CreationTime
+  DisplayName: DisplayName
+  InputArtifacts: InputArtifacts
+  LastModifiedTime: LastModifiedTime
+  LineageGroupArn: LineageGroupArn
+  MetadataProperties:
+    member: MetadataProperties
+    properties:
+      CommitId: CommitId
+      GeneratedBy: GeneratedBy
+      ProjectId: ProjectId
+      Repository: Repository
+  OutputArtifacts: OutputArtifacts
+  Parameters: Parameters
+  Status:
+    member: Status
+    properties:
+      Message: Message
+      PrimaryStatus: PrimaryStatus
+  TrialComponentArn: TrialComponentArn
+  TrialComponentName: TrialComponentName
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

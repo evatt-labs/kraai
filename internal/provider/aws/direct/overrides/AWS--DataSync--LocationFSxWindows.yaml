@@ -1,0 +1,29 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::DataSync::LocationFSxWindows
+read:
+  model: datasync/service/2018-11-09/datasync-2018-11-09.json
+  operation: DescribeLocationFsxWindows
+  identifier:
+    LocationArn: LocationArn
+properties:
+  CmkSecretConfig:
+    member: CmkSecretConfig
+    properties:
+      KmsKeyArn: KmsKeyArn
+      SecretArn: SecretArn
+  CustomSecretConfig:
+    member: CustomSecretConfig
+    properties:
+      SecretAccessRoleArn: SecretAccessRoleArn
+      SecretArn: SecretArn
+  Domain: Domain
+  LocationArn: LocationArn
+  LocationUri: LocationUri
+  ManagedSecretConfig:
+    member: ManagedSecretConfig
+    properties:
+      SecretArn: SecretArn
+  SecurityGroupArns: SecurityGroupArns
+  User: User
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

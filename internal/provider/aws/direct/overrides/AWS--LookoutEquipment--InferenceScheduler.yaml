@@ -1,0 +1,40 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::LookoutEquipment::InferenceScheduler
+read:
+  model: lookoutequipment/service/2020-12-15/lookoutequipment-2020-12-15.json
+  operation: DescribeInferenceScheduler
+  identifier:
+    InferenceSchedulerName: InferenceSchedulerName
+properties:
+  DataDelayOffsetInMinutes: DataDelayOffsetInMinutes
+  DataInputConfiguration:
+    member: DataInputConfiguration
+    properties:
+      InferenceInputNameConfiguration:
+        member: InferenceInputNameConfiguration
+        properties:
+          ComponentTimestampDelimiter: ComponentTimestampDelimiter
+          TimestampFormat: TimestampFormat
+      InputTimeZoneOffset: InputTimeZoneOffset
+      S3InputConfiguration:
+        member: S3InputConfiguration
+        properties:
+          Bucket: Bucket
+          Prefix: Prefix
+  DataOutputConfiguration:
+    member: DataOutputConfiguration
+    properties:
+      KmsKeyId: KmsKeyId
+      S3OutputConfiguration:
+        member: S3OutputConfiguration
+        properties:
+          Bucket: Bucket
+          Prefix: Prefix
+  DataUploadFrequency: DataUploadFrequency
+  InferenceSchedulerArn: InferenceSchedulerArn
+  InferenceSchedulerName: InferenceSchedulerName
+  ModelName: ModelName
+  RoleArn: RoleArn
+  ServerSideKmsKeyId: ServerSideKmsKeyId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

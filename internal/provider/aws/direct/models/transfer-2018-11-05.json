@@ -1,0 +1,2246 @@
+{
+  "shapes": {
+    "com.amazonaws.transfer#AddressAllocationId": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#AddressAllocationIds": {
+      "member": {
+        "target": "com.amazonaws.transfer#AddressAllocationId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#As2Id": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\u0020-\\u007E\\s]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#As2Transport": {
+      "members": {
+        "HTTP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#As2Transports": {
+      "member": {
+        "target": "com.amazonaws.transfer#As2Transport"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#CertDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.transfer#CertSerial": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 48,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[0-9a-fA-F{}:?]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#Certificate": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#CertificateBodyType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 16384,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\t\\n\\r\\u0020-\\u00FF]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#CertificateChainType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2097152,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\t\\n\\r\\u0020-\\u00FF]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#CertificateId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 22
+        },
+        "smithy.api#pattern": "^cert-([0-9a-f]{17})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#CertificateIds": {
+      "member": {
+        "target": "com.amazonaws.transfer#CertificateId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#CertificateStatusType": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "INACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INACTIVE"
+          }
+        },
+        "PENDING_ROTATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PENDING_ROTATION"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#CertificateType": {
+      "members": {
+        "CERTIFICATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CERTIFICATE"
+          }
+        },
+        "CERTIFICATE_WITH_PRIVATE_KEY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CERTIFICATE_WITH_PRIVATE_KEY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#CertificateUsageType": {
+      "members": {
+        "ENCRYPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENCRYPTION"
+          }
+        },
+        "SIGNING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SIGNING"
+          }
+        },
+        "TLS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TLS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#CopyStepDetails": {
+      "members": {
+        "DestinationFileLocation": {
+          "target": "com.amazonaws.transfer#InputFileLocation",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.transfer#WorkflowStepName",
+          "traits": {}
+        },
+        "OverwriteExisting": {
+          "target": "com.amazonaws.transfer#OverwriteExisting",
+          "traits": {}
+        },
+        "SourceFileLocation": {
+          "target": "com.amazonaws.transfer#SourceFileLocation",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#CustomStepDetails": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.transfer#WorkflowStepName",
+          "traits": {}
+        },
+        "SourceFileLocation": {
+          "target": "com.amazonaws.transfer#SourceFileLocation",
+          "traits": {}
+        },
+        "Target": {
+          "target": "com.amazonaws.transfer#CustomStepTarget",
+          "traits": {}
+        },
+        "TimeoutSeconds": {
+          "target": "com.amazonaws.transfer#CustomStepTimeoutSeconds",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#CustomStepTarget": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 170,
+          "min": 0
+        },
+        "smithy.api#pattern": "^arn:[a-z-]+:lambda:.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#CustomStepTimeoutSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1800,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.transfer#DecryptStepDetails": {
+      "members": {
+        "DestinationFileLocation": {
+          "target": "com.amazonaws.transfer#InputFileLocation",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.transfer#WorkflowStepName",
+          "traits": {}
+        },
+        "OverwriteExisting": {
+          "target": "com.amazonaws.transfer#OverwriteExisting",
+          "traits": {}
+        },
+        "SourceFileLocation": {
+          "target": "com.amazonaws.transfer#SourceFileLocation",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.transfer#EncryptionType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DeleteStepDetails": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.transfer#WorkflowStepName",
+          "traits": {}
+        },
+        "SourceFileLocation": {
+          "target": "com.amazonaws.transfer#SourceFileLocation",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeCertificate": {
+      "errors": [
+        {
+          "target": "com.amazonaws.transfer#InternalServiceError"
+        },
+        {
+          "target": "com.amazonaws.transfer#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.transfer#DescribeCertificateRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.transfer#DescribeCertificateResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.transfer#DescribeCertificateRequest": {
+      "members": {
+        "CertificateId": {
+          "target": "com.amazonaws.transfer#CertificateId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeCertificateResponse": {
+      "members": {
+        "Certificate": {
+          "target": "com.amazonaws.transfer#DescribedCertificate",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeProfile": {
+      "errors": [
+        {
+          "target": "com.amazonaws.transfer#InternalServiceError"
+        },
+        {
+          "target": "com.amazonaws.transfer#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.transfer#DescribeProfileRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.transfer#DescribeProfileResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.transfer#DescribeProfileRequest": {
+      "members": {
+        "ProfileId": {
+          "target": "com.amazonaws.transfer#ProfileId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeProfileResponse": {
+      "members": {
+        "Profile": {
+          "target": "com.amazonaws.transfer#DescribedProfile",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeServer": {
+      "errors": [
+        {
+          "target": "com.amazonaws.transfer#InternalServiceError"
+        },
+        {
+          "target": "com.amazonaws.transfer#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.transfer#DescribeServerRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.transfer#DescribeServerResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "requiredActions": [
+            "ec2:DescribeVpcEndpoints",
+            "transfer:DescribeServer"
+          ]
+        },
+        "smithy.api#readonly": {},
+        "smithy.waiters#waitable": {
+          "ServerOffline": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "OFFLINE",
+                    "path": "Server.State"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "STOP_FAILED",
+                    "path": "Server.State"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "maxDelay": 3600,
+            "minDelay": 30
+          },
+          "ServerOnline": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ONLINE",
+                    "path": "Server.State"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "START_FAILED",
+                    "path": "Server.State"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "maxDelay": 3600,
+            "minDelay": 30
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.transfer#DescribeServerRequest": {
+      "members": {
+        "ServerId": {
+          "target": "com.amazonaws.transfer#ServerId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeServerResponse": {
+      "members": {
+        "Server": {
+          "target": "com.amazonaws.transfer#DescribedServer",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeWorkflow": {
+      "errors": [
+        {
+          "target": "com.amazonaws.transfer#InternalServiceError"
+        },
+        {
+          "target": "com.amazonaws.transfer#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.transfer#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.transfer#DescribeWorkflowRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.transfer#DescribeWorkflowResponse"
+      },
+      "traits": {
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.transfer#DescribeWorkflowRequest": {
+      "members": {
+        "WorkflowId": {
+          "target": "com.amazonaws.transfer#WorkflowId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribeWorkflowResponse": {
+      "members": {
+        "Workflow": {
+          "target": "com.amazonaws.transfer#DescribedWorkflow",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribedCertificate": {
+      "members": {
+        "ActiveDate": {
+          "target": "com.amazonaws.transfer#CertDate",
+          "traits": {}
+        },
+        "Arn": {
+          "target": "com.amazonaws.transfer#Arn",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "read",
+            "smithy.api#required": {}
+          }
+        },
+        "Certificate": {
+          "target": "com.amazonaws.transfer#CertificateBodyType",
+          "traits": {}
+        },
+        "CertificateChain": {
+          "target": "com.amazonaws.transfer#CertificateChainType",
+          "traits": {}
+        },
+        "CertificateId": {
+          "target": "com.amazonaws.transfer#CertificateId",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.transfer#Description",
+          "traits": {}
+        },
+        "InactiveDate": {
+          "target": "com.amazonaws.transfer#CertDate",
+          "traits": {}
+        },
+        "NotAfterDate": {
+          "target": "com.amazonaws.transfer#CertDate",
+          "traits": {}
+        },
+        "NotBeforeDate": {
+          "target": "com.amazonaws.transfer#CertDate",
+          "traits": {}
+        },
+        "Serial": {
+          "target": "com.amazonaws.transfer#CertSerial",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.transfer#CertificateStatusType",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.transfer#Tags",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.transfer#CertificateType",
+          "traits": {}
+        },
+        "Usage": {
+          "target": "com.amazonaws.transfer#CertificateUsageType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribedProfile": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.transfer#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "As2Id": {
+          "target": "com.amazonaws.transfer#As2Id",
+          "traits": {}
+        },
+        "CertificateIds": {
+          "target": "com.amazonaws.transfer#CertificateIds",
+          "traits": {}
+        },
+        "ProfileId": {
+          "target": "com.amazonaws.transfer#ProfileId",
+          "traits": {}
+        },
+        "ProfileType": {
+          "target": "com.amazonaws.transfer#ProfileType",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.transfer#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribedServer": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.transfer#Arn",
+          "traits": {
+            "aws.cloudformation#cfnAdditionalIdentifier": {},
+            "aws.cloudformation#cfnMutability": "read",
+            "smithy.api#required": {}
+          }
+        },
+        "As2ServiceManagedEgressIpAddresses": {
+          "target": "com.amazonaws.transfer#ServiceManagedEgressIpAddresses",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "read"
+          }
+        },
+        "Certificate": {
+          "target": "com.amazonaws.transfer#Certificate",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "Domain": {
+          "target": "com.amazonaws.transfer#Domain",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "create-and-read"
+          }
+        },
+        "EndpointDetails": {
+          "target": "com.amazonaws.transfer#EndpointDetails",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "EndpointType": {
+          "target": "com.amazonaws.transfer#EndpointType",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "HostKeyFingerprint": {
+          "target": "com.amazonaws.transfer#HostKeyFingerprint",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "IdentityProviderDetails": {
+          "target": "com.amazonaws.transfer#IdentityProviderDetails",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "IdentityProviderType": {
+          "target": "com.amazonaws.transfer#IdentityProviderType",
+          "traits": {}
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.transfer#IpAddressType",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "LoggingRole": {
+          "target": "com.amazonaws.transfer#NullableRole",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "PostAuthenticationLoginBanner": {
+          "target": "com.amazonaws.transfer#PostAuthenticationLoginBanner",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "PreAuthenticationLoginBanner": {
+          "target": "com.amazonaws.transfer#PreAuthenticationLoginBanner",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "ProtocolDetails": {
+          "target": "com.amazonaws.transfer#ProtocolDetails",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "Protocols": {
+          "target": "com.amazonaws.transfer#Protocols",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "S3StorageOptions": {
+          "target": "com.amazonaws.transfer#S3StorageOptions",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "SecurityPolicyName": {
+          "target": "com.amazonaws.transfer#SecurityPolicyName",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "ServerId": {
+          "target": "com.amazonaws.transfer#ServerId",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.transfer#State",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "StructuredLogDestinations": {
+          "target": "com.amazonaws.transfer#StructuredLogDestinations",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.transfer#Tags",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        },
+        "UserCount": {
+          "target": "com.amazonaws.transfer#UserCount",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "WorkflowDetails": {
+          "target": "com.amazonaws.transfer#WorkflowDetails",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "full"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#DescribedWorkflow": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.transfer#Arn",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "read",
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.transfer#WorkflowDescription",
+          "traits": {}
+        },
+        "OnExceptionSteps": {
+          "target": "com.amazonaws.transfer#WorkflowSteps",
+          "traits": {}
+        },
+        "Steps": {
+          "target": "com.amazonaws.transfer#WorkflowSteps",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.transfer#Tags",
+          "traits": {}
+        },
+        "WorkflowId": {
+          "target": "com.amazonaws.transfer#WorkflowId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\u0021-\\u007E]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#DirectoryId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^d-[0-9a-f]{10}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#DirectoryListingOptimization": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#Domain": {
+      "members": {
+        "EFS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EFS"
+          }
+        },
+        "S3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "S3"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#EfsFileLocation": {
+      "members": {
+        "FileSystemId": {
+          "target": "com.amazonaws.transfer#EfsFileSystemId",
+          "traits": {}
+        },
+        "Path": {
+          "target": "com.amazonaws.transfer#EfsPath",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#EfsFileSystemId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(arn:aws[-a-z]*:elasticfilesystem:[0-9a-z-:]+:(access-point/fsap|file-system/fs)-[0-9a-f]{8,40}|fs(ap)?-[0-9a-f]{8,40})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#EfsPath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 65536,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^\\x00]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#EncryptionType": {
+      "members": {
+        "PGP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PGP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#EndpointDetails": {
+      "members": {
+        "AddressAllocationIds": {
+          "target": "com.amazonaws.transfer#AddressAllocationIds",
+          "traits": {}
+        },
+        "SecurityGroupIds": {
+          "target": "com.amazonaws.transfer#SecurityGroupIds",
+          "traits": {}
+        },
+        "SubnetIds": {
+          "target": "com.amazonaws.transfer#SubnetIds",
+          "traits": {}
+        },
+        "VpcEndpointId": {
+          "target": "com.amazonaws.transfer#VpcEndpointId",
+          "traits": {}
+        },
+        "VpcId": {
+          "target": "com.amazonaws.transfer#VpcId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#EndpointType": {
+      "members": {
+        "PUBLIC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PUBLIC"
+          }
+        },
+        "VPC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VPC"
+          }
+        },
+        "VPC_ENDPOINT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VPC_ENDPOINT"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#Function": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 170,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:[a-z-]+:lambda:.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#HostKeyFingerprint": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#IdentityProviderDetails": {
+      "members": {
+        "DirectoryId": {
+          "target": "com.amazonaws.transfer#DirectoryId",
+          "traits": {}
+        },
+        "Function": {
+          "target": "com.amazonaws.transfer#Function",
+          "traits": {}
+        },
+        "InvocationRole": {
+          "target": "com.amazonaws.transfer#Role",
+          "traits": {}
+        },
+        "SftpAuthenticationMethods": {
+          "target": "com.amazonaws.transfer#SftpAuthenticationMethods",
+          "traits": {}
+        },
+        "Url": {
+          "target": "com.amazonaws.transfer#Url",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#IdentityProviderType": {
+      "members": {
+        "API_GATEWAY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "API_GATEWAY"
+          }
+        },
+        "AWS_DIRECTORY_SERVICE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_DIRECTORY_SERVICE"
+          }
+        },
+        "AWS_LAMBDA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWS_LAMBDA"
+          }
+        },
+        "SERVICE_MANAGED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SERVICE_MANAGED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#InputFileLocation": {
+      "members": {
+        "EfsFileLocation": {
+          "target": "com.amazonaws.transfer#EfsFileLocation",
+          "traits": {}
+        },
+        "S3FileLocation": {
+          "target": "com.amazonaws.transfer#S3InputFileLocation",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#InternalServiceError": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#Message",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#InvalidRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#Message",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#IpAddressType": {
+      "members": {
+        "DUALSTACK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DUALSTACK"
+          }
+        },
+        "IPV4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IPV4"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#Message": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#NullableRole": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(|arn:.*role/\\S+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#OnPartialUploadWorkflowDetails": {
+      "member": {
+        "target": "com.amazonaws.transfer#WorkflowDetail"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#OnUploadWorkflowDetails": {
+      "member": {
+        "target": "com.amazonaws.transfer#WorkflowDetail"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#OverwriteExisting": {
+      "members": {
+        "FALSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FALSE"
+          }
+        },
+        "TRUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TRUE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#PassiveIp": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#PostAuthenticationLoginBanner": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\x09-\\x0D\\x20-\\x7E]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#PreAuthenticationLoginBanner": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\x09-\\x0D\\x20-\\x7E]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#ProfileId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 19,
+          "min": 19
+        },
+        "smithy.api#pattern": "^p-([0-9a-f]{17})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#ProfileType": {
+      "members": {
+        "LOCAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LOCAL"
+          }
+        },
+        "PARTNER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PARTNER"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#Protocol": {
+      "members": {
+        "AS2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AS2"
+          }
+        },
+        "FTP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FTP"
+          }
+        },
+        "FTPS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FTPS"
+          }
+        },
+        "SFTP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SFTP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#ProtocolDetails": {
+      "members": {
+        "As2Transports": {
+          "target": "com.amazonaws.transfer#As2Transports",
+          "traits": {}
+        },
+        "PassiveIp": {
+          "target": "com.amazonaws.transfer#PassiveIp",
+          "traits": {}
+        },
+        "ProxyConfig": {
+          "target": "com.amazonaws.transfer#ProxyConfig",
+          "traits": {}
+        },
+        "SetStatOption": {
+          "target": "com.amazonaws.transfer#SetStatOption",
+          "traits": {}
+        },
+        "TlsSessionResumptionMode": {
+          "target": "com.amazonaws.transfer#TlsSessionResumptionMode",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#Protocols": {
+      "member": {
+        "target": "com.amazonaws.transfer#Protocol"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 4,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#ProxyConfig": {
+      "members": {
+        "SftpMode": {
+          "target": "com.amazonaws.transfer#ProxyMode",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#ProxyMode": {
+      "members": {
+        "NONE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NONE"
+          }
+        },
+        "PROXY_PROTOCOL_V2_ENFORCED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROXY_PROTOCOL_V2_ENFORCED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#Resource": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#Message",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Resource": {
+          "target": "com.amazonaws.transfer#Resource",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.transfer#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#ResourceType": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#Role": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        },
+        "smithy.api#pattern": "^arn:.*role/\\S+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#S3Bucket": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 63,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#S3InputFileLocation": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.transfer#S3Bucket",
+          "traits": {}
+        },
+        "Key": {
+          "target": "com.amazonaws.transfer#S3Key",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#S3Key": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\P{M}\\p{M}]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#S3StorageOptions": {
+      "members": {
+        "DirectoryListingOptimization": {
+          "target": "com.amazonaws.transfer#DirectoryListingOptimization",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#S3Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.transfer#S3TagKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.transfer#S3TagValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#S3TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#S3TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#S3Tags": {
+      "member": {
+        "target": "com.amazonaws.transfer#S3Tag"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#SecurityGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 11
+        },
+        "smithy.api#pattern": "^sg-[0-9a-f]{8,17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#SecurityGroupIds": {
+      "member": {
+        "target": "com.amazonaws.transfer#SecurityGroupId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#SecurityPolicyName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        },
+        "smithy.api#pattern": "^Transfer[A-Za-z0-9]*SecurityPolicy-[A-Za-z0-9-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#ServerId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 19,
+          "min": 19
+        },
+        "smithy.api#pattern": "^s-([0-9a-f]{17})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#ServiceErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#ServiceManagedEgressIpAddress": {
+      "traits": {
+        "smithy.api#pattern": "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#ServiceManagedEgressIpAddresses": {
+      "member": {
+        "target": "com.amazonaws.transfer#ServiceManagedEgressIpAddress"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.transfer#ServiceUnavailableException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#ServiceErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServiceUnavailable",
+          "httpResponseCode": 503
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#SetStatOption": {
+      "members": {
+        "DEFAULT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEFAULT"
+          }
+        },
+        "ENABLE_NO_OP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLE_NO_OP"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#SftpAuthenticationMethods": {
+      "members": {
+        "PASSWORD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PASSWORD"
+          }
+        },
+        "PUBLIC_KEY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PUBLIC_KEY"
+          }
+        },
+        "PUBLIC_KEY_AND_PASSWORD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PUBLIC_KEY_AND_PASSWORD"
+          }
+        },
+        "PUBLIC_KEY_OR_PASSWORD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PUBLIC_KEY_OR_PASSWORD"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#SourceFileLocation": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^\\$\\{(\\w+.)+\\w+\\}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#State": {
+      "members": {
+        "OFFLINE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OFFLINE"
+          }
+        },
+        "ONLINE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONLINE"
+          }
+        },
+        "STARTING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STARTING"
+          }
+        },
+        "START_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "START_FAILED"
+          }
+        },
+        "STOPPING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STOPPING"
+          }
+        },
+        "STOP_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STOP_FAILED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#StructuredLogDestinations": {
+      "member": {
+        "target": "com.amazonaws.transfer#Arn"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#SubnetId": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#SubnetIds": {
+      "member": {
+        "target": "com.amazonaws.transfer#SubnetId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.transfer#TagKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.transfer#TagValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#TagStepDetails": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.transfer#WorkflowStepName",
+          "traits": {}
+        },
+        "SourceFileLocation": {
+          "target": "com.amazonaws.transfer#SourceFileLocation",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.transfer#S3Tags",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#Tags": {
+      "member": {
+        "target": "com.amazonaws.transfer#Tag"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.transfer#TlsSessionResumptionMode": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ENFORCED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENFORCED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#TransferService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.transfer#DescribeCertificate"
+        },
+        {
+          "target": "com.amazonaws.transfer#DescribeProfile"
+        },
+        {
+          "target": "com.amazonaws.transfer#DescribeServer"
+        },
+        {
+          "target": "com.amazonaws.transfer#DescribeWorkflow"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "transfer",
+          "cloudFormationName": "Transfer",
+          "cloudTrailEventSource": "transfer.amazonaws.com",
+          "endpointPrefix": "transfer",
+          "sdkId": "Transfer"
+        },
+        "aws.api#tagEnabled": {},
+        "aws.auth#sigv4": {
+          "name": "transfer"
+        },
+        "aws.protocols#awsJson1_1": {},
+        "smithy.api#title": "AWS Transfer Family",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://transfer-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://transfer-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://transfer.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://transfer.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-11-05"
+    },
+    "com.amazonaws.transfer#Url": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#UserCount": {
+      "type": "integer"
+    },
+    "com.amazonaws.transfer#VpcEndpointId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 22,
+          "min": 22
+        },
+        "smithy.api#pattern": "^vpce-[0-9a-f]{17}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#VpcId": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#WorkflowDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\w- ]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#WorkflowDetail": {
+      "members": {
+        "ExecutionRole": {
+          "target": "com.amazonaws.transfer#Role",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "WorkflowId": {
+          "target": "com.amazonaws.transfer#WorkflowId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#WorkflowDetails": {
+      "members": {
+        "OnPartialUpload": {
+          "target": "com.amazonaws.transfer#OnPartialUploadWorkflowDetails",
+          "traits": {}
+        },
+        "OnUpload": {
+          "target": "com.amazonaws.transfer#OnUploadWorkflowDetails",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#WorkflowId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 19,
+          "min": 19
+        },
+        "smithy.api#pattern": "^w-([a-z0-9]{17})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#WorkflowStep": {
+      "members": {
+        "CopyStepDetails": {
+          "target": "com.amazonaws.transfer#CopyStepDetails",
+          "traits": {}
+        },
+        "CustomStepDetails": {
+          "target": "com.amazonaws.transfer#CustomStepDetails",
+          "traits": {}
+        },
+        "DecryptStepDetails": {
+          "target": "com.amazonaws.transfer#DecryptStepDetails",
+          "traits": {}
+        },
+        "DeleteStepDetails": {
+          "target": "com.amazonaws.transfer#DeleteStepDetails",
+          "traits": {}
+        },
+        "TagStepDetails": {
+          "target": "com.amazonaws.transfer#TagStepDetails",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.transfer#WorkflowStepType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.transfer#WorkflowStepName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 30,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\w-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.transfer#WorkflowStepType": {
+      "members": {
+        "COPY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COPY"
+          }
+        },
+        "CUSTOM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CUSTOM"
+          }
+        },
+        "DECRYPT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DECRYPT"
+          }
+        },
+        "DELETE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE"
+          }
+        },
+        "TAG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TAG"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.transfer#WorkflowSteps": {
+      "member": {
+        "target": "com.amazonaws.transfer#WorkflowStep"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 8,
+          "min": 0
+        }
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

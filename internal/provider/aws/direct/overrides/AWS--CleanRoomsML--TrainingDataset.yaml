@@ -1,0 +1,36 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::CleanRoomsML::TrainingDataset
+read:
+  model: cleanroomsml/service/2023-09-06/cleanroomsml-2023-09-06.json
+  operation: GetTrainingDataset
+  identifier:
+    TrainingDatasetArn: trainingDatasetArn
+properties:
+  Description: description
+  Name: name
+  RoleArn: roleArn
+  Status: status
+  TrainingData:
+    member: trainingData
+    properties:
+      InputConfig:
+        member: inputConfig
+        properties:
+          DataSource:
+            member: dataSource
+            properties:
+              GlueDataSource:
+                member: glueDataSource
+                properties:
+                  CatalogId: catalogId
+                  DatabaseName: databaseName
+                  TableName: tableName
+          Schema:
+            member: schema
+            properties:
+              ColumnName: columnName
+              ColumnTypes: columnTypes
+      Type: type
+  TrainingDatasetArn: trainingDatasetArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

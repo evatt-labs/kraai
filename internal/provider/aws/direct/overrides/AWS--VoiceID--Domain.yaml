@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::VoiceID::Domain
+read:
+  model: voice-id/service/2021-09-27/voice-id-2021-09-27.json
+  operation: DescribeDomain
+  identifier:
+    DomainId: DomainId
+  response: Domain
+properties:
+  Description: Description
+  DomainId: DomainId
+  Name: Name
+  ServerSideEncryptionConfiguration:
+    member: ServerSideEncryptionConfiguration
+    properties:
+      KmsKeyId: KmsKeyId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

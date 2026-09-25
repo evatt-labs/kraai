@@ -1,0 +1,1937 @@
+{
+  "shapes": {
+    "com.amazonaws.iot#AWSIotService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.iot#DescribeCustomMetric"
+        },
+        {
+          "target": "com.amazonaws.iot#DescribeDimension"
+        },
+        {
+          "target": "com.amazonaws.iot#DescribeFleetMetric"
+        },
+        {
+          "target": "com.amazonaws.iot#DescribeRoleAlias"
+        },
+        {
+          "target": "com.amazonaws.iot#DescribeScheduledAudit"
+        },
+        {
+          "target": "com.amazonaws.iot#GetPackage"
+        },
+        {
+          "target": "com.amazonaws.iot#GetTopicRuleDestination"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "iot",
+          "cloudFormationName": "IoT",
+          "cloudTrailEventSource": "iot.amazonaws.com",
+          "endpointPrefix": "iot",
+          "sdkId": "IoT"
+        },
+        "aws.auth#sigv4": {
+          "name": "iot"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS IoT",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://iot-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://iot-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://iot.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            "aws",
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            }
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://iot.{Region}.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            "aws-cn",
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            }
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://iot.{Region}.amazonaws.com.cn"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            "aws-us-gov",
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            }
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://iot.{Region}.amazonaws.com"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://iot.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2015-05-28"
+    },
+    "com.amazonaws.iot#AggregationField": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#AggregationType": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.iot#AggregationTypeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "values": {
+          "target": "com.amazonaws.iot#AggregationTypeValues",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iot#AggregationTypeName": {
+      "members": {
+        "CARDINALITY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Cardinality"
+          }
+        },
+        "PERCENTILES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Percentiles"
+          }
+        },
+        "STATISTICS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Statistics"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#AggregationTypeValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#AggregationTypeValues": {
+      "member": {
+        "target": "com.amazonaws.iot#AggregationTypeValue"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iot#AuditCheckName": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.iot#AuditFrequency": {
+      "members": {
+        "BIWEEKLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BIWEEKLY"
+          }
+        },
+        "DAILY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DAILY"
+          }
+        },
+        "MONTHLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MONTHLY"
+          }
+        },
+        "WEEKLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WEEKLY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#AwsAccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 12
+        },
+        "smithy.api#pattern": "^[0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#AwsArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#CreatedAtDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.iot#CreationDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.iot#CredentialDurationSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 43200,
+          "min": 900
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iot#CustomMetricArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#CustomMetricDisplayName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\p{Graph}\\x20]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#CustomMetricType": {
+      "members": {
+        "IP_ADDRESS_LIST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ip-address-list"
+          }
+        },
+        "NUMBER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "number"
+          }
+        },
+        "NUMBER_LIST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "number-list"
+          }
+        },
+        "STRING_LIST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "string-list"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#DateType": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.iot#DayOfMonth": {
+      "traits": {
+        "smithy.api#pattern": "^([1-9]|[12][0-9]|3[01])$|^LAST$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#DayOfWeek": {
+      "members": {
+        "FRI": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FRI"
+          }
+        },
+        "MON": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MON"
+          }
+        },
+        "SAT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAT"
+          }
+        },
+        "SUN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SUN"
+          }
+        },
+        "THU": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "THU"
+          }
+        },
+        "TUE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TUE"
+          }
+        },
+        "WED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#DescribeCustomMetric": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iot#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iot#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iot#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iot#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iot#DescribeCustomMetricRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iot#DescribeCustomMetricResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/custom-metric/{metricName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iot#DescribeCustomMetricRequest": {
+      "members": {
+        "metricName": {
+          "target": "com.amazonaws.iot#MetricName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeCustomMetricResponse": {
+      "members": {
+        "creationDate": {
+          "target": "com.amazonaws.iot#Timestamp",
+          "traits": {}
+        },
+        "displayName": {
+          "target": "com.amazonaws.iot#CustomMetricDisplayName",
+          "traits": {}
+        },
+        "lastModifiedDate": {
+          "target": "com.amazonaws.iot#Timestamp",
+          "traits": {}
+        },
+        "metricArn": {
+          "target": "com.amazonaws.iot#CustomMetricArn",
+          "traits": {}
+        },
+        "metricName": {
+          "target": "com.amazonaws.iot#MetricName",
+          "traits": {}
+        },
+        "metricType": {
+          "target": "com.amazonaws.iot#CustomMetricType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeDimension": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iot#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iot#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iot#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iot#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iot#DescribeDimensionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iot#DescribeDimensionResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/dimensions/{name}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iot#DescribeDimensionRequest": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.iot#DimensionName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeDimensionResponse": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.iot#DimensionArn",
+          "traits": {}
+        },
+        "creationDate": {
+          "target": "com.amazonaws.iot#Timestamp",
+          "traits": {}
+        },
+        "lastModifiedDate": {
+          "target": "com.amazonaws.iot#Timestamp",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.iot#DimensionName",
+          "traits": {}
+        },
+        "stringValues": {
+          "target": "com.amazonaws.iot#DimensionStringValues",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.iot#DimensionType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeFleetMetric": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iot#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iot#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iot#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iot#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.iot#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.iot#UnauthorizedException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iot#DescribeFleetMetricRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iot#DescribeFleetMetricResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/fleet-metric/{metricName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iot#DescribeFleetMetricRequest": {
+      "members": {
+        "metricName": {
+          "target": "com.amazonaws.iot#FleetMetricName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeFleetMetricResponse": {
+      "members": {
+        "aggregationField": {
+          "target": "com.amazonaws.iot#AggregationField",
+          "traits": {}
+        },
+        "aggregationType": {
+          "target": "com.amazonaws.iot#AggregationType",
+          "traits": {}
+        },
+        "creationDate": {
+          "target": "com.amazonaws.iot#CreationDate",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.iot#FleetMetricDescription",
+          "traits": {}
+        },
+        "indexName": {
+          "target": "com.amazonaws.iot#IndexName",
+          "traits": {}
+        },
+        "lastModifiedDate": {
+          "target": "com.amazonaws.iot#LastModifiedDate",
+          "traits": {}
+        },
+        "metricArn": {
+          "target": "com.amazonaws.iot#FleetMetricArn",
+          "traits": {}
+        },
+        "metricName": {
+          "target": "com.amazonaws.iot#FleetMetricName",
+          "traits": {}
+        },
+        "period": {
+          "target": "com.amazonaws.iot#FleetMetricPeriod",
+          "traits": {}
+        },
+        "queryString": {
+          "target": "com.amazonaws.iot#QueryString",
+          "traits": {}
+        },
+        "queryVersion": {
+          "target": "com.amazonaws.iot#QueryVersion",
+          "traits": {}
+        },
+        "unit": {
+          "target": "com.amazonaws.iot#FleetMetricUnit",
+          "traits": {}
+        },
+        "version": {
+          "target": "com.amazonaws.iot#Version",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeRoleAlias": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iot#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iot#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iot#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iot#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.iot#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.iot#UnauthorizedException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iot#DescribeRoleAliasRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iot#DescribeRoleAliasResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/role-aliases/{roleAlias}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iot#DescribeRoleAliasRequest": {
+      "members": {
+        "roleAlias": {
+          "target": "com.amazonaws.iot#RoleAlias",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeRoleAliasResponse": {
+      "members": {
+        "roleAliasDescription": {
+          "target": "com.amazonaws.iot#RoleAliasDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeScheduledAudit": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iot#InternalFailureException"
+        },
+        {
+          "target": "com.amazonaws.iot#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iot#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iot#ThrottlingException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iot#DescribeScheduledAuditRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iot#DescribeScheduledAuditResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/audit/scheduledaudits/{scheduledAuditName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iot#DescribeScheduledAuditRequest": {
+      "members": {
+        "scheduledAuditName": {
+          "target": "com.amazonaws.iot#ScheduledAuditName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DescribeScheduledAuditResponse": {
+      "members": {
+        "dayOfMonth": {
+          "target": "com.amazonaws.iot#DayOfMonth",
+          "traits": {}
+        },
+        "dayOfWeek": {
+          "target": "com.amazonaws.iot#DayOfWeek",
+          "traits": {}
+        },
+        "frequency": {
+          "target": "com.amazonaws.iot#AuditFrequency",
+          "traits": {}
+        },
+        "scheduledAuditArn": {
+          "target": "com.amazonaws.iot#ScheduledAuditArn",
+          "traits": {}
+        },
+        "scheduledAuditName": {
+          "target": "com.amazonaws.iot#ScheduledAuditName",
+          "traits": {}
+        },
+        "targetCheckNames": {
+          "target": "com.amazonaws.iot#TargetAuditCheckNames",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#DimensionArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#DimensionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9:_-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#DimensionStringValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#DimensionStringValues": {
+      "member": {
+        "target": "com.amazonaws.iot#DimensionStringValue"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iot#DimensionType": {
+      "members": {
+        "TOPIC_FILTER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TOPIC_FILTER"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#ErrorMessage2": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#FleetMetricArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#FleetMetricDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\p{Graph}\\x20]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#FleetMetricName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_\\-\\.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#FleetMetricPeriod": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 86400,
+          "min": 60
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iot#FleetMetricUnit": {
+      "members": {
+        "Bits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bits"
+          }
+        },
+        "BitsSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bits/Second"
+          }
+        },
+        "Bytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bytes"
+          }
+        },
+        "BytesSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bytes/Second"
+          }
+        },
+        "Count": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Count"
+          }
+        },
+        "CountSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Count/Second"
+          }
+        },
+        "Gigabits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabits"
+          }
+        },
+        "GigabitsSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabits/Second"
+          }
+        },
+        "Gigabytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabytes"
+          }
+        },
+        "GigabytesSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabytes/Second"
+          }
+        },
+        "Kilobits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobits"
+          }
+        },
+        "KilobitsSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobits/Second"
+          }
+        },
+        "Kilobytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobytes"
+          }
+        },
+        "KilobytesSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobytes/Second"
+          }
+        },
+        "Megabits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabits"
+          }
+        },
+        "MegabitsSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabits/Second"
+          }
+        },
+        "Megabytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabytes"
+          }
+        },
+        "MegabytesSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabytes/Second"
+          }
+        },
+        "Microseconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Microseconds"
+          }
+        },
+        "Milliseconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Milliseconds"
+          }
+        },
+        "None": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "None"
+          }
+        },
+        "Percent": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Percent"
+          }
+        },
+        "Seconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Seconds"
+          }
+        },
+        "Terabits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabits"
+          }
+        },
+        "TerabitsSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabits/Second"
+          }
+        },
+        "Terabytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabytes"
+          }
+        },
+        "TerabytesSecond": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabytes/Second"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#GetPackage": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iot#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.iot#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iot#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.iot#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iot#GetPackageRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iot#GetPackageResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/packages/{packageName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iot#GetPackageRequest": {
+      "members": {
+        "packageName": {
+          "target": "com.amazonaws.iot#PackageName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#GetPackageResponse": {
+      "members": {
+        "creationDate": {
+          "target": "com.amazonaws.iot#CreationDate",
+          "traits": {}
+        },
+        "defaultVersionName": {
+          "target": "com.amazonaws.iot#VersionName",
+          "traits": {}
+        },
+        "description": {
+          "target": "com.amazonaws.iot#ResourceDescription",
+          "traits": {}
+        },
+        "lastModifiedDate": {
+          "target": "com.amazonaws.iot#LastModifiedDate",
+          "traits": {}
+        },
+        "packageArn": {
+          "target": "com.amazonaws.iot#PackageArn",
+          "traits": {}
+        },
+        "packageName": {
+          "target": "com.amazonaws.iot#PackageName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#GetTopicRuleDestination": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iot#InternalException"
+        },
+        {
+          "target": "com.amazonaws.iot#InvalidRequestException"
+        },
+        {
+          "target": "com.amazonaws.iot#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.iot#UnauthorizedException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iot#GetTopicRuleDestinationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iot#GetTopicRuleDestinationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/destinations/{arn+}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iot#GetTopicRuleDestinationRequest": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.iot#AwsArn",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#GetTopicRuleDestinationResponse": {
+      "members": {
+        "topicRuleDestination": {
+          "target": "com.amazonaws.iot#TopicRuleDestination",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#HttpUrlDestinationProperties": {
+      "members": {
+        "confirmationUrl": {
+          "target": "com.amazonaws.iot#Url",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iot#IndexName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9:_-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#InfluxDBDestinationProperties": {
+      "members": {
+        "endpoint": {
+          "target": "com.amazonaws.iot#Url",
+          "traits": {}
+        },
+        "influxDBVersion": {
+          "target": "com.amazonaws.iot#InfluxDBVersion",
+          "traits": {}
+        },
+        "secretId": {
+          "target": "com.amazonaws.iot#InfluxDBSecretId",
+          "traits": {}
+        },
+        "secretKey": {
+          "target": "com.amazonaws.iot#InfluxDBSecretKey",
+          "traits": {}
+        },
+        "secretType": {
+          "target": "com.amazonaws.iot#InfluxDBSecretType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iot#InfluxDBSecretId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#InfluxDBSecretKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#InfluxDBSecretType": {
+      "members": {
+        "SECRET_BINARY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SecretBinary"
+          }
+        },
+        "SECRET_STRING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SecretString"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#InfluxDBVersion": {
+      "members": {
+        "V2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "V2"
+          }
+        },
+        "V3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "V3"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#InternalException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#InternalFailureException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#InvalidRequestException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#LastModifiedDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.iot#LastUpdatedAtDate": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.iot#MetricName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9:_-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#PackageArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#PackageName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#QueryString": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#QueryVersion": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#ResourceDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\p{C}]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#RoleAlias": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w=,@-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#RoleAliasArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#RoleAliasDescription": {
+      "members": {
+        "creationDate": {
+          "target": "com.amazonaws.iot#DateType",
+          "traits": {}
+        },
+        "credentialDurationSeconds": {
+          "target": "com.amazonaws.iot#CredentialDurationSeconds",
+          "traits": {}
+        },
+        "lastModifiedDate": {
+          "target": "com.amazonaws.iot#DateType",
+          "traits": {}
+        },
+        "owner": {
+          "target": "com.amazonaws.iot#AwsAccountId",
+          "traits": {}
+        },
+        "roleAlias": {
+          "target": "com.amazonaws.iot#RoleAlias",
+          "traits": {}
+        },
+        "roleAliasArn": {
+          "target": "com.amazonaws.iot#RoleAliasArn",
+          "traits": {}
+        },
+        "roleArn": {
+          "target": "com.amazonaws.iot#RoleArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iot#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#ScheduledAuditArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#ScheduledAuditName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#SecurityGroupId": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#SecurityGroupList": {
+      "member": {
+        "target": "com.amazonaws.iot#SecurityGroupId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iot#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#String": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#SubnetId": {
+      "type": "string"
+    },
+    "com.amazonaws.iot#SubnetIdList": {
+      "member": {
+        "target": "com.amazonaws.iot#SubnetId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iot#TargetAuditCheckNames": {
+      "member": {
+        "target": "com.amazonaws.iot#AuditCheckName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iot#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.iot#TopicRuleDestination": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.iot#AwsArn",
+          "traits": {}
+        },
+        "createdAt": {
+          "target": "com.amazonaws.iot#CreatedAtDate",
+          "traits": {}
+        },
+        "httpUrlProperties": {
+          "target": "com.amazonaws.iot#HttpUrlDestinationProperties",
+          "traits": {}
+        },
+        "influxDBProperties": {
+          "target": "com.amazonaws.iot#InfluxDBDestinationProperties",
+          "traits": {}
+        },
+        "lastUpdatedAt": {
+          "target": "com.amazonaws.iot#LastUpdatedAtDate",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.iot#TopicRuleDestinationStatus",
+          "traits": {}
+        },
+        "statusReason": {
+          "target": "com.amazonaws.iot#String",
+          "traits": {}
+        },
+        "vpcProperties": {
+          "target": "com.amazonaws.iot#VpcDestinationProperties",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iot#TopicRuleDestinationStatus": {
+      "members": {
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ERROR"
+          }
+        },
+        "IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IN_PROGRESS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iot#UnauthorizedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#Url": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iot#ErrorMessage2"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iot#Version": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "long"
+    },
+    "com.amazonaws.iot#VersionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iot#VpcDestinationProperties": {
+      "members": {
+        "roleArn": {
+          "target": "com.amazonaws.iot#AwsArn",
+          "traits": {}
+        },
+        "securityGroups": {
+          "target": "com.amazonaws.iot#SecurityGroupList",
+          "traits": {}
+        },
+        "subnetIds": {
+          "target": "com.amazonaws.iot#SubnetIdList",
+          "traits": {}
+        },
+        "vpcId": {
+          "target": "com.amazonaws.iot#VpcId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iot#VpcId": {
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

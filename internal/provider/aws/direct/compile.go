@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -21,7 +22,7 @@ type Reader struct {
 	// Method and URI are the HTTP binding of a restJson1 operation.
 	Method, URI string
 	Identifier  []Binding
-	// Response is the member path from the output to the resource.
+	// Response is the wire path from the output to the resource.
 	Response []string
 	Fields   []Field
 	// List lists every instance, when the type's override names a list.
@@ -169,6 +170,9 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	var api struct{ EndpointPrefix string }
 	_ = json.Unmarshal(svc.Traits["aws.auth#sigv4"], &sigv4)
 	_ = json.Unmarshal(svc.Traits["aws.api#service"], &api)
+	if api.EndpointPrefix == "" {
+		api.EndpointPrefix = ruleSetHost(svc.Traits["smithy.rules#endpointRuleSet"])
+	}
 	r.SigningName, r.EndpointPrefix = sigv4.Name, api.EndpointPrefix
 	if r.SigningName == "" || r.EndpointPrefix == "" {
 		fail("the service declares no signing name or endpoint prefix")
@@ -234,15 +238,48 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 
 	// The response path, to the structure holding the resource.
 	resource := ref(op.Output)
+	// Under restJson1 an output member may be bound to a header or the
+	// status code, which the client never reads, or be the whole body, in
+	// which case the body is not wrapped in it.
+	payload := ""
+	if r.Protocol == "restJson1" {
+		for name, m := range model.Shapes[resource].Members {
+			if m.Traits["smithy.api#httpPayload"] != nil {
+				payload = name
+			}
+		}
+	}
 	if o.Read.Response != "" {
-		for _, step := range strings.Split(o.Read.Response, ".") {
+		for i, step := range strings.Split(o.Read.Response, ".") {
 			m, ok := model.Shapes[resource].Members[step]
 			if !ok {
 				fail("response path %s: %s has no member %s", o.Read.Response, resource, step)
 				break
 			}
-			r.Response = append(r.Response, step)
+			if i == 0 && payload != "" && step != payload {
+				fail("response path %s: the body is the payload %s, not %s", o.Read.Response, payload, step)
+			}
+			var jsonName string
+			_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &jsonName)
+			if jsonName != "" && r.Protocol != "restJson1" {
+				fail("response path member %s has a jsonName, which %s is not known to honour", step, r.Protocol)
+			}
+			if i > 0 || step != payload {
+				r.Response = append(r.Response, r.wire(step, jsonName))
+			}
 			resource = m.Target
+		}
+	} else if payload != "" {
+		fail("the body is the payload %s, so the response path must start at it", payload)
+	}
+	if r.Protocol == "restJson1" && o.Read.Response == "" {
+		for _, name := range sortedKeys(o.Properties) {
+			m := model.Shapes[resource].Members[o.Properties[name].Member]
+			for _, trait := range []string{"smithy.api#httpHeader", "smithy.api#httpPrefixHeaders", "smithy.api#httpResponseCode"} {
+				if m.Traits[trait] != nil {
+					fail("%s maps to %s, which is bound to %s, not the body", name, o.Properties[name].Member, trait)
+				}
+			}
 		}
 	}
 	if model.Shapes[resource].Type != "structure" {
@@ -362,6 +399,44 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		fields = append(fields, f)
 	}
 	return fields
+}
+
+// standardHost matches a rule set's standard endpoint: neither FIPS nor
+// dual-stack, in the region's own partition.
+var standardHost = regexp.MustCompile(`^https://([a-z0-9-]+)\.\{Region\}\.\{PartitionResult#dnsSuffix\}$`)
+
+// ruleSetHost is the endpoint prefix a service's endpoint rule set implies,
+// for a model that declares none: the one non-FIPS standard host its rules
+// name, or "" when they name none or several.
+func ruleSetHost(ruleSet json.RawMessage) string {
+	var tree any
+	if json.Unmarshal(ruleSet, &tree) != nil {
+		return ""
+	}
+	hosts := map[string]bool{}
+	var walk func(any)
+	walk = func(v any) {
+		switch t := v.(type) {
+		case map[string]any:
+			for k, child := range t {
+				if url, ok := child.(string); ok && k == "url" {
+					if m := standardHost.FindStringSubmatch(url); m != nil && !strings.HasSuffix(m[1], "-fips") {
+						hosts[m[1]] = true
+					}
+				}
+				walk(child)
+			}
+		case []any:
+			for _, child := range t {
+				walk(child)
+			}
+		}
+	}
+	walk(tree)
+	if len(hosts) != 1 {
+		return ""
+	}
+	return sortedKeys(hosts)[0]
 }
 
 func ref(m *smithyMember) string {

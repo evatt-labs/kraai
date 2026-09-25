@@ -1,0 +1,19 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IVS::IngestConfiguration
+read:
+  model: ivs-realtime/service/2020-07-14/ivs-realtime-2020-07-14.json
+  operation: GetIngestConfiguration
+  identifier:
+    Arn: arn
+  response: ingestConfiguration
+properties:
+  Arn: arn
+  IngestProtocol: ingestProtocol
+  Name: name
+  ParticipantId: participantId
+  StageArn: stageArn
+  State: state
+  StreamKey: streamKey
+  UserId: userId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

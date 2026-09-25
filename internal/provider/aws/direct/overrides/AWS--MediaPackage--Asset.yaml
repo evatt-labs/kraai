@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MediaPackage::Asset
+read:
+  model: mediapackage-vod/service/2018-11-07/mediapackage-vod-2018-11-07.json
+  operation: DescribeAsset
+  identifier:
+    Id: Id
+properties:
+  Arn: Arn
+  CreatedAt: CreatedAt
+  EgressEndpoints:
+    member: EgressEndpoints
+    properties:
+      PackagingConfigurationId: PackagingConfigurationId
+      Url: Url
+  Id: Id
+  PackagingGroupId: PackagingGroupId
+  ResourceId: ResourceId
+  SourceArn: SourceArn
+  SourceRoleArn: SourceRoleArn
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

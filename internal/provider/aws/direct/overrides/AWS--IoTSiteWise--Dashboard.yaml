@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoTSiteWise::Dashboard
+read:
+  model: iotsitewise/service/2019-12-02/iotsitewise-2019-12-02.json
+  operation: DescribeDashboard
+  identifier:
+    DashboardId: dashboardId
+properties:
+  DashboardArn: dashboardArn
+  DashboardDefinition: dashboardDefinition
+  DashboardDescription: dashboardDescription
+  DashboardId: dashboardId
+  DashboardName: dashboardName
+  ProjectId: projectId
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

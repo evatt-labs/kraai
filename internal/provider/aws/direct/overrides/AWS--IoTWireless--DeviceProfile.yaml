@@ -1,0 +1,35 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IoTWireless::DeviceProfile
+read:
+  model: iot-wireless/service/2020-11-22/iot-wireless-2020-11-22.json
+  operation: GetDeviceProfile
+  identifier:
+    Id: Id
+properties:
+  Arn: Arn
+  Id: Id
+  LoRaWAN:
+    member: LoRaWAN
+    properties:
+      ClassBTimeout: ClassBTimeout
+      ClassCTimeout: ClassCTimeout
+      FactoryPresetFreqsList: FactoryPresetFreqsList
+      MacVersion: MacVersion
+      MaxDutyCycle: MaxDutyCycle
+      MaxEirp: MaxEirp
+      PingSlotDr: PingSlotDr
+      PingSlotFreq: PingSlotFreq
+      PingSlotPeriod: PingSlotPeriod
+      RegParamsRevision: RegParamsRevision
+      RfRegion: RfRegion
+      RxDataRate2: RxDataRate2
+      RxDelay1: RxDelay1
+      RxDrOffset1: RxDrOffset1
+      RxFreq2: RxFreq2
+      Supports32BitFCnt: Supports32BitFCnt
+      SupportsClassB: SupportsClassB
+      SupportsClassC: SupportsClassC
+      SupportsJoin: SupportsJoin
+  Name: Name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

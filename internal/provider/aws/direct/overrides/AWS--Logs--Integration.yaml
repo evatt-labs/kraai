@@ -1,0 +1,11 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Logs::Integration
+read:
+  model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
+  operation: GetIntegration
+  identifier:
+    IntegrationName: integrationName
+properties:
+  IntegrationName: integrationName
+  IntegrationStatus: integrationStatus
+  IntegrationType: integrationType

@@ -1,0 +1,1506 @@
+{
+  "shapes": {
+    "com.amazonaws.chimesdkmediapipelines#AmazonTranscribeCallAnalyticsProcessorConfiguration": {
+      "members": {
+        "CallAnalyticsStreamCategories": {
+          "target": "com.amazonaws.chimesdkmediapipelines#CategoryNameList",
+          "traits": {}
+        },
+        "ContentIdentificationType": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ContentType",
+          "traits": {}
+        },
+        "ContentRedactionType": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ContentType",
+          "traits": {}
+        },
+        "EnablePartialResultsStabilization": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "FilterPartialResults": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "LanguageCode": {
+          "target": "com.amazonaws.chimesdkmediapipelines#CallAnalyticsLanguageCode",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "LanguageModelName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ModelName",
+          "traits": {}
+        },
+        "PartialResultsStability": {
+          "target": "com.amazonaws.chimesdkmediapipelines#PartialResultsStability",
+          "traits": {}
+        },
+        "PiiEntityTypes": {
+          "target": "com.amazonaws.chimesdkmediapipelines#PiiEntityTypes",
+          "traits": {}
+        },
+        "PostCallAnalyticsSettings": {
+          "target": "com.amazonaws.chimesdkmediapipelines#PostCallAnalyticsSettings",
+          "traits": {}
+        },
+        "VocabularyFilterMethod": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyFilterMethod",
+          "traits": {}
+        },
+        "VocabularyFilterName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyFilterName",
+          "traits": {}
+        },
+        "VocabularyName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#AmazonTranscribeProcessorConfiguration": {
+      "members": {
+        "ContentIdentificationType": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ContentType",
+          "traits": {}
+        },
+        "ContentRedactionType": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ContentType",
+          "traits": {}
+        },
+        "EnablePartialResultsStabilization": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "FilterPartialResults": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "IdentifyLanguage": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "IdentifyMultipleLanguages": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "LanguageCode": {
+          "target": "com.amazonaws.chimesdkmediapipelines#CallAnalyticsLanguageCode",
+          "traits": {}
+        },
+        "LanguageModelName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ModelName",
+          "traits": {}
+        },
+        "LanguageOptions": {
+          "target": "com.amazonaws.chimesdkmediapipelines#LanguageOptions",
+          "traits": {}
+        },
+        "PartialResultsStability": {
+          "target": "com.amazonaws.chimesdkmediapipelines#PartialResultsStability",
+          "traits": {}
+        },
+        "PiiEntityTypes": {
+          "target": "com.amazonaws.chimesdkmediapipelines#PiiEntityTypes",
+          "traits": {}
+        },
+        "PreferredLanguage": {
+          "target": "com.amazonaws.chimesdkmediapipelines#CallAnalyticsLanguageCode",
+          "traits": {}
+        },
+        "ShowSpeakerLabel": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "VocabularyFilterMethod": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyFilterMethod",
+          "traits": {}
+        },
+        "VocabularyFilterName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyFilterName",
+          "traits": {}
+        },
+        "VocabularyFilterNames": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyFilterNames",
+          "traits": {}
+        },
+        "VocabularyName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyName",
+          "traits": {}
+        },
+        "VocabularyNames": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VocabularyNames",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn[\\/\\:\\-\\_\\.a-zA-Z0-9]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#BadRequestException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#Boolean": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.chimesdkmediapipelines#CallAnalyticsLanguageCode": {
+      "members": {
+        "DE_DE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "de-DE"
+          }
+        },
+        "EN_AU": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "en-AU"
+          }
+        },
+        "EN_GB": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "en-GB"
+          }
+        },
+        "EN_US": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "en-US"
+          }
+        },
+        "ES_US": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "es-US"
+          }
+        },
+        "FR_CA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fr-CA"
+          }
+        },
+        "FR_FR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fr-FR"
+          }
+        },
+        "IT_IT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "it-IT"
+          }
+        },
+        "PT_BR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "pt-BR"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#CategoryName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z._-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#CategoryNameList": {
+      "member": {
+        "target": "com.amazonaws.chimesdkmediapipelines#CategoryName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ChimeSDKMediaPipelinesService": {
+      "operations": [
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#GetMediaInsightsPipelineConfiguration"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "chime",
+          "cloudFormationName": "ChimeSDKMediaPipelines",
+          "cloudTrailEventSource": "chimesdkmediapipelines.amazonaws.com",
+          "endpointPrefix": "media-pipelines-chime",
+          "sdkId": "Chime SDK Media Pipelines"
+        },
+        "aws.auth#sigv4": {
+          "name": "chime"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "Amazon Chime SDK Media Pipelines",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://media-pipelines-chime-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://media-pipelines-chime-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://media-pipelines-chime.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://media-pipelines-chime.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2021-07-15"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ContentRedactionOutput": {
+      "members": {
+        "REDACTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "redacted"
+          }
+        },
+        "REDACTED_AND_UNREDACTED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "redacted_and_unredacted"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ContentType": {
+      "members": {
+        "PII": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PII"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ErrorCode": {
+      "members": {
+        "BadRequest": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BadRequest"
+          }
+        },
+        "Forbidden": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Forbidden"
+          }
+        },
+        "NotFound": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NotFound"
+          }
+        },
+        "ResourceLimitExceeded": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ResourceLimitExceeded"
+          }
+        },
+        "ServiceFailure": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ServiceFailure"
+          }
+        },
+        "ServiceUnavailable": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ServiceUnavailable"
+          }
+        },
+        "Throttling": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Throttling"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ForbiddenException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#GetMediaInsightsPipelineConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#ForbiddenException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#ServiceFailureException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#ServiceUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#ThrottledClientException"
+        },
+        {
+          "target": "com.amazonaws.chimesdkmediapipelines#UnauthorizedClientException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.chimesdkmediapipelines#GetMediaInsightsPipelineConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.chimesdkmediapipelines#GetMediaInsightsPipelineConfigurationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/media-insights-pipeline-configurations/{Identifier}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.chimesdkmediapipelines#GetMediaInsightsPipelineConfigurationRequest": {
+      "members": {
+        "Identifier": {
+          "target": "com.amazonaws.chimesdkmediapipelines#NonEmptyString",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#GetMediaInsightsPipelineConfigurationResponse": {
+      "members": {
+        "MediaInsightsPipelineConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#GuidString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 36,
+          "min": 36
+        },
+        "smithy.api#pattern": "^[a-fA-F0-9]{8}(?:-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#Iso8601Timestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.chimesdkmediapipelines#IssueDetectionConfiguration": {
+      "members": {
+        "RuleName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#Keyword": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\s0-9a-zA-Z'-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#KeywordMatchConfiguration": {
+      "members": {
+        "Keywords": {
+          "target": "com.amazonaws.chimesdkmediapipelines#KeywordMatchWordList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Negate": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "RuleName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#KeywordMatchWordList": {
+      "member": {
+        "target": "com.amazonaws.chimesdkmediapipelines#Keyword"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.chimesdkmediapipelines#KinesisDataStreamSinkConfiguration": {
+      "members": {
+        "InsightsTarget": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#LambdaFunctionSinkConfiguration": {
+      "members": {
+        "InsightsTarget": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#LanguageOptions": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z-,]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfiguration": {
+      "members": {
+        "CreatedTimestamp": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Iso8601Timestamp",
+          "traits": {}
+        },
+        "Elements": {
+          "target": "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationElements",
+          "traits": {}
+        },
+        "MediaInsightsPipelineConfigurationArn": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Arn",
+          "traits": {}
+        },
+        "MediaInsightsPipelineConfigurationId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#GuidString",
+          "traits": {}
+        },
+        "MediaInsightsPipelineConfigurationName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationNameString",
+          "traits": {}
+        },
+        "RealTimeAlertConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#RealTimeAlertConfiguration",
+          "traits": {}
+        },
+        "ResourceAccessRoleArn": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Arn",
+          "traits": {}
+        },
+        "UpdatedTimestamp": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Iso8601Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationElement": {
+      "members": {
+        "AmazonTranscribeCallAnalyticsProcessorConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#AmazonTranscribeCallAnalyticsProcessorConfiguration",
+          "traits": {}
+        },
+        "AmazonTranscribeProcessorConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#AmazonTranscribeProcessorConfiguration",
+          "traits": {}
+        },
+        "KinesisDataStreamSinkConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#KinesisDataStreamSinkConfiguration",
+          "traits": {}
+        },
+        "LambdaFunctionSinkConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#LambdaFunctionSinkConfiguration",
+          "traits": {}
+        },
+        "S3RecordingSinkConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#S3RecordingSinkConfiguration",
+          "traits": {}
+        },
+        "SnsTopicSinkConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#SnsTopicSinkConfiguration",
+          "traits": {}
+        },
+        "SqsQueueSinkConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#SqsQueueSinkConfiguration",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationElementType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "VoiceAnalyticsProcessorConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VoiceAnalyticsProcessorConfiguration",
+          "traits": {}
+        },
+        "VoiceEnhancementSinkConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VoiceEnhancementSinkConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationElementType": {
+      "members": {
+        "AMAZON_TRANSCRIBE_CALL_ANALYTICS_PROCESSOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AmazonTranscribeCallAnalyticsProcessor"
+          }
+        },
+        "AMAZON_TRANSCRIBE_PROCESSOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AmazonTranscribeProcessor"
+          }
+        },
+        "KINESIS_DATA_STREAM_SINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KinesisDataStreamSink"
+          }
+        },
+        "LAMBDA_FUNCTION_SINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LambdaFunctionSink"
+          }
+        },
+        "S3_RECORDING_SINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "S3RecordingSink"
+          }
+        },
+        "SNS_TOPIC_SINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SnsTopicSink"
+          }
+        },
+        "SQS_QUEUE_SINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SqsQueueSink"
+          }
+        },
+        "VOICE_ANALYTICS_PROCESSOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VoiceAnalyticsProcessor"
+          }
+        },
+        "VOICE_ENHANCEMENT_SINK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VoiceEnhancementSink"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationElements": {
+      "member": {
+        "target": "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationElement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.chimesdkmediapipelines#MediaInsightsPipelineConfigurationNameString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 2
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z._-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ModelName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z._-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#NonEmptyString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#pattern": "\\S"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#NotFoundException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#PartialResultsStability": {
+      "members": {
+        "HIGH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "high"
+          }
+        },
+        "LOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "low"
+          }
+        },
+        "MEDIUM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "medium"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#PiiEntityTypes": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 300,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Z_, ]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#PostCallAnalyticsSettings": {
+      "members": {
+        "ContentRedactionOutput": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ContentRedactionOutput",
+          "traits": {}
+        },
+        "DataAccessRoleArn": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OutputEncryptionKMSKeyId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        },
+        "OutputLocation": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#RealTimeAlertConfiguration": {
+      "members": {
+        "Disabled": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "Rules": {
+          "target": "com.amazonaws.chimesdkmediapipelines#RealTimeAlertRuleList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#RealTimeAlertRule": {
+      "members": {
+        "IssueDetectionConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#IssueDetectionConfiguration",
+          "traits": {}
+        },
+        "KeywordMatchConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#KeywordMatchConfiguration",
+          "traits": {}
+        },
+        "SentimentConfiguration": {
+          "target": "com.amazonaws.chimesdkmediapipelines#SentimentConfiguration",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.chimesdkmediapipelines#RealTimeAlertRuleType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#RealTimeAlertRuleList": {
+      "member": {
+        "target": "com.amazonaws.chimesdkmediapipelines#RealTimeAlertRule"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.chimesdkmediapipelines#RealTimeAlertRuleType": {
+      "members": {
+        "IssueDetection": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IssueDetection"
+          }
+        },
+        "KeywordMatch": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KeywordMatch"
+          }
+        },
+        "Sentiment": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Sentiment"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#RecordingFileFormat": {
+      "members": {
+        "Opus": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Opus"
+          }
+        },
+        "Wav": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Wav"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#RuleName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 2
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z._-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#S3RecordingSinkConfiguration": {
+      "members": {
+        "Destination": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Arn",
+          "traits": {}
+        },
+        "RecordingFileFormat": {
+          "target": "com.amazonaws.chimesdkmediapipelines#RecordingFileFormat",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#SentimentConfiguration": {
+      "members": {
+        "RuleName": {
+          "target": "com.amazonaws.chimesdkmediapipelines#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SentimentType": {
+          "target": "com.amazonaws.chimesdkmediapipelines#SentimentType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TimePeriod": {
+          "target": "com.amazonaws.chimesdkmediapipelines#SentimentTimePeriodInSeconds",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#SentimentTimePeriodInSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1800,
+          "min": 60
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.chimesdkmediapipelines#SentimentType": {
+      "members": {
+        "NEGATIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NEGATIVE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ServiceFailureException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ServiceUnavailableException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#SnsTopicSinkConfiguration": {
+      "members": {
+        "InsightsTarget": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#SqsQueueSinkConfiguration": {
+      "members": {
+        "InsightsTarget": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#String": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        },
+        "smithy.api#pattern": ".*"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ThrottledClientException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#UnauthorizedClientException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VocabularyFilterMethod": {
+      "members": {
+        "MASK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "mask"
+          }
+        },
+        "REMOVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "remove"
+          }
+        },
+        "TAG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "tag"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VocabularyFilterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z._-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VocabularyFilterNames": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 3000,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9,-._]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VocabularyName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9a-zA-Z._-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VocabularyNames": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 3000,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9,-._]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VoiceAnalyticsConfigurationStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Disabled"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Enabled"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VoiceAnalyticsProcessorConfiguration": {
+      "members": {
+        "SpeakerSearchStatus": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VoiceAnalyticsConfigurationStatus",
+          "traits": {}
+        },
+        "VoiceToneAnalysisStatus": {
+          "target": "com.amazonaws.chimesdkmediapipelines#VoiceAnalyticsConfigurationStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkmediapipelines#VoiceEnhancementSinkConfiguration": {
+      "members": {
+        "Disabled": {
+          "target": "com.amazonaws.chimesdkmediapipelines#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

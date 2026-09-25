@@ -1,0 +1,20 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::SageMaker::NotebookInstanceLifecycleConfig
+read:
+  model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
+  operation: DescribeNotebookInstanceLifecycleConfig
+  identifier:
+    NotebookInstanceLifecycleConfigArn: NotebookInstanceLifecycleConfigName
+properties:
+  NotebookInstanceLifecycleConfigArn: NotebookInstanceLifecycleConfigArn
+  NotebookInstanceLifecycleConfigName: NotebookInstanceLifecycleConfigName
+  OnCreate:
+    member: OnCreate
+    properties:
+      Content: Content
+  OnStart:
+    member: OnStart
+    properties:
+      Content: Content
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

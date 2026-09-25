@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ResilienceHubV2::System
+read:
+  model: resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json
+  operation: GetSystem
+  identifier:
+    SystemArn: systemArn
+  response: system
+properties:
+  CreatedAt: createdAt
+  Description: description
+  Name: name
+  SharingEnabled: sharingEnabled
+  SystemArn: systemArn
+  SystemId: systemId
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

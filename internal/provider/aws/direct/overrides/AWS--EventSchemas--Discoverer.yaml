@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::EventSchemas::Discoverer
+read:
+  model: schemas/service/2019-12-02/schemas-2019-12-02.json
+  operation: DescribeDiscoverer
+  identifier:
+    DiscovererArn: DiscovererId
+properties:
+  CrossAccount: CrossAccount
+  Description: Description
+  DiscovererArn: DiscovererArn
+  DiscovererId: DiscovererId
+  SourceArn: SourceArn
+  State: State
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

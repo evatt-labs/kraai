@@ -1,0 +1,1207 @@
+{
+  "shapes": {
+    "com.amazonaws.bedrockagentcorecontrol#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#AmazonBedrockAgentCoreControl": {
+      "operations": [
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#GetApiKeyCredentialProvider"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#GetBrowserProfile"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#GetPolicyEngine"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "bedrock-agentcore",
+          "cloudTrailEventSource": "bedrock-agentcore.amazonaws.com",
+          "endpointPrefix": "bedrock-agentcore-control",
+          "sdkId": "Bedrock AgentCore Control"
+        },
+        "aws.auth#sigv4": {
+          "name": "bedrock-agentcore"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "Amazon Bedrock AgentCore Control",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://bedrock-agentcore-control-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://bedrock-agentcore-control-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://bedrock-agentcore-control.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://bedrock-agentcore-control.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2023-06-05"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ApiKeyCredentialProviderArnType": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::BedrockAgentCore::APIKeyCredentialProvider"
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov):acps:[A-Za-z0-9-]{1,64}:[0-9]{12}:token-vault/[a-zA-Z0-9-.]+/apikeycredentialprovider/[a-zA-Z0-9-.]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#BrowserId": {
+      "traits": {
+        "smithy.api#pattern": "^(aws\\.browser\\.v1|[a-zA-Z][a-zA-Z0-9_]{0,47}-[a-zA-Z0-9]{10})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#BrowserProfileArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::BedrockAgentCore::BrowserProfile"
+        },
+        "smithy.api#pattern": "^arn:aws(-[^:]+)?:bedrock-agentcore:[a-z0-9-]+:[0-9]{12}:browser-profile/[a-zA-Z][a-zA-Z0-9_]{0,47}-[a-zA-Z0-9]{10}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#BrowserProfileId": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,47}-[a-zA-Z0-9]{10}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#BrowserProfileName": {
+      "traits": {
+        "smithy.api#pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,47}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#BrowserProfileStatus": {
+      "members": {
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "READY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "READY"
+          }
+        },
+        "SAVING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SAVING"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#BrowserSessionId": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9a-zA-Z]{1,40}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#CredentialProviderName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9\\-_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#DateTimestamp": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#DecryptionFailure": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetApiKeyCredentialProvider": {
+      "errors": [
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#DecryptionFailure"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#UnauthorizedException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#GetApiKeyCredentialProviderRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#GetApiKeyCredentialProviderResponse"
+      },
+      "traits": {
+        "aws.api#controlPlane": {},
+        "smithy.api#http": {
+          "method": "POST",
+          "uri": "/identities/GetApiKeyCredentialProvider"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetApiKeyCredentialProviderRequest": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#CredentialProviderName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetApiKeyCredentialProviderResponse": {
+      "members": {
+        "apiKeySecretArn": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#Secret",
+          "traits": {
+            "smithy.api#property": {},
+            "smithy.api#required": {}
+          }
+        },
+        "apiKeySecretJsonKey": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#SecretJsonKeyType",
+          "traits": {
+            "smithy.api#property": {}
+          }
+        },
+        "apiKeySecretSource": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#SecretSourceType",
+          "traits": {
+            "smithy.api#property": {}
+          }
+        },
+        "createdTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "credentialProviderArn": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ApiKeyCredentialProviderArnType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "lastUpdatedTime": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#CredentialProviderName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetBrowserProfile": {
+      "errors": [
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#GetBrowserProfileRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#GetBrowserProfileResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/browser-profiles/{profileId}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetBrowserProfileRequest": {
+      "members": {
+        "profileId": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#BrowserProfileId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetBrowserProfileResponse": {
+      "members": {
+        "createdAt": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#DateTimestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#Description",
+          "traits": {}
+        },
+        "lastSavedAt": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#DateTimestamp",
+          "traits": {}
+        },
+        "lastSavedBrowserId": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#BrowserId",
+          "traits": {}
+        },
+        "lastSavedBrowserSessionId": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#BrowserSessionId",
+          "traits": {}
+        },
+        "lastUpdatedAt": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#DateTimestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#BrowserProfileName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "profileArn": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#BrowserProfileArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "profileId": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#BrowserProfileId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#BrowserProfileStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetPolicyEngine": {
+      "errors": [
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#GetPolicyEngineRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#GetPolicyEngineResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/policy-engines/{policyEngineId}"
+        },
+        "smithy.api#readonly": {},
+        "smithy.waiters#waitable": {
+          "PolicyEngineActive": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ACTIVE",
+                    "path": "status"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "CREATE_FAILED",
+                    "path": "status"
+                  }
+                },
+                "state": "failure"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "UPDATE_FAILED",
+                    "path": "status"
+                  }
+                },
+                "state": "failure"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETE_FAILED",
+                    "path": "status"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "documentation": "Wait until a PolicyEngine is active",
+            "maxDelay": 120,
+            "minDelay": 5
+          },
+          "PolicyEngineDeleted": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "errorType": "ResourceNotFoundException"
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETING",
+                    "path": "status"
+                  }
+                },
+                "state": "retry"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "DELETE_FAILED",
+                    "path": "status"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "documentation": "Wait until a PolicyEngine is deleted",
+            "maxDelay": 120,
+            "minDelay": 2
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetPolicyEngineRequest": {
+      "members": {
+        "policyEngineId": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ResourceId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#GetPolicyEngineResponse": {
+      "members": {
+        "createdAt": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#DateTimestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#Description",
+          "traits": {}
+        },
+        "encryptionKeyArn": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#KmsKeyArn",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#PolicyEngineName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "policyEngineArn": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#PolicyEngineArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "policyEngineId": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#PolicyEngineStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "statusReasons": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#PolicyStatusReasons",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "updatedAt": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#DateTimestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#KmsKeyArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(|-cn|-us-gov):kms:[a-zA-Z0-9-]*:[0-9]{12}:key/[a-zA-Z0-9-]{36}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#NonBlankString": {
+      "traits": {
+        "smithy.api#pattern": "^[\\s\\S]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#PolicyEngineArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "type": "AWS::BedrockAgentCore::PolicyEngine"
+        },
+        "smithy.api#length": {
+          "max": 136,
+          "min": 76
+        },
+        "smithy.api#pattern": "^arn:aws[-a-z]{0,7}:bedrock-agentcore:[a-z0-9-]{9,15}:[0-9]{12}:policy-engine/[a-zA-Z][a-zA-Z0-9-_]{0,47}-[a-zA-Z0-9_]{10}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#PolicyEngineName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 48,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#PolicyEngineStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATE_FAILED"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETE_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "UPDATE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATE_FAILED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#PolicyStatusReasons": {
+      "member": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ResourceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 59,
+          "min": 12
+        },
+        "smithy.api#pattern": "^[A-Za-z][A-Za-z0-9_]*-[a-z0-9_]{10}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#Secret": {
+      "members": {
+        "secretArn": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#SecretArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#SecretArn": {
+      "traits": {
+        "smithy.api#pattern": "^arn:(aws|aws-us-gov):secretsmanager:[A-Za-z0-9-]{1,64}:[0-9]{12}:secret:[a-zA-Z0-9-_/+=.@!]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#SecretJsonKeyType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#SecretSourceType": {
+      "members": {
+        "EXTERNAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXTERNAL"
+          }
+        },
+        "MANAGED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MANAGED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#String": {
+      "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#UnauthorizedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ValidationExceptionFieldList"
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.bedrockagentcorecontrol#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ValidationExceptionReason": {
+      "members": {
+        "CANNOT_PARSE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CannotParse"
+          }
+        },
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FieldValidationFailed"
+          }
+        },
+        "IDEMPOTENT_PARAMETER_MISMATCH_EXCEPTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IdempotentParameterMismatchException"
+          }
+        },
+        "RESOURCE_CONFLICT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ResourceConflict"
+          }
+        },
+        "ROOT_EVENT_IN_OTHER_SESSION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EventInOtherSession"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

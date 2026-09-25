@@ -1,0 +1,3368 @@
+{
+  "shapes": {
+    "com.amazonaws.pipes#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-]+):([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?)?:(\\d{12})?:(.+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#ArnOrJsonPath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-]+):([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?)?:(\\d{12})?:(.+)|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#ArnOrUrl": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^smk://(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]):[0-9]{1,5}|arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-]+):([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?)?:(\\d{12})?:(.+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#AssignPublicIp": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ENABLED",
+            "value": "ENABLED"
+          },
+          {
+            "name": "DISABLED",
+            "value": "DISABLED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#AwsVpcConfiguration": {
+      "members": {
+        "AssignPublicIp": {
+          "target": "com.amazonaws.pipes#AssignPublicIp",
+          "traits": {}
+        },
+        "SecurityGroups": {
+          "target": "com.amazonaws.pipes#SecurityGroups",
+          "traits": {}
+        },
+        "Subnets": {
+          "target": "com.amazonaws.pipes#Subnets",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#BatchArrayProperties": {
+      "members": {
+        "Size": {
+          "target": "com.amazonaws.pipes#BatchArraySize",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#BatchArraySize": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10000,
+          "min": 2
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#BatchContainerOverrides": {
+      "members": {
+        "Command": {
+          "target": "com.amazonaws.pipes#StringList",
+          "traits": {}
+        },
+        "Environment": {
+          "target": "com.amazonaws.pipes#BatchEnvironmentVariableList",
+          "traits": {}
+        },
+        "InstanceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "ResourceRequirements": {
+          "target": "com.amazonaws.pipes#BatchResourceRequirementsList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#BatchDependsOn": {
+      "member": {
+        "target": "com.amazonaws.pipes#BatchJobDependency"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#BatchEnvironmentVariable": {
+      "members": {
+        "Name": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "Value": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#BatchEnvironmentVariableList": {
+      "member": {
+        "target": "com.amazonaws.pipes#BatchEnvironmentVariable"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#BatchJobDependency": {
+      "members": {
+        "JobId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.pipes#BatchJobDependencyType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#BatchJobDependencyType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "N_TO_N",
+            "value": "N_TO_N"
+          },
+          {
+            "name": "SEQUENTIAL",
+            "value": "SEQUENTIAL"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#BatchParametersMap": {
+      "key": {
+        "target": "smithy.api#String"
+      },
+      "type": "map",
+      "value": {
+        "target": "smithy.api#String"
+      }
+    },
+    "com.amazonaws.pipes#BatchResourceRequirement": {
+      "members": {
+        "Type": {
+          "target": "com.amazonaws.pipes#BatchResourceRequirementType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#BatchResourceRequirementType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "GPU",
+            "value": "GPU"
+          },
+          {
+            "name": "MEMORY",
+            "value": "MEMORY"
+          },
+          {
+            "name": "VCPU",
+            "value": "VCPU"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#BatchResourceRequirementsList": {
+      "member": {
+        "target": "com.amazonaws.pipes#BatchResourceRequirement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#BatchRetryAttempts": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#BatchRetryStrategy": {
+      "members": {
+        "Attempts": {
+          "target": "com.amazonaws.pipes#BatchRetryAttempts",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#Boolean": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.pipes#CapacityProvider": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#CapacityProviderStrategy": {
+      "member": {
+        "target": "com.amazonaws.pipes#CapacityProviderStrategyItem"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 6,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#CapacityProviderStrategyItem": {
+      "members": {
+        "base": {
+          "target": "com.amazonaws.pipes#CapacityProviderStrategyItemBase",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "capacityProvider": {
+          "target": "com.amazonaws.pipes#CapacityProvider",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "weight": {
+          "target": "com.amazonaws.pipes#CapacityProviderStrategyItemWeight",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#CapacityProviderStrategyItemBase": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 100000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#CapacityProviderStrategyItemWeight": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#CloudwatchLogGroupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(^arn:aws([a-z]|\\-)*:logs:([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?):(\\d{12}):log-group:[\\.\\-_/#A-Za-z0-9]{1,512}(:\\*)?)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#CloudwatchLogsLogDestination": {
+      "members": {
+        "LogGroupArn": {
+          "target": "com.amazonaws.pipes#CloudwatchLogGroupArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#Database": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#DbUser": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#DeadLetterConfig": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.pipes#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#DescribePipe": {
+      "errors": [
+        {
+          "target": "com.amazonaws.pipes#InternalException"
+        },
+        {
+          "target": "com.amazonaws.pipes#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.pipes#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.pipes#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.pipes#DescribePipeRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.pipes#DescribePipeResponse"
+      },
+      "traits": {
+        "aws.iam#actionPermissionDescription": "Grants permission to describe a pipe",
+        "aws.iam#conditionKeys": [
+          "aws:ResourceTag/${TagKey}",
+          "aws:RequestTag/${TagKey}",
+          "aws:TagKeys"
+        ],
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v1/pipes/{Name}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.pipes#DescribePipeRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.pipes#PipeName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#DescribePipeResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.pipes#PipeArn",
+          "traits": {}
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.pipes#Timestamp",
+          "traits": {}
+        },
+        "CurrentState": {
+          "target": "com.amazonaws.pipes#PipeState",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.pipes#PipeDescription",
+          "traits": {}
+        },
+        "DesiredState": {
+          "target": "com.amazonaws.pipes#RequestedPipeStateDescribeResponse",
+          "traits": {
+            "aws.cloudformation#cfnExcludeProperty": {}
+          }
+        },
+        "Enrichment": {
+          "target": "com.amazonaws.pipes#OptionalArn",
+          "traits": {}
+        },
+        "EnrichmentParameters": {
+          "target": "com.amazonaws.pipes#PipeEnrichmentParameters",
+          "traits": {}
+        },
+        "KmsKeyIdentifier": {
+          "target": "com.amazonaws.pipes#KmsKeyIdentifier",
+          "traits": {}
+        },
+        "LastModifiedTime": {
+          "target": "com.amazonaws.pipes#Timestamp",
+          "traits": {}
+        },
+        "LogConfiguration": {
+          "target": "com.amazonaws.pipes#PipeLogConfiguration",
+          "traits": {
+            "aws.cloudformation#cfnMutability": "read"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.pipes#PipeName",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.pipes#RoleArn",
+          "traits": {}
+        },
+        "Source": {
+          "target": "com.amazonaws.pipes#ArnOrUrl",
+          "traits": {}
+        },
+        "SourceParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceParameters",
+          "traits": {}
+        },
+        "StateReason": {
+          "target": "com.amazonaws.pipes#PipeStateReason",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.pipes#TagMap",
+          "traits": {}
+        },
+        "Target": {
+          "target": "com.amazonaws.pipes#Arn",
+          "traits": {}
+        },
+        "TargetParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetParameters",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#DimensionMapping": {
+      "members": {
+        "DimensionName": {
+          "target": "com.amazonaws.pipes#DimensionName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DimensionValue": {
+          "target": "com.amazonaws.pipes#DimensionValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DimensionValueType": {
+          "target": "com.amazonaws.pipes#DimensionValueType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#DimensionMappings": {
+      "member": {
+        "target": "com.amazonaws.pipes#DimensionMapping"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#DimensionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#DimensionValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#DimensionValueType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "VARCHAR",
+            "value": "VARCHAR"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#DynamoDBStreamStartPosition": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "TRIM_HORIZON",
+            "value": "TRIM_HORIZON"
+          },
+          {
+            "name": "LATEST",
+            "value": "LATEST"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EcsContainerOverride": {
+      "members": {
+        "Command": {
+          "target": "com.amazonaws.pipes#StringList",
+          "traits": {}
+        },
+        "Cpu": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        },
+        "Environment": {
+          "target": "com.amazonaws.pipes#EcsEnvironmentVariableList",
+          "traits": {}
+        },
+        "EnvironmentFiles": {
+          "target": "com.amazonaws.pipes#EcsEnvironmentFileList",
+          "traits": {}
+        },
+        "Memory": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        },
+        "MemoryReservation": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "ResourceRequirements": {
+          "target": "com.amazonaws.pipes#EcsResourceRequirementsList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#EcsContainerOverrideList": {
+      "member": {
+        "target": "com.amazonaws.pipes#EcsContainerOverride"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#EcsEnvironmentFile": {
+      "members": {
+        "type": {
+          "target": "com.amazonaws.pipes#EcsEnvironmentFileType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "value": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#EcsEnvironmentFileList": {
+      "member": {
+        "target": "com.amazonaws.pipes#EcsEnvironmentFile"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#EcsEnvironmentFileType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "s3",
+            "value": "s3"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EcsEnvironmentVariable": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "value": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#EcsEnvironmentVariableList": {
+      "member": {
+        "target": "com.amazonaws.pipes#EcsEnvironmentVariable"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#EcsEphemeralStorage": {
+      "members": {
+        "sizeInGiB": {
+          "target": "com.amazonaws.pipes#EphemeralStorageSize",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#EcsInferenceAcceleratorOverride": {
+      "members": {
+        "deviceName": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "deviceType": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#EcsInferenceAcceleratorOverrideList": {
+      "member": {
+        "target": "com.amazonaws.pipes#EcsInferenceAcceleratorOverride"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#EcsResourceRequirement": {
+      "members": {
+        "type": {
+          "target": "com.amazonaws.pipes#EcsResourceRequirementType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "value": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#EcsResourceRequirementType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "GPU",
+            "value": "GPU"
+          },
+          {
+            "name": "InferenceAccelerator",
+            "value": "InferenceAccelerator"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EcsResourceRequirementsList": {
+      "member": {
+        "target": "com.amazonaws.pipes#EcsResourceRequirement"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#EcsTaskOverride": {
+      "members": {
+        "ContainerOverrides": {
+          "target": "com.amazonaws.pipes#EcsContainerOverrideList",
+          "traits": {}
+        },
+        "Cpu": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "EphemeralStorage": {
+          "target": "com.amazonaws.pipes#EcsEphemeralStorage",
+          "traits": {}
+        },
+        "ExecutionRoleArn": {
+          "target": "com.amazonaws.pipes#ArnOrJsonPath",
+          "traits": {}
+        },
+        "InferenceAcceleratorOverrides": {
+          "target": "com.amazonaws.pipes#EcsInferenceAcceleratorOverrideList",
+          "traits": {}
+        },
+        "Memory": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "TaskRoleArn": {
+          "target": "com.amazonaws.pipes#ArnOrJsonPath",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#EndpointString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 300,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]):[0-9]{1,5}$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EphemeralStorageSize": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 200,
+          "min": 21
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#EpochTimeUnit": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "MILLISECONDS",
+            "value": "MILLISECONDS"
+          },
+          {
+            "name": "SECONDS",
+            "value": "SECONDS"
+          },
+          {
+            "name": "MICROSECONDS",
+            "value": "MICROSECONDS"
+          },
+          {
+            "name": "NANOSECONDS",
+            "value": "NANOSECONDS"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EventBridgeDetailType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EventBridgeEndpointId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9\\-]+[\\.][A-Za-z0-9\\-]+$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EventBridgeEventResourceList": {
+      "member": {
+        "target": "com.amazonaws.pipes#ArnOrJsonPath"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#EventBridgeEventSource": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "(?=[/\\.\\-_A-Za-z0-9]+)((?!aws\\.).*)|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#EventPattern": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#Filter": {
+      "members": {
+        "Pattern": {
+          "target": "com.amazonaws.pipes#EventPattern",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#FilterCriteria": {
+      "members": {
+        "Filters": {
+          "target": "com.amazonaws.pipes#FilterList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#FilterList": {
+      "member": {
+        "target": "com.amazonaws.pipes#Filter"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#FirehoseArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(^arn:aws([a-z]|\\-)*:firehose:([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?):(\\d{12}):deliverystream/[a-zA-Z0-9_.-]{1,64})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#FirehoseLogDestination": {
+      "members": {
+        "DeliveryStreamArn": {
+          "target": "com.amazonaws.pipes#FirehoseArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#HeaderKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[!#$%&'*+-.^_`|~0-9a-zA-Z]+|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#HeaderParametersMap": {
+      "key": {
+        "target": "com.amazonaws.pipes#HeaderKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.pipes#HeaderValue"
+      }
+    },
+    "com.amazonaws.pipes#HeaderValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[ \\t]*[\\x20-\\x7E]+([ \\t]+[\\x20-\\x7E]+)*[ \\t]*|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#IncludeExecutionData": {
+      "member": {
+        "target": "com.amazonaws.pipes#IncludeExecutionDataOption"
+      },
+      "traits": {
+        "smithy.api#uniqueItems": {}
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#IncludeExecutionDataOption": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ALL",
+            "value": "ALL"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#InputTemplate": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 8192,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#InternalException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#JsonPath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#KafkaBootstrapServers": {
+      "member": {
+        "target": "com.amazonaws.pipes#EndpointString"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 2,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#KafkaTopicName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 249,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^.]([a-zA-Z0-9\\-_.]+)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#KinesisPartitionKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#KinesisStreamStartPosition": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "TRIM_HORIZON",
+            "value": "TRIM_HORIZON"
+          },
+          {
+            "name": "LATEST",
+            "value": "LATEST"
+          },
+          {
+            "name": "AT_TIMESTAMP",
+            "value": "AT_TIMESTAMP"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#KmsKeyIdentifier": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_\\-/:]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#LaunchType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "EC2",
+            "value": "EC2"
+          },
+          {
+            "name": "FARGATE",
+            "value": "FARGATE"
+          },
+          {
+            "name": "EXTERNAL",
+            "value": "EXTERNAL"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#LimitMax10": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#LimitMax10000": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10000,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#LimitMin1": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#LogLevel": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "OFF",
+            "value": "OFF"
+          },
+          {
+            "name": "ERROR",
+            "value": "ERROR"
+          },
+          {
+            "name": "INFO",
+            "value": "INFO"
+          },
+          {
+            "name": "TRACE",
+            "value": "TRACE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#LogStreamName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MQBrokerAccessCredentials": {
+      "members": {
+        "BasicAuth": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.pipes#MQBrokerQueueName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\s\\S]*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MSKAccessCredentials": {
+      "members": {
+        "ClientCertificateTlsAuth": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        },
+        "SaslScram512Auth": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.pipes#MSKStartPosition": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "TRIM_HORIZON",
+            "value": "TRIM_HORIZON"
+          },
+          {
+            "name": "LATEST",
+            "value": "LATEST"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MaximumBatchingWindowInSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 300,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#MaximumRecordAgeInSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 604800,
+          "min": -1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#MaximumRetryAttemptsESM": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 10000,
+          "min": -1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.pipes#MeasureName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MeasureValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MeasureValueType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "DOUBLE",
+            "value": "DOUBLE"
+          },
+          {
+            "name": "BIGINT",
+            "value": "BIGINT"
+          },
+          {
+            "name": "VARCHAR",
+            "value": "VARCHAR"
+          },
+          {
+            "name": "BOOLEAN",
+            "value": "BOOLEAN"
+          },
+          {
+            "name": "TIMESTAMP",
+            "value": "TIMESTAMP"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MessageDeduplicationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MessageGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MultiMeasureAttributeMapping": {
+      "members": {
+        "MeasureValue": {
+          "target": "com.amazonaws.pipes#MeasureValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MeasureValueType": {
+          "target": "com.amazonaws.pipes#MeasureValueType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MultiMeasureAttributeName": {
+          "target": "com.amazonaws.pipes#MultiMeasureAttributeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#MultiMeasureAttributeMappings": {
+      "member": {
+        "target": "com.amazonaws.pipes#MultiMeasureAttributeMapping"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#MultiMeasureAttributeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#MultiMeasureMapping": {
+      "members": {
+        "MultiMeasureAttributeMappings": {
+          "target": "com.amazonaws.pipes#MultiMeasureAttributeMappings",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MultiMeasureName": {
+          "target": "com.amazonaws.pipes#MultiMeasureName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#MultiMeasureMappings": {
+      "member": {
+        "target": "com.amazonaws.pipes#MultiMeasureMapping"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#MultiMeasureName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#NetworkConfiguration": {
+      "members": {
+        "awsvpcConfiguration": {
+          "target": "com.amazonaws.pipes#AwsVpcConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#NotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.pipes#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#OnPartialBatchItemFailureStreams": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "AUTOMATIC_BISECT",
+            "value": "AUTOMATIC_BISECT"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#OptionalArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 0
+        },
+        "smithy.api#pattern": "^$|arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-]+):([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?)?:(\\d{12})?:(.+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PathParameter": {
+      "traits": {
+        "smithy.api#pattern": "^(?!\\s*$).+|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PathParameterList": {
+      "member": {
+        "target": "com.amazonaws.pipes#PathParameter"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#PipeArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws([a-z]|\\-)*:([a-zA-Z0-9\\-]+):([a-z]|\\d|\\-)*:([0-9]{12})?:(.+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PipeDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^.*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PipeEnrichmentHttpParameters": {
+      "members": {
+        "HeaderParameters": {
+          "target": "com.amazonaws.pipes#HeaderParametersMap",
+          "traits": {}
+        },
+        "PathParameterValues": {
+          "target": "com.amazonaws.pipes#PathParameterList",
+          "traits": {}
+        },
+        "QueryStringParameters": {
+          "target": "com.amazonaws.pipes#QueryStringParametersMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeEnrichmentParameters": {
+      "members": {
+        "HttpParameters": {
+          "target": "com.amazonaws.pipes#PipeEnrichmentHttpParameters",
+          "traits": {}
+        },
+        "InputTemplate": {
+          "target": "com.amazonaws.pipes#InputTemplate",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeLogConfiguration": {
+      "members": {
+        "CloudwatchLogsLogDestination": {
+          "target": "com.amazonaws.pipes#CloudwatchLogsLogDestination",
+          "traits": {}
+        },
+        "FirehoseLogDestination": {
+          "target": "com.amazonaws.pipes#FirehoseLogDestination",
+          "traits": {}
+        },
+        "IncludeExecutionData": {
+          "target": "com.amazonaws.pipes#IncludeExecutionData",
+          "traits": {}
+        },
+        "Level": {
+          "target": "com.amazonaws.pipes#LogLevel",
+          "traits": {}
+        },
+        "S3LogDestination": {
+          "target": "com.amazonaws.pipes#S3LogDestination",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PipeSourceActiveMQBrokerParameters": {
+      "members": {
+        "BatchSize": {
+          "target": "com.amazonaws.pipes#LimitMax10000",
+          "traits": {}
+        },
+        "Credentials": {
+          "target": "com.amazonaws.pipes#MQBrokerAccessCredentials",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MaximumBatchingWindowInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumBatchingWindowInSeconds",
+          "traits": {}
+        },
+        "QueueName": {
+          "target": "com.amazonaws.pipes#MQBrokerQueueName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeSourceDynamoDBStreamParameters": {
+      "members": {
+        "BatchSize": {
+          "target": "com.amazonaws.pipes#LimitMax10000",
+          "traits": {}
+        },
+        "DeadLetterConfig": {
+          "target": "com.amazonaws.pipes#DeadLetterConfig",
+          "traits": {}
+        },
+        "MaximumBatchingWindowInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumBatchingWindowInSeconds",
+          "traits": {}
+        },
+        "MaximumRecordAgeInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumRecordAgeInSeconds",
+          "traits": {}
+        },
+        "MaximumRetryAttempts": {
+          "target": "com.amazonaws.pipes#MaximumRetryAttemptsESM",
+          "traits": {}
+        },
+        "OnPartialBatchItemFailure": {
+          "target": "com.amazonaws.pipes#OnPartialBatchItemFailureStreams",
+          "traits": {}
+        },
+        "ParallelizationFactor": {
+          "target": "com.amazonaws.pipes#LimitMax10",
+          "traits": {}
+        },
+        "StartingPosition": {
+          "target": "com.amazonaws.pipes#DynamoDBStreamStartPosition",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeSourceKinesisStreamParameters": {
+      "members": {
+        "BatchSize": {
+          "target": "com.amazonaws.pipes#LimitMax10000",
+          "traits": {}
+        },
+        "DeadLetterConfig": {
+          "target": "com.amazonaws.pipes#DeadLetterConfig",
+          "traits": {}
+        },
+        "MaximumBatchingWindowInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumBatchingWindowInSeconds",
+          "traits": {}
+        },
+        "MaximumRecordAgeInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumRecordAgeInSeconds",
+          "traits": {}
+        },
+        "MaximumRetryAttempts": {
+          "target": "com.amazonaws.pipes#MaximumRetryAttemptsESM",
+          "traits": {}
+        },
+        "OnPartialBatchItemFailure": {
+          "target": "com.amazonaws.pipes#OnPartialBatchItemFailureStreams",
+          "traits": {}
+        },
+        "ParallelizationFactor": {
+          "target": "com.amazonaws.pipes#LimitMax10",
+          "traits": {}
+        },
+        "StartingPosition": {
+          "target": "com.amazonaws.pipes#KinesisStreamStartPosition",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StartingPositionTimestamp": {
+          "target": "com.amazonaws.pipes#Timestamp",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeSourceManagedStreamingKafkaParameters": {
+      "members": {
+        "BatchSize": {
+          "target": "com.amazonaws.pipes#LimitMax10000",
+          "traits": {}
+        },
+        "ConsumerGroupID": {
+          "target": "com.amazonaws.pipes#URI",
+          "traits": {}
+        },
+        "Credentials": {
+          "target": "com.amazonaws.pipes#MSKAccessCredentials",
+          "traits": {}
+        },
+        "MaximumBatchingWindowInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumBatchingWindowInSeconds",
+          "traits": {}
+        },
+        "StartingPosition": {
+          "target": "com.amazonaws.pipes#MSKStartPosition",
+          "traits": {}
+        },
+        "TopicName": {
+          "target": "com.amazonaws.pipes#KafkaTopicName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeSourceParameters": {
+      "members": {
+        "ActiveMQBrokerParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceActiveMQBrokerParameters",
+          "traits": {}
+        },
+        "DynamoDBStreamParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceDynamoDBStreamParameters",
+          "traits": {}
+        },
+        "FilterCriteria": {
+          "target": "com.amazonaws.pipes#FilterCriteria",
+          "traits": {}
+        },
+        "KinesisStreamParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceKinesisStreamParameters",
+          "traits": {}
+        },
+        "ManagedStreamingKafkaParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceManagedStreamingKafkaParameters",
+          "traits": {}
+        },
+        "RabbitMQBrokerParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceRabbitMQBrokerParameters",
+          "traits": {}
+        },
+        "SelfManagedKafkaParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceSelfManagedKafkaParameters",
+          "traits": {}
+        },
+        "SqsQueueParameters": {
+          "target": "com.amazonaws.pipes#PipeSourceSqsQueueParameters",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeSourceRabbitMQBrokerParameters": {
+      "members": {
+        "BatchSize": {
+          "target": "com.amazonaws.pipes#LimitMax10000",
+          "traits": {}
+        },
+        "Credentials": {
+          "target": "com.amazonaws.pipes#MQBrokerAccessCredentials",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MaximumBatchingWindowInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumBatchingWindowInSeconds",
+          "traits": {}
+        },
+        "QueueName": {
+          "target": "com.amazonaws.pipes#MQBrokerQueueName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "VirtualHost": {
+          "target": "com.amazonaws.pipes#URI",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeSourceSelfManagedKafkaParameters": {
+      "members": {
+        "AdditionalBootstrapServers": {
+          "target": "com.amazonaws.pipes#KafkaBootstrapServers",
+          "traits": {}
+        },
+        "BatchSize": {
+          "target": "com.amazonaws.pipes#LimitMax10000",
+          "traits": {}
+        },
+        "ConsumerGroupID": {
+          "target": "com.amazonaws.pipes#URI",
+          "traits": {}
+        },
+        "Credentials": {
+          "target": "com.amazonaws.pipes#SelfManagedKafkaAccessConfigurationCredentials",
+          "traits": {}
+        },
+        "MaximumBatchingWindowInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumBatchingWindowInSeconds",
+          "traits": {}
+        },
+        "ServerRootCaCertificate": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        },
+        "StartingPosition": {
+          "target": "com.amazonaws.pipes#SelfManagedKafkaStartPosition",
+          "traits": {}
+        },
+        "TopicName": {
+          "target": "com.amazonaws.pipes#KafkaTopicName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Vpc": {
+          "target": "com.amazonaws.pipes#SelfManagedKafkaAccessConfigurationVpc",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeSourceSqsQueueParameters": {
+      "members": {
+        "BatchSize": {
+          "target": "com.amazonaws.pipes#LimitMax10000",
+          "traits": {}
+        },
+        "MaximumBatchingWindowInSeconds": {
+          "target": "com.amazonaws.pipes#MaximumBatchingWindowInSeconds",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeState": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "RUNNING",
+            "value": "RUNNING"
+          },
+          {
+            "name": "STOPPED",
+            "value": "STOPPED"
+          },
+          {
+            "name": "CREATING",
+            "value": "CREATING"
+          },
+          {
+            "name": "UPDATING",
+            "value": "UPDATING"
+          },
+          {
+            "name": "DELETING",
+            "value": "DELETING"
+          },
+          {
+            "name": "STARTING",
+            "value": "STARTING"
+          },
+          {
+            "name": "STOPPING",
+            "value": "STOPPING"
+          },
+          {
+            "name": "CREATE_FAILED",
+            "value": "CREATE_FAILED"
+          },
+          {
+            "name": "UPDATE_FAILED",
+            "value": "UPDATE_FAILED"
+          },
+          {
+            "name": "START_FAILED",
+            "value": "START_FAILED"
+          },
+          {
+            "name": "STOP_FAILED",
+            "value": "STOP_FAILED"
+          },
+          {
+            "name": "DELETE_FAILED",
+            "value": "DELETE_FAILED"
+          },
+          {
+            "name": "CREATE_ROLLBACK_FAILED",
+            "value": "CREATE_ROLLBACK_FAILED"
+          },
+          {
+            "name": "DELETE_ROLLBACK_FAILED",
+            "value": "DELETE_ROLLBACK_FAILED"
+          },
+          {
+            "name": "UPDATE_ROLLBACK_FAILED",
+            "value": "UPDATE_ROLLBACK_FAILED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PipeStateReason": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PipeTargetBatchJobParameters": {
+      "members": {
+        "ArrayProperties": {
+          "target": "com.amazonaws.pipes#BatchArrayProperties",
+          "traits": {}
+        },
+        "ContainerOverrides": {
+          "target": "com.amazonaws.pipes#BatchContainerOverrides",
+          "traits": {}
+        },
+        "DependsOn": {
+          "target": "com.amazonaws.pipes#BatchDependsOn",
+          "traits": {}
+        },
+        "JobDefinition": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "JobName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.pipes#BatchParametersMap",
+          "traits": {}
+        },
+        "RetryStrategy": {
+          "target": "com.amazonaws.pipes#BatchRetryStrategy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetCloudWatchLogsParameters": {
+      "members": {
+        "LogStreamName": {
+          "target": "com.amazonaws.pipes#LogStreamName",
+          "traits": {}
+        },
+        "Timestamp": {
+          "target": "com.amazonaws.pipes#JsonPath",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetEcsTaskParameters": {
+      "members": {
+        "CapacityProviderStrategy": {
+          "target": "com.amazonaws.pipes#CapacityProviderStrategy",
+          "traits": {}
+        },
+        "EnableECSManagedTags": {
+          "target": "com.amazonaws.pipes#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "EnableExecuteCommand": {
+          "target": "com.amazonaws.pipes#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "Group": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "LaunchType": {
+          "target": "com.amazonaws.pipes#LaunchType",
+          "traits": {}
+        },
+        "NetworkConfiguration": {
+          "target": "com.amazonaws.pipes#NetworkConfiguration",
+          "traits": {}
+        },
+        "Overrides": {
+          "target": "com.amazonaws.pipes#EcsTaskOverride",
+          "traits": {}
+        },
+        "PlacementConstraints": {
+          "target": "com.amazonaws.pipes#PlacementConstraints",
+          "traits": {}
+        },
+        "PlacementStrategy": {
+          "target": "com.amazonaws.pipes#PlacementStrategies",
+          "traits": {}
+        },
+        "PlatformVersion": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "PropagateTags": {
+          "target": "com.amazonaws.pipes#PropagateTags",
+          "traits": {}
+        },
+        "ReferenceId": {
+          "target": "com.amazonaws.pipes#ReferenceId",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.pipes#TagList",
+          "traits": {}
+        },
+        "TaskCount": {
+          "target": "com.amazonaws.pipes#LimitMin1",
+          "traits": {}
+        },
+        "TaskDefinitionArn": {
+          "target": "com.amazonaws.pipes#ArnOrJsonPath",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetEventBridgeEventBusParameters": {
+      "members": {
+        "DetailType": {
+          "target": "com.amazonaws.pipes#EventBridgeDetailType",
+          "traits": {}
+        },
+        "EndpointId": {
+          "target": "com.amazonaws.pipes#EventBridgeEndpointId",
+          "traits": {}
+        },
+        "Resources": {
+          "target": "com.amazonaws.pipes#EventBridgeEventResourceList",
+          "traits": {}
+        },
+        "Source": {
+          "target": "com.amazonaws.pipes#EventBridgeEventSource",
+          "traits": {}
+        },
+        "Time": {
+          "target": "com.amazonaws.pipes#JsonPath",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetHttpParameters": {
+      "members": {
+        "HeaderParameters": {
+          "target": "com.amazonaws.pipes#HeaderParametersMap",
+          "traits": {}
+        },
+        "PathParameterValues": {
+          "target": "com.amazonaws.pipes#PathParameterList",
+          "traits": {}
+        },
+        "QueryStringParameters": {
+          "target": "com.amazonaws.pipes#QueryStringParametersMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetInvocationType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "REQUEST_RESPONSE",
+            "value": "REQUEST_RESPONSE"
+          },
+          {
+            "name": "FIRE_AND_FORGET",
+            "value": "FIRE_AND_FORGET"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PipeTargetKinesisStreamParameters": {
+      "members": {
+        "PartitionKey": {
+          "target": "com.amazonaws.pipes#KinesisPartitionKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetLambdaFunctionParameters": {
+      "members": {
+        "InvocationType": {
+          "target": "com.amazonaws.pipes#PipeTargetInvocationType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetParameters": {
+      "members": {
+        "BatchJobParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetBatchJobParameters",
+          "traits": {}
+        },
+        "CloudWatchLogsParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetCloudWatchLogsParameters",
+          "traits": {}
+        },
+        "EcsTaskParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetEcsTaskParameters",
+          "traits": {}
+        },
+        "EventBridgeEventBusParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetEventBridgeEventBusParameters",
+          "traits": {}
+        },
+        "HttpParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetHttpParameters",
+          "traits": {}
+        },
+        "InputTemplate": {
+          "target": "com.amazonaws.pipes#InputTemplate",
+          "traits": {}
+        },
+        "KinesisStreamParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetKinesisStreamParameters",
+          "traits": {}
+        },
+        "LambdaFunctionParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetLambdaFunctionParameters",
+          "traits": {}
+        },
+        "RedshiftDataParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetRedshiftDataParameters",
+          "traits": {}
+        },
+        "SageMakerPipelineParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetSageMakerPipelineParameters",
+          "traits": {}
+        },
+        "SqsQueueParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetSqsQueueParameters",
+          "traits": {}
+        },
+        "StepFunctionStateMachineParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetStateMachineParameters",
+          "traits": {}
+        },
+        "TimestreamParameters": {
+          "target": "com.amazonaws.pipes#PipeTargetTimestreamParameters",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetRedshiftDataParameters": {
+      "members": {
+        "Database": {
+          "target": "com.amazonaws.pipes#Database",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DbUser": {
+          "target": "com.amazonaws.pipes#DbUser",
+          "traits": {}
+        },
+        "SecretManagerArn": {
+          "target": "com.amazonaws.pipes#SecretManagerArnOrJsonPath",
+          "traits": {}
+        },
+        "Sqls": {
+          "target": "com.amazonaws.pipes#Sqls",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StatementName": {
+          "target": "com.amazonaws.pipes#StatementName",
+          "traits": {}
+        },
+        "WithEvent": {
+          "target": "com.amazonaws.pipes#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetSageMakerPipelineParameters": {
+      "members": {
+        "PipelineParameterList": {
+          "target": "com.amazonaws.pipes#SageMakerPipelineParameterList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetSqsQueueParameters": {
+      "members": {
+        "MessageDeduplicationId": {
+          "target": "com.amazonaws.pipes#MessageDeduplicationId",
+          "traits": {}
+        },
+        "MessageGroupId": {
+          "target": "com.amazonaws.pipes#MessageGroupId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetStateMachineParameters": {
+      "members": {
+        "InvocationType": {
+          "target": "com.amazonaws.pipes#PipeTargetInvocationType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PipeTargetTimestreamParameters": {
+      "members": {
+        "DimensionMappings": {
+          "target": "com.amazonaws.pipes#DimensionMappings",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "EpochTimeUnit": {
+          "target": "com.amazonaws.pipes#EpochTimeUnit",
+          "traits": {}
+        },
+        "MultiMeasureMappings": {
+          "target": "com.amazonaws.pipes#MultiMeasureMappings",
+          "traits": {}
+        },
+        "SingleMeasureMappings": {
+          "target": "com.amazonaws.pipes#SingleMeasureMappings",
+          "traits": {}
+        },
+        "TimeFieldType": {
+          "target": "com.amazonaws.pipes#TimeFieldType",
+          "traits": {}
+        },
+        "TimeValue": {
+          "target": "com.amazonaws.pipes#TimeValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TimestampFormat": {
+          "target": "com.amazonaws.pipes#TimestampFormat",
+          "traits": {}
+        },
+        "VersionValue": {
+          "target": "com.amazonaws.pipes#VersionValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#Pipes": {
+      "operations": [
+        {
+          "target": "com.amazonaws.pipes#DescribePipe"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "pipes",
+          "cloudFormationName": "Pipes",
+          "cloudTrailEventSource": "pipes.amazonaws.com",
+          "endpointPrefix": "pipes",
+          "sdkId": "Pipes"
+        },
+        "aws.auth#sigv4": {
+          "name": "pipes"
+        },
+        "aws.iam#supportedPrincipalTypes": [
+          "Root",
+          "IAMUser",
+          "IAMRole",
+          "FederatedUser"
+        ],
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "Authorization",
+            "Date",
+            "X-Amz-Date",
+            "X-Amz-Security-Token",
+            "X-Amz-Target",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-errormessage",
+            "x-amzn-trace-id",
+            "x-amz-apigw-id",
+            "date"
+          ],
+          "maxAge": 86400,
+          "origin": "*"
+        },
+        "smithy.api#title": "Amazon EventBridge Pipes",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://events.amazonaws.com/doc/2015-10-07"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://pipes-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://pipes-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://pipes.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://pipes.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2015-10-07"
+    },
+    "com.amazonaws.pipes#PlacementConstraint": {
+      "members": {
+        "expression": {
+          "target": "com.amazonaws.pipes#PlacementConstraintExpression",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.pipes#PlacementConstraintType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PlacementConstraintExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2000,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PlacementConstraintType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "DISTINCT_INSTANCE",
+            "value": "distinctInstance"
+          },
+          {
+            "name": "MEMBER_OF",
+            "value": "memberOf"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PlacementConstraints": {
+      "member": {
+        "target": "com.amazonaws.pipes#PlacementConstraint"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#PlacementStrategies": {
+      "member": {
+        "target": "com.amazonaws.pipes#PlacementStrategy"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#PlacementStrategy": {
+      "members": {
+        "field": {
+          "target": "com.amazonaws.pipes#PlacementStrategyField",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.pipes#PlacementStrategyType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#PlacementStrategyField": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PlacementStrategyType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "RANDOM",
+            "value": "random"
+          },
+          {
+            "name": "SPREAD",
+            "value": "spread"
+          },
+          {
+            "name": "BINPACK",
+            "value": "binpack"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#PropagateTags": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "TASK_DEFINITION",
+            "value": "TASK_DEFINITION"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#QueryStringKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\x00-\\x1F\\x7F]+|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#QueryStringParametersMap": {
+      "key": {
+        "target": "com.amazonaws.pipes#QueryStringKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.pipes#QueryStringValue"
+      }
+    },
+    "com.amazonaws.pipes#QueryStringValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\x00-\\x09\\x0B\\x0C\\x0E-\\x1F\\x7F]+|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#ReferenceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#RequestedPipeStateDescribeResponse": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "RUNNING",
+            "value": "RUNNING"
+          },
+          {
+            "name": "STOPPED",
+            "value": "STOPPED"
+          },
+          {
+            "name": "DELETED",
+            "value": "DELETED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:(aws[a-zA-Z-]*)?:iam::\\d{12}:role/?[a-zA-Z0-9+=,.@\\-_/]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#S3LogDestination": {
+      "members": {
+        "BucketName": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "BucketOwner": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        },
+        "OutputFormat": {
+          "target": "com.amazonaws.pipes#S3OutputFormat",
+          "traits": {}
+        },
+        "Prefix": {
+          "target": "com.amazonaws.pipes#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#S3OutputFormat": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "JSON",
+            "value": "json"
+          },
+          {
+            "name": "PLAIN",
+            "value": "plain"
+          },
+          {
+            "name": "W3C",
+            "value": "w3c"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SageMakerPipelineParameter": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.pipes#SageMakerPipelineParameterName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.pipes#SageMakerPipelineParameterValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#SageMakerPipelineParameterList": {
+      "member": {
+        "target": "com.amazonaws.pipes#SageMakerPipelineParameter"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#SageMakerPipelineParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9](-*[a-zA-Z0-9])*|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SageMakerPipelineParameterValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SecretManagerArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(^arn:aws([a-z]|\\-)*:secretsmanager:([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?):(\\d{12}):secret:.+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SecretManagerArnOrJsonPath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(^arn:aws([a-z]|\\-)*:secretsmanager:([a-z]{2,4}((-gov)|(-de)|(-iso([a-z]?)))?-[a-z]+(-\\d{1})?):(\\d{12}):secret:.+)|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SecurityGroup": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^sg-[0-9a-zA-Z]*|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SecurityGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^sg-[0-9a-zA-Z]*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SecurityGroupIds": {
+      "member": {
+        "target": "com.amazonaws.pipes#SecurityGroupId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#SecurityGroups": {
+      "member": {
+        "target": "com.amazonaws.pipes#SecurityGroup"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#SelfManagedKafkaAccessConfigurationCredentials": {
+      "members": {
+        "BasicAuth": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        },
+        "ClientCertificateTlsAuth": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        },
+        "SaslScram256Auth": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        },
+        "SaslScram512Auth": {
+          "target": "com.amazonaws.pipes#SecretManagerArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.pipes#SelfManagedKafkaAccessConfigurationVpc": {
+      "members": {
+        "SecurityGroup": {
+          "target": "com.amazonaws.pipes#SecurityGroupIds",
+          "traits": {}
+        },
+        "Subnets": {
+          "target": "com.amazonaws.pipes#SubnetIds",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#SelfManagedKafkaStartPosition": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "TRIM_HORIZON",
+            "value": "TRIM_HORIZON"
+          },
+          {
+            "name": "LATEST",
+            "value": "LATEST"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SingleMeasureMapping": {
+      "members": {
+        "MeasureName": {
+          "target": "com.amazonaws.pipes#MeasureName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MeasureValue": {
+          "target": "com.amazonaws.pipes#MeasureValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MeasureValueType": {
+          "target": "com.amazonaws.pipes#MeasureValueType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#SingleMeasureMappings": {
+      "member": {
+        "target": "com.amazonaws.pipes#SingleMeasureMapping"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 8192,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#Sql": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100000,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#Sqls": {
+      "member": {
+        "target": "com.amazonaws.pipes#Sql"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#StatementName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#String": {
+      "type": "string"
+    },
+    "com.amazonaws.pipes#StringList": {
+      "member": {
+        "target": "com.amazonaws.pipes#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#Subnet": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^subnet-[0-9a-z]*|(\\$(\\.[\\w/_-]+(\\[(\\d+|\\*)\\])*)*)$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SubnetId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^subnet-[0-9a-z]*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#SubnetIds": {
+      "member": {
+        "target": "com.amazonaws.pipes#SubnetId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 16,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#Subnets": {
+      "member": {
+        "target": "com.amazonaws.pipes#Subnet"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 16,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.pipes#TagKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.pipes#TagValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#TagList": {
+      "member": {
+        "target": "com.amazonaws.pipes#Tag"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#TagMap": {
+      "key": {
+        "target": "com.amazonaws.pipes#TagKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.pipes#TagValue"
+      }
+    },
+    "com.amazonaws.pipes#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#TimeFieldType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "EPOCH",
+            "value": "EPOCH"
+          },
+          {
+            "name": "TIMESTAMP_FORMAT",
+            "value": "TIMESTAMP_FORMAT"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#TimeValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.pipes#TimestampFormat": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#URI": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-\\/*:_+=.@-]*$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.pipes#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.pipes#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.pipes#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.pipes#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.pipes#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.pipes#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.pipes#VersionValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

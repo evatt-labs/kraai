@@ -1,0 +1,11 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::LakeFormation::Tag
+read:
+  model: lakeformation/service/2017-03-31/lakeformation-2017-03-31.json
+  operation: GetLFTag
+  identifier:
+    TagKey: TagKey
+properties:
+  CatalogId: CatalogId
+  TagKey: TagKey
+  TagValues: TagValues

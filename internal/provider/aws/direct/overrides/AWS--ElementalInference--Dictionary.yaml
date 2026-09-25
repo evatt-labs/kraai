@@ -1,0 +1,13 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ElementalInference::Dictionary
+read:
+  model: elementalinference/service/2018-11-14/elementalinference-2018-11-14.json
+  operation: GetDictionary
+  identifier:
+    Id: id
+properties:
+  Arn: arn
+  Id: id
+  Language: language
+  Name: name
+  Tags: tags

@@ -1,0 +1,990 @@
+{
+  "shapes": {
+    "com.amazonaws.docdbelastic#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#Auth": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "PLAIN_TEXT",
+            "value": "PLAIN_TEXT"
+          },
+          {
+            "name": "SECRET_ARN",
+            "value": "SECRET_ARN"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.docdbelastic#ChimeraDbLionfishServiceLambda": {
+      "operations": [
+        {
+          "target": "com.amazonaws.docdbelastic#GetCluster"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#GetClusterSnapshot"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "docdb-elastic",
+          "cloudTrailEventSource": "CASCADES_EVENT_SOURCE",
+          "sdkId": "DocDB Elastic"
+        },
+        "aws.auth#sigv4": {
+          "name": "docdb-elastic"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#cors": {
+          "additionalAllowedHeaders": [
+            "*",
+            "content-type",
+            "x-amz-content-sha256",
+            "x-amz-user-agent",
+            "x-amzn-platform-id",
+            "x-amzn-trace-id"
+          ],
+          "additionalExposedHeaders": [
+            "x-amzn-errortype",
+            "x-amzn-requestid",
+            "x-amzn-trace-id"
+          ],
+          "maxAge": 86400
+        },
+        "smithy.api#title": "Amazon DocumentDB Elastic Clusters",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://docdb-elastic-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://docdb-elastic-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {},
+                                        "url": "https://docdb-elastic.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://docdb-elastic.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2022-11-28"
+    },
+    "com.amazonaws.docdbelastic#Cluster": {
+      "members": {
+        "adminUserName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "authType": {
+          "target": "com.amazonaws.docdbelastic#Auth",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "backupRetentionPeriod": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        },
+        "clusterArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "clusterEndpoint": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "clusterName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createTime": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "kmsKeyId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "preferredBackupWindow": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "preferredMaintenanceWindow": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "shardCapacity": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "shardCount": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "shardInstanceCount": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        },
+        "shards": {
+          "target": "com.amazonaws.docdbelastic#ShardList",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.docdbelastic#Status",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "subnetIds": {
+          "target": "com.amazonaws.docdbelastic#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "vpcSecurityGroupIds": {
+          "target": "com.amazonaws.docdbelastic#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#ClusterSnapshot": {
+      "members": {
+        "adminUserName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "clusterArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "clusterCreationTime": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "kmsKeyId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "snapshotArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "snapshotCreationTime": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "snapshotName": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "snapshotType": {
+          "target": "com.amazonaws.docdbelastic#SnapshotType",
+          "traits": {}
+        },
+        "status": {
+          "target": "com.amazonaws.docdbelastic#Status",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "subnetIds": {
+          "target": "com.amazonaws.docdbelastic#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "vpcSecurityGroupIds": {
+          "target": "com.amazonaws.docdbelastic#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#GetCluster": {
+      "errors": [
+        {
+          "target": "com.amazonaws.docdbelastic#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.docdbelastic#GetClusterInput"
+      },
+      "output": {
+        "target": "com.amazonaws.docdbelastic#GetClusterOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/cluster/{clusterArn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.docdbelastic#GetClusterInput": {
+      "members": {
+        "clusterArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "clusterArn"
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#GetClusterOutput": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.docdbelastic#Cluster",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#GetClusterSnapshot": {
+      "errors": [
+        {
+          "target": "com.amazonaws.docdbelastic#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.docdbelastic#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.docdbelastic#GetClusterSnapshotInput"
+      },
+      "output": {
+        "target": "com.amazonaws.docdbelastic#GetClusterSnapshotOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/cluster-snapshot/{snapshotArn}"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.docdbelastic#GetClusterSnapshotInput": {
+      "members": {
+        "snapshotArn": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "snapshotArn"
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#GetClusterSnapshotOutput": {
+      "members": {
+        "snapshot": {
+          "target": "com.amazonaws.docdbelastic#ClusterSnapshot",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#Shard": {
+      "members": {
+        "createTime": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "shardId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.docdbelastic#Status",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#ShardList": {
+      "member": {
+        "target": "com.amazonaws.docdbelastic#Shard"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.docdbelastic#SnapshotType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "MANUAL",
+            "value": "MANUAL"
+          },
+          {
+            "name": "AUTOMATED",
+            "value": "AUTOMATED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.docdbelastic#Status": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CREATING",
+            "value": "CREATING"
+          },
+          {
+            "name": "ACTIVE",
+            "value": "ACTIVE"
+          },
+          {
+            "name": "DELETING",
+            "value": "DELETING"
+          },
+          {
+            "name": "UPDATING",
+            "value": "UPDATING"
+          },
+          {
+            "name": "VPC_ENDPOINT_LIMIT_EXCEEDED",
+            "value": "VPC_ENDPOINT_LIMIT_EXCEEDED"
+          },
+          {
+            "name": "IP_ADDRESS_LIMIT_EXCEEDED",
+            "value": "IP_ADDRESS_LIMIT_EXCEEDED"
+          },
+          {
+            "name": "INVALID_SECURITY_GROUP_ID",
+            "value": "INVALID_SECURITY_GROUP_ID"
+          },
+          {
+            "name": "INVALID_SUBNET_ID",
+            "value": "INVALID_SUBNET_ID"
+          },
+          {
+            "name": "INACCESSIBLE_ENCRYPTION_CREDS",
+            "value": "INACCESSIBLE_ENCRYPTION_CREDS"
+          },
+          {
+            "name": "INACCESSIBLE_SECRET_ARN",
+            "value": "INACCESSIBLE_SECRET_ARN"
+          },
+          {
+            "name": "INACCESSIBLE_VPC_ENDPOINT",
+            "value": "INACCESSIBLE_VPC_ENDPOINT"
+          },
+          {
+            "name": "INCOMPATIBLE_NETWORK",
+            "value": "INCOMPATIBLE_NETWORK"
+          },
+          {
+            "name": "MERGING",
+            "value": "MERGING"
+          },
+          {
+            "name": "MODIFYING",
+            "value": "MODIFYING"
+          },
+          {
+            "name": "SPLITTING",
+            "value": "SPLITTING"
+          },
+          {
+            "name": "COPYING",
+            "value": "COPYING"
+          },
+          {
+            "name": "STARTING",
+            "value": "STARTING"
+          },
+          {
+            "name": "STOPPING",
+            "value": "STOPPING"
+          },
+          {
+            "name": "STOPPED",
+            "value": "STOPPED"
+          },
+          {
+            "name": "MAINTENANCE",
+            "value": "MAINTENANCE"
+          },
+          {
+            "name": "INACCESSIBLE_ENCRYPTION_CREDENTIALS_RECOVERABLE",
+            "value": "INACCESSIBLE_ENCRYPTION_CREDENTIALS_RECOVERABLE"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.docdbelastic#StringList": {
+      "member": {
+        "target": "smithy.api#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.docdbelastic#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.docdbelastic#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "reason": {
+          "target": "com.amazonaws.docdbelastic#ValidationExceptionReason",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.docdbelastic#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.docdbelastic#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.docdbelastic#ValidationExceptionReason": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "UNKNOWN_OPERATION",
+            "value": "unknownOperation"
+          },
+          {
+            "name": "CANNOT_PARSE",
+            "value": "cannotParse"
+          },
+          {
+            "name": "FIELD_VALIDATION_FAILED",
+            "value": "fieldValidationFailed"
+          },
+          {
+            "name": "OTHER",
+            "value": "other"
+          }
+        ]
+      },
+      "type": "string"
+    }
+  },
+  "smithy": "2.0"
+}

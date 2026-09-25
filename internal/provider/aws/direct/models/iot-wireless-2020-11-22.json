@@ -1,0 +1,1656 @@
+{
+  "shapes": {
+    "com.amazonaws.iotwireless#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iotwireless#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#AddGwMetadata": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#ApId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ApplicationServerPublicKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-fA-F0-9]{64}$",
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ChannelMask": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ClassBTimeout": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#ClassCTimeout": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#DakCertificateId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DakCertificateMetadata": {
+      "members": {
+        "ApId": {
+          "target": "com.amazonaws.iotwireless#ApId",
+          "traits": {}
+        },
+        "CertificateId": {
+          "target": "com.amazonaws.iotwireless#DakCertificateId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DeviceTypeId": {
+          "target": "com.amazonaws.iotwireless#DeviceTypeId",
+          "traits": {}
+        },
+        "FactorySupport": {
+          "target": "com.amazonaws.iotwireless#FactorySupport",
+          "traits": {}
+        },
+        "MaxAllowedSignature": {
+          "target": "com.amazonaws.iotwireless#MaxAllowedSignature",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#DakCertificateMetadataList": {
+      "member": {
+        "target": "com.amazonaws.iotwireless#DakCertificateMetadata"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotwireless#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DestinationArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DestinationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DevStatusReqFreq": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2147483647,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#DeviceProfileArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DeviceProfileId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DeviceProfileName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DeviceTypeId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DlBucketSize": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2147483647,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#DlRate": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2147483647,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#DlRatePolicy": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#DrMax": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#DrMin": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#Expression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ExpressionType": {
+      "members": {
+        "MqttTopic": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MqttTopic"
+          }
+        },
+        "RuleName": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RuleName"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.iotwireless#FactoryPresetFreqsList": {
+      "member": {
+        "target": "com.amazonaws.iotwireless#PresetFreq"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotwireless#FactorySupport": {
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#GetDestination": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotwireless#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotwireless#GetDestinationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotwireless#GetDestinationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/destinations/{Name}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotwireless#GetDestinationRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.iotwireless#DestinationName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#GetDestinationResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.iotwireless#DestinationArn",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.iotwireless#Description",
+          "traits": {}
+        },
+        "Expression": {
+          "target": "com.amazonaws.iotwireless#Expression",
+          "traits": {}
+        },
+        "ExpressionType": {
+          "target": "com.amazonaws.iotwireless#ExpressionType",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.iotwireless#DestinationName",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.iotwireless#RoleArn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#GetDeviceProfile": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotwireless#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotwireless#GetDeviceProfileRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotwireless#GetDeviceProfileResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/device-profiles/{Id}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotwireless#GetDeviceProfileRequest": {
+      "members": {
+        "Id": {
+          "target": "com.amazonaws.iotwireless#DeviceProfileId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#GetDeviceProfileResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.iotwireless#DeviceProfileArn",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.iotwireless#DeviceProfileId",
+          "traits": {}
+        },
+        "LoRaWAN": {
+          "target": "com.amazonaws.iotwireless#LoRaWANDeviceProfile",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.iotwireless#DeviceProfileName",
+          "traits": {}
+        },
+        "Sidewalk": {
+          "target": "com.amazonaws.iotwireless#SidewalkGetDeviceProfile",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#GetNetworkAnalyzerConfiguration": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotwireless#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotwireless#GetNetworkAnalyzerConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotwireless#GetNetworkAnalyzerConfigurationResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/network-analyzer-configurations/{ConfigurationName}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotwireless#GetNetworkAnalyzerConfigurationRequest": {
+      "members": {
+        "ConfigurationName": {
+          "target": "com.amazonaws.iotwireless#NetworkAnalyzerConfigurationName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#GetNetworkAnalyzerConfigurationResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.iotwireless#NetworkAnalyzerConfigurationArn",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.iotwireless#Description"
+        },
+        "MulticastGroups": {
+          "target": "com.amazonaws.iotwireless#NetworkAnalyzerMulticastGroupList",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.iotwireless#NetworkAnalyzerConfigurationName"
+        },
+        "TraceContent": {
+          "target": "com.amazonaws.iotwireless#TraceContent"
+        },
+        "WirelessDevices": {
+          "target": "com.amazonaws.iotwireless#WirelessDeviceList",
+          "traits": {}
+        },
+        "WirelessGateways": {
+          "target": "com.amazonaws.iotwireless#WirelessGatewayList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#GetServiceProfile": {
+      "errors": [
+        {
+          "target": "com.amazonaws.iotwireless#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.iotwireless#GetServiceProfileRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.iotwireless#GetServiceProfileResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/service-profiles/{Id}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.iotwireless#GetServiceProfileRequest": {
+      "members": {
+        "Id": {
+          "target": "com.amazonaws.iotwireless#ServiceProfileId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#GetServiceProfileResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.iotwireless#ServiceProfileArn",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.iotwireless#ServiceProfileId",
+          "traits": {}
+        },
+        "LoRaWAN": {
+          "target": "com.amazonaws.iotwireless#LoRaWANGetServiceProfileInfo",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.iotwireless#ServiceProfileName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#HrAllowed": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iotwireless#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#LoRaWANDeviceProfile": {
+      "members": {
+        "ClassBTimeout": {
+          "target": "com.amazonaws.iotwireless#ClassBTimeout",
+          "traits": {}
+        },
+        "ClassCTimeout": {
+          "target": "com.amazonaws.iotwireless#ClassCTimeout",
+          "traits": {}
+        },
+        "FactoryPresetFreqsList": {
+          "target": "com.amazonaws.iotwireless#FactoryPresetFreqsList",
+          "traits": {}
+        },
+        "MacVersion": {
+          "target": "com.amazonaws.iotwireless#MacVersion",
+          "traits": {}
+        },
+        "MaxDutyCycle": {
+          "target": "com.amazonaws.iotwireless#MaxDutyCycle",
+          "traits": {}
+        },
+        "MaxEirp": {
+          "target": "com.amazonaws.iotwireless#MaxEirp",
+          "traits": {}
+        },
+        "PingSlotDr": {
+          "target": "com.amazonaws.iotwireless#PingSlotDr",
+          "traits": {}
+        },
+        "PingSlotFreq": {
+          "target": "com.amazonaws.iotwireless#PingSlotFreq",
+          "traits": {}
+        },
+        "PingSlotPeriod": {
+          "target": "com.amazonaws.iotwireless#PingSlotPeriod",
+          "traits": {}
+        },
+        "RegParamsRevision": {
+          "target": "com.amazonaws.iotwireless#RegParamsRevision",
+          "traits": {}
+        },
+        "RfRegion": {
+          "target": "com.amazonaws.iotwireless#RfRegion",
+          "traits": {}
+        },
+        "RxDataRate2": {
+          "target": "com.amazonaws.iotwireless#RxDataRate2",
+          "traits": {}
+        },
+        "RxDelay1": {
+          "target": "com.amazonaws.iotwireless#RxDelay1",
+          "traits": {}
+        },
+        "RxDrOffset1": {
+          "target": "com.amazonaws.iotwireless#RxDrOffset1",
+          "traits": {}
+        },
+        "RxFreq2": {
+          "target": "com.amazonaws.iotwireless#RxFreq2",
+          "traits": {}
+        },
+        "Supports32BitFCnt": {
+          "target": "com.amazonaws.iotwireless#Supports32BitFCnt",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "SupportsClassB": {
+          "target": "com.amazonaws.iotwireless#SupportsClassB",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "SupportsClassC": {
+          "target": "com.amazonaws.iotwireless#SupportsClassC",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "SupportsJoin": {
+          "target": "com.amazonaws.iotwireless#SupportsJoin",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#LoRaWANGetServiceProfileInfo": {
+      "members": {
+        "AddGwMetadata": {
+          "target": "com.amazonaws.iotwireless#AddGwMetadata",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "ChannelMask": {
+          "target": "com.amazonaws.iotwireless#ChannelMask",
+          "traits": {}
+        },
+        "DevStatusReqFreq": {
+          "target": "com.amazonaws.iotwireless#DevStatusReqFreq",
+          "traits": {}
+        },
+        "DlBucketSize": {
+          "target": "com.amazonaws.iotwireless#DlBucketSize",
+          "traits": {}
+        },
+        "DlRate": {
+          "target": "com.amazonaws.iotwireless#DlRate",
+          "traits": {}
+        },
+        "DlRatePolicy": {
+          "target": "com.amazonaws.iotwireless#DlRatePolicy",
+          "traits": {}
+        },
+        "DrMax": {
+          "target": "com.amazonaws.iotwireless#DrMax",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "DrMin": {
+          "target": "com.amazonaws.iotwireless#DrMin",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "HrAllowed": {
+          "target": "com.amazonaws.iotwireless#HrAllowed",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "MinGwDiversity": {
+          "target": "com.amazonaws.iotwireless#MinGwDiversity",
+          "traits": {}
+        },
+        "NbTransMax": {
+          "target": "com.amazonaws.iotwireless#NbTransMax",
+          "traits": {}
+        },
+        "NbTransMin": {
+          "target": "com.amazonaws.iotwireless#NbTransMin",
+          "traits": {}
+        },
+        "NwkGeoLoc": {
+          "target": "com.amazonaws.iotwireless#NwkGeoLoc",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "PrAllowed": {
+          "target": "com.amazonaws.iotwireless#PrAllowed",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "RaAllowed": {
+          "target": "com.amazonaws.iotwireless#RaAllowed",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "ReportDevStatusBattery": {
+          "target": "com.amazonaws.iotwireless#ReportDevStatusBattery",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "ReportDevStatusMargin": {
+          "target": "com.amazonaws.iotwireless#ReportDevStatusMargin",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "TargetPer": {
+          "target": "com.amazonaws.iotwireless#TargetPer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "TxPowerIndexMax": {
+          "target": "com.amazonaws.iotwireless#TxPowerIndexMax",
+          "traits": {}
+        },
+        "TxPowerIndexMin": {
+          "target": "com.amazonaws.iotwireless#TxPowerIndexMin",
+          "traits": {}
+        },
+        "UlBucketSize": {
+          "target": "com.amazonaws.iotwireless#UlBucketSize",
+          "traits": {}
+        },
+        "UlRate": {
+          "target": "com.amazonaws.iotwireless#UlRate",
+          "traits": {}
+        },
+        "UlRatePolicy": {
+          "target": "com.amazonaws.iotwireless#UlRatePolicy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#LogLevel": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ERROR"
+          }
+        },
+        "INFO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INFO"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.iotwireless#MacVersion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#MaxAllowedSignature": {
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#MaxDutyCycle": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#MaxEirp": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#Message": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#MinGwDiversity": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#MulticastFrameInfo": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.iotwireless#MulticastGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#NbTransMax": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#NbTransMin": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#NetworkAnalyzerConfigurationArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1124,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#NetworkAnalyzerConfigurationName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9-_]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#NetworkAnalyzerMulticastGroupList": {
+      "member": {
+        "target": "com.amazonaws.iotwireless#MulticastGroupId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotwireless#NwkGeoLoc": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#PingSlotDr": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#PingSlotFreq": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 16700000,
+          "min": 1000000
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#PingSlotPeriod": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 4096,
+          "min": 32
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#PrAllowed": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#PresetFreq": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 16700000,
+          "min": 1000000
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#QualificationStatus": {
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#RaAllowed": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#RegParamsRevision": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ReportDevStatusBattery": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#ReportDevStatusMargin": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#ResourceId": {
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iotwireless#Message"
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.iotwireless#ResourceId",
+          "traits": {}
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.iotwireless#ResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#ResourceType": {
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#RfRegion": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 20
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#RxDataRate2": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#RxDelay1": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#RxDrOffset1": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 7,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#RxFreq2": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 16700000,
+          "min": 1000000
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#ServiceProfileArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ServiceProfileId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ServiceProfileName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#SidewalkGetDeviceProfile": {
+      "members": {
+        "ApplicationServerPublicKey": {
+          "target": "com.amazonaws.iotwireless#ApplicationServerPublicKey",
+          "traits": {}
+        },
+        "DakCertificateMetadata": {
+          "target": "com.amazonaws.iotwireless#DakCertificateMetadataList",
+          "traits": {}
+        },
+        "QualificationStatus": {
+          "target": "com.amazonaws.iotwireless#QualificationStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#Supports32BitFCnt": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#SupportsClassB": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#SupportsClassC": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#SupportsJoin": {
+      "type": "boolean"
+    },
+    "com.amazonaws.iotwireless#TargetPer": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iotwireless#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#TraceContent": {
+      "members": {
+        "LogLevel": {
+          "target": "com.amazonaws.iotwireless#LogLevel"
+        },
+        "MulticastFrameInfo": {
+          "target": "com.amazonaws.iotwireless#MulticastFrameInfo"
+        },
+        "WirelessDeviceFrameInfo": {
+          "target": "com.amazonaws.iotwireless#WirelessDeviceFrameInfo"
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#TxPowerIndexMax": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#TxPowerIndexMin": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 15,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#UlBucketSize": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2147483647,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#UlRate": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2147483647,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.iotwireless#UlRatePolicy": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iotwireless#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#WirelessDeviceFrameInfo": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.iotwireless#WirelessDeviceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#WirelessDeviceList": {
+      "member": {
+        "target": "com.amazonaws.iotwireless#WirelessDeviceId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 250,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotwireless#WirelessGatewayId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.iotwireless#WirelessGatewayList": {
+      "member": {
+        "target": "com.amazonaws.iotwireless#WirelessGatewayId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.iotwireless#iotwireless": {
+      "operations": [
+        {
+          "target": "com.amazonaws.iotwireless#GetDestination"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#GetDeviceProfile"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#GetNetworkAnalyzerConfiguration"
+        },
+        {
+          "target": "com.amazonaws.iotwireless#GetServiceProfile"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "iotwireless",
+          "cloudFormationName": "IoTWireless",
+          "cloudTrailEventSource": "iotwireless.amazonaws.com",
+          "docId": "iotwireless-2020-11-22",
+          "endpointPrefix": "api.iotwireless",
+          "sdkId": "IoT Wireless"
+        },
+        "aws.auth#sigv4": {
+          "name": "iotwireless"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#title": "AWS IoT Wireless",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://api.iotwireless-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://api.iotwireless-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://api.iotwireless.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://api.iotwireless.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-11-22"
+    }
+  },
+  "smithy": "2.0"
+}

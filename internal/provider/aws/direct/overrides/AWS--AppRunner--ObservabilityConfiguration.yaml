@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::AppRunner::ObservabilityConfiguration
+read:
+  model: apprunner/service/2020-05-15/apprunner-2020-05-15.json
+  operation: DescribeObservabilityConfiguration
+  identifier:
+    ObservabilityConfigurationArn: ObservabilityConfigurationArn
+  response: ObservabilityConfiguration
+properties:
+  Latest: Latest
+  ObservabilityConfigurationArn: ObservabilityConfigurationArn
+  ObservabilityConfigurationName: ObservabilityConfigurationName
+  ObservabilityConfigurationRevision: ObservabilityConfigurationRevision
+  TraceConfiguration:
+    member: TraceConfiguration
+    properties:
+      Vendor: Vendor

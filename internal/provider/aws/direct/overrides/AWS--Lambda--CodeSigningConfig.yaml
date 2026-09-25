@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Lambda::CodeSigningConfig
+read:
+  model: lambda/service/2015-03-31/lambda-2015-03-31.json
+  operation: GetCodeSigningConfig
+  identifier:
+    CodeSigningConfigArn: CodeSigningConfigArn
+  response: CodeSigningConfig
+properties:
+  AllowedPublishers:
+    member: AllowedPublishers
+    properties:
+      SigningProfileVersionArns: SigningProfileVersionArns
+  CodeSigningConfigArn: CodeSigningConfigArn
+  CodeSigningConfigId: CodeSigningConfigId
+  CodeSigningPolicies:
+    member: CodeSigningPolicies
+    properties:
+      UntrustedArtifactOnDeployment: UntrustedArtifactOnDeployment
+  Description: Description
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

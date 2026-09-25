@@ -1,0 +1,903 @@
+{
+  "shapes": {
+    "com.amazonaws.proton#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.proton#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov):[a-zA-Z0-9-]+:[a-zA-Z0-9-]*:\\d{12}:([\\w+=,.@-]+[/:])*[\\w+=,.@-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#AwsAccountId": {
+      "traits": {
+        "smithy.api#pattern": "^\\d{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#AwsProton20200720": {
+      "operations": [
+        {
+          "target": "com.amazonaws.proton#GetEnvironmentAccountConnection"
+        },
+        {
+          "target": "com.amazonaws.proton#GetEnvironmentTemplate"
+        },
+        {
+          "target": "com.amazonaws.proton#GetServiceTemplate"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "endpointPrefix": "proton",
+          "sdkId": "Proton"
+        },
+        "aws.auth#sigv4": {
+          "name": "proton"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#title": "AWS Proton",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://proton-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://proton-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://proton.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://proton.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2020-07-20"
+    },
+    "com.amazonaws.proton#Description": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#DisplayName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#EnvironmentAccountConnection": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.proton#EnvironmentAccountConnectionArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "codebuildRoleArn": {
+          "target": "com.amazonaws.proton#RoleArn",
+          "traits": {}
+        },
+        "componentRoleArn": {
+          "target": "com.amazonaws.proton#RoleArn",
+          "traits": {}
+        },
+        "environmentAccountId": {
+          "target": "com.amazonaws.proton#AwsAccountId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "environmentName": {
+          "target": "com.amazonaws.proton#ResourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "id": {
+          "target": "com.amazonaws.proton#EnvironmentAccountConnectionId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "lastModifiedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "managementAccountId": {
+          "target": "com.amazonaws.proton#AwsAccountId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "requestedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "roleArn": {
+          "target": "com.amazonaws.proton#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "status": {
+          "target": "com.amazonaws.proton#EnvironmentAccountConnectionStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.proton#EnvironmentAccountConnectionArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.proton#EnvironmentAccountConnectionResource"
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#EnvironmentAccountConnectionId": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#EnvironmentAccountConnectionStatus": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "PENDING",
+            "value": "PENDING"
+          },
+          {
+            "name": "CONNECTED",
+            "value": "CONNECTED"
+          },
+          {
+            "name": "REJECTED",
+            "value": "REJECTED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#EnvironmentTemplate": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.proton#EnvironmentTemplateArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.proton#Description",
+          "traits": {}
+        },
+        "displayName": {
+          "target": "com.amazonaws.proton#DisplayName",
+          "traits": {}
+        },
+        "encryptionKey": {
+          "target": "com.amazonaws.proton#Arn",
+          "traits": {}
+        },
+        "lastModifiedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.proton#ResourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "provisioning": {
+          "target": "com.amazonaws.proton#Provisioning",
+          "traits": {}
+        },
+        "recommendedVersion": {
+          "target": "com.amazonaws.proton#FullTemplateVersionNumber",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.proton#EnvironmentTemplateArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.proton#EnvironmentTemplateResource"
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#ErrorMessage": {
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#FullTemplateVersionNumber": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(0|([1-9]{1}\\d*)).(0|([1-9]{1}\\d*))$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#GetEnvironmentAccountConnection": {
+      "errors": [
+        {
+          "target": "com.amazonaws.proton#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.proton#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.proton#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.proton#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.proton#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.proton#GetEnvironmentAccountConnectionInput"
+      },
+      "output": {
+        "target": "com.amazonaws.proton#GetEnvironmentAccountConnectionOutput"
+      },
+      "traits": {
+        "smithy.api#deprecated": {
+          "message": "AWS Proton is not accepting new customers.",
+          "since": "10/07/2025"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.proton#GetEnvironmentAccountConnectionInput": {
+      "members": {
+        "id": {
+          "target": "com.amazonaws.proton#EnvironmentAccountConnectionId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.proton#EnvironmentAccountConnectionResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#GetEnvironmentAccountConnectionOutput": {
+      "members": {
+        "environmentAccountConnection": {
+          "target": "com.amazonaws.proton#EnvironmentAccountConnection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#GetEnvironmentTemplate": {
+      "errors": [
+        {
+          "target": "com.amazonaws.proton#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.proton#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.proton#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.proton#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.proton#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.proton#GetEnvironmentTemplateInput"
+      },
+      "output": {
+        "target": "com.amazonaws.proton#GetEnvironmentTemplateOutput"
+      },
+      "traits": {
+        "smithy.api#deprecated": {
+          "message": "AWS Proton is not accepting new customers.",
+          "since": "10/07/2025"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.proton#GetEnvironmentTemplateInput": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.proton#ResourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#GetEnvironmentTemplateOutput": {
+      "members": {
+        "environmentTemplate": {
+          "target": "com.amazonaws.proton#EnvironmentTemplate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#GetServiceTemplate": {
+      "errors": [
+        {
+          "target": "com.amazonaws.proton#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.proton#InternalServerException"
+        },
+        {
+          "target": "com.amazonaws.proton#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.proton#ThrottlingException"
+        },
+        {
+          "target": "com.amazonaws.proton#ValidationException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.proton#GetServiceTemplateInput"
+      },
+      "output": {
+        "target": "com.amazonaws.proton#GetServiceTemplateOutput"
+      },
+      "traits": {
+        "smithy.api#deprecated": {
+          "message": "AWS Proton is not accepting new customers.",
+          "since": "10/07/2025"
+        },
+        "smithy.api#readonly": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.proton#GetServiceTemplateInput": {
+      "members": {
+        "name": {
+          "target": "com.amazonaws.proton#ResourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#references": [
+          {
+            "resource": "com.amazonaws.proton#ServiceTemplateResource"
+          }
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#GetServiceTemplateOutput": {
+      "members": {
+        "serviceTemplate": {
+          "target": "com.amazonaws.proton#ServiceTemplate",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.proton#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#Provisioning": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "CUSTOMER_MANAGED",
+            "value": "CUSTOMER_MANAGED"
+          }
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#ResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[0-9A-Za-z]+[0-9A-Za-z_\\-]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.proton#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov):iam::\\d{12}:role/([\\w+=,.@-]{1,512}[/:])*([\\w+=,.@-]{1,64})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#ServiceTemplate": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.proton#ServiceTemplateArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "createdAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "description": {
+          "target": "com.amazonaws.proton#Description",
+          "traits": {}
+        },
+        "displayName": {
+          "target": "com.amazonaws.proton#DisplayName",
+          "traits": {}
+        },
+        "encryptionKey": {
+          "target": "com.amazonaws.proton#Arn",
+          "traits": {}
+        },
+        "lastModifiedAt": {
+          "target": "smithy.api#Timestamp",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.proton#ResourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "pipelineProvisioning": {
+          "target": "com.amazonaws.proton#Provisioning",
+          "traits": {}
+        },
+        "recommendedVersion": {
+          "target": "com.amazonaws.proton#FullTemplateVersionNumber",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.proton#ServiceTemplateArn": {
+      "traits": {
+        "aws.api#arnReference": {
+          "resource": "com.amazonaws.proton#ServiceTemplateResource"
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.proton#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.proton#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.proton#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.proton#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

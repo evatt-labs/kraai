@@ -1,0 +1,14 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::AppRunner::VpcConnector
+read:
+  model: apprunner/service/2020-05-15/apprunner-2020-05-15.json
+  operation: DescribeVpcConnector
+  identifier:
+    VpcConnectorArn: VpcConnectorArn
+  response: VpcConnector
+properties:
+  SecurityGroups: SecurityGroups
+  Subnets: Subnets
+  VpcConnectorArn: VpcConnectorArn
+  VpcConnectorName: VpcConnectorName
+  VpcConnectorRevision: VpcConnectorRevision

@@ -1,0 +1,75 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::MWAA::Environment
+read:
+  model: mwaa/service/2020-07-01/mwaa-2020-07-01.json
+  operation: GetEnvironment
+  identifier:
+    Name: Name
+  response: Environment
+properties:
+  AirflowConfigurationOptions: AirflowConfigurationOptions
+  AirflowVersion: AirflowVersion
+  Arn: Arn
+  CeleryExecutorQueue: CeleryExecutorQueue
+  DagS3Path: DagS3Path
+  DatabaseVpcEndpointService: DatabaseVpcEndpointService
+  EndpointManagement: EndpointManagement
+  EnvironmentClass: EnvironmentClass
+  ExecutionRoleArn: ExecutionRoleArn
+  KmsKey: KmsKey
+  LoggingConfiguration:
+    member: LoggingConfiguration
+    properties:
+      DagProcessingLogs:
+        member: DagProcessingLogs
+        properties:
+          CloudWatchLogGroupArn: CloudWatchLogGroupArn
+          Enabled: Enabled
+          LogLevel: LogLevel
+      SchedulerLogs:
+        member: SchedulerLogs
+        properties:
+          CloudWatchLogGroupArn: CloudWatchLogGroupArn
+          Enabled: Enabled
+          LogLevel: LogLevel
+      TaskLogs:
+        member: TaskLogs
+        properties:
+          CloudWatchLogGroupArn: CloudWatchLogGroupArn
+          Enabled: Enabled
+          LogLevel: LogLevel
+      WebserverLogs:
+        member: WebserverLogs
+        properties:
+          CloudWatchLogGroupArn: CloudWatchLogGroupArn
+          Enabled: Enabled
+          LogLevel: LogLevel
+      WorkerLogs:
+        member: WorkerLogs
+        properties:
+          CloudWatchLogGroupArn: CloudWatchLogGroupArn
+          Enabled: Enabled
+          LogLevel: LogLevel
+  MaxWebservers: MaxWebservers
+  MaxWorkers: MaxWorkers
+  MinWebservers: MinWebservers
+  MinWorkers: MinWorkers
+  Name: Name
+  NetworkConfiguration:
+    member: NetworkConfiguration
+    properties:
+      SecurityGroupIds: SecurityGroupIds
+      SubnetIds: SubnetIds
+  PluginsS3ObjectVersion: PluginsS3ObjectVersion
+  PluginsS3Path: PluginsS3Path
+  RequirementsS3ObjectVersion: RequirementsS3ObjectVersion
+  RequirementsS3Path: RequirementsS3Path
+  Schedulers: Schedulers
+  SourceBucketArn: SourceBucketArn
+  StartupScriptS3ObjectVersion: StartupScriptS3ObjectVersion
+  StartupScriptS3Path: StartupScriptS3Path
+  Tags: Tags
+  WebserverAccessMode: WebserverAccessMode
+  WebserverUrl: WebserverUrl
+  WebserverVpcEndpointService: WebserverVpcEndpointService
+  WeeklyMaintenanceWindowStart: WeeklyMaintenanceWindowStart

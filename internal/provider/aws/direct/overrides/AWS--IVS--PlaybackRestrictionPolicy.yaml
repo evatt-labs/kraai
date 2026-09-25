@@ -1,0 +1,16 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IVS::PlaybackRestrictionPolicy
+read:
+  model: ivs/service/2020-07-14/ivs-2020-07-14.json
+  operation: GetPlaybackRestrictionPolicy
+  identifier:
+    Arn: arn
+  response: playbackRestrictionPolicy
+properties:
+  AllowedCountries: allowedCountries
+  AllowedOrigins: allowedOrigins
+  Arn: arn
+  EnableStrictOriginEnforcement: enableStrictOriginEnforcement
+  Name: name
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

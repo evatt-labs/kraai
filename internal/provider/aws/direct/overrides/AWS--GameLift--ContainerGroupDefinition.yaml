@@ -1,0 +1,104 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::GameLift::ContainerGroupDefinition
+read:
+  model: gamelift/service/2015-10-01/gamelift-2015-10-01.json
+  operation: DescribeContainerGroupDefinition
+  identifier:
+    Name: Name
+  response: ContainerGroupDefinition
+properties:
+  ContainerGroupDefinitionArn: ContainerGroupDefinitionArn
+  ContainerGroupType: ContainerGroupType
+  CreationTime: CreationTime
+  GameServerContainerDefinition:
+    member: GameServerContainerDefinition
+    properties:
+      ContainerName: ContainerName
+      DependsOn:
+        member: DependsOn
+        properties:
+          Condition: Condition
+          ContainerName: ContainerName
+      EnvironmentOverride:
+        member: EnvironmentOverride
+        properties:
+          Name: Name
+          Value: Value
+      ImageUri: ImageUri
+      LinuxCapabilities:
+        member: LinuxCapabilities
+        properties:
+          Include: Include
+      MountPoints:
+        member: MountPoints
+        properties:
+          AccessLevel: AccessLevel
+          ContainerPath: ContainerPath
+          InstancePath: InstancePath
+      PortConfiguration:
+        member: PortConfiguration
+        properties:
+          ContainerPortRanges:
+            member: ContainerPortRanges
+            properties:
+              FromPort: FromPort
+              Protocol: Protocol
+              ToPort: ToPort
+      ResolvedImageDigest: ResolvedImageDigest
+      ServerSdkVersion: ServerSdkVersion
+  Name: Name
+  OperatingSystem: OperatingSystem
+  Status: Status
+  StatusReason: StatusReason
+  SupportContainerDefinitions:
+    member: SupportContainerDefinitions
+    properties:
+      ContainerName: ContainerName
+      DependsOn:
+        member: DependsOn
+        properties:
+          Condition: Condition
+          ContainerName: ContainerName
+      EnvironmentOverride:
+        member: EnvironmentOverride
+        properties:
+          Name: Name
+          Value: Value
+      Essential: Essential
+      HealthCheck:
+        member: HealthCheck
+        properties:
+          Command: Command
+          Interval: Interval
+          Retries: Retries
+          StartPeriod: StartPeriod
+          Timeout: Timeout
+      ImageUri: ImageUri
+      LinuxCapabilities:
+        member: LinuxCapabilities
+        properties:
+          Include: Include
+      MemoryHardLimitMebibytes: MemoryHardLimitMebibytes
+      MountPoints:
+        member: MountPoints
+        properties:
+          AccessLevel: AccessLevel
+          ContainerPath: ContainerPath
+          InstancePath: InstancePath
+      PortConfiguration:
+        member: PortConfiguration
+        properties:
+          ContainerPortRanges:
+            member: ContainerPortRanges
+            properties:
+              FromPort: FromPort
+              Protocol: Protocol
+              ToPort: ToPort
+      ResolvedImageDigest: ResolvedImageDigest
+      Vcpu: Vcpu
+  TotalMemoryLimitMebibytes: TotalMemoryLimitMebibytes
+  TotalVcpuLimit: TotalVcpuLimit
+  VersionDescription: VersionDescription
+  VersionNumber: VersionNumber
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

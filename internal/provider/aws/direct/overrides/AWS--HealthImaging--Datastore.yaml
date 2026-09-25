@@ -1,0 +1,18 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::HealthImaging::Datastore
+read:
+  model: medical-imaging/service/2023-07-19/medical-imaging-2023-07-19.json
+  operation: GetDatastore
+  identifier:
+    DatastoreId: datastoreId
+  response: datastoreProperties
+properties:
+  CreatedAt: createdAt
+  DatastoreArn: datastoreArn
+  DatastoreId: datastoreId
+  DatastoreName: datastoreName
+  DatastoreStatus: datastoreStatus
+  KmsKeyArn: kmsKeyArn
+  UpdatedAt: updatedAt
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

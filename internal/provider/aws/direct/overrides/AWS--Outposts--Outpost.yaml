@@ -1,0 +1,22 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Outposts::Outpost
+read:
+  model: outposts/service/2019-12-03/outposts-2019-12-03.json
+  operation: GetOutpost
+  identifier:
+    OutpostArn: OutpostId
+  response: Outpost
+properties:
+  AvailabilityZone: AvailabilityZone
+  AvailabilityZoneId: AvailabilityZoneId
+  Description: Description
+  LifeCycleStatus: LifeCycleStatus
+  Name: Name
+  OutpostArn: OutpostArn
+  OutpostId: OutpostId
+  OwnerId: OwnerId
+  SiteArn: SiteArn
+  SiteId: SiteId
+  SupportedHardwareType: SupportedHardwareType
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,34 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::IVS::RecordingConfiguration
+read:
+  model: ivs/service/2020-07-14/ivs-2020-07-14.json
+  operation: GetRecordingConfiguration
+  identifier:
+    Arn: arn
+  response: recordingConfiguration
+properties:
+  Arn: arn
+  DestinationConfiguration:
+    member: destinationConfiguration
+    properties:
+      S3:
+        member: s3
+        properties:
+          BucketName: bucketName
+  Name: name
+  RecordingReconnectWindowSeconds: recordingReconnectWindowSeconds
+  RenditionConfiguration:
+    member: renditionConfiguration
+    properties:
+      RenditionSelection: renditionSelection
+      Renditions: renditions
+  State: state
+  ThumbnailConfiguration:
+    member: thumbnailConfiguration
+    properties:
+      RecordingMode: recordingMode
+      Resolution: resolution
+      Storage: storage
+      TargetIntervalSeconds: targetIntervalSeconds
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

@@ -1,0 +1,56 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::LicenseManager::License
+read:
+  model: license-manager/service/2018-08-01/license-manager-2018-08-01.json
+  operation: GetLicense
+  identifier:
+    LicenseArn: LicenseArn
+  response: License
+properties:
+  Beneficiary: Beneficiary
+  ConsumptionConfiguration:
+    member: ConsumptionConfiguration
+    properties:
+      BorrowConfiguration:
+        member: BorrowConfiguration
+        properties:
+          AllowEarlyCheckIn: AllowEarlyCheckIn
+          MaxTimeToLiveInMinutes: MaxTimeToLiveInMinutes
+      ProvisionalConfiguration:
+        member: ProvisionalConfiguration
+        properties:
+          MaxTimeToLiveInMinutes: MaxTimeToLiveInMinutes
+      RenewType: RenewType
+  Entitlements:
+    member: Entitlements
+    properties:
+      AllowCheckIn: AllowCheckIn
+      MaxCount: MaxCount
+      Name: Name
+      Overage: Overage
+      Unit: Unit
+      Value: Value
+  HomeRegion: HomeRegion
+  Issuer:
+    member: Issuer
+    properties:
+      Name: Name
+      SignKey: SignKey
+  LicenseArn: LicenseArn
+  LicenseMetadata:
+    member: LicenseMetadata
+    properties:
+      Name: Name
+      Value: Value
+  LicenseName: LicenseName
+  ProductName: ProductName
+  ProductSKU: ProductSKU
+  Status: Status
+  Validity:
+    member: Validity
+    properties:
+      Begin: Begin
+      End: End
+  Version: Version
+skip:
+  Tags: no member of the read's resource structure matches Tags by name and type; not mapped mechanically

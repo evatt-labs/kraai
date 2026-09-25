@@ -1,0 +1,171 @@
+{
+  "additionalIdentifiers": [
+    [
+      "/properties/VoiceConnectorId"
+    ]
+  ],
+  "additionalProperties": false,
+  "createOnlyProperties": [
+    "/properties/AwsRegion",
+    "/properties/NetworkType"
+  ],
+  "definitions": {
+    "Tag": {
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "description": "The tag key.",
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "Value": {
+          "description": "The tag value.",
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "An Amazon Chime SDK Voice Connector configuration, including outbound host name and encryption settings.",
+  "handlers": {
+    "create": {
+      "permissions": [
+        "chime:CreateVoiceConnector",
+        "chime:GetVoiceConnector",
+        "chime:TagResource",
+        "chime:ListTagsForResource"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "chime:DeleteVoiceConnector",
+        "chime:GetVoiceConnector",
+        "chime:ListTagsForResource"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "chime:ListVoiceConnectors"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "chime:GetVoiceConnector",
+        "chime:ListTagsForResource"
+      ]
+    },
+    "update": {
+      "permissions": [
+        "chime:UpdateVoiceConnector",
+        "chime:GetVoiceConnector",
+        "chime:TagResource",
+        "chime:UntagResource",
+        "chime:ListTagsForResource"
+      ]
+    }
+  },
+  "primaryIdentifier": [
+    "/properties/VoiceConnectorArn"
+  ],
+  "properties": {
+    "AwsRegion": {
+      "description": "The AWS Region in which the Voice Connector is created.",
+      "enum": [
+        "us-east-1",
+        "us-west-2",
+        "ca-central-1",
+        "eu-central-1",
+        "eu-west-1",
+        "eu-west-2",
+        "ap-northeast-2",
+        "ap-northeast-1",
+        "ap-southeast-1",
+        "ap-southeast-2"
+      ],
+      "type": "string"
+    },
+    "CreatedTimestamp": {
+      "description": "The Voice Connector creation timestamp, in ISO 8601 format.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "Name": {
+      "description": "The name of the Voice Connector.",
+      "maxLength": 256,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9 _.-]+$",
+      "type": "string"
+    },
+    "NetworkType": {
+      "description": "The type of network for the Voice Connector.",
+      "enum": [
+        "IPV4_ONLY",
+        "DUAL_STACK"
+      ],
+      "type": "string"
+    },
+    "OutboundHostName": {
+      "description": "The outbound host name for the Voice Connector.",
+      "type": "string"
+    },
+    "RequireEncryption": {
+      "description": "Enables or disables encryption for the Voice Connector.",
+      "type": "boolean"
+    },
+    "Tags": {
+      "description": "The tags assigned to the Voice Connector.",
+      "insertionOrder": false,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "UpdatedTimestamp": {
+      "description": "The Voice Connector updated timestamp, in ISO 8601 format.",
+      "format": "date-time",
+      "type": "string"
+    },
+    "VoiceConnectorArn": {
+      "description": "The ARN of the Voice Connector.",
+      "type": "string"
+    },
+    "VoiceConnectorId": {
+      "description": "The Voice Connector ID.",
+      "type": "string"
+    }
+  },
+  "readOnlyProperties": [
+    "/properties/VoiceConnectorArn",
+    "/properties/VoiceConnectorId",
+    "/properties/OutboundHostName",
+    "/properties/CreatedTimestamp",
+    "/properties/UpdatedTimestamp"
+  ],
+  "required": [
+    "Name",
+    "RequireEncryption"
+  ],
+  "tagging": {
+    "cloudFormationSystemTags": false,
+    "permissions": [
+      "chime:TagResource",
+      "chime:UntagResource",
+      "chime:ListTagsForResource"
+    ],
+    "tagOnCreate": true,
+    "tagProperty": "/properties/Tags",
+    "tagUpdatable": true,
+    "taggable": true
+  },
+  "typeName": "AWS::Chime::VoiceConnector"
+}

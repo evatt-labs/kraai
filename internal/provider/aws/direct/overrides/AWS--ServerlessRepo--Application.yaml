@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::ServerlessRepo::Application
+read:
+  model: serverlessapplicationrepository/service/2017-09-08/serverlessapplicationrepository-2017-09-08.json
+  operation: GetApplication
+  identifier:
+    ApplicationId: ApplicationId
+properties:
+  ApplicationId: ApplicationId
+  Author: Author
+  CreationTime: CreationTime
+  Description: Description
+  HomePageUrl: HomePageUrl
+  IsVerifiedAuthor: IsVerifiedAuthor
+  Labels: Labels
+  Name: Name
+  SpdxLicenseId: SpdxLicenseId

@@ -1,0 +1,17 @@
+# Joined mechanically by join_main.go; delete this line once reviewed.
+type: AWS::Omics::RunGroup
+read:
+  model: omics/service/2022-11-28/omics-2022-11-28.json
+  operation: GetRunGroup
+  identifier:
+    Id: id
+properties:
+  Arn: arn
+  CreationTime: creationTime
+  Id: id
+  MaxCpus: maxCpus
+  MaxDuration: maxDuration
+  MaxGpus: maxGpus
+  MaxRuns: maxRuns
+  Name: name
+  Tags: tags
