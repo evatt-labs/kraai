@@ -42,7 +42,7 @@ type Call struct {
 	Operation  string             `yaml:"operation"`
 	Identifier map[string]string  `yaml:"identifier,omitempty"`
 	Response   string             `yaml:"response,omitempty"`
-	Input      map[string]string  `yaml:"input,omitempty"`
+	Input      map[string]any     `yaml:"input,omitempty"`
 	Properties map[string]Mapping `yaml:"properties"`
 }
 
@@ -60,9 +60,12 @@ type Read struct {
 	// the structure holding the resource; empty when the output is it.
 	Response string `yaml:"response,omitempty"`
 	// Input fixes input members to a value on every read, such as asking
-	// for tags the operation otherwise leaves out. A list member is sent
-	// the value as a list of one.
-	Input map[string]string `yaml:"input,omitempty"`
+	// for tags the operation otherwise leaves out. A string sent to a list
+	// member is sent as a list of one. A list or map is sent as the
+	// member's structure, such as EC2's Filters, under a query or awsJson
+	// protocol. A string may name an identifier property as {Property},
+	// replaced by its value on every call.
+	Input map[string]any `yaml:"input,omitempty"`
 	// Absent names members of the resource structure and the values that
 	// mean the instance is gone although the service still returns it,
 	// such as a status of INACTIVE.

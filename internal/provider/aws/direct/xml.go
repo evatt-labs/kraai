@@ -90,7 +90,7 @@ func (n *xmlNode) items(name, item string) (items []*xmlNode, present bool) {
 
 // readXML finds the resource in an XML response by r's wrapper and path,
 // and translates it.
-func (r Reader) readXML(body []byte) (map[string]any, error) {
+func (r Reader) readXML(body []byte, w *walk) (map[string]any, error) {
 	node, err := parseXML(body)
 	if err != nil {
 		return nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
@@ -117,17 +117,24 @@ func (r Reader) readXML(body []byte) (map[string]any, error) {
 		}
 		node = items[0]
 	}
-	return r.finish(func(fields []Field, fromRoot bool) map[string]any {
+	props, err := r.finish(func(fields []Field, fromRoot bool) map[string]any {
 		if fromRoot {
-			return translateXML(root, fields)
+			return translateXML(w, root, fields)
 		}
-		return translateXML(node, fields)
+		return translateXML(w, node, fields)
 	})
+	if err == nil {
+		err = errors.Join(w.errs...)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return props, nil
 }
 
 // translateXML reads fields from n as translate reads them from JSON: keyed
 // by property, an element absent from the response absent from the result.
-func translateXML(n *xmlNode, fields []Field) map[string]any {
+func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 	out := map[string]any{}
 	for _, f := range fields {
 		holders, projected := []*xmlNode{n}, false
@@ -140,15 +147,28 @@ func translateXML(n *xmlNode, fields []Field) map[string]any {
 					}
 					continue
 				}
-				projected = true
 				items, _ := h.items(step.Name, step.Item)
-				next = append(next, items...)
+				for _, item := range items {
+					var got any
+					if c := item.child(step.Where); c != nil {
+						got = c.text
+					}
+					if w.selects(step, got) {
+						next = append(next, item)
+					}
+				}
+				if step.Where == "" {
+					projected = true
+				} else if len(next) > 1 {
+					w.errs = append(w.errs, fmt.Errorf("%s selects %d elements of %s, not one", f.Property, len(next), step.Name))
+					next = nil
+				}
 			}
 			holders = next
 		}
 		var values []any
 		for _, h := range holders {
-			if v, ok := xmlValue(h, f); ok {
+			if v, ok := xmlValue(w, h, f); ok {
 				values = append(values, v)
 			}
 		}
@@ -166,7 +186,7 @@ func translateXML(n *xmlNode, fields []Field) map[string]any {
 }
 
 // xmlValue reads f's member from one element, as value does from JSON.
-func xmlValue(n *xmlNode, f Field) (any, bool) {
+func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 	var v any
 	switch f.Kind {
 	case "structure":
@@ -174,7 +194,7 @@ func xmlValue(n *xmlNode, f Field) (any, bool) {
 		if c == nil {
 			return nil, false
 		}
-		v = translateXML(c, f.Fields)
+		v = translateXML(w, c, f.Fields)
 	case "list":
 		items, present := n.items(f.XMLName, f.Item)
 		if !present {
@@ -183,7 +203,7 @@ func xmlValue(n *xmlNode, f Field) (any, bool) {
 		list := make([]any, 0, len(items))
 		for _, item := range items {
 			if len(f.Fields) > 0 {
-				list = append(list, translateXML(item, f.Fields))
+				list = append(list, translateXML(w, item, f.Fields))
 			} else {
 				list = append(list, xmlScalar(item.text, f.Scalar))
 			}

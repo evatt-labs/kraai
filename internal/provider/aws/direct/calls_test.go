@@ -81,3 +81,42 @@ func TestAFurtherCallFindingNothingIsNotAbsence(t *testing.T) {
 		t.Fatalf("Read = %v, want an error that is not ErrAbsent", err)
 	}
 }
+
+func TestCompileRefusesAStructuredInputOrSelection(t *testing.T) {
+	const file = "AWS--EC2--Subnet.yaml"
+	cases := map[string]struct {
+		old, replacement, want string
+	}{
+		"a filter member the structure lacks":                {"        - Name: association.subnet-id", "        - Key: association.subnet-id", "names Key, which"},
+		"a map where the input is a list":                    {"      Filters:\n        - Name: association.subnet-id\n          Values: [\"{SubnetId}\"]", "      Filters:\n        Name: association.subnet-id", "gives a map where Filter is list"},
+		"a placeholder that is not the identifier":           {`Values: ["{SubnetId}"]`, `Values: ["{VpcId}"]`, "names {VpcId}, which is not the primary identifier"},
+		"a call bound by nothing":                            {`Values: ["{SubnetId}"]`, `Values: ["subnet-x"]`, "identifier does not bind SubnetId"},
+		"a selection by a member that is not a string":       {"Associations[SubnetId={SubnetId}]", "Associations[Nope={SubnetId}]", "selects by Nope, which is not a string member"},
+		"a selection placeholder that is not the identifier": {"Associations[SubnetId={SubnetId}]", "Associations[SubnetId={VpcId}]", "selects by {VpcId}, which is not the primary identifier"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, err := compileAll(edit(t, file, c.old, c.replacement))
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
+			}
+		})
+	}
+}
+
+// A path either selects one element or projects over every element; one
+// that does both would read a list where a single value is expected.
+func TestCompileRefusesAPathThatSelectsAndProjects(t *testing.T) {
+	m := listWidget()
+	shapes := m["shapes"].(map[string]any)
+	shapes["com.example#Nodes"] = map[string]any{"type": "list", "member": map[string]any{"target": "com.example#Node"}}
+	shapes["com.example#Widget"].(map[string]any)["members"].(map[string]any)["Nodes"] = map[string]any{"target": "com.example#Nodes"}
+	o := widgetOverride("")
+	o.Read.Identifier = map[string]string{"WidgetId": "WidgetIds"}
+	o.Properties = map[string]Mapping{"Name": {Member: "Widgets[WidgetId={WidgetId}].Nodes[].Label"}}
+	o.Skip = map[string]string{"WidgetId": "r", "Size": "r", "Tags": "r"}
+	_, errs := compileWidget(t, m, o)
+	if !containsErr(errs, "Name both selects and projects") {
+		t.Fatalf("errors = %v", errs)
+	}
+}

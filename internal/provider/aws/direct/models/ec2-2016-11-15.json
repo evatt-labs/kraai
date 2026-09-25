@@ -3,6 +3,9 @@
     "com.amazonaws.ec2#AmazonEC2": {
       "operations": [
         {
+          "target": "com.amazonaws.ec2#DescribeNetworkAcls"
+        },
+        {
           "target": "com.amazonaws.ec2#DescribeSubnets"
         }
       ],
@@ -407,6 +410,89 @@
     "com.amazonaws.ec2#CoipPoolId": {
       "type": "string"
     },
+    "com.amazonaws.ec2#DescribeNetworkAcls": {
+      "input": {
+        "target": "com.amazonaws.ec2#DescribeNetworkAclsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#DescribeNetworkAclsResult"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "NextToken",
+          "items": "NetworkAcls",
+          "outputToken": "NextToken",
+          "pageSize": "MaxResults"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DescribeNetworkAclsMaxResults": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ec2#DescribeNetworkAclsRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "Filters": {
+          "target": "com.amazonaws.ec2#FilterList",
+          "traits": {
+            "smithy.api#xmlName": "Filter"
+          }
+        },
+        "MaxResults": {
+          "target": "com.amazonaws.ec2#DescribeNetworkAclsMaxResults",
+          "traits": {}
+        },
+        "NetworkAclIds": {
+          "target": "com.amazonaws.ec2#NetworkAclIdStringList",
+          "traits": {
+            "smithy.api#xmlName": "NetworkAclId"
+          }
+        },
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DescribeNetworkAclsResult": {
+      "members": {
+        "NetworkAcls": {
+          "target": "com.amazonaws.ec2#NetworkAclList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NetworkAclSet",
+            "smithy.api#xmlName": "networkAclSet"
+          }
+        },
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NextToken",
+            "smithy.api#xmlName": "nextToken"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ec2#DescribeSubnets": {
       "input": {
         "target": "com.amazonaws.ec2#DescribeSubnetsRequest"
@@ -549,6 +635,26 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ec2#IcmpTypeCode": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Code",
+            "smithy.api#xmlName": "code"
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Type",
+            "smithy.api#xmlName": "type"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.ec2#Integer": {
       "type": "integer"
     },
@@ -592,6 +698,209 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ec2#NetworkAcl": {
+      "members": {
+        "Associations": {
+          "target": "com.amazonaws.ec2#NetworkAclAssociationList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssociationSet",
+            "smithy.api#xmlName": "associationSet"
+          }
+        },
+        "Entries": {
+          "target": "com.amazonaws.ec2#NetworkAclEntryList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "EntrySet",
+            "smithy.api#xmlName": "entrySet"
+          }
+        },
+        "IsDefault": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Default",
+            "smithy.api#xmlName": "default"
+          }
+        },
+        "NetworkAclId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NetworkAclId",
+            "smithy.api#xmlName": "networkAclId"
+          }
+        },
+        "OwnerId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "OwnerId",
+            "smithy.api#xmlName": "ownerId"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "TagSet",
+            "smithy.api#xmlName": "tagSet"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#xmlName": "vpcId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#NetworkAclAssociation": {
+      "members": {
+        "NetworkAclAssociationId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NetworkAclAssociationId",
+            "smithy.api#xmlName": "networkAclAssociationId"
+          }
+        },
+        "NetworkAclId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NetworkAclId",
+            "smithy.api#xmlName": "networkAclId"
+          }
+        },
+        "SubnetId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SubnetId",
+            "smithy.api#xmlName": "subnetId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#NetworkAclAssociationList": {
+      "member": {
+        "target": "com.amazonaws.ec2#NetworkAclAssociation",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#NetworkAclEntry": {
+      "members": {
+        "CidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CidrBlock",
+            "smithy.api#xmlName": "cidrBlock"
+          }
+        },
+        "Egress": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Egress",
+            "smithy.api#xmlName": "egress"
+          }
+        },
+        "IcmpTypeCode": {
+          "target": "com.amazonaws.ec2#IcmpTypeCode",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IcmpTypeCode",
+            "smithy.api#xmlName": "icmpTypeCode"
+          }
+        },
+        "Ipv6CidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Ipv6CidrBlock",
+            "smithy.api#xmlName": "ipv6CidrBlock"
+          }
+        },
+        "PortRange": {
+          "target": "com.amazonaws.ec2#PortRange",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PortRange",
+            "smithy.api#xmlName": "portRange"
+          }
+        },
+        "Protocol": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Protocol",
+            "smithy.api#xmlName": "protocol"
+          }
+        },
+        "RuleAction": {
+          "target": "com.amazonaws.ec2#RuleAction",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RuleAction",
+            "smithy.api#xmlName": "ruleAction"
+          }
+        },
+        "RuleNumber": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RuleNumber",
+            "smithy.api#xmlName": "ruleNumber"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#NetworkAclEntryList": {
+      "member": {
+        "target": "com.amazonaws.ec2#NetworkAclEntry",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#NetworkAclId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#NetworkAclIdStringList": {
+      "member": {
+        "target": "com.amazonaws.ec2#NetworkAclId",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#NetworkAclList": {
+      "member": {
+        "target": "com.amazonaws.ec2#NetworkAcl",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#PortRange": {
+      "members": {
+        "From": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "From",
+            "smithy.api#xmlName": "from"
+          }
+        },
+        "To": {
+          "target": "com.amazonaws.ec2#Integer",
+          "traits": {
+            "aws.protocols#ec2QueryName": "To",
+            "smithy.api#xmlName": "to"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.ec2#PrivateDnsNameOptionsOnLaunch": {
       "members": {
         "EnableResourceNameDnsAAAARecord": {
@@ -618,6 +927,23 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.ec2#RuleAction": {
+      "members": {
+        "allow": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "allow"
+          }
+        },
+        "deny": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "deny"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.ec2#String": {
       "type": "string"

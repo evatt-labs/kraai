@@ -36,7 +36,7 @@ func taggedOverride() Override {
 	o := widgetOverride("Widget")
 	delete(o.Skip, "Tags")
 	o.Properties["Tags"] = Mapping{Member: "$.tags", Properties: map[string]Mapping{"Key": {Member: "key"}, "Value": {Member: "value"}}}
-	o.Read.Input = map[string]string{"include": "TAGS"}
+	o.Read.Input = map[string]any{"include": "TAGS"}
 	o.Read.Absent = map[string][]string{"status": {"INACTIVE"}}
 	return o
 }
@@ -161,5 +161,24 @@ func TestCompileRefusesTheRung(t *testing.T) {
 				t.Fatalf("errors = %v\nwant one containing %q", errs, c.want)
 			}
 		})
+	}
+}
+
+// A structured input is sent as the member's structure under awsJson.
+func TestReadSendsAStructuredInputAsJSON(t *testing.T) {
+	o := taggedOverride()
+	o.Read.Input = map[string]any{"include": []any{"TAGS"}}
+	r, errs := compileTagged(t, taggedWidget(), o)
+	if len(errs) > 0 {
+		t.Fatal(errs)
+	}
+	readers[r.Type] = r
+	t.Cleanup(func() { delete(readers, r.Type) })
+	client, seen := bodyPages(t, func(string) (int, string) { return 200, `{"Widget":{"WidgetId":"w-1"}}` })
+	if _, err := client.Read(context.Background(), r.Type, map[string]string{"WidgetId": "w-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasSuffix((*seen)[0], `{"WidgetId":"w-1","include":["TAGS"]}`) {
+		t.Fatalf("request = %s", (*seen)[0])
 	}
 }

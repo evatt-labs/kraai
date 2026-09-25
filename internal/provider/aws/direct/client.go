@@ -95,13 +95,19 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		b.Value = value
 		values = append(values, b)
 	}
-	values = append(values, r.Input...)
+	for _, b := range r.Input {
+		b.Value = substitute(b.Value, identifier).(string)
+		if b.Structured != nil {
+			b.Structured = substitute(b.Structured, identifier)
+		}
+		values = append(values, b)
+	}
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
 			return nil, err
 		}
-		return r.readXML(body)
+		return r.readXML(body, &walk{vars: identifier})
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
@@ -126,12 +132,20 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if !ok {
 		return nil, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
-	return r.finish(func(fields []Field, fromRoot bool) map[string]any {
+	w := &walk{vars: identifier}
+	props, err := r.finish(func(fields []Field, fromRoot bool) map[string]any {
 		if fromRoot {
-			return r.translate(root, fields)
+			return r.translate(w, root, fields)
 		}
-		return r.translate(obj, fields)
+		return r.translate(w, obj, fields)
 	})
+	if err == nil {
+		err = errors.Join(w.errs...)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return props, nil
 }
 
 // ErrAbsent is Read's answer for an instance the service still returns
@@ -350,7 +364,10 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 			form.Set(b.Name, b.Value)
 		default:
 			var v any = b.Value
-			if b.List {
+			switch {
+			case b.Structured != nil:
+				v = b.Structured
+			case b.List:
 				v = []string{b.Value}
 			}
 			body[r.wire(b.Member, b.JSONName)] = v
@@ -454,7 +471,7 @@ func (r Reader) wire(member, jsonName string) string {
 
 // translate renames a response structure's members to the properties they
 // map to. A member absent from the response is absent from the result.
-func (r Reader) translate(obj map[string]any, fields []Field) map[string]any {
+func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[string]any {
 	out := map[string]any{}
 	for _, f := range fields {
 		// Walk Via to every structure holding the member; a list step
@@ -470,19 +487,24 @@ func (r Reader) translate(obj map[string]any, fields []Field) map[string]any {
 					}
 					continue
 				}
-				projected = true
 				items, _ := v.([]any)
 				for _, item := range items {
-					if m, ok := item.(map[string]any); ok {
+					if m, ok := item.(map[string]any); ok && w.selects(step, m[step.Where]) {
 						next = append(next, m)
 					}
+				}
+				if step.Where == "" {
+					projected = true
+				} else if len(next) > 1 {
+					w.errs = append(w.errs, fmt.Errorf("%s selects %d elements of %s, not one", f.Property, len(next), step.Name))
+					next = nil
 				}
 			}
 			holders = next
 		}
 		var values []any
 		for _, h := range holders {
-			if v, ok := r.value(h, f); ok {
+			if v, ok := r.value(w, h, f); ok {
 				values = append(values, v)
 			}
 		}
@@ -501,7 +523,7 @@ func (r Reader) translate(obj map[string]any, fields []Field) map[string]any {
 
 // value reads f's member from one structure, translating nested fields
 // and applying f's transform; ok is false when the member is absent.
-func (r Reader) value(holder map[string]any, f Field) (any, bool) {
+func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 	v, ok := holder[r.wire(f.Member, f.JSONName)]
 	if !ok || v == nil {
 		return nil, false
@@ -509,14 +531,14 @@ func (r Reader) value(holder map[string]any, f Field) (any, bool) {
 	switch f.Kind {
 	case "structure":
 		if nested, ok := v.(map[string]any); ok && len(f.Fields) > 0 {
-			v = r.translate(nested, f.Fields)
+			v = r.translate(w, nested, f.Fields)
 		}
 	case "list":
 		if items, ok := v.([]any); ok && len(f.Fields) > 0 {
 			translated := make([]any, 0, len(items))
 			for _, item := range items {
 				if nested, ok := item.(map[string]any); ok {
-					translated = append(translated, r.translate(nested, f.Fields))
+					translated = append(translated, r.translate(w, nested, f.Fields))
 				}
 			}
 			v = translated
@@ -568,4 +590,50 @@ func transform(name string, v any) any {
 		}
 	}
 	return v
+}
+
+// substitute replaces each {Property} in every string of v with that
+// identifier property's value.
+func substitute(v any, identifier map[string]string) any {
+	switch t := v.(type) {
+	case string:
+		if !strings.Contains(t, "{") {
+			return t
+		}
+		pairs := make([]string, 0, 2*len(identifier))
+		for k, val := range identifier {
+			pairs = append(pairs, "{"+k+"}", val)
+		}
+		return strings.NewReplacer(pairs...).Replace(t)
+	case []any:
+		out := make([]any, len(t))
+		for i, item := range t {
+			out[i] = substitute(item, identifier)
+		}
+		return out
+	case map[string]any:
+		out := make(map[string]any, len(t))
+		for k, item := range t {
+			out[k] = substitute(item, identifier)
+		}
+		return out
+	}
+	return v
+}
+
+// walk is what translating one response needs beyond the response: the
+// identifier's values, for a selection's {Property}, and the problems a
+// selection found.
+type walk struct {
+	vars map[string]string
+	errs []error
+}
+
+// selects reports whether a list element whose Where member is got passes
+// step's selection; every element passes a step that selects nothing.
+func (w *walk) selects(step Step, got any) bool {
+	if step.Where == "" {
+		return true
+	}
+	return got == substitute(step.Equals, w.vars)
 }

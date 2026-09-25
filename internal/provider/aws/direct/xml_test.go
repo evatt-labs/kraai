@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -69,8 +70,46 @@ const subnetXML = `<?xml version="1.0" encoding="UTF-8"?>
 // ec2Query: the identifier as a flattened list, the resource inside the
 // one item of the list, booleans typed, a list of structures, a nested
 // structure, and text kept exactly.
+// xmlServerBy answers each request by its Action, recording every form.
+func xmlServerBy(t *testing.T, byAction map[string]string) (*Client, *[]url.Values) {
+	t.Helper()
+	var (
+		mu    sync.Mutex
+		forms []url.Values
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		form, _ := url.ParseQuery(string(raw))
+		mu.Lock()
+		forms = append(forms, form)
+		mu.Unlock()
+		_, _ = io.WriteString(w, byAction[form.Get("Action")])
+	}))
+	t.Cleanup(srv.Close)
+	return &Client{
+		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
+	}, &forms
+}
+
+func networkACLsXML(assocs ...[2]string) string {
+	var b strings.Builder
+	for _, a := range assocs {
+		fmt.Fprintf(&b, "<item><networkAclAssociationId>%s</networkAclAssociationId><subnetId>%s</subnetId></item>", a[0], a[1])
+	}
+	return `<DescribeNetworkAclsResponse><networkAclSet><item><networkAclId>acl-1</networkAclId><associationSet>` +
+		b.String() + `</associationSet></item></networkAclSet></DescribeNetworkAclsResponse>`
+}
+
+// ec2Query: the identifier as a flattened list, the resource inside the
+// one item of the list, booleans typed, a list of structures, a nested
+// structure, and text kept exactly; then the network ACL call, filtered
+// by the subnet, with its association selected by subnet id.
 func TestReadEC2Query(t *testing.T) {
-	client, forms := xmlServer(t, 200, subnetXML)
+	client, forms := xmlServerBy(t, map[string]string{
+		"DescribeSubnets":     subnetXML,
+		"DescribeNetworkAcls": networkACLsXML([2]string{"aclassoc-2", "subnet-2"}, [2]string{"aclassoc-1", "subnet-1"}),
+	})
 	got, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "subnet-1"})
 	if err != nil {
 		t.Fatal(err)
@@ -79,13 +118,29 @@ func TestReadEC2Query(t *testing.T) {
 		"SubnetId": "subnet-1", "CidrBlock": "10.0.0.0/24", "MapPublicIpOnLaunch": true, "EnableDns64": false,
 		"Tags":                          []any{map[string]any{"Key": "Name", "Value": "a b"}, map[string]any{"Key": "env", "Value": ""}},
 		"PrivateDnsNameOptionsOnLaunch": map[string]any{"HostnameType": "ip-name"},
+		"NetworkAclAssociationId":       "aclassoc-1",
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Read = %#v\nwant   %#v", got, want)
 	}
-	wantForm := url.Values{"Action": {"DescribeSubnets"}, "Version": {"2016-11-15"}, "SubnetId.1": {"subnet-1"}}
-	if !reflect.DeepEqual((*forms)[0], wantForm) {
-		t.Fatalf("form = %v, want %v", (*forms)[0], wantForm)
+	wantForms := []url.Values{
+		{"Action": {"DescribeSubnets"}, "Version": {"2016-11-15"}, "SubnetId.1": {"subnet-1"}},
+		{"Action": {"DescribeNetworkAcls"}, "Version": {"2016-11-15"}, "Filter.1.Name": {"association.subnet-id"}, "Filter.1.Value.1": {"subnet-1"}},
+	}
+	if !reflect.DeepEqual(*forms, wantForms) {
+		t.Fatalf("forms = %v\nwant    %v", *forms, wantForms)
+	}
+}
+
+// A selection that finds two elements is an error, never the first of
+// them: the read must not guess which one Cloud Control would report.
+func TestReadAmbiguousSelectionFails(t *testing.T) {
+	client, _ := xmlServerBy(t, map[string]string{
+		"DescribeSubnets":     subnetXML,
+		"DescribeNetworkAcls": networkACLsXML([2]string{"aclassoc-1", "subnet-1"}, [2]string{"aclassoc-9", "subnet-1"}),
+	})
+	if _, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "subnet-1"}); err == nil || !strings.Contains(err.Error(), "selects 2 elements") {
+		t.Fatalf("Read = %v, want an ambiguous-selection error", err)
 	}
 }
 
@@ -223,7 +278,7 @@ func TestTranslateXML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := translateXML(root, []Field{
+	got := translateXML(&walk{}, root, []Field{
 		{Property: "Flat", Kind: "list", XMLName: "flat", Scalar: "string"},
 		{Property: "Attrs", Kind: "map", XMLName: "attrs", Scalar: "number"},
 		{Property: "N", Kind: "scalar", XMLName: "n", Scalar: "number"},
@@ -399,7 +454,7 @@ func TestCompileRefusesAMemberPath(t *testing.T) {
 // Under a JSON protocol a member path is walked through the objects too.
 func TestTranslateAMemberPath(t *testing.T) {
 	r := Reader{Protocol: "restJson1"}
-	got := r.translate(map[string]any{"Headers": map[string]any{"Quantity": 1, "Items": []any{"Host"}}}, []Field{
+	got := r.translate(&walk{}, map[string]any{"Headers": map[string]any{"Quantity": 1, "Items": []any{"Host"}}}, []Field{
 		{Property: "Headers", Member: "Items", Kind: "list", Via: []Step{{Name: "Headers"}}},
 		{Property: "Absent", Member: "Items", Kind: "list", Via: []Step{{Name: "Nothing"}}},
 	})
