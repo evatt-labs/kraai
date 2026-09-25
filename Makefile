@@ -8,25 +8,31 @@ SHELL := bash
 COVERAGE_FLOOR := 85
 COVERPROFILE := coverage.out
 
+# Caps how many packages build, vet, test and lint at once. Uncapped, the
+# race test starts a binary per core and exhausts memory on a
+# workstation. CI's runners are small enough not to need it; override
+# with JOBS=n.
+JOBS ?= 4
+
 .PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract direct-parity observability-up observability-down
 
 check: build vet test coverage-floor lint fmt-check
 
 build:
-	go build ./...
+	go build -p $(JOBS) ./...
 
 vet:
-	go vet ./...
+	go vet -p $(JOBS) ./...
 
 # Matches go-ci.yml's go-race job.
 test:
-	go test ./... -race
+	go test -p $(JOBS) ./... -race
 
 # Matches go-ci.yml's go-build-test job: coverage without -race, and the
 # same ratchet floor. Copied byte for byte from go-ci.yml, including the
 # inverted awk exit code (0 means "below floor, fail the build").
 coverage-floor:
-	go test ./... -coverprofile=$(COVERPROFILE)
+	go test -p $(JOBS) ./... -coverprofile=$(COVERPROFILE)
 	@total=$$(go tool cover -func=$(COVERPROFILE) | awk '/^total:/ { sub("%", "", $$NF); print $$NF }'); \
 	echo "total statement coverage: $${total}% (floor $(COVERAGE_FLOOR)%)"; \
 	if awk -v total="$$total" -v floor="$(COVERAGE_FLOOR)" 'BEGIN { exit (total + 0 < floor + 0) ? 0 : 1 }'; then \
@@ -35,7 +41,7 @@ coverage-floor:
 	fi
 
 lint:
-	golangci-lint run ./...
+	golangci-lint run --concurrency $(JOBS) ./...
 
 fmt:
 	gofmt -w .
