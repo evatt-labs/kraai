@@ -582,6 +582,11 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		return resource.Same, err
 	}
 
+	unordered := map[string]bool{}
+	for _, pointer := range schema.Unordered {
+		unordered[pointer] = true
+	}
+
 	createOnly := map[string]bool{}
 	for _, pointer := range schema.CreateOnly {
 		path := schemaPropertyPath(pointer)
@@ -608,7 +613,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
 
-		if !covers(desiredNorm, currentNorm) {
+		if !covers(desiredNorm, currentNorm, pointer, unordered) {
 			return resource.Immutable, nil
 		}
 	}
@@ -635,7 +640,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		if err != nil {
 			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
-		if !covers(desiredNorm, currentNorm) {
+		if !covers(desiredNorm, currentNorm, pointer, unordered) {
 			if schema.HasUpdate {
 				return resource.Mutable, nil
 			}
@@ -648,8 +653,14 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 // covers reports whether current carries everything desired sets, applying
 // compare's top-level rule at every depth: a key only current has is the
 // vendor's default, and a key current does not return is not compared.
-// Arrays compare element by element and must be the same length.
-func covers(desired, current any) bool {
+// Arrays must be the same length and compare element by element, except
+// those unordered names, the pointers of arrays the schema declares
+// insertionOrder false: their elements match in any order, each desired
+// element covered by a different current one, since the service may
+// return them in another order than they were written. pointer is the
+// value's own, with "*" for an array's elements, as
+// cfschema.Facts.Unordered writes them.
+func covers(desired, current any, pointer string, unordered map[string]bool) bool {
 	switch d := desired.(type) {
 	case map[string]any:
 		c, ok := current.(map[string]any)
@@ -657,7 +668,7 @@ func covers(desired, current any) bool {
 			return false
 		}
 		for k, dv := range d {
-			if cv, ok := c[k]; ok && !covers(dv, cv) {
+			if cv, ok := c[k]; ok && !covers(dv, cv, pointer+"/"+k, unordered) {
 				return false
 			}
 		}
@@ -667,8 +678,12 @@ func covers(desired, current any) bool {
 		if !ok || len(c) != len(d) {
 			return false
 		}
+		item := pointer + "/*"
+		if unordered[pointer] {
+			return matchAll(len(d), func(i, j int) bool { return covers(d[i], c[j], item, unordered) })
+		}
 		for i := range d {
-			if !covers(d[i], c[i]) {
+			if !covers(d[i], c[i], item, unordered) {
 				return false
 			}
 		}
@@ -676,6 +691,38 @@ func covers(desired, current any) bool {
 	default:
 		return reflect.DeepEqual(desired, current)
 	}
+}
+
+// matchAll reports whether n desired elements can each be paired with a
+// different one of n current elements such that fits(desired, current)
+// holds for every pair: a perfect bipartite matching, found by augmenting
+// paths. A greedy pairing is not enough, since covers is partial and one
+// current element can fit several desired ones.
+func matchAll(n int, fits func(desired, current int) bool) bool {
+	owner := make([]int, n)
+	for j := range owner {
+		owner[j] = -1
+	}
+	var augment func(i int, seen []bool) bool
+	augment = func(i int, seen []bool) bool {
+		for j := range n {
+			if seen[j] || !fits(i, j) {
+				continue
+			}
+			seen[j] = true
+			if owner[j] < 0 || augment(owner[j], seen) {
+				owner[j] = i
+				return true
+			}
+		}
+		return false
+	}
+	for i := range n {
+		if !augment(i, make([]bool, n)) {
+			return false
+		}
+	}
+	return true
 }
 
 // resolveDeclared finds, among candidates, the one instance whose properties
