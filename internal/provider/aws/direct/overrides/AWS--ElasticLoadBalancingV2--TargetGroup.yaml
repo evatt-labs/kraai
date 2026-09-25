@@ -27,12 +27,45 @@ properties:
   ProtocolVersion: ProtocolVersion
   TargetControlPort: TargetControlPort
   TargetGroupArn: TargetGroupArn
+  TargetGroupFullName:
+    member: TargetGroupArn
+    transform: arnResource
   TargetGroupName: TargetGroupName
   TargetType: TargetType
   UnhealthyThresholdCount: UnhealthyThresholdCount
   VpcId: VpcId
-skip:
-  Tags: read from DescribeTags, a second call
-  TargetGroupAttributes: read from DescribeTargetGroupAttributes, a second call
-  TargetGroupFullName: derived from the ARN's resource part, not a member of the response
-  Targets: read from DescribeTargetHealth, a second call
+also:
+  # The read handler calls these four operations; each carries what the
+  # others do not.
+  - operation: DescribeTags
+    identifier:
+      TargetGroupArn: ResourceArns
+    response: TagDescriptions[]
+    properties:
+      Tags:
+        member: Tags
+        properties:
+          Key: Key
+          Value: Value
+  - operation: DescribeTargetGroupAttributes
+    identifier:
+      TargetGroupArn: TargetGroupArn
+    properties:
+      TargetGroupAttributes:
+        member: Attributes
+        properties:
+          Key: Key
+          Value: Value
+  - operation: DescribeTargetHealth
+    identifier:
+      TargetGroupArn: TargetGroupArn
+    properties:
+      Targets:
+        member: TargetHealthDescriptions[].Target
+        properties:
+          AvailabilityZone: AvailabilityZone
+          Id: Id
+          Port: Port
+          QuicServerId: QuicServerId
+absentIds:
+  - arn:aws:elasticloadbalancing:{region}:{account}:targetgroup/kraai-absent-probe/0123456789abcdef

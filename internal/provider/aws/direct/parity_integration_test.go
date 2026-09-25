@@ -17,8 +17,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
 	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/smithy-go"
 )
+
+// account is the account the harness runs in, for AbsentIDs' {account}.
+var account string
 
 var (
 	updateEvidence = flag.Bool("update-evidence", false, "merge this run into evidence/parity.json")
@@ -38,6 +42,11 @@ func TestReadParity(t *testing.T) {
 		t.Fatal(err)
 	}
 	cc := cloudcontrol.NewFromConfig(cfg)
+	who, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	account = aws.ToString(who.Account)
 	client := &Client{HTTP: &http.Client{Timeout: 30 * time.Second}, Credentials: cfg.Credentials, Region: region}
 	lock, err := LoadLock()
 	if err != nil {
@@ -170,7 +179,7 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 	if unreadable > 0 && e.Instances > 0 {
 		e.Note = "Cloud Control could not read some listed instances"
 	}
-	if r.Probe != nil {
+	if r.Probe != nil || len(r.AbsentIDs) > 0 {
 		e = absenceParity(ctx, t, cc, client, r, e, perType)
 	}
 	return e
@@ -181,10 +190,17 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 // not find one present. An identifier Cloud Control finds proves nothing
 // and is not counted.
 func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, client *Client, r Reader, e TypeEvidence, perType int) TypeEvidence {
-	ids, err := client.Probe(ctx, r.Type)
-	if err != nil {
-		t.Errorf("probing: %v", err)
-		return e
+	var ids []string
+	if r.Probe != nil {
+		probed, err := client.Probe(ctx, r.Type)
+		if err != nil {
+			t.Errorf("probing: %v", err)
+			return e
+		}
+		ids = probed
+	}
+	for _, id := range r.AbsentIDs {
+		ids = append(ids, strings.NewReplacer("{account}", account, "{region}", client.Region).Replace(id))
 	}
 	if len(ids) > perType {
 		ids = ids[:perType]

@@ -9,7 +9,9 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"reflect"
+	"sort"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -91,7 +93,7 @@ const targetGroupXML = `<DescribeTargetGroupsResponse xmlns="http://elasticloadb
   <DescribeTargetGroupsResult>
     <TargetGroups>
       <member>
-        <TargetGroupArn>arn:tg</TargetGroupArn>
+        <TargetGroupArn>arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc</TargetGroupArn>
         <TargetGroupName>tg</TargetGroupName>
         <Port>80</Port>
         <HealthCheckIntervalSeconds>30</HealthCheckIntervalSeconds>
@@ -107,23 +109,68 @@ const targetGroupXML = `<DescribeTargetGroupsResponse xmlns="http://elasticloadb
 // inside its Result wrapper, numbers typed, a list of scalars, and one
 // member mapped to two properties.
 func TestReadAWSQuery(t *testing.T) {
-	client, forms := xmlServer(t, 200, targetGroupXML)
-	got, err := client.Read(context.Background(), targetGroups, map[string]string{"TargetGroupArn": "arn:tg"})
+	byAction := map[string]string{
+		"DescribeTargetGroups": targetGroupXML,
+		"DescribeTags": `<DescribeTagsResponse><DescribeTagsResult><TagDescriptions><member>
+			<ResourceArn>arn:tg</ResourceArn><Tags><member><Key>k</Key><Value>v</Value></member></Tags>
+		</member></TagDescriptions></DescribeTagsResult></DescribeTagsResponse>`,
+		"DescribeTargetGroupAttributes": `<DescribeTargetGroupAttributesResponse><DescribeTargetGroupAttributesResult><Attributes>
+			<member><Key>stickiness.enabled</Key><Value>false</Value></member>
+		</Attributes></DescribeTargetGroupAttributesResult></DescribeTargetGroupAttributesResponse>`,
+		"DescribeTargetHealth": `<DescribeTargetHealthResponse><DescribeTargetHealthResult><TargetHealthDescriptions>
+			<member><Target><Id>i-1</Id><Port>80</Port></Target><TargetHealth><State>healthy</State></TargetHealth></member>
+			<member><Target><Id>i-2</Id><Port>81</Port></Target></member>
+		</TargetHealthDescriptions></DescribeTargetHealthResult></DescribeTargetHealthResponse>`,
+	}
+	var (
+		mu    sync.Mutex
+		forms []url.Values
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		form, _ := url.ParseQuery(string(raw))
+		mu.Lock()
+		forms = append(forms, form)
+		mu.Unlock()
+		_, _ = io.WriteString(w, byAction[form.Get("Action")])
+	}))
+	t.Cleanup(srv.Close)
+	client := &Client{
+		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
+	}
+	got, err := client.Read(context.Background(), targetGroups, map[string]string{"TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	want := map[string]any{
-		"TargetGroupArn": "arn:tg", "TargetGroupName": "tg", "Name": "tg",
-		"Port": json.Number("80"), "HealthCheckIntervalSeconds": json.Number("30"),
-		"LoadBalancerArns": []any{"arn:lb1", "arn:lb2"},
-		"Matcher":          map[string]any{"HttpCode": "200"},
+		"TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc", "TargetGroupName": "tg", "Name": "tg",
+		"TargetGroupFullName": "targetgroup/tg/abc",
+		"Port":                json.Number("80"), "HealthCheckIntervalSeconds": json.Number("30"),
+		"LoadBalancerArns":      []any{"arn:lb1", "arn:lb2"},
+		"Matcher":               map[string]any{"HttpCode": "200"},
+		"Tags":                  []any{map[string]any{"Key": "k", "Value": "v"}},
+		"TargetGroupAttributes": []any{map[string]any{"Key": "stickiness.enabled", "Value": "false"}},
+		"Targets": []any{
+			map[string]any{"Id": "i-1", "Port": json.Number("80")},
+			map[string]any{"Id": "i-2", "Port": json.Number("81")},
+		},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Read = %#v\nwant   %#v", got, want)
 	}
-	wantForm := url.Values{"Action": {"DescribeTargetGroups"}, "Version": {"2015-12-01"}, "TargetGroupArns.member.1": {"arn:tg"}}
-	if !reflect.DeepEqual((*forms)[0], wantForm) {
-		t.Fatalf("form = %v, want %v", (*forms)[0], wantForm)
+	id := "arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc"
+	wantForms := []url.Values{
+		{"Action": {"DescribeTargetGroups"}, "Version": {"2015-12-01"}, "TargetGroupArns.member.1": {id}},
+		{"Action": {"DescribeTags"}, "Version": {"2015-12-01"}, "ResourceArns.member.1": {id}},
+		{"Action": {"DescribeTargetGroupAttributes"}, "Version": {"2015-12-01"}, "TargetGroupArn": {id}},
+		{"Action": {"DescribeTargetHealth"}, "Version": {"2015-12-01"}, "TargetGroupArn": {id}},
+	}
+	// The read comes first; the further calls are made together, in no
+	// particular order.
+	sort.Slice(forms[1:], func(i, j int) bool { return forms[1+i].Get("Action") < forms[1+j].Get("Action") })
+	if !reflect.DeepEqual(forms, wantForms) {
+		t.Fatalf("forms = %v\nwant    %v", forms, wantForms)
 	}
 }
 
@@ -353,8 +400,8 @@ func TestCompileRefusesAMemberPath(t *testing.T) {
 func TestTranslateAMemberPath(t *testing.T) {
 	r := Reader{Protocol: "restJson1"}
 	got := r.translate(map[string]any{"Headers": map[string]any{"Quantity": 1, "Items": []any{"Host"}}}, []Field{
-		{Property: "Headers", Member: "Items", Kind: "list", Via: []string{"Headers"}},
-		{Property: "Absent", Member: "Items", Kind: "list", Via: []string{"Nothing"}},
+		{Property: "Headers", Member: "Items", Kind: "list", Via: []Step{{Name: "Headers"}}},
+		{Property: "Absent", Member: "Items", Kind: "list", Via: []Step{{Name: "Nothing"}}},
 	})
 	if !reflect.DeepEqual(got, map[string]any{"Headers": []any{"Host"}}) {
 		t.Fatalf("translate = %v", got)

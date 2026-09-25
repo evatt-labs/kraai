@@ -25,6 +25,25 @@ type Override struct {
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
 	// Skip names each property the read does not carry, and why.
 	Skip map[string]string `yaml:"skip,omitempty"`
+	// Also names further calls whose responses carry properties the read
+	// does not, each addressed by the same identifier.
+	Also []Call `yaml:"also,omitempty"`
+	// AbsentIDs are identifiers of instances that do not exist, for the
+	// read-parity harness to prove the direct read agrees on absence of a
+	// type whose service never describes a gone instance. {account} and
+	// {region} stand for the account and region the harness runs in.
+	AbsentIDs []string `yaml:"absentIds,omitempty"`
+}
+
+// Call is one further call of a read: an operation of the same model,
+// addressed and walked as Read is, and the properties its response
+// carries.
+type Call struct {
+	Operation  string             `yaml:"operation"`
+	Identifier map[string]string  `yaml:"identifier,omitempty"`
+	Response   string             `yaml:"response,omitempty"`
+	Input      map[string]string  `yaml:"input,omitempty"`
+	Properties map[string]Mapping `yaml:"properties"`
 }
 
 // Read names the operation that reads one instance and how to call it.
@@ -73,6 +92,9 @@ type Mapping struct {
 	Member     string             `yaml:"member"`
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
 	Skip       map[string]string  `yaml:"skip,omitempty"`
+	// Transform names a function applied to the value read: arnResource,
+	// an ARN's resource part.
+	Transform string `yaml:"transform,omitempty"`
 }
 
 // UnmarshalYAML accepts a bare member name for a mapping with no nested
@@ -94,7 +116,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 {
+	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" {
 		return m.Member, nil
 	}
 	type plain Mapping

@@ -27,77 +27,94 @@ func Generate() ([]byte, error) {
 	b.WriteString("var readers = map[string]Reader{\n")
 	for _, r := range readers {
 		fmt.Fprintf(&b, "%s: {\n", strconv.Quote(r.Type))
-		field(&b, "Type", r.Type)
-		field(&b, "Protocol", r.Protocol)
-		field(&b, "SigningName", r.SigningName)
-		if r.Complete {
-			b.WriteString("Complete: true,\n")
-		}
-		if r.Complete && proven[r.Type] && len(r.Identifier) == 1 {
-			b.WriteString("Production: true,\n")
-		}
-		field(&b, "Host", r.Host)
-		field(&b, "SigningRegion", r.SigningRegion)
-		field(&b, "Target", r.Target)
-		field(&b, "Method", r.Method)
-		field(&b, "URI", r.URI)
-		field(&b, "Action", r.Action)
-		field(&b, "Version", r.Version)
-		field(&b, "Wrapper", r.Wrapper)
-		if len(r.Identifier) > 0 {
-			b.WriteString("Identifier: []Binding{\n")
-			for _, id := range r.Identifier {
-				fmt.Fprintf(&b, "{Property: %q, Member: %q, Location: %q", id.Property, id.Member, id.Location)
-				if id.Name != "" {
-					fmt.Fprintf(&b, ", Name: %q", id.Name)
-				}
-				if id.JSONName != "" {
-					fmt.Fprintf(&b, ", JSONName: %q", id.JSONName)
-				}
-				if id.List {
-					b.WriteString(", List: true")
-				}
-				b.WriteString("},\n")
-			}
-			b.WriteString("},\n")
-		}
-		if len(r.Input) > 0 {
-			b.WriteString("Input: []Binding{\n")
-			for _, in := range r.Input {
-				binding(&b, in)
-			}
-			b.WriteString("},\n")
-		}
-		if len(r.Absent) > 0 {
-			b.WriteString("Absent: []Condition{\n")
-			for _, c := range r.Absent {
-				b.WriteString("{Field: ")
-				fieldLiteral(&b, c.Field, "Field")
-				fmt.Fprintf(&b, ", Values: %#v},\n", c.Values)
-			}
-			b.WriteString("},\n")
-		}
-		if len(r.Response) > 0 {
-			b.WriteString("Response: []Step{")
-			for _, st := range r.Response {
-				fmt.Fprintf(&b, "{Name: %q", st.Name)
-				if st.List {
-					b.WriteString(", List: true")
-				}
-				if st.Item != "" {
-					fmt.Fprintf(&b, ", Item: %q", st.Item)
-				}
-				b.WriteString("}, ")
-			}
-			b.WriteString("},\n")
-		}
-		fields(&b, r.Fields)
-		lister(&b, "List", r.List)
-		lister(&b, "Probe", r.Probe)
+		readerBody(&b, r, r.Complete && proven[r.Type] && len(r.Identifier) == 1)
 		b.WriteString("},\n")
 	}
 	b.WriteString("}\n")
 	return format.Source(b.Bytes())
+}
+
+// readerBody writes r's fields as the body of a Reader literal.
+func readerBody(b *bytes.Buffer, r Reader, production bool) {
+	field(b, "Type", r.Type)
+	field(b, "Protocol", r.Protocol)
+	field(b, "SigningName", r.SigningName)
+	if r.Complete {
+		b.WriteString("Complete: true,\n")
+	}
+	if production {
+		b.WriteString("Production: true,\n")
+	}
+	field(b, "Host", r.Host)
+	field(b, "SigningRegion", r.SigningRegion)
+	field(b, "Target", r.Target)
+	field(b, "Method", r.Method)
+	field(b, "URI", r.URI)
+	field(b, "Action", r.Action)
+	field(b, "Version", r.Version)
+	field(b, "Wrapper", r.Wrapper)
+	if len(r.Identifier) > 0 {
+		b.WriteString("Identifier: []Binding{\n")
+		for _, id := range r.Identifier {
+			fmt.Fprintf(b, "{Property: %q, Member: %q, Location: %q", id.Property, id.Member, id.Location)
+			if id.Name != "" {
+				fmt.Fprintf(b, ", Name: %q", id.Name)
+			}
+			if id.JSONName != "" {
+				fmt.Fprintf(b, ", JSONName: %q", id.JSONName)
+			}
+			if id.List {
+				b.WriteString(", List: true")
+			}
+			b.WriteString("},\n")
+		}
+		b.WriteString("},\n")
+	}
+	if len(r.Input) > 0 {
+		b.WriteString("Input: []Binding{\n")
+		for _, in := range r.Input {
+			binding(b, in)
+		}
+		b.WriteString("},\n")
+	}
+	if len(r.Absent) > 0 {
+		b.WriteString("Absent: []Condition{\n")
+		for _, c := range r.Absent {
+			b.WriteString("{Field: ")
+			fieldLiteral(b, c.Field, "Field")
+			fmt.Fprintf(b, ", Values: %#v},\n", c.Values)
+		}
+		b.WriteString("},\n")
+	}
+	if len(r.Response) > 0 {
+		b.WriteString("Response: []Step{")
+		for _, st := range r.Response {
+			fmt.Fprintf(b, "{Name: %q", st.Name)
+			if st.List {
+				b.WriteString(", List: true")
+			}
+			if st.Item != "" {
+				fmt.Fprintf(b, ", Item: %q", st.Item)
+			}
+			b.WriteString("}, ")
+		}
+		b.WriteString("},\n")
+	}
+	fields(b, r.Fields)
+	lister(b, "List", r.List)
+	lister(b, "Probe", r.Probe)
+	if len(r.AbsentIDs) > 0 {
+		fmt.Fprintf(b, "AbsentIDs: %#v,\n", r.AbsentIDs)
+	}
+	if len(r.Also) > 0 {
+		b.WriteString("Also: []Reader{\n")
+		for _, also := range r.Also {
+			b.WriteString("{\n")
+			readerBody(b, also, false)
+			b.WriteString("},\n")
+		}
+		b.WriteString("},\n")
+	}
 }
 
 func lister(b *bytes.Buffer, name string, l *Lister) {
@@ -160,7 +177,21 @@ func fields(b *bytes.Buffer, fs []Field) {
 func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	fmt.Fprintf(b, "%s{Property: %q, Member: %q, Kind: %q", typeName, f.Property, f.Member, f.Kind)
 	if len(f.Via) > 0 {
-		fmt.Fprintf(b, ", Via: %#v", f.Via)
+		b.WriteString(", Via: []Step{")
+		for _, st := range f.Via {
+			fmt.Fprintf(b, "{Name: %q", st.Name)
+			if st.List {
+				b.WriteString(", List: true")
+			}
+			if st.Item != "" {
+				fmt.Fprintf(b, ", Item: %q", st.Item)
+			}
+			b.WriteString("}, ")
+		}
+		b.WriteString("}")
+	}
+	if f.Transform != "" {
+		fmt.Fprintf(b, ", Transform: %q", f.Transform)
 	}
 	if f.Root {
 		b.WriteString(", Root: true")

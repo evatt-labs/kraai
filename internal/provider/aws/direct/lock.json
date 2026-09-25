@@ -179,7 +179,7 @@
     "elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json": {
       "file": "models/elastic-load-balancing-v2-2015-12-01.json",
       "sourceSha256": "b8e2667dc02196215c863ecab13f2aecd8d9520262c85de1edbe80fd95e74d2f",
-      "subsetSha256": "5f3b6adca4a799647403333bc83687c777b4ac174ca2398fc0345c0aad6b1260"
+      "subsetSha256": "8eb6a59601980026de9b8b283bf584535aba15086d2691331a96d2f6449a1d9a"
     },
     "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
       "file": "models/elementalinference-2018-11-14.json",

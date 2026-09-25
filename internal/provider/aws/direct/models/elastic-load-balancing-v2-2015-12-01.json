@@ -1,5 +1,150 @@
 {
   "shapes": {
+    "com.amazonaws.elasticloadbalancingv2#AdministrativeOverride": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Description",
+          "traits": {}
+        },
+        "Reason": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetAdministrativeOverrideReasonEnum",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetAdministrativeOverrideStateEnum",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#AnomalyDetection": {
+      "members": {
+        "MitigationInEffect": {
+          "target": "com.amazonaws.elasticloadbalancingv2#MitigationInEffectEnum",
+          "traits": {}
+        },
+        "Result": {
+          "target": "com.amazonaws.elasticloadbalancingv2#AnomalyResultEnum",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#AnomalyResultEnum": {
+      "members": {
+        "ANOMALOUS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "anomalous"
+          }
+        },
+        "NORMAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "normal"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTags": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#ListenerNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#LoadBalancerNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#RuleNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TrustStoreNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTagsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTagsOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTagsInput": {
+      "members": {
+        "ResourceArns": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ResourceArns",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTagsOutput": {
+      "members": {
+        "TagDescriptions": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TagDescriptions",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupAttributes": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupAttributesInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupAttributesOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupAttributesInput": {
+      "members": {
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupAttributesOutput": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributes",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroups": {
       "errors": [
         {
@@ -68,10 +213,143 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealth": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#InvalidTargetException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealthInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealthOutput"
+      },
+      "traits": {
+        "smithy.api#suppress": [
+          "WaitableTraitInvalidErrorType"
+        ],
+        "smithy.waiters#waitable": {
+          "TargetDeregistered": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "errorType": "InvalidTarget"
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "allStringEquals",
+                    "expected": "unused",
+                    "path": "TargetHealthDescriptions[].TargetHealth.State"
+                  }
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 15
+          },
+          "TargetInService": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "allStringEquals",
+                    "expected": "healthy",
+                    "path": "TargetHealthDescriptions[].TargetHealth.State"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "errorType": "InvalidInstance"
+                },
+                "state": "retry"
+              }
+            ],
+            "minDelay": 15
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealthInput": {
+      "members": {
+        "Include": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ListOfDescribeTargetHealthIncludeOptions",
+          "traits": {}
+        },
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Targets": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetDescriptions",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealthInputIncludeEnum": {
+      "members": {
+        "ALL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "All"
+          }
+        },
+        "ANOMALY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AnomalyDetection"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealthOutput": {
+      "members": {
+        "TargetHealthDescriptions": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetHealthDescriptions",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#Description": {
+      "type": "string"
+    },
     "com.amazonaws.elasticloadbalancingv2#ElasticLoadBalancing_v10": {
       "operations": [
         {
+          "target": "com.amazonaws.elasticloadbalancingv2#DescribeTags"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroupAttributes"
+        },
+        {
           "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetGroups"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealth"
         }
       ],
       "traits": {
@@ -473,8 +751,62 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.elasticloadbalancingv2#HealthUnavailableException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "HealthUnavailable",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#HttpCode": {
       "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InvalidTargetException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidTarget",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ListOfDescribeTargetHealthIncludeOptions": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealthInputIncludeEnum"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ListenerNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ListenerNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#LoadBalancerArn": {
       "type": "string"
@@ -517,6 +849,23 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#MitigationInEffectEnum": {
+      "members": {
+        "NO": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "no"
+          }
+        },
+        "YES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "yes"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.elasticloadbalancingv2#PageSize": {
       "traits": {
@@ -607,6 +956,166 @@
     "com.amazonaws.elasticloadbalancingv2#ProtocolVersion": {
       "type": "string"
     },
+    "com.amazonaws.elasticloadbalancingv2#QuicServerId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ResourceArn": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ResourceArns": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#ResourceArn"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RuleNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RuleNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TagKey",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TagValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TagDescription": {
+      "members": {
+        "ResourceArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ResourceArn",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TagDescriptions": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TagDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TagList": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#Tag"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetAdministrativeOverrideReasonEnum": {
+      "members": {
+        "INTERNAL_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AdministrativeOverride.Unknown"
+          }
+        },
+        "NO_OVERRIDE_ENGAGED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AdministrativeOverride.NoOverride"
+          }
+        },
+        "ZONAL_SHIFT_DELEGATED_TO_DNS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AdministrativeOverride.ZonalShiftDelegatedToDns"
+          }
+        },
+        "ZONAL_SHIFT_ENGAGED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AdministrativeOverride.ZonalShiftActive"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetAdministrativeOverrideStateEnum": {
+      "members": {
+        "NO_OVERRIDE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "no_override"
+          }
+        },
+        "UNKNOWN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unknown"
+          }
+        },
+        "ZONAL_SHIFT_ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "zonal_shift_active"
+          }
+        },
+        "ZONAL_SHIFT_DELEGATED_TO_DNS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "zonal_shift_delegated_to_dns"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.elasticloadbalancingv2#TargetControlPort": {
       "traits": {
         "smithy.api#range": {
@@ -615,6 +1124,37 @@
         }
       },
       "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetDescription": {
+      "members": {
+        "AvailabilityZone": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ZoneName",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetId",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Port": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Port",
+          "traits": {}
+        },
+        "QuicServerId": {
+          "target": "com.amazonaws.elasticloadbalancingv2#QuicServerId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetDescriptions": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TargetDescription"
+      },
+      "type": "list"
     },
     "com.amazonaws.elasticloadbalancingv2#TargetGroup": {
       "members": {
@@ -707,6 +1247,39 @@
       },
       "type": "list"
     },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupAttribute": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributeKey",
+          "traits": {}
+        },
+        "Value": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributeValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributeKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9._]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributeValue": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributes": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupAttribute"
+      },
+      "type": "list"
+    },
     "com.amazonaws.elasticloadbalancingv2#TargetGroupIpAddressTypeEnum": {
       "members": {
         "IPV4": {
@@ -755,6 +1328,183 @@
       },
       "type": "list"
     },
+    "com.amazonaws.elasticloadbalancingv2#TargetHealth": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Description",
+          "traits": {}
+        },
+        "Reason": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetHealthReasonEnum",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetHealthStateEnum",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetHealthDescription": {
+      "members": {
+        "AdministrativeOverride": {
+          "target": "com.amazonaws.elasticloadbalancingv2#AdministrativeOverride",
+          "traits": {}
+        },
+        "AnomalyDetection": {
+          "target": "com.amazonaws.elasticloadbalancingv2#AnomalyDetection",
+          "traits": {}
+        },
+        "HealthCheckPort": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckPort",
+          "traits": {}
+        },
+        "Target": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetDescription",
+          "traits": {}
+        },
+        "TargetHealth": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetHealth",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetHealthDescriptions": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TargetHealthDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetHealthReasonEnum": {
+      "members": {
+        "DEREGISTRATION_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.DeregistrationInProgress"
+          }
+        },
+        "FAILED_HEALTH_CHECKS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.FailedHealthChecks"
+          }
+        },
+        "HEALTH_CHECK_DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.HealthCheckDisabled"
+          }
+        },
+        "INITIAL_HEALTH_CHECKING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Elb.InitialHealthChecking"
+          }
+        },
+        "INTERNAL_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Elb.InternalError"
+          }
+        },
+        "INVALID_STATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.InvalidState"
+          }
+        },
+        "IP_UNUSABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.IpUnusable"
+          }
+        },
+        "NOT_IN_USE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.NotInUse"
+          }
+        },
+        "NOT_REGISTERED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.NotRegistered"
+          }
+        },
+        "REGISTRATION_IN_PROGRESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Elb.RegistrationInProgress"
+          }
+        },
+        "RESPONSE_CODE_MISMATCH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.ResponseCodeMismatch"
+          }
+        },
+        "TIMEOUT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Target.Timeout"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetHealthStateEnum": {
+      "members": {
+        "DRAINING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "draining"
+          }
+        },
+        "HEALTHY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "healthy"
+          }
+        },
+        "INITIAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "initial"
+          }
+        },
+        "UNAVAILABLE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unavailable"
+          }
+        },
+        "UNHEALTHY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unhealthy"
+          }
+        },
+        "UNHEALTHY_DRAINING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unhealthy.draining"
+          }
+        },
+        "UNUSED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "unused"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetId": {
+      "type": "string"
+    },
     "com.amazonaws.elasticloadbalancingv2#TargetTypeEnum": {
       "members": {
         "ALB": {
@@ -784,7 +1534,26 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.elasticloadbalancingv2#TrustStoreNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TrustStoreNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#VpcId": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ZoneName": {
       "type": "string"
     }
   },
