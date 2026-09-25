@@ -22,6 +22,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/smithy-go"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/evatt-labs/kraai/internal/httpx"
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -296,8 +298,43 @@ func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (
 	return properties, true, nil
 }
 
-// fetchResource sends one GetResource and remembers its answer.
+// fetchResource sends one GetResource and remembers its answer. A type
+// whose direct reader is proven to agree with Cloud Control (see
+// direct.CanRead) is read through its own service instead: faster, and
+// outside Cloud Control's GetResource throttle. Any direct failure but a
+// proven absence falls back to Cloud Control, so the direct path can only
+// ever save a call, never change an answer.
 func (c *Client) fetchResource(ctx context.Context, typeName, identifier string) (readEntry, error) {
+	if c.direct != nil && direct.CanRead(typeName) {
+		props, err := c.direct.ReadByID(ctx, typeName, identifier)
+		if errors.Is(err, direct.ErrAbsent) {
+			c.reads.putGet(typeName, identifier, "", false)
+			return readEntry{}, nil
+		}
+		var raw []byte
+		if err == nil {
+			// Stored as JSON, as Cloud Control's properties are, so every
+			// caller decodes a direct read exactly as it decodes one of
+			// Cloud Control's.
+			raw, err = json.Marshal(props)
+		}
+		if err == nil {
+			c.reads.putGet(typeName, identifier, string(raw), true)
+			return readEntry{properties: string(raw), found: true}, nil
+		}
+		// The answer stays right, only slower; the event makes a direct
+		// path that always falls back visible in a trace. The service's
+		// error code only: a message can name the instance.
+		reason := "unexpected response"
+		var apiErr *direct.APIError
+		if errors.As(err, &apiErr) {
+			reason = apiErr.Code
+		}
+		trace.SpanFromContext(ctx).AddEvent("direct read fell back to Cloud Control", trace.WithAttributes(
+			attribute.String("kraai.type", typeName),
+			attribute.String("kraai.fallback_reason", reason),
+		))
+	}
 	out, err := c.cc.GetResource(ctx, &cloudcontrol.GetResourceInput{
 		TypeName:   aws.String(typeName),
 		Identifier: aws.String(identifier),

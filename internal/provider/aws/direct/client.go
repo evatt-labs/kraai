@@ -139,6 +139,20 @@ func (r Reader) responsePath() string {
 	return strings.Join(names, ".")
 }
 
+// CanRead reports whether typeName's direct reader may stand in for Cloud
+// Control's read: see Reader.Production.
+func CanRead(typeName string) bool { return readers[typeName].Production }
+
+// ReadByID is Read for a type with a single primary identifier, given as
+// Cloud Control gives it.
+func (c *Client) ReadByID(ctx context.Context, typeName, identifier string) (map[string]any, error) {
+	r, ok := readers[typeName]
+	if !ok || len(r.Identifier) != 1 {
+		return nil, fmt.Errorf("%s has no direct reader with a single identifier", typeName)
+	}
+	return c.Read(ctx, typeName, map[string]string{r.Identifier[0].Property: identifier})
+}
+
 // maxListPages bounds one List. A list longer than this is an error, never
 // a truncation: an instance on a page not read would be taken for absent.
 const maxListPages = 1000

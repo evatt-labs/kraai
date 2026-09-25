@@ -33,6 +33,15 @@ type Reader struct {
 	Absent []Condition
 	// Probe lists identifiers that must read as absent, for the harness.
 	Probe *Lister
+	// Complete is true when the override skips no property at any depth,
+	// so a read carries everything Cloud Control's does.
+	Complete bool
+	// Production is true when the reader is Complete, has the single
+	// identifier a Cloud Control read gives it, and its recorded evidence
+	// shows parity with Cloud Control both on the instances it reads and on
+	// those it must read as absent: the only readers a lookup may use in
+	// place of Cloud Control.
+	Production bool
 	// Response is the path from the output to the resource.
 	Response []Step
 	Fields   []Field
@@ -406,6 +415,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			ownMapped[name] = mapping
 		}
 	}
+	r.Complete = !skipsAny(o.Skip, o.Properties)
 	r.Fields = compileFields(&model, &schema, ownProps, resource, ownMapped, o.Skip, "", fail)
 	if isXML(r.Protocol) {
 		xmlFields(&model, resource, r.Fields, "", fail)
@@ -778,6 +788,19 @@ func sortedKeys[V any](m map[string]V) []string {
 }
 
 func sortedSet(m map[string]bool) []string { return sortedKeys(m) }
+
+// skipsAny reports whether an override skips any property, at any depth.
+func skipsAny(skip map[string]string, mapped map[string]Mapping) bool {
+	if len(skip) > 0 {
+		return true
+	}
+	for _, m := range mapped {
+		if skipsAny(m.Skip, m.Properties) {
+			return true
+		}
+	}
+	return false
+}
 
 // bindInput places one input member in a request under protocol: in the
 // body, a form, or, under a REST protocol, wherever its HTTP binding puts

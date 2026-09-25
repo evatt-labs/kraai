@@ -17,7 +17,7 @@ import (
 
 //go:generate go run generate_main.go
 
-//go:embed lock.json models/*.json schemas/*.json overrides/*.yaml
+//go:embed lock.json models/*.json schemas/*.json overrides/*.yaml evidence/parity.json
 var files embed.FS
 
 // Lock records where the checked-in subset came from and what it hashed to,
