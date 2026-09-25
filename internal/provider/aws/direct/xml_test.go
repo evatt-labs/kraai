@@ -516,3 +516,57 @@ func TestReadSecurityGroupSplitsRulesByDirection(t *testing.T) {
 		t.Fatalf("rules request = %v", f)
 	}
 }
+
+// A VPC reads each DNS attribute in its own call to the same operation, told
+// apart by a fixed input, alongside filtered calls for its default network
+// ACL and security group.
+func TestReadVPCAttributesByFixedInput(t *testing.T) {
+	byKey := map[string]string{
+		"DescribeVpcs": `<DescribeVpcsResponse><vpcSet><item><vpcId>vpc-1</vpcId><cidrBlock>10.0.0.0/16</cidrBlock>
+<cidrBlockAssociationSet><item><associationId>assoc-4</associationId></item></cidrBlockAssociationSet>
+<ipv6CidrBlockAssociationSet><item><ipv6CidrBlock>2600::/56</ipv6CidrBlock></item></ipv6CidrBlockAssociationSet>
+</item></vpcSet></DescribeVpcsResponse>`,
+		"DescribeNetworkAcls":                     `<DescribeNetworkAclsResponse><networkAclSet><item><networkAclId>acl-1</networkAclId></item></networkAclSet></DescribeNetworkAclsResponse>`,
+		"DescribeSecurityGroups":                  `<DescribeSecurityGroupsResponse><securityGroupInfo><item><groupId>sg-1</groupId></item></securityGroupInfo></DescribeSecurityGroupsResponse>`,
+		"DescribeVpcAttribute/enableDnsSupport":   `<DescribeVpcAttributeResponse><enableDnsSupport><value>true</value></enableDnsSupport></DescribeVpcAttributeResponse>`,
+		"DescribeVpcAttribute/enableDnsHostnames": `<DescribeVpcAttributeResponse><enableDnsHostnames><value>false</value></enableDnsHostnames></DescribeVpcAttributeResponse>`,
+	}
+	var mu sync.Mutex
+	var forms []url.Values
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		form, _ := url.ParseQuery(string(raw))
+		mu.Lock()
+		forms = append(forms, form)
+		mu.Unlock()
+		key := form.Get("Action")
+		if a := form.Get("Attribute"); a != "" {
+			key += "/" + a
+		}
+		_, _ = io.WriteString(w, byKey[key])
+	}))
+	t.Cleanup(srv.Close)
+	client := &Client{HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }}
+
+	got, err := client.Read(context.Background(), "AWS::EC2::VPC", map[string]string{"VpcId": "vpc-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]any{
+		"VpcId": "vpc-1", "CidrBlock": "10.0.0.0/16", "CidrBlockAssociations": []any{"assoc-4"}, "Ipv6CidrBlocks": []any{"2600::/56"},
+		"DefaultNetworkAcl": "acl-1", "DefaultSecurityGroup": "sg-1", "EnableDnsSupport": true, "EnableDnsHostnames": false,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Read = %#v\nwant   %#v", got, want)
+	}
+	var acl url.Values
+	for _, f := range forms {
+		if f.Get("Action") == "DescribeNetworkAcls" {
+			acl = f
+		}
+	}
+	if acl.Get("Filter.1.Value.1") != "vpc-1" || acl.Get("Filter.2.Name") != "default" || acl.Get("Filter.2.Value.1") != "true" {
+		t.Fatalf("network ACL request = %v", acl)
+	}
+}
