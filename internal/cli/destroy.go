@@ -14,6 +14,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/destroy"
 	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/naming"
 	"github.com/evatt-labs/kraai/internal/plan"
@@ -151,7 +152,7 @@ func runDestroy(
 	}
 	defer release()
 
-	result, err := destroyEnvironment(ctx, envName, m, assembler, policies)
+	result, err := destroyEnvironment(ctx, envName, m, assembler, policies, store)
 	if err := lockLost(ctx, envName, err); err != nil {
 		return err
 	}
@@ -365,7 +366,7 @@ func writeDestroyJSON(w io.Writer, envName string, result *destroy.Result) error
 // destroy policies deny it: what destroy does once the manifest is loaded
 // and the lock held, shared with gc.
 func destroyEnvironment(
-	ctx context.Context, envName string, m *manifest.Manifest, assembler RegistryAssembler, policies *policy.Set,
+	ctx context.Context, envName string, m *manifest.Manifest, assembler RegistryAssembler, policies *policy.Set, store lock.Store,
 ) (*destroy.Result, error) {
 	reg, err := assembler(ctx, m)
 	if err != nil {
@@ -381,6 +382,9 @@ func destroyEnvironment(
 	}
 	if len(denials) > 0 {
 		return nil, policy.Denied(policy.GateDestroy, denials)
+	}
+	if err := recordStart(ctx, store, envName, m); err != nil {
+		return nil, err
 	}
 	return destroy.New(reg).Destroy(ctx, p)
 }

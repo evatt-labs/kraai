@@ -23,7 +23,11 @@ type losingLease struct{ store *losingStore }
 func (s *losingStore) Acquire(context.Context, string, string, time.Duration) (lock.Lease, error) {
 	return losingLease{store: s}, nil
 }
-func (losingLease) Renew(context.Context, time.Duration) error { return lock.ErrLost }
+func (*losingStore) ReadStatus(context.Context, string) (lock.Status, bool, error) {
+	return lock.Status{}, false, nil
+}
+func (*losingStore) WriteStatus(context.Context, lock.Status) error { return nil }
+func (losingLease) Renew(context.Context, time.Duration) error      { return lock.ErrLost }
 func (l losingLease) Release(context.Context) error {
 	l.store.released = true
 	return nil

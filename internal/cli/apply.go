@@ -200,6 +200,9 @@ func runApply(
 		return policy.Denied(policy.GatePlan, denials)
 	}
 
+	if err := recordStart(ctx, store, envName, m); err != nil {
+		return err
+	}
 	result, err := apply.New(reg, apply.WithAllowReplace(allowReplace)).Apply(ctx, p)
 	if err := lockLost(ctx, envName, err); err != nil {
 		return err

@@ -176,6 +176,10 @@ type Client struct {
 	// than one per lookup. Forgotten per type on any mutation of it.
 	reads readCache
 
+	// created is every type this client has created an instance of, for
+	// Created.
+	created sync.Map
+
 	// schemaCacheDir, when set, holds fetched resource provider schemas on
 	// disk between runs, for schemaCacheTTL; see schemacache.go.
 	schemaCacheDir string
@@ -267,6 +271,13 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		opt(c)
 	}
 	return c, nil
+}
+
+// Created reports whether this client has asked Cloud Control to create an
+// instance of typeName: one a lagging index could not yet show.
+func (c *Client) Created(typeName string) bool {
+	_, ok := c.created.Load(typeName)
+	return ok
 }
 
 // GetResource returns typeName/identifier's current properties, or
@@ -558,6 +569,9 @@ func decodeResourceModel(model *string) (map[string]any, error) {
 // state, returning the provider-assigned identifier and the resulting
 // properties.
 func (c *Client) CreateResource(ctx context.Context, typeName string, desiredState map[string]any) (string, map[string]any, error) {
+	// Marked before the call: a create that fails part way may still have
+	// made the instance.
+	c.created.Store(typeName, true)
 	// Before and after: a read of this type in flight during the call must
 	// not repopulate the cache with the world as it was.
 	c.reads.forget(typeName)

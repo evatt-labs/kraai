@@ -498,6 +498,10 @@ func TestClientCreateResource(t *testing.T) {
 		if id != "my-bucket" || props["BucketName"] != "my-bucket" {
 			t.Fatalf("id=%q props=%+v", id, props)
 		}
+		// The type is now one a lagging index cannot be trusted about.
+		if !c.Created(TypeS3Bucket) || c.Created(typeECSTaskDefinition) {
+			t.Fatalf("Created(bucket) = %v, Created(task definition) = %v", c.Created(TypeS3Bucket), c.Created(typeECSTaskDefinition))
+		}
 		if len(cc.createReq) != 1 || *cc.createReq[0].TypeName != TypeS3Bucket {
 			t.Fatalf("createReq = %+v", cc.createReq)
 		}

@@ -262,3 +262,27 @@ func TestAnEC2IdentifierIsReadFromItsARN(t *testing.T) {
 		t.Fatalf("index queried for %v, listed %d times", fc.taggedTypes, fc.listCalls)
 	}
 }
+
+// A mutating run against a settled environment takes the index's miss as
+// absence, with no walk: nothing has created the resource since the index
+// could have seen it.
+func TestASettledIndexTrustsAMiss(t *testing.T) {
+	fc := taskDefinitions(nil, nil)
+	_, _, found, err := taskDefinitionType(fc).resolve(resource.WithSettledIndex(context.Background()),
+		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
+	if err != nil || found || fc.listCalls != 0 {
+		t.Fatalf("resolve = %v, %v after %d lists; want a miss and no walk", found, err, fc.listCalls)
+	}
+}
+
+// Once the run has created an instance of the type, the index cannot have
+// caught up, so even a settled run walks on a miss.
+func TestASettledIndexWalksAfterTheRunCreatesTheType(t *testing.T) {
+	fc := taskDefinitions(nil, nil)
+	fc.created = map[string]bool{typeECSTaskDefinition: true}
+	id, _, found, err := taskDefinitionType(fc).resolve(resource.WithSettledIndex(context.Background()),
+		resource.Ref{Provider: Provider, Type: typeECSTaskDefinition, Name: "env-app-task"})
+	if err != nil || !found || id != tdWanted || fc.listCalls != 1 {
+		t.Fatalf("resolve = %q, %v, %v after %d lists; want the walk to find it", id, found, err, fc.listCalls)
+	}
+}
