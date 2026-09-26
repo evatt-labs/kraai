@@ -2,32 +2,44 @@ package direct
 
 import (
 	"bytes"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 	"testing/fstest"
 )
 
-// readers.go is exactly what the checked-in inputs generate.
+// The readers_<service>.go files are exactly what the checked-in inputs
+// generate, and no other such file exists.
 func TestReadersAreGenerated(t *testing.T) {
 	want, err := Generate()
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := os.ReadFile("readers.go")
+	onDisk, err := filepath.Glob("readers_*.go")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(got, want) {
-		t.Fatal("readers.go is not what the overrides generate; run go generate ./internal/provider/aws/direct")
+	for _, name := range onDisk {
+		if _, ok := want[name]; !ok {
+			t.Errorf("%s is generated for no service; run go generate ./internal/provider/aws/direct", name)
+		}
+	}
+	dir := os.DirFS(".")
+	for name, src := range want {
+		got, err := fs.ReadFile(dir, name)
+		if err != nil || !bytes.Equal(got, src) {
+			t.Errorf("%s is not what the overrides generate; run go generate ./internal/provider/aws/direct", name)
+		}
 	}
 	if len(Readers()) != len(readers) || len(readers) == 0 {
 		t.Fatalf("Readers() = %d, readers = %d", len(Readers()), len(readers))
 	}
 }
 
-// readers.go carries every field Compile produces: a field the generator
+// The generated readers carry every field Compile produces: a field the generator
 // does not write would compile clean and be silently absent at run time.
 func TestGeneratedReadersMatchCompiled(t *testing.T) {
 	compiled, err := Compile()
@@ -38,7 +50,7 @@ func TestGeneratedReadersMatchCompiled(t *testing.T) {
 		got := readers[want.Type]
 		got.Production, got.Mutable = false, false
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("%s: readers.go differs from Compile()\ngot  %#v\nwant %#v", want.Type, got, want)
+			t.Errorf("%s: the generated reader differs from Compile()\ngot  %#v\nwant %#v", want.Type, got, want)
 		}
 	}
 }
