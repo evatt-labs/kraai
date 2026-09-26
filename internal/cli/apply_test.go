@@ -65,7 +65,7 @@ func (c *countingResource) Delete(context.Context, resource.Ref) error {
 // Diff implements plan.Differ unconditionally; c.differs
 // says what it reports. Every countingResource has this method, but the
 // planner only reaches it for a resource that already exists (Get returned
-// non-nil), matching internal/plan/planner.go's decide().
+// non-nil), matching internal/plan/decide.go's decide().
 func (c *countingResource) Diff(resource.Spec, *resource.State) (resource.Difference, error) {
 	// The fake keeps its bool: "differs" here means "needs replace", which
 	// is Immutable — every test using it is about the --replace gate.

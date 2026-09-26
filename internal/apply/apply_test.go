@@ -29,9 +29,10 @@ func newRegistry(t *testing.T, regs ...resource.Registration) *resource.Registry
 // filling in the fields apply actually reads. ReadsBindings is left nil —
 // every existing test in this file exercises apply's fallback-to-own-
 // binding path (effectiveReadsBindings in apply.go), which is also exactly
-// what internal/plan/planner.go's expandBinding sets explicitly for every
-// non-compute item today. See actionReading for tests that need a
-// different ReadsBindings, e.g. a compute item reading a sibling binding.
+// what internal/plan/binding.go's expandBinding sets explicitly for every
+// non-compute item today. The tests in secrets_test.go use actionReading
+// for a different ReadsBindings, e.g. a compute item reading a sibling
+// binding.
 func action(serviceKey, binding, provider, typ string, wave int, kind plan.ActionKind) plan.Action {
 	name := serviceKey + "-" + binding
 	return plan.Action{
@@ -46,7 +47,7 @@ func action(serviceKey, binding, provider, typ string, wave int, kind plan.Actio
 }
 
 // actionReading builds a plan.Action like action, but with an explicit
-// ReadsBindings — the shape internal/plan/planner.go's expandCompute
+// ReadsBindings — the shape internal/plan/compute.go's expandCompute
 // produces for a compute item, whose own Binding is the service key and
 // whose ReadsBindings names the (possibly many) bindings the service
 // declares.

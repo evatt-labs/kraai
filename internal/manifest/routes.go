@@ -10,7 +10,7 @@ import (
 //
 // Here rather than in validateEnvironment because it needs the service map:
 // a route belongs to a service, and a custom domain's certificate is one of
-// that service's own `tls:` bindings. Sorted iteration, as everywhere in this
+// that service's own `tls:` bindings. Sorted iteration, as everywhere in the
 // file, so a manifest with several problems reports the same one first.
 func validateRoutes(envName string, services map[string]Service, env *Environment) error {
 	path := environmentsDir + "/" + envName + ".yaml"

@@ -229,3 +229,12 @@ func secretRefGrant(ref secretref.Ref, region, account string) ([]SecretRefGrant
 		return nil, kerrors.Validation("unknown secret reference scheme %q in %s", ref.Scheme, ref.String())
 	}
 }
+
+func sortedActions(set map[string]bool) []string {
+	out := make([]string, 0, len(set))
+	for action := range set {
+		out = append(out, action)
+	}
+	sort.Strings(out)
+	return out
+}

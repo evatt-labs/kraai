@@ -49,7 +49,7 @@ func (s specValidatorOnly) Get(context.Context, resource.Ref) (*resource.State, 
 // This is deliberate, not an oversight: the whole point of this file's
 // tests is proving that internal/provider/aws's real ValidateSpec — which
 // calls decodeLambdaSettings, which calls computeSettingsSchema.Validate
-// (settings_schema.go) — is what decide (planner.go) reaches, through the
+// (settings_schema.go) — is what decide (decide.go) reaches, through the
 // real resource.Instrument decorator this registry applies to every
 // registration, exactly as internal/assemble.Registry wires a live run. A
 // fake resource, or a direct unit test against decodeLambdaSettings alone,

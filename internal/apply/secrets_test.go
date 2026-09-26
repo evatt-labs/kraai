@@ -169,7 +169,7 @@ func TestApply_NoChangeWithNilCurrentIsInvalidPlan(t *testing.T) {
 
 // TestApply_ComputeReadsSiblingBindingSecret_Namespaced is the gap this
 // workstream fixes: a compute item's own Binding is the service key (see
-// internal/plan/planner.go's expandCompute), not any one of the bindings it
+// internal/plan/compute.go's expandCompute), not any one of the bindings it
 // reads — so without ReadsBindings, a Lambda for service "api" could never
 // see the connection_uri its own "DB" binding produced. With ReadsBindings
 // set to ["DB"], it must see it namespaced as "DB.connection_uri" — never
@@ -280,7 +280,7 @@ func TestApply_TwoReadableBindingsSameSecretName_NoCollision(t *testing.T) {
 // TestApply_NonComputeActionExplicitReadsBindings_OwnBindingOnly mirrors
 // TestApply_SecretsDoNotLeakAcrossBindings but with ReadsBindings set
 // explicitly to the item's own binding — the exact value
-// internal/plan/planner.go's expandBinding now writes for every non-compute
+// internal/plan/binding.go's expandBinding now writes for every non-compute
 // item — rather than relying on the nil-fallback path. A sibling binding's
 // secret must still not leak in.
 func TestApply_NonComputeActionExplicitReadsBindings_OwnBindingOnly(t *testing.T) {

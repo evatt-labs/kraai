@@ -427,7 +427,7 @@ func bindingName(i int) string {
 // internal/apply/apply_test.go's test of the same name: a teardown
 // deleting several branches that all live in one Neon project is exactly
 // as capable of racing Neon's per-project mutation lock as an apply
-// creating them (see internal/resource/registry.go's Registration.Scope
+// creating them (see internal/resource/registration.go's Registration.Scope
 // doc comment for the live 423 this prevents on the create side).
 func TestDestroy_ScopedRegistration_SerializesSameScope(t *testing.T) {
 	const n = 6
