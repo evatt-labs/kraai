@@ -77,6 +77,15 @@ func proposeWith(model *smithyModel, schema *cfnSchema, o Override) (Override, e
 					o.Read.Identifier[property] = required[0]
 				}
 			}
+			// An ARN is not sent to a member that cannot hold one: the
+			// draft reads the name or id from the ARN's last segment.
+			if member, ok := o.Read.Identifier[property]; ok && arnValued(property) && refusesARN(model, input.Members[member]) {
+				delete(o.Read.Identifier, property)
+				if o.Read.Input == nil {
+					o.Read.Input = map[string]any{}
+				}
+				o.Read.Input[member] = "{" + property + ":arnName}"
+			}
 		}
 	}
 
@@ -174,4 +183,38 @@ func proposeNested(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		skipped = nil
 	}
 	return mapped, skipped
+}
+
+// arnValued reports an identifier property named as an ARN.
+func arnValued(property string) bool {
+	return property == "Arn" || strings.HasSuffix(property, "Arn")
+}
+
+// refusesARN reports a member whose constraints rule out an ARN: a length
+// too short for one, or a pattern with no colon and no class broad enough
+// to match one.
+func refusesARN(model *smithyModel, m smithyMember) bool {
+	traits := map[string]json.RawMessage{}
+	for k, v := range model.Shapes[m.Target].Traits {
+		traits[k] = v
+	}
+	for k, v := range m.Traits {
+		traits[k] = v
+	}
+	var length struct{ Max *int }
+	_ = json.Unmarshal(traits["smithy.api#length"], &length)
+	if length.Max != nil && *length.Max < 20 {
+		return true
+	}
+	var pattern string
+	_ = json.Unmarshal(traits["smithy.api#pattern"], &pattern)
+	if pattern == "" {
+		return false
+	}
+	for _, broad := range []string{":", ".", `\S`, "[^"} {
+		if strings.Contains(pattern, broad) {
+			return false
+		}
+	}
+	return true
 }
