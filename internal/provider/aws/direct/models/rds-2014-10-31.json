@@ -7,6 +7,9 @@
         },
         {
           "target": "com.amazonaws.rds#DescribeDBSubnetGroups"
+        },
+        {
+          "target": "com.amazonaws.rds#ListTagsForResource"
         }
       ],
       "traits": {
@@ -378,6 +381,38 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.rds#BlueGreenDeploymentNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "BlueGreenDeploymentNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBClusterParameterGroup": {
       "members": {
         "DBClusterParameterGroupArn": {
@@ -425,6 +460,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBInstanceNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBParameterGroupNotFoundFault": {
       "members": {
         "message": {
@@ -434,6 +485,102 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "DBParameterGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBProxyEndpointNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyEndpointNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBProxyNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBProxyTargetGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyTargetGroupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBShardGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBShardGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSnapshotNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSnapshotNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSnapshotTenantDatabaseNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSnapshotTenantDatabaseNotFoundFault",
           "httpResponseCode": 404
         },
         "smithy.api#error": "client",
@@ -652,6 +799,86 @@
     "com.amazonaws.rds#IntegerOptional": {
       "type": "integer"
     },
+    "com.amazonaws.rds#IntegrationNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IntegrationNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ListTagsForResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#BlueGreenDeploymentNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBClusterNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBInstanceNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyEndpointNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyTargetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBShardGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSnapshotTenantDatabaseNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#IntegrationNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#TenantDatabaseNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#ListTagsForResourceMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#TagListMessage"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#ListTagsForResourceMessage": {
+      "members": {
+        "Filters": {
+          "target": "com.amazonaws.rds#FilterList",
+          "traits": {}
+        },
+        "ResourceName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#Outpost": {
       "members": {
         "Arn": {
@@ -700,6 +927,58 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.rds#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "Value": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#TagList": {
+      "member": {
+        "target": "com.amazonaws.rds#Tag",
+        "traits": {
+          "smithy.api#xmlName": "Tag"
+        }
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.rds#TagListMessage": {
+      "members": {
+        "TagList": {
+          "target": "com.amazonaws.rds#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#TenantDatabaseNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TenantDatabaseNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"slices"
@@ -52,9 +53,21 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if !ok {
 		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
-	props, err := c.readCall(ctx, r, identifier)
+	props, captured, err := c.readCall(ctx, r, identifier)
 	if err != nil {
 		return nil, err
+	}
+	// The further calls may be addressed by values the read captured.
+	vars := identifier
+	if len(r.Capture) > 0 {
+		vars = maps.Clone(identifier)
+		for _, f := range r.Capture {
+			v, _ := captured[f.Property].(string)
+			if v == "" {
+				return nil, fmt.Errorf("the %s read did not return %s, which its further calls are addressed by", typeName, f.Member)
+			}
+			vars[f.Property] = v
+		}
 	}
 	// The further calls are independent of one another: made together, a
 	// read costs two round trips rather than one per call.
@@ -62,7 +75,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	g, gctx := errgroup.WithContext(ctx)
 	for i, also := range r.Also {
 		g.Go(func() error {
-			more, err := c.readCall(gctx, also, identifier)
+			more, _, err := c.readCall(gctx, also, vars)
 			if errors.Is(err, ErrAbsent) {
 				// Gone between the calls, or a further call that finds
 				// nothing: not proof of absence, so not reported as it.
@@ -83,14 +96,15 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	return props, nil
 }
 
-// readCall makes one call of a read and translates its response.
-func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]string) (map[string]any, error) {
+// readCall makes one call of a read and translates its response, and
+// returns the values r captures from it.
+func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]string) (props, captured map[string]any, err error) {
 	typeName := r.Type
 	values := make([]Binding, 0, len(r.Identifier)+len(r.Input))
 	for _, b := range r.Identifier {
 		value, ok := identifier[b.Property]
 		if !ok {
-			return nil, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
+			return nil, nil, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
 		}
 		b.Value = value
 		values = append(values, b)
@@ -105,16 +119,16 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		return r.readXML(body, &walk{vars: identifier})
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if token, _ := at(out, r.PageToken); len(r.PageToken) > 0 && token != nil && token != "" {
-		return nil, errIncomplete(typeName)
+		return nil, nil, errIncomplete(typeName)
 	}
 	root, _ := out.(map[string]any)
 	for _, step := range r.Response {
@@ -123,32 +137,35 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		if step.List {
 			items, _ := out.([]any)
 			if len(items) == 0 {
-				return nil, ErrAbsent
+				return nil, nil, ErrAbsent
 			}
 			if len(items) != 1 {
-				return nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
+				return nil, nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
 			}
 			out = items[0]
 		}
 	}
 	obj, ok := out.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
+		return nil, nil, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
 	w := &walk{vars: identifier}
-	props, err := r.finish(func(fields []Field, fromRoot bool) map[string]any {
+	props, err = r.finish(func(fields []Field, fromRoot bool) map[string]any {
 		if fromRoot {
 			return r.translate(w, root, fields)
 		}
 		return r.translate(w, obj, fields)
 	})
 	if err == nil {
+		captured = r.translate(w, obj, r.Capture)
+	}
+	if err == nil {
 		err = errors.Join(w.errs...)
 	}
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return props, nil
+	return props, captured, nil
 }
 
 // errIncomplete reports a read answered with one page of several, which

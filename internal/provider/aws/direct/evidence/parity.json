@@ -16,7 +16,8 @@
         "Id",
         "Name",
         "ReplicateTo"
-      ]
+      ],
+      "override": "b6da18a5ad7bfec86a80ae15cc9633b455bbde9e7f57603cddc0d261daae02b7"
     },
     {
       "type": "AWS::AppConfig::Extension",
@@ -33,7 +34,8 @@
         "Name",
         "Parameters",
         "VersionNumber"
-      ]
+      ],
+      "override": "fcf11d05759075ded4ebf088af002fc265471f7f56073af5855a3e79706caa15"
     },
     {
       "type": "AWS::AppConfig::ExtensionAssociation",
@@ -42,7 +44,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "68ebe6159ca91160275796b466a93754cb9844284bf968aa7352d77c46c61440"
     },
     {
       "type": "AWS::AppIntegrations::EventIntegration",
@@ -51,7 +54,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "de67e957077f57df07f72ea052a9350be4063ef3c323cfdd982a68bbd3149969"
     },
     {
       "type": "AWS::AppRunner::AutoScalingConfiguration",
@@ -68,7 +72,8 @@
         "MaxConcurrency",
         "MaxSize",
         "MinSize"
-      ]
+      ],
+      "override": "9fe0ca2ce4aa8cf77b46e1a235d1d7c7f2d45338f3e5108254a0644b3e896604"
     },
     {
       "type": "AWS::AppRunner::ObservabilityConfiguration",
@@ -83,7 +88,8 @@
         "ObservabilityConfigurationName",
         "ObservabilityConfigurationRevision",
         "TraceConfiguration"
-      ]
+      ],
+      "override": "97bdbc398ff1f514d4c6544d99fc6c8692a34f61056f9bf156c086116f39e920"
     },
     {
       "type": "AWS::AppRunner::VpcConnector",
@@ -92,7 +98,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "805c56293096fc84ae46ad533737b71db8f2082a54b9b7af01020c9c9d1ee45c"
     },
     {
       "type": "AWS::AppRunner::VpcIngressConnection",
@@ -101,7 +108,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "15f65a6abdb26a49ba6c4ad9ba3b62c1c4c7eb3ec4d57721271c1d36131eac0e"
     },
     {
       "type": "AWS::AppSync::DomainName",
@@ -110,7 +118,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "b8247a135a94b6a6f2a95afa6f88ecd331639e7b62533ad52826a7dfac66835c"
     },
     {
       "type": "AWS::Athena::DataCatalog",
@@ -120,7 +129,8 @@
       "outcome": "oracle-unavailable",
       "instances": 0,
       "compared": [],
-      "note": "Cloud Control could not read any listed instance"
+      "note": "Cloud Control could not read any listed instance",
+      "override": "973e18fdc4ed7d464da7cc4104e31795c64f9b68856c0ff20ff348ed1c23a42e"
     },
     {
       "type": "AWS::Athena::NamedQuery",
@@ -129,7 +139,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d3f4d10ce6d50628d691294addd60feb5f6435a5a58a82fa60ead56010b63201"
     },
     {
       "type": "AWS::B2BI::Profile",
@@ -138,7 +149,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c1c9bf6f1de8a4a8d3854167e84a7d5df5e2a39c182048b72472b38fee9e21c3"
     },
     {
       "type": "AWS::BCM::ScheduledReport",
@@ -147,7 +159,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "baba23114bc5c3d215729fb6ef7d6f9ca554612617cfc2c835081f1facca16f6"
     },
     {
       "type": "AWS::Backup::RestoreTestingPlan",
@@ -156,7 +169,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "32d49822f497f0c924ea8a8adafe6d8507abb6cf88db985ac67dcba2be05ed0b"
     },
     {
       "type": "AWS::BackupGateway::Hypervisor",
@@ -165,7 +179,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "e4bc49cfca53b6568b30e4bfa504105bf5707243516c37998892d9ac4555e51d"
     },
     {
       "type": "AWS::Bedrock::AutomatedReasoningPolicy",
@@ -174,7 +189,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "9f9c93461a682c1a29701337ed60144080ad9ee27fb1b36dbe68dd1b40dc770b"
     },
     {
       "type": "AWS::Bedrock::DataAutomationProject",
@@ -183,7 +199,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "12efd09c3785669524ea005989e043342825641cf753311c3816f02cd0e1f7f6"
     },
     {
       "type": "AWS::Bedrock::IntelligentPromptRouter",
@@ -202,7 +219,8 @@
         "Status",
         "Type",
         "UpdatedAt"
-      ]
+      ],
+      "override": "47907f629d7f8fed76367d504543e72b904319d4230e28480e0081bfb0e5450e"
     },
     {
       "type": "AWS::Bedrock::Session",
@@ -211,7 +229,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "1fbe491b3c0583e5310cb8bd8ab9377e0761657e8b741443b4c36e531090d5c6"
     },
     {
       "type": "AWS::BedrockAgentCore::ApiKeyCredentialProvider",
@@ -220,7 +239,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "87ba1f31d8619c8ed74a2889f279a4ea5272d8b8f4878ca6ae8cd5a5548e3545"
     },
     {
       "type": "AWS::BedrockAgentCore::BrowserProfile",
@@ -229,7 +249,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "84305a1a0de30fc4a5226e046f67fc0c868ceb6f369fb52ad2f324bc56dae12a"
     },
     {
       "type": "AWS::BedrockAgentCore::PolicyEngine",
@@ -238,7 +259,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "f370a2de038d0811fdf072f2bb7debf0f761b60f7515b050708e58d809e144c3"
     },
     {
       "type": "AWS::Cases::Domain",
@@ -247,7 +269,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "83e5cd585c52cb3c60cffd6c5b2c4dfbf415a3dd901004cc34c616dbc0bb81f7"
     },
     {
       "type": "AWS::CertificateManager::AcmeExternalAccountBinding",
@@ -257,7 +280,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "7bb0152ff83646635d88ab65cd0db5c69f233772ab4158af86f3c829d253b204"
     },
     {
       "type": "AWS::Chatbot::CustomAction",
@@ -266,7 +290,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "9b2f4d45c1468d7ad3b40ab216ae89959dcdd6f10dc888d9ecdbe9b46583b41e"
     },
     {
       "type": "AWS::Chime::AppInstance",
@@ -275,7 +300,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "18222439e9ba8fabe16fcf8d74a4fe07fdad705b591162b102a5f2d3dfbac98e"
     },
     {
       "type": "AWS::Chime::MediaInsightsPipelineConfiguration",
@@ -284,7 +310,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "e4c017fee58d6beb5e422147973e9d26080e18eb20d192e470adf83abfa7c563"
     },
     {
       "type": "AWS::Chime::SipMediaApplication",
@@ -293,7 +320,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4e5c7bf0aaf29905717a2d97c8aff95628801013f0c8ce0cde3e6b4a93fe11fa"
     },
     {
       "type": "AWS::Chime::VoiceConnector",
@@ -302,7 +330,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d091397d1563deb64e2ae1d0a87e18a7534b7b6961280a855777aa333c43f561"
     },
     {
       "type": "AWS::CleanRoomsML::ConfiguredModelAlgorithm",
@@ -311,7 +340,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "9bc033ae09fbccc6f9edc6557c3eb6fdcad6a8642495d9944f257d372c4e1ca1"
     },
     {
       "type": "AWS::CleanRoomsML::TrainingDataset",
@@ -320,7 +350,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "bc098025f857ab4170a6cdce9e36a2efea26a52660de6fe2ee7af7237299f895"
     },
     {
       "type": "AWS::CloudFormation::ChangeSet",
@@ -330,7 +361,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "6cc9b918b8502cb3595a2a5d64dad6efb036600fe543cebbe79a22036f877184"
     },
     {
       "type": "AWS::CloudFormation::GeneratedTemplate",
@@ -339,7 +371,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "2c0107ca9983ef91b799265d448b47e6f53649653104b15515e156a124e0a0fa"
     },
     {
       "type": "AWS::CloudFormation::ModuleDefaultVersion",
@@ -348,7 +381,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "8ea3b59972c96136e096fa47f96a0dcaddbffadba7377750d5784256e3c05dbb"
     },
     {
       "type": "AWS::CloudFront::CachePolicy",
@@ -361,7 +395,8 @@
         "CachePolicyConfig",
         "Id",
         "LastModifiedTime"
-      ]
+      ],
+      "override": "1b92a601b7ce50d684a46fd669d0f699c958d31897aaa515e15398229d49a187"
     },
     {
       "type": "AWS::CodeConnections::Connection",
@@ -370,7 +405,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "464073cb0a1a7344af119249854db771040b4d55d4ede61ad18956fdf04e4acb"
     },
     {
       "type": "AWS::CodeDeploy::Application",
@@ -379,7 +415,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "3033f4b227eea7e03a40970477074adffaa3e077b7b0292ed1eef341d673c3e1"
     },
     {
       "type": "AWS::CodeDeploy::DeploymentConfig",
@@ -393,7 +430,8 @@
         "DeploymentConfigName",
         "MinimumHealthyHosts",
         "TrafficRoutingConfig"
-      ]
+      ],
+      "override": "12e1bc837717e0dec4113db6a7263f978d43e840196c6dfc2f2015d62fe20ac9"
     },
     {
       "type": "AWS::CodeStarConnections::Connection",
@@ -402,7 +440,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d21eb58f3cf1f97fd49e93f55ba03581e09ae1fb1b30a3f9ba17ba245f2bf1f6"
     },
     {
       "type": "AWS::Config::Connector",
@@ -411,7 +450,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4f4dcc0e5507ff040f2002f9577d795964d27158cbe36d84ea03da9e942fc036"
     },
     {
       "type": "AWS::CustomerProfiles::Domain",
@@ -420,7 +460,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "7bd8e1c04bda341481f4a506859d314a0bfcd9cef612b7c13cb92514a1d07831"
     },
     {
       "type": "AWS::DataBrew::Project",
@@ -429,7 +470,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "01cb87c1881d6e3f5bf6cb7e8e246c41b20e69b8ef517549766efb34bfdaf9c1"
     },
     {
       "type": "AWS::DataBrew::Recipe",
@@ -438,7 +480,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "9b7ebd1c7df3727fe86fd23d2247884b697c2caedc6f2baf0495a06c4c0fe701"
     },
     {
       "type": "AWS::DataBrew::Schedule",
@@ -447,7 +490,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "781d942eb9f141330d036299a5ebefe493f75f8e66b7f772c60e65fd7fafc449"
     },
     {
       "type": "AWS::DataExchange::DataSet",
@@ -456,7 +500,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a1718338861bd6d9f5e5640d7edc1fb62b7189abaa8b6c054f7563c215bcdda6"
     },
     {
       "type": "AWS::DataSync::LocationEFS",
@@ -465,7 +510,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "13b36a2b09558e4936e1fc4f9ec88c0bcdca3103fffc58e82dded23360014f3b"
     },
     {
       "type": "AWS::DataSync::LocationFSxLustre",
@@ -474,7 +520,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "0c89d38a6027d1f7f4b1e49f4adc6f626904455b71d9ac387dbde04124d05bb7"
     },
     {
       "type": "AWS::DataSync::LocationFSxONTAP",
@@ -483,7 +530,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "321974b1b731e3840234bd24e2a29c3e84fe279ee315568434584c4a13894343"
     },
     {
       "type": "AWS::DataSync::LocationFSxOpenZFS",
@@ -492,7 +540,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4655d13d36294bbc4ae4e6d88bf59d15da944a2c56b6446f079a846543a6bd41"
     },
     {
       "type": "AWS::DataSync::LocationFSxWindows",
@@ -501,7 +550,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "04dea8655303efcb7aadfcb3dda4a03763c1b5722a4ff72810dda0c783794ab5"
     },
     {
       "type": "AWS::DataSync::LocationHDFS",
@@ -510,7 +560,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "7e813dbb073b3250944569f4e2cc58cb7c267fdeeaf7d774b0e3963beae30c58"
     },
     {
       "type": "AWS::DataSync::LocationNFS",
@@ -519,7 +570,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "2bff381dbaa99327ac3cc03770d9e9b46d0dce006e9b86d5d79c047dcfbf308b"
     },
     {
       "type": "AWS::DataSync::LocationS3",
@@ -528,7 +580,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "ba5f345ec591ff92b33429d1772c56b85800b3537f2255990b7741e22db8ef04"
     },
     {
       "type": "AWS::DataSync::LocationSMB",
@@ -537,7 +590,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "67af506464c6e0f7a858b87caf52c5710b315b61e83ce00e46eea7bd16913a5d"
     },
     {
       "type": "AWS::DocDBElastic::Cluster",
@@ -546,7 +600,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "495c1c37f0b95e7a62b2352a4d799f154a009a918fa31ab2c8b89b277766145c"
     },
     {
       "type": "AWS::DocDBElastic::ClusterSnapshot",
@@ -555,7 +610,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "733c488041adcd39de3523626a63774cae148b1ab5662e9f40cfb425084cb372"
     },
     {
       "type": "AWS::EC2::InternetGateway",
@@ -569,7 +625,8 @@
         "Tags"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "28ca1429ea484eeeac9bfa7ee773d3b4633c3c1ad900d2972d1489d80e946b90"
     },
     {
       "type": "AWS::EC2::RouteTable",
@@ -584,7 +641,8 @@
         "VpcId"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "0377a5a3ec7eed37107a68ae83c2eadfebb860702daa39d8f06e0f61482e87f1"
     },
     {
       "type": "AWS::EC2::SecurityGroup",
@@ -604,7 +662,8 @@
         "VpcId"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "0e89ba65bba60ba168d1e90b4aa4ba33cc6971e6d73814467d069863b7f8f598"
     },
     {
       "type": "AWS::EC2::Subnet",
@@ -629,7 +688,8 @@
         "VpcId"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "499470dce5c3668ec34346cbf221f43db18a784a836edfed11eb5d4ef2d5ac63"
     },
     {
       "type": "AWS::EC2::VPC",
@@ -652,7 +712,8 @@
         "VpcId"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "35e73f1126a6618015bfbc6b5909c168f6a208b0dcd4860eab9ad41b7db3b56a"
     },
     {
       "type": "AWS::ECS::Cluster",
@@ -671,7 +732,8 @@
         "Tags"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "ff7bc0114bfaa6c915d5739df17799fe380419cacbe7b481c283ff5f06a7d9dd"
     },
     {
       "type": "AWS::ECS::DaemonTaskDefinition",
@@ -680,7 +742,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "3aa6f8dd2434e2e27b64369e30e834bc2a54212669bc5e50698c65f91f102e32"
     },
     {
       "type": "AWS::ECS::TaskDefinition",
@@ -706,7 +769,8 @@
         "Volumes"
       ],
       "absence": "parity",
-      "probed": 20
+      "probed": 20,
+      "override": "e565a22467295986ae5e2c8c6b12c6700e1a27989e2df1e1e44817a615eef061"
     },
     {
       "type": "AWS::EMR::SecurityConfiguration",
@@ -715,22 +779,25 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "60c9d48917384d434acb6720d76131bc9ba5f0f81a6b94f3a4f36d8f1b31ea57"
     },
     {
       "type": "AWS::ElastiCache::SubnetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
       "compared": [
         "CacheSubnetGroupName",
         "Description",
-        "SubnetIds"
+        "SubnetIds",
+        "Tags"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "b0f26b48092a542ecfaca594e754d861a2d0458116d8f6a2aba521593731bb6d"
     },
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
@@ -765,7 +832,8 @@
         "VpcId"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "bbcfa38d2d24144c81efe5d2341343e0747cb65b879ad93dacae623601c381b1"
     },
     {
       "type": "AWS::ElementalInference::Dictionary",
@@ -774,7 +842,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "5edcc3bd3112906825bf0dd23d4b93136f1da3b70275e297f7b70459a9dd90de"
     },
     {
       "type": "AWS::EntityResolution::IdNamespace",
@@ -783,7 +852,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "20f285452ff745dd9eaf925916e4d210c2fd8e357314638f13e0de508629ef6c"
     },
     {
       "type": "AWS::EntityResolution::SchemaMapping",
@@ -792,7 +862,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "b9f11cd0bc403513618a702d1a21d902e6d0b5aec51ecb2073e47922876a9b98"
     },
     {
       "type": "AWS::EventSchemas::Discoverer",
@@ -801,7 +872,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a1941bc3005b66a6425f71ea7db6cfafd7863409e3ca013bd4da85f00906e516"
     },
     {
       "type": "AWS::EventSchemas::Registry",
@@ -810,7 +882,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "6797a0ccf15fb363cc59c2149f779a5e2d52bcebe0cb3cc07e37beb106eb15dd"
     },
     {
       "type": "AWS::Events::Endpoint",
@@ -819,7 +892,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "3d94745273e59a5e25e94703f31157fe77316fe920f54b627318e294d1b394dd"
     },
     {
       "type": "AWS::Forecast::DatasetGroup",
@@ -828,7 +902,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "dd666673ca7fab6e4ab568d011bbb5037f20db8da11c8272e96fdd1765ef9330"
     },
     {
       "type": "AWS::GameLift::Alias",
@@ -837,7 +912,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "46772a40df643e5402ddbfc5bc24bcba7cd5171f87f33e445dfc03a434718107"
     },
     {
       "type": "AWS::GameLift::Build",
@@ -846,7 +922,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "7d1b0c24a46aebd14f49598df611efe1428efa4f0e76a44d6f885a65e5aa6a57"
     },
     {
       "type": "AWS::GameLift::ContainerGroupDefinition",
@@ -855,7 +932,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a7c9688ae07aa49f9931a48add4e3c8b65c1216ccbdeb42091f89720ed045b88"
     },
     {
       "type": "AWS::GameLift::GameServerGroup",
@@ -864,7 +942,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "45f18aa7cf1be1a571cffdfee47ce98bf8be6f03f36edc382ed37e75b6a61148"
     },
     {
       "type": "AWS::GlobalAccelerator::CrossAccountAttachment",
@@ -873,7 +952,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "e94575a60d1746a43f476628df19619ddb27901f0a149af049fdfb79935d863e"
     },
     {
       "type": "AWS::Glue::CustomEntityType",
@@ -882,7 +962,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "cf2e32f54ceb7480ef28d21416b289e615f0650fb6605a67884e1f304fb6fddb"
     },
     {
       "type": "AWS::GreengrassV2::ComponentVersion",
@@ -892,7 +973,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "e3775f8c6c636992998954fece1b66d2d3cae011a7b5444c9526bc820c0940e8"
     },
     {
       "type": "AWS::HealthAgent::Domain",
@@ -901,7 +983,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d1040a04a4e14ad1a8427db817120f611d6257cae14e0b6a51083e1bea07a342"
     },
     {
       "type": "AWS::HealthImaging::Datastore",
@@ -910,7 +993,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "81a1085934f53482e7686159bbdda6cf36e16e77ba8a5a9c11baf4f331bb9e0c"
     },
     {
       "type": "AWS::IVS::Channel",
@@ -919,7 +1003,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "6f98f3295d022aef2a9a300f5eccc0e55084d2380cb5b22e6c92244932f386d4"
     },
     {
       "type": "AWS::IVS::EncoderConfiguration",
@@ -928,7 +1013,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "1266ab8064d51a55f73d684aa58206f18424a4081180b783b036512b90f1e626"
     },
     {
       "type": "AWS::IVS::IngestConfiguration",
@@ -937,7 +1023,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c10bef96283415927e33a767b0309164defb2066d08d0a467c681f13a9071ab1"
     },
     {
       "type": "AWS::IVS::PlaybackKeyPair",
@@ -946,7 +1033,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "640512550c28b72e8b0c77d211ac328b2b5b48ba2f2a962e049753f70fcf4809"
     },
     {
       "type": "AWS::IVS::PlaybackRestrictionPolicy",
@@ -955,7 +1043,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "def13819a4223baa7823beb7a7d07c2188fd1f23890390df761b7d07fe2160ff"
     },
     {
       "type": "AWS::IVS::PublicKey",
@@ -964,7 +1053,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "0b8b5e2e48d4a3923032ead068651cb8698028086c3acfaf82d80f6ff77fbcf0"
     },
     {
       "type": "AWS::IVS::RecordingConfiguration",
@@ -973,7 +1063,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "2d7a447ffb1b7f15ab02f7f56b437db4d85f6c98199d4a996e7bbac561a524e5"
     },
     {
       "type": "AWS::IVS::StorageConfiguration",
@@ -982,7 +1073,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c36780eacd40ae11f47d69265d80721ea79448c697992760e8dce93a0bc9d858"
     },
     {
       "type": "AWS::IVS::StreamKey",
@@ -992,7 +1084,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "03cc807db32b4461af7ac9b6c6e962feceae865cba3e74ff4a96f848dcc14589"
     },
     {
       "type": "AWS::IVSChat::Room",
@@ -1001,7 +1094,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c1b1b5fb192cc09646844cdbf5ac377ffc7f194f85cd529092ab38834481070f"
     },
     {
       "type": "AWS::ImageBuilder::LifecyclePolicy",
@@ -1010,7 +1104,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "baceace35bbbd774855abe18ad90b5b178aa4f7304b16889023811c117c7d359"
     },
     {
       "type": "AWS::InternetMonitor::Monitor",
@@ -1019,7 +1114,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "8d16ae967308a95e19314d81d2919e4e9c6da71a74272a7c9a06b8ad2ab2073b"
     },
     {
       "type": "AWS::Invoicing::ProcurementPortalPreference",
@@ -1028,7 +1124,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "6517ca958fc06f33a410fe69bf8aef52505a440bc6c31efe89ed464c150b4a5d"
     },
     {
       "type": "AWS::IoT::CustomMetric",
@@ -1038,7 +1135,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "a95d6e609833dfc925c0eb3008447a1f79ba73e6d37181afd06ebdf539f64cc3"
     },
     {
       "type": "AWS::IoT::Dimension",
@@ -1048,7 +1146,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "4932316e79f28104fc08d3b0fc43abe2c93cf5e4e64349c26aa4652e8235d077"
     },
     {
       "type": "AWS::IoT::FleetMetric",
@@ -1057,7 +1156,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c94783b37fd0fa717349928b8631f49bfa0df7c3222709b1252eb970fb07ab6a"
     },
     {
       "type": "AWS::IoT::RoleAlias",
@@ -1066,7 +1166,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4893b3e7ed6070cb8209ffbeae62a5f51c0ddd38454921b98b0681c12945b529"
     },
     {
       "type": "AWS::IoT::ScheduledAudit",
@@ -1075,7 +1176,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "898642d579f2fd0beaf9adaa5e88a63df0117793f3aea7ec98170af03ba99986"
     },
     {
       "type": "AWS::IoT::SoftwarePackage",
@@ -1084,7 +1186,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "119015196cdd25830b8b32a4d466c0bf008b6ee970843ba6f7e61dd4044aa1ee"
     },
     {
       "type": "AWS::IoT::TopicRuleDestination",
@@ -1093,7 +1196,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "fa3990c7a6694f733629516868ec764fe01d78ddc99be0b89ec1ea8f622ab20a"
     },
     {
       "type": "AWS::IoTCoreDeviceAdvisor::SuiteDefinition",
@@ -1102,7 +1206,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4448d9eaeaece0b6117c2fb18712c01d8e0503a024509f52f6e7152511d73be5"
     },
     {
       "type": "AWS::IoTFleetWise::Fleet",
@@ -1112,7 +1217,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "fa92754c33833877034484478e290e6d2ac1a79617fd3f5932038455f3321413"
     },
     {
       "type": "AWS::IoTFleetWise::StateTemplate",
@@ -1122,7 +1228,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "ac14531ef2408ecae1daa9b1276dd408c12d4ad653e35f2af77ba34597e2d7e6"
     },
     {
       "type": "AWS::IoTSiteWise::AccessPolicy",
@@ -1132,7 +1239,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "9a109fd3295fd4bcc4f75dd390e9690067f645993bf8e494afe20b172f6029cf"
     },
     {
       "type": "AWS::IoTSiteWise::ComputationModel",
@@ -1141,7 +1249,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "febe93f39ba7ddffb55e9fa704898f09453466dea2718c3708f55eaa97712541"
     },
     {
       "type": "AWS::IoTSiteWise::Dashboard",
@@ -1151,7 +1260,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "3ba11d98c3c8d29500f654f8b9729cd2786665d43bfb1d52d65d407f6dc30547"
     },
     {
       "type": "AWS::IoTSiteWise::Portal",
@@ -1160,7 +1270,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4bd029ebf92c62c22e4d8d1c031d3a44c6e1ae8cf9b745796ac5c10ba4dcbdee"
     },
     {
       "type": "AWS::IoTTwinMaker::Workspace",
@@ -1169,7 +1280,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a56b128ee4b396da066ed7f732809cb73a4689b69bfc408814d9dc9a91704a9b"
     },
     {
       "type": "AWS::IoTWireless::Destination",
@@ -1178,7 +1290,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "212d905620f5e72d877351ee4214f623d49bd2c236a773bbfbfb9a1f4b01a32a"
     },
     {
       "type": "AWS::IoTWireless::DeviceProfile",
@@ -1187,7 +1300,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "78721fdb4583bb244b9269ce0e5adc914d14b6022d2889b438490ae33d9c4ee2"
     },
     {
       "type": "AWS::IoTWireless::NetworkAnalyzerConfiguration",
@@ -1196,7 +1310,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "14a7935d4e1b43f151fdb9e815a33b97f5c83a86f89499b4151502d377e3a539"
     },
     {
       "type": "AWS::IoTWireless::ServiceProfile",
@@ -1205,7 +1320,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "96c85ee1a2da2d3d3ac8f0afb047cbe24e6977e5a40439a36258aedecc5a4b96"
     },
     {
       "type": "AWS::KafkaConnect::Connector",
@@ -1214,7 +1330,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "6bae375290beae17643e25cd7a9805379544da88be6e0cee150bcc4a9a719264"
     },
     {
       "type": "AWS::KendraRanking::ExecutionPlan",
@@ -1223,7 +1340,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "95fba2b12ae77ea86e0992496f0380a50d6676a114e809836a01a4b2175671dd"
     },
     {
       "type": "AWS::Kinesis::Channel",
@@ -1232,7 +1350,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "cce51671c4553da01c77d01e9e7dbc48b1d40863836a966d66505acea5835701"
     },
     {
       "type": "AWS::Kinesis::StreamConsumer",
@@ -1242,7 +1361,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: GeneralServiceException"
+      "note": "Cloud Control could not list the type: GeneralServiceException",
+      "override": "2a389f6ffeafecb44b93972d5bceba21aab98409377b2e18d62490cad5f8ce1a"
     },
     {
       "type": "AWS::LakeFormation::Tag",
@@ -1251,7 +1371,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "37aeaf8c20e5f2cff00b2e8a238779fd7bb88d3c7b38ccaf33faf946141a85cc"
     },
     {
       "type": "AWS::Lambda::CodeSigningConfig",
@@ -1260,7 +1381,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "85f1014984bb6e76cbd229423c850618977c19048b99956060bb08f7488379e7"
     },
     {
       "type": "AWS::Lambda::MicrovmImage",
@@ -1269,7 +1391,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "b38227661eeec8f90e65f9e118082207a453ee111f2e6febfc43b15a7abac994"
     },
     {
       "type": "AWS::LicenseManager::Grant",
@@ -1279,7 +1402,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "304c22d899e08852cfebbcdac1f88eeb3a47d192fa40f2acd3b943a825bede41"
     },
     {
       "type": "AWS::LicenseManager::License",
@@ -1289,7 +1413,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "d710170aaba6adf3cfd049e5d8bd90d7e590aaf095b5447606119ab5a8902260"
     },
     {
       "type": "AWS::LicenseManager::LicenseAssetGroup",
@@ -1299,7 +1424,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "6e5b8b38dd1f8f4ef36d67435a1116c0508d6117466058dc9b177fd9c381df40"
     },
     {
       "type": "AWS::LicenseManager::LicenseAssetRuleSet",
@@ -1309,7 +1435,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "6e286540fb82ae68a18b2e6501d151c2fea73ea59912b460e52a74f28b766f91"
     },
     {
       "type": "AWS::Logs::DeliverySource",
@@ -1318,7 +1445,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "11761f7367d5524c59920f71f89b0c9022641a1494bbb9fe270c68c3656ca247"
     },
     {
       "type": "AWS::Logs::Integration",
@@ -1327,7 +1455,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "f87b822b26e371c7a97818d940fbda34ae7f32222969b9b9619ce0fe2515877d"
     },
     {
       "type": "AWS::Logs::LogGroup",
@@ -1345,7 +1474,8 @@
         "RetentionInDays"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "469fda6b54953652c71ced60c6584b26a2c7ce691869d524691c7e327597801f"
     },
     {
       "type": "AWS::Logs::ScheduledQuery",
@@ -1354,7 +1484,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "1d4de574e84f4a156ef88b4e410781ce9c7bdf55369210269b34b40212f92b39"
     },
     {
       "type": "AWS::Logs::Transformer",
@@ -1363,7 +1494,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c606f7eb30e2a2e1e34c9181c88a64a253500181d9ae16cadf262e886853b38a"
     },
     {
       "type": "AWS::LookoutEquipment::InferenceScheduler",
@@ -1372,7 +1504,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a63bf7d408a6ce9cdef7dfe60f1147ed1a145122aca51ce6dcc75ae26e4df92e"
     },
     {
       "type": "AWS::M2::Application",
@@ -1381,7 +1514,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c4f89b63e0ab50f9243a10936a78458f74f50b798256738c11faedf5e1965d39"
     },
     {
       "type": "AWS::M2::Environment",
@@ -1390,7 +1524,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "499014feb490c19c0fff323438e9fdf22eb09d7ce24e8ec63a6c50e7c8930dca"
     },
     {
       "type": "AWS::MGN::NetworkMigrationDefinition",
@@ -1399,7 +1534,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "486966cf2ed32606c4a897adc57975643452f23b84a5c291cac39293032f74e0"
     },
     {
       "type": "AWS::MWAA::Environment",
@@ -1408,7 +1544,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "29278d3f1b42f370e3afd07545058eca13fb43dd354c25b47d1700eda6ad5c4e"
     },
     {
       "type": "AWS::Macie::CustomDataIdentifier",
@@ -1418,7 +1555,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "3c5428b1e2766ee3e79ce42a9ae70bc27c0d2beee6e9e32ec6f60d5db4962769"
     },
     {
       "type": "AWS::Macie::FindingsFilter",
@@ -1428,7 +1566,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "47e32a872d2636422ce57ab3d84f0a96f731cd9e771f81c7a00013cf84cd71ed"
     },
     {
       "type": "AWS::Macie::Member",
@@ -1438,7 +1577,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "7bb74f517c9542e1564e6c92b22c1f0afe6e620af90904cf4366fbe40720cfb8"
     },
     {
       "type": "AWS::MediaConnect::Bridge",
@@ -1447,7 +1587,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "681f016448d0e3545c706cc7e1f6d7530a068943d48e23fa11df99ebb1a4b435"
     },
     {
       "type": "AWS::MediaConnect::Gateway",
@@ -1456,7 +1597,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "ae9a182cce35846850aefb2cac1871305c5ef6ba7c6f397e4f9529bee82cb153"
     },
     {
       "type": "AWS::MediaConvert::Queue",
@@ -1472,7 +1614,8 @@
         "Name",
         "PricingPlan",
         "Status"
-      ]
+      ],
+      "override": "225545369dea20f732df60ea8522ec18a3a358dd6870c7a2888c1461be485be6"
     },
     {
       "type": "AWS::MediaLive::Cluster",
@@ -1481,7 +1624,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a29df9085cddbe40f37a3e26037448ae3822a2f4882208a85de475e3d21aedba"
     },
     {
       "type": "AWS::MediaLive::Network",
@@ -1490,7 +1634,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "03a7543f5fbf7a8dbcaf77e72f41a8e8afc7fe8e0dd5178d876a9e79d681ae28"
     },
     {
       "type": "AWS::MediaLive::SdiSource",
@@ -1499,7 +1644,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c83f7df9f0f79246d16eb9223bf2d885fb32de5cefbf14840d7fcd8b1f2a03ab"
     },
     {
       "type": "AWS::MediaPackage::Asset",
@@ -1509,7 +1655,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "72d27e11c10364d88127b21e13cf751a4a7a09ccbff6f93ec80a450b65f29832"
     },
     {
       "type": "AWS::MediaPackage::Channel",
@@ -1518,7 +1665,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "e8eafa01803195d96439aa1a4d530d6e82e18b3c10e0392be754e145a9a27ada"
     },
     {
       "type": "AWS::MediaPackage::OriginEndpoint",
@@ -1527,7 +1675,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "798682631ebf4cada74eba525a77c63aee0db26b6905bf75f4979e9bf95e900f"
     },
     {
       "type": "AWS::MediaPackage::PackagingConfiguration",
@@ -1537,7 +1686,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "81a89b1493276f9459ac82bb9e7b5e402975144b4cbfc4ee0087149edf97a6aa"
     },
     {
       "type": "AWS::MediaPackage::PackagingGroup",
@@ -1546,7 +1696,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "18c936baccad85404952b2154a5642efaf84dc93237941e543b91a514be680c7"
     },
     {
       "type": "AWS::MediaPackageV2::ChannelGroup",
@@ -1555,7 +1706,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "83e3483b31ece9ddfe66bce59b92248de7eb989ea15b9340e7b014d8bd6535b9"
     },
     {
       "type": "AWS::MediaTailor::Channel",
@@ -1564,7 +1716,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "5d9beb95650066c2c1e1be79a33ae4782c68efcbef264daeaea37386660b6959"
     },
     {
       "type": "AWS::MediaTailor::Function",
@@ -1573,7 +1726,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "aff1a2698da8df3232120fc315e677df6d93049b2a23c0041b81e4e8f20b624d"
     },
     {
       "type": "AWS::MediaTailor::SourceLocation",
@@ -1582,7 +1736,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "7a38ff649ea83dd2b5ff64e46de8108e32060c6c17dc142b82decdef371ca07c"
     },
     {
       "type": "AWS::NetworkFirewall::ContainerAssociation",
@@ -1591,7 +1746,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "2320c23f3133d238f9a4b89d8897ad18dfd426157f9382957ade349eed38fa94"
     },
     {
       "type": "AWS::Notifications::EventRule",
@@ -1601,7 +1757,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "601dbb874f1e7e1a968aaaa7096eaf86363cd1d982b02e553190b4d9a50571c6"
     },
     {
       "type": "AWS::Notifications::NotificationConfiguration",
@@ -1610,7 +1767,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "ca980bbde89908b5789cb7bce5ccf7dd534eba981710d4fefb11ab46f7bf105b"
     },
     {
       "type": "AWS::NovaAct::WorkflowDefinition",
@@ -1619,7 +1777,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "af6dd3e811a8e995c57ed7eb3411e2bad0e07285e42b45f865e79545c493f849"
     },
     {
       "type": "AWS::ODB::OdbNetwork",
@@ -1629,7 +1788,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "4372ad8c2ed4d373d6c3d472ebf98b18525ce005053531c22b532e85be847e67"
     },
     {
       "type": "AWS::ODB::OdbPeeringConnection",
@@ -1639,7 +1799,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "0a3b227c2385c50b97763c85a6cb79dc1702281b7827788828c7d0d957ffd125"
     },
     {
       "type": "AWS::Omics::Configuration",
@@ -1648,7 +1809,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "54f6ff3af6d30945c0c92a54b24388ae843651cfd5915a3324faed491bb2141f"
     },
     {
       "type": "AWS::Omics::RunCache",
@@ -1657,7 +1819,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "e30870b9b74548502a8e63017a07bbab040dc11976b23fc9127adcd3640b2872"
     },
     {
       "type": "AWS::Omics::RunGroup",
@@ -1666,7 +1829,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "bd782e764d1580517d51c2d4b9c9614f7ca27aedaf7aada8e19838623069043f"
     },
     {
       "type": "AWS::Omics::Workflow",
@@ -1675,7 +1839,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "312a01b8e64a1d90064c56b26e9cf820f1df20eb32663fc2e899171eb455e861"
     },
     {
       "type": "AWS::OpenSearchServerless::SecurityConfig",
@@ -1685,7 +1850,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "66c1aa622f8daeb3c369453ecdf4948ceeacbb7e0d51702f8c1d6fe1611d1ca6"
     },
     {
       "type": "AWS::Outposts::Outpost",
@@ -1694,7 +1860,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "612df13b81cbee43cf87e38c28cfa396a459979b339e9c80953fe6e08c6e4904"
     },
     {
       "type": "AWS::PCS::Cluster",
@@ -1703,7 +1870,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d4ca4f94296f6a1d6bd58c9fcd9a6db276f5dc248a76d8126d02ca70c4ff72e5"
     },
     {
       "type": "AWS::PaymentCryptography::Alias",
@@ -1712,7 +1880,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a64752e17d733217b5c4c868b754d5a358c359b6958e08893b425a0f6a09b24b"
     },
     {
       "type": "AWS::Personalize::DatasetGroup",
@@ -1721,7 +1890,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d24cb91ff24130df8e1db8d33c72ad278c7097e46ecab313331a5b6172ba4c89"
     },
     {
       "type": "AWS::Personalize::EventTracker",
@@ -1730,7 +1900,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "8d1f4253a04f07e49fcc80ef1f271305cc8db1cf3462920b074f95c1e82570b7"
     },
     {
       "type": "AWS::Personalize::Filter",
@@ -1739,7 +1910,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "8553954627e74d85e71760ae2040e53549ba52670da5a737e4396a05f2d2a8ac"
     },
     {
       "type": "AWS::Personalize::Schema",
@@ -1748,7 +1920,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "630805c188dd0d3d9715397d86c6818422e7a3b4a1e8eb6d3fd3c0523228c9f7"
     },
     {
       "type": "AWS::Personalize::Solution",
@@ -1757,7 +1930,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c010bc5bc37b85d02e3cc7ba3525a85f5fdf87455f02ab293dc90ddb6997e90d"
     },
     {
       "type": "AWS::Pinpoint::InAppTemplate",
@@ -1766,7 +1940,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "b18017d1593f4bb723ac296e98e45001fc7e64a3b7a38ceecff853fa0b454450"
     },
     {
       "type": "AWS::Pipes::Pipe",
@@ -1775,7 +1950,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "91c66149ed104caf2804a5d23850f52df0fc9941ad7620515635ddff98304220"
     },
     {
       "type": "AWS::Proton::EnvironmentAccountConnection",
@@ -1784,7 +1960,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4e2f91f575f328bc9f7d52f61b7d878fe06c4f37ef8144d1fac77e481926c9af"
     },
     {
       "type": "AWS::Proton::EnvironmentTemplate",
@@ -1793,7 +1970,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "1b112850a6d57b2b9c89a6824f365ef791fc6ca7b55c26a1a3baee0ba876348b"
     },
     {
       "type": "AWS::Proton::ServiceTemplate",
@@ -1802,7 +1980,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "3dc6735e2c2b626d613c7b92b32837d4d84b39f8b58532e52556b8d0b251c411"
     },
     {
       "type": "AWS::QBusiness::Application",
@@ -1811,27 +1990,30 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "6b2e3845ec49f0511d6494b1d2f56b157b68d4e274507b652807b4a02e145ba0"
     },
     {
       "type": "AWS::RDS::DBClusterParameterGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 2,
       "compared": [
         "DBClusterParameterGroupName",
         "Description",
-        "Family"
+        "Family",
+        "Tags"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "8da6b51ad000de6f76ff372b00760c8b2ef59e6726a6e79f5e4316e9dd3b3b4d"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 3,
@@ -1839,10 +2021,12 @@
         "DBSubnetGroupArn",
         "DBSubnetGroupDescription",
         "DBSubnetGroupName",
-        "SubnetIds"
+        "SubnetIds",
+        "Tags"
       ],
       "absence": "parity",
-      "probed": 1
+      "probed": 1,
+      "override": "1c401c1da2dbe2b9fce5a41222142e02c7dcf09c67b4c4a53b5c2a7a4c1671a3"
     },
     {
       "type": "AWS::ResilienceHubV2::Policy",
@@ -1851,7 +2035,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4ff2135132c140247081b57e034eb3971ce98aeae899b0b592c09b3a8625c88c"
     },
     {
       "type": "AWS::ResilienceHubV2::System",
@@ -1860,7 +2045,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "85a81d8ef6d9dd8314df09e3abbfef9ba7109247653e1b732721cc960d3bed06"
     },
     {
       "type": "AWS::RolesAnywhere::Profile",
@@ -1869,7 +2055,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "377de0753d08963bcb0bd8827680b5916ac032554d1ad404b2deb0fd1ded644f"
     },
     {
       "type": "AWS::Route53Profiles::Profile",
@@ -1878,7 +2065,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "70c4d796a847433128b0bf4cfa5c8b12009730441034d23e3312aaa4ebb7be9c"
     },
     {
       "type": "AWS::Route53Profiles::ProfileAssociation",
@@ -1887,7 +2075,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "e04211049f1507f69788f0e7490ec634872dfdf359ad5e24f5bae1ddb1854c7a"
     },
     {
       "type": "AWS::Route53Profiles::ProfileResourceAssociation",
@@ -1897,7 +2086,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "fac2e2fb22bf51cf5932f114979028454cf561bb9e131303691d0e081d9c4107"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::Cell",
@@ -1906,7 +2096,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "b827351cb903d1e5fcaa40e96995b2b26d1de4ef25a71ceed19dac901ffe627a"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::RecoveryGroup",
@@ -1915,7 +2106,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a28254e5ea9574f32dc204c369d0ff5a2f35d31d71878acdf48537da34eeabc6"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::ResourceSet",
@@ -1924,7 +2116,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "826284efed71be7a241e898efa2b022132fbce43536a34f4f757ede50f363d31"
     },
     {
       "type": "AWS::Route53Resolver::FirewallDomainList",
@@ -1934,7 +2127,8 @@
       "outcome": "oracle-unavailable",
       "instances": 0,
       "compared": [],
-      "note": "Cloud Control could not read any listed instance"
+      "note": "Cloud Control could not read any listed instance",
+      "override": "6a224ae35341c733972f4b860778b6be865279cdefb669161c2319731c35b6c2"
     },
     {
       "type": "AWS::Route53Resolver::FirewallRuleGroupAssociation",
@@ -1943,7 +2137,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "5887c8513c80ac4653779b8fc63f179f4ea5f58d4f91e3fef1c2653af9f2ad50"
     },
     {
       "type": "AWS::Route53Resolver::OutpostResolver",
@@ -1952,7 +2147,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "9b516e1ed48f89e1617b8298df81a20939017a7eecabb2c72565095526d84257"
     },
     {
       "type": "AWS::Route53Resolver::ResolverQueryLoggingConfig",
@@ -1961,7 +2157,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "068ee85cbe9885d1c26a5bf87f03cc7039e238d771e847855a30faeee727caf1"
     },
     {
       "type": "AWS::Route53Resolver::ResolverQueryLoggingConfigAssociation",
@@ -1970,7 +2167,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "84ca00c418c58d59c6f4237b91412b4a7ae167f586c12fd0f62e47a377fa8645"
     },
     {
       "type": "AWS::S3Vectors::VectorBucket",
@@ -1979,7 +2177,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "09fd5a6ba6ca8f03afaf3652ff8c87f46ecc2bce8c93e731fd80fe8823021241"
     },
     {
       "type": "AWS::SES::ContactList",
@@ -1988,7 +2187,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "57cfb6dfebc974fdc5d1dd350253718ef1dfb71bb0addebfbdbb7e4db18bddcd"
     },
     {
       "type": "AWS::SES::CustomVerificationEmailTemplate",
@@ -1997,7 +2197,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "9e256f1dc31967bd77f4e1d05f37b1f82872bff4148591ad7c6677c5ae81770b"
     },
     {
       "type": "AWS::SES::MailManagerAddressList",
@@ -2006,7 +2207,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "27e0f3a32112c2e9cbaccbdab8efff2ad396761c1c665adafa9f01e92174ba36"
     },
     {
       "type": "AWS::SES::MailManagerRuleSet",
@@ -2015,7 +2217,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "f5c01aa341505b50c411a53b43af8c0074efbd38729a42e5753dfc40066ad011"
     },
     {
       "type": "AWS::SES::MailManagerTrafficPolicy",
@@ -2024,7 +2227,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "1282b07467be006d2f0428523a55fdb0f0cfe56a87ffad7319adabb32886d709"
     },
     {
       "type": "AWS::SSM::Association",
@@ -2033,7 +2237,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c22c3228791562407ae889aba66db69ab583483ed66388ee2b8e8eef11f3bb33"
     },
     {
       "type": "AWS::SSM::MaintenanceWindow",
@@ -2042,7 +2247,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "98e11cc83a1dff3a8f44f0cd414c444249e27badf54396b44f7725b8968081b3"
     },
     {
       "type": "AWS::SSM::ServiceSetting",
@@ -2052,7 +2258,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "26d92d2465776fbfc4daad996127ea167e59d68b3efb0a17ffe89518381dd063"
     },
     {
       "type": "AWS::SSMQuickSetup::ConfigurationManager",
@@ -2061,7 +2268,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "fc301ceadc6bbdc67eac63d590a90c04a62bd8162016d54d1f3c0b9a3ac5c78d"
     },
     {
       "type": "AWS::SSO::Application",
@@ -2071,7 +2279,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "be4846a474454b514628b22f539ae47afc4df5691b05f93535655da1ae01b2c2"
     },
     {
       "type": "AWS::SSO::Instance",
@@ -2080,7 +2289,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "7014cace9dbd6a04e50ea1c642a19a0a3c8f4227bf783e9dfb4a985469159b85"
     },
     {
       "type": "AWS::SageMaker::Algorithm",
@@ -2089,7 +2299,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "92374cc752dfa6c33ea2b1b6f3c07dbcc625807db514ee70f6030b84e683e463"
     },
     {
       "type": "AWS::SageMaker::ClusterSchedulerConfig",
@@ -2098,7 +2309,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "5713168873e043eacb0de8ccb7fc206249caa2cb2632128a9d1545074390e134"
     },
     {
       "type": "AWS::SageMaker::CodeRepository",
@@ -2107,7 +2319,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "9a4c155c87e2da2620fb53480374f297bf9578324f27e94a66f913ba27976c5a"
     },
     {
       "type": "AWS::SageMaker::DeviceFleet",
@@ -2117,7 +2330,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: UnsupportedActionException"
+      "note": "Cloud Control could not list the type: UnsupportedActionException",
+      "override": "b0e5038b7486080ab012e0254e326f8eec0384d8732343c0f4b9fe2edbcd93e7"
     },
     {
       "type": "AWS::SageMaker::FeatureGroup",
@@ -2126,7 +2340,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "cfc3d72966698741cafdffe5c42cf7319eb69702925912b8da847754b1dc7717"
     },
     {
       "type": "AWS::SageMaker::Hub",
@@ -2135,7 +2350,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "da9062aaa7e58823904d15aaf6c3f3ed09fd3d4306a2e75e1b13a3e09b372dbf"
     },
     {
       "type": "AWS::SageMaker::HumanTaskUi",
@@ -2144,7 +2360,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "2b02ce69a2517f8f849852582c8b273b2f3ec344c4ebb7691f4498b2809ebbf4"
     },
     {
       "type": "AWS::SageMaker::MlflowTrackingServer",
@@ -2153,7 +2370,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c6786d3a97813dd7f7edaf1d085906f6edfe3ff20f052194a0953b297d0b3453"
     },
     {
       "type": "AWS::SageMaker::Model",
@@ -2162,7 +2380,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c7a60c2e6afd5cd29ee4657a60a4bf699dea383646115362522f1a17381fe7a5"
     },
     {
       "type": "AWS::SageMaker::ModelPackage",
@@ -2171,7 +2390,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "716a658043d55890c2307a6db7a598e80ef9a96a15c6f57138abba83fcd217bb"
     },
     {
       "type": "AWS::SageMaker::NotebookInstanceLifecycleConfig",
@@ -2180,7 +2400,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "bee1ff669085ee73213e15919336b999dee341c470a56484646f3ebc7d2ee445"
     },
     {
       "type": "AWS::SageMaker::ProcessingJob",
@@ -2189,7 +2410,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "5a8fe65d0725088fcd0b12dee7d319594f82688f5902a85f7eb57961c5895d65"
     },
     {
       "type": "AWS::SageMaker::Project",
@@ -2198,7 +2420,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "fbc98d8619ef9c5d6d047e4afb2b17c7d3fbf85d2d7f6e1e8aea80f20f8852af"
     },
     {
       "type": "AWS::SageMaker::StudioLifecycleConfig",
@@ -2207,7 +2430,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "ca2ffa66c701dcc1bb5e4ff604d19a151ac7854c9cb6afa976c6d341d81e5bf8"
     },
     {
       "type": "AWS::SageMaker::TrialComponent",
@@ -2216,7 +2440,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "12d2e2a9185d4653ce35b53cd9c37b61a3ba95fa4518dc9491abd538931576e0"
     },
     {
       "type": "AWS::Scheduler::Schedule",
@@ -2225,7 +2450,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d2b3f40821773cfb70fb42972379c30f733eb762bb5307e2275caa1fd8c9ccdc"
     },
     {
       "type": "AWS::Scheduler::ScheduleGroup",
@@ -2241,7 +2467,8 @@
       ],
       "differing": [
         "Arn"
-      ]
+      ],
+      "override": "4ba5284ac22f533d7ee86f9ad10bf72d38abd59e3cc6f3222905ebfd1a9f1522"
     },
     {
       "type": "AWS::SecurityAgent::Application",
@@ -2250,7 +2477,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "cb77be9e175f5a7b3a0ac24eca1a5cec1da208da1f5213d6366cdbb0d4631c7d"
     },
     {
       "type": "AWS::SecurityHub::AggregatorV2",
@@ -2260,7 +2488,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AlreadyExistsException"
+      "note": "Cloud Control could not list the type: AlreadyExistsException",
+      "override": "8a66e1209f1a2b1a70483b3e0e483eb8b144554405a48be21cd24159fa6c3053"
     },
     {
       "type": "AWS::SecurityHub::FindingAggregator",
@@ -2270,7 +2499,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: ResourceNotFoundException"
+      "note": "Cloud Control could not list the type: ResourceNotFoundException",
+      "override": "3be936a07cc0c7b401b3b702d14934b43c673feb96b00f70e96bb291d123e185"
     },
     {
       "type": "AWS::ServerlessRepo::Application",
@@ -2279,7 +2509,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d7c47dc77122be6fa19eb8698d70d2391297b185ddf7fed00e630f7283a08596"
     },
     {
       "type": "AWS::ServiceCatalog::TagOption",
@@ -2288,7 +2519,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "f819a4cc088ef3a79383cfd53dcfd6ea41d12a624acaede1e779ace83d1445d0"
     },
     {
       "type": "AWS::ServiceDiscovery::HttpNamespace",
@@ -2297,7 +2529,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "1fac83dc5f81168621426e326a8ba511553cb5c9779a309b4f91472b43db0a0e"
     },
     {
       "type": "AWS::Shield::ProtectionGroup",
@@ -2307,7 +2540,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: ResourceNotFoundException"
+      "note": "Cloud Control could not list the type: ResourceNotFoundException",
+      "override": "81c795aba7774a477a7562463444acec63ff1db225036e07fcaf3d34560f3a87"
     },
     {
       "type": "AWS::Signer::SigningProfile",
@@ -2316,7 +2550,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "b26316d58746c2ff3644bccd1aae23b130750562f031359aa21beaeec7503047"
     },
     {
       "type": "AWS::Timestream::InfluxDBCluster",
@@ -2325,7 +2560,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "de3405616fa52ab37518664190d3fc5f237c0597691df9df2b805f78b7cfdf1a"
     },
     {
       "type": "AWS::Timestream::InfluxDBInstance",
@@ -2334,7 +2570,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "01072c20c680449dec470396ea18cf44f4a6d0d7203a20ce6598afb36ee5b79d"
     },
     {
       "type": "AWS::Transfer::Certificate",
@@ -2343,7 +2580,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "01e0ac4ee7e5cccd072b5a896823233c23129eb7fa37625459b6cbc318234426"
     },
     {
       "type": "AWS::Transfer::Profile",
@@ -2352,7 +2590,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "e8bfb5467e8ec3a6a20c9b0a7d06b7cc1e1ecac051150a7d0c55e995f0bc3539"
     },
     {
       "type": "AWS::Transfer::Server",
@@ -2361,7 +2600,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4e4d33a694a8f3c70005dfb4075508db9e89bc678d849459cf53d2a2df180f17"
     },
     {
       "type": "AWS::Transfer::Workflow",
@@ -2370,7 +2610,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "87a47744b20112bef2caf1ad16b9f4dae6ffbbfa5c7ef8ff3a6f3c1cc33ad757"
     },
     {
       "type": "AWS::VerifiedPermissions::PolicyStoreAlias",
@@ -2379,7 +2620,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "f74502b0d9ff642cda93ff4926ba0201f9562c7af5b119e5e201d7bdc7cb6398"
     },
     {
       "type": "AWS::VoiceID::Domain",
@@ -2389,7 +2631,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: AccessDeniedException"
+      "note": "Cloud Control could not list the type: AccessDeniedException",
+      "override": "f11c50970ca93d0433366a6bcbcd06893bbd493a8442e81ffa3e660f41896869"
     },
     {
       "type": "AWS::VpcLattice::AccessLogSubscription",
@@ -2399,7 +2642,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "5c34eedb1936394e7eabd83dc3ba42bc79abd1e3829e0e0d4abadd8fca9c68f8"
     },
     {
       "type": "AWS::VpcLattice::DomainVerification",
@@ -2408,7 +2652,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "d1bf1c468827b3beed3c6a009f6771094f60f83a89dcff8c99de1638054e586e"
     },
     {
       "type": "AWS::VpcLattice::Service",
@@ -2417,7 +2662,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "f981b14faa708e3ed35b73e8992a39cf75736a4d46b741c68feee3196ac6e2aa"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetwork",
@@ -2426,7 +2672,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4e943e2d979220b73bd5e1b7daec85e2737526a8dfc0ffffbb411f235fdf1c63"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkResourceAssociation",
@@ -2435,7 +2682,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "42b5002590e0f229839be2b0cd78d61da58f1e16e4a9b00e43d5e7566e9a5b3a"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkServiceAssociation",
@@ -2445,7 +2693,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "d2394c2c37efb10fcef56279a5b4355652bb6711975bd5efce9671d0954602b1"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkVpcAssociation",
@@ -2455,7 +2704,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "89415d4d1d387fca569550725cf0037579e5089d77cfa5f7388cf7f24b06e398"
     },
     {
       "type": "AWS::WellArchitected::AgentProfile",
@@ -2464,7 +2714,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "6ecaa0e402f7edcf3422c4cf702fe629dff77e6aedabe1142b4fd50c805581c1"
     },
     {
       "type": "AWS::WellArchitected::Profile",
@@ -2473,7 +2724,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "4b269a89e322398b07ce0008518f73b74988dab0faa406ad4f3c47807120d20c"
     },
     {
       "type": "AWS::WellArchitected::ReviewTemplate",
@@ -2482,7 +2734,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "a9ba4939cdac1ff56359045b36c5c0d68a47d1ea4b3b12b650ddfa02a39adfe6"
     },
     {
       "type": "AWS::WellArchitected::Workload",
@@ -2491,7 +2744,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "b2fe78835f0b93ae8caca4e82e428f6225ad7f4f57d86a27715d8d2facfba123"
     },
     {
       "type": "AWS::Wickr::Network",
@@ -2500,7 +2754,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "c1f9c73d45f3a4ce952929176f59186a4da87c0520d5be70f2994629ce758943"
     },
     {
       "type": "AWS::WorkSpacesWeb::BrowserSettings",
@@ -2509,7 +2764,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "57526ccfa82fac617069f79eaebf468574a023078c2845180b4e2fdb3e42b0e2"
     },
     {
       "type": "AWS::WorkSpacesWeb::DataProtectionSettings",
@@ -2518,7 +2774,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "2d4e8e2287b5538003a4d0e937cb8dd5acbc184af8c8f755a2d84785bd8d38d2"
     },
     {
       "type": "AWS::WorkSpacesWeb::IdentityProvider",
@@ -2528,7 +2785,8 @@
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
-      "note": "Cloud Control could not list the type: InvalidRequestException"
+      "note": "Cloud Control could not list the type: InvalidRequestException",
+      "override": "597f467d133be782eb44778fa86f18c671b2b7139c2a424a6ce39e7484a1bef3"
     },
     {
       "type": "AWS::WorkSpacesWeb::IpAccessSettings",
@@ -2537,7 +2795,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "1d701134d15f2a9d328f9f658b3f1958e3a815db58e375602a5aff51961763ad"
     },
     {
       "type": "AWS::WorkSpacesWeb::NetworkSettings",
@@ -2546,7 +2805,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "6f4ce10c07fa926d42bbb41649e7f486ffe37b9d475b326001febb3b88a7c9d7"
     },
     {
       "type": "AWS::WorkSpacesWeb::UserAccessLoggingSettings",
@@ -2555,7 +2815,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "cd016bd0dd730bbad03255dff580e0a8a4aaa31706e890afa415f25bd297a118"
     },
     {
       "type": "AWS::WorkspacesInstances::WorkspaceInstance",
@@ -2564,7 +2825,8 @@
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
-      "compared": []
+      "compared": [],
+      "override": "cd5217f9115cd377ef60c0dc7bcbba6dee28ee9303e5bcf6907ec553c866396e"
     },
     {
       "type": "AWS::XRay::Group",
@@ -2577,7 +2839,8 @@
         "GroupARN",
         "GroupName",
         "InsightsConfiguration"
-      ]
+      ],
+      "override": "53ef54d3b0108dc5e2b902bf5239dad1068a2049c5361f876187380d5f181f08"
     }
   ]
 }

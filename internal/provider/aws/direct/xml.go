@@ -90,14 +90,14 @@ func (n *xmlNode) items(name, item string) (items []*xmlNode, present bool) {
 
 // readXML finds the resource in an XML response by r's wrapper and path,
 // and translates it.
-func (r Reader) readXML(body []byte, w *walk) (map[string]any, error) {
+func (r Reader) readXML(body []byte, w *walk) (props, captured map[string]any, err error) {
 	node, err := parseXML(body)
 	if err != nil {
-		return nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
+		return nil, nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
 	}
 	if r.Wrapper != "" {
 		if node = node.child(r.Wrapper); node == nil {
-			return nil, fmt.Errorf("the %s response has no %s", r.Type, r.Wrapper)
+			return nil, nil, fmt.Errorf("the %s response has no %s", r.Type, r.Wrapper)
 		}
 	}
 	if len(r.PageToken) > 0 {
@@ -108,39 +108,42 @@ func (r Reader) readXML(body []byte, w *walk) (map[string]any, error) {
 			}
 		}
 		if token != nil && token.text != "" {
-			return nil, errIncomplete(r.Type)
+			return nil, nil, errIncomplete(r.Type)
 		}
 	}
 	root := node
 	for _, step := range r.Response {
 		if !step.List {
 			if node = node.child(step.Name); node == nil {
-				return nil, fmt.Errorf("the %s response has no resource at %s", r.Type, r.responsePath())
+				return nil, nil, fmt.Errorf("the %s response has no resource at %s", r.Type, r.responsePath())
 			}
 			continue
 		}
 		items, _ := node.items(step.Name, step.Item)
 		if len(items) == 0 {
-			return nil, ErrAbsent
+			return nil, nil, ErrAbsent
 		}
 		if len(items) != 1 {
-			return nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", r.Type, len(items), step.Name)
+			return nil, nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", r.Type, len(items), step.Name)
 		}
 		node = items[0]
 	}
-	props, err := r.finish(func(fields []Field, fromRoot bool) map[string]any {
+	props, err = r.finish(func(fields []Field, fromRoot bool) map[string]any {
 		if fromRoot {
 			return translateXML(w, root, fields)
 		}
 		return translateXML(w, node, fields)
 	})
 	if err == nil {
+		captured = translateXML(w, node, r.Capture)
+	}
+	if err == nil {
 		err = errors.Join(w.errs...)
 	}
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return props, nil
+	return props, captured, nil
 }
 
 // translateXML reads fields from n as translate reads them from JSON: keyed

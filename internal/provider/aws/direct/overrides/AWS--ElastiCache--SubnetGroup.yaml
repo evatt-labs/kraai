@@ -4,25 +4,27 @@ read:
   operation: DescribeCacheSubnetGroups
   identifier:
     CacheSubnetGroupName: CacheSubnetGroupName
-  # DescribeCacheSubnetGroups filters by one name, not a list, and answers
-  # with a list of the one group; unlike EC2's filtered describes, a name
-  # matching nothing is a CacheSubnetGroupNotFoundFault, not an empty list.
-  # See the report: this override cannot turn that fault into absence.
+  # DescribeCacheSubnetGroups filters by one name and answers with a list;
+  # a name matching nothing is CacheSubnetGroupNotFoundFault, not an empty
+  # list.
   response: CacheSubnetGroups[]
+  capture:
+    Arn: ARN
 properties:
   CacheSubnetGroupName: CacheSubnetGroupName
   Description: CacheSubnetGroupDescription
   SubnetIds:
     member: Subnets[].SubnetIdentifier
-skip:
-  # ListTagsForResource takes ResourceName as an ARN, not the subnet group
-  # name; the ARN is only known from this read's own response (ARN), and
-  # an also call's identifier may bind only the primary identifier
-  # CacheSubnetGroupName, so there is no construct in this vocabulary that
-  # reaches the tags. See the report for the two candidate constructs this
-  # would need. Proven: identifier: { ARN: ResourceName } fails to compile
-  # with "identifier binds ARN, which is not the primary identifier
-  # [/properties/CacheSubnetGroupName]".
-  Tags: "ListTagsForResource needs an ARN this override cannot chain from ARN; see report"
+also:
+  # Tags are read by ARN, which only the read's response carries.
+  - operation: ListTagsForResource
+    input:
+      ResourceName: "{Arn}"
+    properties:
+      Tags:
+        member: TagList
+        properties:
+          Key: Key
+          Value: Value
 absentIds:
   - kraai-absent-probe-subnetgroup

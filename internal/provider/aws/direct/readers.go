@@ -2842,6 +2842,8 @@ var readers = map[string]Reader{
 		Type:        "AWS::ElastiCache::SubnetGroup",
 		Protocol:    "awsQuery",
 		SigningName: "elasticache",
+		Complete:    true,
+		Production:  true,
 		Host:        "elasticache.{region}.amazonaws.com",
 		Action:      "DescribeCacheSubnetGroups",
 		Version:     "2015-02-02",
@@ -2857,6 +2859,31 @@ var readers = map[string]Reader{
 			{Property: "SubnetIds", Member: "SubnetIdentifier", Kind: "scalar", Via: []Step{{Name: "Subnets", List: true, Item: "Subnet"}}, XMLName: "SubnetIdentifier", Scalar: "string"},
 		},
 		AbsentIDs: []string{"kraai-absent-probe-subnetgroup"},
+		Capture: []Field{
+			{Property: "Arn", Member: "ARN", Kind: "scalar", XMLName: "ARN", Scalar: "string"},
+		},
+		Also: []Reader{
+			{
+				Type:        "AWS::ElastiCache::SubnetGroup",
+				Protocol:    "awsQuery",
+				SigningName: "elasticache",
+				Host:        "elasticache.{region}.amazonaws.com",
+				Action:      "ListTagsForResource",
+				Version:     "2015-02-02",
+				Wrapper:     "ListTagsForResourceResult",
+				Input: []Binding{
+					Binding{Member: "ResourceName", Location: "form", Name: "ResourceName", Value: "{Arn}"},
+				},
+				Fields: []Field{
+					{Property: "Tags", Member: "TagList", Kind: "list", XMLName: "TagList", Item: "Tag",
+						Fields: []Field{
+							{Property: "Key", Member: "Key", Kind: "scalar", XMLName: "Key", Scalar: "string"},
+							{Property: "Value", Member: "Value", Kind: "scalar", XMLName: "Value", Scalar: "string"},
+						},
+					},
+				},
+			},
+		},
 	},
 	"AWS::ElasticLoadBalancingV2::TargetGroup": {
 		Type:        "AWS::ElasticLoadBalancingV2::TargetGroup",
@@ -7323,11 +7350,38 @@ var readers = map[string]Reader{
 			{Property: "Family", Member: "DBParameterGroupFamily", Kind: "scalar", XMLName: "DBParameterGroupFamily", Scalar: "string"},
 		},
 		AbsentIDs: []string{"kraai-absent-probe"},
+		Capture: []Field{
+			{Property: "Arn", Member: "DBClusterParameterGroupArn", Kind: "scalar", XMLName: "DBClusterParameterGroupArn", Scalar: "string"},
+		},
+		Also: []Reader{
+			{
+				Type:        "AWS::RDS::DBClusterParameterGroup",
+				Protocol:    "awsQuery",
+				SigningName: "rds",
+				Host:        "rds.{region}.amazonaws.com",
+				Action:      "ListTagsForResource",
+				Version:     "2014-10-31",
+				Wrapper:     "ListTagsForResourceResult",
+				Input: []Binding{
+					Binding{Member: "ResourceName", Location: "form", Name: "ResourceName", Value: "{Arn}"},
+				},
+				Fields: []Field{
+					{Property: "Tags", Member: "TagList", Kind: "list", XMLName: "TagList", Item: "Tag",
+						Fields: []Field{
+							{Property: "Key", Member: "Key", Kind: "scalar", XMLName: "Key", Scalar: "string"},
+							{Property: "Value", Member: "Value", Kind: "scalar", XMLName: "Value", Scalar: "string"},
+						},
+					},
+				},
+			},
+		},
 	},
 	"AWS::RDS::DBSubnetGroup": {
 		Type:        "AWS::RDS::DBSubnetGroup",
 		Protocol:    "awsQuery",
 		SigningName: "rds",
+		Complete:    true,
+		Production:  true,
 		Host:        "rds.{region}.amazonaws.com",
 		Action:      "DescribeDBSubnetGroups",
 		Version:     "2014-10-31",
@@ -7344,6 +7398,31 @@ var readers = map[string]Reader{
 			{Property: "SubnetIds", Member: "SubnetIdentifier", Kind: "scalar", Via: []Step{{Name: "Subnets", List: true, Item: "Subnet"}}, XMLName: "SubnetIdentifier", Scalar: "string"},
 		},
 		AbsentIDs: []string{"kraai-absent-probe-0123456789"},
+		Capture: []Field{
+			{Property: "Arn", Member: "DBSubnetGroupArn", Kind: "scalar", XMLName: "DBSubnetGroupArn", Scalar: "string"},
+		},
+		Also: []Reader{
+			{
+				Type:        "AWS::RDS::DBSubnetGroup",
+				Protocol:    "awsQuery",
+				SigningName: "rds",
+				Host:        "rds.{region}.amazonaws.com",
+				Action:      "ListTagsForResource",
+				Version:     "2014-10-31",
+				Wrapper:     "ListTagsForResourceResult",
+				Input: []Binding{
+					Binding{Member: "ResourceName", Location: "form", Name: "ResourceName", Value: "{Arn}"},
+				},
+				Fields: []Field{
+					{Property: "Tags", Member: "TagList", Kind: "list", XMLName: "TagList", Item: "Tag",
+						Fields: []Field{
+							{Property: "Key", Member: "Key", Kind: "scalar", XMLName: "Key", Scalar: "string"},
+							{Property: "Value", Member: "Value", Kind: "scalar", XMLName: "Value", Scalar: "string"},
+						},
+					},
+				},
+			},
+		},
 	},
 	"AWS::ResilienceHubV2::Policy": {
 		Type:        "AWS::ResilienceHubV2::Policy",

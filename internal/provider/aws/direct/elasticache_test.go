@@ -26,12 +26,10 @@ const subnetGroupXML = `<DescribeCacheSubnetGroupsResponse>
   </DescribeCacheSubnetGroupsResult>
 </DescribeCacheSubnetGroupsResponse>`
 
-// DescribeCacheSubnetGroups answers a filtered read with the group's own
-// properties and its subnets projected to their identifiers; VpcId and ARN
-// carry no CloudFormation property and are not read. Tags is this
-// override's documented gap and is not asked for.
+// DescribeCacheSubnetGroups answers with the group and its subnets
+// projected to their identifiers; tags are read by the ARN it captured.
 func TestReadElastiCacheSubnetGroup(t *testing.T) {
-	client, forms := xmlServer(t, 200, subnetGroupXML)
+	client, forms := xmlServerBy(t, map[string]string{"DescribeCacheSubnetGroups": subnetGroupXML, "ListTagsForResource": tagsXML})
 	got, err := client.Read(context.Background(), subnetGroups, map[string]string{"CacheSubnetGroupName": "kraai-test-subnetgroup"})
 	if err != nil {
 		t.Fatal(err)
@@ -40,6 +38,7 @@ func TestReadElastiCacheSubnetGroup(t *testing.T) {
 		"CacheSubnetGroupName": "kraai-test-subnetgroup",
 		"Description":          "a description",
 		"SubnetIds":            []any{"subnet-1", "subnet-2"},
+		"Tags":                 []any{map[string]any{"Key": "team", "Value": "cloud"}},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Read = %#v\nwant   %#v", got, want)
@@ -50,5 +49,8 @@ func TestReadElastiCacheSubnetGroup(t *testing.T) {
 	}
 	if !reflect.DeepEqual((*forms)[0], want1) {
 		t.Fatalf("form = %v\nwant  %v", (*forms)[0], want1)
+	}
+	if arn := tagForm(t, *forms).Get("ResourceName"); arn != "arn:aws:elasticache:us-east-1:1:subnetgroup:kraai-test-subnetgroup" {
+		t.Fatalf("tags ResourceName = %q, want the captured ARN", arn)
 	}
 }

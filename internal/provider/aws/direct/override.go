@@ -70,6 +70,10 @@ type Read struct {
 	// mean the instance is gone although the service still returns it,
 	// such as a status of INACTIVE.
 	Absent map[string][]string `yaml:"absent,omitempty"`
+	// Capture names string members of the resource structure, as dotted
+	// paths, that a further call's input may use as {Name}: a value only
+	// the read's own response carries, such as the ARN a tag call takes.
+	Capture map[string]string `yaml:"capture,omitempty"`
 }
 
 // List names the operation that lists every instance of a type, for a type

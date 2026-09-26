@@ -6,17 +6,24 @@ read:
     DBSubnetGroupName: DBSubnetGroupName
   # DescribeDBSubnetGroups filters by a single name and answers with a list.
   response: DBSubnetGroups[]
+  capture:
+    Arn: DBSubnetGroupArn
 properties:
   DBSubnetGroupArn: DBSubnetGroupArn
   DBSubnetGroupDescription: DBSubnetGroupDescription
   DBSubnetGroupName: DBSubnetGroupName
   SubnetIds:
     member: Subnets[].SubnetIdentifier
-skip:
-  # ListTagsForResource takes the resource ARN as ResourceName.
-  # DBSubnetGroupArn is mapped above, but a further call may only be
-  # addressed by the primary identifier (DBSubnetGroupName); nothing
-  # threads a mapped response value, or {region}/{account}, into one.
-  Tags: ListTagsForResource needs the ARN, which no further call can be addressed by
+also:
+  # Tags are read by ARN, which only the read's response carries.
+  - operation: ListTagsForResource
+    input:
+      ResourceName: "{Arn}"
+    properties:
+      Tags:
+        member: TagList
+        properties:
+          Key: Key
+          Value: Value
 absentIds:
   - kraai-absent-probe-0123456789

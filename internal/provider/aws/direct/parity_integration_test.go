@@ -66,7 +66,11 @@ func TestReadParity(t *testing.T) {
 		if len(only) > 0 && !only[r.Type] {
 			continue
 		}
-		e := TypeEvidence{Type: r.Type, SmithyCommit: lock.SmithyCommit, Date: time.Now().UTC().Format("2006-01-02"), Region: region}
+		hash, err := OverrideHash(r.Type)
+		if err != nil {
+			t.Fatal(err)
+		}
+		e := TypeEvidence{Type: r.Type, SmithyCommit: lock.SmithyCommit, Date: time.Now().UTC().Format("2006-01-02"), Region: region, Override: hash}
 		t.Run(r.Type, func(t *testing.T) {
 			e = readParity(ctx, t, cc, client, r, e, perType)
 		})

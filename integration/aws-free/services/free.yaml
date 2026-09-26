@@ -58,17 +58,20 @@ services:
         properties:
           DBSubnetGroupDescription: kraai integration
           SubnetIds: ["${SUBNET_A.SubnetId}", "${SUBNET_B.SubnetId}"]
+          Tags: [{ Key: team, Value: kraai }]
       - binding: CLUSTER_PARAMS
         type: AWS::RDS::DBClusterParameterGroup
         properties:
           Description: kraai integration
           Family: aurora-postgresql16
           Parameters: { timezone: UTC }
+          Tags: [{ Key: team, Value: kraai }]
       - binding: CACHE_SUBNETS
         type: AWS::ElastiCache::SubnetGroup
         properties:
           Description: kraai integration
           SubnetIds: ["${SUBNET_A.SubnetId}", "${SUBNET_B.SubnetId}"]
+          Tags: [{ Key: team, Value: kraai }]
 
       # Log groups hold no data, and a cluster with no services runs nothing.
       # Container Insights is left disabled, as enabled it bills metrics.
