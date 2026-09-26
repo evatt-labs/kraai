@@ -80,11 +80,16 @@ plan-examples:
 schema-index:
 	go generate ./internal/provider/aws/cfschema
 
-# Needs the network and AWS credentials: fetches, at the commit lock.json
-# pins, the Smithy models and CloudFormation schemas the direct overrides
-# name, and rewrites the checked-in subset. Pass COMMIT=<sha> to move the pin.
+# Needs the network and, for schemas not yet in lock.json, AWS credentials:
+# fetches, at the commit lock.json pins, the Smithy models and CloudFormation
+# schemas the direct overrides name, and rewrites the checked-in subset. Pass
+# COMMIT=<sha> to move the pin. By default a schema already locked for a type
+# an override still names is kept rather than re-fetched live; REFRESH=1
+# re-fetches every schema. SCHEMAS=<dir>, for example
+# ~/.cache/kraai/cfschema/us-east-1, reads raw schemas from a local cache
+# instead of calling DescribeType and needs no AWS credentials.
 direct-extract:
-	cd internal/provider/aws/direct && go run extract.go $(if $(COMMIT),-commit $(COMMIT))
+	cd internal/provider/aws/direct && go run extract.go $(if $(COMMIT),-commit $(COMMIT)) $(if $(REFRESH),-refresh) $(if $(SCHEMAS),-schemas $(SCHEMAS))
 
 # Read-only, needs AWS credentials: reads each direct type's live instances
 # both directly and through Cloud Control and compares them. UPDATE=1
