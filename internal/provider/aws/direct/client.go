@@ -34,6 +34,9 @@ type Client struct {
 	Endpoint func(host string) string
 	// Now is the signing clock; nil is time.Now.
 	Now func() time.Time
+	// Wait bounds how long a mutation waits for a read to show it, and Poll
+	// is how often it reads meanwhile; zero is two minutes and two seconds.
+	Wait, Poll time.Duration
 }
 
 // APIError is a service's refusal of a read.

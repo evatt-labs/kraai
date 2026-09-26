@@ -42,6 +42,17 @@ type Reader struct {
 	Also []Reader
 	// Capture reads, keyed by Property, the values Also calls may name.
 	Capture []Field
+	// Create, Update and Delete are the compiled mutations; see Override.
+	Create *MutationCall
+	Update []MutationCall
+	Delete *MutationCall
+	// LifecycleComplete is true when every property an update can change
+	// has an update call: with Production and lifecycle evidence, the only
+	// readers a mutation may use in place of Cloud Control.
+	LifecycleComplete bool
+	// Mutable is true when the type may be created, updated and deleted
+	// directly; see LifecycleComplete.
+	Mutable bool
 	// When is the read properties, and their values, an Also call is made
 	// for; see Call.When.
 	When []Condition
@@ -316,6 +327,9 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		}
 	}
 	r.AbsentIDs = o.AbsentIDs
+	if o.Create != nil || o.Update != nil || o.Delete != nil {
+		errs = append(errs, compileMutations(files, lock, o, &r)...)
+	}
 	return r, errs
 }
 

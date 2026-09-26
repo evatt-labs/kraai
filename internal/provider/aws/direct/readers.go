@@ -8764,7 +8764,14 @@ var readers = map[string]Reader{
 			{Property: "SqsManagedSseEnabled", Member: "Attributes", Kind: "scalar", Transform: "boolean", Key: "SqsManagedSseEnabled"},
 			{Property: "VisibilityTimeout", Member: "Attributes", Kind: "scalar", Transform: "number", Key: "VisibilityTimeout"},
 		},
-		AbsentIDs: []string{"https://sqs.{region}.amazonaws.com/{account}/kraai-absent-probe"},
+		AbsentIDs:         []string{"https://sqs.{region}.amazonaws.com/{account}/kraai-absent-probe"},
+		LifecycleComplete: true,
+		Create:            &MutationCall{Operation: "CreateQueue", Target: "AmazonSQS.CreateQueue", NameProperty: "QueueName", NameTag: "kraai:resource-name", Input: map[string]any{"Attributes": map[string]any{"ContentBasedDeduplication": "{ContentBasedDeduplication:string}", "DeduplicationScope": "{DeduplicationScope}", "DelaySeconds": "{DelaySeconds:string}", "FifoQueue": "{FifoQueue:string}", "FifoThroughputLimit": "{FifoThroughputLimit}", "KmsDataKeyReusePeriodSeconds": "{KmsDataKeyReusePeriodSeconds:string}", "KmsMasterKeyId": "{KmsMasterKeyId}", "MaximumMessageSize": "{MaximumMessageSize:string}", "MessageRetentionPeriod": "{MessageRetentionPeriod:string}", "ReceiveMessageWaitTimeSeconds": "{ReceiveMessageWaitTimeSeconds:string}", "RedriveAllowPolicy": "{RedriveAllowPolicy:json}", "RedrivePolicy": "{RedrivePolicy:json}", "SqsManagedSseEnabled": "{SqsManagedSseEnabled:string}", "VisibilityTimeout": "{VisibilityTimeout:string}"}, "QueueName": "{QueueName}", "tags": "{Tags:entries}"}, RetryErrors: []string{"QueueDeletedRecently"}, Identifier: map[string]string{"QueueUrl": "QueueUrl"}},
+		Delete:            &MutationCall{Operation: "DeleteQueue", Target: "AmazonSQS.DeleteQueue", Input: map[string]any{"QueueUrl": "{QueueUrl}"}, AbsentErrors: []string{"QueueDoesNotExist"}},
+		Update: []MutationCall{
+			MutationCall{Operation: "SetQueueAttributes", Target: "AmazonSQS.SetQueueAttributes", Input: map[string]any{"Attributes": map[string]any{"ContentBasedDeduplication": "{ContentBasedDeduplication:string}", "DeduplicationScope": "{DeduplicationScope}", "DelaySeconds": "{DelaySeconds:string}", "FifoThroughputLimit": "{FifoThroughputLimit}", "KmsDataKeyReusePeriodSeconds": "{KmsDataKeyReusePeriodSeconds:string}", "KmsMasterKeyId": "{KmsMasterKeyId}", "MaximumMessageSize": "{MaximumMessageSize:string}", "MessageRetentionPeriod": "{MessageRetentionPeriod:string}", "ReceiveMessageWaitTimeSeconds": "{ReceiveMessageWaitTimeSeconds:string}", "RedriveAllowPolicy": "{RedriveAllowPolicy:json}", "RedrivePolicy": "{RedrivePolicy:json}", "SqsManagedSseEnabled": "{SqsManagedSseEnabled:string}", "VisibilityTimeout": "{VisibilityTimeout:string}"}, "QueueUrl": "{QueueUrl}"}, Properties: []string{"ContentBasedDeduplication", "DeduplicationScope", "DelaySeconds", "FifoThroughputLimit", "KmsDataKeyReusePeriodSeconds", "KmsMasterKeyId", "MaximumMessageSize", "MessageRetentionPeriod", "ReceiveMessageWaitTimeSeconds", "RedriveAllowPolicy", "RedrivePolicy", "SqsManagedSseEnabled", "VisibilityTimeout"}},
+			MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "TagQueue", Target: "AmazonSQS.TagQueue", Input: map[string]any{"QueueUrl": "{QueueUrl}", "Tags": "{added:entries}"}}, Remove: &MutationCall{Operation: "UntagQueue", Target: "AmazonSQS.UntagQueue", Input: map[string]any{"QueueUrl": "{QueueUrl}", "TagKeys": "{removed}"}}},
+		},
 		Also: []Reader{
 			{
 				Type:        "AWS::SQS::Queue",
@@ -8780,6 +8787,7 @@ var readers = map[string]Reader{
 				},
 			},
 		},
+		Mutable: true,
 	},
 	"AWS::SSM::Association": {
 		Type:        "AWS::SSM::Association",

@@ -574,7 +574,7 @@
     "sqs/service/2012-11-05/sqs-2012-11-05.json": {
       "file": "models/sqs-2012-11-05.json",
       "sourceSha256": "f34a7d2560fb9776206fb35958b8d0fc5f17d33f377bb7512d55a34a8c0c78f0",
-      "subsetSha256": "9bf6486a66611747d0f6e46409eeefd40a3764ed6790714ccf40a1ca7a243ad2"
+      "subsetSha256": "cb9ddaf9530f61cbaa3a7442fd35729753744a0dc2543e00ec6eb3730b51dd7a"
     },
     "ssm-quicksetup/service/2018-05-10/ssm-quicksetup-2018-05-10.json": {
       "file": "models/ssm-quicksetup-2018-05-10.json",

@@ -28,6 +28,14 @@ type Override struct {
 	// Also names further calls whose responses carry properties the read
 	// does not, each addressed by the same identifier.
 	Also []Call `yaml:"also,omitempty"`
+	// Create, Update and Delete mutate an instance through the service's
+	// own API, used only once the type has lifecycle evidence.
+	Create *Create      `yaml:"create,omitempty"`
+	Update []UpdateCall `yaml:"update,omitempty"`
+	Delete *Mutation    `yaml:"delete,omitempty"`
+	// Lifecycle is the values the lifecycle harness creates an instance
+	// with, then sets one property at a time.
+	Lifecycle *Lifecycle `yaml:"lifecycle,omitempty"`
 	// AbsentIDs are identifiers of instances that do not exist, for the
 	// read-parity harness to prove the direct read agrees on absence of a
 	// type whose service never describes a gone instance. {account} and
@@ -176,3 +184,62 @@ func (m Mapping) MarshalYAML() (any, error) {
 
 // String is for error messages.
 func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
+
+// Mutation is one call that changes an instance. Input is the operation's
+// input as templates: a string that is exactly {Property} or
+// {Property:filter} is that property's desired value, and a template whose
+// property is not being set is left out. The filters are json, a value
+// sent as its JSON text; string, a number or boolean sent as text; and
+// entries, a list of Key/Value structures sent as a map.
+type Mutation struct {
+	Operation string         `yaml:"operation"`
+	Input     map[string]any `yaml:"input,omitempty"`
+	// AbsentErrors names the error codes that mean the instance is already
+	// gone, which a delete takes as done.
+	AbsentErrors []string `yaml:"absentErrors,omitempty"`
+	// RetryErrors names the error codes that mean the call can succeed if
+	// made again shortly, such as a name still held after a delete; the
+	// call is retried within the mutation's wait.
+	RetryErrors []string `yaml:"retryErrors,omitempty"`
+}
+
+// Create is the call that creates an instance, and where its identifier is
+// in the response.
+type Create struct {
+	Mutation `yaml:",inline"`
+	// Identifier maps the primary identifier to the output member that
+	// carries it.
+	Identifier map[string]string `yaml:"identifier"`
+	// Name fills a name property the manifest leaves unset from the value
+	// of a tag the desired state carries, so a create that is retried names
+	// the instance it made rather than a second one.
+	Name *NameFrom `yaml:"name,omitempty"`
+}
+
+// NameFrom is a name property filled from a tag's value.
+type NameFrom struct {
+	Property string `yaml:"property"`
+	Tag      string `yaml:"tag"`
+}
+
+// UpdateCall is one call that sets the named properties, or, for Tags, the
+// pair of calls that add and remove tags.
+type UpdateCall struct {
+	Mutation   `yaml:",inline"`
+	Properties []string `yaml:"properties,omitempty"`
+	Tags       *Tags    `yaml:"tags,omitempty"`
+}
+
+// Tags updates a Key/Value tag list property by the tags added or changed,
+// {added:entries}, and the keys removed, {removed}.
+type Tags struct {
+	Property string   `yaml:"property"`
+	Add      Mutation `yaml:"add"`
+	Remove   Mutation `yaml:"remove"`
+}
+
+// Lifecycle is the harness's test vector for a type.
+type Lifecycle struct {
+	Create map[string]any `yaml:"create"`
+	Update map[string]any `yaml:"update"`
+}

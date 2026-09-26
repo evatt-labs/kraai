@@ -36,7 +36,7 @@ func TestGeneratedReadersMatchCompiled(t *testing.T) {
 	}
 	for _, want := range compiled {
 		got := readers[want.Type]
-		got.Production = false
+		got.Production, got.Mutable = false, false
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%s: readers.go differs from Compile()\ngot  %#v\nwant %#v", want.Type, got, want)
 		}

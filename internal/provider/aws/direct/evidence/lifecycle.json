@@ -1,0 +1,20 @@
+{
+  "types": [
+    {
+      "type": "AWS::SQS::Queue",
+      "date": "2026-09-26",
+      "outcome": "parity",
+      "updated": [
+        "DelaySeconds",
+        "MaximumMessageSize",
+        "MessageRetentionPeriod",
+        "ReceiveMessageWaitTimeSeconds",
+        "RedriveAllowPolicy",
+        "SqsManagedSseEnabled",
+        "Tags",
+        "VisibilityTimeout"
+      ],
+      "override": "1bb077f67919c05f72278a3d5997da0090e34ae1ab62b94397aec250d1bc013a"
+    }
+  ]
+}
