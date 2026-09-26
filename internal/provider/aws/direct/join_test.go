@@ -544,3 +544,47 @@ func TestCompileRefusesAPathThroughAJSONName(t *testing.T) {
 		t.Fatalf("errors = %v", errs)
 	}
 }
+
+// An ARN identifier is drafted into a name member only through its last
+// segment, when the member's own constraints rule the ARN out.
+func TestProposeReadsANameFromAnARNIdentifier(t *testing.T) {
+	for name, c := range map[string]struct {
+		pattern string
+		input   bool
+	}{
+		"a name the pattern limits": {"^[a-zA-Z0-9-]+$", true},
+		"a member that takes ARNs":  {"^(arn:aws:[a-z]+:.+|[a-z]+)$", false},
+		"no pattern":                {"", false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			m := widgetModel("Widgets", "widgets")
+			shapes := m["shapes"].(map[string]any)
+			str := map[string]any{"target": "com.example#WidgetName", "traits": map[string]any{"smithy.api#required": map[string]any{}}}
+			shapes["com.example#WidgetName"] = map[string]any{"type": "string"}
+			if c.pattern != "" {
+				shapes["com.example#WidgetName"].(map[string]any)["traits"] = map[string]any{"smithy.api#pattern": c.pattern}
+			}
+			shapes["com.example#GetWidgetRequest"].(map[string]any)["members"] = map[string]any{"WidgetName": str}
+			s := widgetSchema()
+			s["primaryIdentifier"] = []any{"/properties/WidgetArn"}
+			s["properties"].(map[string]any)["WidgetArn"] = map[string]any{"type": "string"}
+			var model smithyModel
+			var schema cfnSchema
+			if err := json.Unmarshal(encode(t, m), &model); err != nil {
+				t.Fatal(err)
+			}
+			if err := json.Unmarshal(encode(t, s), &schema); err != nil {
+				t.Fatal(err)
+			}
+			o, err := proposeWith(&model, &schema, Override{Type: "AWS::Widgets::Widget", Read: Read{Model: "widgets.json", Operation: "GetWidget"}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, bound := o.Read.Identifier["WidgetArn"]
+			got := o.Read.Input["WidgetName"]
+			if c.input && (bound || got != "{WidgetArn:arnName}") || !c.input && (!bound || got != nil) {
+				t.Fatalf("identifier %v, input %v", o.Read.Identifier, o.Read.Input)
+			}
+		})
+	}
+}
