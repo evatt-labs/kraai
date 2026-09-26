@@ -81,6 +81,46 @@ services:
       - binding: LOGS_IA
         type: AWS::Logs::LogGroup
         properties: { LogGroupClass: INFREQUENT_ACCESS }
+      # Data protection is billed per GB scanned, and nothing is written. A
+      # resource policy must name the log group's ARN, account included, so
+      # none is set here.
+      - binding: LOGS_POLICIES
+        type: AWS::Logs::LogGroup
+        properties:
+          Tags: [{ Key: team, Value: kraai }]
+          FieldIndexPolicies: [{ Fields: [requestId] }]
+          DataProtectionPolicy:
+            Name: kraai-integration
+            Version: "2021-06-01"
+            Statement:
+              - Sid: audit
+                DataIdentifier: ["arn:aws:dataprotection::aws:data-identifier/EmailAddress"]
+                Operation: { Audit: { FindingsDestination: {} } }
+              - Sid: redact
+                DataIdentifier: ["arn:aws:dataprotection::aws:data-identifier/EmailAddress"]
+                Operation: { Deidentify: { MaskConfig: {} } }
+
+      # Queues are billed per request; kraai's reads fit the free tier.
+      - binding: DLQ
+        type: AWS::SQS::Queue
+        properties: { MessageRetentionPeriod: 1209600 }
+      - binding: QUEUE
+        type: AWS::SQS::Queue
+        properties:
+          DelaySeconds: 5
+          VisibilityTimeout: 60
+          ReceiveMessageWaitTimeSeconds: 10
+          SqsManagedSseEnabled: true
+          RedrivePolicy: { deadLetterTargetArn: "${DLQ.Arn}", maxReceiveCount: 3 }
+          Tags: [{ Key: team, Value: kraai }]
+      - binding: FIFO
+        type: AWS::SQS::Queue
+        properties:
+          QueueName: kraai-integration-free.fifo
+          FifoQueue: true
+          ContentBasedDeduplication: true
+          DeduplicationScope: messageGroup
+          FifoThroughputLimit: perMessageGroupId
       - binding: CLUSTER
         type: AWS::ECS::Cluster
         properties:

@@ -1,0 +1,769 @@
+{
+  "shapes": {
+    "com.amazonaws.sqs#AmazonSQS": {
+      "operations": [
+        {
+          "target": "com.amazonaws.sqs#GetQueueAttributes"
+        },
+        {
+          "target": "com.amazonaws.sqs#ListQueueTags"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "sqs",
+          "cloudFormationName": "SQS",
+          "cloudTrailEventSource": "sqs.amazonaws.com",
+          "endpointPrefix": "sqs",
+          "sdkId": "SQS"
+        },
+        "aws.auth#sigv4": {
+          "name": "sqs"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "aws.protocols#awsQueryCompatible": {},
+        "smithy.api#title": "Amazon Simple Queue Service",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sqs-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sqs.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sqs-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://sqs.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://sqs.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2012-11-05"
+    },
+    "com.amazonaws.sqs#AttributeNameList": {
+      "member": {
+        "target": "com.amazonaws.sqs#QueueAttributeName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sqs#ExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.sqs#GetQueueAttributes": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sqs#InvalidAddress"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidAttributeName"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidSecurity"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueDoesNotExist"
+        },
+        {
+          "target": "com.amazonaws.sqs#RequestThrottled"
+        },
+        {
+          "target": "com.amazonaws.sqs#UnsupportedOperation"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sqs#GetQueueAttributesRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.sqs#GetQueueAttributesResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.sqs#GetQueueAttributesRequest": {
+      "members": {
+        "AttributeNames": {
+          "target": "com.amazonaws.sqs#AttributeNameList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "AttributeName"
+          }
+        },
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#GetQueueAttributesResult": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.sqs#QueueAttributeMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Attribute"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#InvalidAddress": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAddress",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#InvalidAttributeName": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#InvalidSecurity": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSecurity",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#ListQueueTags": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sqs#InvalidAddress"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidSecurity"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueDoesNotExist"
+        },
+        {
+          "target": "com.amazonaws.sqs#RequestThrottled"
+        },
+        {
+          "target": "com.amazonaws.sqs#UnsupportedOperation"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sqs#ListQueueTagsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.sqs#ListQueueTagsResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.sqs#ListQueueTagsRequest": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#ListQueueTagsResult": {
+      "members": {
+        "Tags": {
+          "target": "com.amazonaws.sqs#TagMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#QueueAttributeMap": {
+      "key": {
+        "target": "com.amazonaws.sqs#QueueAttributeName",
+        "traits": {
+          "smithy.api#xmlName": "Name"
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.sqs#String",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      }
+    },
+    "com.amazonaws.sqs#QueueAttributeName": {
+      "members": {
+        "All": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "All"
+          }
+        },
+        "ApproximateNumberOfMessages": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateNumberOfMessages"
+          }
+        },
+        "ApproximateNumberOfMessagesDelayed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateNumberOfMessagesDelayed"
+          }
+        },
+        "ApproximateNumberOfMessagesNotVisible": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateNumberOfMessagesNotVisible"
+          }
+        },
+        "ContentBasedDeduplication": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ContentBasedDeduplication"
+          }
+        },
+        "CreatedTimestamp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CreatedTimestamp"
+          }
+        },
+        "DeduplicationScope": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DeduplicationScope"
+          }
+        },
+        "DelaySeconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DelaySeconds"
+          }
+        },
+        "FifoQueue": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FifoQueue"
+          }
+        },
+        "FifoThroughputLimit": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FifoThroughputLimit"
+          }
+        },
+        "KmsDataKeyReusePeriodSeconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KmsDataKeyReusePeriodSeconds"
+          }
+        },
+        "KmsMasterKeyId": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KmsMasterKeyId"
+          }
+        },
+        "LastModifiedTimestamp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LastModifiedTimestamp"
+          }
+        },
+        "MaximumMessageSize": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MaximumMessageSize"
+          }
+        },
+        "MessageRetentionPeriod": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MessageRetentionPeriod"
+          }
+        },
+        "Policy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Policy"
+          }
+        },
+        "QueueArn": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "QueueArn"
+          }
+        },
+        "ReceiveMessageWaitTimeSeconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ReceiveMessageWaitTimeSeconds"
+          }
+        },
+        "RedriveAllowPolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RedriveAllowPolicy"
+          }
+        },
+        "RedrivePolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RedrivePolicy"
+          }
+        },
+        "SqsManagedSseEnabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SqsManagedSseEnabled"
+          }
+        },
+        "VisibilityTimeout": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VisibilityTimeout"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.sqs#QueueDoesNotExist": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.NonExistentQueue",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#RequestThrottled": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RequestThrottled",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#String": {
+      "type": "string"
+    },
+    "com.amazonaws.sqs#TagKey": {
+      "type": "string"
+    },
+    "com.amazonaws.sqs#TagMap": {
+      "key": {
+        "target": "com.amazonaws.sqs#TagKey",
+        "traits": {
+          "smithy.api#xmlName": "Key"
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.sqs#TagValue",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      }
+    },
+    "com.amazonaws.sqs#TagValue": {
+      "type": "string"
+    },
+    "com.amazonaws.sqs#UnsupportedOperation": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.UnsupportedOperation",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    }
+  },
+  "smithy": "2.0"
+}

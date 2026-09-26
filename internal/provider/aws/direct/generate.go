@@ -86,6 +86,13 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if len(r.When) > 0 {
+		b.WriteString("When: []Condition{\n")
+		for _, c := range r.When {
+			fmt.Fprintf(b, "{Field: Field{Property: %q}, Values: %#v},\n", c.Field.Property, c.Values)
+		}
+		b.WriteString("},\n")
+	}
 	if len(r.PageToken) > 0 {
 		fmt.Fprintf(b, "PageToken: %#v,\n", r.PageToken)
 	}
@@ -234,6 +241,15 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	}
 	if f.Transform != "" {
 		fmt.Fprintf(b, ", Transform: %q", f.Transform)
+	}
+	if f.Key != "" {
+		fmt.Fprintf(b, ", Key: %q", f.Key)
+	}
+	if f.Entries != nil {
+		fmt.Fprintf(b, ", Entries: %#v", f.Entries)
+	}
+	if f.Keyed != nil {
+		fmt.Fprintf(b, ", Keyed: %#v", f.Keyed)
 	}
 	if len(f.Where) > 0 {
 		b.WriteString(", Where: []Match{")

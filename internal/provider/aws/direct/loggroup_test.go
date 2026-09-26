@@ -5,25 +5,30 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
-	"strings"
 	"testing"
 )
 
 const logGroupType = "AWS::Logs::LogGroup"
 
 // DescribeLogGroups answers a matched log group's own properties, filtered
-// by an exact identifier rather than a prefix.
+// by an exact identifier rather than a prefix. A log group with no tags or
+// policies reads without them rather than failing.
 func TestReadLogGroup(t *testing.T) {
-	client, seen := bodyPages(t, func(string) (int, string) {
-		return 200, `{"logGroups":[{` +
+	client, seen := targetServer(t, map[string]string{
+		"DescribeLogGroups": `{"logGroups":[{` +
 			`"logGroupName":"/aws/lambda/kraai",` +
 			`"arn":"arn:aws:logs:us-east-1:409032463870:log-group:/aws/lambda/kraai:*",` +
+			`"logGroupArn":"arn:aws:logs:us-east-1:409032463870:log-group:/aws/lambda/kraai",` +
 			`"kmsKeyId":"arn:aws:kms:us-east-1:409032463870:key/abc",` +
 			`"logGroupClass":"STANDARD",` +
 			`"retentionInDays":14,` +
 			`"deletionProtectionEnabled":true,` +
 			`"bearerTokenAuthenticationEnabled":false` +
-			`}]}`
+			`}]}`,
+		"ListTagsForResource":      `{}`,
+		"GetDataProtectionPolicy":  `{}`,
+		"DescribeIndexPolicies":    `{"indexPolicies":[]}`,
+		"DescribeResourcePolicies": `{"resourcePolicies":[]}`,
 	})
 	got, err := client.Read(context.Background(), logGroupType, map[string]string{"LogGroupName": "/aws/lambda/kraai"})
 	if err != nil {
@@ -41,8 +46,8 @@ func TestReadLogGroup(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Read = %#v, want %#v", got, want)
 	}
-	if !strings.HasSuffix((*seen)[0], `{"logGroupIdentifiers":["/aws/lambda/kraai"]}`) {
-		t.Fatalf("request = %s, want it to filter by the exact identifier", (*seen)[0])
+	if seen["DescribeLogGroups"] != `{"logGroupIdentifiers":["/aws/lambda/kraai"]}` {
+		t.Fatalf("request = %s, want it to filter by the exact identifier", seen["DescribeLogGroups"])
 	}
 }
 

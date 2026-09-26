@@ -1,0 +1,62 @@
+type: AWS::SQS::Queue
+read:
+  model: sqs/service/2012-11-05/sqs-2012-11-05.json
+  operation: GetQueueAttributes
+  identifier:
+    QueueUrl: QueueUrl
+  input:
+    AttributeNames: [All]
+properties:
+  # The response is one map of attribute names to strings; the URL itself
+  # is not in it.
+  QueueUrl: "{QueueUrl}"
+  Arn: Attributes.QueueArn
+  QueueName:
+    member: Attributes.QueueArn
+    transform: arnResource
+  DeduplicationScope: Attributes.DeduplicationScope
+  FifoThroughputLimit: Attributes.FifoThroughputLimit
+  KmsMasterKeyId: Attributes.KmsMasterKeyId
+  ContentBasedDeduplication:
+    member: Attributes.ContentBasedDeduplication
+    transform: boolean
+  FifoQueue:
+    member: Attributes.FifoQueue
+    transform: boolean
+  SqsManagedSseEnabled:
+    member: Attributes.SqsManagedSseEnabled
+    transform: boolean
+  DelaySeconds:
+    member: Attributes.DelaySeconds
+    transform: number
+  KmsDataKeyReusePeriodSeconds:
+    member: Attributes.KmsDataKeyReusePeriodSeconds
+    transform: number
+  MaximumMessageSize:
+    member: Attributes.MaximumMessageSize
+    transform: number
+  MessageRetentionPeriod:
+    member: Attributes.MessageRetentionPeriod
+    transform: number
+  ReceiveMessageWaitTimeSeconds:
+    member: Attributes.ReceiveMessageWaitTimeSeconds
+    transform: number
+  VisibilityTimeout:
+    member: Attributes.VisibilityTimeout
+    transform: number
+  RedriveAllowPolicy:
+    member: Attributes.RedriveAllowPolicy
+    transform: json
+  RedrivePolicy:
+    member: Attributes.RedrivePolicy
+    transform: json
+also:
+  - operation: ListQueueTags
+    identifier:
+      QueueUrl: QueueUrl
+    properties:
+      Tags:
+        member: Tags
+        entries: [Key, Value]
+absentIds:
+  - https://sqs.{region}.amazonaws.com/{account}/kraai-absent-probe

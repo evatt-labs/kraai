@@ -13,9 +13,18 @@ properties:
   DBClusterParameterGroupName: DBClusterParameterGroupName
   Description: Description
   Family: DBParameterGroupFamily
-skip:
-  Parameters: DescribeDBClusterParameters answers a list of name/value structures, which no mapping folds into this object
 also:
+  # The schema holds the parameters set on the group, not the engine's
+  # defaults.
+  - operation: DescribeDBClusterParameters
+    identifier:
+      DBClusterParameterGroupName: DBClusterParameterGroupName
+    input:
+      Source: user
+    properties:
+      Parameters:
+        member: Parameters
+        keyed: [ParameterName, ParameterValue]
   # Tags are read by ARN, which only the read's response carries.
   - operation: ListTagsForResource
     input:

@@ -151,6 +151,12 @@ func (r Reader) readXML(body []byte, w *walk) (props, captured map[string]any, e
 func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 	out := map[string]any{}
 	for _, f := range fields {
+		if f.Kind == "identifier" {
+			if v, ok := w.vars[f.Member]; ok {
+				out[f.Property] = v
+			}
+			continue
+		}
 		holders, projected := []*xmlNode{n}, false
 		for _, step := range f.Via {
 			var next []*xmlNode
@@ -214,6 +220,16 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 		if !present {
 			return nil, false
 		}
+		if f.Keyed != nil {
+			keyed := map[string]any{}
+			for _, item := range items {
+				if k, val := item.child(f.Keyed[0]), item.child(f.Keyed[1]); k != nil && val != nil {
+					keyed[k.text] = val.text
+				}
+			}
+			v = keyed
+			break
+		}
 		list := make([]any, 0, len(items))
 		for _, item := range items {
 			if !w.keeps(f.Where, func(member string) (string, bool) {
@@ -244,10 +260,24 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 			}
 		}
 		v = m
+		if f.Entries != nil {
+			v = entryList(f.Entries, m)
+		}
 	default:
 		c := n.child(f.XMLName)
 		if c == nil {
 			return nil, false
+		}
+		if f.Key != "" {
+			var found bool
+			for _, entry := range c.children("entry") {
+				if k, val := entry.child("key"), entry.child("value"); k != nil && val != nil && k.text == f.Key {
+					c, found = val, true
+				}
+			}
+			if !found {
+				return nil, false
+			}
 		}
 		v = xmlScalar(c.text, f.Scalar)
 	}

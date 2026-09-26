@@ -109,7 +109,7 @@
     "cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json": {
       "file": "models/cloudwatch-logs-2014-03-28.json",
       "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
-      "subsetSha256": "a45794551a50fa93abb9230ecb9a3d47d06432cee5fb880fef35b2f2b77cf0ab"
+      "subsetSha256": "84685afb422a0a53dd8c76ba95cebc93ce6d323b5cde93934c6377f81eb8564c"
     },
     "codeconnections/service/2023-12-01/codeconnections-2023-12-01.json": {
       "file": "models/codeconnections-2023-12-01.json",
@@ -469,7 +469,7 @@
     "rds/service/2014-10-31/rds-2014-10-31.json": {
       "file": "models/rds-2014-10-31.json",
       "sourceSha256": "ece1de6b0278c9327d5e79ac62032ca8c6c1f76e4d24fef95e7d3641f0459020",
-      "subsetSha256": "39351dc3d2edac6ca70432607f48b06795d3fda40bc1902d205403439242305d"
+      "subsetSha256": "6a3871ad8e05cf17b5b514e1698313705511d05acf61ba01be2ae71b3c9cf691"
     },
     "resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json": {
       "file": "models/resiliencehubv2-2026-02-17.json",
@@ -560,6 +560,11 @@
       "file": "models/signer-2017-08-25.json",
       "sourceSha256": "1145d7c9e3867eeb629d1aa934b8da3a2031102c9f5382dcb898fd8ae7cd19d3",
       "subsetSha256": "ce4181cababaefe2774486af545d9c3a4dbb4787dcb4a436d0189be753c49021"
+    },
+    "sqs/service/2012-11-05/sqs-2012-11-05.json": {
+      "file": "models/sqs-2012-11-05.json",
+      "sourceSha256": "f34a7d2560fb9776206fb35958b8d0fc5f17d33f377bb7512d55a34a8c0c78f0",
+      "subsetSha256": "9bf6486a66611747d0f6e46409eeefd40a3764ed6790714ccf40a1ca7a243ad2"
     },
     "ssm-quicksetup/service/2018-05-10/ssm-quicksetup-2018-05-10.json": {
       "file": "models/ssm-quicksetup-2018-05-10.json",
@@ -1632,6 +1637,11 @@
       "file": "schemas/AWS--SES--MailManagerTrafficPolicy.json",
       "sourceSha256": "0a29347805eb0e1d3038908411e8b6ca8d0ec920edb13b4282756742308dc461",
       "subsetSha256": "34ff80507924796c777ea79ed44cb7b9c445d341b21b652ee7f507fd60dc3881"
+    },
+    "AWS::SQS::Queue": {
+      "file": "schemas/AWS--SQS--Queue.json",
+      "sourceSha256": "6cc5a80ebe846019ec866d3f499788c48090352e834e308ec6bcf39523051784",
+      "subsetSha256": "6e51d1bcaf6f9a1b43fbed2a64136a7a33fde7323a9ab4583e6368f656530075"
     },
     "AWS::SSM::Association": {
       "file": "schemas/AWS--SSM--Association.json",
