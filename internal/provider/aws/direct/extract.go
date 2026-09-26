@@ -233,17 +233,10 @@ func run() error {
 		return err
 	}
 
-	if err := os.RemoveAll("models"); err != nil {
-		return err
-	}
-	if err := os.Rename(tmpModels, "models"); err != nil {
-		return err
-	}
-	if err := os.RemoveAll("schemas"); err != nil {
-		return err
-	}
-	if err := os.Rename(tmpSchemas, "schemas"); err != nil {
-		return err
+	for _, dir := range [][2]string{{tmpModels, "models"}, {tmpSchemas, "schemas"}} {
+		if err := replaceDir(dir[0], dir[1], tmpRoot); err != nil {
+			return err
+		}
 	}
 	return os.Rename(filepath.Join(tmpRoot, "lock.json"), "lock.json")
 }
@@ -451,4 +444,18 @@ func canonical(raw []byte) ([]byte, error) {
 func sum(b []byte) string {
 	s := sha256.Sum256(b)
 	return hex.EncodeToString(s[:])
+}
+
+// replaceDir moves next into place as dir, moving the old dir aside under
+// tmpRoot first, so a failed rename restores it rather than losing both.
+func replaceDir(next, dir, tmpRoot string) error {
+	old := filepath.Join(tmpRoot, "old-"+dir)
+	if err := os.Rename(dir, old); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.Rename(next, dir); err != nil {
+		_ = os.Rename(old, dir)
+		return err
+	}
+	return nil
 }
