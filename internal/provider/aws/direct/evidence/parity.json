@@ -1461,21 +1461,24 @@
     {
       "type": "AWS::Logs::LogGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 4,
+      "instances": 5,
       "compared": [
         "Arn",
         "BearerTokenAuthenticationEnabled",
+        "DataProtectionPolicy",
         "DeletionProtectionEnabled",
+        "FieldIndexPolicies",
         "LogGroupClass",
         "LogGroupName",
-        "RetentionInDays"
+        "RetentionInDays",
+        "Tags"
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "469fda6b54953652c71ced60c6584b26a2c7ce691869d524691c7e327597801f"
+      "override": "7e80818642b64e67a4ceb49bb24cd8538a62ce54eba3d4e5ccc1ff28f4e4a61a"
     },
     {
       "type": "AWS::Logs::ScheduledQuery",
@@ -2004,11 +2007,12 @@
         "DBClusterParameterGroupName",
         "Description",
         "Family",
+        "Parameters",
         "Tags"
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "8da6b51ad000de6f76ff372b00760c8b2ef59e6726a6e79f5e4316e9dd3b3b4d"
+      "override": "4819434cc9627ae8428fa0a2c2da934bcdd1e9832529e0878ea03b9d92b3f704"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",
@@ -2229,6 +2233,34 @@
       "instances": 0,
       "compared": [],
       "override": "1282b07467be006d2f0428523a55fdb0f0cfe56a87ffad7319adabb32886d709"
+    },
+    {
+      "type": "AWS::SQS::Queue",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-26",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "Arn",
+        "ContentBasedDeduplication",
+        "DeduplicationScope",
+        "DelaySeconds",
+        "FifoQueue",
+        "FifoThroughputLimit",
+        "MaximumMessageSize",
+        "MessageRetentionPeriod",
+        "QueueName",
+        "QueueUrl",
+        "ReceiveMessageWaitTimeSeconds",
+        "RedrivePolicy",
+        "SqsManagedSseEnabled",
+        "Tags",
+        "VisibilityTimeout"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "64639179df2a66044b573efb71fa47fb3c2e7eefe8bbd73a1e0df7ead7a4873e"
     },
     {
       "type": "AWS::SSM::Association",

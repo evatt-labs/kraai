@@ -88,7 +88,10 @@ const dbClusterParameterGroupXML = `<DescribeDBClusterParameterGroupsResponse xm
 
 // Tags are read by the ARN the read captured, which no property carries.
 func TestReadRDSDBClusterParameterGroup(t *testing.T) {
-	client, forms := xmlServerBy(t, map[string]string{"DescribeDBClusterParameterGroups": dbClusterParameterGroupXML, "ListTagsForResource": tagsXML})
+	client, forms := xmlServerBy(t, map[string]string{
+		"DescribeDBClusterParameterGroups": dbClusterParameterGroupXML, "ListTagsForResource": tagsXML,
+		"DescribeDBClusterParameters": `<DescribeDBClusterParametersResponse><DescribeDBClusterParametersResult/></DescribeDBClusterParametersResponse>`,
+	})
 	got, err := client.Read(context.Background(), dbClusterParameterGroups, map[string]string{"DBClusterParameterGroupName": "my-params"})
 	if err != nil {
 		t.Fatal(err)

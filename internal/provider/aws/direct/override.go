@@ -44,6 +44,10 @@ type Call struct {
 	Response   string             `yaml:"response,omitempty"`
 	Input      map[string]any     `yaml:"input,omitempty"`
 	Properties map[string]Mapping `yaml:"properties"`
+	// When makes the call only for an instance whose read property has one
+	// of the values given, for an operation the service refuses on others,
+	// such as index policies on a log group of another class.
+	When map[string][]string `yaml:"when,omitempty"`
 }
 
 // Read names the operation that reads one instance and how to call it.
@@ -92,7 +96,10 @@ type List struct {
 
 // Mapping is where one property's value is in the response: a member of
 // the enclosing structure and, for a structure or a list of structures,
-// how each nested property maps. A top-level property may instead name a
+// how each nested property maps. A member path whose last step follows a
+// map reads that key's value, such as Attributes.DelaySeconds; a member
+// of {Property} reads the identifier property's own value, for one the
+// response does not repeat. A top-level property may instead name a
 // member of the operation's whole output with a leading "$.", for a value
 // the output carries beside the resource, such as its tags.
 type Mapping struct {
@@ -100,8 +107,17 @@ type Mapping struct {
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
 	Skip       map[string]string  `yaml:"skip,omitempty"`
 	// Transform names a function applied to the value read: arnResource,
-	// an ARN's resource part.
+	// an ARN's resource part; or json, number or boolean, parsing a string
+	// the service returns for a property the schema types otherwise.
 	Transform string `yaml:"transform,omitempty"`
+	// Entries reads a map as a list of structures, each holding one entry
+	// under the two property names given, key first, such as tags returned
+	// as a map for a schema's [{Key, Value}].
+	Entries []string `yaml:"entries,omitempty"`
+	// Keyed reads a list of structures as a map, keyed by the first member
+	// named and valued by the second, such as parameters returned as
+	// [{ParameterName, ParameterValue}] for a schema's object.
+	Keyed []string `yaml:"keyed,omitempty"`
 	// Where keeps, of a list of structures, only the elements whose member
 	// equals the value, such as the ingress rules of a list holding both
 	// directions. {Property} stands for an identifier property's value.
@@ -127,7 +143,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 {
+	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 {
 		return m.Member, nil
 	}
 	type plain Mapping

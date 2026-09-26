@@ -39,6 +39,9 @@ type Reader struct {
 	Also []Reader
 	// Capture reads, keyed by Property, the values Also calls may name.
 	Capture []Field
+	// When is the read properties, and their values, an Also call is made
+	// for; see Call.When.
+	When []Condition
 	// AbsentIDs are identifiers that must read as absent, for the harness.
 	AbsentIDs []string
 	// Complete is true when the override skips no property at any depth,
@@ -146,6 +149,11 @@ type Field struct {
 	// Where keeps, of a list of structures, the elements matching every
 	// Match; see Mapping.Where.
 	Where []Match
+	// Key reads one entry of the map Member names.
+	Key string
+	// Entries and Keyed are Mapping.Entries and Mapping.Keyed, Keyed by
+	// wire member.
+	Entries, Keyed []string
 	// Root reads the member from the operation's whole output rather than
 	// the resource, for a value carried beside it.
 	Root bool
@@ -258,6 +266,17 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		}
 		if len(call.Properties) == 0 {
 			errs = append(errs, fmt.Errorf("also[%d] %s maps no property", i, call.Operation))
+		}
+		for _, property := range sortedKeys(call.When) {
+			j := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == property })
+			switch {
+			case j < 0 || r.Fields[j].Kind != "scalar":
+				errs = append(errs, fmt.Errorf("also[%d] %s is made when %s, which is not a scalar property of the read", i, call.Operation, property))
+			case len(call.When[property]) == 0:
+				errs = append(errs, fmt.Errorf("also[%d] %s is made when %s has no value", i, call.Operation, property))
+			default:
+				also.When = append(also.When, Condition{Field: Field{Property: property}, Values: call.When[property]})
+			}
 		}
 		r.Also = append(r.Also, also)
 	}
@@ -578,17 +597,20 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 		for _, f := range fields {
 			for _, st := range f.Via {
 				for _, p := range placeholders(st.Equals) {
-					if !want[p] {
+					if !want[p] && !captured[p] {
 						fail("%s selects by {%s}, which is not the primary identifier", f.Property, p)
 					}
 				}
 			}
 			for _, m := range f.Where {
 				for _, p := range placeholders(m.Equals) {
-					if !want[p] {
+					if !want[p] && !captured[p] {
 						fail("%s filters by {%s}, which is not the primary identifier", f.Property, p)
 					}
 				}
+			}
+			if f.Kind == "identifier" && !want[f.Member] {
+				fail("%s reads {%s}, which is not the primary identifier", f.Property, f.Member)
 			}
 			checkSelections(f.Fields)
 		}
@@ -715,11 +737,24 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s is neither mapped nor skipped", at, name)
 			continue
 		}
+		if id, ok := strings.CutPrefix(mapping.Member, "{"); ok && strings.HasSuffix(id, "}") {
+			if !schema.types(props[name])["string"] {
+				fail("%s%s reads the identifier %s, but the schema does not type it a string", at, name, mapping.Member)
+			}
+			fields = append(fields, Field{Property: name, Member: strings.TrimSuffix(id, "}"), Kind: "identifier"})
+			continue
+		}
 		// A dotted member is a path through structures to the one mapped;
 		// a step ending [] is a list of structures, read element by element.
 		steps := strings.Split(mapping.Member, ".")
 		holder, via, walked, projected, selected := structure, []Step{}, true, false, false
-		for _, step := range steps[:len(steps)-1] {
+		mapMember := ""
+		for i, step := range steps[:len(steps)-1] {
+			// The step before the last may be a map, whose key the last is.
+			if pm, ok := model.Shapes[holder].Members[step]; ok && i == len(steps)-2 && targetType(model.Shapes[pm.Target].Type, pm.Target) == "map" {
+				mapMember = step
+				break
+			}
 			var where, equals string
 			if sel := selection.FindStringSubmatch(step); sel != nil {
 				step, where, equals = sel[1]+"[]", sel[2], sel[3]
@@ -771,23 +806,34 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s both selects and projects; a path does one or the other", at, name)
 			continue
 		}
-		m, ok := model.Shapes[holder].Members[steps[len(steps)-1]]
+		member, key := steps[len(steps)-1], ""
+		if mapMember != "" {
+			member, key = mapMember, steps[len(steps)-1]
+		}
+		m, ok := model.Shapes[holder].Members[member]
 		if !ok {
 			fail("%s%s maps to %s, which %s does not have", at, name, mapping.Member, structure)
 			continue
 		}
-		f := Field{Property: name, Member: steps[len(steps)-1], Transform: mapping.Transform}
+		f := Field{Property: name, Member: member, Key: key, Transform: mapping.Transform}
 		if len(via) > 0 {
 			f.Via = via
 		}
+		// valueTarget is the shape read: the map's value for a key.
+		valueTarget := m.Target
+		if key != "" {
+			valueTarget = ref(model.Shapes[m.Target].Value)
+		}
+		parsed := false
 		switch mapping.Transform {
 		case "":
-		case "arnResource":
-			if targetType(model.Shapes[m.Target].Type, m.Target) != "string" {
-				fail("%s%s transforms %s, which is not a string", at, name, f.Member)
+		case "arnResource", "json", "number", "boolean":
+			if targetType(model.Shapes[valueTarget].Type, valueTarget) != "string" {
+				fail("%s%s transforms %s, which is not a string", at, name, mapping.Member)
 			}
+			parsed = mapping.Transform != "arnResource"
 		default:
-			fail("%s%s names transform %q; the only one is arnResource", at, name, mapping.Transform)
+			fail("%s%s names transform %q; it is one of arnResource, json, number and boolean", at, name, mapping.Transform)
 		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]
@@ -802,12 +848,34 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			}
 		}
 		types := schema.types(prop)
-		target := model.Shapes[m.Target]
-		if !compatible(types, target.Type, m.Target) {
-			fail("%s%s is %v in the schema, but %s is %s", at, name, sortedSet(types), mapping.Member, targetType(target.Type, m.Target))
+		target := model.Shapes[valueTarget]
+		switch {
+		case parsed:
+			want := map[string][]string{"json": {"object", "array", "string"}, "number": {"integer", "number"}, "boolean": {"boolean"}}[mapping.Transform]
+			if !slices.ContainsFunc(want, func(t string) bool { return types[t] }) {
+				fail("%s%s is %v in the schema, which transform %s does not produce", at, name, sortedSet(types), mapping.Transform)
+			}
+			f.Kind = "scalar"
+			fields = append(fields, f)
+			continue
+		case len(mapping.Entries) > 0:
+			if entries := compileEntries(model, schema, prop, target, valueTarget, mapping.Entries, at+name, fail); entries != nil {
+				f.Kind, f.Entries = "map", entries
+				fields = append(fields, f)
+			}
+			continue
+		case len(mapping.Keyed) > 0:
+			if keyed := compileKeyed(model, types, target, valueTarget, mapping.Keyed, at+name, fail); keyed != nil {
+				f.Kind, f.Keyed = "list", keyed
+				fields = append(fields, f)
+			}
 			continue
 		}
-		f.Kind = kindOf(target.Type, m.Target)
+		if !compatible(types, target.Type, valueTarget) {
+			fail("%s%s is %v in the schema, but %s is %s", at, name, sortedSet(types), mapping.Member, targetType(target.Type, valueTarget))
+			continue
+		}
+		f.Kind = kindOf(target.Type, valueTarget)
 		nested, nestedStructure := schema.nested(prop), ""
 		switch f.Kind {
 		case "structure":
@@ -836,6 +904,58 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		fields = append(fields, f)
 	}
 	return fields
+}
+
+// compileEntries checks a map read as a list of two-property structures:
+// the schema's items hold exactly the two properties named, and the map's
+// values are scalars.
+func compileEntries(model *smithyModel, schema *cfnSchema, prop cfnProperty, target smithyShape, shape string, names []string, at string, fail func(string, ...any)) []string {
+	if len(names) != 2 {
+		fail("%s entries names %d properties, not a key and a value", at, len(names))
+		return nil
+	}
+	if targetType(target.Type, shape) != "map" {
+		fail("%s reads entries of %s, which is not a map", at, shape)
+		return nil
+	}
+	if value := ref(target.Value); kindOf(model.Shapes[value].Type, value) != "scalar" {
+		fail("%s reads entries of a map of %s, not of scalars", at, targetType(model.Shapes[value].Type, value))
+		return nil
+	}
+	nested := schema.nested(prop)
+	_, hasKey := nested[names[0]]
+	_, hasValue := nested[names[1]]
+	if !schema.types(prop)["array"] || len(nested) != 2 || !hasKey || !hasValue {
+		fail("%s reads entries as %v, but the schema's items are not exactly those two properties", at, names)
+		return nil
+	}
+	return slices.Clone(names)
+}
+
+// compileKeyed checks a list of structures read as a map: each element
+// holds the two string members named, and the schema types it an object.
+func compileKeyed(model *smithyModel, types map[string]bool, target smithyShape, shape string, members []string, at string, fail func(string, ...any)) []string {
+	if len(members) != 2 {
+		fail("%s keyed names %d members, not a key and a value", at, len(members))
+		return nil
+	}
+	if !types["object"] {
+		fail("%s is keyed into a map, but the schema does not type it an object", at)
+		return nil
+	}
+	if targetType(target.Type, shape) != "list" {
+		fail("%s is keyed from %s, which is not a list", at, shape)
+		return nil
+	}
+	element := ref(target.Member)
+	for _, member := range members {
+		m, ok := model.Shapes[element].Members[member]
+		if !ok || targetType(model.Shapes[m.Target].Type, m.Target) != "string" {
+			fail("%s is keyed by %s, which is not a string member of %s", at, member, element)
+			return nil
+		}
+	}
+	return slices.Clone(members)
 }
 
 // compileCapture resolves each captured value to a string member of the
@@ -1325,6 +1445,9 @@ func queryKey(model *smithyModel, protocol, member string, m smithyMember) strin
 func xmlFields(model *smithyModel, structure string, fields []Field, at string, fail func(string, ...any)) {
 	for i := range fields {
 		f := &fields[i]
+		if f.Kind == "identifier" {
+			continue
+		}
 		holder := structure
 		for j, step := range f.Via {
 			pm := model.Shapes[holder].Members[step.Name]
@@ -1345,11 +1468,18 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 		switch f.Kind {
 		case "scalar", "timestamp":
 			f.Scalar = scalarOf(target.Type, m.Target)
+			if f.Key != "" {
+				value := ref(target.Value)
+				f.Scalar = scalarOf(model.Shapes[value].Type, value)
+			}
 		case "structure":
 			xmlFields(model, m.Target, f.Fields, at+f.Property+".", fail)
 		case "list":
 			f.Item = itemName(m, target)
 			el := ref(target.Member)
+			for j, member := range f.Keyed {
+				f.Keyed[j] = xmlName(member, model.Shapes[el].Members[member])
+			}
 			for j, w := range f.Where {
 				f.Where[j].Member = xmlName(w.Member, model.Shapes[el].Members[w.Member])
 			}

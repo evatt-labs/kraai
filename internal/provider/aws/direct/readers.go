@@ -5003,6 +5003,8 @@ var readers = map[string]Reader{
 		Type:        "AWS::Logs::LogGroup",
 		Protocol:    "awsJson1_1",
 		SigningName: "logs",
+		Complete:    true,
+		Production:  true,
 		Host:        "logs.{region}.amazonaws.com",
 		Target:      "Logs_20140328.DescribeLogGroups",
 		Identifier: []Binding{
@@ -5020,6 +5022,67 @@ var readers = map[string]Reader{
 			{Property: "RetentionInDays", Member: "retentionInDays", Kind: "scalar"},
 		},
 		AbsentIDs: []string{"does-not-exist-kraai-probe-xyz"},
+		Capture: []Field{
+			{Property: "Arn", Member: "logGroupArn", Kind: "scalar"},
+		},
+		Also: []Reader{
+			{
+				Type:        "AWS::Logs::LogGroup",
+				Protocol:    "awsJson1_1",
+				SigningName: "logs",
+				Host:        "logs.{region}.amazonaws.com",
+				Target:      "Logs_20140328.ListTagsForResource",
+				Input: []Binding{
+					Binding{Member: "resourceArn", Location: "body", Value: "{Arn}"},
+				},
+				Fields: []Field{
+					{Property: "Tags", Member: "tags", Kind: "map", Entries: []string{"Key", "Value"}},
+				},
+			},
+			{
+				Type:        "AWS::Logs::LogGroup",
+				Protocol:    "awsJson1_1",
+				SigningName: "logs",
+				Host:        "logs.{region}.amazonaws.com",
+				Target:      "Logs_20140328.GetDataProtectionPolicy",
+				Identifier: []Binding{
+					{Property: "LogGroupName", Member: "logGroupIdentifier", Location: "body"},
+				},
+				Fields: []Field{
+					{Property: "DataProtectionPolicy", Member: "policyDocument", Kind: "scalar", Transform: "json"},
+				},
+			},
+			{
+				Type:        "AWS::Logs::LogGroup",
+				Protocol:    "awsJson1_1",
+				SigningName: "logs",
+				Host:        "logs.{region}.amazonaws.com",
+				Target:      "Logs_20140328.DescribeIndexPolicies",
+				Identifier: []Binding{
+					{Property: "LogGroupName", Member: "logGroupIdentifiers", Location: "body", List: true},
+				},
+				When: []Condition{
+					{Field: Field{Property: "LogGroupClass"}, Values: []string{"STANDARD"}},
+				},
+				Fields: []Field{
+					{Property: "FieldIndexPolicies", Member: "policyDocument", Kind: "scalar", Via: []Step{{Name: "indexPolicies", List: true}}, Transform: "json"},
+				},
+			},
+			{
+				Type:        "AWS::Logs::LogGroup",
+				Protocol:    "awsJson1_1",
+				SigningName: "logs",
+				Host:        "logs.{region}.amazonaws.com",
+				Target:      "Logs_20140328.DescribeResourcePolicies",
+				Input: []Binding{
+					Binding{Member: "policyScope", Location: "body", Value: "RESOURCE"},
+					Binding{Member: "resourceArn", Location: "body", Value: "{Arn}"},
+				},
+				Fields: []Field{
+					{Property: "ResourcePolicyDocument", Member: "policyDocument", Kind: "scalar", Via: []Step{{Name: "resourcePolicies", List: true, Where: "resourceArn", Equals: "{Arn}"}}, Transform: "json"},
+				},
+			},
+		},
 	},
 	"AWS::Logs::ScheduledQuery": {
 		Type:        "AWS::Logs::ScheduledQuery",
@@ -7335,6 +7398,8 @@ var readers = map[string]Reader{
 		Type:        "AWS::RDS::DBClusterParameterGroup",
 		Protocol:    "awsQuery",
 		SigningName: "rds",
+		Complete:    true,
+		Production:  true,
 		Host:        "rds.{region}.amazonaws.com",
 		Action:      "DescribeDBClusterParameterGroups",
 		Version:     "2014-10-31",
@@ -7354,6 +7419,25 @@ var readers = map[string]Reader{
 			{Property: "Arn", Member: "DBClusterParameterGroupArn", Kind: "scalar", XMLName: "DBClusterParameterGroupArn", Scalar: "string"},
 		},
 		Also: []Reader{
+			{
+				Type:        "AWS::RDS::DBClusterParameterGroup",
+				Protocol:    "awsQuery",
+				SigningName: "rds",
+				Host:        "rds.{region}.amazonaws.com",
+				Action:      "DescribeDBClusterParameters",
+				Version:     "2014-10-31",
+				Wrapper:     "DescribeDBClusterParametersResult",
+				Identifier: []Binding{
+					{Property: "DBClusterParameterGroupName", Member: "DBClusterParameterGroupName", Location: "form", Name: "DBClusterParameterGroupName"},
+				},
+				Input: []Binding{
+					Binding{Member: "Source", Location: "form", Name: "Source", Value: "user"},
+				},
+				PageToken: []string{"Marker"},
+				Fields: []Field{
+					{Property: "Parameters", Member: "Parameters", Kind: "list", Keyed: []string{"ParameterName", "ParameterValue"}, XMLName: "Parameters", Item: "Parameter"},
+				},
+			},
 			{
 				Type:        "AWS::RDS::DBClusterParameterGroup",
 				Protocol:    "awsQuery",
@@ -7909,6 +7993,56 @@ var readers = map[string]Reader{
 			{Property: "TrafficPolicyArn", Member: "TrafficPolicyArn", Kind: "scalar"},
 			{Property: "TrafficPolicyId", Member: "TrafficPolicyId", Kind: "scalar"},
 			{Property: "TrafficPolicyName", Member: "TrafficPolicyName", Kind: "scalar"},
+		},
+	},
+	"AWS::SQS::Queue": {
+		Type:        "AWS::SQS::Queue",
+		Protocol:    "awsJson1_0",
+		SigningName: "sqs",
+		Complete:    true,
+		Production:  true,
+		Host:        "sqs.{region}.amazonaws.com",
+		Target:      "AmazonSQS.GetQueueAttributes",
+		Identifier: []Binding{
+			{Property: "QueueUrl", Member: "QueueUrl", Location: "body"},
+		},
+		Input: []Binding{
+			Binding{Member: "AttributeNames", Location: "body", Structured: []any{"All"}},
+		},
+		Fields: []Field{
+			{Property: "Arn", Member: "Attributes", Kind: "scalar", Key: "QueueArn"},
+			{Property: "ContentBasedDeduplication", Member: "Attributes", Kind: "scalar", Transform: "boolean", Key: "ContentBasedDeduplication"},
+			{Property: "DeduplicationScope", Member: "Attributes", Kind: "scalar", Key: "DeduplicationScope"},
+			{Property: "DelaySeconds", Member: "Attributes", Kind: "scalar", Transform: "number", Key: "DelaySeconds"},
+			{Property: "FifoQueue", Member: "Attributes", Kind: "scalar", Transform: "boolean", Key: "FifoQueue"},
+			{Property: "FifoThroughputLimit", Member: "Attributes", Kind: "scalar", Key: "FifoThroughputLimit"},
+			{Property: "KmsDataKeyReusePeriodSeconds", Member: "Attributes", Kind: "scalar", Transform: "number", Key: "KmsDataKeyReusePeriodSeconds"},
+			{Property: "KmsMasterKeyId", Member: "Attributes", Kind: "scalar", Key: "KmsMasterKeyId"},
+			{Property: "MaximumMessageSize", Member: "Attributes", Kind: "scalar", Transform: "number", Key: "MaximumMessageSize"},
+			{Property: "MessageRetentionPeriod", Member: "Attributes", Kind: "scalar", Transform: "number", Key: "MessageRetentionPeriod"},
+			{Property: "QueueName", Member: "Attributes", Kind: "scalar", Transform: "arnResource", Key: "QueueArn"},
+			{Property: "QueueUrl", Member: "QueueUrl", Kind: "identifier"},
+			{Property: "ReceiveMessageWaitTimeSeconds", Member: "Attributes", Kind: "scalar", Transform: "number", Key: "ReceiveMessageWaitTimeSeconds"},
+			{Property: "RedriveAllowPolicy", Member: "Attributes", Kind: "scalar", Transform: "json", Key: "RedriveAllowPolicy"},
+			{Property: "RedrivePolicy", Member: "Attributes", Kind: "scalar", Transform: "json", Key: "RedrivePolicy"},
+			{Property: "SqsManagedSseEnabled", Member: "Attributes", Kind: "scalar", Transform: "boolean", Key: "SqsManagedSseEnabled"},
+			{Property: "VisibilityTimeout", Member: "Attributes", Kind: "scalar", Transform: "number", Key: "VisibilityTimeout"},
+		},
+		AbsentIDs: []string{"https://sqs.{region}.amazonaws.com/{account}/kraai-absent-probe"},
+		Also: []Reader{
+			{
+				Type:        "AWS::SQS::Queue",
+				Protocol:    "awsJson1_0",
+				SigningName: "sqs",
+				Host:        "sqs.{region}.amazonaws.com",
+				Target:      "AmazonSQS.ListQueueTags",
+				Identifier: []Binding{
+					{Property: "QueueUrl", Member: "QueueUrl", Location: "body"},
+				},
+				Fields: []Field{
+					{Property: "Tags", Member: "Tags", Kind: "map", Entries: []string{"Key", "Value"}},
+				},
+			},
 		},
 	},
 	"AWS::SSM::Association": {

@@ -90,6 +90,16 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.cloudwatchlogs#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\w+=/:,.@-]*$"
+      },
+      "type": "string"
+    },
     "com.amazonaws.cloudwatchlogs#Arn": {
       "type": "string"
     },
@@ -190,6 +200,9 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DataProtectionPolicyDocument": {
+      "type": "string"
     },
     "com.amazonaws.cloudwatchlogs#DataProtectionStatus": {
       "members": {
@@ -407,6 +420,77 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.cloudwatchlogs#DescribeIndexPolicies": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#OperationAbortedException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#DescribeIndexPoliciesRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#DescribeIndexPoliciesResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeIndexPoliciesLogGroupIdentifiers": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeIndexPoliciesRequest": {
+      "members": {
+        "logGroupIdentifiers": {
+          "target": "com.amazonaws.cloudwatchlogs#DescribeIndexPoliciesLogGroupIdentifiers",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "nextToken": {
+          "target": "com.amazonaws.cloudwatchlogs#NextToken"
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeIndexPoliciesResponse": {
+      "members": {
+        "indexPolicies": {
+          "target": "com.amazonaws.cloudwatchlogs#IndexPolicies",
+          "traits": {}
+        },
+        "nextToken": {
+          "target": "com.amazonaws.cloudwatchlogs#NextToken"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#DescribeLimit": {
       "traits": {
         "smithy.api#range": {
@@ -521,6 +605,62 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatchlogs#DescribeResourcePolicies": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#DescribeResourcePoliciesRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#DescribeResourcePoliciesResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeResourcePoliciesRequest": {
+      "members": {
+        "limit": {
+          "target": "com.amazonaws.cloudwatchlogs#DescribeLimit",
+          "traits": {}
+        },
+        "nextToken": {
+          "target": "com.amazonaws.cloudwatchlogs#NextToken"
+        },
+        "policyScope": {
+          "target": "com.amazonaws.cloudwatchlogs#PolicyScope",
+          "traits": {}
+        },
+        "resourceArn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeResourcePoliciesResponse": {
+      "members": {
+        "nextToken": {
+          "target": "com.amazonaws.cloudwatchlogs#NextToken"
+        },
+        "resourcePolicies": {
+          "target": "com.amazonaws.cloudwatchlogs#ResourcePolicies",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#DestinationConfiguration": {
       "members": {
         "lookupTableConfiguration": {
@@ -617,6 +757,14 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.cloudwatchlogs#ExpectedRevisionId": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.cloudwatchlogs#FilterCount": {
       "type": "integer"
     },
@@ -651,6 +799,64 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#GetDataProtectionPolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#OperationAbortedException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#GetDataProtectionPolicyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#GetDataProtectionPolicyResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#GetDataProtectionPolicyRequest": {
+      "members": {
+        "logGroupIdentifier": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#GetDataProtectionPolicyResponse": {
+      "members": {
+        "lastUpdatedTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "logGroupIdentifier": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier",
+          "traits": {}
+        },
+        "policyDocument": {
+          "target": "com.amazonaws.cloudwatchlogs#DataProtectionPolicyDocument",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudwatchlogs#GetDeliverySource": {
       "errors": [
@@ -983,6 +1189,55 @@
     "com.amazonaws.cloudwatchlogs#IncludeLinkedAccounts": {
       "type": "boolean"
     },
+    "com.amazonaws.cloudwatchlogs#IndexPolicies": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#IndexPolicy"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#IndexPolicy": {
+      "members": {
+        "lastUpdateTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "logGroupIdentifier": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier",
+          "traits": {}
+        },
+        "policyDocument": {
+          "target": "com.amazonaws.cloudwatchlogs#PolicyDocument",
+          "traits": {}
+        },
+        "policyName": {
+          "target": "com.amazonaws.cloudwatchlogs#PolicyName",
+          "traits": {}
+        },
+        "source": {
+          "target": "com.amazonaws.cloudwatchlogs#IndexSource",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#IndexSource": {
+      "members": {
+        "ACCOUNT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACCOUNT"
+          }
+        },
+        "LOG_GROUP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LOG_GROUP"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.cloudwatchlogs#InheritedProperties": {
       "member": {
         "target": "com.amazonaws.cloudwatchlogs#InheritedProperty"
@@ -1131,6 +1386,64 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ListTagsForResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#ListTagsForResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#ListTagsForResourceResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#ListTagsForResourceRequest": {
+      "members": {
+        "resourceArn": {
+          "target": "com.amazonaws.cloudwatchlogs#AmazonResourceName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ListTagsForResourceResponse": {
+      "members": {
+        "tags": {
+          "target": "com.amazonaws.cloudwatchlogs#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudwatchlogs#ListToMap": {
       "members": {
@@ -1305,7 +1618,16 @@
     "com.amazonaws.cloudwatchlogs#Logs_20140328": {
       "operations": [
         {
+          "target": "com.amazonaws.cloudwatchlogs#DescribeIndexPolicies"
+        },
+        {
           "target": "com.amazonaws.cloudwatchlogs#DescribeLogGroups"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#DescribeResourcePolicies"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#GetDataProtectionPolicy"
         },
         {
           "target": "com.amazonaws.cloudwatchlogs#GetDeliverySource"
@@ -1318,6 +1640,9 @@
         },
         {
           "target": "com.amazonaws.cloudwatchlogs#GetTransformer"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ListTagsForResource"
         }
       ],
       "traits": {
@@ -2140,6 +2465,17 @@
       },
       "type": "string"
     },
+    "com.amazonaws.cloudwatchlogs#OperationAbortedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#OverwriteIfExists": {
       "traits": {
         "smithy.api#default": false
@@ -2280,6 +2616,35 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#PolicyDocument": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 51200,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#PolicyName": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#PolicyScope": {
+      "members": {
+        "ACCOUNT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACCOUNT"
+          }
+        },
+        "RESOURCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESOURCE"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.cloudwatchlogs#Processor": {
       "members": {
@@ -2504,6 +2869,42 @@
       "traits": {
         "smithy.api#error": "client"
       },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#ResourcePolicies": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#ResourcePolicy"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#ResourcePolicy": {
+      "members": {
+        "lastUpdatedTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "policyDocument": {
+          "target": "com.amazonaws.cloudwatchlogs#PolicyDocument",
+          "traits": {}
+        },
+        "policyName": {
+          "target": "com.amazonaws.cloudwatchlogs#PolicyName",
+          "traits": {}
+        },
+        "policyScope": {
+          "target": "com.amazonaws.cloudwatchlogs#PolicyScope",
+          "traits": {}
+        },
+        "resourceArn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        },
+        "revisionId": {
+          "target": "com.amazonaws.cloudwatchlogs#ExpectedRevisionId",
+          "traits": {}
+        }
+      },
+      "traits": {},
       "type": "structure"
     },
     "com.amazonaws.cloudwatchlogs#RoleArn": {
