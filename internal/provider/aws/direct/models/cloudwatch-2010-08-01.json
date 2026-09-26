@@ -1,0 +1,2145 @@
+{
+  "shapes": {
+    "com.amazonaws.cloudwatch#AccountId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ActionLogLineCount": {
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#ActionLogLineRoleArn": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ActionPrefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ActionsEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudwatch#ActionsSuppressedBy": {
+      "members": {
+        "Alarm": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Alarm"
+          }
+        },
+        "ExtensionPeriod": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ExtensionPeriod"
+          }
+        },
+        "WaitPeriod": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WaitPeriod"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#ActionsSuppressedReason": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AggregationExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AlarmArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AlarmDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AlarmName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AlarmNamePrefix": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AlarmNames": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#AlarmName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#AlarmPromQLCriteria": {
+      "members": {
+        "PendingPeriod": {
+          "target": "com.amazonaws.cloudwatch#PendingPeriod",
+          "traits": {}
+        },
+        "Query": {
+          "target": "com.amazonaws.cloudwatch#Query",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "RecoveryPeriod": {
+          "target": "com.amazonaws.cloudwatch#RecoveryPeriod",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#AlarmRule": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10240,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AlarmType": {
+      "members": {
+        "CompositeAlarm": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CompositeAlarm"
+          }
+        },
+        "LogAlarm": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LogAlarm"
+          }
+        },
+        "MetricAlarm": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MetricAlarm"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#AlarmTypes": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#AlarmType"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#AwsQueryErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ComparisonOperator": {
+      "members": {
+        "GreaterThanOrEqualToThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GreaterThanOrEqualToThreshold"
+          }
+        },
+        "GreaterThanThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GreaterThanThreshold"
+          }
+        },
+        "GreaterThanUpperThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GreaterThanUpperThreshold"
+          }
+        },
+        "LessThanLowerOrGreaterThanUpperThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LessThanLowerOrGreaterThanUpperThreshold"
+          }
+        },
+        "LessThanLowerThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LessThanLowerThreshold"
+          }
+        },
+        "LessThanOrEqualToThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LessThanOrEqualToThreshold"
+          }
+        },
+        "LessThanThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LessThanThreshold"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#CompositeAlarm": {
+      "members": {
+        "ActionsEnabled": {
+          "target": "com.amazonaws.cloudwatch#ActionsEnabled",
+          "traits": {}
+        },
+        "ActionsSuppressedBy": {
+          "target": "com.amazonaws.cloudwatch#ActionsSuppressedBy",
+          "traits": {}
+        },
+        "ActionsSuppressedReason": {
+          "target": "com.amazonaws.cloudwatch#ActionsSuppressedReason",
+          "traits": {}
+        },
+        "ActionsSuppressor": {
+          "target": "com.amazonaws.cloudwatch#AlarmArn",
+          "traits": {}
+        },
+        "ActionsSuppressorExtensionPeriod": {
+          "target": "com.amazonaws.cloudwatch#SuppressorPeriod",
+          "traits": {}
+        },
+        "ActionsSuppressorWaitPeriod": {
+          "target": "com.amazonaws.cloudwatch#SuppressorPeriod",
+          "traits": {}
+        },
+        "AlarmActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "AlarmArn": {
+          "target": "com.amazonaws.cloudwatch#AlarmArn",
+          "traits": {}
+        },
+        "AlarmConfigurationUpdatedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "AlarmDescription": {
+          "target": "com.amazonaws.cloudwatch#AlarmDescription",
+          "traits": {}
+        },
+        "AlarmName": {
+          "target": "com.amazonaws.cloudwatch#AlarmName",
+          "traits": {}
+        },
+        "AlarmRule": {
+          "target": "com.amazonaws.cloudwatch#AlarmRule",
+          "traits": {}
+        },
+        "InsufficientDataActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "OKActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "StateReason": {
+          "target": "com.amazonaws.cloudwatch#StateReason",
+          "traits": {}
+        },
+        "StateReasonData": {
+          "target": "com.amazonaws.cloudwatch#StateReasonData",
+          "traits": {}
+        },
+        "StateTransitionedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "StateUpdatedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "StateValue": {
+          "target": "com.amazonaws.cloudwatch#StateValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#CompositeAlarms": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#CompositeAlarm"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#DatapointsToAlarm": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#DescribeAlarms": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatch#InvalidNextToken"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatch#DescribeAlarmsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatch#DescribeAlarmsOutput"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "NextToken",
+          "outputToken": "NextToken",
+          "pageSize": "MaxRecords"
+        },
+        "smithy.waiters#waitable": {
+          "AlarmExists": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "booleanEquals",
+                    "expected": "true",
+                    "path": "length(MetricAlarms[]) > `0`"
+                  }
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 5
+          },
+          "CompositeAlarmExists": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "booleanEquals",
+                    "expected": "true",
+                    "path": "length(CompositeAlarms[]) > `0`"
+                  }
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 5
+          },
+          "LogAlarmExists": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "booleanEquals",
+                    "expected": "true",
+                    "path": "length(LogAlarms[]) > `0`"
+                  }
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 5
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatch#DescribeAlarmsInput": {
+      "members": {
+        "ActionPrefix": {
+          "target": "com.amazonaws.cloudwatch#ActionPrefix",
+          "traits": {}
+        },
+        "AlarmNamePrefix": {
+          "target": "com.amazonaws.cloudwatch#AlarmNamePrefix",
+          "traits": {}
+        },
+        "AlarmNames": {
+          "target": "com.amazonaws.cloudwatch#AlarmNames",
+          "traits": {}
+        },
+        "AlarmTypes": {
+          "target": "com.amazonaws.cloudwatch#AlarmTypes",
+          "traits": {}
+        },
+        "ChildrenOfAlarmName": {
+          "target": "com.amazonaws.cloudwatch#AlarmName",
+          "traits": {}
+        },
+        "MaxRecords": {
+          "target": "com.amazonaws.cloudwatch#MaxRecords",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.cloudwatch#NextToken",
+          "traits": {}
+        },
+        "ParentsOfAlarmName": {
+          "target": "com.amazonaws.cloudwatch#AlarmName",
+          "traits": {}
+        },
+        "StateValue": {
+          "target": "com.amazonaws.cloudwatch#StateValue",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#DescribeAlarmsOutput": {
+      "members": {
+        "CompositeAlarms": {
+          "target": "com.amazonaws.cloudwatch#CompositeAlarms",
+          "traits": {}
+        },
+        "LogAlarms": {
+          "target": "com.amazonaws.cloudwatch#LogAlarms",
+          "traits": {}
+        },
+        "MetricAlarms": {
+          "target": "com.amazonaws.cloudwatch#MetricAlarms",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.cloudwatch#NextToken",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#Dimension": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.cloudwatch#DimensionName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.cloudwatch#DimensionValue",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#DimensionName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#DimensionValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#Dimensions": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#Dimension"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 30,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#EndTimeOffset": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2592000,
+          "min": 0
+        }
+      },
+      "type": "long"
+    },
+    "com.amazonaws.cloudwatch#ErrorMessage": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#EvaluateLowSampleCountPercentile": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#EvaluationCriteria": {
+      "members": {
+        "PromQLCriteria": {
+          "target": "com.amazonaws.cloudwatch#AlarmPromQLCriteria",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.cloudwatch#EvaluationInterval": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 3600,
+          "min": 10
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#EvaluationPeriods": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#EvaluationState": {
+      "members": {
+        "EVALUATION_ERROR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EVALUATION_ERROR"
+          }
+        },
+        "EVALUATION_FAILURE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EVALUATION_FAILURE"
+          }
+        },
+        "PARTIAL_DATA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PARTIAL_DATA"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#EvaluationWindow": {
+      "members": {
+        "SlidingWindow": {
+          "target": "com.amazonaws.cloudwatch#SlidingWindow",
+          "traits": {}
+        },
+        "WallClockWindow": {
+          "target": "com.amazonaws.cloudwatch#WallClockWindow",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.cloudwatch#ExtendedStatistic": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#FaultDescription": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#GraniteServiceVersion20100801": {
+      "operations": [
+        {
+          "target": "com.amazonaws.cloudwatch#DescribeAlarms"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#ListTagsForResource"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "monitoring",
+          "cloudFormationName": "CloudWatch",
+          "cloudTrailEventSource": "monitoring.amazonaws.com",
+          "docId": "monitoring-2010-08-01",
+          "endpointPrefix": "monitoring",
+          "sdkId": "CloudWatch"
+        },
+        "aws.auth#sigv4": {
+          "name": "monitoring"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "aws.protocols#awsQuery": {},
+        "aws.protocols#awsQueryCompatible": {},
+        "smithy.api#title": "Amazon CloudWatch",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://monitoring.amazonaws.com/doc/2010-08-01/"
+        },
+        "smithy.protocols#rpcv2Cbor": {},
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                      "type": "error"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": {
+                          "ref": "Endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "fn": "isSet"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            }
+                          ],
+                          "assign": "PartitionResult",
+                          "fn": "aws.partition"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "name"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                "aws-us-gov"
+                              ],
+                              "fn": "stringEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://monitoring.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "name"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                "aws-us-gov"
+                              ],
+                              "fn": "stringEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://monitoring.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                },
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://monitoring-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsFIPS"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://monitoring-fips.{Region}.{PartitionResult#dnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "FIPS is enabled but this partition does not support FIPS",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                false
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    true,
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "supportsDualStack"
+                                      ],
+                                      "fn": "getAttr"
+                                    }
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://monitoring.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "DualStack is enabled but this partition does not support DualStack",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {},
+                            "url": "https://monitoring.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    }
+                  ],
+                  "type": "tree"
+                },
+                {
+                  "conditions": [],
+                  "error": "Invalid Configuration: Missing Region",
+                  "type": "error"
+                }
+              ],
+              "type": "tree"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2010-08-01"
+    },
+    "com.amazonaws.cloudwatch#InternalServiceFault": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#FaultDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InternalServiceError",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#InvalidNextToken": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidNextToken",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#InvalidParameterValueException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#AwsQueryErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidParameterValue",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#ListTagsForResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatch#InternalServiceFault"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatch#ListTagsForResourceInput"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatch#ListTagsForResourceOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatch#ListTagsForResourceInput": {
+      "members": {
+        "ResourceARN": {
+          "target": "com.amazonaws.cloudwatch#AmazonResourceName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#ListTagsForResourceOutput": {
+      "members": {
+        "Tags": {
+          "target": "com.amazonaws.cloudwatch#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#LogAlarm": {
+      "members": {
+        "ActionLogLineCount": {
+          "target": "com.amazonaws.cloudwatch#ActionLogLineCount",
+          "traits": {}
+        },
+        "ActionLogLineRoleArn": {
+          "target": "com.amazonaws.cloudwatch#ActionLogLineRoleArn",
+          "traits": {}
+        },
+        "ActionsEnabled": {
+          "target": "com.amazonaws.cloudwatch#ActionsEnabled",
+          "traits": {}
+        },
+        "AlarmActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "AlarmArn": {
+          "target": "com.amazonaws.cloudwatch#AlarmArn",
+          "traits": {}
+        },
+        "AlarmConfigurationUpdatedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "AlarmDescription": {
+          "target": "com.amazonaws.cloudwatch#AlarmDescription",
+          "traits": {}
+        },
+        "AlarmName": {
+          "target": "com.amazonaws.cloudwatch#AlarmName",
+          "traits": {}
+        },
+        "ComparisonOperator": {
+          "target": "com.amazonaws.cloudwatch#ComparisonOperator",
+          "traits": {}
+        },
+        "EvaluationState": {
+          "target": "com.amazonaws.cloudwatch#EvaluationState",
+          "traits": {}
+        },
+        "InsufficientDataActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "OKActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "QueryResultsToAlarm": {
+          "target": "com.amazonaws.cloudwatch#QueryResultsToAlarm",
+          "traits": {}
+        },
+        "QueryResultsToEvaluate": {
+          "target": "com.amazonaws.cloudwatch#QueryResultsToEvaluate",
+          "traits": {}
+        },
+        "ScheduledQueryConfiguration": {
+          "target": "com.amazonaws.cloudwatch#ScheduledQueryConfiguration",
+          "traits": {}
+        },
+        "StateReason": {
+          "target": "com.amazonaws.cloudwatch#StateReason",
+          "traits": {}
+        },
+        "StateReasonData": {
+          "target": "com.amazonaws.cloudwatch#StateReasonData",
+          "traits": {}
+        },
+        "StateTransitionedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "StateUpdatedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "StateValue": {
+          "target": "com.amazonaws.cloudwatch#StateValue",
+          "traits": {}
+        },
+        "Threshold": {
+          "target": "com.amazonaws.cloudwatch#Threshold",
+          "traits": {}
+        },
+        "TreatMissingData": {
+          "target": "com.amazonaws.cloudwatch#TreatMissingData",
+          "traits": {}
+        },
+        "WarmUpConfiguration": {
+          "target": "com.amazonaws.cloudwatch#WarmUpConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#LogAlarms": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#LogAlarm"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#LogGroupIdentifiers": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#AmazonResourceName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#MaxRecords": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#Metric": {
+      "members": {
+        "Dimensions": {
+          "target": "com.amazonaws.cloudwatch#Dimensions",
+          "traits": {}
+        },
+        "MetricName": {
+          "target": "com.amazonaws.cloudwatch#MetricName",
+          "traits": {}
+        },
+        "Namespace": {
+          "target": "com.amazonaws.cloudwatch#Namespace",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#MetricAlarm": {
+      "members": {
+        "ActionsEnabled": {
+          "target": "com.amazonaws.cloudwatch#ActionsEnabled",
+          "traits": {}
+        },
+        "AlarmActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "AlarmArn": {
+          "target": "com.amazonaws.cloudwatch#AlarmArn",
+          "traits": {}
+        },
+        "AlarmConfigurationUpdatedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "AlarmDescription": {
+          "target": "com.amazonaws.cloudwatch#AlarmDescription",
+          "traits": {}
+        },
+        "AlarmName": {
+          "target": "com.amazonaws.cloudwatch#AlarmName",
+          "traits": {}
+        },
+        "ComparisonOperator": {
+          "target": "com.amazonaws.cloudwatch#ComparisonOperator",
+          "traits": {}
+        },
+        "DatapointsToAlarm": {
+          "target": "com.amazonaws.cloudwatch#DatapointsToAlarm",
+          "traits": {}
+        },
+        "Dimensions": {
+          "target": "com.amazonaws.cloudwatch#Dimensions",
+          "traits": {}
+        },
+        "EvaluateLowSampleCountPercentile": {
+          "target": "com.amazonaws.cloudwatch#EvaluateLowSampleCountPercentile",
+          "traits": {}
+        },
+        "EvaluationCriteria": {
+          "target": "com.amazonaws.cloudwatch#EvaluationCriteria",
+          "traits": {}
+        },
+        "EvaluationInterval": {
+          "target": "com.amazonaws.cloudwatch#EvaluationInterval",
+          "traits": {}
+        },
+        "EvaluationPeriods": {
+          "target": "com.amazonaws.cloudwatch#EvaluationPeriods",
+          "traits": {}
+        },
+        "EvaluationState": {
+          "target": "com.amazonaws.cloudwatch#EvaluationState",
+          "traits": {}
+        },
+        "EvaluationWindow": {
+          "target": "com.amazonaws.cloudwatch#EvaluationWindow",
+          "traits": {}
+        },
+        "ExtendedStatistic": {
+          "target": "com.amazonaws.cloudwatch#ExtendedStatistic",
+          "traits": {}
+        },
+        "InsufficientDataActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "MetricName": {
+          "target": "com.amazonaws.cloudwatch#MetricName",
+          "traits": {}
+        },
+        "Metrics": {
+          "target": "com.amazonaws.cloudwatch#MetricDataQueries",
+          "traits": {}
+        },
+        "Namespace": {
+          "target": "com.amazonaws.cloudwatch#Namespace",
+          "traits": {}
+        },
+        "OKActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "Period": {
+          "target": "com.amazonaws.cloudwatch#Period",
+          "traits": {}
+        },
+        "StateReason": {
+          "target": "com.amazonaws.cloudwatch#StateReason",
+          "traits": {}
+        },
+        "StateReasonData": {
+          "target": "com.amazonaws.cloudwatch#StateReasonData",
+          "traits": {}
+        },
+        "StateTransitionedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "StateUpdatedTimestamp": {
+          "target": "com.amazonaws.cloudwatch#Timestamp",
+          "traits": {}
+        },
+        "StateValue": {
+          "target": "com.amazonaws.cloudwatch#StateValue",
+          "traits": {}
+        },
+        "Statistic": {
+          "target": "com.amazonaws.cloudwatch#Statistic",
+          "traits": {}
+        },
+        "Threshold": {
+          "target": "com.amazonaws.cloudwatch#Threshold",
+          "traits": {}
+        },
+        "ThresholdMetricId": {
+          "target": "com.amazonaws.cloudwatch#MetricId",
+          "traits": {}
+        },
+        "TreatMissingData": {
+          "target": "com.amazonaws.cloudwatch#TreatMissingData",
+          "traits": {}
+        },
+        "Unit": {
+          "target": "com.amazonaws.cloudwatch#StandardUnit",
+          "traits": {}
+        },
+        "WarmUpConfiguration": {
+          "target": "com.amazonaws.cloudwatch#WarmUpConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#MetricAlarms": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#MetricAlarm"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#MetricDataQueries": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#MetricDataQuery"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#MetricDataQuery": {
+      "members": {
+        "AccountId": {
+          "target": "com.amazonaws.cloudwatch#AccountId",
+          "traits": {}
+        },
+        "Expression": {
+          "target": "com.amazonaws.cloudwatch#MetricExpression",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.cloudwatch#MetricId",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Label": {
+          "target": "com.amazonaws.cloudwatch#MetricLabel",
+          "traits": {}
+        },
+        "MetricStat": {
+          "target": "com.amazonaws.cloudwatch#MetricStat",
+          "traits": {}
+        },
+        "Period": {
+          "target": "com.amazonaws.cloudwatch#Period",
+          "traits": {}
+        },
+        "ReturnData": {
+          "target": "com.amazonaws.cloudwatch#ReturnData",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#MetricExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#MetricId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#MetricLabel": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#MetricName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#MetricStat": {
+      "members": {
+        "Metric": {
+          "target": "com.amazonaws.cloudwatch#Metric",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Period": {
+          "target": "com.amazonaws.cloudwatch#Period",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Stat": {
+          "target": "com.amazonaws.cloudwatch#Stat",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Unit": {
+          "target": "com.amazonaws.cloudwatch#StandardUnit",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#Namespace": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[^:]"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#NextToken": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#OnlyStartEvaluatingAfterWarmUpPeriodEnds": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudwatch#PendingPeriod": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 86400,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#Period": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#Query": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10000,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#QueryResultsToAlarm": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#QueryResultsToEvaluate": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#QueryString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#RecoveryPeriod": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 86400,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#ResourceId": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ResourceList": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#ResourceName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#ResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#FaultDescription"
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.cloudwatch#ResourceId"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.cloudwatch#ResourceType"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#ResourceType": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ReturnData": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudwatch#ScheduleConfiguration": {
+      "members": {
+        "EndTimeOffset": {
+          "target": "com.amazonaws.cloudwatch#EndTimeOffset",
+          "traits": {}
+        },
+        "ScheduleExpression": {
+          "target": "com.amazonaws.cloudwatch#ScheduleExpression",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "StartTimeOffset": {
+          "target": "com.amazonaws.cloudwatch#StartTimeOffset",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#ScheduleExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ScheduledQueryConfiguration": {
+      "members": {
+        "AggregationExpression": {
+          "target": "com.amazonaws.cloudwatch#AggregationExpression",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "LogGroupIdentifiers": {
+          "target": "com.amazonaws.cloudwatch#LogGroupIdentifiers",
+          "traits": {}
+        },
+        "QueryARN": {
+          "target": "com.amazonaws.cloudwatch#AmazonResourceName",
+          "traits": {}
+        },
+        "QueryString": {
+          "target": "com.amazonaws.cloudwatch#QueryString",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ScheduleConfiguration": {
+          "target": "com.amazonaws.cloudwatch#ScheduleConfiguration",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ScheduledQueryRoleARN": {
+          "target": "com.amazonaws.cloudwatch#AmazonResourceName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.cloudwatch#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#SlidingWindow": {
+      "members": {},
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#StandardUnit": {
+      "members": {
+        "Bits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bits"
+          }
+        },
+        "Bits_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bits/Second"
+          }
+        },
+        "Bytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bytes"
+          }
+        },
+        "Bytes_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Bytes/Second"
+          }
+        },
+        "Count": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Count"
+          }
+        },
+        "Count_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Count/Second"
+          }
+        },
+        "Gigabits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabits"
+          }
+        },
+        "Gigabits_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabits/Second"
+          }
+        },
+        "Gigabytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabytes"
+          }
+        },
+        "Gigabytes_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Gigabytes/Second"
+          }
+        },
+        "Kilobits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobits"
+          }
+        },
+        "Kilobits_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobits/Second"
+          }
+        },
+        "Kilobytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobytes"
+          }
+        },
+        "Kilobytes_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Kilobytes/Second"
+          }
+        },
+        "Megabits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabits"
+          }
+        },
+        "Megabits_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabits/Second"
+          }
+        },
+        "Megabytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabytes"
+          }
+        },
+        "Megabytes_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Megabytes/Second"
+          }
+        },
+        "Microseconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Microseconds"
+          }
+        },
+        "Milliseconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Milliseconds"
+          }
+        },
+        "None": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "None"
+          }
+        },
+        "Percent": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Percent"
+          }
+        },
+        "Seconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Seconds"
+          }
+        },
+        "Terabits": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabits"
+          }
+        },
+        "Terabits_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabits/Second"
+          }
+        },
+        "Terabytes": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabytes"
+          }
+        },
+        "Terabytes_Second": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Terabytes/Second"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#StartTimeOffset": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2592000,
+          "min": 1
+        }
+      },
+      "type": "long"
+    },
+    "com.amazonaws.cloudwatch#Stat": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#StateReason": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1023,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#StateReasonData": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#StateValue": {
+      "members": {
+        "ALARM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALARM"
+          }
+        },
+        "INSUFFICIENT_DATA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INSUFFICIENT_DATA"
+          }
+        },
+        "OK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OK"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#Statistic": {
+      "members": {
+        "Average": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Average"
+          }
+        },
+        "Maximum": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Maximum"
+          }
+        },
+        "Minimum": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Minimum"
+          }
+        },
+        "SampleCount": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SampleCount"
+          }
+        },
+        "Sum": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Sum"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#SuppressorPeriod": {
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.cloudwatch#TagKey",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.cloudwatch#TagValue",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#TagList": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#Tag"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#Threshold": {
+      "type": "double"
+    },
+    "com.amazonaws.cloudwatch#Timestamp": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.cloudwatch#Timezone": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#TreatMissingData": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#WallClockWindow": {
+      "members": {
+        "Timezone": {
+          "target": "com.amazonaws.cloudwatch#Timezone",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#WarmUpConfiguration": {
+      "members": {
+        "OnlyStartEvaluatingAfterWarmUpPeriodEnds": {
+          "target": "com.amazonaws.cloudwatch#OnlyStartEvaluatingAfterWarmUpPeriodEnds",
+          "traits": {}
+        },
+        "WarmUpPeriodDurationInMinutes": {
+          "target": "com.amazonaws.cloudwatch#WarmUpPeriodDurationInMinutes",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#WarmUpPeriodDurationInMinutes": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 2880,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    }
+  },
+  "smithy": "2.0"
+}

@@ -724,7 +724,7 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 			if isList {
 				next = ref(model.Shapes[next].Member)
 			}
-			if model.Shapes[next].Type != "structure" {
+			if !isStructure(model.Shapes[next]) {
 				fail("absent names %s, but %s is not a structure", path, step)
 				walked = false
 				break
@@ -911,7 +911,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 					next = ref(model.Shapes[next].Member)
 				}
 			}
-			if !ok || model.Shapes[next].Type != "structure" {
+			if !ok || !isStructure(model.Shapes[next]) {
 				fail("%s%s maps to %s, but %s is not a structure member of %s", at, name, mapping.Member, step, holder)
 				walked = false
 				break
@@ -1042,13 +1042,21 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		case "structure":
 			nestedStructure = m.Target
 		case "list":
-			if el := model.Shapes[ref(target.Member)]; el.Type == "structure" {
+			if el := model.Shapes[ref(target.Member)]; isStructure(el) {
 				nestedStructure = ref(target.Member)
 			}
 		}
 		// Only the service's shape says which alternative a response is.
 		if nested == nil && nestedStructure != "" {
 			nested = schema.nestedAlternative(prop)
+		}
+		// A union the schema declares no structure for, or a structure with
+		// no members, is read whole, as the value the service returns.
+		if nested == nil && nestedStructure != "" && (model.Shapes[nestedStructure].Type == "union" || len(model.Shapes[nestedStructure].Members) == 0) {
+			nestedStructure = ""
+			if f.Kind == "structure" {
+				f.Kind = "scalar"
+			}
 		}
 		switch {
 		case nested != nil && nestedStructure != "":
@@ -1139,7 +1147,7 @@ func compileCapture(model *smithyModel, resource string, capture map[string]stri
 		holder, via, ok := resource, []Step{}, true
 		for _, step := range steps[:len(steps)-1] {
 			m, found := model.Shapes[holder].Members[step]
-			if !found || model.Shapes[m.Target].Type != "structure" {
+			if !found || !isStructure(model.Shapes[m.Target]) {
 				fail("capture %s: %s is not a structure member of %s", name, step, holder)
 				ok = false
 				break
@@ -1401,8 +1409,16 @@ func targetType(shapeType, target string) string {
 	return "unknown"
 }
 
+// isStructure reports a shape read as a structure: a union is one whose
+// members are all optional and of which the service sets exactly one.
+func isStructure(shape smithyShape) bool {
+	return shape.Type == "structure" || shape.Type == "union"
+}
+
 func kindOf(shapeType, target string) string {
 	switch t := targetType(shapeType, target); t {
+	case "union":
+		return "structure"
 	case "structure", "map":
 		return t
 	case "list", "set":
@@ -1420,7 +1436,7 @@ var compatibleTypes = map[string][]string{
 	"number":  {"integer", "long", "short", "byte", "intenum", "float", "double", "bigdecimal"},
 	"boolean": {"boolean"},
 	"array":   {"list", "set"},
-	"object":  {"structure", "map", "document"},
+	"object":  {"structure", "union", "map", "document"},
 }
 
 func compatible(types map[string]bool, shapeType, target string) bool {
@@ -1735,7 +1751,7 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 				f.Where[j].Member = xmlName(w.Member, model.Shapes[el].Members[w.Member])
 			}
 			switch elShape := model.Shapes[el]; {
-			case elShape.Type == "structure":
+			case isStructure(elShape):
 				xmlFields(model, el, f.Fields, at+f.Property+".", fail)
 			case kindOf(elShape.Type, el) == "scalar" || kindOf(elShape.Type, el) == "timestamp":
 				f.Scalar = scalarOf(elShape.Type, el)

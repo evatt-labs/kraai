@@ -1,0 +1,92 @@
+type: AWS::CloudWatch::Alarm
+read:
+  model: cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json
+  operation: DescribeAlarms
+  identifier:
+    AlarmName: AlarmNames
+  response: MetricAlarms[]
+  # Tags are read by the alarm's ARN.
+  capture:
+    Arn: AlarmArn
+properties:
+  ActionsEnabled: ActionsEnabled
+  AlarmActions: AlarmActions
+  AlarmDescription: AlarmDescription
+  AlarmName: AlarmName
+  Arn: AlarmArn
+  ComparisonOperator: ComparisonOperator
+  DatapointsToAlarm: DatapointsToAlarm
+  Dimensions:
+    member: Dimensions
+    properties: { Name: Name, Value: Value }
+  EvaluateLowSampleCountPercentile: EvaluateLowSampleCountPercentile
+  EvaluationInterval: EvaluationInterval
+  EvaluationPeriods: EvaluationPeriods
+  ExtendedStatistic: ExtendedStatistic
+  InsufficientDataActions: InsufficientDataActions
+  Metrics:
+    member: Metrics
+    properties:
+      AccountId: AccountId
+      Expression: Expression
+      Id: Id
+      Label: Label
+      MetricStat:
+        member: MetricStat
+        properties:
+          Metric:
+            member: Metric
+            properties:
+              Dimensions:
+                member: Dimensions
+                properties: { Name: Name, Value: Value }
+              MetricName: MetricName
+              Namespace: Namespace
+          Period: Period
+          Stat: Stat
+          Unit: Unit
+      Period: Period
+      ReturnData: ReturnData
+  MetricName: MetricName
+  Namespace: Namespace
+  OKActions: OKActions
+  Period: Period
+  Statistic: Statistic
+  Threshold: Threshold
+  ThresholdMetricId: ThresholdMetricId
+  TreatMissingData: TreatMissingData
+  Unit: Unit
+  WarmUpConfiguration:
+    member: WarmUpConfiguration
+    properties:
+      OnlyStartEvaluatingAfterWarmUpPeriodEnds: OnlyStartEvaluatingAfterWarmUpPeriodEnds
+      WarmUpPeriodDurationInMinutes: WarmUpPeriodDurationInMinutes
+  EvaluationCriteria:
+    member: EvaluationCriteria
+    properties:
+      PromQLCriteria:
+        member: PromQLCriteria
+        properties:
+          PendingPeriod: PendingPeriod
+          Query: Query
+          RecoveryPeriod: RecoveryPeriod
+  EvaluationWindow:
+    member: EvaluationWindow
+    properties:
+      SlidingWindow: SlidingWindow
+      WallClockWindow:
+        member: WallClockWindow
+        properties:
+          Timezone: Timezone
+also:
+  - operation: ListTagsForResource
+    input:
+      ResourceARN: "{Arn}"
+    properties:
+      Tags:
+        member: Tags
+        properties:
+          Key: Key
+          Value: Value
+absentIds:
+  - kraai-absent-probe-alarm
