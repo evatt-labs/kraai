@@ -4,6 +4,9 @@
       "operations": [
         {
           "target": "com.amazonaws.elasticache#DescribeCacheSubnetGroups"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ListTagsForResource"
         }
       ],
       "traits": {
@@ -375,6 +378,54 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.elasticache#CacheClusterNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheClusterNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CacheParameterGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheParameterGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CacheSecurityGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheSecurityGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#CacheSubnetGroup": {
       "members": {
         "ARN": {
@@ -494,6 +545,142 @@
     "com.amazonaws.elasticache#IntegerOptional": {
       "type": "integer"
     },
+    "com.amazonaws.elasticache#InvalidARNFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidARN",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidReplicationGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidReplicationGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidServerlessCacheSnapshotStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidServerlessCacheSnapshotStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidServerlessCacheStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidServerlessCacheStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ListTagsForResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticache#CacheClusterNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheParameterGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSecurityGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidARNFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidReplicationGroupStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidServerlessCacheSnapshotStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidServerlessCacheStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ReplicationGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ReservedCacheNodeNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ServerlessCacheNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ServerlessCacheSnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#SnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#UserGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#UserNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticache#ListTagsForResourceMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticache#TagListMessage"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticache#ListTagsForResourceMessage": {
+      "members": {
+        "ResourceName": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#NetworkType": {
       "members": {
         "DUAL_STACK": {
@@ -522,6 +709,86 @@
         "target": "com.amazonaws.elasticache#NetworkType"
       },
       "type": "list"
+    },
+    "com.amazonaws.elasticache#ReplicationGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReplicationGroupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ReservedCacheNodeNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedCacheNodeNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ServerlessCacheNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServerlessCacheNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ServerlessCacheSnapshotNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServerlessCacheSnapshotNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#SnapshotNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SnapshotNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticache#String": {
       "type": "string"
@@ -565,6 +832,71 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {}
+        },
+        "Value": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#TagList": {
+      "member": {
+        "target": "com.amazonaws.elasticache#Tag",
+        "traits": {
+          "smithy.api#xmlName": "Tag"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticache#TagListMessage": {
+      "members": {
+        "TagList": {
+          "target": "com.amazonaws.elasticache#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#UserGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UserGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#UserNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UserNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
       "type": "structure"
     }
   },

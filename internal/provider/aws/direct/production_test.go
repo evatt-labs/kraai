@@ -3,6 +3,7 @@ package direct
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 	"testing"
 	"testing/fstest"
 )
@@ -29,15 +30,24 @@ func TestSkipsAny(t *testing.T) {
 }
 
 // A type is proven only by parity on both the instances read and the
-// identifiers probed as absent.
+// identifiers probed as absent, recorded against the override it has now.
 func TestProvenTypes(t *testing.T) {
+	fsys := fstest.MapFS{}
+	hashes := map[string]string{}
+	for _, name := range []string{"AWS::A::Both", "AWS::B::ReadOnly", "AWS::C::AbsenceDiffers", "AWS::D::ReadDiffers", "AWS::E::Edited"} {
+		fsys["overrides/"+strings.ReplaceAll(name, "::", "--")+".yaml"] = &fstest.MapFile{Data: []byte("type: " + name + "\n")}
+		hashes[name], _ = overrideHash(fsys, name)
+	}
 	raw, _ := json.Marshal(Evidence{Types: []TypeEvidence{
-		{Type: "AWS::A::Both", Outcome: "parity", Absence: "parity"},
-		{Type: "AWS::B::ReadOnly", Outcome: "parity"},
-		{Type: "AWS::C::AbsenceDiffers", Outcome: "parity", Absence: "differs"},
-		{Type: "AWS::D::ReadDiffers", Outcome: "differs", Absence: "parity"},
+		{Type: "AWS::A::Both", Outcome: "parity", Absence: "parity", Override: hashes["AWS::A::Both"]},
+		{Type: "AWS::B::ReadOnly", Outcome: "parity", Override: hashes["AWS::B::ReadOnly"]},
+		{Type: "AWS::C::AbsenceDiffers", Outcome: "parity", Absence: "differs", Override: hashes["AWS::C::AbsenceDiffers"]},
+		{Type: "AWS::D::ReadDiffers", Outcome: "differs", Absence: "parity", Override: hashes["AWS::D::ReadDiffers"]},
+		{Type: "AWS::E::Edited", Outcome: "parity", Absence: "parity", Override: "an earlier override"},
+		{Type: "AWS::F::NoOverride", Outcome: "parity", Absence: "parity"},
 	}})
-	got, err := provenTypes(fstest.MapFS{"evidence/parity.json": {Data: raw}})
+	fsys["evidence/parity.json"] = &fstest.MapFile{Data: raw}
+	got, err := provenTypes(fsys)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -109,6 +109,14 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	if len(r.AbsentIDs) > 0 {
 		fmt.Fprintf(b, "AbsentIDs: %#v,\n", r.AbsentIDs)
 	}
+	if len(r.Capture) > 0 {
+		b.WriteString("Capture: []Field{\n")
+		for _, f := range r.Capture {
+			fieldLiteral(b, f, "")
+			b.WriteString(",\n")
+		}
+		b.WriteString("},\n")
+	}
 	if len(r.Also) > 0 {
 		b.WriteString("Also: []Reader{\n")
 		for _, also := range r.Also {
@@ -274,7 +282,11 @@ func provenTypes(files fs.FS) (map[string]bool, error) {
 	}
 	out := map[string]bool{}
 	for _, e := range evidence.Types {
-		if e.Outcome == "parity" && e.Absence == "parity" {
+		if e.Outcome != "parity" || e.Absence != "parity" {
+			continue
+		}
+		// A missing override is no reader to prove.
+		if current, err := overrideHash(files, e.Type); err == nil && current == e.Override {
 			out[e.Type] = true
 		}
 	}

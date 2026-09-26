@@ -39,6 +39,19 @@ type LockedFile struct {
 	Subset string `json:"subsetSha256"`
 }
 
+// OverrideHash is the SHA-256 of typeName's override file, which evidence
+// records to say what it was run against.
+func OverrideHash(typeName string) (string, error) { return overrideHash(files, typeName) }
+
+func overrideHash(files fs.FS, typeName string) (string, error) {
+	raw, err := fs.ReadFile(files, "overrides/"+strings.ReplaceAll(typeName, "::", "--")+".yaml")
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(raw)
+	return hex.EncodeToString(sum[:]), nil
+}
+
 // Overrides returns every override, sorted by type. Unknown fields are an
 // error: a misspelled key must not be read as an omission.
 func Overrides() ([]Override, error) { return overrides(files) }

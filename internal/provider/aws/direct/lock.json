@@ -184,7 +184,7 @@
     "elasticache/service/2015-02-02/elasticache-2015-02-02.json": {
       "file": "models/elasticache-2015-02-02.json",
       "sourceSha256": "531f322d4461115b8cebe68b55a2dae3bbbcff5908b5ed711f19fd6bfb073940",
-      "subsetSha256": "000a3c249e7c1f6d2517c273ef4fa89e297fdfc9ebc9cea946ffe2f58f93dfc3"
+      "subsetSha256": "ec5742102990d7df78e5274eabfa5654e379cbb999e127e4ab897f0930d5150b"
     },
     "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
       "file": "models/elementalinference-2018-11-14.json",
@@ -469,7 +469,7 @@
     "rds/service/2014-10-31/rds-2014-10-31.json": {
       "file": "models/rds-2014-10-31.json",
       "sourceSha256": "ece1de6b0278c9327d5e79ac62032ca8c6c1f76e4d24fef95e7d3641f0459020",
-      "subsetSha256": "26fa4e0b784d5bd11ee33d07a3c478cd83907cf667eb1c13bf5aa97b9a89f43b"
+      "subsetSha256": "39351dc3d2edac6ca70432607f48b06795d3fda40bc1902d205403439242305d"
     },
     "resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json": {
       "file": "models/resiliencehubv2-2026-02-17.json",

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -36,6 +37,8 @@ type Reader struct {
 	Probe *Lister
 	// Also is the further calls whose properties are merged into a read.
 	Also []Reader
+	// Capture reads, keyed by Property, the values Also calls may name.
+	Capture []Field
 	// AbsentIDs are identifiers that must read as absent, for the harness.
 	AbsentIDs []string
 	// Complete is true when the override skips no property at any depth,
@@ -233,7 +236,11 @@ func compileAll(files fs.FS) ([]Reader, error) {
 }
 
 func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
-	r, errs := compileCall(files, lock, o, nil)
+	r, errs := compileCall(files, lock, o, nil, nil)
+	captured := map[string]bool{}
+	for name := range o.Read.Capture {
+		captured[name] = true
+	}
 	for i, call := range o.Also {
 		only := map[string]bool{}
 		for name := range call.Properties {
@@ -245,7 +252,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 				Response: call.Response, Input: call.Input},
 			Properties: call.Properties,
 		}
-		also, alsoErrs := compileCall(files, lock, sub, only)
+		also, alsoErrs := compileCall(files, lock, sub, only, captured)
 		for _, e := range alsoErrs {
 			errs = append(errs, fmt.Errorf("also[%d] %s: %w", i, call.Operation, e))
 		}
@@ -253,6 +260,17 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			errs = append(errs, fmt.Errorf("also[%d] %s maps no property", i, call.Operation))
 		}
 		r.Also = append(r.Also, also)
+	}
+	for _, name := range sortedKeys(o.Read.Capture) {
+		named := false
+		for _, call := range o.Also {
+			for _, value := range call.Input {
+				named = named || slices.Contains(placeholders(value), name)
+			}
+		}
+		if !named {
+			errs = append(errs, fmt.Errorf("capture %s is named by no further call", name))
+		}
 	}
 	r.AbsentIDs = o.AbsentIDs
 	return r, errs
@@ -262,7 +280,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 // properties the call must account for to those it maps, for a further
 // call; otherwise the call accounts for every readable property but those
 // o's further calls map.
-func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Reader, []error) {
+func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]bool) (Reader, []error) {
 	var errs []error
 	fail := func(format string, args ...any) { errs = append(errs, fmt.Errorf(format, args...)) }
 
@@ -399,7 +417,7 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 		bound[member] = true
 		value := o.Read.Input[member]
 		for _, name := range placeholders(value) {
-			if !want[name] {
+			if !want[name] && !captured[name] {
 				fail("read input %s names {%s}, which is not the primary identifier", member, name)
 			}
 		}
@@ -423,14 +441,16 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 	}
 	// A call filtered by the identifier binds it through a placeholder in
 	// its input rather than an input member of its own.
-	inInput := map[string]bool{}
+	// A further call may instead be addressed by a value the read captured.
+	inInput, byCapture := map[string]bool{}, false
 	for _, value := range o.Read.Input {
 		for _, name := range placeholders(value) {
 			inInput[name] = true
+			byCapture = byCapture || captured[name]
 		}
 	}
 	for property := range want {
-		if _, ok := o.Read.Identifier[property]; !ok && !inInput[property] {
+		if _, ok := o.Read.Identifier[property]; !ok && !inInput[property] && !byCapture {
 			fail("identifier does not bind %s", property)
 		}
 	}
@@ -548,6 +568,10 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 	r.Fields = compileFields(&model, &schema, ownProps, resource, ownMapped, o.Skip, "", fail)
 	if isXML(r.Protocol) {
 		xmlFields(&model, resource, r.Fields, "", fail)
+	}
+	r.Capture = compileCapture(&model, resource, o.Read.Capture, want, fail)
+	if isXML(r.Protocol) {
+		xmlFields(&model, resource, r.Capture, "capture ", fail)
 	}
 	var checkSelections func([]Field)
 	checkSelections = func(fields []Field) {
@@ -808,6 +832,44 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		}
 		if len(mapping.Where) > 0 {
 			f.Where = compileWhere(model, f, nestedStructure, mapping.Where, at+name, fail)
+		}
+		fields = append(fields, f)
+	}
+	return fields
+}
+
+// compileCapture resolves each captured value to a string member of the
+// resource structure, reached through structures only.
+func compileCapture(model *smithyModel, resource string, capture map[string]string, identifier map[string]bool, fail func(string, ...any)) []Field {
+	var fields []Field
+	for _, name := range sortedKeys(capture) {
+		if identifier[name] {
+			fail("capture %s is the primary identifier, which every call already has", name)
+			continue
+		}
+		steps := strings.Split(capture[name], ".")
+		holder, via, ok := resource, []Step{}, true
+		for _, step := range steps[:len(steps)-1] {
+			m, found := model.Shapes[holder].Members[step]
+			if !found || model.Shapes[m.Target].Type != "structure" {
+				fail("capture %s: %s is not a structure member of %s", name, step, holder)
+				ok = false
+				break
+			}
+			via, holder = append(via, Step{Name: step}), m.Target
+		}
+		if !ok {
+			continue
+		}
+		last := steps[len(steps)-1]
+		m, found := model.Shapes[holder].Members[last]
+		if !found || targetType(model.Shapes[m.Target].Type, m.Target) != "string" {
+			fail("capture %s: %s is not a string member of %s", name, last, holder)
+			continue
+		}
+		f := Field{Property: name, Member: last, Kind: "scalar"}
+		if len(via) > 0 {
+			f.Via = via
 		}
 		fields = append(fields, f)
 	}

@@ -7,22 +7,24 @@ read:
   # DescribeDBClusterParameterGroups filters by a single name and answers
   # with a list.
   response: DBClusterParameterGroups[]
+  capture:
+    Arn: DBClusterParameterGroupArn
 properties:
   DBClusterParameterGroupName: DBClusterParameterGroupName
   Description: Description
   Family: DBParameterGroupFamily
 skip:
-  # The response carries DBClusterParameterGroupArn, but the
-  # CloudFormation schema never exposes it as a property, so there is
-  # nothing to map it onto; ListTagsForResource needs it as ResourceName.
-  # Even mapped, the same gap as DBSubnetGroup's Tags applies: a further
-  # call may only be addressed by the primary identifier
-  # (DBClusterParameterGroupName).
-  Tags: ListTagsForResource needs the ARN, which this schema does not expose and no further call can be addressed by
-  # DescribeDBClusterParameters answers a list of {ParameterName,
-  # ParameterValue, ...} structures; this schema's Parameters property is
-  # type object, a free-form map. No mapping construct folds a list of
-  # name/value structures into a map.
-  Parameters: DescribeDBClusterParameters answers a list of name/value structures; the object-typed property has no construct to fold a list into a map
+  Parameters: DescribeDBClusterParameters answers a list of name/value structures, which no mapping folds into this object
+also:
+  # Tags are read by ARN, which only the read's response carries.
+  - operation: ListTagsForResource
+    input:
+      ResourceName: "{Arn}"
+    properties:
+      Tags:
+        member: TagList
+        properties:
+          Key: Key
+          Value: Value
 absentIds:
   - kraai-absent-probe

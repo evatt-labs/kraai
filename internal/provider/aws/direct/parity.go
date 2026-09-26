@@ -182,6 +182,9 @@ type TypeEvidence struct {
 	Absence string `json:"absence,omitempty"`
 	// Probed is how many such identifiers were read.
 	Probed int `json:"probed,omitempty"`
+	// Override is the SHA-256 of the override the run read through:
+	// evidence for an earlier override proves nothing about this one.
+	Override string `json:"override"`
 }
 
 // shape is where a type's schema declares an array unordered, nested as
@@ -308,7 +311,7 @@ func MergeEvidence(prior, run Evidence, readers map[string]bool) Evidence {
 		}
 	}
 	for _, e := range run.Types {
-		if old, ok := byType[e.Type]; ok && inconclusive[e.Outcome] && !inconclusive[old.Outcome] {
+		if old, ok := byType[e.Type]; ok && inconclusive[e.Outcome] && !inconclusive[old.Outcome] && old.Override == e.Override {
 			continue
 		}
 		byType[e.Type] = e
