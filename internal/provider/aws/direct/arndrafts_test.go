@@ -2,10 +2,10 @@ package direct
 
 import "testing"
 
-// Fixing #380: join_main bound each of these types' primary identifier,
-// an ARN, straight to an input member that takes only the name or id, a
-// draft every direct read would reject. Each is now read by substituting
-// the name or id out of the ARN through an {ArnProperty:arnName} input
+// join_main bound each of these types' primary identifier, an ARN,
+// straight to an input member that takes only the name or id, a draft
+// every direct read would reject. Each is now read by substituting the
+// name or id out of the ARN through an {ArnProperty:arnName} input
 // placeholder; the ARN itself remains the reader's identifier, bound
 // through the placeholder rather than an input member of its own.
 func TestReadersSubstituteARNDrafts(t *testing.T) {
