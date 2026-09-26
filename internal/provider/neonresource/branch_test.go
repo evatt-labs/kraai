@@ -13,7 +13,7 @@ import (
 // registration produces resolves to the same scope, keyed on the
 // registration's own settings.Project/OrgID rather than anything in the
 // per-call Spec — see newBranchScope's doc comment for why. This is the
-// mechanism internal/resource/registry.go's Registration.Scope exists for:
+// mechanism internal/resource/registration.go's Registration.Scope exists for:
 // two branches sharing a project must serialize, which this test checks
 // at the level that actually matters — the string two different Specs
 // produce is identical, and a different project's settings produce a

@@ -55,7 +55,7 @@ type s3API interface {
 	// account-scoped rather than bucket-scoped.
 	ListBuckets(ctx context.Context, params *s3.ListBucketsInput, optFns ...func(*s3.Options)) (*s3.ListBucketsOutput, error)
 	// PutBucketPolicy, GetBucketPolicy and DeleteBucketPolicy serve
-	// cloudfront.go, which grants a distribution read access to the bucket
+	// cloudfrontgrant.go, which grants a distribution read access to the bucket
 	// it fronts.
 	PutBucketPolicy(ctx context.Context, params *s3.PutBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.PutBucketPolicyOutput, error)
 	GetBucketPolicy(ctx context.Context, params *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error)
@@ -99,7 +99,7 @@ type ssmAPI interface {
 // Client is a thin Cloud Control and CloudFormation client whose exported
 // methods speak this package's vocabulary (a decoded properties map, an
 // identifier list) rather than the SDK's, so *Client satisfies ccAPI and
-// nothing above this file needs to know the SDK exists.
+// nothing outside this package needs to know the SDK exists.
 type Client struct {
 	cc  cloudControlAPI
 	cf  cloudFormationAPI

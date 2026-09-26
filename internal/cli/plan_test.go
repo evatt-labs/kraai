@@ -457,11 +457,6 @@ func unreachableAssembler(context.Context, *manifest.Manifest) (*resource.Regist
 	return nil, kerrors.New("the assembler was reached; this command should have failed first")
 }
 
-// fixtureCatalogAssembler declares exactly the capabilities this package's
-// manifest fixtures name, so plan/apply/destroy validate against a real
-// resource.Catalog without importing internal/assemble or any provider
-// package — the same isolation fakeCatalogAssembler gives `kraai
-// capabilities`.
 // fixtureResolver is the ManifestResolver these tests inject: a real manifest
 // load against the fake catalog below, with no plugins.
 //
@@ -488,6 +483,11 @@ func fixtureResolver(
 	}, nil
 }
 
+// fixtureCatalogAssembler declares exactly the capabilities this package's
+// manifest fixtures name, so plan/apply/destroy validate against a real
+// resource.Catalog without importing internal/assemble or any provider
+// package — the same isolation fakeCatalogAssembler gives `kraai
+// capabilities`.
 func fixtureCatalogAssembler() (*resource.Catalog, error) {
 	return resource.NewCatalog(
 		resource.FuncProvider{ProviderName: "fake", CapabilitiesFunc: func() []resource.CapabilityDef {
