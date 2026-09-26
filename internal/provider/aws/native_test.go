@@ -235,6 +235,91 @@ func TestNativeCreateAddsTheIdentity(t *testing.T) {
 	})
 }
 
+// A native FIFO queue's derived name is unusable as its QueueName: SQS
+// rejects a FifoQueue: true create whose name does not end in .fifo.
+func TestNativeFifoQueueName(t *testing.T) {
+	t.Run("standard queue gains no .fifo QueueName", func(t *testing.T) {
+		// A standard queue carries no QueueName at all today, native SQS
+		// being byTag rather than byName; this only asserts that FIFO's new
+		// naming rule leaves that inherited shape alone, not that it is the
+		// intended long-term behavior of a standard queue.
+		queue := newFixtureNative(t, TypeSQSQueue, &fakeClient{})
+		spec := nativeSpec("kraai-e-s-q", map[string]any{})
+		if err := queue.ValidateSpec(spec); err != nil {
+			t.Fatalf("ValidateSpec: %v", err)
+		}
+		translated, err := queue.translate(context.Background(), spec)
+		if err != nil {
+			t.Fatalf("translate: %v", err)
+		}
+		if _, set := translated.Config["QueueName"]; set {
+			t.Fatalf("translated.Config = %v, want no QueueName for a standard queue", translated.Config)
+		}
+	})
+
+	t.Run("FIFO queue with no QueueName gets the derived name suffixed", func(t *testing.T) {
+		cc := &fakeClient{createID: "https://sqs/q"}
+		queue := newFixtureNative(t, TypeSQSQueue, cc)
+		spec := nativeSpec("kraai-e-s-fifo", map[string]any{"FifoQueue": true})
+		if err := queue.ValidateSpec(spec); err != nil {
+			t.Fatalf("ValidateSpec: %v", err)
+		}
+		if _, err := queue.Create(context.Background(), spec); err != nil {
+			t.Fatalf("Create: %v", err)
+		}
+		if got := cc.createCalls[0]["QueueName"]; got != "kraai-e-s-fifo.fifo" {
+			t.Fatalf("QueueName = %v, want %q", got, "kraai-e-s-fifo.fifo")
+		}
+	})
+
+	t.Run("FIFO queue with an explicit .fifo QueueName is left alone", func(t *testing.T) {
+		queue := newFixtureNative(t, TypeSQSQueue, &fakeClient{createID: "https://sqs/q"})
+		spec := nativeSpec("kraai-e-s-fifo", map[string]any{"FifoQueue": true, "QueueName": "chosen.fifo"})
+		if err := queue.ValidateSpec(spec); err != nil {
+			t.Fatalf("ValidateSpec: %v", err)
+		}
+		translated, err := queue.translate(context.Background(), spec)
+		if err != nil {
+			t.Fatalf("translate: %v", err)
+		}
+		if got := translated.Config["QueueName"]; got != "chosen.fifo" {
+			t.Fatalf("QueueName = %v, want %q (unchanged)", got, "chosen.fifo")
+		}
+	})
+
+	t.Run("FIFO queue with an explicit QueueName missing the suffix is refused", func(t *testing.T) {
+		queue := newFixtureNative(t, TypeSQSQueue, &fakeClient{})
+		spec := nativeSpec("kraai-e-s-fifo", map[string]any{"FifoQueue": true, "QueueName": "chosen"})
+		err := queue.ValidateSpec(spec)
+		if err == nil || !strings.Contains(err.Error(), `QueueName must end in ".fifo"`) {
+			t.Fatalf("ValidateSpec error = %v, want a QueueName-must-end-in-.fifo refusal", err)
+		}
+	})
+
+	t.Run("the derived name plus the suffix stays within SQS's 80-character limit", func(t *testing.T) {
+		// A planner-derived name never reaches 90 bytes (internal/naming
+		// truncates to 63), so this exercises the truncate guard directly
+		// rather than a name the planner could actually produce.
+		cc := &fakeClient{createID: "https://sqs/q"}
+		queue := newFixtureNative(t, TypeSQSQueue, cc)
+		long := strings.Repeat("x", 90)
+		spec := nativeSpec(long, map[string]any{"FifoQueue": true})
+		if err := queue.ValidateSpec(spec); err != nil {
+			t.Fatalf("ValidateSpec: %v", err)
+		}
+		if _, err := queue.Create(context.Background(), spec); err != nil {
+			t.Fatalf("Create: %v", err)
+		}
+		got, _ := cc.createCalls[0]["QueueName"].(string)
+		if len(got) > sqsQueueNameLimit {
+			t.Fatalf("QueueName = %q, length %d exceeds the %d-character limit", got, len(got), sqsQueueNameLimit)
+		}
+		if !strings.HasSuffix(got, fifoQueueSuffix) {
+			t.Fatalf("QueueName = %q, want it to end in %q", got, fifoQueueSuffix)
+		}
+	})
+}
+
 func TestNativeGetFindsItsTaggedInstance(t *testing.T) {
 	cc := &fakeClient{
 		list: []string{"other", "mine"},
