@@ -195,6 +195,7 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 // and is not counted.
 func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, client *Client, r Reader, e TypeEvidence, perType int) TypeEvidence {
 	var ids []string
+	listed := map[string]bool{}
 	if r.Probe != nil {
 		probed, err := client.Probe(ctx, r.Type)
 		if err != nil {
@@ -202,6 +203,9 @@ func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, c
 			return e
 		}
 		ids = probed
+		for _, id := range probed {
+			listed[id] = true
+		}
 	}
 	for _, id := range r.AbsentIDs {
 		ids = append(ids, strings.NewReplacer("{account}", account, "{region}", client.Region).Replace(id))
@@ -209,23 +213,35 @@ func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, c
 	if len(ids) > perType {
 		ids = ids[:perType]
 	}
-	present := 0
+	present, failed := 0, 0
 	for _, id := range ids {
 		_, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(r.Type), Identifier: aws.String(id)})
 		var notFound *cctypes.ResourceNotFoundException
 		if !errors.As(err, &notFound) {
+			// A listed identifier Cloud Control finds proves nothing; a
+			// declared absent one it does not read as absent is a probe
+			// that cannot prove anything, which the override must fix.
+			if !listed[id] {
+				t.Errorf("absentIds %s: Cloud Control answers %v, not NotFound", id, err)
+			}
 			continue
 		}
 		e.Probed++
-		if _, err := client.Read(ctx, r.Type, map[string]string{r.Identifier[0].Property: id}); err == nil {
-			// Printed to this run's log only, never to evidence.
+		// Printed to this run's log only, never to evidence.
+		switch _, err := client.Read(ctx, r.Type, map[string]string{r.Identifier[0].Property: id}); {
+		case err == nil:
 			t.Errorf("Cloud Control reads %s as absent, the direct read finds it", id)
 			present++
+		case !errors.Is(err, ErrAbsent):
+			t.Errorf("Cloud Control reads %s as absent, the direct read fails: %v", id, err)
+			failed++
 		}
 	}
 	switch {
 	case present > 0:
 		e.Absence = "differs"
+	case failed > 0:
+		e.Absence = "direct-unreadable"
 	case e.Probed > 0:
 		e.Absence = "parity"
 	}

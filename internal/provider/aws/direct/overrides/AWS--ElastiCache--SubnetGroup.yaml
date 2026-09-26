@@ -2,6 +2,7 @@ type: AWS::ElastiCache::SubnetGroup
 read:
   model: elasticache/service/2015-02-02/elasticache-2015-02-02.json
   operation: DescribeCacheSubnetGroups
+  absentErrors: [CacheSubnetGroupNotFoundFault]
   identifier:
     CacheSubnetGroupName: CacheSubnetGroupName
   # DescribeCacheSubnetGroups filters by one name and answers with a list;

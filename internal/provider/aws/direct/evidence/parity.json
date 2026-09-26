@@ -616,7 +616,7 @@
     {
       "type": "AWS::EC2::InternetGateway",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 2,
@@ -626,12 +626,12 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "28ca1429ea484eeeac9bfa7ee773d3b4633c3c1ad900d2972d1489d80e946b90"
+      "override": "700159411294c6663d69983ac3835c5bd23c3415077a6ceb8cd8db362066c8c8"
     },
     {
       "type": "AWS::EC2::RouteTable",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 3,
@@ -642,12 +642,12 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "0377a5a3ec7eed37107a68ae83c2eadfebb860702daa39d8f06e0f61482e87f1"
+      "override": "a3d79207a540b4871d3a85c3a3d3df7f5dfeb6e022af27963652feb1b12f78d8"
     },
     {
       "type": "AWS::EC2::SecurityGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 4,
@@ -663,15 +663,15 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "0e89ba65bba60ba168d1e90b4aa4ba33cc6971e6d73814467d069863b7f8f598"
+      "override": "db012227787be49ba9ebc9679c5df19d2d28ec880c65989b889090ffc0bb68d2"
     },
     {
       "type": "AWS::EC2::Subnet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 6,
+      "instances": 8,
       "compared": [
         "AssignIpv6AddressOnCreation",
         "AvailabilityZone",
@@ -689,12 +689,12 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "499470dce5c3668ec34346cbf221f43db18a784a836edfed11eb5d4ef2d5ac63"
+      "override": "67a438cdf632932a77941bb00c7120807bc6d645f9e7ad54ba2f246bb4a7e3e4"
     },
     {
       "type": "AWS::EC2::VPC",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 2,
@@ -713,12 +713,12 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "35e73f1126a6618015bfbc6b5909c168f6a208b0dcd4860eab9ad41b7db3b56a"
+      "override": "a3b26f185d1c71d8b5bc8acef964a2dd2c72eb79b960ce07965d82c061480654"
     },
     {
       "type": "AWS::ECS::Cluster",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
@@ -748,7 +748,7 @@
     {
       "type": "AWS::ECS::TaskDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 20,
@@ -797,15 +797,15 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "b0f26b48092a542ecfaca594e754d861a2d0458116d8f6a2aba521593731bb6d"
+      "override": "8bc13234c5a901a1813a4d0ecc8937a938e31a9247ebe1b943d67e0963129e1c"
     },
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-09-26",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 3,
+      "instances": 4,
       "compared": [
         "HealthCheckEnabled",
         "HealthCheckIntervalSeconds",
@@ -833,7 +833,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "bbcfa38d2d24144c81efe5d2341343e0747cb65b879ad93dacae623601c381b1"
+      "override": "36b6e7a6653a2a11195d348d28799737bf70ce33a09a5d2a3da88213e808c3c7"
     },
     {
       "type": "AWS::ElementalInference::Dictionary",
@@ -2012,7 +2012,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "4819434cc9627ae8428fa0a2c2da934bcdd1e9832529e0878ea03b9d92b3f704"
+      "override": "ef6c2184f700ef7be3ae9e0e3a918dca58e5ff2c549203d9e48fb65449b6874e"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",
@@ -2030,7 +2030,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "1c401c1da2dbe2b9fce5a41222142e02c7dcf09c67b4c4a53b5c2a7a4c1671a3"
+      "override": "28fc833975cc29d2d041554d8c7ba8772e9447a5bce445cb54bd3c072419c8f4"
     },
     {
       "type": "AWS::ResilienceHubV2::Policy",
@@ -2260,7 +2260,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "64639179df2a66044b573efb71fa47fb3c2e7eefe8bbd73a1e0df7ead7a4873e"
+      "override": "fe8429f3c5b9969f6a68e9866dfbaf365548c705069103c7a9e8cf8e434e778f"
     },
     {
       "type": "AWS::SSM::Association",

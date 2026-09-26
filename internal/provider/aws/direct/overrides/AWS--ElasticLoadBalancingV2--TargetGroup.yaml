@@ -2,6 +2,7 @@ type: AWS::ElasticLoadBalancingV2::TargetGroup
 read:
   model: elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json
   operation: DescribeTargetGroups
+  absentErrors: [TargetGroupNotFound]
   identifier:
     TargetGroupArn: TargetGroupArns
   # DescribeTargetGroups filters by a list of ARNs and answers with a list.

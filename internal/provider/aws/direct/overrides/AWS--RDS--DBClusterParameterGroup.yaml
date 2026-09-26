@@ -2,6 +2,7 @@ type: AWS::RDS::DBClusterParameterGroup
 read:
   model: rds/service/2014-10-31/rds-2014-10-31.json
   operation: DescribeDBClusterParameterGroups
+  absentErrors: [DBParameterGroupNotFound]
   identifier:
     DBClusterParameterGroupName: DBClusterParameterGroupName
   # DescribeDBClusterParameterGroups filters by a single name and answers

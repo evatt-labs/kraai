@@ -2,6 +2,7 @@ type: AWS::EC2::InternetGateway
 read:
   model: ec2/service/2016-11-15/ec2-2016-11-15.json
   operation: DescribeInternetGateways
+  absentErrors: [InvalidInternetGatewayID.NotFound]
   identifier:
     InternetGatewayId: InternetGatewayIds
   # DescribeInternetGateways filters by a list of ids and answers with a list.

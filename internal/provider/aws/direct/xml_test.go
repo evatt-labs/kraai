@@ -273,8 +273,8 @@ func TestReadXMLErrors(t *testing.T) {
 	cases := map[string]struct {
 		typeName, body, code string
 	}{
-		"ec2Query": {subnets, `<Response><Errors><Error><Code>InvalidSubnetID.NotFound</Code><Message>gone</Message></Error></Errors><RequestID>r</RequestID></Response>`, "InvalidSubnetID.NotFound"},
-		"awsQuery": {targetGroups, `<ErrorResponse><Error><Type>Sender</Type><Code>TargetGroupNotFound</Code><Message>gone</Message></Error></ErrorResponse>`, "TargetGroupNotFound"},
+		"ec2Query": {subnets, `<Response><Errors><Error><Code>UnauthorizedOperation</Code><Message>gone</Message></Error></Errors><RequestID>r</RequestID></Response>`, "UnauthorizedOperation"},
+		"awsQuery": {targetGroups, `<ErrorResponse><Error><Type>Sender</Type><Code>Throttling</Code><Message>gone</Message></Error></ErrorResponse>`, "Throttling"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -283,6 +283,26 @@ func TestReadXMLErrors(t *testing.T) {
 			var apiErr *APIError
 			if !errors.As(err, &apiErr) || apiErr.Code != c.code || apiErr.Message != "gone" || apiErr.Status != 400 {
 				t.Fatalf("error = %#v", err)
+			}
+		})
+	}
+}
+
+// An error code the override declares absent is absence; any other code
+// stays an error, so a lookup falls back rather than reading it as gone.
+func TestReadAbsentErrorIsAbsence(t *testing.T) {
+	for name, c := range map[string]struct {
+		body string
+		want error
+	}{
+		"declared": {`<Response><Errors><Error><Code>InvalidSubnetID.NotFound</Code><Message>gone</Message></Error></Errors></Response>`, ErrAbsent},
+		"another":  {`<Response><Errors><Error><Code>InvalidSubnetID.Malformed</Code><Message>bad</Message></Error></Errors></Response>`, nil},
+	} {
+		t.Run(name, func(t *testing.T) {
+			client, _ := xmlServer(t, 400, c.body)
+			_, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "subnet-1"})
+			if c.want != nil && !errors.Is(err, c.want) || c.want == nil && (err == nil || errors.Is(err, ErrAbsent)) {
+				t.Fatalf("Read = %v, want %v", err, c.want)
 			}
 		})
 	}
