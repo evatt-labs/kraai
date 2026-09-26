@@ -3,8 +3,9 @@ type: AWS::SageMaker::CodeRepository
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeCodeRepository
-  identifier:
-    CodeRepositoryArn: CodeRepositoryName
+  # The name member refuses an ARN; arn:...:code-repository/name.
+  input:
+    CodeRepositoryName: "{CodeRepositoryArn:arnName}"
 properties:
   CodeRepositoryArn: CodeRepositoryArn
   CodeRepositoryName: CodeRepositoryName

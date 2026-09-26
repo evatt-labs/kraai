@@ -442,6 +442,13 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 				fail("read input %s names {%s}, which is not the primary identifier", member, name)
 			}
 		}
+		if text, ok := value.(string); ok {
+			for _, m := range placeholderName.FindAllStringSubmatch(text, -1) {
+				if _, known := placeholderFilters[m[2]]; m[2] != "" && !known {
+					fail("read input %s filters {%s} by %s; the filters are arnName and arnParent", member, m[1], m[2])
+				}
+			}
+		}
 		text, isText := value.(string)
 		switch {
 		case isText:
@@ -470,8 +477,14 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 			byCapture = byCapture || captured[name]
 		}
 	}
-	for property := range want {
-		if _, ok := o.Read.Identifier[property]; !ok && !inInput[property] && !byCapture {
+	for _, property := range sortedKeys(want) {
+		_, bound := o.Read.Identifier[property]
+		switch {
+		case !bound && inInput[property]:
+			// Sent only through the input's placeholders, but still what
+			// the reader is addressed by.
+			r.Identifier = append(r.Identifier, Binding{Property: property, Location: "placeholder"})
+		case !bound && !byCapture:
 			fail("identifier does not bind %s", property)
 		}
 	}
@@ -639,31 +652,78 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 	}
 	checkSelections(r.Fields)
 
-	for _, member := range sortedKeys(o.Read.Absent) {
-		m, ok := model.Shapes[resource].Members[member]
+	for _, path := range sortedKeys(o.Read.Absent) {
+		// A dotted path reaches the member through structures, or through a
+		// list by selecting the one element, such as a selected association.
+		steps := strings.Split(path, ".")
+		holder, via, walked := resource, []Step{}, true
+		for _, step := range steps[:len(steps)-1] {
+			var where, equals string
+			if sel := selection.FindStringSubmatch(step); sel != nil {
+				step, where, equals = sel[1], sel[2], sel[3]
+			}
+			pm, ok := model.Shapes[holder].Members[step]
+			if !ok {
+				fail("absent names %s, but %s is not a member of %s", path, step, holder)
+				walked = false
+				break
+			}
+			next, isList := pm.Target, targetType(model.Shapes[pm.Target].Type, pm.Target) == "list"
+			if isList != (where != "") {
+				fail("absent names %s, but %s must select one element of a list or be a structure", path, step)
+				walked = false
+				break
+			}
+			if isList {
+				next = ref(model.Shapes[next].Member)
+			}
+			if model.Shapes[next].Type != "structure" {
+				fail("absent names %s, but %s is not a structure", path, step)
+				walked = false
+				break
+			}
+			for _, p := range placeholders(equals) {
+				if !want[p] {
+					fail("absent %s selects by {%s}, which is not the primary identifier", path, p)
+				}
+			}
+			via, holder = append(via, Step{Name: step, List: isList, Where: where, Equals: equals}), next
+		}
+		if !walked {
+			continue
+		}
+		member := steps[len(steps)-1]
+		m, ok := model.Shapes[holder].Members[member]
 		if !ok {
-			fail("absent names %s, which %s does not have", member, resource)
+			fail("absent names %s, which %s does not have", path, holder)
 			continue
 		}
 		if kind := kindOf(model.Shapes[m.Target].Type, m.Target); kind != "scalar" {
-			fail("absent names %s, which is a %s, not a scalar", member, kind)
+			fail("absent names %s, which is a %s, not a scalar", path, kind)
 			continue
 		}
-		if len(o.Read.Absent[member]) == 0 {
-			fail("absent names %s with no value", member)
+		if len(o.Read.Absent[path]) == 0 {
+			fail("absent names %s with no value", path)
 		}
-		for _, value := range o.Read.Absent[member] {
-			if reason := fixedValue(&model, m.Target, value); reason != "" {
-				fail("absent %s %s", member, reason)
+		for _, value := range o.Read.Absent[path] {
+			if targetType(model.Shapes[m.Target].Type, m.Target) == "boolean" {
+				if value != "true" && value != "false" {
+					fail("absent %s is boolean, not %q", path, value)
+				}
+			} else if reason := fixedValue(&model, m.Target, value); reason != "" {
+				fail("absent %s %s", path, reason)
 			}
 		}
-		f := Field{Property: member, Member: member, Kind: "scalar"}
+		f := Field{Property: path, Member: member, Kind: "scalar"}
+		if len(via) > 0 {
+			f.Via = via
+		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		fields := []Field{f}
 		if isXML(r.Protocol) {
 			xmlFields(&model, resource, fields, "absent ", fail)
 		}
-		r.Absent = append(r.Absent, Condition{Field: fields[0], Values: o.Read.Absent[member]})
+		r.Absent = append(r.Absent, Condition{Field: fields[0], Values: o.Read.Absent[path]})
 	}
 
 	if o.List != nil && isXML(r.Protocol) {
@@ -1330,8 +1390,34 @@ func itemName(m smithyMember, list smithyShape) string {
 	return "member"
 }
 
-// placeholderName matches a {Property} placeholder.
-var placeholderName = regexp.MustCompile(`\{([A-Za-z0-9]+)\}`)
+// placeholderName matches a {Property} placeholder, or {Property:filter}
+// for a part of its value; see placeholderFilters.
+var placeholderName = regexp.MustCompile(`\{([A-Za-z0-9]+)(?::([A-Za-z]+))?\}`)
+
+// placeholderFilters reads a part of an ARN placeholder's value: arnName is
+// the last segment of the resource, and arnParent the one before it, empty
+// when the resource has no parent, such as a rule on the default bus.
+var placeholderFilters = map[string]func(string) string{
+	"arnName": func(arn string) string {
+		segments := arnSegments(arn)
+		return segments[len(segments)-1]
+	},
+	"arnParent": func(arn string) string {
+		if segments := arnSegments(arn); len(segments) >= 3 {
+			return segments[len(segments)-2]
+		}
+		return ""
+	},
+}
+
+// arnSegments splits an ARN's resource on slashes; a value that is not an
+// ARN is one segment.
+func arnSegments(arn string) []string {
+	if parts := strings.SplitN(arn, ":", 6); len(parts) == 6 {
+		return strings.Split(parts[5], "/")
+	}
+	return []string{arn}
+}
 
 // placeholders lists the {Property} names in every string of value.
 func placeholders(value any) []string {

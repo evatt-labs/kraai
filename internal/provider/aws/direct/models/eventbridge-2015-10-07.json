@@ -4,6 +4,15 @@
       "operations": [
         {
           "target": "com.amazonaws.eventbridge#DescribeEndpoint"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#DescribeRule"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ListTagsForResource"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ListTargetsByRule"
         }
       ],
       "traits": {
@@ -641,6 +650,220 @@
       "type": "service",
       "version": "2015-10-07"
     },
+    "com.amazonaws.eventbridge#AppSyncParameters": {
+      "members": {
+        "GraphQLOperation": {
+          "target": "com.amazonaws.eventbridge#GraphQLOperation",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#Arn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#AssignPublicIp": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.eventbridge#AwsVpcConfiguration": {
+      "members": {
+        "AssignPublicIp": {
+          "target": "com.amazonaws.eventbridge#AssignPublicIp",
+          "traits": {}
+        },
+        "SecurityGroups": {
+          "target": "com.amazonaws.eventbridge#StringList",
+          "traits": {}
+        },
+        "Subnets": {
+          "target": "com.amazonaws.eventbridge#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#BatchArrayProperties": {
+      "members": {
+        "Size": {
+          "target": "com.amazonaws.eventbridge#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#BatchParameters": {
+      "members": {
+        "ArrayProperties": {
+          "target": "com.amazonaws.eventbridge#BatchArrayProperties",
+          "traits": {}
+        },
+        "JobDefinition": {
+          "target": "com.amazonaws.eventbridge#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "JobName": {
+          "target": "com.amazonaws.eventbridge#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RetryStrategy": {
+          "target": "com.amazonaws.eventbridge#BatchRetryStrategy",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#BatchRetryStrategy": {
+      "members": {
+        "Attempts": {
+          "target": "com.amazonaws.eventbridge#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#Boolean": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
+    "com.amazonaws.eventbridge#CapacityProvider": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#CapacityProviderStrategy": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#CapacityProviderStrategyItem"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 6,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#CapacityProviderStrategyItem": {
+      "members": {
+        "base": {
+          "target": "com.amazonaws.eventbridge#CapacityProviderStrategyItemBase",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "capacityProvider": {
+          "target": "com.amazonaws.eventbridge#CapacityProvider",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "weight": {
+          "target": "com.amazonaws.eventbridge#CapacityProviderStrategyItemWeight",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#CapacityProviderStrategyItemBase": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 100000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.eventbridge#CapacityProviderStrategyItemWeight": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.eventbridge#CreatedBy": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#Database": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#DbUser": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#DeadLetterConfig": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.eventbridge#ResourceArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.eventbridge#DescribeEndpoint": {
       "errors": [
         {
@@ -735,6 +958,174 @@
       "traits": {
         "smithy.api#output": {}
       },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#DescribeRule": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#DescribeRuleRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#DescribeRuleResponse"
+      },
+      "traits": {
+        "smithy.test#smokeTests": [
+          {
+            "expect": {
+              "failure": {}
+            },
+            "id": "DescribeRuleFailure",
+            "params": {
+              "Name": "fake-rule"
+            },
+            "vendorParams": {
+              "region": "us-west-2"
+            },
+            "vendorParamsShape": "aws.test#AwsVendorParams"
+          }
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#DescribeRuleRequest": {
+      "members": {
+        "EventBusName": {
+          "target": "com.amazonaws.eventbridge#EventBusNameOrArn",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.eventbridge#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#DescribeRuleResponse": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.eventbridge#RuleArn",
+          "traits": {}
+        },
+        "CreatedBy": {
+          "target": "com.amazonaws.eventbridge#CreatedBy",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.eventbridge#RuleDescription",
+          "traits": {}
+        },
+        "EventBusName": {
+          "target": "com.amazonaws.eventbridge#EventBusName",
+          "traits": {}
+        },
+        "EventPattern": {
+          "target": "com.amazonaws.eventbridge#EventPattern",
+          "traits": {}
+        },
+        "ManagedBy": {
+          "target": "com.amazonaws.eventbridge#ManagedBy",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.eventbridge#RuleName",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.eventbridge#RoleArn",
+          "traits": {}
+        },
+        "ScheduleExpression": {
+          "target": "com.amazonaws.eventbridge#ScheduleExpression",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.eventbridge#RuleState",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#EcsParameters": {
+      "members": {
+        "CapacityProviderStrategy": {
+          "target": "com.amazonaws.eventbridge#CapacityProviderStrategy",
+          "traits": {}
+        },
+        "EnableECSManagedTags": {
+          "target": "com.amazonaws.eventbridge#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "EnableExecuteCommand": {
+          "target": "com.amazonaws.eventbridge#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "Group": {
+          "target": "com.amazonaws.eventbridge#String",
+          "traits": {}
+        },
+        "LaunchType": {
+          "target": "com.amazonaws.eventbridge#LaunchType",
+          "traits": {}
+        },
+        "NetworkConfiguration": {
+          "target": "com.amazonaws.eventbridge#NetworkConfiguration",
+          "traits": {}
+        },
+        "PlacementConstraints": {
+          "target": "com.amazonaws.eventbridge#PlacementConstraints",
+          "traits": {}
+        },
+        "PlacementStrategy": {
+          "target": "com.amazonaws.eventbridge#PlacementStrategies",
+          "traits": {}
+        },
+        "PlatformVersion": {
+          "target": "com.amazonaws.eventbridge#String",
+          "traits": {}
+        },
+        "PropagateTags": {
+          "target": "com.amazonaws.eventbridge#PropagateTags",
+          "traits": {}
+        },
+        "ReferenceId": {
+          "target": "com.amazonaws.eventbridge#ReferenceId",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.eventbridge#TagList",
+          "traits": {}
+        },
+        "TaskCount": {
+          "target": "com.amazonaws.eventbridge#LimitMin1",
+          "traits": {}
+        },
+        "TaskDefinitionArn": {
+          "target": "com.amazonaws.eventbridge#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
       "type": "structure"
     },
     "com.amazonaws.eventbridge#EndpointArn": {
@@ -871,6 +1262,35 @@
     "com.amazonaws.eventbridge#ErrorMessage": {
       "type": "string"
     },
+    "com.amazonaws.eventbridge#EventBusName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[/\\.\\-_A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#EventBusNameOrArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(arn:aws[\\w-]*:events:[a-z]+-[a-z]+-[\\w-]+:[0-9]{12}:event-bus\\/)?[/\\.\\-_A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#EventPattern": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.eventbridge#FailoverConfig": {
       "members": {
         "Primary": {
@@ -888,6 +1308,45 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.eventbridge#GraphQLOperation": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1048576,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#HeaderKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[!#$%&'*+-.^_`|~0-9a-zA-Z]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#HeaderParametersMap": {
+      "key": {
+        "target": "com.amazonaws.eventbridge#HeaderKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.eventbridge#HeaderValue"
+      }
+    },
+    "com.amazonaws.eventbridge#HeaderValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[ \\t]*[\\x20-\\x7E]+([ \\t]+[\\x20-\\x7E]+)*[ \\t]*$"
+      },
+      "type": "string"
     },
     "com.amazonaws.eventbridge#HealthCheck": {
       "traits": {
@@ -909,6 +1368,24 @@
       },
       "type": "string"
     },
+    "com.amazonaws.eventbridge#HttpParameters": {
+      "members": {
+        "HeaderParameters": {
+          "target": "com.amazonaws.eventbridge#HeaderParametersMap",
+          "traits": {}
+        },
+        "PathParameterValues": {
+          "target": "com.amazonaws.eventbridge#PathParameterList",
+          "traits": {}
+        },
+        "QueryStringParameters": {
+          "target": "com.amazonaws.eventbridge#QueryStringParametersMap",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.eventbridge#IamRoleArn": {
       "traits": {
         "smithy.api#length": {
@@ -918,6 +1395,38 @@
         "smithy.api#pattern": "^arn:aws[a-z-]*:iam::\\d{12}:role\\/[\\w+=,.@/-]+$"
       },
       "type": "string"
+    },
+    "com.amazonaws.eventbridge#InputTransformer": {
+      "members": {
+        "InputPathsMap": {
+          "target": "com.amazonaws.eventbridge#TransformerPaths",
+          "traits": {}
+        },
+        "InputTemplate": {
+          "target": "com.amazonaws.eventbridge#TransformerInput",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#InputTransformerPathKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[A-Za-z0-9\\_\\-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#Integer": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
     },
     "com.amazonaws.eventbridge#InternalException": {
       "members": {
@@ -930,6 +1439,217 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.eventbridge#KinesisParameters": {
+      "members": {
+        "PartitionKeyPath": {
+          "target": "com.amazonaws.eventbridge#TargetPartitionKeyPath",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#LaunchType": {
+      "members": {
+        "EC2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EC2"
+          }
+        },
+        "EXTERNAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EXTERNAL"
+          }
+        },
+        "FARGATE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FARGATE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.eventbridge#LimitMax100": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.eventbridge#LimitMin1": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.eventbridge#ListTagsForResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#ListTagsForResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#ListTagsForResourceResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#ListTagsForResourceRequest": {
+      "members": {
+        "ResourceARN": {
+          "target": "com.amazonaws.eventbridge#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#ListTagsForResourceResponse": {
+      "members": {
+        "Tags": {
+          "target": "com.amazonaws.eventbridge#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#ListTargetsByRule": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#ListTargetsByRuleRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#ListTargetsByRuleResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#ListTargetsByRuleRequest": {
+      "members": {
+        "EventBusName": {
+          "target": "com.amazonaws.eventbridge#EventBusNameOrArn",
+          "traits": {}
+        },
+        "Limit": {
+          "target": "com.amazonaws.eventbridge#LimitMax100",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.eventbridge#NextToken",
+          "traits": {}
+        },
+        "Rule": {
+          "target": "com.amazonaws.eventbridge#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#ListTargetsByRuleResponse": {
+      "members": {
+        "NextToken": {
+          "target": "com.amazonaws.eventbridge#NextToken",
+          "traits": {}
+        },
+        "Targets": {
+          "target": "com.amazonaws.eventbridge#TargetList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#ManagedBy": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#MaximumEventAgeInSeconds": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 86400,
+          "min": 60
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.eventbridge#MaximumRetryAttempts": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 185,
+          "min": 0
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.eventbridge#MessageGroupId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#NetworkConfiguration": {
+      "members": {
+        "awsvpcConfiguration": {
+          "target": "com.amazonaws.eventbridge#AwsVpcConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#NextToken": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.eventbridge#NonPartnerEventBusArn": {
       "traits": {
         "smithy.api#length": {
@@ -939,6 +1659,128 @@
         "smithy.api#pattern": "^arn:aws[a-z-]*:events:[a-z]+-[a-z-]+-\\d+:\\d{12}:event-bus/[\\w.-]+$"
       },
       "type": "string"
+    },
+    "com.amazonaws.eventbridge#PathParameter": {
+      "traits": {
+        "smithy.api#pattern": "^(?!\\s*$).+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#PathParameterList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#PathParameter"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#PlacementConstraint": {
+      "members": {
+        "expression": {
+          "target": "com.amazonaws.eventbridge#PlacementConstraintExpression",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.eventbridge#PlacementConstraintType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PlacementConstraintExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#PlacementConstraintType": {
+      "members": {
+        "DISTINCT_INSTANCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "distinctInstance"
+          }
+        },
+        "MEMBER_OF": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "memberOf"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.eventbridge#PlacementConstraints": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#PlacementConstraint"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 10,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#PlacementStrategies": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#PlacementStrategy"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#PlacementStrategy": {
+      "members": {
+        "field": {
+          "target": "com.amazonaws.eventbridge#PlacementStrategyField",
+          "traits": {}
+        },
+        "type": {
+          "target": "com.amazonaws.eventbridge#PlacementStrategyType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PlacementStrategyField": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#PlacementStrategyType": {
+      "members": {
+        "BINPACK": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "binpack"
+          }
+        },
+        "RANDOM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "random"
+          }
+        },
+        "SPREAD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "spread"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.eventbridge#Primary": {
       "members": {
@@ -951,6 +1793,103 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PropagateTags": {
+      "members": {
+        "TASK_DEFINITION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "TASK_DEFINITION"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.eventbridge#QueryStringKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\x00-\\x1F\\x7F]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#QueryStringParametersMap": {
+      "key": {
+        "target": "com.amazonaws.eventbridge#QueryStringKey"
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.eventbridge#QueryStringValue"
+      }
+    },
+    "com.amazonaws.eventbridge#QueryStringValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\x00-\\x09\\x0B\\x0C\\x0E-\\x1F\\x7F]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#RedshiftDataParameters": {
+      "members": {
+        "Database": {
+          "target": "com.amazonaws.eventbridge#Database",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DbUser": {
+          "target": "com.amazonaws.eventbridge#DbUser",
+          "traits": {}
+        },
+        "SecretManagerArn": {
+          "target": "com.amazonaws.eventbridge#RedshiftSecretManagerArn",
+          "traits": {}
+        },
+        "Sql": {
+          "target": "com.amazonaws.eventbridge#Sql",
+          "traits": {}
+        },
+        "Sqls": {
+          "target": "com.amazonaws.eventbridge#Sqls",
+          "traits": {}
+        },
+        "StatementName": {
+          "target": "com.amazonaws.eventbridge#StatementName",
+          "traits": {}
+        },
+        "WithEvent": {
+          "target": "com.amazonaws.eventbridge#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RedshiftSecretManagerArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(^arn:aws([a-z]|\\-)*:secretsmanager:[a-z0-9-.]+:.*)|(\\$(\\.[\\w_-]+(\\[(\\d+|\\*)\\])*)*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#ReferenceId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
     },
     "com.amazonaws.eventbridge#ReplicationConfig": {
       "members": {
@@ -979,6 +1918,15 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.eventbridge#ResourceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.eventbridge#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -989,6 +1937,29 @@
         "smithy.api#error": "client"
       },
       "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RetryPolicy": {
+      "members": {
+        "MaximumEventAgeInSeconds": {
+          "target": "com.amazonaws.eventbridge#MaximumEventAgeInSeconds",
+          "traits": {}
+        },
+        "MaximumRetryAttempts": {
+          "target": "com.amazonaws.eventbridge#MaximumRetryAttempts",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RoleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
     },
     "com.amazonaws.eventbridge#Route": {
       "traits": {
@@ -1012,6 +1983,198 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.eventbridge#RuleArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#RuleDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#RuleName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#RuleState": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.eventbridge#RunCommandParameters": {
+      "members": {
+        "RunCommandTargets": {
+          "target": "com.amazonaws.eventbridge#RunCommandTargets",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RunCommandTarget": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.eventbridge#RunCommandTargetKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.eventbridge#RunCommandTargetValues",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RunCommandTargetKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#RunCommandTargetValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#RunCommandTargetValues": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#RunCommandTargetValue"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#RunCommandTargets": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#RunCommandTarget"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 5,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#SageMakerPipelineParameter": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.eventbridge#SageMakerPipelineParameterName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.eventbridge#SageMakerPipelineParameterValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#SageMakerPipelineParameterList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#SageMakerPipelineParameter"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 200,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#SageMakerPipelineParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9](-*[a-zA-Z0-9])*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#SageMakerPipelineParameterValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#SageMakerPipelineParameters": {
+      "members": {
+        "PipelineParameterList": {
+          "target": "com.amazonaws.eventbridge#SageMakerPipelineParameterList",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#ScheduleExpression": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.eventbridge#Secondary": {
       "members": {
         "Route": {
@@ -1024,8 +2187,261 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.eventbridge#Sql": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100000,
+          "min": 1
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#Sqls": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#Sql"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 40,
+          "min": 0
+        },
+        "smithy.api#sensitive": {}
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#SqsParameters": {
+      "members": {
+        "MessageGroupId": {
+          "target": "com.amazonaws.eventbridge#MessageGroupId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#StatementName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 500,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#String": {
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#StringList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.eventbridge#TagKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.eventbridge#TagValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#TagList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#Tag"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#Target": {
+      "members": {
+        "AppSyncParameters": {
+          "target": "com.amazonaws.eventbridge#AppSyncParameters",
+          "traits": {}
+        },
+        "Arn": {
+          "target": "com.amazonaws.eventbridge#TargetArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "BatchParameters": {
+          "target": "com.amazonaws.eventbridge#BatchParameters",
+          "traits": {}
+        },
+        "DeadLetterConfig": {
+          "target": "com.amazonaws.eventbridge#DeadLetterConfig",
+          "traits": {}
+        },
+        "EcsParameters": {
+          "target": "com.amazonaws.eventbridge#EcsParameters",
+          "traits": {}
+        },
+        "HttpParameters": {
+          "target": "com.amazonaws.eventbridge#HttpParameters",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.eventbridge#TargetId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Input": {
+          "target": "com.amazonaws.eventbridge#TargetInput",
+          "traits": {}
+        },
+        "InputPath": {
+          "target": "com.amazonaws.eventbridge#TargetInputPath",
+          "traits": {}
+        },
+        "InputTransformer": {
+          "target": "com.amazonaws.eventbridge#InputTransformer",
+          "traits": {}
+        },
+        "KinesisParameters": {
+          "target": "com.amazonaws.eventbridge#KinesisParameters",
+          "traits": {}
+        },
+        "RedshiftDataParameters": {
+          "target": "com.amazonaws.eventbridge#RedshiftDataParameters",
+          "traits": {}
+        },
+        "RetryPolicy": {
+          "target": "com.amazonaws.eventbridge#RetryPolicy",
+          "traits": {}
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.eventbridge#RoleArn",
+          "traits": {}
+        },
+        "RunCommandParameters": {
+          "target": "com.amazonaws.eventbridge#RunCommandParameters",
+          "traits": {}
+        },
+        "SageMakerPipelineParameters": {
+          "target": "com.amazonaws.eventbridge#SageMakerPipelineParameters",
+          "traits": {}
+        },
+        "SqsParameters": {
+          "target": "com.amazonaws.eventbridge#SqsParameters",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#TargetArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1600,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#TargetId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#TargetInput": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 8192,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#TargetInputPath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#TargetList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#Target"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.eventbridge#TargetPartitionKeyPath": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.eventbridge#Timestamp": {
       "type": "timestamp"
+    },
+    "com.amazonaws.eventbridge#TransformerInput": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 8192,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.eventbridge#TransformerPaths": {
+      "key": {
+        "target": "com.amazonaws.eventbridge#InputTransformerPathKey"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.eventbridge#TargetInputPath"
+      }
     }
   },
   "smithy": "2.0"

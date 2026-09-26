@@ -687,9 +687,9 @@ var readers = map[string]Reader{
 			Method:    "GET",
 			URI:       "/prompt-routers",
 			Input: []Binding{
-				Binding{Member: "type", Location: "query", Name: "type", Value: "custom"},
+				Binding{Location: "query", Member: "type", Name: "type", Value: "custom"},
 			},
-			Token:     Binding{Member: "nextToken", Location: "query", Name: "nextToken"},
+			Token:     Binding{Location: "query", Member: "nextToken", Name: "nextToken"},
 			NextToken: []string{"nextToken"},
 			Items:     []string{"promptRouterSummaries"},
 			Item:      "promptRouterArn",
@@ -2019,9 +2019,12 @@ var readers = map[string]Reader{
 				Host:        "ec2.{region}.amazonaws.com",
 				Action:      "DescribeSecurityGroupRules",
 				Version:     "2016-11-15",
+				Identifier: []Binding{
+					{Property: "Id", Member: "", Location: "placeholder"},
+				},
 				Input: []Binding{
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Name", Value: "group-id"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Value.1", Value: "{Id}"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Name", Value: "group-id"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Value.1", Value: "{Id}"},
 				},
 				PageToken: []string{"nextToken"},
 				Fields: []Field{
@@ -2106,9 +2109,12 @@ var readers = map[string]Reader{
 				Host:        "ec2.{region}.amazonaws.com",
 				Action:      "DescribeNetworkAcls",
 				Version:     "2016-11-15",
+				Identifier: []Binding{
+					{Property: "SubnetId", Member: "", Location: "placeholder"},
+				},
 				Input: []Binding{
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Name", Value: "association.subnet-id"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Value.1", Value: "{SubnetId}"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Name", Value: "association.subnet-id"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Value.1", Value: "{SubnetId}"},
 				},
 				PageToken: []string{"nextToken"},
 				Response:  []Step{{Name: "networkAclSet", List: true, Item: "item"}},
@@ -2117,6 +2123,34 @@ var readers = map[string]Reader{
 				},
 			},
 		},
+	},
+	"AWS::EC2::SubnetRouteTableAssociation": {
+		Type:        "AWS::EC2::SubnetRouteTableAssociation",
+		Protocol:    "ec2Query",
+		SigningName: "ec2",
+		Complete:    true,
+		Production:  true,
+		Host:        "ec2.{region}.amazonaws.com",
+		Action:      "DescribeRouteTables",
+		Version:     "2016-11-15",
+		Identifier: []Binding{
+			{Property: "Id", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "form", Member: "Filters", Name: "Filter.1.Name", Value: "association.route-table-association-id"},
+			Binding{Location: "form", Member: "Filters", Name: "Filter.1.Value.1", Value: "{Id}"},
+		},
+		Absent: []Condition{
+			{Field: Field{Property: "Associations[RouteTableAssociationId={Id}].Main", Member: "Main", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}}, XMLName: "main", Scalar: "boolean"}, Values: []string{"true"}},
+		},
+		PageToken: []string{"nextToken"},
+		Response:  []Step{{Name: "routeTableSet", List: true, Item: "item"}},
+		Fields: []Field{
+			{Property: "Id", Member: "RouteTableAssociationId", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}}, XMLName: "routeTableAssociationId", Scalar: "string"},
+			{Property: "RouteTableId", Member: "RouteTableId", Kind: "scalar", XMLName: "routeTableId", Scalar: "string"},
+			{Property: "SubnetId", Member: "SubnetId", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}}, XMLName: "subnetId", Scalar: "string"},
+		},
+		AbsentIDs: []string{"rtbassoc-0a1b2c3d4e5f60718"},
 	},
 	"AWS::EC2::VPC": {
 		Type:        "AWS::EC2::VPC",
@@ -2216,11 +2250,14 @@ var readers = map[string]Reader{
 				Host:        "ec2.{region}.amazonaws.com",
 				Action:      "DescribeNetworkAcls",
 				Version:     "2016-11-15",
+				Identifier: []Binding{
+					{Property: "VpcId", Member: "", Location: "placeholder"},
+				},
 				Input: []Binding{
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Name", Value: "vpc-id"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Value.1", Value: "{VpcId}"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.2.Name", Value: "default"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.2.Value.1", Value: "true"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Name", Value: "vpc-id"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Value.1", Value: "{VpcId}"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.2.Name", Value: "default"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.2.Value.1", Value: "true"},
 				},
 				PageToken: []string{"nextToken"},
 				Response:  []Step{{Name: "networkAclSet", List: true, Item: "item"}},
@@ -2235,11 +2272,14 @@ var readers = map[string]Reader{
 				Host:        "ec2.{region}.amazonaws.com",
 				Action:      "DescribeSecurityGroups",
 				Version:     "2016-11-15",
+				Identifier: []Binding{
+					{Property: "VpcId", Member: "", Location: "placeholder"},
+				},
 				Input: []Binding{
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Name", Value: "vpc-id"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.1.Value.1", Value: "{VpcId}"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.2.Name", Value: "group-name"},
-					Binding{Member: "Filters", Location: "form", Name: "Filter.2.Value.1", Value: "default"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Name", Value: "vpc-id"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.1.Value.1", Value: "{VpcId}"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.2.Name", Value: "group-name"},
+					Binding{Location: "form", Member: "Filters", Name: "Filter.2.Value.1", Value: "default"},
 				},
 				PageToken: []string{"nextToken"},
 				Response:  []Step{{Name: "securityGroupInfo", List: true, Item: "item"}},
@@ -2258,7 +2298,7 @@ var readers = map[string]Reader{
 					{Property: "VpcId", Member: "VpcId", Location: "form", Name: "VpcId"},
 				},
 				Input: []Binding{
-					Binding{Member: "Attribute", Location: "form", Name: "Attribute", Value: "enableDnsSupport"},
+					Binding{Location: "form", Member: "Attribute", Name: "Attribute", Value: "enableDnsSupport"},
 				},
 				Fields: []Field{
 					{Property: "EnableDnsSupport", Member: "Value", Kind: "scalar", Via: []Step{{Name: "enableDnsSupport"}}, XMLName: "value", Scalar: "boolean"},
@@ -2275,7 +2315,7 @@ var readers = map[string]Reader{
 					{Property: "VpcId", Member: "VpcId", Location: "form", Name: "VpcId"},
 				},
 				Input: []Binding{
-					Binding{Member: "Attribute", Location: "form", Name: "Attribute", Value: "enableDnsHostnames"},
+					Binding{Location: "form", Member: "Attribute", Name: "Attribute", Value: "enableDnsHostnames"},
 				},
 				Fields: []Field{
 					{Property: "EnableDnsHostnames", Member: "Value", Kind: "scalar", Via: []Step{{Name: "enableDnsHostnames"}}, XMLName: "value", Scalar: "boolean"},
@@ -2295,7 +2335,7 @@ var readers = map[string]Reader{
 			{Property: "ClusterName", Member: "clusters", Location: "body", List: true},
 		},
 		Input: []Binding{
-			Binding{Member: "include", Location: "body", Structured: []any{"TAGS", "SETTINGS", "CONFIGURATIONS"}},
+			Binding{Location: "body", Member: "include", Structured: []any{"TAGS", "SETTINGS", "CONFIGURATIONS"}},
 		},
 		Absent: []Condition{
 			{Field: Field{Property: "status", Member: "status", Kind: "scalar"}, Values: []string{"INACTIVE"}},
@@ -2523,7 +2563,7 @@ var readers = map[string]Reader{
 			{Property: "TaskDefinitionArn", Member: "taskDefinition", Location: "body"},
 		},
 		Input: []Binding{
-			Binding{Member: "include", Location: "body", Value: "TAGS", List: true},
+			Binding{Location: "body", Member: "include", Value: "TAGS", List: true},
 		},
 		Absent: []Condition{
 			{Field: Field{Property: "status", Member: "status", Kind: "scalar"}, Values: []string{"INACTIVE", "DELETE_IN_PROGRESS"}},
@@ -2809,9 +2849,9 @@ var readers = map[string]Reader{
 			Operation: "ListTaskDefinitions",
 			Target:    "AmazonEC2ContainerServiceV20141113.ListTaskDefinitions",
 			Input: []Binding{
-				Binding{Member: "status", Location: "body", Value: "ACTIVE"},
+				Binding{Location: "body", Member: "status", Value: "ACTIVE"},
 			},
-			Token:     Binding{Member: "nextToken", Location: "body"},
+			Token:     Binding{Location: "body", Member: "nextToken"},
 			NextToken: []string{"nextToken"},
 			Items:     []string{"taskDefinitionArns"},
 			Property:  "TaskDefinitionArn",
@@ -2820,9 +2860,9 @@ var readers = map[string]Reader{
 			Operation: "ListTaskDefinitions",
 			Target:    "AmazonEC2ContainerServiceV20141113.ListTaskDefinitions",
 			Input: []Binding{
-				Binding{Member: "status", Location: "body", Value: "INACTIVE"},
+				Binding{Location: "body", Member: "status", Value: "INACTIVE"},
 			},
-			Token:     Binding{Member: "nextToken", Location: "body"},
+			Token:     Binding{Location: "body", Member: "nextToken"},
 			NextToken: []string{"nextToken"},
 			Items:     []string{"taskDefinitionArns"},
 			Property:  "TaskDefinitionArn",
@@ -2878,7 +2918,7 @@ var readers = map[string]Reader{
 				Version:     "2015-02-02",
 				Wrapper:     "ListTagsForResourceResult",
 				Input: []Binding{
-					Binding{Member: "ResourceName", Location: "form", Name: "ResourceName", Value: "{Arn}"},
+					Binding{Location: "form", Member: "ResourceName", Name: "ResourceName", Value: "{Arn}"},
 				},
 				Fields: []Field{
 					{Property: "Tags", Member: "TagList", Kind: "list", XMLName: "TagList", Item: "Tag",
@@ -3182,6 +3222,215 @@ var readers = map[string]Reader{
 			},
 			{Property: "State", Member: "State", Kind: "scalar"},
 			{Property: "StateReason", Member: "StateReason", Kind: "scalar"},
+		},
+	},
+	"AWS::Events::Rule": {
+		Type:        "AWS::Events::Rule",
+		Protocol:    "awsJson1_1",
+		SigningName: "events",
+		Complete:    true,
+		Production:  true,
+		Host:        "events.{region}.amazonaws.com",
+		Target:      "AWSEvents.DescribeRule",
+		Identifier: []Binding{
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "EventBusName", Value: "{Arn:arnParent}"},
+			Binding{Location: "body", Member: "Name", Value: "{Arn:arnName}"},
+		},
+		AbsentErrors: []string{"ResourceNotFoundException"},
+		Fields: []Field{
+			{Property: "Arn", Member: "Arn", Kind: "scalar"},
+			{Property: "Description", Member: "Description", Kind: "scalar"},
+			{Property: "EventBusName", Member: "EventBusName", Kind: "scalar"},
+			{Property: "EventPattern", Member: "EventPattern", Kind: "scalar", Transform: "json"},
+			{Property: "Name", Member: "Name", Kind: "scalar"},
+			{Property: "RoleArn", Member: "RoleArn", Kind: "scalar"},
+			{Property: "RuleName", Member: "Name", Kind: "scalar"},
+			{Property: "ScheduleExpression", Member: "ScheduleExpression", Kind: "scalar"},
+			{Property: "State", Member: "State", Kind: "scalar"},
+		},
+		AbsentIDs: []string{"arn:aws:events:{region}:{account}:rule/kraai-absent-probe"},
+		Also: []Reader{
+			{
+				Type:        "AWS::Events::Rule",
+				Protocol:    "awsJson1_1",
+				SigningName: "events",
+				Host:        "events.{region}.amazonaws.com",
+				Target:      "AWSEvents.ListTargetsByRule",
+				Identifier: []Binding{
+					{Property: "Arn", Member: "", Location: "placeholder"},
+				},
+				Input: []Binding{
+					Binding{Location: "body", Member: "EventBusName", Value: "{Arn:arnParent}"},
+					Binding{Location: "body", Member: "Rule", Value: "{Arn:arnName}"},
+				},
+				Fields: []Field{
+					{Property: "Targets", Member: "Targets", Kind: "list",
+						Fields: []Field{
+							{Property: "AppSyncParameters", Member: "AppSyncParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "GraphQLOperation", Member: "GraphQLOperation", Kind: "scalar"},
+								},
+							},
+							{Property: "Arn", Member: "Arn", Kind: "scalar"},
+							{Property: "BatchParameters", Member: "BatchParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "ArrayProperties", Member: "ArrayProperties", Kind: "structure",
+										Fields: []Field{
+											{Property: "Size", Member: "Size", Kind: "scalar"},
+										},
+									},
+									{Property: "JobDefinition", Member: "JobDefinition", Kind: "scalar"},
+									{Property: "JobName", Member: "JobName", Kind: "scalar"},
+									{Property: "RetryStrategy", Member: "RetryStrategy", Kind: "structure",
+										Fields: []Field{
+											{Property: "Attempts", Member: "Attempts", Kind: "scalar"},
+										},
+									},
+								},
+							},
+							{Property: "DeadLetterConfig", Member: "DeadLetterConfig", Kind: "structure",
+								Fields: []Field{
+									{Property: "Arn", Member: "Arn", Kind: "scalar"},
+								},
+							},
+							{Property: "EcsParameters", Member: "EcsParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "CapacityProviderStrategy", Member: "CapacityProviderStrategy", Kind: "list",
+										Fields: []Field{
+											{Property: "Base", Member: "base", Kind: "scalar"},
+											{Property: "CapacityProvider", Member: "capacityProvider", Kind: "scalar"},
+											{Property: "Weight", Member: "weight", Kind: "scalar"},
+										},
+									},
+									{Property: "EnableECSManagedTags", Member: "EnableECSManagedTags", Kind: "scalar"},
+									{Property: "EnableExecuteCommand", Member: "EnableExecuteCommand", Kind: "scalar"},
+									{Property: "Group", Member: "Group", Kind: "scalar"},
+									{Property: "LaunchType", Member: "LaunchType", Kind: "scalar"},
+									{Property: "NetworkConfiguration", Member: "NetworkConfiguration", Kind: "structure",
+										Fields: []Field{
+											{Property: "AwsVpcConfiguration", Member: "awsvpcConfiguration", Kind: "structure",
+												Fields: []Field{
+													{Property: "AssignPublicIp", Member: "AssignPublicIp", Kind: "scalar"},
+													{Property: "SecurityGroups", Member: "SecurityGroups", Kind: "list"},
+													{Property: "Subnets", Member: "Subnets", Kind: "list"},
+												},
+											},
+										},
+									},
+									{Property: "PlacementConstraints", Member: "PlacementConstraints", Kind: "list",
+										Fields: []Field{
+											{Property: "Expression", Member: "expression", Kind: "scalar"},
+											{Property: "Type", Member: "type", Kind: "scalar"},
+										},
+									},
+									{Property: "PlacementStrategies", Member: "PlacementStrategy", Kind: "list",
+										Fields: []Field{
+											{Property: "Field", Member: "field", Kind: "scalar"},
+											{Property: "Type", Member: "type", Kind: "scalar"},
+										},
+									},
+									{Property: "PlatformVersion", Member: "PlatformVersion", Kind: "scalar"},
+									{Property: "PropagateTags", Member: "PropagateTags", Kind: "scalar"},
+									{Property: "ReferenceId", Member: "ReferenceId", Kind: "scalar"},
+									{Property: "TagList", Member: "Tags", Kind: "list",
+										Fields: []Field{
+											{Property: "Key", Member: "Key", Kind: "scalar"},
+											{Property: "Value", Member: "Value", Kind: "scalar"},
+										},
+									},
+									{Property: "TaskCount", Member: "TaskCount", Kind: "scalar"},
+									{Property: "TaskDefinitionArn", Member: "TaskDefinitionArn", Kind: "scalar"},
+								},
+							},
+							{Property: "HttpParameters", Member: "HttpParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "HeaderParameters", Member: "HeaderParameters", Kind: "map"},
+									{Property: "PathParameterValues", Member: "PathParameterValues", Kind: "list"},
+									{Property: "QueryStringParameters", Member: "QueryStringParameters", Kind: "map"},
+								},
+							},
+							{Property: "Id", Member: "Id", Kind: "scalar"},
+							{Property: "Input", Member: "Input", Kind: "scalar"},
+							{Property: "InputPath", Member: "InputPath", Kind: "scalar"},
+							{Property: "InputTransformer", Member: "InputTransformer", Kind: "structure",
+								Fields: []Field{
+									{Property: "InputPathsMap", Member: "InputPathsMap", Kind: "map"},
+									{Property: "InputTemplate", Member: "InputTemplate", Kind: "scalar"},
+								},
+							},
+							{Property: "KinesisParameters", Member: "KinesisParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "PartitionKeyPath", Member: "PartitionKeyPath", Kind: "scalar"},
+								},
+							},
+							{Property: "RedshiftDataParameters", Member: "RedshiftDataParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "Database", Member: "Database", Kind: "scalar"},
+									{Property: "DbUser", Member: "DbUser", Kind: "scalar"},
+									{Property: "SecretManagerArn", Member: "SecretManagerArn", Kind: "scalar"},
+									{Property: "Sql", Member: "Sql", Kind: "scalar"},
+									{Property: "Sqls", Member: "Sqls", Kind: "list"},
+									{Property: "StatementName", Member: "StatementName", Kind: "scalar"},
+									{Property: "WithEvent", Member: "WithEvent", Kind: "scalar"},
+								},
+							},
+							{Property: "RetryPolicy", Member: "RetryPolicy", Kind: "structure",
+								Fields: []Field{
+									{Property: "MaximumEventAgeInSeconds", Member: "MaximumEventAgeInSeconds", Kind: "scalar"},
+									{Property: "MaximumRetryAttempts", Member: "MaximumRetryAttempts", Kind: "scalar"},
+								},
+							},
+							{Property: "RoleArn", Member: "RoleArn", Kind: "scalar"},
+							{Property: "RunCommandParameters", Member: "RunCommandParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "RunCommandTargets", Member: "RunCommandTargets", Kind: "list",
+										Fields: []Field{
+											{Property: "Key", Member: "Key", Kind: "scalar"},
+											{Property: "Values", Member: "Values", Kind: "list"},
+										},
+									},
+								},
+							},
+							{Property: "SageMakerPipelineParameters", Member: "SageMakerPipelineParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "PipelineParameterList", Member: "PipelineParameterList", Kind: "list",
+										Fields: []Field{
+											{Property: "Name", Member: "Name", Kind: "scalar"},
+											{Property: "Value", Member: "Value", Kind: "scalar"},
+										},
+									},
+								},
+							},
+							{Property: "SqsParameters", Member: "SqsParameters", Kind: "structure",
+								Fields: []Field{
+									{Property: "MessageGroupId", Member: "MessageGroupId", Kind: "scalar"},
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::Events::Rule",
+				Protocol:    "awsJson1_1",
+				SigningName: "events",
+				Host:        "events.{region}.amazonaws.com",
+				Target:      "AWSEvents.ListTagsForResource",
+				Identifier: []Binding{
+					{Property: "Arn", Member: "ResourceARN", Location: "body"},
+				},
+				Fields: []Field{
+					{Property: "Tags", Member: "Tags", Kind: "list",
+						Fields: []Field{
+							{Property: "Key", Member: "Key", Kind: "scalar"},
+							{Property: "Value", Member: "Value", Kind: "scalar"},
+						},
+					},
+				},
+			},
 		},
 	},
 	"AWS::Forecast::DatasetGroup": {
@@ -5040,7 +5289,7 @@ var readers = map[string]Reader{
 				Host:        "logs.{region}.amazonaws.com",
 				Target:      "Logs_20140328.ListTagsForResource",
 				Input: []Binding{
-					Binding{Member: "resourceArn", Location: "body", Value: "{Arn}"},
+					Binding{Location: "body", Member: "resourceArn", Value: "{Arn}"},
 				},
 				Fields: []Field{
 					{Property: "Tags", Member: "tags", Kind: "map", Entries: []string{"Key", "Value"}},
@@ -5082,8 +5331,8 @@ var readers = map[string]Reader{
 				Host:        "logs.{region}.amazonaws.com",
 				Target:      "Logs_20140328.DescribeResourcePolicies",
 				Input: []Binding{
-					Binding{Member: "policyScope", Location: "body", Value: "RESOURCE"},
-					Binding{Member: "resourceArn", Location: "body", Value: "{Arn}"},
+					Binding{Location: "body", Member: "policyScope", Value: "RESOURCE"},
+					Binding{Location: "body", Member: "resourceArn", Value: "{Arn}"},
 				},
 				Fields: []Field{
 					{Property: "ResourcePolicyDocument", Member: "policyDocument", Kind: "scalar", Via: []Step{{Name: "resourcePolicies", List: true, Where: "resourceArn", Equals: "{Arn}"}}, Transform: "json"},
@@ -7439,7 +7688,7 @@ var readers = map[string]Reader{
 					{Property: "DBClusterParameterGroupName", Member: "DBClusterParameterGroupName", Location: "form", Name: "DBClusterParameterGroupName"},
 				},
 				Input: []Binding{
-					Binding{Member: "Source", Location: "form", Name: "Source", Value: "user"},
+					Binding{Location: "form", Member: "Source", Name: "Source", Value: "user"},
 				},
 				PageToken: []string{"Marker"},
 				Fields: []Field{
@@ -7455,7 +7704,7 @@ var readers = map[string]Reader{
 				Version:     "2014-10-31",
 				Wrapper:     "ListTagsForResourceResult",
 				Input: []Binding{
-					Binding{Member: "ResourceName", Location: "form", Name: "ResourceName", Value: "{Arn}"},
+					Binding{Location: "form", Member: "ResourceName", Name: "ResourceName", Value: "{Arn}"},
 				},
 				Fields: []Field{
 					{Property: "Tags", Member: "TagList", Kind: "list", XMLName: "TagList", Item: "Tag",
@@ -7504,7 +7753,7 @@ var readers = map[string]Reader{
 				Version:     "2014-10-31",
 				Wrapper:     "ListTagsForResourceResult",
 				Input: []Binding{
-					Binding{Member: "ResourceName", Location: "form", Name: "ResourceName", Value: "{Arn}"},
+					Binding{Location: "form", Member: "ResourceName", Name: "ResourceName", Value: "{Arn}"},
 				},
 				Fields: []Field{
 					{Property: "Tags", Member: "TagList", Kind: "list", XMLName: "TagList", Item: "Tag",
@@ -8016,7 +8265,7 @@ var readers = map[string]Reader{
 			{Property: "QueueUrl", Member: "QueueUrl", Location: "body"},
 		},
 		Input: []Binding{
-			Binding{Member: "AttributeNames", Location: "body", Structured: []any{"All"}},
+			Binding{Location: "body", Member: "AttributeNames", Structured: []any{"All"}},
 		},
 		AbsentErrors: []string{"QueueDoesNotExist"},
 		Fields: []Field{
@@ -8372,7 +8621,10 @@ var readers = map[string]Reader{
 		Host:        "api.sagemaker.{region}.amazonaws.com",
 		Target:      "SageMaker.DescribeCodeRepository",
 		Identifier: []Binding{
-			{Property: "CodeRepositoryArn", Member: "CodeRepositoryName", Location: "body"},
+			{Property: "CodeRepositoryArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "CodeRepositoryName", Value: "{CodeRepositoryArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "CodeRepositoryArn", Member: "CodeRepositoryArn", Kind: "scalar"},

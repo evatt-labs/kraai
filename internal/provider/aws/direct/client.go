@@ -110,13 +110,21 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		if !ok {
 			return nil, nil, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
 		}
+		if b.Location == "placeholder" {
+			continue
+		}
 		b.Value = value
 		values = append(values, b)
 	}
 	for _, b := range r.Input {
+		template := b.Value
 		b.Value = substitute(b.Value, identifier).(string)
 		if b.Structured != nil {
 			b.Structured = substitute(b.Structured, identifier)
+		} else if template != "" && b.Value == "" {
+			// A placeholder filtered to nothing, such as the parent of a
+			// resource that has none, leaves the input unset.
+			continue
 		}
 		values = append(values, b)
 	}
@@ -715,11 +723,17 @@ func substitute(v any, identifier map[string]string) any {
 		if !strings.Contains(t, "{") {
 			return t
 		}
-		pairs := make([]string, 0, 2*len(identifier))
-		for k, val := range identifier {
-			pairs = append(pairs, "{"+k+"}", val)
-		}
-		return strings.NewReplacer(pairs...).Replace(t)
+		return placeholderName.ReplaceAllStringFunc(t, func(m string) string {
+			sub := placeholderName.FindStringSubmatch(m)
+			val, ok := identifier[sub[1]]
+			if !ok {
+				return m
+			}
+			if filter := placeholderFilters[sub[2]]; filter != nil {
+				return filter(val)
+			}
+			return val
+		})
 	case []any:
 		out := make([]any, len(t))
 		for i, item := range t {
