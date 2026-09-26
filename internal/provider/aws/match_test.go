@@ -2,9 +2,14 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
+
+	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
@@ -127,6 +132,19 @@ func TestResolveByDeclaredMatch(t *testing.T) {
 	cc = &fakeClient{list: []string{"r1", "r2"}, byIdentifier: map[string]map[string]any{"r1": mine, "r2": mine}}
 	if _, err := newRoute(cc).Get(context.Background(), ref); err == nil || !strings.Contains(err.Error(), "2 instances carry") {
 		t.Fatalf("Get with two matches = %v, want an error", err)
+	}
+
+	// A listed entry Cloud Control refuses to read as not an instance, such
+	// as a main route table association, is passed over; any other read
+	// failure is not.
+	refused := kerrors.Wrap(&cctypes.InvalidRequestException{Message: aws.String("does not belong to a subnet")}, kerrors.CodeUnexpected, "getting")
+	cc = &fakeClient{list: []string{"main", "r2"}, byIdentifier: map[string]map[string]any{"r2": mine}, getErr: map[string]error{"main": refused}}
+	if state, err := newRoute(cc).Get(context.Background(), ref); err != nil || state == nil || state.ID != "r2" {
+		t.Fatalf("Get past a refused entry = %+v, %v; want r2", state, err)
+	}
+	cc = &fakeClient{list: []string{"r1"}, getErr: map[string]error{"r1": errors.New("throttled")}}
+	if _, err := newRoute(cc).Get(context.Background(), ref); err == nil {
+		t.Fatal("Get over a failed read succeeded, want the error")
 	}
 
 	unmatched := ref
