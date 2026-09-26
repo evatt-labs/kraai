@@ -3,8 +3,9 @@ type: AWS::SageMaker::ClusterSchedulerConfig
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeClusterSchedulerConfig
-  identifier:
-    ClusterSchedulerConfigArn: ClusterSchedulerConfigId
+  # The ClusterSchedulerConfigId member refuses an ARN; arn:...:cluster-scheduler-config/id.
+  input:
+    ClusterSchedulerConfigId: "{ClusterSchedulerConfigArn:arnName}"
 properties:
   ClusterArn: ClusterArn
   ClusterSchedulerConfigArn: ClusterSchedulerConfigArn

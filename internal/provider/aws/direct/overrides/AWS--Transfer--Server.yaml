@@ -3,8 +3,9 @@ type: AWS::Transfer::Server
 read:
   model: transfer/service/2018-11-05/transfer-2018-11-05.json
   operation: DescribeServer
-  identifier:
-    Arn: ServerId
+  # The ServerId member refuses an ARN; arn:...:server/id.
+  input:
+    ServerId: "{Arn:arnName}"
   response: Server
 properties:
   Arn: Arn

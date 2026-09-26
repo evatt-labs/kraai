@@ -3,8 +3,9 @@ type: AWS::BedrockAgentCore::PolicyEngine
 read:
   model: bedrock-agentcore-control/service/2023-06-05/bedrock-agentcore-control-2023-06-05.json
   operation: GetPolicyEngine
-  identifier:
-    PolicyEngineArn: policyEngineId
+  # The policyEngineId member refuses an ARN; arn:...:policy-engine/id.
+  input:
+    policyEngineId: "{PolicyEngineArn:arnName}"
 properties:
   CreatedAt: createdAt
   Description: description

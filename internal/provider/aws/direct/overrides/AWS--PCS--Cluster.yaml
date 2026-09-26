@@ -3,8 +3,9 @@ type: AWS::PCS::Cluster
 read:
   model: pcs/service/2023-02-10/pcs-2023-02-10.json
   operation: GetCluster
-  identifier:
-    Arn: clusterIdentifier
+  # The clusterIdentifier member refuses an ARN; arn:...:cluster/id.
+  input:
+    clusterIdentifier: "{Arn:arnName}"
   response: cluster
 properties:
   Arn: arn

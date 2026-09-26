@@ -3,8 +3,9 @@ type: AWS::SageMaker::Model
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeModel
-  identifier:
-    ModelArn: ModelName
+  # The ModelName member refuses an ARN; arn:...:model/name.
+  input:
+    ModelName: "{ModelArn:arnName}"
 properties:
   Containers:
     member: Containers

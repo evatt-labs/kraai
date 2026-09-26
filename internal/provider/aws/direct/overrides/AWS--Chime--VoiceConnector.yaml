@@ -3,8 +3,9 @@ type: AWS::Chime::VoiceConnector
 read:
   model: chime-sdk-voice/service/2022-08-03/chime-sdk-voice-2022-08-03.json
   operation: GetVoiceConnector
-  identifier:
-    VoiceConnectorArn: VoiceConnectorId
+  # The VoiceConnectorId member refuses an ARN; arn:...:vc/id.
+  input:
+    VoiceConnectorId: "{VoiceConnectorArn:arnName}"
   response: VoiceConnector
 properties:
   AwsRegion: AwsRegion
