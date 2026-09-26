@@ -15,6 +15,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -58,28 +59,68 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if err != nil {
 		return nil, err
 	}
-	// The further calls may be addressed by values the read captured.
+	// The further calls may be addressed by values the read captured; a
+	// value the read did not return fails only a call that needs it.
 	vars := identifier
 	if len(r.Capture) > 0 {
 		vars = maps.Clone(identifier)
 		for _, f := range r.Capture {
-			v, _ := captured[f.Property].(string)
-			if v == "" {
-				return nil, fmt.Errorf("the %s read did not return %s, which its further calls are addressed by", typeName, f.Member)
+			if v, _ := captured[f.Property].(string); v != "" {
+				vars[f.Property] = v
 			}
-			vars[f.Property] = v
 		}
 	}
 	// The further calls are independent of one another: made together, a
 	// read costs two round trips rather than one per call.
 	results := make([]map[string]any, len(r.Also))
+	var (
+		mu     sync.Mutex
+		merges []elementResult
+	)
 	g, gctx := errgroup.WithContext(ctx)
 	for i, also := range r.Also {
 		if !made(also.When, props) {
 			continue
 		}
+		if also.Each != "" {
+			// Each element's calls are merged into it once every call is
+			// done: several calls may be made for the same element.
+			items, _ := props[also.Each].([]any)
+			if one, ok := props[also.Each].(map[string]any); ok {
+				items = []any{one}
+			}
+			for _, item := range items {
+				element, ok := item.(map[string]any)
+				if !ok {
+					continue
+				}
+				elementVars := maps.Clone(vars)
+				for k, v := range element {
+					if s, ok := v.(string); ok {
+						elementVars[k] = s
+					}
+				}
+				g.Go(func() error {
+					more, _, err := c.readCall(gctx, also, elementVars)
+					if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
+						return nil
+					}
+					if err != nil {
+						return fmt.Errorf("the %s call %s for an element of %s: %w", typeName, also.Action+also.Target+also.URI, also.Each, err)
+					}
+					mu.Lock()
+					merges = append(merges, elementResult{element, more})
+					mu.Unlock()
+					return nil
+				})
+			}
+			continue
+		}
 		g.Go(func() error {
 			more, _, err := c.readCall(gctx, also, vars)
+			if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
+				return nil
+			}
 			if errors.Is(err, ErrAbsent) {
 				// Gone between the calls, or a further call that finds
 				// nothing: not proof of absence, so not reported as it.
@@ -97,7 +138,16 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 			props[k] = v
 		}
 	}
+	for _, m := range merges {
+		maps.Copy(m.element, m.props)
+	}
 	return props, nil
+}
+
+// elementResult is a call made for one element of a list or structure
+// property, and the properties it read for that element.
+type elementResult struct {
+	element, props map[string]any
 }
 
 // readCall makes one call of a read and translates its response, and
@@ -119,6 +169,9 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	for _, b := range r.Input {
 		template := b.Value
 		b.Value = substitute(b.Value, identifier).(string)
+		if missing := placeholderName.FindStringSubmatch(b.Value); missing != nil {
+			return nil, nil, fmt.Errorf("the %s read did not return %s, which its call %s is addressed by", typeName, missing[1], r.Action+r.Target+r.URI)
+		}
 		if b.Structured != nil {
 			b.Structured = substitute(b.Structured, identifier)
 		} else if template != "" && b.Value == "" {
@@ -190,6 +243,37 @@ func (r Reader) absence(err error) error {
 	return err
 }
 
+// unless removes, at every depth of v, each field whose Unless conditions
+// the read's own properties top meet.
+func unless(v any, fields []Field, top map[string]any) {
+	switch t := v.(type) {
+	case map[string]any:
+		for _, f := range fields {
+			if len(f.Unless) > 0 && madeAny(f.Unless, top) {
+				delete(t, f.Property)
+				continue
+			}
+			if len(f.Fields) > 0 {
+				unless(t[f.Property], f.Fields, top)
+			}
+		}
+	case []any:
+		for _, item := range t {
+			unless(item, fields, top)
+		}
+	}
+}
+
+// madeAny reports whether any condition's property has one of its values.
+func madeAny(conditions []Condition, props map[string]any) bool {
+	for _, c := range conditions {
+		if v, ok := props[c.Field.Property]; ok && slices.Contains(c.Values, fmt.Sprint(v)) {
+			return true
+		}
+	}
+	return false
+}
+
 // made reports whether a further call is made for an instance read as
 // props: every condition's property has one of its values.
 func made(when []Condition, props map[string]any) bool {
@@ -236,6 +320,7 @@ func (r Reader) finish(translate func(fields []Field, fromRoot bool) map[string]
 			props[k] = v
 		}
 	}
+	unless(props, r.Fields, props)
 	return props, nil
 }
 
@@ -590,6 +675,9 @@ func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[strin
 // value reads f's member from one structure, translating nested fields
 // and applying f's transform; ok is false when the member is absent.
 func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
+	if f.Member == "." {
+		return r.translate(w, holder, f.Fields), true
+	}
 	v, ok := holder[r.wire(f.Member, f.JSONName)]
 	if !ok || v == nil {
 		return nil, false
@@ -638,7 +726,16 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 			v = translated
 		}
 	}
-	return transform(f.Transform, v), true
+	return truth(f, transform(f.Transform, v)), true
+}
+
+// truth is v read as a boolean for a field that reads trueWhen, and v
+// unchanged for any other.
+func truth(f Field, v any) any {
+	if f.TrueWhen == nil {
+		return v
+	}
+	return slices.Contains(f.TrueWhen, fmt.Sprint(v))
 }
 
 // entryList reads a map as a list of {key: k, value: v} structures under

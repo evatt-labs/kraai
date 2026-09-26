@@ -12,7 +12,7 @@ func TestReadWithoutACapturedValueFails(t *testing.T) {
 	noARN := strings.Replace(dbSubnetGroupXML, "<DBSubnetGroupArn>arn:aws:rds:us-east-1:1:subgrp:my-group</DBSubnetGroupArn>", "", 1)
 	client, forms := xmlServerBy(t, map[string]string{"DescribeDBSubnetGroups": noARN, "ListTagsForResource": tagsXML})
 	_, err := client.Read(context.Background(), dbSubnetGroups, map[string]string{"DBSubnetGroupName": "my-group"})
-	if err == nil || !strings.Contains(err.Error(), "did not return DBSubnetGroupArn") {
+	if err == nil || !strings.Contains(err.Error(), "did not return Arn") {
 		t.Fatalf("Read = %v, want the missing capture named", err)
 	}
 	if len(*forms) != 1 {

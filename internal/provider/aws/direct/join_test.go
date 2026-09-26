@@ -257,7 +257,7 @@ func TestEndpointOf(t *testing.T) {
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			host, signing, reason := endpointOf(c.rules)
+			host, signing, reason := endpointOf(c.rules, nil)
 			if c.refused != "" {
 				if !strings.Contains(reason, c.refused) || host != "" {
 					t.Fatalf("endpointOf = %q, %q, %q; want refused with %q", host, signing, reason, c.refused)
@@ -266,6 +266,48 @@ func TestEndpointOf(t *testing.T) {
 			}
 			if host != c.host || signing != c.signing || reason != "" {
 				t.Fatalf("endpointOf = %q, %q, %q; want %q, %q", host, signing, reason, c.host, c.signing)
+			}
+		})
+	}
+}
+
+// A rule gated on an operation parameter is reachable only by an operation
+// whose static context parameters satisfy it, as DynamoDB routes only
+// SearchVectors to a second host.
+func TestEndpointOfPrunesOperationRules(t *testing.T) {
+	endpoint := func(url string) map[string]any {
+		return map[string]any{"type": "endpoint", "endpoint": map[string]any{"url": url}}
+	}
+	search := endpoint("https://search-widgets.{Region}.{PartitionResult#dnsSuffix}")
+	search["conditions"] = []any{
+		map[string]any{"fn": "isSet", "argv": []any{map[string]any{"ref": "IsSearchOperation"}}},
+		map[string]any{"fn": "booleanEquals", "argv": []any{map[string]any{"ref": "IsSearchOperation"}, true}},
+	}
+	raw, _ := json.Marshal(map[string]any{
+		"parameters": map[string]any{
+			"Region":            map[string]any{"builtIn": "AWS::Region", "type": "string"},
+			"IsSearchOperation": map[string]any{"type": "boolean"},
+		},
+		"rules": []any{search, endpoint("https://widgets.{Region}.{PartitionResult#dnsSuffix}")},
+	})
+	for name, c := range map[string]struct {
+		static map[string]any
+		host   string
+	}{
+		"another operation":           {nil, "widgets.{region}.amazonaws.com"},
+		"the search operation":        {map[string]any{"IsSearchOperation": true}, ""},
+		"an operation setting it off": {map[string]any{"IsSearchOperation": false}, "widgets.{region}.amazonaws.com"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			host, _, reason := endpointOf(raw, c.static)
+			if c.host == "" {
+				if !strings.Contains(reason, "2 standard endpoints") {
+					t.Fatalf("endpointOf = %q, %q; want both hosts reachable", host, reason)
+				}
+				return
+			}
+			if host != c.host || reason != "" {
+				t.Fatalf("endpointOf = %q, %q; want %q", host, reason, c.host)
 			}
 		})
 	}

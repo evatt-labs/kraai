@@ -1,0 +1,4214 @@
+{
+  "shapes": {
+    "com.amazonaws.dynamodb#ApproximateCreationDateTimePrecision": {
+      "members": {
+        "MICROSECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MICROSECOND"
+          }
+        },
+        "MILLISECOND": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MILLISECOND"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#ArchivalReason": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ArchivalSummary": {
+      "members": {
+        "ArchivalBackupArn": {
+          "target": "com.amazonaws.dynamodb#BackupArn",
+          "traits": {}
+        },
+        "ArchivalDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "ArchivalReason": {
+          "target": "com.amazonaws.dynamodb#ArchivalReason",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#AttributeDefinition": {
+      "members": {
+        "AttributeName": {
+          "target": "com.amazonaws.dynamodb#KeySchemaAttributeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "AttributeType": {
+          "target": "com.amazonaws.dynamodb#ScalarAttributeType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#AttributeDefinitions": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#AttributeDefinition"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#AttributeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 65535,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#Backfilling": {
+      "type": "boolean"
+    },
+    "com.amazonaws.dynamodb#BackupArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 37
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#BillingMode": {
+      "members": {
+        "PAY_PER_REQUEST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PAY_PER_REQUEST"
+          }
+        },
+        "PROVISIONED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PROVISIONED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#BillingModeSummary": {
+      "members": {
+        "BillingMode": {
+          "target": "com.amazonaws.dynamodb#BillingMode",
+          "traits": {}
+        },
+        "LastUpdateToPayPerRequestDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ContinuousBackupsDescription": {
+      "members": {
+        "ContinuousBackupsStatus": {
+          "target": "com.amazonaws.dynamodb#ContinuousBackupsStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "PointInTimeRecoveryDescription": {
+          "target": "com.amazonaws.dynamodb#PointInTimeRecoveryDescription",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ContinuousBackupsStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#ContributorInsightsMode": {
+      "members": {
+        "ACCESSED_AND_THROTTLED_KEYS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACCESSED_AND_THROTTLED_KEYS"
+          }
+        },
+        "THROTTLED_KEYS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "THROTTLED_KEYS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#ContributorInsightsRule": {
+      "traits": {
+        "smithy.api#pattern": "^[A-Za-z0-9][A-Za-z0-9\\-\\_\\.]{0,126}[A-Za-z0-9]$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ContributorInsightsRuleList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#ContributorInsightsRule"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#ContributorInsightsStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "DISABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLING"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ENABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLING"
+          }
+        },
+        "FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FAILED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#Date": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.dynamodb#DeletionProtectionEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.dynamodb#DescribeContinuousBackups": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#TableNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#DescribeContinuousBackupsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#DescribeContinuousBackupsOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#DescribeContinuousBackupsInput": {
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeContinuousBackupsOutput": {
+      "members": {
+        "ContinuousBackupsDescription": {
+          "target": "com.amazonaws.dynamodb#ContinuousBackupsDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeContributorInsights": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#DescribeContributorInsightsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#DescribeContributorInsightsOutput"
+      },
+      "traits": {
+        "smithy.waiters#waitable": {
+          "ContributorInsightsEnabled": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ENABLED",
+                    "path": "ContributorInsightsStatus"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "FAILED",
+                    "path": "ContributorInsightsStatus"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "minDelay": 20
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#DescribeContributorInsightsInput": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeContributorInsightsOutput": {
+      "members": {
+        "ContributorInsightsMode": {
+          "target": "com.amazonaws.dynamodb#ContributorInsightsMode",
+          "traits": {}
+        },
+        "ContributorInsightsRuleList": {
+          "target": "com.amazonaws.dynamodb#ContributorInsightsRuleList",
+          "traits": {}
+        },
+        "ContributorInsightsStatus": {
+          "target": "com.amazonaws.dynamodb#ContributorInsightsStatus",
+          "traits": {}
+        },
+        "FailureException": {
+          "target": "com.amazonaws.dynamodb#FailureException",
+          "traits": {}
+        },
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {}
+        },
+        "LastUpdateDateTime": {
+          "target": "com.amazonaws.dynamodb#LastUpdateDateTime",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeKinesisStreamingDestination": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#DescribeKinesisStreamingDestinationInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#DescribeKinesisStreamingDestinationOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        },
+        "smithy.waiters#waitable": {
+          "KinesisStreamingDestinationActive": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "anyStringEquals",
+                    "expected": "ACTIVE",
+                    "path": "KinesisDataStreamDestinations[].DestinationStatus"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "booleanEquals",
+                    "expected": "true",
+                    "path": "length(KinesisDataStreamDestinations) > `0`  && length(KinesisDataStreamDestinations[?DestinationStatus == 'DISABLED' || DestinationStatus == 'ENABLE_FAILED']) ==  length(KinesisDataStreamDestinations)"
+                  }
+                },
+                "state": "failure"
+              }
+            ],
+            "minDelay": 20
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#DescribeKinesisStreamingDestinationInput": {
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeKinesisStreamingDestinationOutput": {
+      "members": {
+        "KinesisDataStreamDestinations": {
+          "target": "com.amazonaws.dynamodb#KinesisDataStreamDestinations",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeTable": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#DescribeTableInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#DescribeTableOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        },
+        "smithy.waiters#waitable": {
+          "TableExists": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "output": {
+                    "comparator": "stringEquals",
+                    "expected": "ACTIVE",
+                    "path": "Table.TableStatus"
+                  }
+                },
+                "state": "success"
+              },
+              {
+                "matcher": {
+                  "errorType": "ResourceNotFoundException"
+                },
+                "state": "retry"
+              }
+            ],
+            "minDelay": 20
+          },
+          "TableNotExists": {
+            "acceptors": [
+              {
+                "matcher": {
+                  "errorType": "ResourceNotFoundException"
+                },
+                "state": "success"
+              }
+            ],
+            "minDelay": 20
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#DescribeTableInput": {
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeTableOutput": {
+      "members": {
+        "Table": {
+          "target": "com.amazonaws.dynamodb#TableDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeTimeToLive": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#DescribeTimeToLiveInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#DescribeTimeToLiveOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#DescribeTimeToLiveInput": {
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DescribeTimeToLiveOutput": {
+      "members": {
+        "TimeToLiveDescription": {
+          "target": "com.amazonaws.dynamodb#TimeToLiveDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DestinationStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "DISABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLING"
+          }
+        },
+        "ENABLE_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLE_FAILED"
+          }
+        },
+        "ENABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#DynamoDB_20120810": {
+      "operations": [
+        {
+          "target": "com.amazonaws.dynamodb#DescribeContinuousBackups"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#DescribeContributorInsights"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#DescribeKinesisStreamingDestination"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#DescribeTable"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#DescribeTimeToLive"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#GetResourcePolicy"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ListTagsOfResource"
+        }
+      ],
+      "traits": {
+        "aws.api#clientEndpointDiscovery": {
+          "error": "com.amazonaws.dynamodb#InvalidEndpointException",
+          "operation": "com.amazonaws.dynamodb#DescribeEndpoints"
+        },
+        "aws.api#service": {
+          "arnNamespace": "dynamodb",
+          "cloudFormationName": "DynamoDB",
+          "cloudTrailEventSource": "dynamodb.amazonaws.com",
+          "endpointPrefix": "dynamodb",
+          "sdkId": "DynamoDB"
+        },
+        "aws.auth#sigv4": {
+          "name": "dynamodb"
+        },
+        "aws.protocols#awsJson1_0": {},
+        "smithy.api#suppress": [
+          "RuleSetAwsBuiltIn.AWS::Auth::AccountId"
+        ],
+        "smithy.api#title": "Amazon DynamoDB",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://dynamodb.amazonaws.com/doc/2012-08-10/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "AccountId": {
+              "builtIn": "AWS::Auth::AccountId",
+              "documentation": "The AWS AccountId used for the request.",
+              "required": false,
+              "type": "string"
+            },
+            "AccountIdEndpointMode": {
+              "builtIn": "AWS::Auth::AccountIdEndpointMode",
+              "documentation": "The AccountId Endpoint Mode.",
+              "required": false,
+              "type": "string"
+            },
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "IsSearchOperation": {
+              "documentation": "Set to true for SearchVectors to route to the Search FQDN",
+              "required": false,
+              "type": "boolean"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "ResourceArn": {
+              "documentation": "ResourceArn containing arn of resource",
+              "required": false,
+              "type": "string"
+            },
+            "ResourceArnList": {
+              "documentation": "ResourceArnList containing list of resource arns",
+              "required": false,
+              "type": "stringArray"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "assign": "PartitionResult",
+                  "fn": "aws.partition"
+                },
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "assign": "parsedEndpoint",
+                  "fn": "parseURL"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "parsedEndpoint"
+                            },
+                            "authority"
+                          ],
+                          "fn": "getAttr"
+                        },
+                        "dynamodb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                      ],
+                      "fn": "stringEquals"
+                    }
+                  ],
+                  "error": "Endpoint override is not supported for dual-stack endpoints. Please enable dual-stack functionality by enabling the configuration. For more details, see: https://docs.aws.amazon.com/sdkref/latest/guide/feature-endpoints.html",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "parsedEndpoint"
+                            },
+                            "authority"
+                          ],
+                          "fn": "getAttr"
+                        },
+                        "search-dynamodb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                      ],
+                      "fn": "stringEquals"
+                    }
+                  ],
+                  "error": "Endpoint override is not supported for dual-stack endpoints. Please enable dual-stack functionality by enabling the configuration. For more details, see: https://docs.aws.amazon.com/sdkref/latest/guide/feature-endpoints.html",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": "{Endpoint}"
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": "{Endpoint}"
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "Region"
+                            },
+                            "local"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "error": "Invalid Configuration: FIPS and local endpoint are not supported",
+                          "type": "error"
+                        },
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseDualStack"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "error": "Invalid Configuration: Dualstack and local endpoint are not supported",
+                          "type": "error"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "authSchemes": [
+                                {
+                                  "name": "sigv4",
+                                  "signingName": "dynamodb",
+                                  "signingRegion": "us-east-1"
+                                }
+                              ]
+                            },
+                            "url": "http://localhost:8000"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    },
+                                    "required"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "error": "Invalid Configuration: AccountIdEndpointMode is required and FIPS is enabled, but FIPS account endpoints are not supported",
+                                  "type": "error"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://search-dynamodb-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://dynamodb-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "AccountIdEndpointMode"
+                                        }
+                                      ],
+                                      "fn": "isSet"
+                                    },
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "AccountIdEndpointMode"
+                                        },
+                                        "required"
+                                      ],
+                                      "fn": "stringEquals"
+                                    }
+                                  ],
+                                  "rules": [
+                                    {
+                                      "conditions": [],
+                                      "error": "Invalid Configuration: AccountIdEndpointMode is required and FIPS is enabled, but FIPS account endpoints are not supported",
+                                      "type": "error"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                },
+                                {
+                                  "conditions": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "IsSearchOperation"
+                                        }
+                                      ],
+                                      "fn": "isSet"
+                                    },
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "IsSearchOperation"
+                                        },
+                                        true
+                                      ],
+                                      "fn": "booleanEquals"
+                                    }
+                                  ],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://search-dynamodb.{Region}.{PartitionResult#dnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                },
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {},
+                                    "url": "https://dynamodb.{Region}.{PartitionResult#dnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    },
+                                    "required"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "error": "Invalid Configuration: AccountIdEndpointMode is required and FIPS is enabled, but FIPS account endpoints are not supported",
+                                  "type": "error"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://search-dynamodb-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://dynamodb-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "AccountIdEndpointMode"
+                                        },
+                                        "disabled"
+                                      ],
+                                      "fn": "stringEquals"
+                                    }
+                                  ],
+                                  "fn": "not"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws"
+                                  ],
+                                  "fn": "stringEquals"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "UseFIPS"
+                                        },
+                                        true
+                                      ],
+                                      "fn": "booleanEquals"
+                                    }
+                                  ],
+                                  "fn": "not"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "ResourceArn"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "ResourceArn"
+                                    }
+                                  ],
+                                  "assign": "ParsedArn",
+                                  "fn": "aws.parseArn"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "service"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "dynamodb"
+                                  ],
+                                  "fn": "stringEquals"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "region"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    false
+                                  ],
+                                  "fn": "isValidHostLabel"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "region"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "{Region}"
+                                  ],
+                                  "fn": "stringEquals"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "accountId"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    false
+                                  ],
+                                  "fn": "isValidHostLabel"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "IsSearchOperation"
+                                        }
+                                      ],
+                                      "fn": "isSet"
+                                    },
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "IsSearchOperation"
+                                        },
+                                        true
+                                      ],
+                                      "fn": "booleanEquals"
+                                    }
+                                  ],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {
+                                      "metricValues": [
+                                        "O"
+                                      ]
+                                    },
+                                    "url": "https://{ParsedArn#accountId}.search-ddb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                },
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {
+                                      "metricValues": [
+                                        "O"
+                                      ]
+                                    },
+                                    "url": "https://{ParsedArn#accountId}.ddb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "AccountIdEndpointMode"
+                                        },
+                                        "disabled"
+                                      ],
+                                      "fn": "stringEquals"
+                                    }
+                                  ],
+                                  "fn": "not"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws"
+                                  ],
+                                  "fn": "stringEquals"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "UseFIPS"
+                                        },
+                                        true
+                                      ],
+                                      "fn": "booleanEquals"
+                                    }
+                                  ],
+                                  "fn": "not"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "ResourceArnList"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "ResourceArnList"
+                                    },
+                                    "[0]"
+                                  ],
+                                  "assign": "FirstArn",
+                                  "fn": "getAttr"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "FirstArn"
+                                    }
+                                  ],
+                                  "assign": "ParsedArn",
+                                  "fn": "aws.parseArn"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "service"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "dynamodb"
+                                  ],
+                                  "fn": "stringEquals"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "region"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    false
+                                  ],
+                                  "fn": "isValidHostLabel"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "region"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "{Region}"
+                                  ],
+                                  "fn": "stringEquals"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "ParsedArn"
+                                        },
+                                        "accountId"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    false
+                                  ],
+                                  "fn": "isValidHostLabel"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "IsSearchOperation"
+                                        }
+                                      ],
+                                      "fn": "isSet"
+                                    },
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "IsSearchOperation"
+                                        },
+                                        true
+                                      ],
+                                      "fn": "booleanEquals"
+                                    }
+                                  ],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {
+                                      "metricValues": [
+                                        "O"
+                                      ]
+                                    },
+                                    "url": "https://{ParsedArn#accountId}.search-ddb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                },
+                                {
+                                  "conditions": [],
+                                  "endpoint": {
+                                    "headers": {},
+                                    "properties": {
+                                      "metricValues": [
+                                        "O"
+                                      ]
+                                    },
+                                    "url": "https://{ParsedArn#accountId}.ddb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                  },
+                                  "type": "endpoint"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "AccountIdEndpointMode"
+                                        },
+                                        "disabled"
+                                      ],
+                                      "fn": "stringEquals"
+                                    }
+                                  ],
+                                  "fn": "not"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws"
+                                  ],
+                                  "fn": "stringEquals"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "UseFIPS"
+                                        },
+                                        true
+                                      ],
+                                      "fn": "booleanEquals"
+                                    }
+                                  ],
+                                  "fn": "not"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountId"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "AccountId"
+                                        },
+                                        false
+                                      ],
+                                      "fn": "isValidHostLabel"
+                                    }
+                                  ],
+                                  "rules": [
+                                    {
+                                      "conditions": [
+                                        {
+                                          "argv": [
+                                            {
+                                              "ref": "IsSearchOperation"
+                                            }
+                                          ],
+                                          "fn": "isSet"
+                                        },
+                                        {
+                                          "argv": [
+                                            {
+                                              "ref": "IsSearchOperation"
+                                            },
+                                            true
+                                          ],
+                                          "fn": "booleanEquals"
+                                        }
+                                      ],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {
+                                          "metricValues": [
+                                            "O"
+                                          ]
+                                        },
+                                        "url": "https://{AccountId}.search-ddb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    },
+                                    {
+                                      "conditions": [],
+                                      "endpoint": {
+                                        "headers": {},
+                                        "properties": {
+                                          "metricValues": [
+                                            "O"
+                                          ]
+                                        },
+                                        "url": "https://{AccountId}.ddb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                                      },
+                                      "type": "endpoint"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                },
+                                {
+                                  "conditions": [],
+                                  "error": "Credentials-sourced account ID parameter is invalid",
+                                  "type": "error"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "AccountIdEndpointMode"
+                                    },
+                                    "required"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "argv": [
+                                            {
+                                              "ref": "UseFIPS"
+                                            },
+                                            true
+                                          ],
+                                          "fn": "booleanEquals"
+                                        }
+                                      ],
+                                      "fn": "not"
+                                    }
+                                  ],
+                                  "rules": [
+                                    {
+                                      "conditions": [
+                                        {
+                                          "argv": [
+                                            {
+                                              "argv": [
+                                                {
+                                                  "ref": "PartitionResult"
+                                                },
+                                                "name"
+                                              ],
+                                              "fn": "getAttr"
+                                            },
+                                            "aws"
+                                          ],
+                                          "fn": "stringEquals"
+                                        }
+                                      ],
+                                      "rules": [
+                                        {
+                                          "conditions": [],
+                                          "error": "AccountIdEndpointMode is required but no AccountID was provided or able to be loaded",
+                                          "type": "error"
+                                        }
+                                      ],
+                                      "type": "tree"
+                                    },
+                                    {
+                                      "conditions": [],
+                                      "error": "Invalid Configuration: AccountIdEndpointMode is required but account endpoints are not supported in this partition",
+                                      "type": "error"
+                                    }
+                                  ],
+                                  "type": "tree"
+                                },
+                                {
+                                  "conditions": [],
+                                  "error": "Invalid Configuration: AccountIdEndpointMode is required and FIPS is enabled, but FIPS account endpoints are not supported",
+                                  "type": "error"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://search-dynamodb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://dynamodb.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            }
+                          ],
+                          "fn": "isSet"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "AccountIdEndpointMode"
+                                },
+                                "disabled"
+                              ],
+                              "fn": "stringEquals"
+                            }
+                          ],
+                          "fn": "not"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "aws"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "fn": "not"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "ResourceArn"
+                            }
+                          ],
+                          "fn": "isSet"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "ResourceArn"
+                            }
+                          ],
+                          "assign": "ParsedArn",
+                          "fn": "aws.parseArn"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "service"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "dynamodb"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "region"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            false
+                          ],
+                          "fn": "isValidHostLabel"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "region"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "{Region}"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "accountId"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            false
+                          ],
+                          "fn": "isValidHostLabel"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "IsSearchOperation"
+                                }
+                              ],
+                              "fn": "isSet"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "IsSearchOperation"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "metricValues": [
+                                "O"
+                              ]
+                            },
+                            "url": "https://{ParsedArn#accountId}.search-ddb.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "metricValues": [
+                                "O"
+                              ]
+                            },
+                            "url": "https://{ParsedArn#accountId}.ddb.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            }
+                          ],
+                          "fn": "isSet"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "AccountIdEndpointMode"
+                                },
+                                "disabled"
+                              ],
+                              "fn": "stringEquals"
+                            }
+                          ],
+                          "fn": "not"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "aws"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "fn": "not"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "ResourceArnList"
+                            }
+                          ],
+                          "fn": "isSet"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "ResourceArnList"
+                            },
+                            "[0]"
+                          ],
+                          "assign": "FirstArn",
+                          "fn": "getAttr"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "FirstArn"
+                            }
+                          ],
+                          "assign": "ParsedArn",
+                          "fn": "aws.parseArn"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "service"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "dynamodb"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "region"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            false
+                          ],
+                          "fn": "isValidHostLabel"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "region"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "{Region}"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "ParsedArn"
+                                },
+                                "accountId"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            false
+                          ],
+                          "fn": "isValidHostLabel"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "IsSearchOperation"
+                                }
+                              ],
+                              "fn": "isSet"
+                            },
+                            {
+                              "argv": [
+                                {
+                                  "ref": "IsSearchOperation"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "metricValues": [
+                                "O"
+                              ]
+                            },
+                            "url": "https://{ParsedArn#accountId}.search-ddb.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        },
+                        {
+                          "conditions": [],
+                          "endpoint": {
+                            "headers": {},
+                            "properties": {
+                              "metricValues": [
+                                "O"
+                              ]
+                            },
+                            "url": "https://{ParsedArn#accountId}.ddb.{Region}.{PartitionResult#dnsSuffix}"
+                          },
+                          "type": "endpoint"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            }
+                          ],
+                          "fn": "isSet"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "AccountIdEndpointMode"
+                                },
+                                "disabled"
+                              ],
+                              "fn": "stringEquals"
+                            }
+                          ],
+                          "fn": "not"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "PartitionResult"
+                                },
+                                "name"
+                              ],
+                              "fn": "getAttr"
+                            },
+                            "aws"
+                          ],
+                          "fn": "stringEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "UseFIPS"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "fn": "not"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "AccountId"
+                            }
+                          ],
+                          "fn": "isSet"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "ref": "AccountId"
+                                },
+                                false
+                              ],
+                              "fn": "isValidHostLabel"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    }
+                                  ],
+                                  "fn": "isSet"
+                                },
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "IsSearchOperation"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {
+                                  "metricValues": [
+                                    "O"
+                                  ]
+                                },
+                                "url": "https://{AccountId}.search-ddb.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {
+                                  "metricValues": [
+                                    "O"
+                                  ]
+                                },
+                                "url": "https://{AccountId}.ddb.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "Credentials-sourced account ID parameter is invalid",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            }
+                          ],
+                          "fn": "isSet"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "AccountIdEndpointMode"
+                            },
+                            "required"
+                          ],
+                          "fn": "stringEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "UseFIPS"
+                                    },
+                                    true
+                                  ],
+                                  "fn": "booleanEquals"
+                                }
+                              ],
+                              "fn": "not"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "rules": [
+                                {
+                                  "conditions": [],
+                                  "error": "AccountIdEndpointMode is required but no AccountID was provided or able to be loaded",
+                                  "type": "error"
+                                }
+                              ],
+                              "type": "tree"
+                            },
+                            {
+                              "conditions": [],
+                              "error": "Invalid Configuration: AccountIdEndpointMode is required but account endpoints are not supported in this partition",
+                              "type": "error"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "Invalid Configuration: AccountIdEndpointMode is required and FIPS is enabled, but FIPS account endpoints are not supported",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "IsSearchOperation"
+                            }
+                          ],
+                          "fn": "isSet"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "IsSearchOperation"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://search-dynamodb.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://dynamodb.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2012-08-10"
+    },
+    "com.amazonaws.dynamodb#ErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ExceptionDescription": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ExceptionName": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#FailureException": {
+      "members": {
+        "ExceptionDescription": {
+          "target": "com.amazonaws.dynamodb#ExceptionDescription",
+          "traits": {}
+        },
+        "ExceptionName": {
+          "target": "com.amazonaws.dynamodb#ExceptionName",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GetResourcePolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#PolicyNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#GetResourcePolicyInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#GetResourcePolicyOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#GetResourcePolicyInput": {
+      "members": {
+        "ResourceArn": {
+          "target": "com.amazonaws.dynamodb#ResourceArnString",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GetResourcePolicyOutput": {
+      "members": {
+        "Policy": {
+          "target": "com.amazonaws.dynamodb#ResourcePolicy",
+          "traits": {}
+        },
+        "RevisionId": {
+          "target": "com.amazonaws.dynamodb#PolicyRevisionId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndexDescription": {
+      "members": {
+        "Backfilling": {
+          "target": "com.amazonaws.dynamodb#Backfilling",
+          "traits": {}
+        },
+        "IndexArn": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {}
+        },
+        "IndexSizeBytes": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "IndexStatus": {
+          "target": "com.amazonaws.dynamodb#IndexStatus",
+          "traits": {}
+        },
+        "ItemCount": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "KeySchema": {
+          "target": "com.amazonaws.dynamodb#KeySchema",
+          "traits": {}
+        },
+        "OnDemandThroughput": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughput",
+          "traits": {}
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {}
+        },
+        "ProvisionedThroughput": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughputDescription",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexWarmThroughputDescription",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndexDescriptionList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndexWarmThroughputDescription": {
+      "members": {
+        "ReadUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.dynamodb#IndexStatus",
+          "traits": {}
+        },
+        "WriteUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GlobalTableSettingsReplicationMode": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ENABLED_WITH_OVERRIDES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED_WITH_OVERRIDES"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#GlobalTableWitnessDescription": {
+      "members": {
+        "RegionName": {
+          "target": "com.amazonaws.dynamodb#RegionName",
+          "traits": {}
+        },
+        "WitnessStatus": {
+          "target": "com.amazonaws.dynamodb#WitnessStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GlobalTableWitnessDescriptionList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#GlobalTableWitnessDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#IndexName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#IndexStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#InternalServerError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#InvalidEndpointException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.dynamodb#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 421
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#KMSMasterKeyArn": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#KMSMasterKeyId": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#KeySchema": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#KeySchemaElement"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#KeySchemaAttributeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#KeySchemaElement": {
+      "members": {
+        "AttributeName": {
+          "target": "com.amazonaws.dynamodb#KeySchemaAttributeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "KeyType": {
+          "target": "com.amazonaws.dynamodb#KeyType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#KeyType": {
+      "members": {
+        "HASH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HASH"
+          }
+        },
+        "RANGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RANGE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#KinesisDataStreamDestination": {
+      "members": {
+        "ApproximateCreationDateTimePrecision": {
+          "target": "com.amazonaws.dynamodb#ApproximateCreationDateTimePrecision",
+          "traits": {}
+        },
+        "DestinationStatus": {
+          "target": "com.amazonaws.dynamodb#DestinationStatus",
+          "traits": {}
+        },
+        "DestinationStatusDescription": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "StreamArn": {
+          "target": "com.amazonaws.dynamodb#StreamArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#KinesisDataStreamDestinations": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#KinesisDataStreamDestination"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#LastUpdateDateTime": {
+      "type": "timestamp"
+    },
+    "com.amazonaws.dynamodb#ListTagsOfResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#ListTagsOfResourceInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#ListTagsOfResourceOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#ListTagsOfResourceInput": {
+      "members": {
+        "NextToken": {
+          "target": "com.amazonaws.dynamodb#NextTokenString",
+          "traits": {}
+        },
+        "ResourceArn": {
+          "target": "com.amazonaws.dynamodb#ResourceArnString",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ListTagsOfResourceOutput": {
+      "members": {
+        "NextToken": {
+          "target": "com.amazonaws.dynamodb#NextTokenString",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.dynamodb#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#LocalSecondaryIndexDescription": {
+      "members": {
+        "IndexArn": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {}
+        },
+        "IndexSizeBytes": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "ItemCount": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "KeySchema": {
+          "target": "com.amazonaws.dynamodb#KeySchema",
+          "traits": {}
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#LocalSecondaryIndexDescriptionList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#LocalSecondaryIndexDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#LongObject": {
+      "type": "long"
+    },
+    "com.amazonaws.dynamodb#MultiRegionConsistency": {
+      "members": {
+        "EVENTUAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EVENTUAL"
+          }
+        },
+        "STRONG": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STRONG"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#NextTokenString": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#NonKeyAttributeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#NonKeyAttributeNameList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#NonKeyAttributeName"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#NonNegativeLongObject": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "long"
+    },
+    "com.amazonaws.dynamodb#OnDemandThroughput": {
+      "members": {
+        "MaxReadRequestUnits": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "MaxWriteRequestUnits": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#OnDemandThroughputOverride": {
+      "members": {
+        "MaxReadRequestUnits": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#PointInTimeRecoveryDescription": {
+      "members": {
+        "EarliestRestorableDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "LatestRestorableDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "PointInTimeRecoveryStatus": {
+          "target": "com.amazonaws.dynamodb#PointInTimeRecoveryStatus",
+          "traits": {}
+        },
+        "RecoveryPeriodInDays": {
+          "target": "com.amazonaws.dynamodb#RecoveryPeriodInDays",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#PointInTimeRecoveryStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#PolicyNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#PolicyRevisionId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#PositiveLongObject": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "long"
+    },
+    "com.amazonaws.dynamodb#Projection": {
+      "members": {
+        "NonKeyAttributes": {
+          "target": "com.amazonaws.dynamodb#NonKeyAttributeNameList",
+          "traits": {}
+        },
+        "ProjectionType": {
+          "target": "com.amazonaws.dynamodb#ProjectionType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ProjectionType": {
+      "members": {
+        "ALL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ALL"
+          }
+        },
+        "INCLUDE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INCLUDE"
+          }
+        },
+        "KEYS_ONLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KEYS_ONLY"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#ProvisionedThroughputDescription": {
+      "members": {
+        "LastDecreaseDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "LastIncreaseDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "NumberOfDecreasesToday": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {}
+        },
+        "ReadCapacityUnits": {
+          "target": "com.amazonaws.dynamodb#NonNegativeLongObject",
+          "traits": {}
+        },
+        "WriteCapacityUnits": {
+          "target": "com.amazonaws.dynamodb#NonNegativeLongObject",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ProvisionedThroughputOverride": {
+      "members": {
+        "ReadCapacityUnits": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#RecoveryPeriodInDays": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 35,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.dynamodb#RegionName": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ReplicaDescription": {
+      "members": {
+        "GlobalSecondaryIndexes": {
+          "target": "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexDescriptionList",
+          "traits": {}
+        },
+        "GlobalTableSettingsReplicationMode": {
+          "target": "com.amazonaws.dynamodb#GlobalTableSettingsReplicationMode",
+          "traits": {}
+        },
+        "KMSMasterKeyId": {
+          "target": "com.amazonaws.dynamodb#KMSMasterKeyId",
+          "traits": {}
+        },
+        "OnDemandThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
+          "traits": {}
+        },
+        "ProvisionedThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughputOverride",
+          "traits": {}
+        },
+        "RegionName": {
+          "target": "com.amazonaws.dynamodb#RegionName",
+          "traits": {}
+        },
+        "ReplicaArn": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "ReplicaInaccessibleDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "ReplicaStatus": {
+          "target": "com.amazonaws.dynamodb#ReplicaStatus",
+          "traits": {}
+        },
+        "ReplicaStatusDescription": {
+          "target": "com.amazonaws.dynamodb#ReplicaStatusDescription",
+          "traits": {}
+        },
+        "ReplicaStatusPercentProgress": {
+          "target": "com.amazonaws.dynamodb#ReplicaStatusPercentProgress",
+          "traits": {}
+        },
+        "ReplicaTableClassSummary": {
+          "target": "com.amazonaws.dynamodb#TableClassSummary"
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#TableWarmThroughputDescription",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ReplicaDescriptionList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#ReplicaDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexDescription": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {}
+        },
+        "OnDemandThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
+          "traits": {}
+        },
+        "ProvisionedThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughputOverride",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexWarmThroughputDescription",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexDescriptionList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#ReplicaStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "ARCHIVED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ARCHIVED"
+          }
+        },
+        "ARCHIVING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ARCHIVING"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "CREATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATION_FAILED"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "INACCESSIBLE_ENCRYPTION_CREDENTIALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INACCESSIBLE_ENCRYPTION_CREDENTIALS"
+          }
+        },
+        "REGION_DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REGION_DISABLED"
+          }
+        },
+        "REPLICATION_NOT_AUTHORIZED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REPLICATION_NOT_AUTHORIZED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#ReplicaStatusDescription": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ReplicaStatusPercentProgress": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ResourceArnString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1283,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ResourcePolicy": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#RestoreInProgress": {
+      "type": "boolean"
+    },
+    "com.amazonaws.dynamodb#RestoreSummary": {
+      "members": {
+        "RestoreDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RestoreInProgress": {
+          "target": "com.amazonaws.dynamodb#RestoreInProgress",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SourceBackupArn": {
+          "target": "com.amazonaws.dynamodb#BackupArn",
+          "traits": {}
+        },
+        "SourceTableArn": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#SSEDescription": {
+      "members": {
+        "InaccessibleEncryptionDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "KMSMasterKeyArn": {
+          "target": "com.amazonaws.dynamodb#KMSMasterKeyArn",
+          "traits": {}
+        },
+        "SSEType": {
+          "target": "com.amazonaws.dynamodb#SSEType",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.dynamodb#SSEStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#SSEStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "DISABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLING"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ENABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLING"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#SSEType": {
+      "members": {
+        "AES256": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AES256"
+          }
+        },
+        "KMS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KMS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#ScalarAttributeType": {
+      "members": {
+        "B": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "B"
+          }
+        },
+        "N": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "N"
+          }
+        },
+        "S": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "S"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#SearchSchema": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#SearchSchemaElement"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#SearchSchemaElement": {
+      "members": {
+        "AttributeName": {
+          "target": "com.amazonaws.dynamodb#AttributeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SearchSchemaElementType": {
+          "target": "com.amazonaws.dynamodb#SearchSchemaElementType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#SearchSchemaElementType": {
+      "members": {
+        "HASH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HASH"
+          }
+        },
+        "INLINE_FILTER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INLINE_FILTER"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#StreamArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 37
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#StreamEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.dynamodb#StreamSpecification": {
+      "members": {
+        "StreamEnabled": {
+          "target": "com.amazonaws.dynamodb#StreamEnabled",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StreamViewType": {
+          "target": "com.amazonaws.dynamodb#StreamViewType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#StreamViewType": {
+      "members": {
+        "KEYS_ONLY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KEYS_ONLY"
+          }
+        },
+        "NEW_AND_OLD_IMAGES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NEW_AND_OLD_IMAGES"
+          }
+        },
+        "NEW_IMAGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "NEW_IMAGE"
+          }
+        },
+        "OLD_IMAGE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OLD_IMAGE"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#String": {
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#TableArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#TableClass": {
+      "members": {
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        },
+        "STANDARD_INFREQUENT_ACCESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD_INFREQUENT_ACCESS"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#TableClassSummary": {
+      "members": {
+        "LastUpdateDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "TableClass": {
+          "target": "com.amazonaws.dynamodb#TableClass",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#TableDescription": {
+      "members": {
+        "ArchivalSummary": {
+          "target": "com.amazonaws.dynamodb#ArchivalSummary",
+          "traits": {}
+        },
+        "AttributeDefinitions": {
+          "target": "com.amazonaws.dynamodb#AttributeDefinitions",
+          "traits": {}
+        },
+        "BillingModeSummary": {
+          "target": "com.amazonaws.dynamodb#BillingModeSummary",
+          "traits": {}
+        },
+        "CreationDateTime": {
+          "target": "com.amazonaws.dynamodb#Date",
+          "traits": {}
+        },
+        "DeletionProtectionEnabled": {
+          "target": "com.amazonaws.dynamodb#DeletionProtectionEnabled",
+          "traits": {}
+        },
+        "GlobalSecondaryIndexes": {
+          "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexDescriptionList",
+          "traits": {}
+        },
+        "GlobalTableSettingsReplicationMode": {
+          "target": "com.amazonaws.dynamodb#GlobalTableSettingsReplicationMode",
+          "traits": {}
+        },
+        "GlobalTableVersion": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "GlobalTableWitnesses": {
+          "target": "com.amazonaws.dynamodb#GlobalTableWitnessDescriptionList",
+          "traits": {}
+        },
+        "ItemCount": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "KeySchema": {
+          "target": "com.amazonaws.dynamodb#KeySchema",
+          "traits": {}
+        },
+        "LatestStreamArn": {
+          "target": "com.amazonaws.dynamodb#StreamArn",
+          "traits": {}
+        },
+        "LatestStreamLabel": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "LocalSecondaryIndexes": {
+          "target": "com.amazonaws.dynamodb#LocalSecondaryIndexDescriptionList",
+          "traits": {}
+        },
+        "MultiRegionConsistency": {
+          "target": "com.amazonaws.dynamodb#MultiRegionConsistency",
+          "traits": {}
+        },
+        "OnDemandThroughput": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughput",
+          "traits": {}
+        },
+        "ProvisionedThroughput": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughputDescription",
+          "traits": {}
+        },
+        "Replicas": {
+          "target": "com.amazonaws.dynamodb#ReplicaDescriptionList",
+          "traits": {}
+        },
+        "RestoreSummary": {
+          "target": "com.amazonaws.dynamodb#RestoreSummary",
+          "traits": {}
+        },
+        "SSEDescription": {
+          "target": "com.amazonaws.dynamodb#SSEDescription",
+          "traits": {}
+        },
+        "StreamSpecification": {
+          "target": "com.amazonaws.dynamodb#StreamSpecification",
+          "traits": {}
+        },
+        "TableArn": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "TableClassSummary": {
+          "target": "com.amazonaws.dynamodb#TableClassSummary",
+          "traits": {}
+        },
+        "TableId": {
+          "target": "com.amazonaws.dynamodb#TableId",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableName",
+          "traits": {}
+        },
+        "TableSizeBytes": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "TableStatus": {
+          "target": "com.amazonaws.dynamodb#TableStatus",
+          "traits": {}
+        },
+        "VectorIndexes": {
+          "target": "com.amazonaws.dynamodb#VectorIndexDescriptionList",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#TableWarmThroughputDescription",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#TableId": {
+      "traits": {
+        "smithy.api#pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#TableName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 3
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9_.-]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#TableNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#TableStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "ARCHIVED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ARCHIVED"
+          }
+        },
+        "ARCHIVING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ARCHIVING"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        },
+        "INACCESSIBLE_ENCRYPTION_CREDENTIALS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INACCESSIBLE_ENCRYPTION_CREDENTIALS"
+          }
+        },
+        "REPLICATION_NOT_AUTHORIZED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "REPLICATION_NOT_AUTHORIZED"
+          }
+        },
+        "UPDATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "UPDATING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#TableWarmThroughputDescription": {
+      "members": {
+        "ReadUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {}
+        },
+        "Status": {
+          "target": "com.amazonaws.dynamodb#TableStatus",
+          "traits": {}
+        },
+        "WriteUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.dynamodb#TagKeyString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.dynamodb#TagValueString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#TagKeyString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#TagList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#Tag"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#TagValueString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#TimeToLiveAttributeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#TimeToLiveDescription": {
+      "members": {
+        "AttributeName": {
+          "target": "com.amazonaws.dynamodb#TimeToLiveAttributeName",
+          "traits": {}
+        },
+        "TimeToLiveStatus": {
+          "target": "com.amazonaws.dynamodb#TimeToLiveStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#TimeToLiveStatus": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "DISABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLING"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        },
+        "ENABLING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLING"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#VectorAttributeDefinition": {
+      "members": {
+        "AttributeName": {
+          "target": "com.amazonaws.dynamodb#VectorAttributeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#VectorAttributeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.dynamodb#VectorDistanceFunction": {
+      "members": {
+        "COSINE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "COSINE"
+          }
+        },
+        "DOT_PRODUCT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DOT_PRODUCT"
+          }
+        },
+        "EUCLIDEAN": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EUCLIDEAN"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.dynamodb#VectorIndexDescription": {
+      "members": {
+        "Backfilling": {
+          "target": "com.amazonaws.dynamodb#Backfilling",
+          "traits": {}
+        },
+        "Dimensions": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {}
+        },
+        "DistanceFunction": {
+          "target": "com.amazonaws.dynamodb#VectorDistanceFunction",
+          "traits": {}
+        },
+        "IndexArn": {
+          "target": "com.amazonaws.dynamodb#String",
+          "traits": {}
+        },
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {}
+        },
+        "IndexSizeBytes": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "IndexStatus": {
+          "target": "com.amazonaws.dynamodb#IndexStatus",
+          "traits": {}
+        },
+        "ItemCount": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {}
+        },
+        "SearchSchema": {
+          "target": "com.amazonaws.dynamodb#SearchSchema",
+          "traits": {}
+        },
+        "VectorAttribute": {
+          "target": "com.amazonaws.dynamodb#VectorAttributeDefinition",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#VectorIndexDescriptionList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#VectorIndexDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#WitnessStatus": {
+      "members": {
+        "ACTIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVE"
+          }
+        },
+        "CREATING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CREATING"
+          }
+        },
+        "DELETING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETING"
+          }
+        }
+      },
+      "type": "enum"
+    }
+  },
+  "smithy": "2.0"
+}

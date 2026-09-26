@@ -207,6 +207,9 @@ func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 
 // xmlValue reads f's member from one element, as value does from JSON.
 func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
+	if f.Member == "." {
+		return translateXML(w, n, f.Fields), true
+	}
 	var v any
 	switch f.Kind {
 	case "structure":
@@ -281,7 +284,7 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 		}
 		v = xmlScalar(c.text, f.Scalar)
 	}
-	return transform(f.Transform, v), true
+	return truth(f, transform(f.Transform, v)), true
 }
 
 // xmlScalar types text as scalar says. Text that is not what the model

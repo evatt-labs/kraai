@@ -166,6 +166,11 @@
       "sourceSha256": "a096d665ac8fdd8fe7d2bbe636cc9b5e12e41f2df97f2bf30bf7018ec8fd94f5",
       "subsetSha256": "464a214f97d23d25a5f08313661e9621fb652a4cc93f34e21f95fc4a602b262c"
     },
+    "dynamodb/service/2012-08-10/dynamodb-2012-08-10.json": {
+      "file": "models/dynamodb-2012-08-10.json",
+      "sourceSha256": "551882dda390dbce7e3d2001e85017a58b76fdcfaf1bc152b6ecf063efc70705",
+      "subsetSha256": "aa976803b980a672e61a73d573f513e6adc169dd1887f970bef95487edca7ae4"
+    },
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
@@ -912,6 +917,11 @@
       "file": "schemas/AWS--DocDBElastic--ClusterSnapshot.json",
       "sourceSha256": "0e43f2f422942e8f013fbde3305c1219db4bfc1e4bc847e3de9e186d19f63991",
       "subsetSha256": "f68e6ea32e74c9986b38d74f319097fa79a40e9738a489fbd551a5fc6c579ee9"
+    },
+    "AWS::DynamoDB::Table": {
+      "file": "schemas/AWS--DynamoDB--Table.json",
+      "sourceSha256": "46809897aefb3b7bf6e0bb8ea1faaf287147aafafeb5e3db2961a2521a0e3ba4",
+      "subsetSha256": "9731416b22184f5b155223e795dfd6503f8eb0e3fb7f84fdc68bf4dc0e2a12cf"
     },
     "AWS::EC2::InternetGateway": {
       "file": "schemas/AWS--EC2--InternetGateway.json",
