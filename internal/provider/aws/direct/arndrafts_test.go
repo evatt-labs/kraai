@@ -47,6 +47,11 @@ func TestReadersSubstituteARNDrafts(t *testing.T) {
 			"arn:aws:nova-act:us-east-1:123456789012:workflow-definition/my-workflow",
 			"my-workflow",
 		},
+		"AWS::MGN::NetworkMigrationDefinition": {
+			"Arn", "networkMigrationDefinitionID",
+			"arn:aws:mgn:us-east-1:123456789012:network-migration-definition/nmd-0123456789abcdef0",
+			"nmd-0123456789abcdef0",
+		},
 		"AWS::Omics::RunCache": {
 			"Arn", "id",
 			"arn:aws:omics:us-east-1:123456789012:runCache/1234567",

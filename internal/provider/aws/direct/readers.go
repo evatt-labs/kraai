@@ -6141,7 +6141,10 @@ var readers = map[string]Reader{
 		Method:      "POST",
 		URI:         "/network-migration/GetNetworkMigrationDefinition",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "networkMigrationDefinitionID", Location: "body"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "networkMigrationDefinitionID", Value: "{Arn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
