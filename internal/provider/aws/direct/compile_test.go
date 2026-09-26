@@ -3,6 +3,7 @@ package direct
 import (
 	"bytes"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -23,6 +24,22 @@ func TestReadersAreGenerated(t *testing.T) {
 	}
 	if len(Readers()) != len(readers) || len(readers) == 0 {
 		t.Fatalf("Readers() = %d, readers = %d", len(Readers()), len(readers))
+	}
+}
+
+// readers.go carries every field Compile produces: a field the generator
+// does not write would compile clean and be silently absent at run time.
+func TestGeneratedReadersMatchCompiled(t *testing.T) {
+	compiled, err := Compile()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range compiled {
+		got := readers[want.Type]
+		got.Production = false
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: readers.go differs from Compile()\ngot  %#v\nwant %#v", want.Type, got, want)
+		}
 	}
 }
 
@@ -96,5 +113,25 @@ func TestCompileRefuses(t *testing.T) {
 				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
 			}
 		})
+	}
+}
+
+// A service declaring two protocols compiles to the same one every time,
+// the JSON protocol its SDKs send.
+func TestCompilePicksOneProtocol(t *testing.T) {
+	m := widgetModel("Widgets", "widgets")
+	svc := m["shapes"].(map[string]any)["com.example#Widgets"].(map[string]any)["traits"].(map[string]any)
+	delete(svc, "aws.protocols#awsJson1_1")
+	svc["aws.protocols#awsQuery"] = map[string]any{}
+	svc["aws.protocols#awsJson1_0"] = map[string]any{}
+	svc["aws.protocols#awsQueryCompatible"] = map[string]any{}
+	for range 20 {
+		r, errs := compileWidget(t, m, widgetOverride("Widget"))
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		}
+		if r.Protocol != "awsJson1_0" {
+			t.Fatalf("Protocol = %q, want awsJson1_0", r.Protocol)
+		}
 	}
 }

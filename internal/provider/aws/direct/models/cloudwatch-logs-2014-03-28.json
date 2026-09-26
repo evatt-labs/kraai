@@ -21,6 +21,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.cloudwatchlogs#AccountIds": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#AccountId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 20,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
     "com.amazonaws.cloudwatchlogs#AddKeyEntries": {
       "member": {
         "target": "com.amazonaws.cloudwatchlogs#AddKeyEntry"
@@ -80,6 +92,9 @@
     },
     "com.amazonaws.cloudwatchlogs#Arn": {
       "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#BearerTokenAuthenticationEnabled": {
+      "type": "boolean"
     },
     "com.amazonaws.cloudwatchlogs#CSV": {
       "members": {
@@ -176,6 +191,35 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.cloudwatchlogs#DataProtectionStatus": {
+      "members": {
+        "ACTIVATED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACTIVATED"
+          }
+        },
+        "ARCHIVED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ARCHIVED"
+          }
+        },
+        "DELETED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELETED"
+          }
+        },
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.cloudwatchlogs#DateTimeConverter": {
       "members": {
         "locale": {
@@ -216,6 +260,10 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.cloudwatchlogs#Days": {
+      "traits": {},
+      "type": "integer"
+    },
     "com.amazonaws.cloudwatchlogs#DeleteKeys": {
       "members": {
         "withKeys": {
@@ -239,6 +287,9 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#DeletionProtectionEnabled": {
+      "type": "boolean"
     },
     "com.amazonaws.cloudwatchlogs#Delimiter": {
       "traits": {
@@ -356,6 +407,120 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.cloudwatchlogs#DescribeLimit": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeLogGroups": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#DescribeLogGroupsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatchlogs#DescribeLogGroupsResponse"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "nextToken",
+          "items": "logGroups",
+          "outputToken": "nextToken",
+          "pageSize": "limit"
+        },
+        "smithy.test#smokeTests": [
+          {
+            "expect": {
+              "success": {}
+            },
+            "id": "DescribeLogGroupsSuccess",
+            "params": {},
+            "vendorParams": {
+              "region": "us-west-2"
+            },
+            "vendorParamsShape": "aws.test#AwsVendorParams"
+          }
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeLogGroupsLogGroupIdentifiers": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#LogGroupIdentifier"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 50,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeLogGroupsRequest": {
+      "members": {
+        "accountIdentifiers": {
+          "target": "com.amazonaws.cloudwatchlogs#AccountIds",
+          "traits": {}
+        },
+        "includeLinkedAccounts": {
+          "target": "com.amazonaws.cloudwatchlogs#IncludeLinkedAccounts",
+          "traits": {}
+        },
+        "limit": {
+          "target": "com.amazonaws.cloudwatchlogs#DescribeLimit",
+          "traits": {}
+        },
+        "logGroupClass": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupClass",
+          "traits": {}
+        },
+        "logGroupIdentifiers": {
+          "target": "com.amazonaws.cloudwatchlogs#DescribeLogGroupsLogGroupIdentifiers",
+          "traits": {}
+        },
+        "logGroupNamePattern": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupNamePattern",
+          "traits": {}
+        },
+        "logGroupNamePrefix": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupName",
+          "traits": {}
+        },
+        "nextToken": {
+          "target": "com.amazonaws.cloudwatchlogs#NextToken",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DescribeLogGroupsResponse": {
+      "members": {
+        "logGroups": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroups",
+          "traits": {}
+        },
+        "nextToken": {
+          "target": "com.amazonaws.cloudwatchlogs#NextToken"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#DestinationConfiguration": {
       "members": {
         "lookupTableConfiguration": {
@@ -451,6 +616,9 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.cloudwatchlogs#FilterCount": {
+      "type": "integer"
     },
     "com.amazonaws.cloudwatchlogs#Flatten": {
       "traits": {
@@ -812,6 +980,26 @@
       },
       "type": "string"
     },
+    "com.amazonaws.cloudwatchlogs#IncludeLinkedAccounts": {
+      "type": "boolean"
+    },
+    "com.amazonaws.cloudwatchlogs#InheritedProperties": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#InheritedProperty"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatchlogs#InheritedProperty": {
+      "members": {
+        "ACCOUNT_DATA_PROTECTION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ACCOUNT_DATA_PROTECTION"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.cloudwatchlogs#IntegrationDetails": {
       "members": {
         "openSearchIntegrationDetails": {
@@ -988,6 +1176,86 @@
       },
       "type": "string"
     },
+    "com.amazonaws.cloudwatchlogs#LogGroup": {
+      "members": {
+        "arn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        },
+        "bearerTokenAuthenticationEnabled": {
+          "target": "com.amazonaws.cloudwatchlogs#BearerTokenAuthenticationEnabled",
+          "traits": {}
+        },
+        "creationTime": {
+          "target": "com.amazonaws.cloudwatchlogs#Timestamp",
+          "traits": {}
+        },
+        "dataProtectionStatus": {
+          "target": "com.amazonaws.cloudwatchlogs#DataProtectionStatus",
+          "traits": {}
+        },
+        "deletionProtectionEnabled": {
+          "target": "com.amazonaws.cloudwatchlogs#DeletionProtectionEnabled",
+          "traits": {}
+        },
+        "inheritedProperties": {
+          "target": "com.amazonaws.cloudwatchlogs#InheritedProperties",
+          "traits": {}
+        },
+        "kmsKeyId": {
+          "target": "com.amazonaws.cloudwatchlogs#KmsKeyId",
+          "traits": {}
+        },
+        "logGroupArn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        },
+        "logGroupClass": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupClass",
+          "traits": {}
+        },
+        "logGroupName": {
+          "target": "com.amazonaws.cloudwatchlogs#LogGroupName",
+          "traits": {}
+        },
+        "metricFilterCount": {
+          "target": "com.amazonaws.cloudwatchlogs#FilterCount",
+          "traits": {}
+        },
+        "retentionInDays": {
+          "target": "com.amazonaws.cloudwatchlogs#Days"
+        },
+        "storedBytes": {
+          "target": "com.amazonaws.cloudwatchlogs#StoredBytes",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#LogGroupClass": {
+      "members": {
+        "DELIVERY": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DELIVERY"
+          }
+        },
+        "INFREQUENT_ACCESS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INFREQUENT_ACCESS"
+          }
+        },
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.cloudwatchlogs#LogGroupIdentifier": {
       "traits": {
         "smithy.api#length": {
@@ -997,6 +1265,32 @@
         "smithy.api#pattern": "^[\\w#+=/:,.@-]*$"
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LogGroupName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LogGroupNamePattern": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 512,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatchlogs#LogGroups": {
+      "member": {
+        "target": "com.amazonaws.cloudwatchlogs#LogGroup"
+      },
+      "type": "list"
     },
     "com.amazonaws.cloudwatchlogs#LogType": {
       "traits": {
@@ -1010,6 +1304,9 @@
     },
     "com.amazonaws.cloudwatchlogs#Logs_20140328": {
       "operations": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#DescribeLogGroups"
+        },
         {
           "target": "com.amazonaws.cloudwatchlogs#GetDeliverySource"
         },
@@ -1549,6 +1846,14 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#NextToken": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
     },
     "com.amazonaws.cloudwatchlogs#NonMatchValue": {
       "traits": {
@@ -2436,6 +2741,14 @@
       "type": "structure"
     },
     "com.amazonaws.cloudwatchlogs#StartTimeOffset": {
+      "type": "long"
+    },
+    "com.amazonaws.cloudwatchlogs#StoredBytes": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
       "type": "long"
     },
     "com.amazonaws.cloudwatchlogs#SubstituteString": {

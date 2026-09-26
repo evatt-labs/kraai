@@ -18,7 +18,7 @@ Resource Groups Tagging API, and the EC2 types that are candidates for it.
 
 ```
 go run ./cmd/kraai apply   kraai-integration --dir integration/aws-free
-go run ./cmd/kraai plan    kraai-integration --dir integration/aws-free   # 13 unchanged
+go run ./cmd/kraai plan    kraai-integration --dir integration/aws-free   # 19 unchanged
 go run ./cmd/kraai destroy kraai-integration --dir integration/aws-free
 ```
 

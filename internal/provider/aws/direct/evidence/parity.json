@@ -572,6 +572,21 @@
       "probed": 1
     },
     {
+      "type": "AWS::EC2::RouteTable",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "RouteTableId",
+        "Tags",
+        "VpcId"
+      ],
+      "absence": "parity",
+      "probed": 1
+    },
+    {
       "type": "AWS::EC2::SecurityGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -640,6 +655,25 @@
       "probed": 1
     },
     {
+      "type": "AWS::ECS::Cluster",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "Arn",
+        "CapacityProviders",
+        "ClusterName",
+        "ClusterSettings",
+        "Configuration",
+        "DefaultCapacityProviderStrategy",
+        "Tags"
+      ],
+      "absence": "parity",
+      "probed": 1
+    },
+    {
       "type": "AWS::ECS::DaemonTaskDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -682,6 +716,21 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": []
+    },
+    {
+      "type": "AWS::ElastiCache::SubnetGroup",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "CacheSubnetGroupName",
+        "Description",
+        "SubnetIds"
+      ],
+      "absence": "parity",
+      "probed": 1
     },
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
@@ -1281,6 +1330,24 @@
       "compared": []
     },
     {
+      "type": "AWS::Logs::LogGroup",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 4,
+      "compared": [
+        "Arn",
+        "BearerTokenAuthenticationEnabled",
+        "DeletionProtectionEnabled",
+        "LogGroupClass",
+        "LogGroupName",
+        "RetentionInDays"
+      ],
+      "absence": "parity",
+      "probed": 1
+    },
+    {
       "type": "AWS::Logs::ScheduledQuery",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -1745,6 +1812,37 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": []
+    },
+    {
+      "type": "AWS::RDS::DBClusterParameterGroup",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "DBClusterParameterGroupName",
+        "Description",
+        "Family"
+      ],
+      "absence": "parity",
+      "probed": 1
+    },
+    {
+      "type": "AWS::RDS::DBSubnetGroup",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-25",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "DBSubnetGroupArn",
+        "DBSubnetGroupDescription",
+        "DBSubnetGroupName",
+        "SubnetIds"
+      ],
+      "absence": "parity",
+      "probed": 1
     },
     {
       "type": "AWS::ResilienceHubV2::Policy",

@@ -1,0 +1,59 @@
+type: AWS::ECS::Cluster
+read:
+  model: ecs/service/2014-11-13/ecs-2014-11-13.json
+  operation: DescribeClusters
+  identifier:
+    ClusterName: clusters
+  # DescribeClusters filters by a list of names or ARNs and answers with a
+  # list.
+  response: clusters[]
+  # Tags, settings and configuration are returned only when asked for.
+  input:
+    include: [TAGS, SETTINGS, CONFIGURATIONS]
+  # A deleted cluster is still describable for a while; Cloud Control reads
+  # it as gone.
+  absent:
+    status: [INACTIVE]
+properties:
+  Arn: clusterArn
+  CapacityProviders: capacityProviders
+  ClusterName: clusterName
+  ClusterSettings:
+    member: settings
+    properties:
+      Name: name
+      Value: value
+  Configuration:
+    member: configuration
+    properties:
+      ExecuteCommandConfiguration:
+        member: executeCommandConfiguration
+        properties:
+          KmsKeyId: kmsKeyId
+          Logging: logging
+          LogConfiguration:
+            member: logConfiguration
+            properties:
+              CloudWatchEncryptionEnabled: cloudWatchEncryptionEnabled
+              CloudWatchLogGroupName: cloudWatchLogGroupName
+              S3BucketName: s3BucketName
+              S3EncryptionEnabled: s3EncryptionEnabled
+              S3KeyPrefix: s3KeyPrefix
+      ManagedStorageConfiguration:
+        member: managedStorageConfiguration
+        properties:
+          FargateEphemeralStorageKmsKeyId: fargateEphemeralStorageKmsKeyId
+          KmsKeyId: kmsKeyId
+  DefaultCapacityProviderStrategy:
+    member: defaultCapacityProviderStrategy
+    properties:
+      Base: base
+      CapacityProvider: capacityProvider
+      Weight: weight
+  Tags:
+    member: tags
+    properties:
+      Key: key
+      Value: value
+absentIds:
+  - kraai-nonexistent-cluster-zzz

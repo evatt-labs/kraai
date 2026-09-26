@@ -1,0 +1,706 @@
+{
+  "shapes": {
+    "com.amazonaws.rds#AmazonRDSv19": {
+      "operations": [
+        {
+          "target": "com.amazonaws.rds#DescribeDBClusterParameterGroups"
+        },
+        {
+          "target": "com.amazonaws.rds#DescribeDBSubnetGroups"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "rds",
+          "cloudFormationName": "RDS",
+          "cloudTrailEventSource": "rds.amazonaws.com",
+          "endpointPrefix": "rds",
+          "sdkId": "RDS"
+        },
+        "aws.auth#sigv4": {
+          "name": "rds"
+        },
+        "aws.protocols#awsQuery": {},
+        "smithy.api#title": "Amazon Relational Database Service",
+        "smithy.api#xmlNamespace": {
+          "uri": "http://rds.amazonaws.com/doc/2014-10-31/"
+        },
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://rds-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [
+                                {
+                                  "argv": [
+                                    {
+                                      "argv": [
+                                        {
+                                          "ref": "PartitionResult"
+                                        },
+                                        "name"
+                                      ],
+                                      "fn": "getAttr"
+                                    },
+                                    "aws-us-gov"
+                                  ],
+                                  "fn": "stringEquals"
+                                }
+                              ],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://rds.{Region}.amazonaws.com"
+                              },
+                              "type": "endpoint"
+                            },
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://rds-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://rds.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://rds.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2014-10-31"
+    },
+    "com.amazonaws.rds#AvailabilityZone": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterParameterGroup": {
+      "members": {
+        "DBClusterParameterGroupArn": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "DBClusterParameterGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "DBParameterGroupFamily": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterParameterGroupList": {
+      "member": {
+        "target": "com.amazonaws.rds#DBClusterParameterGroup",
+        "traits": {
+          "smithy.api#xmlName": "DBClusterParameterGroup"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rds#DBClusterParameterGroupsMessage": {
+      "members": {
+        "DBClusterParameterGroups": {
+          "target": "com.amazonaws.rds#DBClusterParameterGroupList",
+          "traits": {}
+        },
+        "Marker": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBParameterGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBParameterGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSubnetGroup": {
+      "members": {
+        "DBSubnetGroupArn": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "DBSubnetGroupDescription": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "DBSubnetGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "SubnetGroupStatus": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "Subnets": {
+          "target": "com.amazonaws.rds#SubnetList",
+          "traits": {}
+        },
+        "SupportedNetworkTypes": {
+          "target": "com.amazonaws.rds#StringList",
+          "traits": {}
+        },
+        "VpcId": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSubnetGroupMessage": {
+      "members": {
+        "DBSubnetGroups": {
+          "target": "com.amazonaws.rds#DBSubnetGroups",
+          "traits": {}
+        },
+        "Marker": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSubnetGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSubnetGroupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSubnetGroups": {
+      "member": {
+        "target": "com.amazonaws.rds#DBSubnetGroup",
+        "traits": {
+          "smithy.api#xmlName": "DBSubnetGroup"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rds#DescribeDBClusterParameterGroups": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBParameterGroupNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#DescribeDBClusterParameterGroupsMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#DBClusterParameterGroupsMessage"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "Marker",
+          "items": "DBClusterParameterGroups",
+          "outputToken": "Marker",
+          "pageSize": "MaxRecords"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.rds#DescribeDBClusterParameterGroupsMessage": {
+      "members": {
+        "DBClusterParameterGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "Filters": {
+          "target": "com.amazonaws.rds#FilterList",
+          "traits": {}
+        },
+        "Marker": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "MaxRecords": {
+          "target": "com.amazonaws.rds#IntegerOptional",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DescribeDBSubnetGroups": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBSubnetGroupNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#DescribeDBSubnetGroupsMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#DBSubnetGroupMessage"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "Marker",
+          "items": "DBSubnetGroups",
+          "outputToken": "Marker",
+          "pageSize": "MaxRecords"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.rds#DescribeDBSubnetGroupsMessage": {
+      "members": {
+        "DBSubnetGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "Filters": {
+          "target": "com.amazonaws.rds#FilterList",
+          "traits": {}
+        },
+        "Marker": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "MaxRecords": {
+          "target": "com.amazonaws.rds#IntegerOptional",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.rds#Filter": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Values": {
+          "target": "com.amazonaws.rds#FilterValueList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#FilterList": {
+      "member": {
+        "target": "com.amazonaws.rds#Filter",
+        "traits": {
+          "smithy.api#xmlName": "Filter"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rds#FilterValueList": {
+      "member": {
+        "target": "com.amazonaws.rds#String",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rds#IntegerOptional": {
+      "type": "integer"
+    },
+    "com.amazonaws.rds#Outpost": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#String": {
+      "type": "string"
+    },
+    "com.amazonaws.rds#StringList": {
+      "member": {
+        "target": "com.amazonaws.rds#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.rds#Subnet": {
+      "members": {
+        "SubnetAvailabilityZone": {
+          "target": "com.amazonaws.rds#AvailabilityZone"
+        },
+        "SubnetIdentifier": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "SubnetOutpost": {
+          "target": "com.amazonaws.rds#Outpost",
+          "traits": {}
+        },
+        "SubnetStatus": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SubnetList": {
+      "member": {
+        "target": "com.amazonaws.rds#Subnet",
+        "traits": {
+          "smithy.api#xmlName": "Subnet"
+        }
+      },
+      "type": "list"
+    }
+  },
+  "smithy": "2.0"
+}

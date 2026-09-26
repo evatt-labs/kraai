@@ -27,7 +27,7 @@ services:
         properties: { VpcId: "${VPC.VpcId}", CidrBlock: 10.94.1.0/24, AvailabilityZone: us-east-1b }
       - binding: RT
         type: AWS::EC2::RouteTable
-        properties: { VpcId: "${VPC.VpcId}" }
+        properties: { VpcId: "${VPC.VpcId}", Tags: [{ Key: Name, Value: kraai-free-rt }] }
       - binding: PEER
         type: AWS::EC2::SecurityGroup
         properties: { GroupDescription: kraai integration peer, VpcId: "${VPC.VpcId}" }
@@ -50,6 +50,44 @@ services:
             - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIpv6: "::/0" }
             - { IpProtocol: tcp, FromPort: 5432, ToPort: 5432, DestinationSecurityGroupId: "${PEER.GroupId}" }
             - { IpProtocol: tcp, FromPort: 443, ToPort: 443, DestinationPrefixListId: pl-02cd2c6b }
+
+      # Groups that cost nothing without the clusters or caches that would
+      # use them.
+      - binding: DB_SUBNETS
+        type: AWS::RDS::DBSubnetGroup
+        properties:
+          DBSubnetGroupDescription: kraai integration
+          SubnetIds: ["${SUBNET_A.SubnetId}", "${SUBNET_B.SubnetId}"]
+      - binding: CLUSTER_PARAMS
+        type: AWS::RDS::DBClusterParameterGroup
+        properties:
+          Description: kraai integration
+          Family: aurora-postgresql16
+          Parameters: { timezone: UTC }
+      - binding: CACHE_SUBNETS
+        type: AWS::ElastiCache::SubnetGroup
+        properties:
+          Description: kraai integration
+          SubnetIds: ["${SUBNET_A.SubnetId}", "${SUBNET_B.SubnetId}"]
+
+      # Log groups hold no data, and a cluster with no services runs nothing.
+      # Container Insights is left disabled, as enabled it bills metrics.
+      - binding: LOGS
+        type: AWS::Logs::LogGroup
+        properties: { RetentionInDays: 14 }
+      - binding: LOGS_IA
+        type: AWS::Logs::LogGroup
+        properties: { LogGroupClass: INFREQUENT_ACCESS }
+      - binding: CLUSTER
+        type: AWS::ECS::Cluster
+        properties:
+          ClusterSettings: [{ Name: containerInsights, Value: disabled }]
+          CapacityProviders: [FARGATE, FARGATE_SPOT]
+          DefaultCapacityProviderStrategy: [{ CapacityProvider: FARGATE, Weight: 1, Base: 0 }]
+          Configuration:
+            ExecuteCommandConfiguration:
+              Logging: OVERRIDE
+              LogConfiguration: { CloudWatchLogGroupName: "${LOGS.LogGroupName}", CloudWatchEncryptionEnabled: false }
 
       # Types whose identifier is their ARN. A target group with no load
       # balancer is free.

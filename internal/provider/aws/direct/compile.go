@@ -159,7 +159,9 @@ type Field struct {
 	XMLName, Item, Scalar string
 }
 
-var protocols = map[string]bool{"awsJson1_0": true, "awsJson1_1": true, "restJson1": true, "awsQuery": true, "ec2Query": true, "restXml": true}
+// protocolPreference is every protocol this package supports, in the order
+// a service's is chosen when it declares more than one.
+var protocolPreference = []string{"awsJson1_0", "awsJson1_1", "restJson1", "restXml", "awsQuery", "ec2Query"}
 
 // isXML reports whether protocol answers in XML.
 func isXML(protocol string) bool {
@@ -289,9 +291,12 @@ func compileCall(files fs.FS, lock Lock, o Override, only map[string]bool) (Read
 		}
 	}
 	svc := model.Shapes[service]
-	for trait := range svc.Traits {
-		if p, ok := strings.CutPrefix(trait, "aws.protocols#"); ok && protocols[p] {
+	// A service moving between protocols declares both, such as awsQuery
+	// beside awsJson1_0 with awsQueryCompatible; the SDKs send the JSON one.
+	for _, p := range protocolPreference {
+		if _, ok := svc.Traits["aws.protocols#"+p]; ok {
 			r.Protocol = p
+			break
 		}
 	}
 	if r.Protocol == "" {

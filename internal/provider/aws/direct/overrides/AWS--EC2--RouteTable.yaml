@@ -1,0 +1,18 @@
+type: AWS::EC2::RouteTable
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeRouteTables
+  identifier:
+    RouteTableId: RouteTableIds
+  # DescribeRouteTables filters by a list of ids and answers with a list.
+  response: RouteTables[]
+properties:
+  RouteTableId: RouteTableId
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+  VpcId: VpcId
+absentIds:
+  - rtb-0a1b2c3d4e5f60718

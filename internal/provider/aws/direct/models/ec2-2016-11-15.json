@@ -9,6 +9,9 @@
           "target": "com.amazonaws.ec2#DescribeNetworkAcls"
         },
         {
+          "target": "com.amazonaws.ec2#DescribeRouteTables"
+        },
+        {
           "target": "com.amazonaws.ec2#DescribeSecurityGroupRules"
         },
         {
@@ -464,7 +467,13 @@
     "com.amazonaws.ec2#Boolean": {
       "type": "boolean"
     },
+    "com.amazonaws.ec2#CarrierGatewayId": {
+      "type": "string"
+    },
     "com.amazonaws.ec2#CoipPoolId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#CoreNetworkArn": {
       "type": "string"
     },
     "com.amazonaws.ec2#DescribeInternetGateways": {
@@ -652,6 +661,89 @@
           "traits": {
             "aws.protocols#ec2QueryName": "NextToken",
             "smithy.api#xmlName": "nextToken"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DescribeRouteTables": {
+      "input": {
+        "target": "com.amazonaws.ec2#DescribeRouteTablesRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#DescribeRouteTablesResult"
+      },
+      "traits": {
+        "smithy.api#paginated": {
+          "inputToken": "NextToken",
+          "items": "RouteTables",
+          "outputToken": "NextToken",
+          "pageSize": "MaxResults"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DescribeRouteTablesMaxResults": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 100,
+          "min": 5
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.ec2#DescribeRouteTablesRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "Filters": {
+          "target": "com.amazonaws.ec2#FilterList",
+          "traits": {
+            "smithy.api#xmlName": "Filter"
+          }
+        },
+        "MaxResults": {
+          "target": "com.amazonaws.ec2#DescribeRouteTablesMaxResults",
+          "traits": {}
+        },
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        },
+        "RouteTableIds": {
+          "target": "com.amazonaws.ec2#RouteTableIdStringList",
+          "traits": {
+            "smithy.api#xmlName": "RouteTableId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DescribeRouteTablesResult": {
+      "members": {
+        "NextToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NextToken",
+            "smithy.api#xmlName": "nextToken"
+          }
+        },
+        "RouteTables": {
+          "target": "com.amazonaws.ec2#RouteTableList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteTableSet",
+            "smithy.api#xmlName": "routeTableSet"
           }
         }
       },
@@ -1662,6 +1754,9 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ec2#OdbNetworkArn": {
+      "type": "string"
+    },
     "com.amazonaws.ec2#PortRange": {
       "members": {
         "From": {
@@ -1741,6 +1836,28 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ec2#PropagatingVgw": {
+      "members": {
+        "GatewayId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GatewayId",
+            "smithy.api#xmlName": "gatewayId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#PropagatingVgwList": {
+      "member": {
+        "target": "com.amazonaws.ec2#PropagatingVgw",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
     "com.amazonaws.ec2#ReferencedSecurityGroup": {
       "members": {
         "GroupId": {
@@ -1781,6 +1898,394 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.ec2#Route": {
+      "members": {
+        "CarrierGatewayId": {
+          "target": "com.amazonaws.ec2#CarrierGatewayId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CarrierGatewayId",
+            "smithy.api#xmlName": "carrierGatewayId"
+          }
+        },
+        "CoreNetworkArn": {
+          "target": "com.amazonaws.ec2#CoreNetworkArn",
+          "traits": {
+            "aws.protocols#ec2QueryName": "CoreNetworkArn",
+            "smithy.api#xmlName": "coreNetworkArn"
+          }
+        },
+        "DestinationCidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DestinationCidrBlock",
+            "smithy.api#xmlName": "destinationCidrBlock"
+          }
+        },
+        "DestinationIpv6CidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DestinationIpv6CidrBlock",
+            "smithy.api#xmlName": "destinationIpv6CidrBlock"
+          }
+        },
+        "DestinationPrefixListId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DestinationPrefixListId",
+            "smithy.api#xmlName": "destinationPrefixListId"
+          }
+        },
+        "EgressOnlyInternetGatewayId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "EgressOnlyInternetGatewayId",
+            "smithy.api#xmlName": "egressOnlyInternetGatewayId"
+          }
+        },
+        "GatewayId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GatewayId",
+            "smithy.api#xmlName": "gatewayId"
+          }
+        },
+        "InstanceId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "InstanceId",
+            "smithy.api#xmlName": "instanceId"
+          }
+        },
+        "InstanceOwnerId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "InstanceOwnerId",
+            "smithy.api#xmlName": "instanceOwnerId"
+          }
+        },
+        "IpAddress": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "IpAddress",
+            "smithy.api#xmlName": "ipAddress"
+          }
+        },
+        "LocalGatewayId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "LocalGatewayId",
+            "smithy.api#xmlName": "localGatewayId"
+          }
+        },
+        "NatGatewayId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NatGatewayId",
+            "smithy.api#xmlName": "natGatewayId"
+          }
+        },
+        "NetworkInterfaceId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "NetworkInterfaceId",
+            "smithy.api#xmlName": "networkInterfaceId"
+          }
+        },
+        "OdbNetworkArn": {
+          "target": "com.amazonaws.ec2#OdbNetworkArn",
+          "traits": {
+            "aws.protocols#ec2QueryName": "OdbNetworkArn",
+            "smithy.api#xmlName": "odbNetworkArn"
+          }
+        },
+        "Origin": {
+          "target": "com.amazonaws.ec2#RouteOrigin",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Origin",
+            "smithy.api#xmlName": "origin"
+          }
+        },
+        "State": {
+          "target": "com.amazonaws.ec2#RouteState",
+          "traits": {
+            "aws.protocols#ec2QueryName": "State",
+            "smithy.api#xmlName": "state"
+          }
+        },
+        "TransitGatewayId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "TransitGatewayId",
+            "smithy.api#xmlName": "transitGatewayId"
+          }
+        },
+        "VpcPeeringConnectionId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcPeeringConnectionId",
+            "smithy.api#xmlName": "vpcPeeringConnectionId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#RouteList": {
+      "member": {
+        "target": "com.amazonaws.ec2#Route",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#RouteOrigin": {
+      "members": {
+        "Advertisement": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Advertisement"
+          }
+        },
+        "CreateRoute": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CreateRoute"
+          }
+        },
+        "CreateRouteTable": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CreateRouteTable"
+          }
+        },
+        "EnableVgwRoutePropagation": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EnableVgwRoutePropagation"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#RouteState": {
+      "members": {
+        "active": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "active"
+          }
+        },
+        "blackhole": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "blackhole"
+          }
+        },
+        "filtered": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "filtered"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#RouteTable": {
+      "members": {
+        "Associations": {
+          "target": "com.amazonaws.ec2#RouteTableAssociationList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssociationSet",
+            "smithy.api#xmlName": "associationSet"
+          }
+        },
+        "OwnerId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "OwnerId",
+            "smithy.api#xmlName": "ownerId"
+          }
+        },
+        "PropagatingVgws": {
+          "target": "com.amazonaws.ec2#PropagatingVgwList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PropagatingVgwSet",
+            "smithy.api#xmlName": "propagatingVgwSet"
+          }
+        },
+        "RouteTableId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteTableId",
+            "smithy.api#xmlName": "routeTableId"
+          }
+        },
+        "Routes": {
+          "target": "com.amazonaws.ec2#RouteList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteSet",
+            "smithy.api#xmlName": "routeSet"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "TagSet",
+            "smithy.api#xmlName": "tagSet"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#xmlName": "vpcId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#RouteTableAssociation": {
+      "members": {
+        "AssociationState": {
+          "target": "com.amazonaws.ec2#RouteTableAssociationState",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssociationState",
+            "smithy.api#xmlName": "associationState"
+          }
+        },
+        "GatewayId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "GatewayId",
+            "smithy.api#xmlName": "gatewayId"
+          }
+        },
+        "Main": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Main",
+            "smithy.api#xmlName": "main"
+          }
+        },
+        "PublicIpv4Pool": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "PublicIpv4Pool",
+            "smithy.api#xmlName": "publicIpv4Pool"
+          }
+        },
+        "RouteTableAssociationId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteTableAssociationId",
+            "smithy.api#xmlName": "routeTableAssociationId"
+          }
+        },
+        "RouteTableId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteTableId",
+            "smithy.api#xmlName": "routeTableId"
+          }
+        },
+        "SubnetId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SubnetId",
+            "smithy.api#xmlName": "subnetId"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#RouteTableAssociationList": {
+      "member": {
+        "target": "com.amazonaws.ec2#RouteTableAssociation",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#RouteTableAssociationState": {
+      "members": {
+        "State": {
+          "target": "com.amazonaws.ec2#RouteTableAssociationStateCode",
+          "traits": {
+            "aws.protocols#ec2QueryName": "State",
+            "smithy.api#xmlName": "state"
+          }
+        },
+        "StatusMessage": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "StatusMessage",
+            "smithy.api#xmlName": "statusMessage"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#RouteTableAssociationStateCode": {
+      "members": {
+        "associated": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "associated"
+          }
+        },
+        "associating": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "associating"
+          }
+        },
+        "disassociated": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "disassociated"
+          }
+        },
+        "disassociating": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "disassociating"
+          }
+        },
+        "failed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "failed"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#RouteTableId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#RouteTableIdStringList": {
+      "member": {
+        "target": "com.amazonaws.ec2#RouteTableId",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#RouteTableList": {
+      "member": {
+        "target": "com.amazonaws.ec2#RouteTable",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
     },
     "com.amazonaws.ec2#RuleAction": {
       "members": {
