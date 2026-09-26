@@ -601,7 +601,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 	}
 
 	unordered := map[string]bool{}
-	for _, pointer := range schema.Unordered {
+	for _, pointer := range append(schema.Unordered, returnedSorted[r.typeName]...) {
 		unordered[pointer] = true
 	}
 
@@ -666,6 +666,15 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		}
 	}
 	return resource.Same, nil
+}
+
+// returnedSorted is, by type, the arrays a service returns in an order of
+// its own although the schema leaves them ordered: compared in order, a
+// manifest listing them otherwise would plan an update on every run. Each
+// entry is observed, not inferred from the schema.
+var returnedSorted = map[string][]string{
+	// DescribeTable returns attribute definitions sorted by name.
+	"AWS::DynamoDB::Table": {"/properties/AttributeDefinitions"},
 }
 
 // covers reports whether current carries everything desired sets, applying
