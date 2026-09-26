@@ -111,6 +111,11 @@
       "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
       "subsetSha256": "84685afb422a0a53dd8c76ba95cebc93ce6d323b5cde93934c6377f81eb8564c"
     },
+    "cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json": {
+      "file": "models/cloudwatch-2010-08-01.json",
+      "sourceSha256": "bdf9bc624e25b5dc82f0e6965ebd5f5a18c0c28aa906eb5c159f39c11ee5bbc8",
+      "subsetSha256": "9addd916076894667870b1f50d1196e8143ea385cb52220fe4e6e94701826bdc"
+    },
     "codeconnections/service/2023-12-01/codeconnections-2023-12-01.json": {
       "file": "models/codeconnections-2023-12-01.json",
       "sourceSha256": "df2b3888b5330379673d58477c15feadb296bcf47d6e6e120bf1be15ec5845b0",
@@ -812,6 +817,11 @@
       "file": "schemas/AWS--CloudFront--CachePolicy.json",
       "sourceSha256": "f5fe75ecfe594677190a6b95aaf5597eea0bb39fb5bec1a5a7a5686c7d6af141",
       "subsetSha256": "d2adf82776346c72ab3203d4f0eb938e344b0f1806106f0f57c5720a02564d4a"
+    },
+    "AWS::CloudWatch::Alarm": {
+      "file": "schemas/AWS--CloudWatch--Alarm.json",
+      "sourceSha256": "ae97b11f62d360018014df83e075dcd943e40dd623c4007e472a99f740da9a33",
+      "subsetSha256": "871346cfdda145df6aef973a8e0023d2a96b6226233d1283db896c0aa947ebf4"
     },
     "AWS::CodeConnections::Connection": {
       "file": "schemas/AWS--CodeConnections--Connection.json",

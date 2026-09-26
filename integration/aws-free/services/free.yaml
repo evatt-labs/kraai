@@ -145,6 +145,38 @@ services:
           SSESpecification: { SSEEnabled: true }
           Tags: [{ Key: team, Value: kraai }]
 
+      # Two alarms of one metric each, within the free tier's ten alarm
+      # metrics. Nothing publishes the metrics, so neither ever fires.
+      - binding: ALARM
+        type: AWS::CloudWatch::Alarm
+        properties:
+          AlarmDescription: kraai integration
+          ComparisonOperator: GreaterThanThreshold
+          EvaluationPeriods: 2
+          DatapointsToAlarm: 1
+          Threshold: 100
+          TreatMissingData: notBreaching
+          Namespace: Kraai/Integration
+          MetricName: Checks
+          Statistic: Sum
+          Period: 300
+          Dimensions: [{ Name: Fixture, Value: aws-free }]
+          ActionsEnabled: false
+          Tags: [{ Key: team, Value: kraai }]
+      - binding: MATH_ALARM
+        type: AWS::CloudWatch::Alarm
+        properties:
+          ComparisonOperator: GreaterThanThreshold
+          EvaluationPeriods: 1
+          Threshold: 1
+          Metrics:
+            - Id: m1
+              ReturnData: true
+              MetricStat:
+                Metric: { Namespace: Kraai/Integration, MetricName: Checks, Dimensions: [{ Name: Fixture, Value: aws-free }] }
+                Period: 300
+                Stat: Average
+
       # Queues are billed per request; kraai's reads fit the free tier.
       - binding: DLQ
         type: AWS::SQS::Queue

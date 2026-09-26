@@ -399,6 +399,38 @@
       "override": "1b92a601b7ce50d684a46fd669d0f699c958d31897aaa515e15398229d49a187"
     },
     {
+      "type": "AWS::CloudWatch::Alarm",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-26",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "ActionsEnabled",
+        "AlarmActions",
+        "AlarmDescription",
+        "AlarmName",
+        "Arn",
+        "ComparisonOperator",
+        "DatapointsToAlarm",
+        "Dimensions",
+        "EvaluationPeriods",
+        "InsufficientDataActions",
+        "MetricName",
+        "Metrics",
+        "Namespace",
+        "OKActions",
+        "Period",
+        "Statistic",
+        "Tags",
+        "Threshold",
+        "TreatMissingData"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "1e9de0be6530d3d8d4a772c3f155ffd8527bb5c023b925d9b05a3c4fec8d8e2e"
+    },
+    {
       "type": "AWS::CodeConnections::Connection",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
