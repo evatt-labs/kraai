@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"regexp"
 	"slices"
 	"sort"
@@ -44,6 +45,9 @@ type Reader struct {
 	// When is the read properties, and their values, an Also call is made
 	// for; see Call.When.
 	When []Condition
+	// Each is the list property an Also call is made once per element of;
+	// see Call.Each.
+	Each string
 	// AbsentIDs are identifiers that must read as absent, for the harness.
 	AbsentIDs []string
 	// Complete is true when the override skips no property at any depth,
@@ -154,8 +158,11 @@ type Field struct {
 	// Key reads one entry of the map Member names.
 	Key string
 	// Entries and Keyed are Mapping.Entries and Mapping.Keyed, Keyed by
-	// wire member.
-	Entries, Keyed []string
+	// wire member; TrueWhen is Mapping.TrueWhen.
+	Entries, Keyed, TrueWhen []string
+	// Unless is Mapping.Unless: the read properties, and their values, for
+	// which the field is left unread.
+	Unless []Condition
 	// Root reads the member from the operation's whole output rather than
 	// the resource, for a value carried beside it.
 	Root bool
@@ -246,7 +253,7 @@ func compileAll(files fs.FS) ([]Reader, error) {
 }
 
 func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
-	r, errs := compileCall(files, lock, o, nil, nil)
+	r, errs := compileCall(files, lock, o, nil, nil, "")
 	captured := map[string]bool{}
 	for name := range o.Read.Capture {
 		captured[name] = true
@@ -259,10 +266,25 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		sub := Override{
 			Type: o.Type,
 			Read: Read{Model: o.Read.Model, Operation: call.Operation, Identifier: call.Identifier,
-				Response: call.Response, Input: call.Input},
+				Response: call.Response, Input: call.Input, AbsentErrors: call.AbsentErrors},
 			Properties: call.Properties,
 		}
-		also, alsoErrs := compileCall(files, lock, sub, only, captured)
+		callCaptured := captured
+		if call.Each != "" {
+			callCaptured = maps.Clone(captured)
+			i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == call.Each })
+			if i < 0 || r.Fields[i].Kind != "list" && r.Fields[i].Kind != "structure" || len(r.Fields[i].Fields) == 0 {
+				errs = append(errs, fmt.Errorf("also %s is made for each %s, which is not a structure or list of structures the read maps", call.Operation, call.Each))
+			} else {
+				for _, f := range r.Fields[i].Fields {
+					if f.Kind == "scalar" {
+						callCaptured[f.Property] = true
+					}
+				}
+			}
+		}
+		also, alsoErrs := compileCall(files, lock, sub, only, callCaptured, call.Each)
+		also.Each = call.Each
 		for _, e := range alsoErrs {
 			errs = append(errs, fmt.Errorf("also[%d] %s: %w", i, call.Operation, e))
 		}
@@ -301,7 +323,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 // properties the call must account for to those it maps, for a further
 // call; otherwise the call accounts for every readable property but those
 // o's further calls map.
-func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]bool) (Reader, []error) {
+func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]bool, each string) (Reader, []error) {
 	var errs []error
 	fail := func(format string, args ...any) { errs = append(errs, fmt.Errorf(format, args...)) }
 
@@ -321,6 +343,7 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 	if err := json.Unmarshal(schemaRaw, &schema); err != nil {
 		return Reader{}, []error{err}
 	}
+	schema.elsewhere = map[string]bool{}
 
 	r := Reader{Type: o.Type}
 	var service, namespace string
@@ -348,7 +371,13 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 		fail("the service declares no signing name")
 	}
 	var reason string
-	if r.Host, r.SigningRegion, reason = endpointOf(svc.Traits["smithy.rules#endpointRuleSet"]); reason != "" {
+	var static map[string]struct{ Value any }
+	_ = json.Unmarshal(model.Shapes[namespace+o.Read.Operation].Traits["smithy.rules#staticContextParams"], &static)
+	params := map[string]any{}
+	for name, p := range static {
+		params[name] = p.Value
+	}
+	if r.Host, r.SigningRegion, reason = endpointOf(svc.Traits["smithy.rules#endpointRuleSet"], params); reason != "" {
 		fail("no endpoint this client can form: %s", reason)
 	}
 
@@ -564,6 +593,10 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 	elsewhere := map[string]bool{}
 	for _, call := range o.Also {
 		for name := range call.Properties {
+			if call.Each != "" {
+				schema.elsewhere[call.Each+"."+name] = true
+				continue
+			}
 			if _, twice := o.Properties[name]; twice || elsewhere[name] {
 				fail("%s is mapped by more than one call", name)
 			}
@@ -571,8 +604,16 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 		}
 	}
 	readable := map[string]cfnProperty{}
-	for name, p := range schema.Properties {
-		if schema.writeOnly(name) || elsewhere[name] || only != nil && !only[name] {
+	top := schema.Properties
+	if each != "" {
+		// A call per element maps the element's properties.
+		top = schema.nested(schema.Properties[each])
+		if top == nil {
+			top = schema.nestedAlternative(schema.Properties[each])
+		}
+	}
+	for name, p := range top {
+		if each == "" && schema.writeOnly(name) || elsewhere[name] || only != nil && !only[name] {
 			continue
 		}
 		readable[name] = p
@@ -632,6 +673,12 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 			}
 			if f.Kind == "identifier" && !want[f.Member] {
 				fail("%s reads {%s}, which is not the primary identifier", f.Property, f.Member)
+			}
+			for _, c := range f.Unless {
+				i := slices.IndexFunc(r.Fields, func(top Field) bool { return top.Property == c.Field.Property })
+				if i < 0 || r.Fields[i].Kind != "scalar" || len(c.Values) == 0 {
+					fail("%s is read unless %s, which is not a scalar property of this read with values", f.Property, c.Field.Property)
+				}
 			}
 			checkSelections(f.Fields)
 		}
@@ -794,6 +841,9 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 	}
 	var fields []Field
 	for _, name := range sortedKeys(props) {
+		if schema.elsewhere[strings.TrimPrefix(at, "$.")+name] {
+			continue
+		}
 		mapping, isMapped := mapped[name]
 		if _, isSkipped := skipped[name]; isSkipped {
 			if isMapped {
@@ -813,8 +863,22 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			continue
 		}
 		// A dotted member is a path through structures to the one mapped;
-		// a step ending [] is a list of structures, read element by element.
+		// a step ending [] is a list of structures, read element by element;
+		// a path ending in a selection is the selected element itself.
 		steps := strings.Split(mapping.Member, ".")
+		if selection.MatchString(steps[len(steps)-1]) {
+			steps = append(steps, ".")
+		}
+		if mapping.Member == "." {
+			nested := schema.nested(props[name])
+			if nested == nil {
+				fail("%s%s maps the enclosing structure, but the schema does not type it one", at, name)
+				continue
+			}
+			fields = append(fields, Field{Property: name, Member: ".", Kind: "structure",
+				Fields: compileFields(model, schema, nested, structure, mapping.Properties, mapping.Skip, at+name+".", fail)})
+			continue
+		}
 		holder, via, walked, projected, selected := structure, []Step{}, true, false, false
 		mapMember := ""
 		for i, step := range steps[:len(steps)-1] {
@@ -856,7 +920,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				fail("%s%s maps through %s, whose jsonName a path does not follow", at, name, step)
 			}
 			if where != "" {
-				if wm, ok := model.Shapes[next].Members[where]; !ok || targetType(model.Shapes[wm.Target].Type, wm.Target) != "string" {
+				if wm, ok := model.Shapes[next].Members[where]; !ok || !slices.Contains([]string{"string", "enum"}, targetType(model.Shapes[wm.Target].Type, wm.Target)) {
 					fail("%s%s selects by %s, which is not a string member of %s", at, name, where, next)
 					walked = false
 					break
@@ -878,6 +942,18 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		if mapMember != "" {
 			member, key = mapMember, steps[len(steps)-1]
 		}
+		if member == "." {
+			// The selected element itself: its properties map as a
+			// structure's do.
+			nested := schema.nested(props[name])
+			if nested == nil {
+				fail("%s%s maps a selected element, but the schema does not type it a structure", at, name)
+				continue
+			}
+			fields = append(fields, Field{Property: name, Member: ".", Via: via, Kind: "structure",
+				Fields: compileFields(model, schema, nested, holder, mapping.Properties, mapping.Skip, at+name+".", fail)})
+			continue
+		}
 		m, ok := model.Shapes[holder].Members[member]
 		if !ok {
 			fail("%s%s maps to %s, which %s does not have", at, name, mapping.Member, structure)
@@ -891,6 +967,23 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		valueTarget := m.Target
 		if key != "" {
 			valueTarget = ref(model.Shapes[m.Target].Value)
+		}
+		if len(mapping.TrueWhen) > 0 {
+			switch {
+			case !schema.types(props[name])["boolean"]:
+				fail("%s%s reads trueWhen, but the schema does not type it a boolean", at, name)
+			case kindOf(model.Shapes[valueTarget].Type, valueTarget) != "scalar" || mapping.Transform != "":
+				fail("%s%s reads trueWhen of %s, which is not a plain scalar", at, name, mapping.Member)
+			default:
+				for _, value := range mapping.TrueWhen {
+					if reason := fixedValue(model, valueTarget, value); reason != "" {
+						fail("%s%s trueWhen %s", at, name, reason)
+					}
+				}
+				f.Kind, f.TrueWhen = "scalar", slices.Clone(mapping.TrueWhen)
+				fields = append(fields, f)
+			}
+			continue
 		}
 		parsed := false
 		switch mapping.Transform {
@@ -953,6 +1046,10 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				nestedStructure = ref(target.Member)
 			}
 		}
+		// Only the service's shape says which alternative a response is.
+		if nested == nil && nestedStructure != "" {
+			nested = schema.nestedAlternative(prop)
+		}
 		switch {
 		case nested != nil && nestedStructure != "":
 			for child := range nested {
@@ -968,6 +1065,9 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		}
 		if len(mapping.Where) > 0 {
 			f.Where = compileWhere(model, f, nestedStructure, mapping.Where, at+name, fail)
+		}
+		for _, property := range sortedKeys(mapping.Unless) {
+			f.Unless = append(f.Unless, Condition{Field: Field{Property: property}, Values: mapping.Unless[property]})
 		}
 		fields = append(fields, f)
 	}
@@ -1127,10 +1227,60 @@ var otherPartitionRegions = []string{"us-gov", "cn-", "us-iso", "eu-iso", "eusc-
 // to an api.aws one, which some services give only in dual-stack form; a
 // literal host for one region that the regional form produces anyway is
 // not a second endpoint.
-func endpointOf(ruleSet json.RawMessage) (host, signingRegion, reason string) {
+func endpointOf(ruleSet json.RawMessage, static map[string]any) (host, signingRegion, reason string) {
 	var tree any
 	if json.Unmarshal(ruleSet, &tree) != nil || tree == nil {
 		return "", "", "the model has no endpoint rule set"
+	}
+	// An operation parameter, one no client setting fills, has only the
+	// value the operation's staticContextParams give it, or its default.
+	var parameters struct {
+		Parameters map[string]struct {
+			BuiltIn string `json:"builtIn"`
+			Default any    `json:"default"`
+		} `json:"parameters"`
+	}
+	_ = json.Unmarshal(ruleSet, &parameters)
+	operationParam := func(argv any) (value any, known, isOperation bool) {
+		ref, _ := argv.(map[string]any)["ref"].(string)
+		p, ok := parameters.Parameters[ref]
+		if !ok || p.BuiltIn != "" {
+			return nil, false, false
+		}
+		if v, ok := static[ref]; ok {
+			return v, true, true
+		}
+		return p.Default, p.Default != nil, true
+	}
+	// unreachable reports a rule gated on an operation parameter this
+	// operation cannot give the value the rule requires.
+	unreachable := func(rule map[string]any) bool {
+		conditions, _ := rule["conditions"].([]any)
+		for _, c := range conditions {
+			cond, _ := c.(map[string]any)
+			argv, _ := cond["argv"].([]any)
+			if len(argv) == 0 {
+				continue
+			}
+			if _, isRef := argv[0].(map[string]any); !isRef {
+				continue
+			}
+			value, known, isOperation := operationParam(argv[0])
+			if !isOperation {
+				continue
+			}
+			switch cond["fn"] {
+			case "isSet":
+				if !known {
+					return true
+				}
+			case "booleanEquals":
+				if len(argv) == 2 && (!known || value != argv[1]) {
+					return true
+				}
+			}
+		}
+		return false
 	}
 	type candidate struct{ host, signingRegion string }
 	tiers := map[string]map[candidate]bool{"amazonaws.com": {}, "api.aws": {}}
@@ -1138,6 +1288,9 @@ func endpointOf(ruleSet json.RawMessage) (host, signingRegion, reason string) {
 	walk = func(v any) {
 		switch t := v.(type) {
 		case map[string]any:
+			if unreachable(t) {
+				return
+			}
 			if t["type"] == "endpoint" {
 				endpoint, _ := t["endpoint"].(map[string]any)
 				url, _ := endpoint["url"].(string)
@@ -1555,6 +1708,10 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 			if step.Where != "" {
 				f.Via[j].Where = xmlName(step.Where, model.Shapes[holder].Members[step.Where])
 			}
+		}
+		if f.Member == "." {
+			xmlFields(model, holder, f.Fields, at+f.Property+".", fail)
+			continue
 		}
 		m := model.Shapes[holder].Members[f.Member]
 		f.XMLName = xmlName(f.Member, m)

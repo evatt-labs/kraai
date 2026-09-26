@@ -108,6 +108,43 @@ services:
                 DataIdentifier: ["arn:aws:dataprotection::aws:data-identifier/EmailAddress"]
                 Operation: { Deidentify: { MaskConfig: {} } }
 
+      # An on-demand table holding nothing costs nothing, nor do its indexes,
+      # stream, TTL or point-in-time recovery. Contributor insights, Kinesis
+      # streaming and warm throughput are billed and left out, and a
+      # resource policy must name the account, so none is set.
+      - binding: TABLE
+        type: AWS::DynamoDB::Table
+        properties:
+          BillingMode: PAY_PER_REQUEST
+          TableClass: STANDARD_INFREQUENT_ACCESS
+          # Sorted by name, the order DynamoDB returns them in (#382).
+          AttributeDefinitions:
+            - { AttributeName: gsi_pk, AttributeType: S }
+            - { AttributeName: lsi_sk, AttributeType: N }
+            - { AttributeName: pk, AttributeType: S }
+            - { AttributeName: sk, AttributeType: S }
+          KeySchema:
+            - { AttributeName: pk, KeyType: HASH }
+            - { AttributeName: sk, KeyType: RANGE }
+          GlobalSecondaryIndexes:
+            - IndexName: gsi
+              KeySchema: [{ AttributeName: gsi_pk, KeyType: HASH }]
+              Projection: { ProjectionType: INCLUDE, NonKeyAttributes: [extra] }
+          LocalSecondaryIndexes:
+            - IndexName: lsi
+              KeySchema:
+                - { AttributeName: pk, KeyType: HASH }
+                - { AttributeName: lsi_sk, KeyType: RANGE }
+              Projection: { ProjectionType: ALL }
+          TimeToLiveSpecification: { AttributeName: expires_at, Enabled: true }
+          PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true, RecoveryPeriodInDays: 7 }
+          StreamSpecification:
+            StreamViewType: NEW_AND_OLD_IMAGES
+            Tags: [{ Key: team, Value: kraai }]
+          OnDemandThroughput: { MaxReadRequestUnits: 10, MaxWriteRequestUnits: 10 }
+          SSESpecification: { SSEEnabled: true }
+          Tags: [{ Key: team, Value: kraai }]
+
       # Queues are billed per request; kraai's reads fit the free tier.
       - binding: DLQ
         type: AWS::SQS::Queue

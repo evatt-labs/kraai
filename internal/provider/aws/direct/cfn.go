@@ -10,6 +10,9 @@ type cfnSchema struct {
 	PrimaryIdentifier  []string               `json:"primaryIdentifier"`
 	WriteOnlyPointers  []string               `json:"writeOnlyProperties"`
 	ReadOnlyProperties []string               `json:"readOnlyProperties"`
+	// elsewhere is the nested properties, as dotted paths, that a call
+	// made per element maps, which the read itself need not.
+	elsewhere map[string]bool
 }
 
 type cfnProperty struct {
@@ -86,6 +89,23 @@ func (s *cfnSchema) types(p cfnProperty) map[string]bool {
 		out["object"] = true
 	}
 	return out
+}
+
+// nestedAlternative is nested of p's one structured oneOf or anyOf
+// alternative, such as a key schema that is a list of elements or a legacy
+// bare object; nil unless exactly one alternative is structured.
+func (s *cfnSchema) nestedAlternative(p cfnProperty) map[string]cfnProperty {
+	p = s.resolve(p)
+	var structured []map[string]cfnProperty
+	for _, alt := range append(append([]cfnProperty{}, p.OneOf...), p.AnyOf...) {
+		if nested := s.nested(alt); nested != nil {
+			structured = append(structured, nested)
+		}
+	}
+	if len(structured) != 1 {
+		return nil
+	}
+	return structured[0]
 }
 
 // nested is the properties of p when it is an object with declared

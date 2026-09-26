@@ -1929,6 +1929,321 @@ var readers = map[string]Reader{
 			{Property: "VpcSecurityGroupIds", Member: "vpcSecurityGroupIds", Kind: "list"},
 		},
 	},
+	"AWS::DynamoDB::Table": {
+		Type:        "AWS::DynamoDB::Table",
+		Protocol:    "awsJson1_0",
+		SigningName: "dynamodb",
+		Complete:    true,
+		Production:  true,
+		Host:        "dynamodb.{region}.amazonaws.com",
+		Target:      "DynamoDB_20120810.DescribeTable",
+		Identifier: []Binding{
+			{Property: "TableName", Member: "TableName", Location: "body"},
+		},
+		AbsentErrors: []string{"ResourceNotFoundException"},
+		Response:     []Step{{Name: "Table"}},
+		Fields: []Field{
+			{Property: "Arn", Member: "TableArn", Kind: "scalar"},
+			{Property: "AttributeDefinitions", Member: "AttributeDefinitions", Kind: "list",
+				Fields: []Field{
+					{Property: "AttributeName", Member: "AttributeName", Kind: "scalar"},
+					{Property: "AttributeType", Member: "AttributeType", Kind: "scalar"},
+				},
+			},
+			{Property: "BillingMode", Member: "BillingMode", Kind: "scalar", Via: []Step{{Name: "BillingModeSummary"}}},
+			{Property: "DeletionProtectionEnabled", Member: "DeletionProtectionEnabled", Kind: "scalar"},
+			{Property: "GlobalSecondaryIndexes", Member: "GlobalSecondaryIndexes", Kind: "list",
+				Fields: []Field{
+					{Property: "IndexName", Member: "IndexName", Kind: "scalar"},
+					{Property: "KeySchema", Member: "KeySchema", Kind: "list",
+						Fields: []Field{
+							{Property: "AttributeName", Member: "AttributeName", Kind: "scalar"},
+							{Property: "KeyType", Member: "KeyType", Kind: "scalar"},
+						},
+					},
+					{Property: "OnDemandThroughput", Member: "OnDemandThroughput", Kind: "structure",
+						Fields: []Field{
+							{Property: "MaxReadRequestUnits", Member: "MaxReadRequestUnits", Kind: "scalar"},
+							{Property: "MaxWriteRequestUnits", Member: "MaxWriteRequestUnits", Kind: "scalar"},
+						},
+					},
+					{Property: "Projection", Member: "Projection", Kind: "structure",
+						Fields: []Field{
+							{Property: "NonKeyAttributes", Member: "NonKeyAttributes", Kind: "list"},
+							{Property: "ProjectionType", Member: "ProjectionType", Kind: "scalar"},
+						},
+					},
+					{Property: "ProvisionedThroughput", Member: "ProvisionedThroughput", Kind: "structure", Unless: []Condition{{Field: Field{Property: "BillingMode"}, Values: []string{"PAY_PER_REQUEST"}}},
+						Fields: []Field{
+							{Property: "ReadCapacityUnits", Member: "ReadCapacityUnits", Kind: "scalar"},
+							{Property: "WriteCapacityUnits", Member: "WriteCapacityUnits", Kind: "scalar"},
+						},
+					},
+					{Property: "WarmThroughput", Member: "WarmThroughput", Kind: "structure",
+						Fields: []Field{
+							{Property: "ReadUnitsPerSecond", Member: "ReadUnitsPerSecond", Kind: "scalar"},
+							{Property: "WriteUnitsPerSecond", Member: "WriteUnitsPerSecond", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{Property: "KeySchema", Member: "KeySchema", Kind: "list",
+				Fields: []Field{
+					{Property: "AttributeName", Member: "AttributeName", Kind: "scalar"},
+					{Property: "KeyType", Member: "KeyType", Kind: "scalar"},
+				},
+			},
+			{Property: "LocalSecondaryIndexes", Member: "LocalSecondaryIndexes", Kind: "list",
+				Fields: []Field{
+					{Property: "IndexName", Member: "IndexName", Kind: "scalar"},
+					{Property: "KeySchema", Member: "KeySchema", Kind: "list",
+						Fields: []Field{
+							{Property: "AttributeName", Member: "AttributeName", Kind: "scalar"},
+							{Property: "KeyType", Member: "KeyType", Kind: "scalar"},
+						},
+					},
+					{Property: "Projection", Member: "Projection", Kind: "structure",
+						Fields: []Field{
+							{Property: "NonKeyAttributes", Member: "NonKeyAttributes", Kind: "list"},
+							{Property: "ProjectionType", Member: "ProjectionType", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{Property: "OnDemandThroughput", Member: "OnDemandThroughput", Kind: "structure",
+				Fields: []Field{
+					{Property: "MaxReadRequestUnits", Member: "MaxReadRequestUnits", Kind: "scalar"},
+					{Property: "MaxWriteRequestUnits", Member: "MaxWriteRequestUnits", Kind: "scalar"},
+				},
+			},
+			{Property: "ProvisionedThroughput", Member: "ProvisionedThroughput", Kind: "structure", Unless: []Condition{{Field: Field{Property: "BillingMode"}, Values: []string{"PAY_PER_REQUEST"}}},
+				Fields: []Field{
+					{Property: "ReadCapacityUnits", Member: "ReadCapacityUnits", Kind: "scalar"},
+					{Property: "WriteCapacityUnits", Member: "WriteCapacityUnits", Kind: "scalar"},
+				},
+			},
+			{Property: "SSESpecification", Member: "SSEDescription", Kind: "structure",
+				Fields: []Field{
+					{Property: "KMSMasterKeyId", Member: "KMSMasterKeyArn", Kind: "scalar"},
+					{Property: "SSEEnabled", Member: "Status", Kind: "scalar", TrueWhen: []string{"ENABLED", "UPDATING"}},
+					{Property: "SSEType", Member: "SSEType", Kind: "scalar"},
+				},
+			},
+			{Property: "StreamArn", Member: "LatestStreamArn", Kind: "scalar"},
+			{Property: "StreamSpecification", Member: "StreamSpecification", Kind: "structure",
+				Fields: []Field{
+					{Property: "StreamViewType", Member: "StreamViewType", Kind: "scalar"},
+				},
+			},
+			{Property: "TableClass", Member: "TableClass", Kind: "scalar", Via: []Step{{Name: "TableClassSummary"}}},
+			{Property: "TableName", Member: "TableName", Kind: "scalar"},
+			{Property: "VectorIndexes", Member: "VectorIndexes", Kind: "list",
+				Fields: []Field{
+					{Property: "Dimensions", Member: "Dimensions", Kind: "scalar"},
+					{Property: "DistanceFunction", Member: "DistanceFunction", Kind: "scalar"},
+					{Property: "IndexName", Member: "IndexName", Kind: "scalar"},
+					{Property: "Projection", Member: "Projection", Kind: "structure",
+						Fields: []Field{
+							{Property: "NonKeyAttributes", Member: "NonKeyAttributes", Kind: "list"},
+							{Property: "ProjectionType", Member: "ProjectionType", Kind: "scalar"},
+						},
+					},
+					{Property: "SearchSchema", Member: "SearchSchema", Kind: "list",
+						Fields: []Field{
+							{Property: "AttributeName", Member: "AttributeName", Kind: "scalar"},
+							{Property: "SearchSchemaElementType", Member: "SearchSchemaElementType", Kind: "scalar"},
+						},
+					},
+					{Property: "VectorAttribute", Member: "VectorAttribute", Kind: "structure",
+						Fields: []Field{
+							{Property: "AttributeName", Member: "AttributeName", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{Property: "WarmThroughput", Member: "WarmThroughput", Kind: "structure",
+				Fields: []Field{
+					{Property: "ReadUnitsPerSecond", Member: "ReadUnitsPerSecond", Kind: "scalar"},
+					{Property: "WriteUnitsPerSecond", Member: "WriteUnitsPerSecond", Kind: "scalar"},
+				},
+			},
+		},
+		AbsentIDs: []string{"kraai-absent-probe-table"},
+		Capture: []Field{
+			{Property: "Arn", Member: "TableArn", Kind: "scalar"},
+			{Property: "StreamArn", Member: "LatestStreamArn", Kind: "scalar"},
+		},
+		Also: []Reader{
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.DescribeContinuousBackups",
+				Identifier: []Binding{
+					{Property: "TableName", Member: "TableName", Location: "body"},
+				},
+				Fields: []Field{
+					{Property: "PointInTimeRecoverySpecification", Member: "PointInTimeRecoveryDescription", Kind: "structure", Via: []Step{{Name: "ContinuousBackupsDescription"}},
+						Fields: []Field{
+							{Property: "PointInTimeRecoveryEnabled", Member: "PointInTimeRecoveryStatus", Kind: "scalar", TrueWhen: []string{"ENABLED"}},
+							{Property: "RecoveryPeriodInDays", Member: "RecoveryPeriodInDays", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.DescribeTimeToLive",
+				Identifier: []Binding{
+					{Property: "TableName", Member: "TableName", Location: "body"},
+				},
+				Fields: []Field{
+					{Property: "TimeToLiveSpecification", Member: "TimeToLiveDescription", Kind: "structure",
+						Fields: []Field{
+							{Property: "AttributeName", Member: "AttributeName", Kind: "scalar"},
+							{Property: "Enabled", Member: "TimeToLiveStatus", Kind: "scalar", TrueWhen: []string{"ENABLED", "ENABLING"}},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.DescribeContributorInsights",
+				Identifier: []Binding{
+					{Property: "TableName", Member: "TableName", Location: "body"},
+				},
+				Fields: []Field{
+					{Property: "ContributorInsightsSpecification", Member: ".", Kind: "structure",
+						Fields: []Field{
+							{Property: "Enabled", Member: "ContributorInsightsStatus", Kind: "scalar", TrueWhen: []string{"ENABLED", "ENABLING"}},
+							{Property: "Mode", Member: "ContributorInsightsMode", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.DescribeContributorInsights",
+				Identifier: []Binding{
+					{Property: "TableName", Member: "TableName", Location: "body"},
+				},
+				Input: []Binding{
+					Binding{Location: "body", Member: "IndexName", Value: "{IndexName}"},
+				},
+				Each: "GlobalSecondaryIndexes",
+				Fields: []Field{
+					{Property: "ContributorInsightsSpecification", Member: ".", Kind: "structure",
+						Fields: []Field{
+							{Property: "Enabled", Member: "ContributorInsightsStatus", Kind: "scalar", TrueWhen: []string{"ENABLED", "ENABLING"}},
+							{Property: "Mode", Member: "ContributorInsightsMode", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.DescribeKinesisStreamingDestination",
+				Identifier: []Binding{
+					{Property: "TableName", Member: "TableName", Location: "body"},
+				},
+				Fields: []Field{
+					{Property: "KinesisStreamSpecification", Member: ".", Kind: "structure", Via: []Step{{Name: "KinesisDataStreamDestinations", List: true, Where: "DestinationStatus", Equals: "ACTIVE"}},
+						Fields: []Field{
+							{Property: "ApproximateCreationDateTimePrecision", Member: "ApproximateCreationDateTimePrecision", Kind: "scalar"},
+							{Property: "StreamArn", Member: "StreamArn", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.ListTagsOfResource",
+				Input: []Binding{
+					Binding{Location: "body", Member: "ResourceArn", Value: "{Arn}"},
+				},
+				Fields: []Field{
+					{Property: "Tags", Member: "Tags", Kind: "list",
+						Fields: []Field{
+							{Property: "Key", Member: "Key", Kind: "scalar"},
+							{Property: "Value", Member: "Value", Kind: "scalar"},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.GetResourcePolicy",
+				Input: []Binding{
+					Binding{Location: "body", Member: "ResourceArn", Value: "{Arn}"},
+				},
+				AbsentErrors: []string{"PolicyNotFoundException"},
+				Fields: []Field{
+					{Property: "ResourcePolicy", Member: ".", Kind: "structure",
+						Fields: []Field{
+							{Property: "PolicyDocument", Member: "Policy", Kind: "scalar", Transform: "json"},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.GetResourcePolicy",
+				Input: []Binding{
+					Binding{Location: "body", Member: "ResourceArn", Value: "{StreamArn}"},
+				},
+				AbsentErrors: []string{"PolicyNotFoundException"},
+				Each:         "StreamSpecification",
+				Fields: []Field{
+					{Property: "ResourcePolicy", Member: ".", Kind: "structure",
+						Fields: []Field{
+							{Property: "PolicyDocument", Member: "Policy", Kind: "scalar", Transform: "json"},
+						},
+					},
+				},
+			},
+			{
+				Type:        "AWS::DynamoDB::Table",
+				Protocol:    "awsJson1_0",
+				SigningName: "dynamodb",
+				Host:        "dynamodb.{region}.amazonaws.com",
+				Target:      "DynamoDB_20120810.ListTagsOfResource",
+				Input: []Binding{
+					Binding{Location: "body", Member: "ResourceArn", Value: "{StreamArn}"},
+				},
+				Each: "StreamSpecification",
+				Fields: []Field{
+					{Property: "Tags", Member: "Tags", Kind: "list",
+						Fields: []Field{
+							{Property: "Key", Member: "Key", Kind: "scalar"},
+							{Property: "Value", Member: "Value", Kind: "scalar"},
+						},
+					},
+				},
+			},
+		},
+	},
 	"AWS::EC2::InternetGateway": {
 		Type:        "AWS::EC2::InternetGateway",
 		Protocol:    "ec2Query",

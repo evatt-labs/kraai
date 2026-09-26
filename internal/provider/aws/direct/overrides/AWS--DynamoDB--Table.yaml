@@ -1,0 +1,229 @@
+type: AWS::DynamoDB::Table
+read:
+  model: dynamodb/service/2012-08-10/dynamodb-2012-08-10.json
+  operation: DescribeTable
+  identifier:
+    TableName: TableName
+  response: Table
+  absentErrors: [ResourceNotFoundException]
+  # Tags and resource policies are read by ARN.
+  capture:
+    Arn: TableArn
+    StreamArn: LatestStreamArn
+properties:
+  Arn: TableArn
+  AttributeDefinitions:
+    member: AttributeDefinitions
+    properties:
+      AttributeName: AttributeName
+      AttributeType: AttributeType
+  BillingMode: BillingModeSummary.BillingMode
+  DeletionProtectionEnabled: DeletionProtectionEnabled
+  GlobalSecondaryIndexes:
+    member: GlobalSecondaryIndexes
+    properties:
+      IndexName: IndexName
+      KeySchema:
+        member: KeySchema
+        properties:
+          AttributeName: AttributeName
+          KeyType: KeyType
+      OnDemandThroughput:
+        member: OnDemandThroughput
+        properties:
+          MaxReadRequestUnits: MaxReadRequestUnits
+          MaxWriteRequestUnits: MaxWriteRequestUnits
+      Projection:
+        member: Projection
+        properties:
+          NonKeyAttributes: NonKeyAttributes
+          ProjectionType: ProjectionType
+      ProvisionedThroughput:
+        member: ProvisionedThroughput
+        # An on-demand table reports zero throughput, which Cloud Control
+        # omits.
+        unless:
+          BillingMode: [PAY_PER_REQUEST]
+        properties:
+          ReadCapacityUnits: ReadCapacityUnits
+          WriteCapacityUnits: WriteCapacityUnits
+      WarmThroughput:
+        member: WarmThroughput
+        properties:
+          ReadUnitsPerSecond: ReadUnitsPerSecond
+          WriteUnitsPerSecond: WriteUnitsPerSecond
+  LocalSecondaryIndexes:
+    member: LocalSecondaryIndexes
+    properties:
+      IndexName: IndexName
+      KeySchema:
+        member: KeySchema
+        properties:
+          AttributeName: AttributeName
+          KeyType: KeyType
+      Projection:
+        member: Projection
+        properties:
+          NonKeyAttributes: NonKeyAttributes
+          ProjectionType: ProjectionType
+  OnDemandThroughput:
+    member: OnDemandThroughput
+    properties:
+      MaxReadRequestUnits: MaxReadRequestUnits
+      MaxWriteRequestUnits: MaxWriteRequestUnits
+  ProvisionedThroughput:
+    member: ProvisionedThroughput
+    unless:
+      BillingMode: [PAY_PER_REQUEST]
+    properties:
+      ReadCapacityUnits: ReadCapacityUnits
+      WriteCapacityUnits: WriteCapacityUnits
+  SSESpecification:
+    member: SSEDescription
+    properties:
+      KMSMasterKeyId: KMSMasterKeyArn
+      SSEType: SSEType
+      SSEEnabled:
+        member: Status
+        trueWhen: [ENABLED, UPDATING]
+  StreamArn: LatestStreamArn
+  StreamSpecification:
+    member: StreamSpecification
+    properties:
+      StreamViewType: StreamViewType
+  TableClass: TableClassSummary.TableClass
+  TableName: TableName
+  VectorIndexes:
+    member: VectorIndexes
+    properties:
+      Dimensions: Dimensions
+      DistanceFunction: DistanceFunction
+      IndexName: IndexName
+      Projection:
+        member: Projection
+        properties:
+          NonKeyAttributes: NonKeyAttributes
+          ProjectionType: ProjectionType
+      SearchSchema:
+        member: SearchSchema
+        properties:
+          AttributeName: AttributeName
+          SearchSchemaElementType: SearchSchemaElementType
+      VectorAttribute:
+        member: VectorAttribute
+        properties:
+          AttributeName: AttributeName
+  WarmThroughput:
+    member: WarmThroughput
+    properties:
+      ReadUnitsPerSecond: ReadUnitsPerSecond
+      WriteUnitsPerSecond: WriteUnitsPerSecond
+  KeySchema:
+    member: KeySchema
+    properties:
+      AttributeName: AttributeName
+      KeyType: KeyType
+also:
+  - operation: DescribeContinuousBackups
+    identifier:
+      TableName: TableName
+    properties:
+      PointInTimeRecoverySpecification:
+        member: ContinuousBackupsDescription.PointInTimeRecoveryDescription
+        properties:
+          RecoveryPeriodInDays: RecoveryPeriodInDays
+          PointInTimeRecoveryEnabled:
+            member: PointInTimeRecoveryStatus
+            trueWhen: [ENABLED]
+  - operation: DescribeTimeToLive
+    identifier:
+      TableName: TableName
+    properties:
+      TimeToLiveSpecification:
+        member: TimeToLiveDescription
+        properties:
+          AttributeName: AttributeName
+          Enabled:
+            member: TimeToLiveStatus
+            trueWhen: [ENABLED, ENABLING]
+  # Contributor insights answer flat at the output's root.
+  - operation: DescribeContributorInsights
+    identifier:
+      TableName: TableName
+    properties:
+      ContributorInsightsSpecification:
+        member: "."
+        properties:
+          Enabled:
+            member: ContributorInsightsStatus
+            trueWhen: [ENABLED, ENABLING]
+          Mode: ContributorInsightsMode
+  - operation: DescribeContributorInsights
+    each: GlobalSecondaryIndexes
+    identifier:
+      TableName: TableName
+    input:
+      IndexName: "{IndexName}"
+    properties:
+      ContributorInsightsSpecification:
+        member: "."
+        properties:
+          Enabled:
+            member: ContributorInsightsStatus
+            trueWhen: [ENABLED, ENABLING]
+          Mode: ContributorInsightsMode
+  - operation: DescribeKinesisStreamingDestination
+    identifier:
+      TableName: TableName
+    properties:
+      KinesisStreamSpecification:
+        member: KinesisDataStreamDestinations[DestinationStatus=ACTIVE]
+        properties:
+          ApproximateCreationDateTimePrecision: ApproximateCreationDateTimePrecision
+          StreamArn: StreamArn
+  - operation: ListTagsOfResource
+    input:
+      ResourceArn: "{Arn}"
+    properties:
+      Tags:
+        member: Tags
+        properties:
+          Key: Key
+          Value: Value
+  # No policy is PolicyNotFoundException.
+  - operation: GetResourcePolicy
+    absentErrors: [PolicyNotFoundException]
+    input:
+      ResourceArn: "{Arn}"
+    properties:
+      ResourcePolicy:
+        member: "."
+        properties:
+          PolicyDocument:
+            member: Policy
+            transform: json
+  - operation: GetResourcePolicy
+    each: StreamSpecification
+    absentErrors: [PolicyNotFoundException]
+    input:
+      ResourceArn: "{StreamArn}"
+    properties:
+      ResourcePolicy:
+        member: "."
+        properties:
+          PolicyDocument:
+            member: Policy
+            transform: json
+  - operation: ListTagsOfResource
+    each: StreamSpecification
+    input:
+      ResourceArn: "{StreamArn}"
+    properties:
+      Tags:
+        member: Tags
+        properties:
+          Key: Key
+          Value: Value
+absentIds:
+  - kraai-absent-probe-table
+

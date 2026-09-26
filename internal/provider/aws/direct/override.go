@@ -44,6 +44,16 @@ type Call struct {
 	Response   string             `yaml:"response,omitempty"`
 	Input      map[string]any     `yaml:"input,omitempty"`
 	Properties map[string]Mapping `yaml:"properties"`
+	// AbsentErrors names the error codes that mean the call has nothing to
+	// read, such as no resource policy set, and leaves its properties
+	// absent rather than failing the read.
+	AbsentErrors []string `yaml:"absentErrors,omitempty"`
+	// Each makes the call once per element of a list property the read
+	// maps, or once for a structure property, its input's {Property}
+	// placeholders naming that element's properties, and maps its
+	// properties into the element: per-index settings a service reads one
+	// index at a time.
+	Each string `yaml:"each,omitempty"`
 	// When makes the call only for an instance whose read property has one
 	// of the values given, for an operation the service refuses on others,
 	// such as index policies on a log group of another class.
@@ -103,7 +113,9 @@ type List struct {
 // how each nested property maps. A member path whose last step follows a
 // map reads that key's value, such as Attributes.DelaySeconds; a member
 // of {Property} reads the identifier property's own value, for one the
-// response does not repeat. A top-level property may instead name a
+// response does not repeat; a member of "." is the enclosing structure
+// itself, for a property whose fields the service returns flat; and a path
+// ending in a selection is the selected element. A top-level property may instead name a
 // member of the operation's whole output with a leading "$.", for a value
 // the output carries beside the resource, such as its tags.
 type Mapping struct {
@@ -118,6 +130,14 @@ type Mapping struct {
 	// under the two property names given, key first, such as tags returned
 	// as a map for a schema's [{Key, Value}].
 	Entries []string `yaml:"entries,omitempty"`
+	// Unless leaves the property unread for an instance whose read property
+	// has one of the values given, for a value the service reports that
+	// Cloud Control does not, such as the zero throughput of an on-demand
+	// table.
+	Unless map[string][]string `yaml:"unless,omitempty"`
+	// TrueWhen reads a scalar as a boolean, true when it is one of the
+	// values given, such as a status of ENABLED for a schema's Enabled.
+	TrueWhen []string `yaml:"trueWhen,omitempty"`
 	// Keyed reads a list of structures as a map, keyed by the first member
 	// named and valued by the second, such as parameters returned as
 	// [{ParameterName, ParameterValue}] for a schema's object.
@@ -147,7 +167,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 {
+	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 {
 		return m.Member, nil
 	}
 	type plain Mapping

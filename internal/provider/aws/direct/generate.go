@@ -89,6 +89,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	if len(r.AbsentErrors) > 0 {
 		fmt.Fprintf(b, "AbsentErrors: %#v,\n", r.AbsentErrors)
 	}
+	if r.Each != "" {
+		fmt.Fprintf(b, "Each: %q,\n", r.Each)
+	}
 	if len(r.When) > 0 {
 		b.WriteString("When: []Condition{\n")
 		for _, c := range r.When {
@@ -253,6 +256,16 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	}
 	if f.Keyed != nil {
 		fmt.Fprintf(b, ", Keyed: %#v", f.Keyed)
+	}
+	if f.TrueWhen != nil {
+		fmt.Fprintf(b, ", TrueWhen: %#v", f.TrueWhen)
+	}
+	if len(f.Unless) > 0 {
+		b.WriteString(", Unless: []Condition{")
+		for _, c := range f.Unless {
+			fmt.Fprintf(b, "{Field: Field{Property: %q}, Values: %#v}, ", c.Field.Property, c.Values)
+		}
+		b.WriteString("}")
 	}
 	if len(f.Where) > 0 {
 		b.WriteString(", Where: []Match{")

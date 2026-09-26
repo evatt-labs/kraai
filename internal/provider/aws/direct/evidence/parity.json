@@ -614,6 +614,37 @@
       "override": "733c488041adcd39de3523626a63774cae148b1ab5662e9f40cfb425084cb372"
     },
     {
+      "type": "AWS::DynamoDB::Table",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-26",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "Arn",
+        "AttributeDefinitions",
+        "BillingMode",
+        "ContributorInsightsSpecification",
+        "DeletionProtectionEnabled",
+        "GlobalSecondaryIndexes",
+        "KeySchema",
+        "LocalSecondaryIndexes",
+        "OnDemandThroughput",
+        "PointInTimeRecoverySpecification",
+        "SSESpecification",
+        "StreamArn",
+        "StreamSpecification",
+        "TableClass",
+        "TableName",
+        "Tags",
+        "TimeToLiveSpecification",
+        "WarmThroughput"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "010f97486a548c053f3f23a07ad213f5b585ae92a3441198caf7707b6b123b96"
+    },
+    {
       "type": "AWS::EC2::InternetGateway",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-26",
