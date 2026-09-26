@@ -6,7 +6,14 @@
 // checked-in subset and lock.json. Needs the network and, for the schemas,
 // AWS credentials; everything downstream of it needs neither.
 //
-//	go run extract.go [-commit SHA] [-region us-east-1] [-models DIR] [-schemas DIR]
+// A schema already recorded in lock.json for a type an override still names
+// is kept as locked rather than re-fetched from the live CloudFormation
+// registry; -refresh re-fetches every schema regardless. Every write lands in
+// a temporary directory first and is swapped into place only once every
+// fetch has succeeded, so a failure partway through leaves schemas/, models/
+// and lock.json exactly as they were.
+//
+//	go run extract.go [-commit SHA] [-region us-east-1] [-models DIR] [-schemas DIR] [-refresh]
 package main
 
 import (
@@ -71,19 +78,21 @@ func main() {
 
 func run() error {
 	var (
-		commit = flag.String("commit", "", "api-models-aws commit to read; defaults to the one lock.json records")
-		region = flag.String("region", "us-east-1", "region whose CloudFormation registry to read")
-		local  = flag.String("models", "", "the models/ directory of an api-models-aws checkout at the commit, read instead of fetching")
-		cached = flag.String("schemas", "", "a directory of raw CloudFormation schemas, read instead of calling DescribeType; the one join_main read")
+		commit  = flag.String("commit", "", "api-models-aws commit to read; defaults to the one lock.json records")
+		region  = flag.String("region", "us-east-1", "region whose CloudFormation registry to read")
+		local   = flag.String("models", "", "the models/ directory of an api-models-aws checkout at the commit, read instead of fetching")
+		cached  = flag.String("schemas", "", "a directory of raw CloudFormation schemas, read instead of calling DescribeType; the one join_main read")
+		refresh = flag.Bool("refresh", false, "re-fetch every schema from the live CloudFormation registry, ignoring what lock.json already has for it")
 	)
 	flag.Parse()
-	if *commit == "" {
-		var old lock
-		if raw, err := os.ReadFile("lock.json"); err == nil {
-			if err := json.Unmarshal(raw, &old); err != nil {
-				return err
-			}
+
+	var old lock
+	if raw, err := os.ReadFile("lock.json"); err == nil {
+		if err := json.Unmarshal(raw, &old); err != nil {
+			return err
 		}
+	}
+	if *commit == "" {
 		if old.SmithyCommit == "" {
 			return fmt.Errorf("no -commit given and lock.json records none")
 		}
@@ -108,15 +117,27 @@ func run() error {
 		}
 	}
 
-	out := lock{SmithyCommit: *commit, Models: map[string]lockedFile{}, Schemas: map[string]lockedFile{}}
-	for _, dir := range []string{"models", "schemas"} {
-		if err := os.RemoveAll(dir); err != nil {
-			return err
-		}
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return err
-		}
+	// Every fetch below writes into tmpRoot. The real models/, schemas/ and
+	// lock.json are only touched once every fetch has succeeded, so a
+	// failure partway through never leaves them half-written. tmpRoot is
+	// always removed on return: on success its contents have already been
+	// moved out, and on failure it still holds the discarded partial output.
+	tmpRoot, err := os.MkdirTemp(".", ".extract-tmp-")
+	if err != nil {
+		return err
 	}
+	defer func() { _ = os.RemoveAll(tmpRoot) }()
+
+	tmpModels := filepath.Join(tmpRoot, "models")
+	tmpSchemas := filepath.Join(tmpRoot, "schemas")
+	if err := os.MkdirAll(tmpModels, 0o755); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(tmpSchemas, 0o755); err != nil {
+		return err
+	}
+
+	out := lock{SmithyCommit: *commit, Models: map[string]lockedFile{}, Schemas: map[string]lockedFile{}}
 
 	models := make([]string, 0, len(ops))
 	for m := range ops {
@@ -138,7 +159,7 @@ func run() error {
 			return fmt.Errorf("%s: %w", model, err)
 		}
 		file := "models/" + path.Base(model)
-		if err := os.WriteFile(file, subset, 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(tmpModels, path.Base(model)), subset, 0o644); err != nil {
 			return err
 		}
 		out.Models[model] = lockedFile{File: file, Source: sum(raw), Subset: sum(subset)}
@@ -146,20 +167,43 @@ func run() error {
 
 	ctx := context.Background()
 	var cf *cloudformation.Client
-	if *cached == "" {
-		cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(*region))
-		if err != nil {
-			return err
+	client := func() (*cloudformation.Client, error) {
+		if cf == nil {
+			cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(*region))
+			if err != nil {
+				return nil, err
+			}
+			cf = cloudformation.NewFromConfig(cfg)
 		}
-		cf = cloudformation.NewFromConfig(cfg)
+		return cf, nil
 	}
 	for _, o := range overrides {
+		base := strings.ReplaceAll(o.Type, "::", "--") + ".json"
+		file := "schemas/" + base
+		tmpFile := filepath.Join(tmpSchemas, base)
+
+		if !*refresh {
+			if entry, ok := old.Schemas[o.Type]; ok {
+				if existing, err := os.ReadFile(file); err == nil {
+					if err := os.WriteFile(tmpFile, existing, 0o644); err != nil {
+						return err
+					}
+					out.Schemas[o.Type] = entry
+					continue
+				}
+			}
+		}
+
 		var raw []byte
 		if *cached != "" {
-			if raw, err = os.ReadFile(filepath.Join(*cached, strings.ReplaceAll(o.Type, "::", "--")+".json")); err != nil {
+			if raw, err = os.ReadFile(filepath.Join(*cached, base)); err != nil {
 				return err
 			}
 		} else {
+			cf, err := client()
+			if err != nil {
+				return err
+			}
 			described, err := cf.DescribeType(ctx, &cloudformation.DescribeTypeInput{
 				Type: cftypes.RegistryTypeResource, TypeName: aws.String(o.Type),
 			})
@@ -175,8 +219,7 @@ func run() error {
 		if err != nil {
 			return fmt.Errorf("%s: %w", o.Type, err)
 		}
-		file := "schemas/" + strings.ReplaceAll(o.Type, "::", "--") + ".json"
-		if err := os.WriteFile(file, pretty, 0o644); err != nil {
+		if err := os.WriteFile(tmpFile, pretty, 0o644); err != nil {
 			return err
 		}
 		out.Schemas[o.Type] = lockedFile{File: file, Source: sum(raw), Subset: sum(pretty)}
@@ -186,7 +229,23 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile("lock.json", append(lockJSON, '\n'), 0o644)
+	if err := os.WriteFile(filepath.Join(tmpRoot, "lock.json"), append(lockJSON, '\n'), 0o644); err != nil {
+		return err
+	}
+
+	if err := os.RemoveAll("models"); err != nil {
+		return err
+	}
+	if err := os.Rename(tmpModels, "models"); err != nil {
+		return err
+	}
+	if err := os.RemoveAll("schemas"); err != nil {
+		return err
+	}
+	if err := os.Rename(tmpSchemas, "schemas"); err != nil {
+		return err
+	}
+	return os.Rename(filepath.Join(tmpRoot, "lock.json"), "lock.json")
 }
 
 func readOverrides() ([]override, error) {
