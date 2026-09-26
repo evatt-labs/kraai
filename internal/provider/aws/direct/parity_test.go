@@ -24,6 +24,7 @@ func TestCompare(t *testing.T) {
 		"a skipped property": {"AWS::XRay::Group", `{"GroupName":"Default","Tags":[]}`, `{"GroupName":"Default"}`, nil},
 		"a property only Cloud Control has": {"AWS::XRay::Group", `{"GroupName":"Default","FilterExpression":"x"}`, `{"GroupName":"Default"}`,
 			[]string{"FilterExpression"}},
+		"a property the schema does not declare": {"AWS::XRay::Group", `{"GroupName":"Default","Id":"x"}`, `{"GroupName":"Default"}`, nil},
 		"a property only the direct read has": {"AWS::XRay::Group", `{"GroupName":"Default"}`, `{"GroupName":"Default","FilterExpression":"x"}`,
 			[]string{"FilterExpression"}},
 		"a nested difference": {"AWS::CodeDeploy::DeploymentConfig",

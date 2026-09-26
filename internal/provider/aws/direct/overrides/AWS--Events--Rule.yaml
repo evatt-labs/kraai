@@ -1,0 +1,160 @@
+type: AWS::Events::Rule
+read:
+  model: eventbridge/service/2015-10-07/eventbridge-2015-10-07.json
+  operation: DescribeRule
+  absentErrors: [ResourceNotFoundException]
+  # The identifier is the rule's ARN, arn:...:rule/[bus/]name; DescribeRule
+  # takes the name and, for a custom bus, the bus.
+  input:
+    Name: "{Arn:arnName}"
+    EventBusName: "{Arn:arnParent}"
+properties:
+  Arn: Arn
+  Description: Description
+  EventBusName: EventBusName
+  EventPattern:
+    member: EventPattern
+    transform: json
+  Name: Name
+  RoleArn: RoleArn
+  RuleName: Name
+  ScheduleExpression: ScheduleExpression
+  State: State
+also:
+  - operation: ListTargetsByRule
+    input:
+      Rule: "{Arn:arnName}"
+      EventBusName: "{Arn:arnParent}"
+    properties:
+      Targets:
+        member: Targets
+        properties:
+          AppSyncParameters:
+            member: AppSyncParameters
+            properties:
+              GraphQLOperation: GraphQLOperation
+          Arn: Arn
+          BatchParameters:
+            member: BatchParameters
+            properties:
+              ArrayProperties:
+                member: ArrayProperties
+                properties:
+                  Size: Size
+              JobDefinition: JobDefinition
+              JobName: JobName
+              RetryStrategy:
+                member: RetryStrategy
+                properties:
+                  Attempts: Attempts
+          DeadLetterConfig:
+            member: DeadLetterConfig
+            properties:
+              Arn: Arn
+          EcsParameters:
+            member: EcsParameters
+            properties:
+              CapacityProviderStrategy:
+                member: CapacityProviderStrategy
+                properties:
+                  Base: base
+                  CapacityProvider: capacityProvider
+                  Weight: weight
+              EnableECSManagedTags: EnableECSManagedTags
+              EnableExecuteCommand: EnableExecuteCommand
+              Group: Group
+              LaunchType: LaunchType
+              NetworkConfiguration:
+                member: NetworkConfiguration
+                properties:
+                  AwsVpcConfiguration:
+                    member: awsvpcConfiguration
+                    properties:
+                      AssignPublicIp: AssignPublicIp
+                      SecurityGroups: SecurityGroups
+                      Subnets: Subnets
+              PlacementConstraints:
+                member: PlacementConstraints
+                properties:
+                  Expression: expression
+                  Type: type
+              PlacementStrategies:
+                member: PlacementStrategy
+                properties:
+                  Field: field
+                  Type: type
+              PlatformVersion: PlatformVersion
+              PropagateTags: PropagateTags
+              ReferenceId: ReferenceId
+              TagList:
+                member: Tags
+                properties:
+                  Key: Key
+                  Value: Value
+              TaskCount: TaskCount
+              TaskDefinitionArn: TaskDefinitionArn
+          HttpParameters:
+            member: HttpParameters
+            properties:
+              HeaderParameters: HeaderParameters
+              PathParameterValues: PathParameterValues
+              QueryStringParameters: QueryStringParameters
+          Id: Id
+          Input: Input
+          InputPath: InputPath
+          InputTransformer:
+            member: InputTransformer
+            properties:
+              InputPathsMap: InputPathsMap
+              InputTemplate: InputTemplate
+          KinesisParameters:
+            member: KinesisParameters
+            properties:
+              PartitionKeyPath: PartitionKeyPath
+          RedshiftDataParameters:
+            member: RedshiftDataParameters
+            properties:
+              Database: Database
+              DbUser: DbUser
+              SecretManagerArn: SecretManagerArn
+              Sql: Sql
+              Sqls: Sqls
+              StatementName: StatementName
+              WithEvent: WithEvent
+          RetryPolicy:
+            member: RetryPolicy
+            properties:
+              MaximumEventAgeInSeconds: MaximumEventAgeInSeconds
+              MaximumRetryAttempts: MaximumRetryAttempts
+          RoleArn: RoleArn
+          RunCommandParameters:
+            member: RunCommandParameters
+            properties:
+              RunCommandTargets:
+                member: RunCommandTargets
+                properties:
+                  Key: Key
+                  Values: Values
+          SageMakerPipelineParameters:
+            member: SageMakerPipelineParameters
+            properties:
+              PipelineParameterList:
+                member: PipelineParameterList
+                properties:
+                  Name: Name
+                  Value: Value
+          SqsParameters:
+            member: SqsParameters
+            properties:
+              MessageGroupId: MessageGroupId
+  - operation: ListTagsForResource
+    identifier:
+      Arn: ResourceARN
+    properties:
+      Tags:
+        member: Tags
+        properties:
+          Key: Key
+          Value: Value
+absentIds:
+  - arn:aws:events:{region}:{account}:rule/kraai-absent-probe

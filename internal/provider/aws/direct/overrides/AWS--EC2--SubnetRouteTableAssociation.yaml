@@ -1,0 +1,20 @@
+type: AWS::EC2::SubnetRouteTableAssociation
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeRouteTables
+  # The association is found through the route table holding it.
+  input:
+    Filters:
+      - Name: association.route-table-association-id
+        Values: ["{Id}"]
+  response: RouteTables[]
+  # A route table's main association belongs to no subnet; Cloud Control
+  # reads it as absent.
+  absent:
+    Associations[RouteTableAssociationId={Id}].Main: ["true"]
+properties:
+  Id: Associations[RouteTableAssociationId={Id}].RouteTableAssociationId
+  RouteTableId: RouteTableId
+  SubnetId: Associations[RouteTableAssociationId={Id}].SubnetId
+absentIds:
+  - rtbassoc-0a1b2c3d4e5f60718

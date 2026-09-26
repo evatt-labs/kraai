@@ -204,7 +204,7 @@
     "eventbridge/service/2015-10-07/eventbridge-2015-10-07.json": {
       "file": "models/eventbridge-2015-10-07.json",
       "sourceSha256": "47054e3cf1572673a5dc9931c0a6cddc1fc29b9338d9b124bc4ad8a0ec3bb2e7",
-      "subsetSha256": "ff75cc707fe41dac7e22e43ba30f5a4eae4feab4ca8d4031eb277f8f1978858a"
+      "subsetSha256": "a8b11b433d219bf96465bbf3ab19a885afe8ddd71f4662483578c7b1da3a684a"
     },
     "forecast/service/2018-06-26/forecast-2018-06-26.json": {
       "file": "models/forecast-2018-06-26.json",
@@ -933,6 +933,11 @@
       "sourceSha256": "eb72b504512cd3eb92948347491c5afbe17397779e365286998b09c5ef880c28",
       "subsetSha256": "939c211ef04d2839cc8ec24912e0a914356ebe062f1566babcd852b0a1f8fc41"
     },
+    "AWS::EC2::SubnetRouteTableAssociation": {
+      "file": "schemas/AWS--EC2--SubnetRouteTableAssociation.json",
+      "sourceSha256": "2f0731efbb061fd065fadb24b1e0aae2a9ea74469d623008fbe243e55b3249dc",
+      "subsetSha256": "da4f31102af53b4f9a1657df5e9e0d5f71dba3fdfcfec7ff19f79fa995baaa2b"
+    },
     "AWS::EC2::VPC": {
       "file": "schemas/AWS--EC2--VPC.json",
       "sourceSha256": "2168d5fa501c524d2663184a94de4bb0872a6ff62c038753024f56ebdcdd48b4",
@@ -997,6 +1002,11 @@
       "file": "schemas/AWS--Events--Endpoint.json",
       "sourceSha256": "028ffaffc1dd66df7c3e48f954fbda0914ac732edd882e65f00daa7aca32ccc3",
       "subsetSha256": "99fd65e93747fb1caa02530dae12bbc17495a7ede71033a4bcc4bd21d4ba59a6"
+    },
+    "AWS::Events::Rule": {
+      "file": "schemas/AWS--Events--Rule.json",
+      "sourceSha256": "25edd9d0c51b187ccae36742f1e2f677a06bc37b64a4095f5bfa1f21228df9d6",
+      "subsetSha256": "d7700b7ce19fde3f9be60821057d4934e9c5e43360a2943cb2ec204944c1b2b8"
     },
     "AWS::Forecast::DatasetGroup": {
       "file": "schemas/AWS--Forecast--DatasetGroup.json",

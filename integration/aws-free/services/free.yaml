@@ -28,6 +28,14 @@ services:
       - binding: RT
         type: AWS::EC2::RouteTable
         properties: { VpcId: "${VPC.VpcId}", Tags: [{ Key: Name, Value: kraai-free-rt }] }
+      - binding: RT_A
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { SubnetId: "${SUBNET_A.SubnetId}", RouteTableId: "${RT.RouteTableId}" }
+        match: [SubnetId]
+      - binding: RT_B
+        type: AWS::EC2::SubnetRouteTableAssociation
+        properties: { SubnetId: "${SUBNET_B.SubnetId}", RouteTableId: "${RT.RouteTableId}" }
+        match: [SubnetId]
       - binding: PEER
         type: AWS::EC2::SecurityGroup
         properties: { GroupDescription: kraai integration peer, VpcId: "${VPC.VpcId}" }
@@ -144,6 +152,28 @@ services:
           Name: kraai-integration-rule
           State: DISABLED
           ScheduleExpression: rate(1 day)
+      # A rule on a custom bus has the bus in its ARN. Nothing is published
+      # to the bus, so the queue target is never invoked.
+      - binding: BUS
+        type: AWS::Events::EventBus
+        properties: {}
+      - binding: BUS_RULE
+        type: AWS::Events::Rule
+        properties:
+          Name: kraai-integration-bus-rule
+          EventBusName: "${BUS.Name}"
+          Description: kraai integration
+          State: ENABLED
+          EventPattern: { source: [kraai.integration], detail-type: [check] }
+          Tags: [{ Key: team, Value: kraai }]
+          Targets:
+            - Id: queue
+              Arn: "${QUEUE.Arn}"
+              RetryPolicy: { MaximumRetryAttempts: 2, MaximumEventAgeInSeconds: 3600 }
+              DeadLetterConfig: { Arn: "${DLQ.Arn}" }
+              InputTransformer:
+                InputPathsMap: { kind: $.detail-type }
+                InputTemplate: '{"kind": <kind>}'
       - binding: TASK
         type: AWS::ECS::TaskDefinition
         properties:

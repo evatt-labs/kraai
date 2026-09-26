@@ -49,7 +49,16 @@ func Compare(typeName string, viaCloudControl, direct map[string]any) ([]Differe
 	if err != nil {
 		return nil, err
 	}
-	a, err := canonicalValue(viaCloudControl)
+	// A property the schema does not declare, such as an Id some handlers
+	// return beside a rule's Arn, cannot be referenced or planned against;
+	// only what the schema declares is compared.
+	declared := make(map[string]any, len(viaCloudControl))
+	for k, v := range viaCloudControl {
+		if _, ok := shape.props[k]; ok {
+			declared[k] = v
+		}
+	}
+	a, err := canonicalValue(declared)
 	if err != nil {
 		return nil, err
 	}

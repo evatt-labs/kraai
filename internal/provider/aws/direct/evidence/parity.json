@@ -692,6 +692,23 @@
       "override": "67a438cdf632932a77941bb00c7120807bc6d645f9e7ad54ba2f246bb4a7e3e4"
     },
     {
+      "type": "AWS::EC2::SubnetRouteTableAssociation",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-26",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "Id",
+        "RouteTableId",
+        "SubnetId"
+      ],
+      "note": "Cloud Control could not read some listed instances",
+      "absence": "parity",
+      "probed": 1,
+      "override": "4f44afb75ca4507952adc13292820431ba7d199cb95862a07f9cb50fa3efe818"
+    },
+    {
       "type": "AWS::EC2::VPC",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-26",
@@ -894,6 +911,30 @@
       "instances": 0,
       "compared": [],
       "override": "3d94745273e59a5e25e94703f31157fe77316fe920f54b627318e294d1b394dd"
+    },
+    {
+      "type": "AWS::Events::Rule",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-09-26",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "Arn",
+        "Description",
+        "EventBusName",
+        "EventPattern",
+        "Id",
+        "Name",
+        "RuleName",
+        "ScheduleExpression",
+        "State",
+        "Tags",
+        "Targets"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "b92fb921772706605a49953c9b894f3d1b2834a3483619b08115776347b51a0f"
     },
     {
       "type": "AWS::Forecast::DatasetGroup",

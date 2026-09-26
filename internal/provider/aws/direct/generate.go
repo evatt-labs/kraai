@@ -163,8 +163,8 @@ func lister(b *bytes.Buffer, name string, l *Lister) {
 }
 
 func binding(b *bytes.Buffer, in Binding) {
-	fmt.Fprintf(b, "Binding{Member: %q, Location: %q", in.Member, in.Location)
-	for _, f := range []struct{ name, value string }{{"Property", in.Property}, {"Name", in.Name}, {"JSONName", in.JSONName}, {"Value", in.Value}} {
+	fmt.Fprintf(b, "Binding{Location: %q", in.Location)
+	for _, f := range []struct{ name, value string }{{"Member", in.Member}, {"Property", in.Property}, {"Name", in.Name}, {"JSONName", in.JSONName}, {"Value", in.Value}} {
 		if f.value != "" {
 			fmt.Fprintf(b, ", %s: %q", f.name, f.value)
 		}
