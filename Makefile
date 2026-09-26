@@ -14,7 +14,7 @@ COVERPROFILE := coverage.out
 # with JOBS=n.
 JOBS ?= 4
 
-.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract direct-parity observability-up observability-down
+.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract direct-parity declcheck observability-up observability-down
 
 check: build vet test coverage-floor lint fmt-check
 
@@ -123,3 +123,10 @@ observability-up:
 
 observability-down:
 	$(CONTAINER) rm -f kraai-otel-lgtm
+
+# Reports whether the working tree only moved declarations relative to BASE,
+# by default where the branch left main: every top-level declaration, doc
+# comment included, must be unchanged.
+BASE ?= $(shell git merge-base HEAD origin/main)
+declcheck:
+	go run ./dev/declcheck -base $(BASE)
