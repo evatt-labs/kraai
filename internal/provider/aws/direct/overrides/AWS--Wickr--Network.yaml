@@ -3,8 +3,9 @@ type: AWS::Wickr::Network
 read:
   model: wickr/service/2024-02-01/wickr-2024-02-01.json
   operation: GetNetwork
-  identifier:
-    NetworkArn: networkId
+  # The networkId member refuses an ARN; arn:...:network/id.
+  input:
+    networkId: "{NetworkArn:arnName}"
 properties:
   AccessLevel: accessLevel
   AwsAccountId: awsAccountId

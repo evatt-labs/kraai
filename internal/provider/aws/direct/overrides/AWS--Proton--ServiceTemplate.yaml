@@ -3,8 +3,9 @@ type: AWS::Proton::ServiceTemplate
 read:
   model: proton/service/2020-07-20/proton-2020-07-20.json
   operation: GetServiceTemplate
-  identifier:
-    Arn: name
+  # The name member refuses an ARN; arn:...:service-template/name.
+  input:
+    name: "{Arn:arnName}"
   response: serviceTemplate
 properties:
   Arn: arn

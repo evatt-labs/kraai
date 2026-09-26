@@ -724,7 +724,10 @@ var readers = map[string]Reader{
 		Method:      "POST",
 		URI:         "/identities/GetApiKeyCredentialProvider",
 		Identifier: []Binding{
-			{Property: "CredentialProviderArn", Member: "name", Location: "body"},
+			{Property: "CredentialProviderArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "name", Value: "{CredentialProviderArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "ApiKeySecretArn", Member: "apiKeySecretArn", Kind: "structure",
@@ -770,7 +773,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/policy-engines/{policyEngineId}",
 		Identifier: []Binding{
-			{Property: "PolicyEngineArn", Member: "policyEngineId", Location: "label"},
+			{Property: "PolicyEngineArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "policyEngineId", Value: "{PolicyEngineArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
@@ -1017,7 +1023,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/voice-connectors/{VoiceConnectorId}",
 		Identifier: []Binding{
-			{Property: "VoiceConnectorArn", Member: "VoiceConnectorId", Location: "label"},
+			{Property: "VoiceConnectorArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "VoiceConnectorId", Value: "{VoiceConnectorArn:arnName}"},
 		},
 		Response: []Step{{Name: "VoiceConnector"}},
 		Fields: []Field{
@@ -1692,7 +1701,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/v1/data-sets/{DataSetId}",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "DataSetId", Location: "label"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "DataSetId", Value: "{Arn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
@@ -4140,7 +4152,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/domain/{domainId}",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "domainId", Location: "label"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "domainId", Value: "{Arn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
@@ -6998,7 +7013,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/channelGroup/{ChannelGroupName}",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "ChannelGroupName", Location: "label"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "ChannelGroupName", Value: "{Arn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Arn", Member: "Arn", Kind: "scalar"},
@@ -7240,7 +7258,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/workflow-definitions/{workflowDefinitionName}",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "workflowDefinitionName", Location: "label"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "workflowDefinitionName", Value: "{Arn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
@@ -7395,7 +7416,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/runCache/{id}",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "id", Location: "label"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "id", Value: "{Arn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
@@ -7553,7 +7577,10 @@ var readers = map[string]Reader{
 		Host:        "pcs.{region}.amazonaws.com",
 		Target:      "AWSParallelComputingService.GetCluster",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "clusterIdentifier", Location: "body"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "clusterIdentifier", Value: "{Arn:arnName}"},
 		},
 		Response: []Step{{Name: "cluster"}},
 		Fields: []Field{
@@ -7979,7 +8006,10 @@ var readers = map[string]Reader{
 		Host:        "proton.{region}.amazonaws.com",
 		Target:      "AwsProton20200720.GetEnvironmentAccountConnection",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "id", Location: "body"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "id", Value: "{Arn:arnName}"},
 		},
 		Response: []Step{{Name: "environmentAccountConnection"}},
 		Fields: []Field{
@@ -8001,7 +8031,10 @@ var readers = map[string]Reader{
 		Host:        "proton.{region}.amazonaws.com",
 		Target:      "AwsProton20200720.GetEnvironmentTemplate",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "name", Location: "body"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "name", Value: "{Arn:arnName}"},
 		},
 		Response: []Step{{Name: "environmentTemplate"}},
 		Fields: []Field{
@@ -8020,7 +8053,10 @@ var readers = map[string]Reader{
 		Host:        "proton.{region}.amazonaws.com",
 		Target:      "AwsProton20200720.GetServiceTemplate",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "name", Location: "body"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "name", Value: "{Arn:arnName}"},
 		},
 		Response: []Step{{Name: "serviceTemplate"}},
 		Fields: []Field{
@@ -9027,7 +9063,10 @@ var readers = map[string]Reader{
 		Host:        "api.sagemaker.{region}.amazonaws.com",
 		Target:      "SageMaker.DescribeClusterSchedulerConfig",
 		Identifier: []Binding{
-			{Property: "ClusterSchedulerConfigArn", Member: "ClusterSchedulerConfigId", Location: "body"},
+			{Property: "ClusterSchedulerConfigArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "ClusterSchedulerConfigId", Value: "{ClusterSchedulerConfigArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "ClusterArn", Member: "ClusterArn", Kind: "scalar"},
@@ -9197,7 +9236,10 @@ var readers = map[string]Reader{
 		Host:        "api.sagemaker.{region}.amazonaws.com",
 		Target:      "SageMaker.DescribeHumanTaskUi",
 		Identifier: []Binding{
-			{Property: "HumanTaskUiArn", Member: "HumanTaskUiName", Location: "body"},
+			{Property: "HumanTaskUiArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "HumanTaskUiName", Value: "{HumanTaskUiArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp"},
@@ -9232,7 +9274,10 @@ var readers = map[string]Reader{
 		Host:        "api.sagemaker.{region}.amazonaws.com",
 		Target:      "SageMaker.DescribeModel",
 		Identifier: []Binding{
-			{Property: "ModelArn", Member: "ModelName", Location: "body"},
+			{Property: "ModelArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "ModelName", Value: "{ModelArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Containers", Member: "Containers", Kind: "list",
@@ -9715,7 +9760,10 @@ var readers = map[string]Reader{
 		Host:        "api.sagemaker.{region}.amazonaws.com",
 		Target:      "SageMaker.DescribeNotebookInstanceLifecycleConfig",
 		Identifier: []Binding{
-			{Property: "NotebookInstanceLifecycleConfigArn", Member: "NotebookInstanceLifecycleConfigName", Location: "body"},
+			{Property: "NotebookInstanceLifecycleConfigArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "NotebookInstanceLifecycleConfigName", Value: "{NotebookInstanceLifecycleConfigArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "NotebookInstanceLifecycleConfigArn", Member: "NotebookInstanceLifecycleConfigArn", Kind: "scalar"},
@@ -9739,7 +9787,10 @@ var readers = map[string]Reader{
 		Host:        "api.sagemaker.{region}.amazonaws.com",
 		Target:      "SageMaker.DescribeProcessingJob",
 		Identifier: []Binding{
-			{Property: "ProcessingJobArn", Member: "ProcessingJobName", Location: "body"},
+			{Property: "ProcessingJobArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "ProcessingJobName", Value: "{ProcessingJobArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "AppSpecification", Member: "AppSpecification", Kind: "structure",
@@ -9880,7 +9931,10 @@ var readers = map[string]Reader{
 		Host:        "api.sagemaker.{region}.amazonaws.com",
 		Target:      "SageMaker.DescribeProject",
 		Identifier: []Binding{
-			{Property: "ProjectArn", Member: "ProjectName", Location: "body"},
+			{Property: "ProjectArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "ProjectName", Value: "{ProjectArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp"},
@@ -10238,7 +10292,10 @@ var readers = map[string]Reader{
 		Host:        "shield.{region}.amazonaws.com",
 		Target:      "AWSShield_20160616.DescribeProtectionGroup",
 		Identifier: []Binding{
-			{Property: "ProtectionGroupArn", Member: "ProtectionGroupId", Location: "body"},
+			{Property: "ProtectionGroupArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "ProtectionGroupId", Value: "{ProtectionGroupArn:arnName}"},
 		},
 		Response: []Step{{Name: "ProtectionGroup"}},
 		Fields: []Field{
@@ -10258,7 +10315,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/signing-profiles/{profileName}",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "profileName", Location: "label"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "profileName", Value: "{Arn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "Arn", Member: "arn", Kind: "scalar"},
@@ -10435,7 +10495,10 @@ var readers = map[string]Reader{
 		Host:        "transfer.{region}.amazonaws.com",
 		Target:      "TransferService.DescribeServer",
 		Identifier: []Binding{
-			{Property: "Arn", Member: "ServerId", Location: "body"},
+			{Property: "Arn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "body", Member: "ServerId", Value: "{Arn:arnName}"},
 		},
 		Response: []Step{{Name: "Server"}},
 		Fields: []Field{
@@ -10984,7 +11047,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/workloads/{WorkloadId}",
 		Identifier: []Binding{
-			{Property: "WorkloadArn", Member: "WorkloadId", Location: "label"},
+			{Property: "WorkloadArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "WorkloadId", Value: "{WorkloadArn:arnName}"},
 		},
 		Response: []Step{{Name: "Workload"}},
 		Fields: []Field{
@@ -11020,7 +11086,10 @@ var readers = map[string]Reader{
 		Method:      "GET",
 		URI:         "/networks/{networkId}",
 		Identifier: []Binding{
-			{Property: "NetworkArn", Member: "networkId", Location: "label"},
+			{Property: "NetworkArn", Member: "", Location: "placeholder"},
+		},
+		Input: []Binding{
+			Binding{Location: "label", Member: "networkId", Value: "{NetworkArn:arnName}"},
 		},
 		Fields: []Field{
 			{Property: "AccessLevel", Member: "accessLevel", Kind: "scalar"},

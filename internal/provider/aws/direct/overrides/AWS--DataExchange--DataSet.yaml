@@ -3,8 +3,9 @@ type: AWS::DataExchange::DataSet
 read:
   model: dataexchange/service/2017-07-25/dataexchange-2017-07-25.json
   operation: GetDataSet
-  identifier:
-    Arn: DataSetId
+  # The DataSetId member refuses an ARN; arn:...:data-sets/id.
+  input:
+    DataSetId: "{Arn:arnName}"
 properties:
   Arn: Arn
   AssetType: AssetType

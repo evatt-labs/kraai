@@ -3,8 +3,9 @@ type: AWS::Signer::SigningProfile
 read:
   model: signer/service/2017-08-25/signer-2017-08-25.json
   operation: GetSigningProfile
-  identifier:
-    Arn: profileName
+  # The profileName member refuses an ARN; arn:...:/signing-profiles/name.
+  input:
+    profileName: "{Arn:arnName}"
 properties:
   Arn: arn
   PlatformId: platformId

@@ -3,8 +3,9 @@ type: AWS::SageMaker::Project
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeProject
-  identifier:
-    ProjectArn: ProjectName
+  # The ProjectName member refuses an ARN; arn:...:project/name.
+  input:
+    ProjectName: "{ProjectArn:arnName}"
 properties:
   CreationTime: CreationTime
   ProjectArn: ProjectArn

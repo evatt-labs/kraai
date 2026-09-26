@@ -3,8 +3,9 @@ type: AWS::HealthAgent::Domain
 read:
   model: connecthealth/service/2025-01-29/connecthealth-2025-01-29.json
   operation: GetDomain
-  identifier:
-    Arn: domainId
+  # The domainId member refuses an ARN; arn:...:domain/id.
+  input:
+    domainId: "{Arn:arnName}"
 properties:
   Arn: arn
   CreatedAt: createdAt

@@ -3,8 +3,9 @@ type: AWS::NovaAct::WorkflowDefinition
 read:
   model: nova-act/service/2025-08-22/nova-act-2025-08-22.json
   operation: GetWorkflowDefinition
-  identifier:
-    Arn: workflowDefinitionName
+  # The workflowDefinitionName member refuses an ARN; arn:...:workflow-definition/name.
+  input:
+    workflowDefinitionName: "{Arn:arnName}"
 properties:
   Arn: arn
   CreatedAt: createdAt

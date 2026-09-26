@@ -3,8 +3,9 @@ type: AWS::SageMaker::NotebookInstanceLifecycleConfig
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeNotebookInstanceLifecycleConfig
-  identifier:
-    NotebookInstanceLifecycleConfigArn: NotebookInstanceLifecycleConfigName
+  # The NotebookInstanceLifecycleConfigName member refuses an ARN; arn:...:notebook-instance-lifecycle-config/name.
+  input:
+    NotebookInstanceLifecycleConfigName: "{NotebookInstanceLifecycleConfigArn:arnName}"
 properties:
   NotebookInstanceLifecycleConfigArn: NotebookInstanceLifecycleConfigArn
   NotebookInstanceLifecycleConfigName: NotebookInstanceLifecycleConfigName

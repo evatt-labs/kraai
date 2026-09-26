@@ -3,8 +3,9 @@ type: AWS::WellArchitected::Workload
 read:
   model: wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json
   operation: GetWorkload
-  identifier:
-    WorkloadArn: WorkloadId
+  # The WorkloadId member refuses an ARN; arn:...:workload/id.
+  input:
+    WorkloadId: "{WorkloadArn:arnName}"
   response: Workload
 properties:
   AccountIds: AccountIds
