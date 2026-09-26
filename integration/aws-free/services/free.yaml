@@ -116,7 +116,6 @@ services:
       - binding: FIFO
         type: AWS::SQS::Queue
         properties:
-          QueueName: kraai-integration-free.fifo
           FifoQueue: true
           ContentBasedDeduplication: true
           DeduplicationScope: messageGroup

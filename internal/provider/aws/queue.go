@@ -2,12 +2,57 @@ package aws
 
 import (
 	"context"
+	"strings"
 
+	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
 // TypeSQSQueue is AWS::SQS::Queue's Cloud Control TypeName.
 const TypeSQSQueue = "AWS::SQS::Queue"
+
+// sqsQueueNameLimit is SQS's own queue name length limit, which the
+// CloudFormation schema's bare `{"type": "string"}` for QueueName does not
+// declare: fifoQueueSuffix must fit inside it along with the rest of the
+// name.
+const sqsQueueNameLimit = 80
+
+// fifoQueueSuffix is required at the end of every FIFO queue's name; SQS
+// rejects a FifoQueue: true create whose name does not end in it.
+const fifoQueueSuffix = ".fifo"
+
+// deriveFifoQueueName is a native AWS::SQS::Queue's per-type naming rule.
+// kraai's derived name never ends in .fifo, so a FIFO queue left to it would
+// be rejected at create; this fills QueueName from the derived name plus
+// the suffix, truncating to leave the suffix room within sqsQueueNameLimit.
+//
+// Only when the entry leaves QueueName unset: an explicit QueueName that
+// does not end in .fifo is refused rather than silently rewritten, since the
+// entry asked for that exact name.
+func deriveFifoQueueName(spec resource.Spec, properties map[string]any) error {
+	fifo, _ := properties["FifoQueue"].(bool)
+	if !fifo {
+		return nil
+	}
+	if existing, set := properties["QueueName"]; set {
+		name, ok := existing.(string)
+		if !ok || !strings.HasSuffix(name, fifoQueueSuffix) {
+			return kerrors.Validation(
+				"%s: FifoQueue is true, so QueueName must end in %q", TypeSQSQueue, fifoQueueSuffix)
+		}
+		return nil
+	}
+	base := spec.Name
+	// A planner-derived name is already at most 63 bytes (internal/naming's
+	// own S3/R2 bound), so this branch does not fire from a manifest today;
+	// kept because nothing here guarantees that bound stays below this
+	// type's own limit forever.
+	if len(base)+len(fifoQueueSuffix) > sqsQueueNameLimit {
+		base = base[:sqsQueueNameLimit-len(fifoQueueSuffix)]
+	}
+	properties["QueueName"] = base + fifoQueueSuffix
+	return nil
+}
 
 // newQueueResource provisions one standard SQS queue per `queues:` binding.
 //

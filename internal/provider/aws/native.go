@@ -282,6 +282,11 @@ func (n *nativeResource) translateWith(spec resource.Spec, strict bool) (resourc
 		return resource.Spec{}, resolution{}, err
 	}
 	properties = res.properties
+	if n.facts.TypeName == TypeSQSQueue {
+		if err := deriveFifoQueueName(spec, properties); err != nil {
+			return resource.Spec{}, resolution{}, err
+		}
+	}
 	if _, authored := properties[n.facts.TagProperty]; authored && n.stampTag != nil {
 		n.stampTag(properties, spec.Name)
 	}
@@ -340,6 +345,11 @@ func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
 		return err
 	}
 	properties = res.properties
+	if n.facts.TypeName == TypeSQSQueue {
+		if err := deriveFifoQueueName(spec, properties); err != nil {
+			return err
+		}
+	}
 	if p := n.facts.IdentityProperty; n.lookup == resource.LookupByName && p != "" {
 		if _, set := properties[p]; set {
 			return kerrors.Validation(
