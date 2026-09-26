@@ -580,3 +580,22 @@ func TestAnUnlistedTypeNeedsADirectList(t *testing.T) {
 		t.Fatalf("the same facts under another type were refused: %v", err)
 	}
 }
+
+// A table's attribute definitions come back sorted by name, which its
+// schema does not say: a manifest listing them otherwise is unchanged, and
+// a changed definition is still a change.
+func TestNativeDiffTakesSortedAttributeDefinitions(t *testing.T) {
+	table := newFixtureNative(t, "AWS::DynamoDB::Table", &fakeClient{})
+	attr := func(name, kind string) any { return map[string]any{"AttributeName": name, "AttributeType": kind} }
+	live := &resource.State{Attributes: map[string]any{
+		"AttributeDefinitions": []any{attr("gsi", "S"), attr("pk", "S"), attr("sk", "N")},
+	}}
+	written := nativeSpec("t", map[string]any{"AttributeDefinitions": []any{attr("pk", "S"), attr("sk", "N"), attr("gsi", "S")}})
+	if got, err := table.Diff(written, live); err != nil || got != resource.Same {
+		t.Fatalf("Diff of definitions in another order = %v, %v; want Same", got, err)
+	}
+	changed := nativeSpec("t", map[string]any{"AttributeDefinitions": []any{attr("pk", "S"), attr("sk", "S"), attr("gsi", "S")}})
+	if got, err := table.Diff(changed, live); err != nil || got == resource.Same {
+		t.Fatalf("Diff of a changed definition = %v, %v; want a change", got, err)
+	}
+}
