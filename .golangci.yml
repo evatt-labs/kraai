@@ -170,6 +170,13 @@ linters:
       - path: ^internal/env/
         linters:
           - forbidigo
+      # Developer tools run by hand against the developer's own tree, as the
+      # ignore-tagged generators are: they print, exit, and open the paths
+      # they are given, which is the whole job.
+      - path: ^dev/
+        linters:
+          - forbidigo
+          - gosec
       # unparam is real signal in production code — a parameter nothing
       # calls with more than one value there usually means the parameter
       # should not exist. In tests it is mostly noise: a fixture/helper

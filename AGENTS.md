@@ -135,6 +135,12 @@ gofmt -l .                     # must be empty
 `make plan-examples` runs `kraai plan` read-only against every manifest
 under `examples/`.
 
+Hand-written source files stay under about 500 lines, tests under about
+700. Split an oversized file with `dev/splitdecls`, which moves declarations
+byte for byte, and prove the split with `make declcheck`, which must report
+0 differences against the base. A split is a pure move; any edit it seems
+to need goes in a separate change.
+
 Two of these rules are enforced by hooks in `.claude/settings.json` when
 working through Claude Code: `gofmt -w` runs after every edit, and any
 `kraai apply`, `kraai destroy` or mutating `aws` CLI verb is denied unless the
