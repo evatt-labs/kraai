@@ -3,10 +3,13 @@ package aws
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"reflect"
 	"sort"
 	"strings"
 	"sync"
+
+	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
@@ -753,6 +756,14 @@ func (r *resourceType) resolveDeclared(ctx context.Context, ref resource.Ref, ca
 	var foundProps map[string]any
 	for _, candidate := range candidates {
 		props, ok, err := r.client.GetResource(ctx, r.typeName, candidate)
+		// Cloud Control lists some entries its own read refuses as not an
+		// instance of the type, such as every VPC's main route table
+		// association listed as a subnet association. That refusal is not
+		// the instance looked for; any other failure still is an error.
+		var notInstance *cctypes.InvalidRequestException
+		if errors.As(err, &notInstance) {
+			continue
+		}
 		if err != nil {
 			return "", nil, false, err
 		}
