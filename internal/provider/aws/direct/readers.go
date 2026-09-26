@@ -1941,8 +1941,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "InternetGatewayId", Member: "InternetGatewayIds", Location: "form", Name: "InternetGatewayId.1", List: true},
 		},
-		PageToken: []string{"nextToken"},
-		Response:  []Step{{Name: "internetGatewaySet", List: true, Item: "item"}},
+		AbsentErrors: []string{"InvalidInternetGatewayID.NotFound"},
+		PageToken:    []string{"nextToken"},
+		Response:     []Step{{Name: "internetGatewaySet", List: true, Item: "item"}},
 		Fields: []Field{
 			{Property: "InternetGatewayId", Member: "InternetGatewayId", Kind: "scalar", XMLName: "internetGatewayId", Scalar: "string"},
 			{Property: "Tags", Member: "Tags", Kind: "list", XMLName: "tagSet", Item: "item",
@@ -1966,8 +1967,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "RouteTableId", Member: "RouteTableIds", Location: "form", Name: "RouteTableId.1", List: true},
 		},
-		PageToken: []string{"nextToken"},
-		Response:  []Step{{Name: "routeTableSet", List: true, Item: "item"}},
+		AbsentErrors: []string{"InvalidRouteTableID.NotFound"},
+		PageToken:    []string{"nextToken"},
+		Response:     []Step{{Name: "routeTableSet", List: true, Item: "item"}},
 		Fields: []Field{
 			{Property: "RouteTableId", Member: "RouteTableId", Kind: "scalar", XMLName: "routeTableId", Scalar: "string"},
 			{Property: "Tags", Member: "Tags", Kind: "list", XMLName: "tagSet", Item: "item",
@@ -1992,8 +1994,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "Id", Member: "GroupIds", Location: "form", Name: "GroupId.1", List: true},
 		},
-		PageToken: []string{"nextToken"},
-		Response:  []Step{{Name: "securityGroupInfo", List: true, Item: "item"}},
+		AbsentErrors: []string{"InvalidGroup.NotFound"},
+		PageToken:    []string{"nextToken"},
+		Response:     []Step{{Name: "securityGroupInfo", List: true, Item: "item"}},
 		Fields: []Field{
 			{Property: "GroupDescription", Member: "Description", Kind: "scalar", XMLName: "groupDescription", Scalar: "string"},
 			{Property: "GroupId", Member: "GroupId", Kind: "scalar", XMLName: "groupId", Scalar: "string"},
@@ -2061,8 +2064,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "SubnetId", Member: "SubnetIds", Location: "form", Name: "SubnetId.1", List: true},
 		},
-		PageToken: []string{"nextToken"},
-		Response:  []Step{{Name: "subnetSet", List: true, Item: "item"}},
+		AbsentErrors: []string{"InvalidSubnetID.NotFound"},
+		PageToken:    []string{"nextToken"},
+		Response:     []Step{{Name: "subnetSet", List: true, Item: "item"}},
 		Fields: []Field{
 			{Property: "AssignIpv6AddressOnCreation", Member: "AssignIpv6AddressOnCreation", Kind: "scalar", XMLName: "assignIpv6AddressOnCreation", Scalar: "boolean"},
 			{Property: "AvailabilityZone", Member: "AvailabilityZone", Kind: "scalar", XMLName: "availabilityZone", Scalar: "string"},
@@ -2126,8 +2130,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "VpcId", Member: "VpcIds", Location: "form", Name: "VpcId.1", List: true},
 		},
-		PageToken: []string{"nextToken"},
-		Response:  []Step{{Name: "vpcSet", List: true, Item: "item"}},
+		AbsentErrors: []string{"InvalidVpcID.NotFound"},
+		PageToken:    []string{"nextToken"},
+		Response:     []Step{{Name: "vpcSet", List: true, Item: "item"}},
 		Fields: []Field{
 			{Property: "CidrBlock", Member: "CidrBlock", Kind: "scalar", XMLName: "cidrBlock", Scalar: "string"},
 			{Property: "CidrBlockAssociations", Member: "AssociationId", Kind: "scalar", Via: []Step{{Name: "cidrBlockAssociationSet", List: true, Item: "item"}}, XMLName: "associationId", Scalar: "string"},
@@ -2851,8 +2856,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "CacheSubnetGroupName", Member: "CacheSubnetGroupName", Location: "form", Name: "CacheSubnetGroupName"},
 		},
-		PageToken: []string{"Marker"},
-		Response:  []Step{{Name: "CacheSubnetGroups", List: true, Item: "CacheSubnetGroup"}},
+		AbsentErrors: []string{"CacheSubnetGroupNotFoundFault"},
+		PageToken:    []string{"Marker"},
+		Response:     []Step{{Name: "CacheSubnetGroups", List: true, Item: "CacheSubnetGroup"}},
 		Fields: []Field{
 			{Property: "CacheSubnetGroupName", Member: "CacheSubnetGroupName", Kind: "scalar", XMLName: "CacheSubnetGroupName", Scalar: "string"},
 			{Property: "Description", Member: "CacheSubnetGroupDescription", Kind: "scalar", XMLName: "CacheSubnetGroupDescription", Scalar: "string"},
@@ -2898,8 +2904,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "TargetGroupArn", Member: "TargetGroupArns", Location: "form", Name: "TargetGroupArns.member.1", List: true},
 		},
-		PageToken: []string{"NextMarker"},
-		Response:  []Step{{Name: "TargetGroups", List: true, Item: "member"}},
+		AbsentErrors: []string{"TargetGroupNotFound"},
+		PageToken:    []string{"NextMarker"},
+		Response:     []Step{{Name: "TargetGroups", List: true, Item: "member"}},
 		Fields: []Field{
 			{Property: "HealthCheckEnabled", Member: "HealthCheckEnabled", Kind: "scalar", XMLName: "HealthCheckEnabled", Scalar: "boolean"},
 			{Property: "HealthCheckIntervalSeconds", Member: "HealthCheckIntervalSeconds", Kind: "scalar", XMLName: "HealthCheckIntervalSeconds", Scalar: "number"},
@@ -7407,8 +7414,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DBClusterParameterGroupName", Member: "DBClusterParameterGroupName", Location: "form", Name: "DBClusterParameterGroupName"},
 		},
-		PageToken: []string{"Marker"},
-		Response:  []Step{{Name: "DBClusterParameterGroups", List: true, Item: "DBClusterParameterGroup"}},
+		AbsentErrors: []string{"DBParameterGroupNotFound"},
+		PageToken:    []string{"Marker"},
+		Response:     []Step{{Name: "DBClusterParameterGroups", List: true, Item: "DBClusterParameterGroup"}},
 		Fields: []Field{
 			{Property: "DBClusterParameterGroupName", Member: "DBClusterParameterGroupName", Kind: "scalar", XMLName: "DBClusterParameterGroupName", Scalar: "string"},
 			{Property: "Description", Member: "Description", Kind: "scalar", XMLName: "Description", Scalar: "string"},
@@ -7473,8 +7481,9 @@ var readers = map[string]Reader{
 		Identifier: []Binding{
 			{Property: "DBSubnetGroupName", Member: "DBSubnetGroupName", Location: "form", Name: "DBSubnetGroupName"},
 		},
-		PageToken: []string{"Marker"},
-		Response:  []Step{{Name: "DBSubnetGroups", List: true, Item: "DBSubnetGroup"}},
+		AbsentErrors: []string{"DBSubnetGroupNotFoundFault"},
+		PageToken:    []string{"Marker"},
+		Response:     []Step{{Name: "DBSubnetGroups", List: true, Item: "DBSubnetGroup"}},
 		Fields: []Field{
 			{Property: "DBSubnetGroupArn", Member: "DBSubnetGroupArn", Kind: "scalar", XMLName: "DBSubnetGroupArn", Scalar: "string"},
 			{Property: "DBSubnetGroupDescription", Member: "DBSubnetGroupDescription", Kind: "scalar", XMLName: "DBSubnetGroupDescription", Scalar: "string"},
@@ -8009,6 +8018,7 @@ var readers = map[string]Reader{
 		Input: []Binding{
 			Binding{Member: "AttributeNames", Location: "body", Structured: []any{"All"}},
 		},
+		AbsentErrors: []string{"QueueDoesNotExist"},
 		Fields: []Field{
 			{Property: "Arn", Member: "Attributes", Kind: "scalar", Key: "QueueArn"},
 			{Property: "ContentBasedDeduplication", Member: "Attributes", Kind: "scalar", Transform: "boolean", Key: "ContentBasedDeduplication"},

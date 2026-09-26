@@ -2,6 +2,7 @@ type: AWS::EC2::VPC
 read:
   model: ec2/service/2016-11-15/ec2-2016-11-15.json
   operation: DescribeVpcs
+  absentErrors: [InvalidVpcID.NotFound]
   identifier:
     VpcId: VpcIds
   # DescribeVpcs filters by a list of ids and answers with a list.

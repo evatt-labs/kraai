@@ -33,6 +33,8 @@ type Reader struct {
 	Input []Binding
 	// Absent is every condition under which a returned instance is gone.
 	Absent []Condition
+	// AbsentErrors is every error code that means the instance is gone.
+	AbsentErrors []string
 	// Probe lists identifiers that must read as absent, for the harness.
 	Probe *Lister
 	// Also is the further calls whose properties are merged into a read.
@@ -588,6 +590,12 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 	if isXML(r.Protocol) {
 		xmlFields(&model, resource, r.Fields, "", fail)
 	}
+	for _, code := range o.Read.AbsentErrors {
+		if code == "" || strings.ContainsAny(code, " \t") {
+			fail("absentErrors names %q, which is not an error code", code)
+		}
+	}
+	r.AbsentErrors = o.Read.AbsentErrors
 	r.Capture = compileCapture(&model, resource, o.Read.Capture, want, fail)
 	if isXML(r.Protocol) {
 		xmlFields(&model, resource, r.Capture, "capture ", fail)

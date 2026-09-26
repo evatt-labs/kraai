@@ -2,6 +2,7 @@ type: AWS::SQS::Queue
 read:
   model: sqs/service/2012-11-05/sqs-2012-11-05.json
   operation: GetQueueAttributes
+  absentErrors: [QueueDoesNotExist]
   identifier:
     QueueUrl: QueueUrl
   input:

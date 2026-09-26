@@ -123,13 +123,13 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, r.absence(err)
 		}
 		return r.readXML(body, &walk{vars: identifier})
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, r.absence(err)
 	}
 	if token, _ := at(out, r.PageToken); len(r.PageToken) > 0 && token != nil && token != "" {
 		return nil, nil, errIncomplete(typeName)
@@ -170,6 +170,16 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		return nil, nil, err
 	}
 	return props, captured, nil
+}
+
+// absence is err, or ErrAbsent when err is an error code r's service
+// answers for an instance that does not exist.
+func (r Reader) absence(err error) error {
+	var api *APIError
+	if errors.As(err, &api) && slices.Contains(r.AbsentErrors, api.Code) {
+		return ErrAbsent
+	}
+	return err
 }
 
 // made reports whether a further call is made for an instance read as

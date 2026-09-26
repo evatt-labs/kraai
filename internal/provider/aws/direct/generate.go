@@ -86,6 +86,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if len(r.AbsentErrors) > 0 {
+		fmt.Fprintf(b, "AbsentErrors: %#v,\n", r.AbsentErrors)
+	}
 	if len(r.When) > 0 {
 		b.WriteString("When: []Condition{\n")
 		for _, c := range r.When {
