@@ -59,5 +59,86 @@ also:
       Tags:
         member: Tags
         entries: [Key, Value]
+create:
+  operation: CreateQueue
+  # A queue is named by kraai's identity tag, so a retried create names the
+  # queue it made; the name cannot be reused for a minute after a delete.
+  name:
+    property: QueueName
+    tag: kraai:resource-name
+  input:
+    QueueName: "{QueueName}"
+    Attributes:
+      ContentBasedDeduplication: "{ContentBasedDeduplication:string}"
+      DeduplicationScope: "{DeduplicationScope}"
+      DelaySeconds: "{DelaySeconds:string}"
+      FifoQueue: "{FifoQueue:string}"
+      FifoThroughputLimit: "{FifoThroughputLimit}"
+      KmsDataKeyReusePeriodSeconds: "{KmsDataKeyReusePeriodSeconds:string}"
+      KmsMasterKeyId: "{KmsMasterKeyId}"
+      MaximumMessageSize: "{MaximumMessageSize:string}"
+      MessageRetentionPeriod: "{MessageRetentionPeriod:string}"
+      ReceiveMessageWaitTimeSeconds: "{ReceiveMessageWaitTimeSeconds:string}"
+      RedriveAllowPolicy: "{RedriveAllowPolicy:json}"
+      RedrivePolicy: "{RedrivePolicy:json}"
+      SqsManagedSseEnabled: "{SqsManagedSseEnabled:string}"
+      VisibilityTimeout: "{VisibilityTimeout:string}"
+    tags: "{Tags:entries}"
+  # A name deleted in the last minute is held; the create is retried.
+  retryErrors: [QueueDeletedRecently]
+  identifier:
+    QueueUrl: QueueUrl
+update:
+  - operation: SetQueueAttributes
+    properties: [ContentBasedDeduplication, DeduplicationScope, DelaySeconds, FifoThroughputLimit, KmsDataKeyReusePeriodSeconds, KmsMasterKeyId, MaximumMessageSize, MessageRetentionPeriod, ReceiveMessageWaitTimeSeconds, RedriveAllowPolicy, RedrivePolicy, SqsManagedSseEnabled, VisibilityTimeout]
+    input:
+      QueueUrl: "{QueueUrl}"
+      Attributes:
+        ContentBasedDeduplication: "{ContentBasedDeduplication:string}"
+        DeduplicationScope: "{DeduplicationScope}"
+        DelaySeconds: "{DelaySeconds:string}"
+        FifoThroughputLimit: "{FifoThroughputLimit}"
+        KmsDataKeyReusePeriodSeconds: "{KmsDataKeyReusePeriodSeconds:string}"
+        KmsMasterKeyId: "{KmsMasterKeyId}"
+        MaximumMessageSize: "{MaximumMessageSize:string}"
+        MessageRetentionPeriod: "{MessageRetentionPeriod:string}"
+        ReceiveMessageWaitTimeSeconds: "{ReceiveMessageWaitTimeSeconds:string}"
+        RedriveAllowPolicy: "{RedriveAllowPolicy:json}"
+        RedrivePolicy: "{RedrivePolicy:json}"
+        SqsManagedSseEnabled: "{SqsManagedSseEnabled:string}"
+        VisibilityTimeout: "{VisibilityTimeout:string}"
+  - tags:
+      property: Tags
+      add:
+        operation: TagQueue
+        input:
+          QueueUrl: "{QueueUrl}"
+          Tags: "{added:entries}"
+      remove:
+        operation: UntagQueue
+        input:
+          QueueUrl: "{QueueUrl}"
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteQueue
+  input:
+    QueueUrl: "{QueueUrl}"
+  absentErrors: [QueueDoesNotExist]
+# FIFO-only settings, a key's reuse period and a redrive to another queue
+# need a FIFO queue, a key or a second queue, which the harness does not
+# make; they are routed but not exercised.
+lifecycle:
+  create:
+    DelaySeconds: 1
+    VisibilityTimeout: 40
+  update:
+    DelaySeconds: 3
+    MaximumMessageSize: 2048
+    MessageRetentionPeriod: 7200
+    ReceiveMessageWaitTimeSeconds: 5
+    RedriveAllowPolicy: {redrivePermission: denyAll}
+    SqsManagedSseEnabled: false
+    Tags: [{Key: team, Value: kraai}]
+    VisibilityTimeout: 50
 absentIds:
   - https://sqs.{region}.amazonaws.com/{account}/kraai-absent-probe

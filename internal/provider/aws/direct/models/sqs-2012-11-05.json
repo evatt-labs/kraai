@@ -3,10 +3,25 @@
     "com.amazonaws.sqs#AmazonSQS": {
       "operations": [
         {
+          "target": "com.amazonaws.sqs#CreateQueue"
+        },
+        {
+          "target": "com.amazonaws.sqs#DeleteQueue"
+        },
+        {
           "target": "com.amazonaws.sqs#GetQueueAttributes"
         },
         {
           "target": "com.amazonaws.sqs#ListQueueTags"
+        },
+        {
+          "target": "com.amazonaws.sqs#SetQueueAttributes"
+        },
+        {
+          "target": "com.amazonaws.sqs#TagQueue"
+        },
+        {
+          "target": "com.amazonaws.sqs#UntagQueue"
         }
       ],
       "traits": {
@@ -372,6 +387,123 @@
       },
       "type": "list"
     },
+    "com.amazonaws.sqs#CreateQueue": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sqs#InvalidAddress"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidAttributeName"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidAttributeValue"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidSecurity"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueDeletedRecently"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueNameExists"
+        },
+        {
+          "target": "com.amazonaws.sqs#RequestThrottled"
+        },
+        {
+          "target": "com.amazonaws.sqs#UnsupportedOperation"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sqs#CreateQueueRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.sqs#CreateQueueResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.sqs#CreateQueueRequest": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.sqs#QueueAttributeMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Attribute"
+          }
+        },
+        "QueueName": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.sqs#TagMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#CreateQueueResult": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#DeleteQueue": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sqs#InvalidAddress"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidSecurity"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueDoesNotExist"
+        },
+        {
+          "target": "com.amazonaws.sqs#RequestThrottled"
+        },
+        {
+          "target": "com.amazonaws.sqs#UnsupportedOperation"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sqs#DeleteQueueRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.sqs#DeleteQueueRequest": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#ExceptionMessage": {
       "type": "string"
     },
@@ -468,6 +600,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.sqs#InvalidAttributeValue": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#InvalidSecurity": {
       "members": {
         "message": {
@@ -537,6 +680,22 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#OverLimit": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OverLimit",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
       },
       "type": "structure"
     },
@@ -692,6 +851,22 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.sqs#QueueDeletedRecently": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.QueueDeletedRecently",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#QueueDoesNotExist": {
       "members": {
         "message": {
@@ -701,6 +876,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "AWS.SimpleQueueService.NonExistentQueue",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#QueueNameExists": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "QueueAlreadyExists",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -724,11 +915,75 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.sqs#SetQueueAttributes": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sqs#InvalidAddress"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidAttributeName"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidAttributeValue"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidSecurity"
+        },
+        {
+          "target": "com.amazonaws.sqs#OverLimit"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueDoesNotExist"
+        },
+        {
+          "target": "com.amazonaws.sqs#RequestThrottled"
+        },
+        {
+          "target": "com.amazonaws.sqs#UnsupportedOperation"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sqs#SetQueueAttributesRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.sqs#SetQueueAttributesRequest": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.sqs#QueueAttributeMap",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Attribute"
+          }
+        },
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#String": {
       "type": "string"
     },
     "com.amazonaws.sqs#TagKey": {
       "type": "string"
+    },
+    "com.amazonaws.sqs#TagKeyList": {
+      "member": {
+        "target": "com.amazonaws.sqs#TagKey"
+      },
+      "type": "list"
     },
     "com.amazonaws.sqs#TagMap": {
       "key": {
@@ -744,6 +999,55 @@
           "smithy.api#xmlName": "Value"
         }
       }
+    },
+    "com.amazonaws.sqs#TagQueue": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sqs#InvalidAddress"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidSecurity"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueDoesNotExist"
+        },
+        {
+          "target": "com.amazonaws.sqs#RequestThrottled"
+        },
+        {
+          "target": "com.amazonaws.sqs#UnsupportedOperation"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sqs#TagQueueRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.sqs#TagQueueRequest": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.sqs#TagMap",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.sqs#TagValue": {
       "type": "string"
@@ -761,6 +1065,55 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#UntagQueue": {
+      "errors": [
+        {
+          "target": "com.amazonaws.sqs#InvalidAddress"
+        },
+        {
+          "target": "com.amazonaws.sqs#InvalidSecurity"
+        },
+        {
+          "target": "com.amazonaws.sqs#QueueDoesNotExist"
+        },
+        {
+          "target": "com.amazonaws.sqs#RequestThrottled"
+        },
+        {
+          "target": "com.amazonaws.sqs#UnsupportedOperation"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.sqs#UntagQueueRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.sqs#UntagQueueRequest": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.sqs#TagKeyList",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "TagKey"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
       },
       "type": "structure"
     }

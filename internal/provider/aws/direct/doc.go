@@ -12,7 +12,10 @@
 // subset whose hashes lock.json records, so generating needs neither the
 // network nor credentials.
 //
-// Outside this package only lists are used: a type with a direct list is
-// listed through it on every lookup, never through Cloud Control. Reads and
-// every mutation still go through Cloud Control.
+// A type is promoted from Cloud Control one rung at a time, each on
+// evidence recorded against its override: a type with a direct list is
+// listed through it; a production reader, complete and at read and absence
+// parity, is read through it; and a mutable one, with lifecycle parity
+// besides, is created, updated and deleted through it. Every other read
+// and mutation goes through Cloud Control.
 package direct

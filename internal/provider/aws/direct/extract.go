@@ -55,6 +55,23 @@ type override struct {
 	Also []struct {
 		Operation string `yaml:"operation"`
 	} `yaml:"also"`
+	Create *struct {
+		Operation string `yaml:"operation"`
+	} `yaml:"create"`
+	Update []struct {
+		Operation string `yaml:"operation"`
+		Tags      *struct {
+			Add struct {
+				Operation string `yaml:"operation"`
+			} `yaml:"add"`
+			Remove struct {
+				Operation string `yaml:"operation"`
+			} `yaml:"remove"`
+		} `yaml:"tags"`
+	} `yaml:"update"`
+	Delete *struct {
+		Operation string `yaml:"operation"`
+	} `yaml:"delete"`
 }
 
 type lockedFile struct {
@@ -111,6 +128,19 @@ func run() error {
 		}
 		if o.Probe != nil {
 			ops[o.Read.Model] = append(ops[o.Read.Model], o.Probe.Operation)
+		}
+		if o.Create != nil {
+			ops[o.Read.Model] = append(ops[o.Read.Model], o.Create.Operation)
+		}
+		if o.Delete != nil {
+			ops[o.Read.Model] = append(ops[o.Read.Model], o.Delete.Operation)
+		}
+		for _, u := range o.Update {
+			if u.Tags != nil {
+				ops[o.Read.Model] = append(ops[o.Read.Model], u.Tags.Add.Operation, u.Tags.Remove.Operation)
+			} else {
+				ops[o.Read.Model] = append(ops[o.Read.Model], u.Operation)
+			}
 		}
 		for _, also := range o.Also {
 			ops[o.Read.Model] = append(ops[o.Read.Model], also.Operation)

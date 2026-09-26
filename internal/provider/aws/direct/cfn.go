@@ -10,6 +10,7 @@ type cfnSchema struct {
 	PrimaryIdentifier  []string               `json:"primaryIdentifier"`
 	WriteOnlyPointers  []string               `json:"writeOnlyProperties"`
 	ReadOnlyProperties []string               `json:"readOnlyProperties"`
+	CreateOnly         []string               `json:"createOnlyProperties"`
 	// elsewhere is the nested properties, as dotted paths, that a call
 	// made per element maps, which the read itself need not.
 	elsewhere map[string]bool

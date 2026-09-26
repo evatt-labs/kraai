@@ -72,3 +72,17 @@ func TestProductionReadersAreCompleteAndProven(t *testing.T) {
 		}
 	}
 }
+
+// Every mutable reader is production, has an update for every property an
+// update can change, and is proven by lifecycle evidence for its override.
+func TestMutableReadersAreProven(t *testing.T) {
+	lived, err := lifecycleTypes(files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, r := range Readers() {
+		if r.Mutable && (!r.Production || !r.LifecycleComplete || !lived[r.Type]) {
+			t.Errorf("%s is mutable but production %v, lifecycle complete %v, proven %v", r.Type, r.Production, r.LifecycleComplete, lived[r.Type])
+		}
+	}
+}

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -576,6 +577,18 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 	// not repopulate the cache with the world as it was.
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
+	if c.direct != nil && direct.CanMutate(typeName) {
+		directMutation(ctx, typeName, "create")
+		identifier, err := c.direct.Create(ctx, typeName, desiredState)
+		if err != nil {
+			return "", nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "creating %s", typeName)
+		}
+		properties, err := c.direct.ReadByID(ctx, typeName, identifier)
+		if err != nil {
+			return "", nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading created %s %q", typeName, identifier)
+		}
+		return identifier, properties, nil
+	}
 	body, err := json.Marshal(desiredState)
 	if err != nil {
 		return "", nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding desired state for %s", typeName)
@@ -621,6 +634,10 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
+	if c.direct != nil && direct.CanMutate(typeName) {
+		directMutation(ctx, typeName, "update")
+		return c.updateDirect(ctx, typeName, identifier, patch)
+	}
 	out, err := c.cc.UpdateResource(ctx, &cloudcontrol.UpdateResourceInput{
 		TypeName:      aws.String(typeName),
 		Identifier:    aws.String(identifier),
@@ -655,6 +672,13 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string) error {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
+	if c.direct != nil && direct.CanMutate(typeName) {
+		directMutation(ctx, typeName, "delete")
+		if err := c.direct.Delete(ctx, typeName, identifier); err != nil {
+			return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting %s %q", typeName, identifier)
+		}
+		return nil
+	}
 	out, err := c.cc.DeleteResource(ctx, &cloudcontrol.DeleteResourceInput{
 		TypeName:   aws.String(typeName),
 		Identifier: aws.String(identifier),
@@ -954,4 +978,44 @@ func sortedActions(set map[string]bool) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// updateDirect applies patch, the add and replace operations buildPatch
+// writes, through the type's direct update calls. A failed direct mutation
+// is an error, never retried through Cloud Control: half of it may have
+// been made.
+func (c *Client) updateDirect(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
+	var ops []patchOp
+	if err := json.Unmarshal(patch, &ops); err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding the patch for %s %q", typeName, identifier)
+	}
+	changes := make(map[string]any, len(ops))
+	for _, op := range ops {
+		property := strings.TrimPrefix(op.Path, "/")
+		if op.Op != "add" && op.Op != "replace" || property == "" || strings.Contains(property, "/") {
+			return nil, kerrors.Validation("the patch for %s %q %ss %s, which a direct update does not apply", typeName, identifier, op.Op, op.Path)
+		}
+		changes[property] = op.Value
+	}
+	current, err := c.direct.ReadByID(ctx, typeName, identifier)
+	if err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s %q to update it", typeName, identifier)
+	}
+	if err := c.direct.Update(ctx, typeName, identifier, current, changes); err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "updating %s %q", typeName, identifier)
+	}
+	properties, err := c.direct.ReadByID(ctx, typeName, identifier)
+	if err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading updated %s %q", typeName, identifier)
+	}
+	return properties, nil
+}
+
+// directMutation marks the span of a mutation made through the type's own
+// API rather than Cloud Control.
+func directMutation(ctx context.Context, typeName, kind string) {
+	trace.SpanFromContext(ctx).AddEvent("direct mutation", trace.WithAttributes(
+		attribute.String("kraai.type", typeName),
+		attribute.String("kraai.mutation", kind),
+	))
 }
