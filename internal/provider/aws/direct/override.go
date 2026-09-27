@@ -199,7 +199,8 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 // member of an object property, never through a list, and a template whose
 // property is not being set is left out. The filters are json, a value
 // sent as its JSON text; string, a number or boolean sent as text;
-// entries, a list of Key/Value structures sent as a map; wire, a value
+// entries, a list of Key/Value structures sent as a map; keys, a list of
+// names sent as structures naming each, {Key: name}; wire, a value
 // sent in the shape the read maps it from, each nested property under its
 // member name; and only, the one element of a list. A whole placeholder may
 // chain filters, applied in order: {Property:only:json}. Update and delete

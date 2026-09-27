@@ -679,7 +679,7 @@
     {
       "type": "AWS::EC2::InternetGateway",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 2,
@@ -689,7 +689,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "700159411294c6663d69983ac3835c5bd23c3415077a6ceb8cd8db362066c8c8"
+      "override": "b8fd938fc8608160eb9fba2a669dd397056ffad22db1b5aa088e00f6fd30563f"
     },
     {
       "type": "AWS::EC2::RouteTable",

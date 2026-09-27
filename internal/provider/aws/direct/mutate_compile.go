@@ -18,6 +18,8 @@ type MutationCall struct {
 	RetryErrors       []string
 	// Properties is what an update call sets, or what a create sends.
 	Properties []string
+	// Form is how a query protocol sends the input, by path; see FormStep.
+	Form map[string]FormStep
 	// Together is UpdateCall.Together; Required is the properties of such
 	// a call that fill members its operation requires, which must be read
 	// when unchanged and are sent even when empty. Any other one unread or
@@ -36,7 +38,7 @@ type MutationCall struct {
 }
 
 // mutationFilters are the template filters a mutation's input may use.
-var mutationFilters = map[string]bool{"json": true, "entries": true, "string": true, "wire": true, "only": true}
+var mutationFilters = map[string]bool{"json": true, "entries": true, "keys": true, "string": true, "wire": true, "only": true}
 
 // mutationPlaceholder matches a placeholder, a property or a dotted path
 // into an object property, with any chain of filters.
@@ -60,8 +62,8 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	if raw, err := fs.ReadFile(files, lock.Schemas[o.Type].File); err != nil || json.Unmarshal(raw, &schema) != nil {
 		return []error{fmt.Errorf("%s has no readable locked schema", o.Type)}
 	}
-	if !isAWSJSON(r.Protocol) {
-		return []error{fmt.Errorf("a mutation under %s is not supported yet; only the awsJson protocols", r.Protocol)}
+	if !isAWSJSON(r.Protocol) && !isQuery(r.Protocol) {
+		return []error{fmt.Errorf("a mutation under %s is not supported yet; only the awsJson and query protocols", r.Protocol)}
 	}
 	var service, namespace string
 	for id, s := range model.Shapes {
@@ -107,7 +109,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				}
 				for _, filter := range chain {
 					if !mutationFilters[filter] {
-						fail("%s input %s filters {%s} by %s; the filters are json, entries, string, wire and only", at, member, name, filter)
+						fail("%s input %s filters {%s} by %s; the filters are json, entries, keys, string, wire and only", at, member, name, filter)
 					}
 				}
 				if slices.Contains(chain, "wire") {
@@ -139,6 +141,11 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		}
 		c := &MutationCall{Operation: m.Operation, Target: service[len(namespace):] + "." + m.Operation,
 			Input: m.Input, AbsentErrors: m.AbsentErrors, RetryErrors: m.RetryErrors}
+		if isQuery(r.Protocol) {
+			c.Form = formTable(&model, r.Protocol, input, sortedKeys(m.Input), func(format string, args ...any) {
+				fail("%s "+format, append([]any{at}, args...)...)
+			})
+		}
 		requiredBy[c] = required
 		return c
 	}
@@ -157,11 +164,20 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 					if path != "{"+property+"}" || !sent {
 						fail("create takes the identifier %s as %s; it must be {%s}, and the input must send it", property, path, property)
 					}
+				case isQuery(r.Protocol):
+					// The XML response names its elements apart from the members.
+					xmlPath, found := xmlOutputPath(&model, r.Protocol, o.Create.Operation, output, path)
+					if !found {
+						fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
+					}
+					c.Identifier = map[string]string{property: xmlPath}
 				case !ok || outputMember(model, output, path) != "string":
 					fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 				}
 			}
-			c.Identifier = o.Create.Identifier
+			if c.Identifier == nil {
+				c.Identifier = o.Create.Identifier
+			}
 			for _, ref := range templateRefs(o.Create.Input) {
 				if _, ok := schema.Properties[ref[0]]; ok && !slices.Contains(c.Properties, ref[0]) {
 					c.Properties = append(c.Properties, ref[0])

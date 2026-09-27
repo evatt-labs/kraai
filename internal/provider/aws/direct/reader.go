@@ -215,6 +215,7 @@ type smithyShape struct {
 	Traits  map[string]json.RawMessage `json:"traits"`
 	Members map[string]smithyMember    `json:"members"`
 	Member  *smithyMember              `json:"member"`
+	Key     *smithyMember              `json:"key"`
 	Value   *smithyMember              `json:"value"`
 	Input   *smithyMember              `json:"input"`
 	Output  *smithyMember              `json:"output"`

@@ -3,6 +3,18 @@
     "com.amazonaws.ec2#AmazonEC2": {
       "operations": [
         {
+          "target": "com.amazonaws.ec2#CreateInternetGateway"
+        },
+        {
+          "target": "com.amazonaws.ec2#CreateTags"
+        },
+        {
+          "target": "com.amazonaws.ec2#DeleteInternetGateway"
+        },
+        {
+          "target": "com.amazonaws.ec2#DeleteTags"
+        },
+        {
           "target": "com.amazonaws.ec2#DescribeInternetGateways"
         },
         {
@@ -475,6 +487,168 @@
     },
     "com.amazonaws.ec2#CoreNetworkArn": {
       "type": "string"
+    },
+    "com.amazonaws.ec2#CreateInternetGateway": {
+      "input": {
+        "target": "com.amazonaws.ec2#CreateInternetGatewayRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#CreateInternetGatewayResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#CreateInternetGatewayRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "TagSpecifications": {
+          "target": "com.amazonaws.ec2#TagSpecificationList",
+          "traits": {
+            "smithy.api#xmlName": "TagSpecification"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#CreateInternetGatewayResult": {
+      "members": {
+        "InternetGateway": {
+          "target": "com.amazonaws.ec2#InternetGateway",
+          "traits": {
+            "aws.protocols#ec2QueryName": "InternetGateway",
+            "smithy.api#xmlName": "internetGateway"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#CreateTags": {
+      "input": {
+        "target": "com.amazonaws.ec2#CreateTagsRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#CreateTagsRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "Resources": {
+          "target": "com.amazonaws.ec2#ResourceIdList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "ResourceId"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DeleteInternetGateway": {
+      "input": {
+        "target": "com.amazonaws.ec2#DeleteInternetGatewayRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DeleteInternetGatewayRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "InternetGatewayId": {
+          "target": "com.amazonaws.ec2#InternetGatewayId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "InternetGatewayId",
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "internetGatewayId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DeleteTags": {
+      "input": {
+        "target": "com.amazonaws.ec2#DeleteTagsRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DeleteTagsRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "Resources": {
+          "target": "com.amazonaws.ec2#ResourceIdList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "ResourceId",
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "resourceId"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Tag",
+            "smithy.api#xmlName": "tag"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.ec2#DescribeInternetGateways": {
       "input": {
@@ -1899,6 +2073,689 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ec2#ResourceIdList": {
+      "member": {
+        "target": "com.amazonaws.ec2#TaggableResourceId"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#ResourceType": {
+      "members": {
+        "application_status_check": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "application-status-check"
+          }
+        },
+        "capacity_block": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "capacity-block"
+          }
+        },
+        "capacity_manager_data_export": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "capacity-manager-data-export"
+          }
+        },
+        "capacity_reservation": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "capacity-reservation"
+          }
+        },
+        "capacity_reservation_cancellation_quote": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "capacity-reservation-cancellation-quote"
+          }
+        },
+        "capacity_reservation_fleet": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "capacity-reservation-fleet"
+          }
+        },
+        "capacity_reservation_modification_quote": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "capacity-reservation-modification-quote"
+          }
+        },
+        "carrier_gateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "carrier-gateway"
+          }
+        },
+        "client_vpn_endpoint": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "client-vpn-endpoint"
+          }
+        },
+        "coip_pool": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "coip-pool"
+          }
+        },
+        "customer_gateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "customer-gateway"
+          }
+        },
+        "declarative_policies_report": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "declarative-policies-report"
+          }
+        },
+        "dedicated_host": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "dedicated-host"
+          }
+        },
+        "dhcp_options": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "dhcp-options"
+          }
+        },
+        "egress_only_internet_gateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "egress-only-internet-gateway"
+          }
+        },
+        "elastic_gpu": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "elastic-gpu"
+          }
+        },
+        "elastic_ip": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "elastic-ip"
+          }
+        },
+        "export_image_task": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "export-image-task"
+          }
+        },
+        "export_instance_task": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "export-instance-task"
+          }
+        },
+        "fleet": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fleet"
+          }
+        },
+        "fpga_image": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "fpga-image"
+          }
+        },
+        "host_reservation": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "host-reservation"
+          }
+        },
+        "image": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "image"
+          }
+        },
+        "image_usage_report": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "image-usage-report"
+          }
+        },
+        "import_image_task": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "import-image-task"
+          }
+        },
+        "import_snapshot_task": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "import-snapshot-task"
+          }
+        },
+        "instance": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "instance"
+          }
+        },
+        "instance_connect_endpoint": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "instance-connect-endpoint"
+          }
+        },
+        "instance_event_window": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "instance-event-window"
+          }
+        },
+        "internet_gateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "internet-gateway"
+          }
+        },
+        "ipam": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam"
+          }
+        },
+        "ipam_external_resource_verification_token": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-external-resource-verification-token"
+          }
+        },
+        "ipam_internet_registry_association": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-internet-registry-association"
+          }
+        },
+        "ipam_policy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-policy"
+          }
+        },
+        "ipam_pool": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-pool"
+          }
+        },
+        "ipam_pool_allocation": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-pool-allocation"
+          }
+        },
+        "ipam_prefix_list_resolver": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-prefix-list-resolver"
+          }
+        },
+        "ipam_prefix_list_resolver_target": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-prefix-list-resolver-target"
+          }
+        },
+        "ipam_resource_discovery": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-resource-discovery"
+          }
+        },
+        "ipam_resource_discovery_association": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-resource-discovery-association"
+          }
+        },
+        "ipam_scope": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipam-scope"
+          }
+        },
+        "ipv4pool_ec2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipv4pool-ec2"
+          }
+        },
+        "ipv6pool_ec2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipv6pool-ec2"
+          }
+        },
+        "key_pair": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "key-pair"
+          }
+        },
+        "launch_template": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "launch-template"
+          }
+        },
+        "local_gateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "local-gateway"
+          }
+        },
+        "local_gateway_route_table": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "local-gateway-route-table"
+          }
+        },
+        "local_gateway_route_table_virtual_interface_group_association": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "local-gateway-route-table-virtual-interface-group-association"
+          }
+        },
+        "local_gateway_route_table_vpc_association": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "local-gateway-route-table-vpc-association"
+          }
+        },
+        "local_gateway_virtual_interface": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "local-gateway-virtual-interface"
+          }
+        },
+        "local_gateway_virtual_interface_group": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "local-gateway-virtual-interface-group"
+          }
+        },
+        "mac_modification_task": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "mac-modification-task"
+          }
+        },
+        "natgateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "natgateway"
+          }
+        },
+        "network_acl": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "network-acl"
+          }
+        },
+        "network_insights_access_scope": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "network-insights-access-scope"
+          }
+        },
+        "network_insights_access_scope_analysis": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "network-insights-access-scope-analysis"
+          }
+        },
+        "network_insights_analysis": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "network-insights-analysis"
+          }
+        },
+        "network_insights_path": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "network-insights-path"
+          }
+        },
+        "network_interface": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "network-interface"
+          }
+        },
+        "outpost_lag": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "outpost-lag"
+          }
+        },
+        "placement_group": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "placement-group"
+          }
+        },
+        "prefix_list": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "prefix-list"
+          }
+        },
+        "replace_root_volume_task": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "replace-root-volume-task"
+          }
+        },
+        "reserved_instances": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "reserved-instances"
+          }
+        },
+        "route_server": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "route-server"
+          }
+        },
+        "route_server_endpoint": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "route-server-endpoint"
+          }
+        },
+        "route_server_peer": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "route-server-peer"
+          }
+        },
+        "route_table": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "route-table"
+          }
+        },
+        "secondary_interface": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "secondary-interface"
+          }
+        },
+        "secondary_network": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "secondary-network"
+          }
+        },
+        "secondary_subnet": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "secondary-subnet"
+          }
+        },
+        "security_group": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "security-group"
+          }
+        },
+        "security_group_rule": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "security-group-rule"
+          }
+        },
+        "service_link_virtual_interface": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "service-link-virtual-interface"
+          }
+        },
+        "snapshot": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "snapshot"
+          }
+        },
+        "spot_fleet_request": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "spot-fleet-request"
+          }
+        },
+        "spot_instances_request": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "spot-instances-request"
+          }
+        },
+        "subnet": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "subnet"
+          }
+        },
+        "subnet_cidr_reservation": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "subnet-cidr-reservation"
+          }
+        },
+        "traffic_mirror_filter": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "traffic-mirror-filter"
+          }
+        },
+        "traffic_mirror_filter_rule": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "traffic-mirror-filter-rule"
+          }
+        },
+        "traffic_mirror_session": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "traffic-mirror-session"
+          }
+        },
+        "traffic_mirror_target": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "traffic-mirror-target"
+          }
+        },
+        "transit_gateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway"
+          }
+        },
+        "transit_gateway_attachment": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway-attachment"
+          }
+        },
+        "transit_gateway_connect_peer": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway-connect-peer"
+          }
+        },
+        "transit_gateway_metering_policy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway-metering-policy"
+          }
+        },
+        "transit_gateway_multicast_domain": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway-multicast-domain"
+          }
+        },
+        "transit_gateway_policy_table": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway-policy-table"
+          }
+        },
+        "transit_gateway_route_table": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway-route-table"
+          }
+        },
+        "transit_gateway_route_table_announcement": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "transit-gateway-route-table-announcement"
+          }
+        },
+        "verified_access_endpoint": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "verified-access-endpoint"
+          }
+        },
+        "verified_access_endpoint_target": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "verified-access-endpoint-target"
+          }
+        },
+        "verified_access_group": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "verified-access-group"
+          }
+        },
+        "verified_access_instance": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "verified-access-instance"
+          }
+        },
+        "verified_access_policy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "verified-access-policy"
+          }
+        },
+        "verified_access_trust_provider": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "verified-access-trust-provider"
+          }
+        },
+        "volume": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "volume"
+          }
+        },
+        "vpc": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc"
+          }
+        },
+        "vpc_block_public_access_exclusion": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-block-public-access-exclusion"
+          }
+        },
+        "vpc_encryption_control": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-encryption-control"
+          }
+        },
+        "vpc_endpoint": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-endpoint"
+          }
+        },
+        "vpc_endpoint_connection": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-endpoint-connection"
+          }
+        },
+        "vpc_endpoint_connection_device_type": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-endpoint-connection-device-type"
+          }
+        },
+        "vpc_endpoint_service": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-endpoint-service"
+          }
+        },
+        "vpc_endpoint_service_permission": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-endpoint-service-permission"
+          }
+        },
+        "vpc_flow_log": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-flow-log"
+          }
+        },
+        "vpc_peering_connection": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpc-peering-connection"
+          }
+        },
+        "vpn_concentrator": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpn-concentrator"
+          }
+        },
+        "vpn_connection": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpn-connection"
+          }
+        },
+        "vpn_connection_device_type": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpn-connection-device-type"
+          }
+        },
+        "vpn_gateway": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "vpn-gateway"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.ec2#Route": {
       "members": {
         "CarrierGatewayId": {
@@ -2881,6 +3738,37 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.ec2#TagSpecification": {
+      "members": {
+        "ResourceType": {
+          "target": "com.amazonaws.ec2#ResourceType",
+          "traits": {
+            "aws.protocols#ec2QueryName": "ResourceType",
+            "smithy.api#xmlName": "resourceType"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ec2#TagList",
+          "traits": {
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#TagSpecificationList": {
+      "member": {
+        "target": "com.amazonaws.ec2#TagSpecification",
+        "traits": {
+          "smithy.api#xmlName": "item"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ec2#TaggableResourceId": {
+      "type": "string"
     },
     "com.amazonaws.ec2#Tenancy": {
       "members": {

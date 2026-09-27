@@ -223,7 +223,8 @@ func (c *Client) settled(ctx context.Context, r Reader, identifier string) bool 
 // mutate sends one mutation, its input rendered from values, and returns
 // the decoded output.
 func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values map[string]any) (map[string]any, error) {
-	call := Reader{Type: r.Type, Protocol: r.Protocol, SigningName: r.SigningName, Host: r.Host, SigningRegion: r.SigningRegion}
+	call := Reader{Type: r.Type, Protocol: r.Protocol, SigningName: r.SigningName, Host: r.Host, SigningRegion: r.SigningRegion,
+		Action: m.Operation, Version: r.Version}
 	wireAs := func(name string, v any) (any, error) {
 		// A tag call's added tags are shaped as its tag property is.
 		if name == "added" && m.TagProperty != "" {
@@ -245,9 +246,18 @@ func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values ma
 		if err != nil {
 			return nil, err
 		}
-		if ok {
-			bindings = append(bindings, Binding{Member: member, Location: "body", Structured: v})
+		if !ok {
+			continue
 		}
+		if !isQuery(r.Protocol) {
+			bindings = append(bindings, Binding{Member: member, Location: "body", Structured: v})
+			continue
+		}
+		pairs, err := formBindings(m.Form, member, v)
+		if err != nil {
+			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
+		}
+		bindings = append(bindings, pairs...)
 	}
 	// Many mutations answer with no body at all.
 	body, err := c.send(ctx, call, "", "", m.Target, bindings)
@@ -263,10 +273,20 @@ func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values ma
 		return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
 	}
 	obj := map[string]any{}
-	if len(strings.TrimSpace(string(body))) > 0 {
-		if err := json.Unmarshal(body, &obj); err != nil {
+	if len(strings.TrimSpace(string(body))) == 0 {
+		return obj, nil
+	}
+	if isXML(r.Protocol) {
+		root, err := parseXML(body)
+		if err != nil {
 			return nil, fmt.Errorf("decoding the %s call %s: %w", r.Type, m.Operation, err)
 		}
+		// The identifier path starts inside the response element.
+		out, _ := xmlMap(root).(map[string]any)
+		return out, nil
+	}
+	if err := json.Unmarshal(body, &obj); err != nil {
+		return nil, fmt.Errorf("decoding the %s call %s: %w", r.Type, m.Operation, err)
 	}
 	return obj, nil
 }
