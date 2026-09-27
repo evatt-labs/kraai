@@ -198,7 +198,8 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 // sent in the shape the read maps it from, each nested property under its
 // member name; and only, the one element of a list. A whole placeholder may
 // chain filters, applied in order: {Property:only:json}. Update and delete
-// templates may also name the read's captures.
+// templates may also name the read's captures; a capture shadows a property
+// of the same name, so {Arn} is the captured ARN.
 type Mutation struct {
 	Operation string         `yaml:"operation"`
 	Input     map[string]any `yaml:"input,omitempty"`
