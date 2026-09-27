@@ -1,7 +1,92 @@
 {
   "shapes": {
+    "com.amazonaws.rds#AddTagsToResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#BlueGreenDeploymentNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBClusterNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBInstanceNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyEndpointNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyTargetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBShardGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSnapshotTenantDatabaseNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#IntegrationNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBClusterEndpointStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBClusterStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBInstanceStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#TenantDatabaseNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#AddTagsToResourceMessage"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#AddTagsToResourceMessage": {
+      "members": {
+        "ResourceName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.rds#TagList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#AmazonRDSv19": {
       "operations": [
+        {
+          "target": "com.amazonaws.rds#AddTagsToResource"
+        },
+        {
+          "target": "com.amazonaws.rds#CreateDBSubnetGroup"
+        },
+        {
+          "target": "com.amazonaws.rds#DeleteDBSubnetGroup"
+        },
         {
           "target": "com.amazonaws.rds#DescribeDBClusterParameterGroups"
         },
@@ -13,6 +98,12 @@
         },
         {
           "target": "com.amazonaws.rds#ListTagsForResource"
+        },
+        {
+          "target": "com.amazonaws.rds#ModifyDBSubnetGroup"
+        },
+        {
+          "target": "com.amazonaws.rds#RemoveTagsFromResource"
         }
       ],
       "traits": {
@@ -420,6 +511,77 @@
     "com.amazonaws.rds#Boolean": {
       "type": "boolean"
     },
+    "com.amazonaws.rds#CreateDBSubnetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBSubnetGroupAlreadyExistsFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSubnetGroupDoesNotCoverEnoughAZs"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSubnetGroupQuotaExceededFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSubnetQuotaExceededFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidSubnet"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#CreateDBSubnetGroupMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#CreateDBSubnetGroupResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#CreateDBSubnetGroupMessage": {
+      "members": {
+        "DBSubnetGroupDescription": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "DBSubnetGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "SubnetIds": {
+          "target": "com.amazonaws.rds#SubnetIdentifierList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.rds#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#CreateDBSubnetGroupResult": {
+      "members": {
+        "DBSubnetGroup": {
+          "target": "com.amazonaws.rds#DBSubnetGroup"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBClusterNotFoundFault": {
       "members": {
         "message": {
@@ -659,6 +821,38 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.rds#DBSubnetGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSubnetGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSubnetGroupDoesNotCoverEnoughAZs": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSubnetGroupDoesNotCoverEnoughAZs",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBSubnetGroupMessage": {
       "members": {
         "DBSubnetGroups": {
@@ -691,6 +885,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBSubnetGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSubnetGroupQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBSubnetGroups": {
       "member": {
         "target": "com.amazonaws.rds#DBSubnetGroup",
@@ -699,6 +909,58 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.rds#DBSubnetQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSubnetQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DeleteDBSubnetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBSubnetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBSubnetGroupStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBSubnetStateFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#DeleteDBSubnetGroupMessage"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#DeleteDBSubnetGroupMessage": {
+      "members": {
+        "DBSubnetGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.rds#DescribeDBClusterParameterGroups": {
       "errors": [
@@ -911,6 +1173,108 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#InvalidDBClusterEndpointStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBClusterEndpointStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBClusterStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBClusterStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBInstanceStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBInstanceState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBSubnetGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBSubnetGroupStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBSubnetStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBSubnetStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidSubnet": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSubnet",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#KeyList": {
+      "member": {
+        "target": "com.amazonaws.rds#String"
+      },
+      "type": "list"
+    },
     "com.amazonaws.rds#ListTagsForResource": {
       "errors": [
         {
@@ -972,6 +1336,73 @@
       },
       "traits": {
         "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ModifyDBSubnetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBSubnetGroupDoesNotCoverEnoughAZs"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSubnetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSubnetQuotaExceededFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBSubnetGroupStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidSubnet"
+        },
+        {
+          "target": "com.amazonaws.rds#SubnetAlreadyInUse"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#ModifyDBSubnetGroupMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#ModifyDBSubnetGroupResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#ModifyDBSubnetGroupMessage": {
+      "members": {
+        "DBSubnetGroupDescription": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        },
+        "DBSubnetGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "SubnetIds": {
+          "target": "com.amazonaws.rds#SubnetIdentifierList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ModifyDBSubnetGroupResult": {
+      "members": {
+        "DBSubnetGroup": {
+          "target": "com.amazonaws.rds#DBSubnetGroup"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
       },
       "type": "structure"
     },
@@ -1047,6 +1478,82 @@
     "com.amazonaws.rds#PotentiallySensitiveParameterValue": {
       "type": "string"
     },
+    "com.amazonaws.rds#RemoveTagsFromResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#BlueGreenDeploymentNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBClusterNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBInstanceNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyEndpointNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBProxyTargetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBShardGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBSnapshotTenantDatabaseNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#IntegrationNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBClusterEndpointStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBClusterStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBInstanceStateFault"
+        },
+        {
+          "target": "com.amazonaws.rds#TenantDatabaseNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#RemoveTagsFromResourceMessage"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#RemoveTagsFromResourceMessage": {
+      "members": {
+        "ResourceName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.rds#KeyList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#String": {
       "type": "string"
     },
@@ -1076,6 +1583,31 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.rds#SubnetAlreadyInUse": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubnetAlreadyInUse",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SubnetIdentifierList": {
+      "member": {
+        "target": "com.amazonaws.rds#String",
+        "traits": {
+          "smithy.api#xmlName": "SubnetIdentifier"
+        }
+      },
+      "type": "list"
     },
     "com.amazonaws.rds#SubnetList": {
       "member": {

@@ -97,6 +97,14 @@ func init() {
 			Capture: []Field{
 				{Property: "Arn", Member: "DBSubnetGroupArn", Kind: "scalar", XMLName: "DBSubnetGroupArn", Scalar: "string"},
 			},
+			LifecycleComplete: true,
+			MutationCaptures:  true,
+			Create:            &MutationCall{Operation: "CreateDBSubnetGroup", Target: "AmazonRDSv19.CreateDBSubnetGroup", NameProperty: "DBSubnetGroupName", NameTag: "kraai:resource-name", Input: map[string]any{"DBSubnetGroupDescription": "{DBSubnetGroupDescription}", "DBSubnetGroupName": "{DBSubnetGroupName}", "SubnetIds": "{SubnetIds}", "Tags": "{Tags}"}, Properties: []string{"DBSubnetGroupDescription", "DBSubnetGroupName", "SubnetIds", "Tags"}, Identifier: map[string]string{"DBSubnetGroupName": "CreateDBSubnetGroupResult.DBSubnetGroup.DBSubnetGroupName"}, Form: map[string]FormStep{"DBSubnetGroupDescription": {Key: "DBSubnetGroupDescription", Kind: "scalar"}, "DBSubnetGroupName": {Key: "DBSubnetGroupName", Kind: "scalar"}, "SubnetIds": {Key: "SubnetIds", Kind: "list", Item: "SubnetIdentifier"}, "SubnetIds[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tags", Kind: "list", Item: "Tag"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}},
+			Delete:            &MutationCall{Operation: "DeleteDBSubnetGroup", Target: "AmazonRDSv19.DeleteDBSubnetGroup", Input: map[string]any{"DBSubnetGroupName": "{DBSubnetGroupName}"}, AbsentErrors: []string{"DBSubnetGroupNotFoundFault"}, Form: map[string]FormStep{"DBSubnetGroupName": {Key: "DBSubnetGroupName", Kind: "scalar"}}},
+			Update: []MutationCall{
+				MutationCall{Operation: "ModifyDBSubnetGroup", Target: "AmazonRDSv19.ModifyDBSubnetGroup", Input: map[string]any{"DBSubnetGroupDescription": "{DBSubnetGroupDescription}", "DBSubnetGroupName": "{DBSubnetGroupName}", "SubnetIds": "{SubnetIds}"}, Properties: []string{"DBSubnetGroupDescription", "SubnetIds"}, Form: map[string]FormStep{"DBSubnetGroupDescription": {Key: "DBSubnetGroupDescription", Kind: "scalar"}, "DBSubnetGroupName": {Key: "DBSubnetGroupName", Kind: "scalar"}, "SubnetIds": {Key: "SubnetIds", Kind: "list", Item: "SubnetIdentifier"}, "SubnetIds[]": {Key: "", Kind: "scalar"}}, Together: true, Required: []string{"SubnetIds"}},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "AddTagsToResource", Target: "AmazonRDSv19.AddTagsToResource", TagProperty: "Tags", Input: map[string]any{"ResourceName": "{Arn}", "Tags": "{added}"}, Form: map[string]FormStep{"ResourceName": {Key: "ResourceName", Kind: "scalar"}, "Tags": {Key: "Tags", Kind: "list", Item: "Tag"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "RemoveTagsFromResource", Target: "AmazonRDSv19.RemoveTagsFromResource", Input: map[string]any{"ResourceName": "{Arn}", "TagKeys": "{removed}"}, Form: map[string]FormStep{"ResourceName": {Key: "ResourceName", Kind: "scalar"}, "TagKeys": {Key: "TagKeys", Kind: "list", Item: "member"}, "TagKeys[]": {Key: "", Kind: "scalar"}}}},
+			},
 			Also: []Reader{
 				{
 					Type:        "AWS::RDS::DBSubnetGroup",
@@ -119,6 +127,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

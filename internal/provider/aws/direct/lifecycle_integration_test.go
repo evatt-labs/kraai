@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -127,7 +128,13 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 		t.Skipf("the create needs %s, which is unset", missing)
 	}
 	desired := fill(o.Lifecycle.Create, vars).(map[string]any)
-	desired["Tags"] = append([]any{nameTag}, asList(desired["Tags"])...)
+	// A type with no tags, such as a route table association, is not named
+	// by one.
+	r := readers[o.Type]
+	tagged := slices.ContainsFunc(append(slices.Clone(r.Fields), alsoFields(r)...), func(f Field) bool { return f.Property == "Tags" })
+	if tagged {
+		desired["Tags"] = append([]any{nameTag}, asList(desired["Tags"])...)
+	}
 
 	id, err := client.Create(ctx, o.Type, desired)
 	deleted := false

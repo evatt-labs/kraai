@@ -27,5 +27,54 @@ also:
         properties:
           Key: Key
           Value: Value
+create:
+  operation: CreateCacheSubnetGroup
+  name:
+    property: CacheSubnetGroupName
+    tag: kraai:resource-name
+  input:
+    CacheSubnetGroupName: "{CacheSubnetGroupName}"
+    CacheSubnetGroupDescription: "{Description}"
+    SubnetIds: "{SubnetIds}"
+    Tags: "{Tags}"
+  # The service lowercases the name; the create returns the one it made.
+  identifier:
+    CacheSubnetGroupName: CacheSubnetGroup.CacheSubnetGroupName
+update:
+  # ModifyCacheSubnetGroup requires only the name; description and subnets
+  # are optional, so a change to one is sent with the other as it was read
+  # rather than risk the service leaving an unsent one unchanged undocumented.
+  - operation: ModifyCacheSubnetGroup
+    properties: [Description, SubnetIds]
+    together: true
+    input:
+      CacheSubnetGroupName: "{CacheSubnetGroupName}"
+      CacheSubnetGroupDescription: "{Description}"
+      SubnetIds: "{SubnetIds}"
+  - tags:
+      property: Tags
+      add:
+        operation: AddTagsToResource
+        input:
+          ResourceName: "{Arn}"
+          Tags: "{added}"
+      remove:
+        operation: RemoveTagsFromResource
+        input:
+          ResourceName: "{Arn}"
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteCacheSubnetGroup
+  input:
+    CacheSubnetGroupName: "{CacheSubnetGroupName}"
+  absentErrors: [CacheSubnetGroupNotFoundFault]
+lifecycle:
+  create:
+    Description: kraai lifecycle probe
+    SubnetIds: ["{subnetIdA}"]
+  update:
+    Description: kraai lifecycle probe, updated
+    SubnetIds: ["{subnetIdA}", "{subnetIdB}"]
+    Tags: [{Key: team, Value: kraai}]
 absentIds:
   - kraai-absent-probe-subnetgroup

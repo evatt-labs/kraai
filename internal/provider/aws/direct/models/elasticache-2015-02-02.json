@@ -1,12 +1,109 @@
 {
   "shapes": {
+    "com.amazonaws.elasticache#AddTagsToResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticache#CacheClusterNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheParameterGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSecurityGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidARNFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidReplicationGroupStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidServerlessCacheSnapshotStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidServerlessCacheStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ReplicationGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ReservedCacheNodeNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ServerlessCacheNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ServerlessCacheSnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#SnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#TagQuotaPerResourceExceeded"
+        },
+        {
+          "target": "com.amazonaws.elasticache#UserGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#UserNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticache#AddTagsToResourceMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticache#TagListMessage"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticache#AddTagsToResourceMessage": {
+      "members": {
+        "ResourceName": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.elasticache#TagList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#AmazonElastiCacheV9": {
       "operations": [
+        {
+          "target": "com.amazonaws.elasticache#AddTagsToResource"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CreateCacheSubnetGroup"
+        },
+        {
+          "target": "com.amazonaws.elasticache#DeleteCacheSubnetGroup"
+        },
         {
           "target": "com.amazonaws.elasticache#DescribeCacheSubnetGroups"
         },
         {
           "target": "com.amazonaws.elasticache#ListTagsForResource"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ModifyCacheSubnetGroup"
+        },
+        {
+          "target": "com.amazonaws.elasticache#RemoveTagsFromResource"
         }
       ],
       "traits": {
@@ -456,6 +553,38 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.elasticache#CacheSubnetGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheSubnetGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CacheSubnetGroupInUse": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheSubnetGroupInUse",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#CacheSubnetGroupMessage": {
       "members": {
         "CacheSubnetGroups": {
@@ -488,6 +617,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#CacheSubnetGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheSubnetGroupQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#CacheSubnetGroups": {
       "member": {
         "target": "com.amazonaws.elasticache#CacheSubnetGroup",
@@ -496,6 +641,129 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.elasticache#CacheSubnetQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheSubnetQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CreateCacheSubnetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupAlreadyExistsFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupQuotaExceededFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetQuotaExceededFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidSubnet"
+        },
+        {
+          "target": "com.amazonaws.elasticache#SubnetNotAllowedFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#TagQuotaPerResourceExceeded"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticache#CreateCacheSubnetGroupMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticache#CreateCacheSubnetGroupResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticache#CreateCacheSubnetGroupMessage": {
+      "members": {
+        "CacheSubnetGroupDescription": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "CacheSubnetGroupName": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "SubnetIds": {
+          "target": "com.amazonaws.elasticache#SubnetIdentifierList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.elasticache#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CreateCacheSubnetGroupResult": {
+      "members": {
+        "CacheSubnetGroup": {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroup"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#DeleteCacheSubnetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupInUse"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticache#DeleteCacheSubnetGroupMessage"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticache#DeleteCacheSubnetGroupMessage": {
+      "members": {
+        "CacheSubnetGroupName": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticache#DescribeCacheSubnetGroups": {
       "errors": [
@@ -609,6 +877,28 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#InvalidSubnet": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSubnet",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#KeyList": {
+      "member": {
+        "target": "com.amazonaws.elasticache#String"
+      },
+      "type": "list"
+    },
     "com.amazonaws.elasticache#ListTagsForResource": {
       "errors": [
         {
@@ -681,6 +971,67 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#ModifyCacheSubnetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetQuotaExceededFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidSubnet"
+        },
+        {
+          "target": "com.amazonaws.elasticache#SubnetInUse"
+        },
+        {
+          "target": "com.amazonaws.elasticache#SubnetNotAllowedFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticache#ModifyCacheSubnetGroupMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticache#ModifyCacheSubnetGroupResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticache#ModifyCacheSubnetGroupMessage": {
+      "members": {
+        "CacheSubnetGroupDescription": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {}
+        },
+        "CacheSubnetGroupName": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "SubnetIds": {
+          "target": "com.amazonaws.elasticache#SubnetIdentifierList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ModifyCacheSubnetGroupResult": {
+      "members": {
+        "CacheSubnetGroup": {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroup"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#NetworkType": {
       "members": {
         "DUAL_STACK": {
@@ -709,6 +1060,88 @@
         "target": "com.amazonaws.elasticache#NetworkType"
       },
       "type": "list"
+    },
+    "com.amazonaws.elasticache#RemoveTagsFromResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticache#CacheClusterNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheParameterGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSecurityGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#CacheSubnetGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidARNFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidReplicationGroupStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidServerlessCacheSnapshotStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#InvalidServerlessCacheStateFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ReplicationGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ReservedCacheNodeNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ServerlessCacheNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#ServerlessCacheSnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#SnapshotNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#TagNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#UserGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.elasticache#UserNotFoundFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticache#RemoveTagsFromResourceMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticache#TagListMessage"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticache#RemoveTagsFromResourceMessage": {
+      "members": {
+        "ResourceName": {
+          "target": "com.amazonaws.elasticache#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.elasticache#KeyList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticache#ReplicationGroupNotFoundFault": {
       "members": {
@@ -815,6 +1248,31 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.elasticache#SubnetIdentifierList": {
+      "member": {
+        "target": "com.amazonaws.elasticache#String",
+        "traits": {
+          "smithy.api#xmlName": "SubnetIdentifier"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.elasticache#SubnetInUse": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubnetInUse",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#SubnetList": {
       "member": {
         "target": "com.amazonaws.elasticache#Subnet",
@@ -823,6 +1281,22 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.elasticache#SubnetNotAllowedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubnetNotAllowedFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticache#SubnetOutpost": {
       "members": {
@@ -865,6 +1339,38 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#TagNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TagNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#TagQuotaPerResourceExceeded": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TagQuotaPerResourceExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.elasticache#UserGroupNotFoundFault": {

@@ -26,5 +26,54 @@ also:
         properties:
           Key: Key
           Value: Value
+create:
+  operation: CreateDBSubnetGroup
+  name:
+    property: DBSubnetGroupName
+    tag: kraai:resource-name
+  input:
+    DBSubnetGroupName: "{DBSubnetGroupName}"
+    DBSubnetGroupDescription: "{DBSubnetGroupDescription}"
+    SubnetIds: "{SubnetIds}"
+    Tags: "{Tags}"
+  # The service lowercases the name it stores; the output carries what it
+  # actually made.
+  identifier:
+    DBSubnetGroupName: DBSubnetGroup.DBSubnetGroupName
+# ModifyDBSubnetGroup requires SubnetIds and replaces the description
+# alongside it, so both are sent whenever either changes.
+update:
+  - operation: ModifyDBSubnetGroup
+    properties: [DBSubnetGroupDescription, SubnetIds]
+    together: true
+    input:
+      DBSubnetGroupName: "{DBSubnetGroupName}"
+      DBSubnetGroupDescription: "{DBSubnetGroupDescription}"
+      SubnetIds: "{SubnetIds}"
+  - tags:
+      property: Tags
+      add:
+        operation: AddTagsToResource
+        input:
+          ResourceName: "{Arn}"
+          Tags: "{added}"
+      remove:
+        operation: RemoveTagsFromResource
+        input:
+          ResourceName: "{Arn}"
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteDBSubnetGroup
+  input:
+    DBSubnetGroupName: "{DBSubnetGroupName}"
+  absentErrors: [DBSubnetGroupNotFoundFault]
+lifecycle:
+  create:
+    DBSubnetGroupDescription: kraai lifecycle probe
+    SubnetIds: ["{subnetIdA}", "{subnetIdB}"]
+  update:
+    DBSubnetGroupDescription: kraai lifecycle probe updated
+    SubnetIds: ["{subnetIdA}", "{subnetIdC}"]
+    Tags: [{Key: team, Value: kraai}]
 absentIds:
   - kraai-absent-probe-0123456789

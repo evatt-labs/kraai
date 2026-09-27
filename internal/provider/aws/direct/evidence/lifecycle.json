@@ -30,6 +30,32 @@
       "override": "b8fd938fc8608160eb9fba2a669dd397056ffad22db1b5aa088e00f6fd30563f"
     },
     {
+      "type": "AWS::EC2::RouteTable",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "Tags"
+      ],
+      "override": "403ee44a1c3df9c5c85e74af0d94626ee577adb4de54cc4752fd8776c2a30614"
+    },
+    {
+      "type": "AWS::EC2::SubnetRouteTableAssociation",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "override": "56a3edd1cc4f0c29814ce14f7055c526ef200be4e718e3311ff6e542e66ce0cb"
+    },
+    {
+      "type": "AWS::EC2::VPC",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "EnableDnsHostnames",
+        "EnableDnsSupport",
+        "Tags"
+      ],
+      "override": "d05ad033f8f885db54504e84d346fa01a81f2404344605b9e7a005b10bebcc41"
+    },
+    {
       "type": "AWS::ECS::Cluster",
       "date": "2026-09-27",
       "outcome": "parity",
@@ -52,6 +78,17 @@
       "override": "d14301cd1de10d25732218074102344ba224e3635aef2f963181a2b287403f97"
     },
     {
+      "type": "AWS::ElastiCache::SubnetGroup",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "Description",
+        "SubnetIds",
+        "Tags"
+      ],
+      "override": "e56590977af954e47d4f000b5af1426306e811451250ed7b60e91f34b98c828c"
+    },
+    {
       "type": "AWS::Logs::LogGroup",
       "date": "2026-09-27",
       "outcome": "parity",
@@ -66,6 +103,17 @@
         "Tags"
       ],
       "override": "da24fc3739aa297da750bffc9d88a647319764993b0196e8fa42e8cbe2afd41f"
+    },
+    {
+      "type": "AWS::RDS::DBSubnetGroup",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "DBSubnetGroupDescription",
+        "SubnetIds",
+        "Tags"
+      ],
+      "override": "5705128f86e8d158bc2f0d8b3f05a5fafb99f0a7a49d86fcd609e0fc713238ec"
     },
     {
       "type": "AWS::SQS::Queue",

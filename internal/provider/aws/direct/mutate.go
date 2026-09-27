@@ -73,11 +73,12 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 			return id, err
 		}
 	}
-	// A write-only property is never read back, so the wait cannot see it.
+	// A write-only property, or member of one, is never read back, so the
+	// wait cannot see it.
 	readable := map[string]any{}
 	for _, f := range append(slices.Clone(r.Fields), alsoFields(r)...) {
 		if v, ok := values[f.Property]; ok {
-			readable[f.Property] = v
+			readable[f.Property] = readableValue(f, v)
 		}
 	}
 	return id, c.waitFor(ctx, typeName, id, func(props map[string]any, err error) bool {
@@ -474,6 +475,31 @@ func empty(v any) bool {
 		return len(t) == 0
 	}
 	return false
+}
+
+// readableValue is v with only what f's read maps, at every depth: the
+// members of a structure, or of each structure in a list, it reads.
+func readableValue(f Field, v any) any {
+	if len(f.Fields) == 0 {
+		return v
+	}
+	switch t := v.(type) {
+	case map[string]any:
+		out := map[string]any{}
+		for _, child := range f.Fields {
+			if cv, ok := t[child.Property]; ok {
+				out[child.Property] = readableValue(child, cv)
+			}
+		}
+		return out
+	case []any:
+		out := make([]any, len(t))
+		for i, item := range t {
+			out[i] = readableValue(f, item)
+		}
+		return out
+	}
+	return v
 }
 
 // alsoFields is every property the read's further calls map.

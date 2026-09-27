@@ -694,7 +694,7 @@
     {
       "type": "AWS::EC2::RouteTable",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 3,
@@ -705,7 +705,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "a3d79207a540b4871d3a85c3a3d3df7f5dfeb6e022af27963652feb1b12f78d8"
+      "override": "403ee44a1c3df9c5c85e74af0d94626ee577adb4de54cc4752fd8776c2a30614"
     },
     {
       "type": "AWS::EC2::SecurityGroup",
@@ -757,7 +757,7 @@
     {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 2,
@@ -769,12 +769,12 @@
       "note": "Cloud Control could not read some listed instances",
       "absence": "parity",
       "probed": 1,
-      "override": "4f44afb75ca4507952adc13292820431ba7d199cb95862a07f9cb50fa3efe818"
+      "override": "56a3edd1cc4f0c29814ce14f7055c526ef200be4e718e3311ff6e542e66ce0cb"
     },
     {
       "type": "AWS::EC2::VPC",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 2,
@@ -793,7 +793,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "a3b26f185d1c71d8b5bc8acef964a2dd2c72eb79b960ce07965d82c061480654"
+      "override": "d05ad033f8f885db54504e84d346fa01a81f2404344605b9e7a005b10bebcc41"
     },
     {
       "type": "AWS::ECS::Cluster",
@@ -865,7 +865,7 @@
     {
       "type": "AWS::ElastiCache::SubnetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
@@ -877,7 +877,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "8bc13234c5a901a1813a4d0ecc8937a938e31a9247ebe1b943d67e0963129e1c"
+      "override": "e56590977af954e47d4f000b5af1426306e811451250ed7b60e91f34b98c828c"
     },
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
@@ -2121,7 +2121,7 @@
     {
       "type": "AWS::RDS::DBSubnetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 3,
@@ -2134,7 +2134,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "28fc833975cc29d2d041554d8c7ba8772e9447a5bce445cb54bd3c072419c8f4"
+      "override": "5705128f86e8d158bc2f0d8b3f05a5fafb99f0a7a49d86fcd609e0fc713238ec"
     },
     {
       "type": "AWS::ResilienceHubV2::Policy",

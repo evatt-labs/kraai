@@ -179,7 +179,7 @@
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
-      "subsetSha256": "4e14aff81ccf74d3c25a9f09f67a216747b0608ccdd454a3d9eb456aca1ac9ba"
+      "subsetSha256": "0b75484aad36257b9efce69fe4c4e422499aa0a34536b443fdce392eaa71a8b8"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
@@ -194,7 +194,7 @@
     "elasticache/service/2015-02-02/elasticache-2015-02-02.json": {
       "file": "models/elasticache-2015-02-02.json",
       "sourceSha256": "531f322d4461115b8cebe68b55a2dae3bbbcff5908b5ed711f19fd6bfb073940",
-      "subsetSha256": "ec5742102990d7df78e5274eabfa5654e379cbb999e127e4ab897f0930d5150b"
+      "subsetSha256": "04b75f59079cbe1e903ba08f3df9e54573817901726dc2488b98c68aa422b79d"
     },
     "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
       "file": "models/elementalinference-2018-11-14.json",
@@ -479,7 +479,7 @@
     "rds/service/2014-10-31/rds-2014-10-31.json": {
       "file": "models/rds-2014-10-31.json",
       "sourceSha256": "ece1de6b0278c9327d5e79ac62032ca8c6c1f76e4d24fef95e7d3641f0459020",
-      "subsetSha256": "6a3871ad8e05cf17b5b514e1698313705511d05acf61ba01be2ae71b3c9cf691"
+      "subsetSha256": "c641762b0ff3b7780ac371bfd9efc7af768db8f58fa44bbacda418c16a2a818a"
     },
     "resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json": {
       "file": "models/resiliencehubv2-2026-02-17.json",
