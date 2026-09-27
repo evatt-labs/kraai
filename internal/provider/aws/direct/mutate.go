@@ -177,6 +177,10 @@ func (c *Client) Delete(ctx context.Context, typeName, identifier string) error 
 		return fmt.Errorf("%s has no direct delete", typeName)
 	}
 	values, err := c.addressOf(ctx, r, identifier)
+	// An instance the read to address it finds gone is deleted already.
+	if errors.Is(err, ErrAbsent) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}

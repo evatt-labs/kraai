@@ -174,6 +174,19 @@ func TestUpdateLogGroupRefusesBeforeAnyCall(t *testing.T) {
 	}
 }
 
+// A type addressed by a capture reads the instance before deleting it; one
+// already gone is deleted already, with no call made.
+func TestDeleteLogGroupAlreadyGone(t *testing.T) {
+	f := &fakeLogs{}
+	client := f.serve(t)
+	if err := client.Delete(context.Background(), logGroupType, "kraai-e-logs"); err != nil {
+		t.Fatalf("Delete of a log group already gone = %v, want done", err)
+	}
+	if n := len(f.calls["DeleteLogGroup"]); n != 0 {
+		t.Fatalf("DeleteLogGroup called %d times, want 0", n)
+	}
+}
+
 // Only a type whose mutation names a capture pays a read to address it.
 func TestMutationCapturesMarksOnlyCapturingTypes(t *testing.T) {
 	if readers["AWS::SQS::Queue"].MutationCaptures || !readers[logGroupType].MutationCaptures {
