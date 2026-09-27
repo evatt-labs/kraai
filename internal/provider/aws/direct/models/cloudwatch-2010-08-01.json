@@ -322,6 +322,34 @@
       },
       "type": "list"
     },
+    "com.amazonaws.cloudwatch#ConcurrentModificationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#FaultDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConcurrentModificationException",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatch#DatapointsToAlarm": {
       "traits": {
         "smithy.api#range": {
@@ -329,6 +357,39 @@
         }
       },
       "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#DeleteAlarms": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatch#ResourceConflict"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#ResourceNotFound"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatch#DeleteAlarmsInput"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatch#DeleteAlarmsInput": {
+      "members": {
+        "AlarmNames": {
+          "target": "com.amazonaws.cloudwatch#AlarmNames",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudwatch#DescribeAlarms": {
       "errors": [
@@ -616,10 +677,22 @@
     "com.amazonaws.cloudwatch#GraniteServiceVersion20100801": {
       "operations": [
         {
+          "target": "com.amazonaws.cloudwatch#DeleteAlarms"
+        },
+        {
           "target": "com.amazonaws.cloudwatch#DescribeAlarms"
         },
         {
           "target": "com.amazonaws.cloudwatch#ListTagsForResource"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#PutMetricAlarm"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#TagResource"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#UntagResource"
         }
       ],
       "traits": {
@@ -1127,6 +1200,23 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatch#LimitExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "LimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatch#ListTagsForResource": {
       "errors": [
         {
@@ -1599,6 +1689,136 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.cloudwatch#PutMetricAlarm": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatch#LimitExceededFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatch#PutMetricAlarmInput"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatch#PutMetricAlarmInput": {
+      "members": {
+        "ActionsEnabled": {
+          "target": "com.amazonaws.cloudwatch#ActionsEnabled",
+          "traits": {}
+        },
+        "AlarmActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "AlarmDescription": {
+          "target": "com.amazonaws.cloudwatch#AlarmDescription",
+          "traits": {}
+        },
+        "AlarmName": {
+          "target": "com.amazonaws.cloudwatch#AlarmName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ComparisonOperator": {
+          "target": "com.amazonaws.cloudwatch#ComparisonOperator",
+          "traits": {}
+        },
+        "DatapointsToAlarm": {
+          "target": "com.amazonaws.cloudwatch#DatapointsToAlarm",
+          "traits": {}
+        },
+        "Dimensions": {
+          "target": "com.amazonaws.cloudwatch#Dimensions",
+          "traits": {}
+        },
+        "EvaluateLowSampleCountPercentile": {
+          "target": "com.amazonaws.cloudwatch#EvaluateLowSampleCountPercentile",
+          "traits": {}
+        },
+        "EvaluationCriteria": {
+          "target": "com.amazonaws.cloudwatch#EvaluationCriteria",
+          "traits": {}
+        },
+        "EvaluationInterval": {
+          "target": "com.amazonaws.cloudwatch#EvaluationInterval",
+          "traits": {}
+        },
+        "EvaluationPeriods": {
+          "target": "com.amazonaws.cloudwatch#EvaluationPeriods",
+          "traits": {}
+        },
+        "EvaluationWindow": {
+          "target": "com.amazonaws.cloudwatch#EvaluationWindow",
+          "traits": {}
+        },
+        "ExtendedStatistic": {
+          "target": "com.amazonaws.cloudwatch#ExtendedStatistic",
+          "traits": {}
+        },
+        "InsufficientDataActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "MetricName": {
+          "target": "com.amazonaws.cloudwatch#MetricName",
+          "traits": {}
+        },
+        "Metrics": {
+          "target": "com.amazonaws.cloudwatch#MetricDataQueries",
+          "traits": {}
+        },
+        "Namespace": {
+          "target": "com.amazonaws.cloudwatch#Namespace",
+          "traits": {}
+        },
+        "OKActions": {
+          "target": "com.amazonaws.cloudwatch#ResourceList",
+          "traits": {}
+        },
+        "Period": {
+          "target": "com.amazonaws.cloudwatch#Period",
+          "traits": {}
+        },
+        "Statistic": {
+          "target": "com.amazonaws.cloudwatch#Statistic",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.cloudwatch#TagList",
+          "traits": {}
+        },
+        "Threshold": {
+          "target": "com.amazonaws.cloudwatch#Threshold",
+          "traits": {}
+        },
+        "ThresholdMetricId": {
+          "target": "com.amazonaws.cloudwatch#MetricId",
+          "traits": {}
+        },
+        "TreatMissingData": {
+          "target": "com.amazonaws.cloudwatch#TreatMissingData",
+          "traits": {}
+        },
+        "Unit": {
+          "target": "com.amazonaws.cloudwatch#StandardUnit",
+          "traits": {}
+        },
+        "WarmUpConfiguration": {
+          "target": "com.amazonaws.cloudwatch#WarmUpConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatch#Query": {
       "traits": {
         "smithy.api#length": {
@@ -1642,6 +1862,22 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.cloudwatch#ResourceConflict": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceConflict",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatch#ResourceId": {
       "type": "string"
     },
@@ -1665,6 +1901,23 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudwatch#ResourceNotFound": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudwatch#ResourceNotFoundException": {
       "members": {
@@ -2065,11 +2318,73 @@
       },
       "type": "string"
     },
+    "com.amazonaws.cloudwatch#TagKeyList": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#TagKey"
+      },
+      "type": "list"
+    },
     "com.amazonaws.cloudwatch#TagList": {
       "member": {
         "target": "com.amazonaws.cloudwatch#Tag"
       },
       "type": "list"
+    },
+    "com.amazonaws.cloudwatch#TagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatch#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#InternalServiceFault"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatch#TagResourceInput"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatch#TagResourceOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatch#TagResourceInput": {
+      "members": {
+        "ResourceARN": {
+          "target": "com.amazonaws.cloudwatch#AmazonResourceName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.cloudwatch#TagList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#TagResourceOutput": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudwatch#TagValue": {
       "traits": {
@@ -2103,6 +2418,62 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudwatch#UntagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatch#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#InternalServiceFault"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatch#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatch#UntagResourceInput"
+      },
+      "output": {
+        "target": "com.amazonaws.cloudwatch#UntagResourceOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatch#UntagResourceInput": {
+      "members": {
+        "ResourceARN": {
+          "target": "com.amazonaws.cloudwatch#AmazonResourceName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.cloudwatch#TagKeyList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#UntagResourceOutput": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudwatch#WallClockWindow": {
       "members": {

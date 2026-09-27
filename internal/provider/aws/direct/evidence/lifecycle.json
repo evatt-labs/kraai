@@ -1,6 +1,26 @@
 {
   "types": [
     {
+      "type": "AWS::CloudWatch::Alarm",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "ActionsEnabled",
+        "AlarmDescription",
+        "ComparisonOperator",
+        "DatapointsToAlarm",
+        "Dimensions",
+        "EvaluationPeriods",
+        "Period",
+        "Statistic",
+        "Tags",
+        "Threshold",
+        "TreatMissingData",
+        "Unit"
+      ],
+      "override": "faf9273e307fc9e772ff1dc6ebbb548de18889fb3de9260ed7b396bca7705f0d"
+    },
+    {
       "type": "AWS::ECS::Cluster",
       "date": "2026-09-27",
       "outcome": "parity",

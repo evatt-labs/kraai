@@ -146,6 +146,21 @@ func TestUpdateClusterSendsCapacityProvidersTogether(t *testing.T) {
 	}
 }
 
+// A cluster with providers but no default strategy reads it as an empty
+// list, which the call requires, so it is sent empty rather than left out.
+func TestUpdateClusterSendsARequiredEmptyStrategy(t *testing.T) {
+	f := &fakeCluster{cluster: map[string]any{"clusterName": "kraai-e-cluster"}}
+	client := f.serve(t)
+	current := map[string]any{"CapacityProviders": []any{"FARGATE"}, "DefaultCapacityProviderStrategy": []any{}}
+	if err := client.Update(context.Background(), clusterType, "kraai-e-cluster", current, map[string]any{"CapacityProviders": []any{"FARGATE", "FARGATE_SPOT"}}); err != nil {
+		t.Fatal(err)
+	}
+	strategy, sent := f.calls["PutClusterCapacityProviders"][0]["defaultCapacityProviderStrategy"]
+	if !sent || !reflect.DeepEqual(strategy, []any{}) {
+		t.Fatalf("defaultCapacityProviderStrategy = %v, sent %v; want an empty list sent", strategy, sent)
+	}
+}
+
 // A property sent together with a change but never read is refused, not
 // left out of a call that would then fail or clear it.
 func TestUpdateClusterRefusesAnUnreadTogetherProperty(t *testing.T) {

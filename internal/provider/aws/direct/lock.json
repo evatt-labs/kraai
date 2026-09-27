@@ -114,7 +114,7 @@
     "cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json": {
       "file": "models/cloudwatch-2010-08-01.json",
       "sourceSha256": "bdf9bc624e25b5dc82f0e6965ebd5f5a18c0c28aa906eb5c159f39c11ee5bbc8",
-      "subsetSha256": "9addd916076894667870b1f50d1196e8143ea385cb52220fe4e6e94701826bdc"
+      "subsetSha256": "dc7a9e60c975178d1a7dbf5e9b1e1b0807807083ec125fe3ec7bce832991cfd4"
     },
     "codeconnections/service/2023-12-01/codeconnections-2023-12-01.json": {
       "file": "models/codeconnections-2023-12-01.json",

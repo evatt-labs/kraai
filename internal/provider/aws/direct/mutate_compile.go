@@ -18,8 +18,11 @@ type MutationCall struct {
 	RetryErrors       []string
 	// Properties is what an update call sets, or what a create sends.
 	Properties []string
-	// Together is UpdateCall.Together.
+	// Together is UpdateCall.Together; Required is the properties of such
+	// a call that fill members its operation requires, which must be read
+	// when unchanged. Any other unread one is unset, and left out.
 	Together bool
+	Required []string
 	// Identifier maps, for a create, each primary identifier property to
 	// the output member carrying it, a dotted path into nested structures.
 	Identifier map[string]string
@@ -73,6 +76,8 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	for name := range o.Read.Capture {
 		captures[name] = true
 	}
+	// requiredBy is the properties filling each call's required members.
+	requiredBy := map[*MutationCall][]string{}
 	// tags is the tag property an add call's {added} is shaped as.
 	call := func(m Mutation, at string, extra map[string]bool, tags string) *MutationCall {
 		op, ok := model.Shapes[namespace+m.Operation]
@@ -118,15 +123,23 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				}
 			}
 		}
+		var required []string
 		for _, name := range sortedKeys(input.Members) {
 			if input.Members[name].Traits["smithy.api#required"] != nil {
 				if _, bound := m.Input[name]; !bound {
 					fail("%s operation %s requires %s, which the input does not set", at, m.Operation, name)
 				}
+				for _, ref := range templateRefs(m.Input[name]) {
+					if !slices.Contains(required, ref[0]) {
+						required = append(required, ref[0])
+					}
+				}
 			}
 		}
-		return &MutationCall{Operation: m.Operation, Target: service[len(namespace):] + "." + m.Operation,
+		c := &MutationCall{Operation: m.Operation, Target: service[len(namespace):] + "." + m.Operation,
 			Input: m.Input, AbsentErrors: m.AbsentErrors, RetryErrors: m.RetryErrors}
+		requiredBy[c] = required
+		return c
 	}
 
 	if o.Create != nil {
@@ -211,6 +224,14 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			fail("%s sets its properties together, but has only %d", at, len(u.Properties))
 		}
 		c.Properties, c.Together = u.Properties, u.Together
+		if u.Together {
+			for _, p := range requiredBy[c] {
+				if slices.Contains(u.Properties, p) {
+					c.Required = append(c.Required, p)
+				}
+			}
+			slices.Sort(c.Required)
+		}
 		r.Update = append(r.Update, *c)
 	}
 	if o.Delete != nil {
