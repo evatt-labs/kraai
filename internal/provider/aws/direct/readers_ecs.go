@@ -21,6 +21,9 @@ func init() {
 			Absent: []Condition{
 				{Field: Field{Property: "status", Member: "status", Kind: "scalar"}, Values: []string{"INACTIVE"}},
 			},
+			Busy: []Condition{
+				{Field: Field{Property: "attachmentsStatus", Member: "attachmentsStatus", Kind: "scalar"}, Values: []string{"UPDATE_IN_PROGRESS"}},
+			},
 			Response: []Step{{Name: "clusters", List: true}},
 			Fields: []Field{
 				{Property: "Arn", Member: "clusterArn", Kind: "scalar"},
@@ -72,6 +75,20 @@ func init() {
 				},
 			},
 			AbsentIDs: []string{"kraai-nonexistent-cluster-zzz"},
+			Capture: []Field{
+				{Property: "Arn", Member: "clusterArn", Kind: "scalar"},
+			},
+			LifecycleComplete: true,
+			MutationCaptures:  true,
+			Create:            &MutationCall{Operation: "CreateCluster", Target: "AmazonEC2ContainerServiceV20141113.CreateCluster", NameProperty: "ClusterName", NameTag: "kraai:resource-name", Input: map[string]any{"capacityProviders": "{CapacityProviders}", "clusterName": "{ClusterName}", "configuration": "{Configuration:wire}", "defaultCapacityProviderStrategy": "{DefaultCapacityProviderStrategy:wire}", "serviceConnectDefaults": map[string]any{"namespace": "{ServiceConnectDefaults.Namespace}"}, "settings": "{ClusterSettings:wire}", "tags": "{Tags:wire}"}, Properties: []string{"CapacityProviders", "ClusterName", "ClusterSettings", "Configuration", "DefaultCapacityProviderStrategy", "ServiceConnectDefaults", "Tags"}, Identifier: map[string]string{"ClusterName": "cluster.clusterName"}},
+			Delete:            &MutationCall{Operation: "DeleteCluster", Target: "AmazonEC2ContainerServiceV20141113.DeleteCluster", Input: map[string]any{"cluster": "{ClusterName}"}, AbsentErrors: []string{"ClusterNotFoundException"}, RetryErrors: []string{"UpdateInProgressException"}},
+			Update: []MutationCall{
+				MutationCall{Operation: "UpdateClusterSettings", Target: "AmazonEC2ContainerServiceV20141113.UpdateClusterSettings", Input: map[string]any{"cluster": "{ClusterName}", "settings": "{ClusterSettings:wire}"}, RetryErrors: []string{"UpdateInProgressException"}, Properties: []string{"ClusterSettings"}},
+				MutationCall{Operation: "UpdateCluster", Target: "AmazonEC2ContainerServiceV20141113.UpdateCluster", Input: map[string]any{"cluster": "{ClusterName}", "configuration": "{Configuration:wire}"}, RetryErrors: []string{"UpdateInProgressException"}, Properties: []string{"Configuration"}},
+				MutationCall{Operation: "PutClusterCapacityProviders", Target: "AmazonEC2ContainerServiceV20141113.PutClusterCapacityProviders", Input: map[string]any{"capacityProviders": "{CapacityProviders}", "cluster": "{ClusterName}", "defaultCapacityProviderStrategy": "{DefaultCapacityProviderStrategy:wire}"}, RetryErrors: []string{"UpdateInProgressException"}, Properties: []string{"CapacityProviders", "DefaultCapacityProviderStrategy"}, Together: true},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "TagResource", Target: "AmazonEC2ContainerServiceV20141113.TagResource", TagProperty: "Tags", Input: map[string]any{"resourceArn": "{Arn}", "tags": "{added:wire}"}}, Remove: &MutationCall{Operation: "UntagResource", Target: "AmazonEC2ContainerServiceV20141113.UntagResource", Input: map[string]any{"resourceArn": "{Arn}", "tagKeys": "{removed}"}}},
+			},
+			Mutable: true,
 		},
 		"AWS::ECS::DaemonTaskDefinition": {
 			Type:        "AWS::ECS::DaemonTaskDefinition",

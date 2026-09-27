@@ -96,6 +96,10 @@ type Read struct {
 	// mean the instance is gone although the service still returns it,
 	// such as a status of INACTIVE.
 	Absent map[string][]string `yaml:"absent,omitempty"`
+	// Busy names members of the resource structure and the values that
+	// mean the instance is still settling a change, which a mutation waits
+	// out before it is done, such as attachments UPDATE_IN_PROGRESS.
+	Busy map[string][]string `yaml:"busy,omitempty"`
 	// AbsentErrors names the error codes the read answers for an instance
 	// that does not exist, such as InvalidGroup.NotFound, which the reader
 	// reports as absence rather than as an error.
@@ -238,7 +242,10 @@ type NameFrom struct {
 type UpdateCall struct {
 	Mutation   `yaml:",inline"`
 	Properties []string `yaml:"properties,omitempty"`
-	Tags       *Tags    `yaml:"tags,omitempty"`
+	// Together sends every one of Properties whenever any changes, an
+	// unchanged one as it was read, for a call that requires them all.
+	Together bool  `yaml:"together,omitempty"`
+	Tags     *Tags `yaml:"tags,omitempty"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

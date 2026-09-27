@@ -28,6 +28,9 @@ type Reader struct {
 	Input []Binding
 	// Absent is every condition under which a returned instance is gone.
 	Absent []Condition
+	// Busy is every condition under which an instance is still settling a
+	// change; see Read.Busy.
+	Busy []Condition
 	// AbsentErrors is every error code that means the instance is gone.
 	AbsentErrors []string
 	// Probe lists identifiers that must read as absent, for the harness.

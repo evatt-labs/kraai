@@ -798,7 +798,7 @@
     {
       "type": "AWS::ECS::Cluster",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
@@ -813,7 +813,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "ff7bc0114bfaa6c915d5739df17799fe380419cacbe7b481c283ff5f06a7d9dd"
+      "override": "7c163a61172b6deee433fd4844a1ac995fd0bb7e8b1e181d8a6bba5375e5b87e"
     },
     {
       "type": "AWS::ECS::DaemonTaskDefinition",

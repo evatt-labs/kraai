@@ -8,7 +8,7 @@ import (
 )
 
 // wholePlaceholder matches a template that is one placeholder only.
-var wholePlaceholder = regexp.MustCompile(`^\{([A-Za-z0-9]+)((?::[A-Za-z]+)*)\}$`)
+var wholePlaceholder = regexp.MustCompile(`^\{([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*)((?::[A-Za-z]+)*)\}$`)
 
 // render fills template from values; ok is false when it names a value
 // not being set, and a map or list leaves out each such entry. A {name:wire}
@@ -17,7 +17,11 @@ func render(template any, values map[string]any, wireAs func(name string, v any)
 	switch t := template.(type) {
 	case string:
 		if m := wholePlaceholder.FindStringSubmatch(t); m != nil {
-			v, ok := values[m[1]]
+			root, rest, _ := strings.Cut(m[1], ".")
+			v, ok := values[root]
+			if ok && rest != "" {
+				v, ok = at(v, strings.Split(rest, "."))
+			}
 			if !ok || v == nil {
 				return nil, false, nil
 			}

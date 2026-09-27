@@ -18,6 +18,8 @@ type MutationCall struct {
 	RetryErrors       []string
 	// Properties is what an update call sets, or what a create sends.
 	Properties []string
+	// Together is UpdateCall.Together.
+	Together bool
 	// Identifier maps, for a create, each primary identifier property to
 	// the output member carrying it, a dotted path into nested structures.
 	Identifier map[string]string
@@ -32,8 +34,9 @@ type MutationCall struct {
 // mutationFilters are the template filters a mutation's input may use.
 var mutationFilters = map[string]bool{"json": true, "entries": true, "string": true, "wire": true, "only": true}
 
-// mutationPlaceholder matches a placeholder with any chain of filters.
-var mutationPlaceholder = regexp.MustCompile(`\{([A-Za-z0-9]+)((?::[A-Za-z]+)*)\}`)
+// mutationPlaceholder matches a placeholder, a property or a dotted path
+// into an object property, with any chain of filters.
+var mutationPlaceholder = regexp.MustCompile(`\{([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*)((?::[A-Za-z]+)*)\}`)
 
 // compileMutations checks an override's create, update and delete calls
 // against its model and schema, and fills r's mutations and
@@ -86,9 +89,12 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				fail("%s input %s filters a placeholder inside a longer string; only a whole placeholder takes filters", at, member)
 			}
 			for _, match := range templateRefs(m.Input[member]) {
-				name, chain := match[0], filterChain(match[1])
+				name, chain, path := match[0], filterChain(match[1]), match[2]
 				if _, known := schema.Properties[name]; !known && !extra[name] {
 					fail("%s input %s names {%s}, which is not a property of %s", at, member, name, o.Type)
+				}
+				if path != name && !schemaPath(&schema, path) {
+					fail("%s input %s names {%s}, which is not a path through %s's object properties", at, member, path, o.Type)
 				}
 				if captures[name] && extra[name] {
 					r.MutationCaptures = true
@@ -99,7 +105,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 					}
 				}
 				if slices.Contains(chain, "wire") {
-					property := name
+					property := path
 					if name == "added" && tags != "" {
 						property = tags
 					}
@@ -128,7 +134,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		if c != nil {
 			op := model.Shapes[namespace+o.Create.Operation]
 			output := model.Shapes[ref(op.Output)]
-			sent := slices.ContainsFunc(templateRefs(o.Create.Input), func(m [2]string) bool { return identifier[m[0]] })
+			sent := slices.ContainsFunc(templateRefs(o.Create.Input), func(m [3]string) bool { return identifier[m[0]] })
 			for property := range identifier {
 				path, ok := o.Create.Identifier[property]
 				switch {
@@ -193,7 +199,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			fail("%s sets no property", at)
 		}
 		for _, property := range u.Properties {
-			if !slices.ContainsFunc(templateRefs(u.Input), func(m [2]string) bool { return m[0] == property }) {
+			if !slices.ContainsFunc(templateRefs(u.Input), func(m [3]string) bool { return m[0] == property }) {
 				fail("%s sets %s, which its input does not send", at, property)
 			}
 			if routed[property] {
@@ -201,7 +207,10 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			}
 			routed[property] = true
 		}
-		c.Properties = u.Properties
+		if u.Together && len(u.Properties) < 2 {
+			fail("%s sets its properties together, but has only %d", at, len(u.Properties))
+		}
+		c.Properties, c.Together = u.Properties, u.Together
 		r.Update = append(r.Update, *c)
 	}
 	if o.Delete != nil {
@@ -276,6 +285,20 @@ func mutations(o Override) []Mutation {
 	return out
 }
 
+// schemaPath reports whether a dotted path steps from a property through
+// declared object properties only; a list has no one element to name.
+func schemaPath(schema *cfnSchema, path string) bool {
+	steps := strings.Split(path, ".")
+	p, ok := schema.Properties[steps[0]]
+	for _, step := range steps[1:] {
+		if !ok || schema.resolve(p).Items != nil {
+			return false
+		}
+		p, ok = schema.resolve(p).Properties[step]
+	}
+	return ok
+}
+
 // embeddedFilter reports a filtered placeholder inside a longer string,
 // which render fills as text, unfiltered.
 func embeddedFilter(v any) bool {
@@ -297,14 +320,15 @@ func embeddedFilter(v any) bool {
 	return false
 }
 
-// templateRefs lists the placeholders a template names, as name and filter
-// chain, such as ":only:json".
-func templateRefs(v any) [][2]string {
-	var out [][2]string
+// templateRefs lists the placeholders a template names, as the property,
+// the filter chain, such as ":only:json", and the whole dotted path.
+func templateRefs(v any) [][3]string {
+	var out [][3]string
 	switch t := v.(type) {
 	case string:
 		for _, m := range mutationPlaceholder.FindAllStringSubmatch(t, -1) {
-			out = append(out, [2]string{m[1], m[2]})
+			root, _, _ := strings.Cut(m[1], ".")
+			out = append(out, [3]string{root, m[2], m[1]})
 		}
 	case []any:
 		for _, item := range t {

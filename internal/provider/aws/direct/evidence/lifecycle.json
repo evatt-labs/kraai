@@ -1,6 +1,19 @@
 {
   "types": [
     {
+      "type": "AWS::ECS::Cluster",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "CapacityProviders",
+        "ClusterSettings",
+        "Configuration",
+        "DefaultCapacityProviderStrategy",
+        "Tags"
+      ],
+      "override": "7c163a61172b6deee433fd4844a1ac995fd0bb7e8b1e181d8a6bba5375e5b87e"
+    },
+    {
       "type": "AWS::ECS::TaskDefinition",
       "date": "2026-09-27",
       "outcome": "parity",

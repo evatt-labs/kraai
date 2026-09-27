@@ -56,7 +56,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		}
 	}
 	if len(rest) > 0 {
-		if err := c.waitFor(ctx, typeName, id, func(_ map[string]any, err error) bool { return err == nil }); err != nil {
+		if err := c.waitFor(ctx, typeName, id, func(_ map[string]any, err error) bool { return err == nil && c.settled(ctx, r, id) }); err != nil {
 			return id, err
 		}
 		address, err := c.addressOf(ctx, r, id)
@@ -67,8 +67,15 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 			return id, err
 		}
 	}
+	// A write-only property is never read back, so the wait cannot see it.
+	readable := map[string]any{}
+	for _, f := range append(slices.Clone(r.Fields), alsoFields(r)...) {
+		if v, ok := values[f.Property]; ok {
+			readable[f.Property] = v
+		}
+	}
 	return id, c.waitFor(ctx, typeName, id, func(props map[string]any, err error) bool {
-		return err == nil && covers(values, props)
+		return err == nil && covers(readable, props) && c.settled(ctx, r, id)
 	})
 }
 
@@ -87,7 +94,7 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 		return err
 	}
 	return c.waitFor(ctx, typeName, identifier, func(props map[string]any, err error) bool {
-		return err == nil && covers(changes, props)
+		return err == nil && covers(changes, props) && c.settled(ctx, r, identifier)
 	})
 }
 
@@ -130,6 +137,13 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 		if len(values) == len(address) {
 			continue
 		}
+		if u.Together {
+			for _, p := range u.Properties {
+				if _, changed := changes[p]; !changed {
+					values[p] = current[p]
+				}
+			}
+		}
 		if _, err := c.mutate(ctx, r, u, values); err != nil {
 			return err
 		}
@@ -171,7 +185,7 @@ func (c *Client) addressOf(ctx context.Context, r Reader, identifier string) (ma
 	if !r.MutationCaptures {
 		return values, nil
 	}
-	_, captured, err := c.readCall(ctx, r, map[string]string{property: identifier})
+	_, captured, _, err := c.readCall(ctx, r, map[string]string{property: identifier})
 	if err != nil {
 		return nil, fmt.Errorf("reading the %s %s to address its mutation: %w", r.Type, identifier, err)
 	}
@@ -181,6 +195,16 @@ func (c *Client) addressOf(ctx context.Context, r Reader, identifier string) (ma
 		}
 	}
 	return values, nil
+}
+
+// settled reports whether the instance identifier names is past every
+// Busy condition, so a mutation of it is done and the next may be made.
+func (c *Client) settled(ctx context.Context, r Reader, identifier string) bool {
+	if len(r.Busy) == 0 {
+		return true
+	}
+	_, _, busy, err := c.readCall(ctx, r, map[string]string{r.Identifier[0].Property: identifier})
+	return err == nil && !busy
 }
 
 // mutate sends one mutation, its input rendered from values, and returns
@@ -387,6 +411,15 @@ func jsonValue(v any) any {
 	dec.UseNumber()
 	if dec.Decode(&out) != nil {
 		return v
+	}
+	return out
+}
+
+// alsoFields is every property the read's further calls map.
+func alsoFields(r Reader) []Field {
+	var out []Field
+	for _, also := range r.Also {
+		out = append(out, also.Fields...)
 	}
 	return out
 }

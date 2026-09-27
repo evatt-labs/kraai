@@ -190,9 +190,22 @@ func (c *callCompiler) fields() {
 	checkSelections(c.r.Fields)
 }
 
-// absent compiles the conditions under which a returned instance is gone.
+// absent compiles the conditions under which a returned instance is gone,
+// and those under which it is busy settling a change.
 func (c *callCompiler) absent() {
-	for _, path := range sortedKeys(c.o.Read.Absent) {
+	c.r.Absent = c.conditions("absent", c.o.Read.Absent)
+	if len(c.o.Read.Busy) > 0 && isXML(c.r.Protocol) {
+		c.fail("busy is not supported under %s yet", c.r.Protocol)
+		return
+	}
+	c.r.Busy = c.conditions("busy", c.o.Read.Busy)
+}
+
+// conditions compiles the members of the resource structure, as dotted
+// paths, and the values of each that make a condition, naming them label.
+func (c *callCompiler) conditions(label string, spec map[string][]string) []Condition {
+	var out []Condition
+	for _, path := range sortedKeys(spec) {
 		// A dotted path reaches the member through structures, or through a
 		// list by selecting the one element, such as a selected association.
 		steps := strings.Split(path, ".")
@@ -204,13 +217,13 @@ func (c *callCompiler) absent() {
 			}
 			pm, ok := c.model.Shapes[holder].Members[step]
 			if !ok {
-				c.fail("absent names %s, but %s is not a member of %s", path, step, holder)
+				c.fail(label+" names %s, but %s is not a member of %s", path, step, holder)
 				walked = false
 				break
 			}
 			next, isList := pm.Target, targetType(c.model.Shapes[pm.Target].Type, pm.Target) == "list"
 			if isList != (where != "") {
-				c.fail("absent names %s, but %s must select one element of a list or be a structure", path, step)
+				c.fail(label+" names %s, but %s must select one element of a list or be a structure", path, step)
 				walked = false
 				break
 			}
@@ -218,13 +231,13 @@ func (c *callCompiler) absent() {
 				next = ref(c.model.Shapes[next].Member)
 			}
 			if !isStructure(c.model.Shapes[next]) {
-				c.fail("absent names %s, but %s is not a structure", path, step)
+				c.fail(label+" names %s, but %s is not a structure", path, step)
 				walked = false
 				break
 			}
 			for _, p := range placeholders(equals) {
 				if !c.want[p] {
-					c.fail("absent %s selects by {%s}, which is not the primary identifier", path, p)
+					c.fail(label+" %s selects by {%s}, which is not the primary identifier", path, p)
 				}
 			}
 			via, holder = append(via, Step{Name: step, List: isList, Where: where, Equals: equals}), next
@@ -235,23 +248,23 @@ func (c *callCompiler) absent() {
 		member := steps[len(steps)-1]
 		m, ok := c.model.Shapes[holder].Members[member]
 		if !ok {
-			c.fail("absent names %s, which %s does not have", path, holder)
+			c.fail(label+" names %s, which %s does not have", path, holder)
 			continue
 		}
 		if kind := kindOf(c.model.Shapes[m.Target].Type, m.Target); kind != "scalar" {
-			c.fail("absent names %s, which is a %s, not a scalar", path, kind)
+			c.fail(label+" names %s, which is a %s, not a scalar", path, kind)
 			continue
 		}
-		if len(c.o.Read.Absent[path]) == 0 {
-			c.fail("absent names %s with no value", path)
+		if len(spec[path]) == 0 {
+			c.fail(label+" names %s with no value", path)
 		}
-		for _, value := range c.o.Read.Absent[path] {
+		for _, value := range spec[path] {
 			if targetType(c.model.Shapes[m.Target].Type, m.Target) == "boolean" {
 				if value != "true" && value != "false" {
-					c.fail("absent %s is boolean, not %q", path, value)
+					c.fail(label+" %s is boolean, not %q", path, value)
 				}
 			} else if reason := fixedValue(&c.model, m.Target, value); reason != "" {
-				c.fail("absent %s %s", path, reason)
+				c.fail(label+" %s %s", path, reason)
 			}
 		}
 		f := Field{Property: path, Member: member, Kind: "scalar"}
@@ -261,10 +274,11 @@ func (c *callCompiler) absent() {
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		fields := []Field{f}
 		if isXML(c.r.Protocol) {
-			xmlFields(&c.model, c.resource, fields, "absent ", c.fail)
+			xmlFields(&c.model, c.resource, fields, label+" ", c.fail)
 		}
-		c.r.Absent = append(c.r.Absent, Condition{Field: fields[0], Values: c.o.Read.Absent[path]})
+		out = append(out, Condition{Field: fields[0], Values: spec[path]})
 	}
+	return out
 }
 
 // lists compiles the type's list and probe operations.

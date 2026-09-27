@@ -102,7 +102,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			}
 		}
 		for _, m := range mutations(o) {
-			named = named || slices.ContainsFunc(templateRefs(m.Input), func(ref [2]string) bool { return ref[0] == name })
+			named = named || slices.ContainsFunc(templateRefs(m.Input), func(ref [3]string) bool { return ref[0] == name })
 		}
 		if !named {
 			errs = append(errs, fmt.Errorf("capture %s is named by no further call or mutation", name))
