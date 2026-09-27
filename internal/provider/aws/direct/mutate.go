@@ -139,9 +139,15 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 		}
 		if u.Together {
 			for _, p := range u.Properties {
-				if _, changed := changes[p]; !changed {
-					values[p] = current[p]
+				if _, changed := changes[p]; changed {
+					continue
 				}
+				v, read := current[p]
+				if !read {
+					// Left out, the call would fail or clear it.
+					return fmt.Errorf("%s's %s sends %s with what changed, but it was not read", r.Type, u.Operation, p)
+				}
+				values[p] = v
 			}
 		}
 		if _, err := c.mutate(ctx, r, u, values); err != nil {

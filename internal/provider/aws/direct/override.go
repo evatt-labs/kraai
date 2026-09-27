@@ -195,7 +195,8 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 
 // Mutation is one call that changes an instance. Input is the operation's
 // input as templates: a string that is exactly {Property} or
-// {Property:filter} is that property's desired value, and a template whose
+// {Property:filter} is that property's desired value, {Property.Member} a
+// member of an object property, never through a list, and a template whose
 // property is not being set is left out. The filters are json, a value
 // sent as its JSON text; string, a number or boolean sent as text;
 // entries, a list of Key/Value structures sent as a map; wire, a value

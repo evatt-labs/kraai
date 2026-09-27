@@ -146,6 +146,20 @@ func TestUpdateClusterSendsCapacityProvidersTogether(t *testing.T) {
 	}
 }
 
+// A property sent together with a change but never read is refused, not
+// left out of a call that would then fail or clear it.
+func TestUpdateClusterRefusesAnUnreadTogetherProperty(t *testing.T) {
+	f := &fakeCluster{cluster: map[string]any{"clusterName": "kraai-e-cluster"}}
+	client := f.serve(t)
+	err := client.Update(context.Background(), clusterType, "kraai-e-cluster", map[string]any{}, map[string]any{"CapacityProviders": []any{"FARGATE"}})
+	if err == nil || !strings.Contains(err.Error(), "sends DefaultCapacityProviderStrategy with what changed, but it was not read") {
+		t.Fatalf("Update = %v", err)
+	}
+	if n := len(f.calls["PutClusterCapacityProviders"]); n != 0 {
+		t.Fatalf("PutClusterCapacityProviders called %d times, want 0", n)
+	}
+}
+
 // A cluster busy with a change made elsewhere is waited out, not failed.
 func TestDeleteClusterRetriesWhileBusy(t *testing.T) {
 	f := &fakeCluster{cluster: map[string]any{"clusterName": "kraai-e-cluster"}, refuse: 2}
