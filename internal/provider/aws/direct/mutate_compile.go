@@ -20,7 +20,8 @@ type MutationCall struct {
 	Properties []string
 	// Together is UpdateCall.Together; Required is the properties of such
 	// a call that fill members its operation requires, which must be read
-	// when unchanged. Any other unread one is unset, and left out.
+	// when unchanged and are sent even when empty. Any other one unread or
+	// read empty is unset, and left out.
 	Together bool
 	Required []string
 	// Identifier maps, for a create, each primary identifier property to
