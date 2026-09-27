@@ -412,6 +412,20 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	if m.Identifier != nil {
 		fmt.Fprintf(b, "Identifier: %#v, ", m.Identifier)
 	}
+	if len(m.Form) > 0 {
+		b.WriteString("Form: map[string]FormStep{")
+		for _, path := range sortedKeys(m.Form) {
+			s := m.Form[path]
+			fmt.Fprintf(b, "%q: {Key: %q, Kind: %q", path, s.Key, s.Kind)
+			for _, f := range []struct{ name, value string }{{"Item", s.Item}, {"Entry", s.Entry}, {"MapKey", s.MapKey}, {"MapValue", s.MapValue}} {
+				if f.value != "" {
+					fmt.Fprintf(b, ", %s: %q", f.name, f.value)
+				}
+			}
+			b.WriteString("}, ")
+		}
+		b.WriteString("}, ")
+	}
 	if m.Together {
 		b.WriteString("Together: true, ")
 	}

@@ -28,7 +28,14 @@ func init() {
 					},
 				},
 			},
-			AbsentIDs: []string{"igw-0a1b2c3d4e5f60718"},
+			AbsentIDs:         []string{"igw-0a1b2c3d4e5f60718"},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "CreateInternetGateway", Target: "AmazonEC2.CreateInternetGateway", Input: map[string]any{"TagSpecifications": []any{map[string]any{"ResourceType": "internet-gateway", "Tags": "{Tags:wire}"}}}, Properties: []string{"Tags"}, Identifier: map[string]string{"InternetGatewayId": "internetGateway.internetGatewayId"}, Form: map[string]FormStep{"TagSpecifications": {Key: "TagSpecification", Kind: "list"}, "TagSpecifications[]": {Key: "", Kind: "structure"}, "TagSpecifications[].ResourceType": {Key: "ResourceType", Kind: "scalar"}, "TagSpecifications[].Tags": {Key: "Tag", Kind: "list"}, "TagSpecifications[].Tags[]": {Key: "", Kind: "structure"}, "TagSpecifications[].Tags[].Key": {Key: "Key", Kind: "scalar"}, "TagSpecifications[].Tags[].Value": {Key: "Value", Kind: "scalar"}}},
+			Delete:            &MutationCall{Operation: "DeleteInternetGateway", Target: "AmazonEC2.DeleteInternetGateway", Input: map[string]any{"InternetGatewayId": "{InternetGatewayId}"}, AbsentErrors: []string{"InvalidInternetGatewayID.NotFound"}, Form: map[string]FormStep{"InternetGatewayId": {Key: "InternetGatewayId", Kind: "scalar"}}},
+			Update: []MutationCall{
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "CreateTags", Target: "AmazonEC2.CreateTags", TagProperty: "Tags", Input: map[string]any{"Resources": []any{"{InternetGatewayId}"}, "Tags": "{added:wire}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "DeleteTags", Target: "AmazonEC2.DeleteTags", Input: map[string]any{"Resources": []any{"{InternetGatewayId}"}, "Tags": "{removed:keys}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}},
+			},
+			Mutable: true,
 		},
 		"AWS::EC2::RouteTable": {
 			Type:        "AWS::EC2::RouteTable",

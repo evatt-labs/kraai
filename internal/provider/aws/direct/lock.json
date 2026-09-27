@@ -179,7 +179,7 @@
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
-      "subsetSha256": "0e83bd27f2b7d0444eaf06e2bc5e30ea24d4bbd7fc9b90405257fbe7c0750581"
+      "subsetSha256": "4e14aff81ccf74d3c25a9f09f67a216747b0608ccdd454a3d9eb456aca1ac9ba"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",

@@ -122,6 +122,14 @@ func filter(name string, v any) (any, bool) {
 			raw, err := json.Marshal(t)
 			return string(raw), err == nil
 		}
+	case "keys":
+		// A list of names sent as structures naming each, as EC2's
+		// DeleteTags takes the tags it removes.
+		var out []any
+		for _, name := range asList(v) {
+			out = append(out, map[string]any{"Key": name})
+		}
+		return out, true
 	case "entries":
 		out := map[string]any{}
 		items, _ := v.([]any)
