@@ -115,6 +115,15 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if len(r.Busy) > 0 {
+		b.WriteString("Busy: []Condition{\n")
+		for _, c := range r.Busy {
+			b.WriteString("{Field: ")
+			fieldLiteral(b, c.Field, "Field")
+			fmt.Fprintf(b, ", Values: %#v},\n", c.Values)
+		}
+		b.WriteString("},\n")
+	}
 	if len(r.AbsentErrors) > 0 {
 		fmt.Fprintf(b, "AbsentErrors: %#v,\n", r.AbsentErrors)
 	}
@@ -402,6 +411,9 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	}
 	if m.Identifier != nil {
 		fmt.Fprintf(b, "Identifier: %#v, ", m.Identifier)
+	}
+	if m.Together {
+		b.WriteString("Together: true, ")
 	}
 	for _, f := range []struct {
 		name string

@@ -96,6 +96,10 @@ type Read struct {
 	// mean the instance is gone although the service still returns it,
 	// such as a status of INACTIVE.
 	Absent map[string][]string `yaml:"absent,omitempty"`
+	// Busy names members of the resource structure and the values that
+	// mean the instance is still settling a change, which a mutation waits
+	// out before it is done, such as attachments UPDATE_IN_PROGRESS.
+	Busy map[string][]string `yaml:"busy,omitempty"`
 	// AbsentErrors names the error codes the read answers for an instance
 	// that does not exist, such as InvalidGroup.NotFound, which the reader
 	// reports as absence rather than as an error.
@@ -191,7 +195,8 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 
 // Mutation is one call that changes an instance. Input is the operation's
 // input as templates: a string that is exactly {Property} or
-// {Property:filter} is that property's desired value, and a template whose
+// {Property:filter} is that property's desired value, {Property.Member} a
+// member of an object property, never through a list, and a template whose
 // property is not being set is left out. The filters are json, a value
 // sent as its JSON text; string, a number or boolean sent as text;
 // entries, a list of Key/Value structures sent as a map; wire, a value
@@ -238,7 +243,10 @@ type NameFrom struct {
 type UpdateCall struct {
 	Mutation   `yaml:",inline"`
 	Properties []string `yaml:"properties,omitempty"`
-	Tags       *Tags    `yaml:"tags,omitempty"`
+	// Together sends every one of Properties whenever any changes, an
+	// unchanged one as it was read, for a call that requires them all.
+	Together bool  `yaml:"together,omitempty"`
+	Tags     *Tags `yaml:"tags,omitempty"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

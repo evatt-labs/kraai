@@ -50,7 +50,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if !ok {
 		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
-	props, captured, err := c.readCall(ctx, r, identifier)
+	props, captured, _, err := c.readCall(ctx, r, identifier)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 					}
 				}
 				g.Go(func() error {
-					more, _, err := c.readCall(gctx, also, elementVars)
+					more, _, _, err := c.readCall(gctx, also, elementVars)
 					if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
 						return nil
 					}
@@ -112,7 +112,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 			continue
 		}
 		g.Go(func() error {
-			more, _, err := c.readCall(gctx, also, vars)
+			more, _, _, err := c.readCall(gctx, also, vars)
 			if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
 				return nil
 			}
@@ -146,14 +146,14 @@ type elementResult struct {
 }
 
 // readCall makes one call of a read and translates its response, and
-// returns the values r captures from it.
-func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]string) (props, captured map[string]any, err error) {
+// returns the values r captures from it and whether it is busy.
+func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]string) (props, captured map[string]any, busy bool, err error) {
 	typeName := r.Type
 	values := make([]Binding, 0, len(r.Identifier)+len(r.Input))
 	for _, b := range r.Identifier {
 		value, ok := identifier[b.Property]
 		if !ok {
-			return nil, nil, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
+			return nil, nil, false, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
 		}
 		if b.Location == "placeholder" {
 			continue
@@ -165,7 +165,7 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		template := b.Value
 		b.Value = substitute(b.Value, identifier).(string)
 		if missing := placeholderName.FindStringSubmatch(b.Value); missing != nil {
-			return nil, nil, fmt.Errorf("the %s read did not return %s, which its call %s is addressed by", typeName, missing[1], r.Action+r.Target+r.URI)
+			return nil, nil, false, fmt.Errorf("the %s read did not return %s, which its call %s is addressed by", typeName, missing[1], r.Action+r.Target+r.URI)
 		}
 		if b.Structured != nil {
 			b.Structured = substitute(b.Structured, identifier)
@@ -179,16 +179,18 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
-			return nil, nil, r.absence(err)
+			return nil, nil, false, r.absence(err)
 		}
-		return r.readXML(body, &walk{vars: identifier})
+		// The compiler refuses busy conditions under an XML protocol.
+		props, captured, err := r.readXML(body, &walk{vars: identifier})
+		return props, captured, false, err
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
-		return nil, nil, r.absence(err)
+		return nil, nil, false, r.absence(err)
 	}
 	if token, _ := at(out, r.PageToken); len(r.PageToken) > 0 && token != nil && token != "" {
-		return nil, nil, errIncomplete(typeName)
+		return nil, nil, false, errIncomplete(typeName)
 	}
 	root, _ := out.(map[string]any)
 	for _, step := range r.Response {
@@ -197,17 +199,17 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		if step.List {
 			items, _ := out.([]any)
 			if len(items) == 0 {
-				return nil, nil, ErrAbsent
+				return nil, nil, false, ErrAbsent
 			}
 			if len(items) != 1 {
-				return nil, nil, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
+				return nil, nil, false, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
 			}
 			out = items[0]
 		}
 	}
 	obj, ok := out.(map[string]any)
 	if !ok {
-		return nil, nil, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
+		return nil, nil, false, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
 	w := &walk{vars: identifier}
 	props, err = r.finish(func(fields []Field, fromRoot bool) map[string]any {
@@ -218,14 +220,18 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	})
 	if err == nil {
 		captured = r.translate(w, obj, r.Capture)
+		busy = r.busy(func(f Field) (any, bool) {
+			v, ok := r.translate(w, obj, []Field{f})[f.Property]
+			return v, ok
+		})
 	}
 	if err == nil {
 		err = errors.Join(w.errs...)
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
-	return props, captured, nil
+	return props, captured, busy, nil
 }
 
 // absence is err, or ErrAbsent when err is an error code r's service
@@ -285,6 +291,17 @@ func made(when []Condition, props map[string]any) bool {
 // can neither prove absence nor carry every property.
 func errIncomplete(typeName string) error {
 	return fmt.Errorf("the %s read was answered with a page token, so the response is incomplete", typeName)
+}
+
+// busy reports whether any Busy condition holds, value reading a
+// condition's member from the response.
+func (r Reader) busy(value func(Field) (any, bool)) bool {
+	for _, c := range r.Busy {
+		if got, present := value(c.Field); present && slices.Contains(c.Values, fmt.Sprint(got)) {
+			return true
+		}
+	}
+	return false
 }
 
 // ErrAbsent is Read's answer for an instance the service still returns

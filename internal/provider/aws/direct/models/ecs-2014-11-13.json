@@ -16,6 +16,12 @@
     "com.amazonaws.ecs#AmazonEC2ContainerServiceV20141113": {
       "operations": [
         {
+          "target": "com.amazonaws.ecs#CreateCluster"
+        },
+        {
+          "target": "com.amazonaws.ecs#DeleteCluster"
+        },
+        {
           "target": "com.amazonaws.ecs#DeregisterTaskDefinition"
         },
         {
@@ -31,6 +37,9 @@
           "target": "com.amazonaws.ecs#ListTaskDefinitions"
         },
         {
+          "target": "com.amazonaws.ecs#PutClusterCapacityProviders"
+        },
+        {
           "target": "com.amazonaws.ecs#RegisterTaskDefinition"
         },
         {
@@ -38,6 +47,12 @@
         },
         {
           "target": "com.amazonaws.ecs#UntagResource"
+        },
+        {
+          "target": "com.amazonaws.ecs#UpdateCluster"
+        },
+        {
+          "target": "com.amazonaws.ecs#UpdateClusterSettings"
         }
       ],
       "traits": {
@@ -647,6 +662,54 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ecs#ClusterContainsCapacityProviderException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterContainsContainerInstancesException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterContainsServicesException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterContainsTasksException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ecs#ClusterField": {
       "members": {
         "ATTACHMENTS": {
@@ -705,6 +768,18 @@
         "namespace": {
           "target": "com.amazonaws.ecs#String",
           "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#ClusterServiceConnectDefaultsRequest": {
+      "members": {
+        "namespace": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
         }
       },
       "traits": {},
@@ -1037,6 +1112,106 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ecs#CreateCluster": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ecs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClientException"
+        },
+        {
+          "target": "com.amazonaws.ecs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.ecs#NamespaceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ServerException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ecs#CreateClusterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ecs#CreateClusterResponse"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "ecs:capacity-provider",
+          "ecs:fargate-ephemeral-storage-kms-key",
+          "aws:RequestTag/${TagKey}",
+          "aws:TagKeys"
+        ],
+        "aws.iam#iamAction": {
+          "createsResources": [
+            "cluster"
+          ],
+          "documentation": "Grants permission to create a new Amazon ECS cluster",
+          "relativeDocumentation": "API_CreateCluster.html",
+          "resources": {
+            "required": {
+              "cluster": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ecs#CreateClusterRequest": {
+      "members": {
+        "capacityProviders": {
+          "target": "com.amazonaws.ecs#StringList",
+          "traits": {}
+        },
+        "clusterName": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        },
+        "configuration": {
+          "target": "com.amazonaws.ecs#ClusterConfiguration",
+          "traits": {}
+        },
+        "defaultCapacityProviderStrategy": {
+          "target": "com.amazonaws.ecs#CapacityProviderStrategy",
+          "traits": {}
+        },
+        "serviceConnectDefaults": {
+          "target": "com.amazonaws.ecs#ClusterServiceConnectDefaultsRequest",
+          "traits": {}
+        },
+        "settings": {
+          "target": "com.amazonaws.ecs#ClusterSettings",
+          "traits": {}
+        },
+        "tags": {
+          "target": "com.amazonaws.ecs#Tags",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#CreateClusterResponse": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#Cluster",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ecs#DaemonContainerDefinition": {
       "members": {
         "command": {
@@ -1335,6 +1510,92 @@
         "target": "com.amazonaws.ecs#DaemonVolume"
       },
       "type": "list"
+    },
+    "com.amazonaws.ecs#DeleteCluster": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ecs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClientException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterContainsCapacityProviderException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterContainsContainerInstancesException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterContainsServicesException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterContainsTasksException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ecs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ServerException"
+        },
+        {
+          "target": "com.amazonaws.ecs#UpdateInProgressException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ecs#DeleteClusterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ecs#DeleteClusterResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to delete the specified cluster",
+          "relativeDocumentation": "API_DeleteCluster.html",
+          "resources": {
+            "required": {
+              "cluster": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        },
+        "smithy.api#idempotent": {}
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ecs#DeleteClusterRequest": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "ClusterName"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#DeleteClusterResponse": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#Cluster",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.ecs#DeregisterTaskDefinition": {
       "errors": [
@@ -2472,6 +2733,18 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ecs#NamespaceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ecs#NetworkMode": {
       "members": {
         "AWSVPC": {
@@ -2656,6 +2929,97 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ecs#PutClusterCapacityProviders": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ecs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClientException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ecs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ResourceInUseException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ServerException"
+        },
+        {
+          "target": "com.amazonaws.ecs#UpdateInProgressException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ecs#PutClusterCapacityProvidersRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ecs#PutClusterCapacityProvidersResponse"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "ecs:capacity-provider"
+        ],
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to modify the available capacity providers and the default capacity provider strategy for a cluster",
+          "relativeDocumentation": "API_PutClusterCapacityProviders.html",
+          "resources": {
+            "required": {
+              "cluster": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ecs#PutClusterCapacityProvidersRequest": {
+      "members": {
+        "capacityProviders": {
+          "target": "com.amazonaws.ecs#StringList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "cluster": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "ClusterName"
+          }
+        },
+        "defaultCapacityProviderStrategy": {
+          "target": "com.amazonaws.ecs#CapacityProviderStrategy",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#PutClusterCapacityProvidersResponse": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#Cluster",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ecs#RegisterTaskDefinition": {
       "errors": [
         {
@@ -2836,6 +3200,18 @@
         "target": "com.amazonaws.ecs#Attribute"
       },
       "type": "list"
+    },
+    "com.amazonaws.ecs#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ecs#ResourceNotFoundException": {
       "members": {
@@ -3630,6 +4006,185 @@
       "members": {},
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#UpdateCluster": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ecs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClientException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ecs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.ecs#NamespaceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ServerException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ecs#UpdateClusterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ecs#UpdateClusterResponse"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "ecs:fargate-ephemeral-storage-kms-key"
+        ],
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to modify the configuration or settings to use for a cluster",
+          "relativeDocumentation": "API_UpdateCluster.html",
+          "resources": {
+            "required": {
+              "cluster": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ecs#UpdateClusterRequest": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "ClusterName"
+          }
+        },
+        "configuration": {
+          "target": "com.amazonaws.ecs#ClusterConfiguration",
+          "traits": {}
+        },
+        "serviceConnectDefaults": {
+          "target": "com.amazonaws.ecs#ClusterServiceConnectDefaultsRequest",
+          "traits": {}
+        },
+        "settings": {
+          "target": "com.amazonaws.ecs#ClusterSettings",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#UpdateClusterResponse": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#Cluster",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#UpdateClusterSettings": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ecs#AccessDeniedException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClientException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ClusterNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.ecs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.ecs#ServerException"
+        },
+        {
+          "target": "com.amazonaws.ecs#UpdateInProgressException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ecs#UpdateClusterSettingsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ecs#UpdateClusterSettingsResponse"
+      },
+      "traits": {
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to modify the settings to use for a cluster",
+          "relativeDocumentation": "API_UpdateClusterSettings.html",
+          "resources": {
+            "required": {
+              "cluster": {
+                "conditionKeys": [
+                  "aws:ResourceTag/${TagKey}"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.ecs#UpdateClusterSettingsRequest": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#resourceIdentifier": "ClusterName"
+          }
+        },
+        "settings": {
+          "target": "com.amazonaws.ecs#ClusterSettings",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#UpdateClusterSettingsResponse": {
+      "members": {
+        "cluster": {
+          "target": "com.amazonaws.ecs#Cluster",
+          "traits": {
+            "smithy.api#notProperty": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ecs#UpdateInProgressException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ecs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
