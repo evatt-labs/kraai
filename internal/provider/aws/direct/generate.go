@@ -162,6 +162,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	if r.LifecycleComplete {
 		b.WriteString("LifecycleComplete: true,\n")
 	}
+	if r.MutationCaptures {
+		b.WriteString("MutationCaptures: true,\n")
+	}
 	for _, m := range []struct {
 		name string
 		call *MutationCall

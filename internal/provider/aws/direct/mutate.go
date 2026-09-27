@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -18,7 +17,9 @@ import (
 func CanMutate(typeName string) bool { return readers[typeName].Mutable }
 
 // Create creates an instance of typeName with the desired properties and
-// returns its identifier once a read shows it.
+// returns its identifier once a read shows it. Properties the create call
+// does not send are set by the update calls once the instance reads; when
+// one of those fails, the identifier is returned with the error.
 func (c *Client) Create(ctx context.Context, typeName string, desired map[string]any) (string, error) {
 	r, ok := readers[typeName]
 	if !ok || r.Create == nil || len(r.Identifier) != 1 {
@@ -37,10 +38,34 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		return "", err
 	}
 	property := r.Identifier[0].Property
-	v, _ := at(out, strings.Split(r.Create.Identifier[property], "."))
+	var v any
+	if wholePlaceholder.MatchString(r.Create.Identifier[property]) {
+		// The create answers with no identifier; it is the one sent.
+		v = values[property]
+	} else {
+		v, _ = at(out, strings.Split(r.Create.Identifier[property], "."))
+	}
 	id, _ := v.(string)
 	if id == "" {
 		return "", fmt.Errorf("the %s create returned no %s", typeName, r.Create.Identifier[property])
+	}
+	rest := map[string]any{}
+	for p, v := range values {
+		if !slices.Contains(r.Create.Properties, p) {
+			rest[p] = v
+		}
+	}
+	if len(rest) > 0 {
+		if err := c.waitFor(ctx, typeName, id, func(_ map[string]any, err error) bool { return err == nil }); err != nil {
+			return id, err
+		}
+		address, err := c.addressOf(ctx, r, id)
+		if err == nil {
+			err = c.apply(ctx, r, address, nil, rest)
+		}
+		if err != nil {
+			return id, err
+		}
 	}
 	return id, c.waitFor(ctx, typeName, id, func(props map[string]any, err error) bool {
 		return err == nil && covers(values, props)
@@ -54,17 +79,35 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 	if !ok || len(r.Identifier) != 1 {
 		return fmt.Errorf("%s has no direct update", typeName)
 	}
-	id := map[string]any{r.Identifier[0].Property: identifier}
-	routed := map[string]bool{}
+	address, err := c.addressOf(ctx, r, identifier)
+	if err == nil {
+		err = c.apply(ctx, r, address, current, changes)
+	}
+	if err != nil {
+		return err
+	}
+	return c.waitFor(ctx, typeName, identifier, func(props map[string]any, err error) bool {
+		return err == nil && covers(changes, props)
+	})
+}
+
+// apply sends the update calls that set changes, current being how the
+// instance was read and address what its calls are addressed by. A change
+// no call sets is refused before any call is made.
+func (c *Client) apply(ctx context.Context, r Reader, address, current, changes map[string]any) error {
+	for p := range changes {
+		if !slices.ContainsFunc(r.Update, func(u MutationCall) bool { return u.TagProperty == p || slices.Contains(u.Properties, p) }) {
+			return fmt.Errorf("%s has no direct update for %s", r.Type, p)
+		}
+	}
 	for _, u := range r.Update {
 		if u.TagProperty != "" {
 			desired, changed := changes[u.TagProperty]
 			if !changed {
 				continue
 			}
-			routed[u.TagProperty] = true
 			added, removed := tagChanges(current[u.TagProperty], desired)
-			values := maps.Clone(id)
+			values := maps.Clone(address)
 			values["added"], values["removed"] = added, removed
 			if len(added) > 0 {
 				if _, err := c.mutate(ctx, r, *u.Add, values); err != nil {
@@ -78,27 +121,20 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 			}
 			continue
 		}
-		values := maps.Clone(id)
+		values := maps.Clone(address)
 		for _, p := range u.Properties {
 			if v, changed := changes[p]; changed {
-				values[p], routed[p] = v, true
+				values[p] = v
 			}
 		}
-		if len(values) == len(id) {
+		if len(values) == len(address) {
 			continue
 		}
 		if _, err := c.mutate(ctx, r, u, values); err != nil {
 			return err
 		}
 	}
-	for p := range changes {
-		if !routed[p] {
-			return fmt.Errorf("%s has no direct update for %s", typeName, p)
-		}
-	}
-	return c.waitFor(ctx, typeName, identifier, func(props map[string]any, err error) bool {
-		return err == nil && covers(changes, props)
-	})
+	return nil
 }
 
 // Delete deletes the instance identifier names and returns once a read
@@ -108,7 +144,11 @@ func (c *Client) Delete(ctx context.Context, typeName, identifier string) error 
 	if !ok || r.Delete == nil || len(r.Identifier) != 1 {
 		return fmt.Errorf("%s has no direct delete", typeName)
 	}
-	_, err := c.mutate(ctx, r, *r.Delete, map[string]any{r.Identifier[0].Property: identifier})
+	values, err := c.addressOf(ctx, r, identifier)
+	if err != nil {
+		return err
+	}
+	_, err = c.mutate(ctx, r, *r.Delete, values)
 	var api *APIError
 	if errors.As(err, &api) && slices.Contains(r.Delete.AbsentErrors, api.Code) {
 		err = nil
@@ -119,6 +159,28 @@ func (c *Client) Delete(ctx context.Context, typeName, identifier string) error 
 	return c.waitFor(ctx, typeName, identifier, func(_ map[string]any, err error) bool {
 		return errors.Is(err, ErrAbsent)
 	})
+}
+
+// addressOf is the values an update or delete of the instance identifier
+// names is addressed by: the identifier, and when a call names one of the
+// read's captures, such as an ARN the schema does not carry, what a read
+// captures.
+func (c *Client) addressOf(ctx context.Context, r Reader, identifier string) (map[string]any, error) {
+	property := r.Identifier[0].Property
+	values := map[string]any{property: identifier}
+	if !r.MutationCaptures {
+		return values, nil
+	}
+	_, captured, err := c.readCall(ctx, r, map[string]string{property: identifier})
+	if err != nil {
+		return nil, fmt.Errorf("reading the %s %s to address its mutation: %w", r.Type, identifier, err)
+	}
+	for _, f := range r.Capture {
+		if v, _ := captured[f.Property].(string); v != "" {
+			values[f.Property] = v
+		}
+	}
+	return values, nil
 }
 
 // mutate sends one mutation, its input rendered from values, and returns
@@ -214,100 +276,6 @@ func (c *Client) poll() time.Duration {
 func retryable(err error, codes []string) bool {
 	var api *APIError
 	return errors.As(err, &api) && slices.Contains(codes, api.Code)
-}
-
-// wholePlaceholder matches a template that is one placeholder only.
-var wholePlaceholder = regexp.MustCompile(`^\{([A-Za-z0-9]+)(?::([A-Za-z]+))?\}$`)
-
-// render fills template from values; ok is false when it names a value
-// not being set, and a map or list leaves out each such entry. A {name:wire}
-// placeholder is rewritten by wireAs, which may fail.
-func render(template any, values map[string]any, wireAs func(name string, v any) (any, error)) (any, bool, error) {
-	switch t := template.(type) {
-	case string:
-		if m := wholePlaceholder.FindStringSubmatch(t); m != nil {
-			v, ok := values[m[1]]
-			if !ok || v == nil {
-				return nil, false, nil
-			}
-			if m[2] == "wire" {
-				w, err := wireAs(m[1], v)
-				return w, err == nil, err
-			}
-			v, ok = filter(m[2], v)
-			return v, ok, nil
-		}
-		complete := true
-		out := placeholderName.ReplaceAllStringFunc(t, func(p string) string {
-			m := placeholderName.FindStringSubmatch(p)
-			v, ok := values[m[1]]
-			if !ok {
-				complete = false
-				return p
-			}
-			s, _ := filter("string", v)
-			return fmt.Sprint(s)
-		})
-		return out, complete, nil
-	case map[string]any:
-		out := map[string]any{}
-		for k, item := range t {
-			v, ok, err := render(item, values, wireAs)
-			if err != nil {
-				return nil, false, err
-			}
-			if ok {
-				out[k] = v
-			}
-		}
-		return out, len(out) > 0 || len(t) == 0, nil
-	case []any:
-		var out []any
-		for _, item := range t {
-			v, ok, err := render(item, values, wireAs)
-			if err != nil {
-				return nil, false, err
-			}
-			if ok {
-				out = append(out, v)
-			}
-		}
-		return out, len(out) > 0 || len(t) == 0, nil
-	}
-	return template, true, nil
-}
-
-// filter applies a template filter to a value.
-func filter(name string, v any) (any, bool) {
-	switch name {
-	case "json":
-		// A property the schema types object or string may arrive as text.
-		if text, ok := v.(string); ok {
-			return text, true
-		}
-		raw, err := json.Marshal(v)
-		return string(raw), err == nil
-	case "string":
-		switch t := v.(type) {
-		case string:
-			return t, true
-		default:
-			raw, err := json.Marshal(t)
-			return string(raw), err == nil
-		}
-	case "entries":
-		out := map[string]any{}
-		items, _ := v.([]any)
-		for _, item := range items {
-			if m, ok := item.(map[string]any); ok {
-				if k, ok := m["Key"].(string); ok {
-					out[k] = m["Value"]
-				}
-			}
-		}
-		return out, true
-	}
-	return v, true
 }
 
 // tagValue is the value of the tag key in any Key/Value list desired

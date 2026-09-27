@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"regexp"
 	"slices"
 	"strings"
 )
@@ -15,7 +16,7 @@ type MutationCall struct {
 	Input             map[string]any
 	AbsentErrors      []string
 	RetryErrors       []string
-	// Properties is what an update call sets.
+	// Properties is what an update call sets, or what a create sends.
 	Properties []string
 	// Identifier maps, for a create, each primary identifier property to
 	// the output member carrying it, a dotted path into nested structures.
@@ -29,7 +30,10 @@ type MutationCall struct {
 }
 
 // mutationFilters are the template filters a mutation's input may use.
-var mutationFilters = map[string]bool{"": true, "json": true, "entries": true, "string": true, "wire": true}
+var mutationFilters = map[string]bool{"json": true, "entries": true, "string": true, "wire": true, "only": true}
+
+// mutationPlaceholder matches a placeholder with any chain of filters.
+var mutationPlaceholder = regexp.MustCompile(`\{([A-Za-z0-9]+)((?::[A-Za-z]+)*)\}`)
 
 // compileMutations checks an override's create, update and delete calls
 // against its model and schema, and fills r's mutations and
@@ -62,6 +66,10 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	for _, p := range schema.PrimaryIdentifier {
 		identifier[strings.TrimPrefix(p, "/properties/")] = true
 	}
+	captures := map[string]bool{}
+	for name := range o.Read.Capture {
+		captures[name] = true
+	}
 	// tags is the tag property an add call's {added} is shaped as.
 	call := func(m Mutation, at string, extra map[string]bool, tags string) *MutationCall {
 		op, ok := model.Shapes[namespace+m.Operation]
@@ -74,15 +82,23 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			if _, ok := input.Members[member]; !ok {
 				fail("%s input %s is not a member of %s's input", at, member, m.Operation)
 			}
+			if embeddedFilter(m.Input[member]) {
+				fail("%s input %s filters a placeholder inside a longer string; only a whole placeholder takes filters", at, member)
+			}
 			for _, match := range templateRefs(m.Input[member]) {
-				name, filter := match[0], match[1]
+				name, chain := match[0], filterChain(match[1])
 				if _, known := schema.Properties[name]; !known && !extra[name] {
 					fail("%s input %s names {%s}, which is not a property of %s", at, member, name, o.Type)
 				}
-				if !mutationFilters[filter] {
-					fail("%s input %s filters {%s} by %s; the filters are json, entries, string and wire", at, member, name, filter)
+				if captures[name] && extra[name] {
+					r.MutationCaptures = true
 				}
-				if filter == "wire" {
+				for _, filter := range chain {
+					if !mutationFilters[filter] {
+						fail("%s input %s filters {%s} by %s; the filters are json, entries, string, wire and only", at, member, name, filter)
+					}
+				}
+				if slices.Contains(chain, "wire") {
 					property := name
 					if name == "added" && tags != "" {
 						property = tags
@@ -112,13 +128,26 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		if c != nil {
 			op := model.Shapes[namespace+o.Create.Operation]
 			output := model.Shapes[ref(op.Output)]
+			sent := slices.ContainsFunc(templateRefs(o.Create.Input), func(m [2]string) bool { return identifier[m[0]] })
 			for property := range identifier {
 				path, ok := o.Create.Identifier[property]
-				if !ok || outputMember(model, output, path) != "string" {
+				switch {
+				case ok && strings.HasPrefix(path, "{"):
+					// The identifier is the value sent, which the create must send.
+					if path != "{"+property+"}" || !sent {
+						fail("create takes the identifier %s as %s; it must be {%s}, and the input must send it", property, path, property)
+					}
+				case !ok || outputMember(model, output, path) != "string":
 					fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 				}
 			}
 			c.Identifier = o.Create.Identifier
+			for _, ref := range templateRefs(o.Create.Input) {
+				if _, ok := schema.Properties[ref[0]]; ok && !slices.Contains(c.Properties, ref[0]) {
+					c.Properties = append(c.Properties, ref[0])
+				}
+			}
+			slices.Sort(c.Properties)
 			if n := o.Create.Name; n != nil {
 				if _, ok := schema.Properties[n.Property]; !ok || n.Tag == "" {
 					fail("create names %s from tag %q; both must be set, the property in the schema", n.Property, n.Tag)
@@ -133,6 +162,9 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	keys := map[string]bool{}
 	for p := range identifier {
 		keys[p] = true
+	}
+	for name := range captures {
+		keys[name] = true
 	}
 	routed := map[string]bool{}
 	for i, u := range o.Update {
@@ -175,15 +207,34 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	if o.Delete != nil {
 		r.Delete = call(*o.Delete, "delete", keys, "")
 	}
-	// Complete when every property an update can change has a call: not
-	// the read-only, create-only or write-only ones.
+	// Complete when every property an update can change has a call, not
+	// the read-only, create-only or write-only ones, and every property a
+	// create can set is sent by it or set by a call after it.
 	unchangeable := map[string]bool{}
 	for _, p := range append(append(append([]string{}, schema.ReadOnlyProperties...), schema.CreateOnly...), schema.WriteOnlyPointers...) {
 		unchangeable[strings.TrimPrefix(p, "/properties/")] = true
 	}
+	for _, p := range o.CreateOnly {
+		switch _, known := schema.Properties[p]; {
+		case !known:
+			fail("createOnly %s is not a property of %s", p, o.Type)
+		case unchangeable[p]:
+			fail("createOnly %s is already read-only, create-only or write-only in the schema", p)
+		case routed[p]:
+			fail("createOnly %s has an update call", p)
+		}
+		unchangeable[p] = true
+	}
 	r.LifecycleComplete = r.Create != nil && r.Delete != nil
+	readOnly := map[string]bool{}
+	for _, p := range schema.ReadOnlyProperties {
+		readOnly[strings.TrimPrefix(p, "/properties/")] = true
+	}
 	for name := range schema.Properties {
 		if !unchangeable[name] && !routed[name] {
+			r.LifecycleComplete = false
+		}
+		if r.Create != nil && !readOnly[name] && !routed[name] && !slices.Contains(r.Create.Properties, name) {
 			r.LifecycleComplete = false
 		}
 	}
@@ -209,13 +260,50 @@ func outputMember(model smithyModel, shape smithyShape, path string) string {
 	return ""
 }
 
-// templateRefs lists the {Property:filter} placeholders a template names,
-// as name and filter.
+// mutations lists every update and delete call of an override, tag calls
+// included.
+func mutations(o Override) []Mutation {
+	var out []Mutation
+	for _, u := range o.Update {
+		out = append(out, u.Mutation)
+		if u.Tags != nil {
+			out = append(out, u.Tags.Add, u.Tags.Remove)
+		}
+	}
+	if o.Delete != nil {
+		out = append(out, *o.Delete)
+	}
+	return out
+}
+
+// embeddedFilter reports a filtered placeholder inside a longer string,
+// which render fills as text, unfiltered.
+func embeddedFilter(v any) bool {
+	switch t := v.(type) {
+	case string:
+		if wholePlaceholder.MatchString(t) {
+			return false
+		}
+		return slices.ContainsFunc(mutationPlaceholder.FindAllStringSubmatch(t, -1), func(m []string) bool { return m[2] != "" })
+	case []any:
+		return slices.ContainsFunc(t, embeddedFilter)
+	case map[string]any:
+		for _, item := range t {
+			if embeddedFilter(item) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// templateRefs lists the placeholders a template names, as name and filter
+// chain, such as ":only:json".
 func templateRefs(v any) [][2]string {
 	var out [][2]string
 	switch t := v.(type) {
 	case string:
-		for _, m := range placeholderName.FindAllStringSubmatch(t, -1) {
+		for _, m := range mutationPlaceholder.FindAllStringSubmatch(t, -1) {
 			out = append(out, [2]string{m[1], m[2]})
 		}
 	case []any:

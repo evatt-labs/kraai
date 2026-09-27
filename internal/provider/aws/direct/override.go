@@ -33,6 +33,10 @@ type Override struct {
 	Create *Create      `yaml:"create,omitempty"`
 	Update []UpdateCall `yaml:"update,omitempty"`
 	Delete *Mutation    `yaml:"delete,omitempty"`
+	// CreateOnly names properties the schema leaves updatable but the
+	// service cannot change, so an update of one fails as Cloud Control's
+	// does; they need no update call to be lifecycle complete.
+	CreateOnly []string `yaml:"createOnly,omitempty"`
 	// Lifecycle is the values the lifecycle harness creates an instance
 	// with, then sets one property at a time.
 	Lifecycle *Lifecycle `yaml:"lifecycle,omitempty"`
@@ -190,9 +194,12 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 // {Property:filter} is that property's desired value, and a template whose
 // property is not being set is left out. The filters are json, a value
 // sent as its JSON text; string, a number or boolean sent as text;
-// entries, a list of Key/Value structures sent as a map; and wire, a value
+// entries, a list of Key/Value structures sent as a map; wire, a value
 // sent in the shape the read maps it from, each nested property under its
-// member name.
+// member name; and only, the one element of a list. A whole placeholder may
+// chain filters, applied in order: {Property:only:json}. Update and delete
+// templates may also name the read's captures; a capture shadows a property
+// of the same name, so {Arn} is the captured ARN.
 type Mutation struct {
 	Operation string         `yaml:"operation"`
 	Input     map[string]any `yaml:"input,omitempty"`
@@ -210,7 +217,9 @@ type Mutation struct {
 type Create struct {
 	Mutation `yaml:",inline"`
 	// Identifier maps the primary identifier to the output member that
-	// carries it, a dotted path when the member is nested.
+	// carries it, a dotted path when the member is nested, or to
+	// {Property} when the output carries none and the identifier is the
+	// value the create sent.
 	Identifier map[string]string `yaml:"identifier"`
 	// Name fills a name property the manifest leaves unset from the value
 	// of a tag the desired state carries, so a create that is retried names
@@ -240,7 +249,8 @@ type Tags struct {
 	Remove   Mutation `yaml:"remove"`
 }
 
-// Lifecycle is the harness's test vector for a type.
+// Lifecycle is the harness's test vector for a type. A string may name the
+// instance being made, {name}, and where: {account} and {region}.
 type Lifecycle struct {
 	Create map[string]any `yaml:"create"`
 	Update map[string]any `yaml:"update"`
