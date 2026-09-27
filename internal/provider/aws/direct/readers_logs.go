@@ -67,6 +67,20 @@ func init() {
 			Capture: []Field{
 				{Property: "Arn", Member: "logGroupArn", Kind: "scalar"},
 			},
+			LifecycleComplete: true,
+			MutationCaptures:  true,
+			Create:            &MutationCall{Operation: "CreateLogGroup", Target: "Logs_20140328.CreateLogGroup", NameProperty: "LogGroupName", NameTag: "kraai:resource-name", Input: map[string]any{"deletionProtectionEnabled": "{DeletionProtectionEnabled}", "kmsKeyId": "{KmsKeyId}", "logGroupClass": "{LogGroupClass}", "logGroupName": "{LogGroupName}", "tags": "{Tags:entries}"}, Properties: []string{"DeletionProtectionEnabled", "KmsKeyId", "LogGroupClass", "LogGroupName", "Tags"}, Identifier: map[string]string{"LogGroupName": "{LogGroupName}"}},
+			Delete:            &MutationCall{Operation: "DeleteLogGroup", Target: "Logs_20140328.DeleteLogGroup", Input: map[string]any{"logGroupName": "{LogGroupName}"}, AbsentErrors: []string{"ResourceNotFoundException"}},
+			Update: []MutationCall{
+				MutationCall{Operation: "PutRetentionPolicy", Target: "Logs_20140328.PutRetentionPolicy", Input: map[string]any{"logGroupName": "{LogGroupName}", "retentionInDays": "{RetentionInDays}"}, Properties: []string{"RetentionInDays"}},
+				MutationCall{Operation: "AssociateKmsKey", Target: "Logs_20140328.AssociateKmsKey", Input: map[string]any{"kmsKeyId": "{KmsKeyId}", "logGroupName": "{LogGroupName}"}, Properties: []string{"KmsKeyId"}},
+				MutationCall{Operation: "PutDataProtectionPolicy", Target: "Logs_20140328.PutDataProtectionPolicy", Input: map[string]any{"logGroupIdentifier": "{LogGroupName}", "policyDocument": "{DataProtectionPolicy:json}"}, Properties: []string{"DataProtectionPolicy"}},
+				MutationCall{Operation: "PutIndexPolicy", Target: "Logs_20140328.PutIndexPolicy", Input: map[string]any{"logGroupIdentifier": "{LogGroupName}", "policyDocument": "{FieldIndexPolicies:only:json}"}, Properties: []string{"FieldIndexPolicies"}},
+				MutationCall{Operation: "PutResourcePolicy", Target: "Logs_20140328.PutResourcePolicy", Input: map[string]any{"policyDocument": "{ResourcePolicyDocument:json}", "resourceArn": "{Arn}"}, Properties: []string{"ResourcePolicyDocument"}},
+				MutationCall{Operation: "PutLogGroupDeletionProtection", Target: "Logs_20140328.PutLogGroupDeletionProtection", Input: map[string]any{"deletionProtectionEnabled": "{DeletionProtectionEnabled}", "logGroupIdentifier": "{LogGroupName}"}, Properties: []string{"DeletionProtectionEnabled"}},
+				MutationCall{Operation: "PutBearerTokenAuthentication", Target: "Logs_20140328.PutBearerTokenAuthentication", Input: map[string]any{"bearerTokenAuthenticationEnabled": "{BearerTokenAuthenticationEnabled}", "logGroupIdentifier": "{LogGroupName}"}, Properties: []string{"BearerTokenAuthenticationEnabled"}},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "TagResource", Target: "Logs_20140328.TagResource", TagProperty: "Tags", Input: map[string]any{"resourceArn": "{Arn}", "tags": "{added:entries}"}}, Remove: &MutationCall{Operation: "UntagResource", Target: "Logs_20140328.UntagResource", Input: map[string]any{"resourceArn": "{Arn}", "tagKeys": "{removed}"}}},
+			},
 			Also: []Reader{
 				{
 					Type:        "AWS::Logs::LogGroup",
@@ -125,6 +139,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 		"AWS::Logs::ScheduledQuery": {
 			Type:        "AWS::Logs::ScheduledQuery",

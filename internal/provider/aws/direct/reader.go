@@ -44,6 +44,9 @@ type Reader struct {
 	// has an update call: with Production and lifecycle evidence, the only
 	// readers a mutation may use in place of Cloud Control.
 	LifecycleComplete bool
+	// MutationCaptures is true when an update or delete call names one of
+	// the read's captures, so the instance is read to address it.
+	MutationCaptures bool
 	// Mutable is true when the type may be created, updated and deleted
 	// directly; see LifecycleComplete.
 	Mutable bool

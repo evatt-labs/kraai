@@ -8,7 +8,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"maps"
 	"net/http"
 	"os"
 	"sort"
@@ -20,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
 	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 var updateLifecycle = flag.Bool("update-lifecycle", false, "merge this run into evidence/lifecycle.json")
@@ -42,6 +42,11 @@ func TestLifecycleParity(t *testing.T) {
 		t.Fatal(err)
 	}
 	cc := cloudcontrol.NewFromConfig(cfg)
+	who, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	account = aws.ToString(who.Account)
 	client := &Client{HTTP: &http.Client{Timeout: 30 * time.Second}, Credentials: cfg.Credentials, Region: region}
 	all, err := Overrides()
 	if err != nil {
@@ -57,9 +62,15 @@ func TestLifecycleParity(t *testing.T) {
 			t.Fatal(err)
 		}
 		e := TypeLifecycle{Type: o.Type, Date: time.Now().UTC().Format("2006-01-02"), Override: hash, Outcome: "parity"}
+		ran := false
 		t.Run(o.Type, func(t *testing.T) {
+			ran = true
 			e = lifecycle(ctx, t, cc, client, o, e)
 		})
+		// A type -run leaves out is not evidence either way.
+		if !ran {
+			continue
+		}
 		t.Logf("%s: lifecycle %s, updated %v", o.Type, e.Outcome, e.Updated)
 		run.Types = append(run.Types, e)
 	}
@@ -84,21 +95,27 @@ func TestLifecycleParity(t *testing.T) {
 func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, client *Client, o Override, e TypeLifecycle) TypeLifecycle {
 	name := fmt.Sprintf("kraai-lifecycle-%s-%d", strings.ToLower(o.Type[strings.LastIndex(o.Type, ":")+1:]), time.Now().Unix())
 	nameTag := map[string]any{"Key": "kraai:resource-name", "Value": name}
-	desired := maps.Clone(o.Lifecycle.Create)
+	// A vector may name the instance: {name}, {account} and {region}.
+	vars := strings.NewReplacer("{name}", name, "{account}", account, "{region}", client.Region)
+	desired := fill(o.Lifecycle.Create, vars).(map[string]any)
 	desired["Tags"] = append([]any{nameTag}, asList(desired["Tags"])...)
 
 	id, err := client.Create(ctx, o.Type, desired)
+	deleted := false
+	// A create that fails after the instance exists still returns its
+	// identifier, and the instance is deleted.
+	if id != "" {
+		t.Cleanup(func() {
+			if !deleted {
+				if err := client.Delete(context.Background(), o.Type, id); err != nil {
+					t.Errorf("cleanup delete of %s: %v", id, err)
+				}
+			}
+		})
+	}
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	deleted := false
-	t.Cleanup(func() {
-		if !deleted {
-			if err := client.Delete(context.Background(), o.Type, id); err != nil {
-				t.Errorf("cleanup delete of %s: %v", id, err)
-			}
-		}
-	})
 	fail := func(step string, err error) {
 		t.Errorf("%s: %v", step, err)
 		e.Outcome = "differs"
@@ -107,7 +124,7 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 		fail("create read through Cloud Control", err)
 	}
 	for _, property := range sortedKeys(o.Lifecycle.Update) {
-		value := o.Lifecycle.Update[property]
+		value := fill(o.Lifecycle.Update[property], vars)
 		if property == "Tags" {
 			value = append([]any{nameTag}, asList(value)...)
 		}
@@ -165,4 +182,25 @@ func ccAbsent(ctx context.Context, cc *cloudcontrol.Client, typeName, id string)
 		}
 	}
 	return errors.New("Cloud Control still reads it")
+}
+
+// fill replaces the variables in every string of v, in a copy.
+func fill(v any, vars *strings.Replacer) any {
+	switch t := v.(type) {
+	case string:
+		return vars.Replace(t)
+	case []any:
+		out := make([]any, len(t))
+		for i, item := range t {
+			out[i] = fill(item, vars)
+		}
+		return out
+	case map[string]any:
+		out := make(map[string]any, len(t))
+		for k, item := range t {
+			out[k] = fill(item, vars)
+		}
+		return out
+	}
+	return v
 }

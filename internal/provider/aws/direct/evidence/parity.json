@@ -1565,7 +1565,7 @@
     {
       "type": "AWS::Logs::LogGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 5,
@@ -1582,7 +1582,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "7e80818642b64e67a4ceb49bb24cd8538a62ce54eba3d4e5ccc1ff28f4e4a61a"
+      "override": "f3ab717e67264405af5914a66f15043388e9ce596312ad8cb25b712f753b3283"
     },
     {
       "type": "AWS::Logs::ScheduledQuery",

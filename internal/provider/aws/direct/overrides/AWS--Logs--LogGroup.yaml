@@ -54,3 +54,112 @@ also:
         transform: json
 absentIds:
   - does-not-exist-kraai-probe-xyz
+create:
+  operation: CreateLogGroup
+  name:
+    property: LogGroupName
+    tag: kraai:resource-name
+  input:
+    logGroupName: "{LogGroupName}"
+    kmsKeyId: "{KmsKeyId}"
+    logGroupClass: "{LogGroupClass}"
+    deletionProtectionEnabled: "{DeletionProtectionEnabled}"
+    tags: "{Tags:entries}"
+  # The create answers with no body; a log group is its name. A name
+  # already taken fails the create, as it does through Cloud Control.
+  identifier:
+    LogGroupName: "{LogGroupName}"
+# The rest are set by their own calls, after the create too.
+update:
+  - operation: PutRetentionPolicy
+    properties: [RetentionInDays]
+    input:
+      logGroupName: "{LogGroupName}"
+      retentionInDays: "{RetentionInDays}"
+  - operation: AssociateKmsKey
+    properties: [KmsKeyId]
+    input:
+      logGroupName: "{LogGroupName}"
+      kmsKeyId: "{KmsKeyId}"
+  - operation: PutDataProtectionPolicy
+    properties: [DataProtectionPolicy]
+    input:
+      logGroupIdentifier: "{LogGroupName}"
+      policyDocument: "{DataProtectionPolicy:json}"
+  # The service takes one index policy per log group.
+  - operation: PutIndexPolicy
+    properties: [FieldIndexPolicies]
+    input:
+      logGroupIdentifier: "{LogGroupName}"
+      policyDocument: "{FieldIndexPolicies:only:json}"
+  - operation: PutResourcePolicy
+    properties: [ResourcePolicyDocument]
+    input:
+      resourceArn: "{Arn}"
+      policyDocument: "{ResourcePolicyDocument:json}"
+  - operation: PutLogGroupDeletionProtection
+    properties: [DeletionProtectionEnabled]
+    input:
+      logGroupIdentifier: "{LogGroupName}"
+      deletionProtectionEnabled: "{DeletionProtectionEnabled}"
+  - operation: PutBearerTokenAuthentication
+    properties: [BearerTokenAuthenticationEnabled]
+    input:
+      logGroupIdentifier: "{LogGroupName}"
+      bearerTokenAuthenticationEnabled: "{BearerTokenAuthenticationEnabled}"
+  - tags:
+      property: Tags
+      add:
+        operation: TagResource
+        input:
+          resourceArn: "{Arn}"
+          tags: "{added:entries}"
+      remove:
+        operation: UntagResource
+        input:
+          resourceArn: "{Arn}"
+          tagKeys: "{removed}"
+delete:
+  operation: DeleteLogGroup
+  input:
+    logGroupName: "{LogGroupName}"
+  absentErrors: [ResourceNotFoundException]
+# The schema leaves the class updatable, but Cloud Control refuses a change:
+# NotUpdatable, "LogGroupClass is a Create-Only Property".
+createOnly: [LogGroupClass]
+# A key costs money, so KmsKeyId is routed but not exercised. The group is
+# made protected and unprotected by an update, so the delete can run.
+lifecycle:
+  create:
+    DeletionProtectionEnabled: true
+    RetentionInDays: 1
+  update:
+    BearerTokenAuthenticationEnabled: true
+    DataProtectionPolicy:
+      Name: kraai-lifecycle
+      Version: "2021-06-01"
+      Statement:
+        - Sid: audit
+          DataIdentifier: ["arn:aws:dataprotection::aws:data-identifier/EmailAddress"]
+          Operation:
+            Audit:
+              FindingsDestination: {}
+        - Sid: redact
+          DataIdentifier: ["arn:aws:dataprotection::aws:data-identifier/EmailAddress"]
+          Operation:
+            Deidentify:
+              MaskConfig: {}
+    DeletionProtectionEnabled: false
+    FieldIndexPolicies:
+      - Fields: [requestId]
+    ResourcePolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Sid: delivery
+          Effect: Allow
+          Principal:
+            Service: delivery.logs.amazonaws.com
+          Action: [logs:CreateLogStream, logs:PutLogEvents]
+          Resource: "arn:aws:logs:{region}:{account}:log-group:{name}:*"
+    RetentionInDays: 3
+    Tags: [{Key: team, Value: kraai}]

@@ -109,7 +109,7 @@
     "cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json": {
       "file": "models/cloudwatch-logs-2014-03-28.json",
       "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
-      "subsetSha256": "84685afb422a0a53dd8c76ba95cebc93ce6d323b5cde93934c6377f81eb8564c"
+      "subsetSha256": "f35a7670e9e8f4020ff2718212ab6de9b0c815486a8dea7e896e700eaef04fc2"
     },
     "cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json": {
       "file": "models/cloudwatch-2010-08-01.json",
