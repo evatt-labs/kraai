@@ -108,5 +108,60 @@ also:
       Attribute: enableDnsHostnames
     properties:
       EnableDnsHostnames: EnableDnsHostnames.Value
+create:
+  operation: CreateVpc
+  input:
+    CidrBlock: "{CidrBlock}"
+    InstanceTenancy: "{InstanceTenancy}"
+    Ipv4IpamPoolId: "{Ipv4IpamPoolId}"
+    Ipv4NetmaskLength: "{Ipv4NetmaskLength}"
+    TagSpecifications:
+      - ResourceType: vpc
+        Tags: "{Tags:wire}"
+  identifier:
+    VpcId: Vpc.VpcId
+update:
+  # ModifyVpcAttribute takes one attribute per call.
+  - operation: ModifyVpcAttribute
+    properties: [EnableDnsSupport]
+    input:
+      VpcId: "{VpcId}"
+      EnableDnsSupport: {Value: "{EnableDnsSupport}"}
+  - operation: ModifyVpcAttribute
+    properties: [EnableDnsHostnames]
+    input:
+      VpcId: "{VpcId}"
+      EnableDnsHostnames: {Value: "{EnableDnsHostnames}"}
+  # The API only allows dedicated tenancy relaxed to default, never the
+  # reverse; the schema still leaves the property updatable.
+  - operation: ModifyVpcTenancy
+    properties: [InstanceTenancy]
+    input:
+      VpcId: "{VpcId}"
+      InstanceTenancy: "{InstanceTenancy}"
+  - tags:
+      property: Tags
+      add:
+        operation: CreateTags
+        input:
+          Resources: ["{VpcId}"]
+          Tags: "{added:wire}"
+      remove:
+        operation: DeleteTags
+        input:
+          Resources: ["{VpcId}"]
+          Tags: "{removed:keys}"
+delete:
+  operation: DeleteVpc
+  input:
+    VpcId: "{VpcId}"
+  absentErrors: [InvalidVpcID.NotFound]
+lifecycle:
+  create:
+    CidrBlock: 10.99.0.0/16
+  update:
+    EnableDnsHostnames: true
+    EnableDnsSupport: false
+    Tags: [{Key: team, Value: kraai}]
 absentIds:
   - vpc-0a1b2c3d4e5f60718
