@@ -50,6 +50,11 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 	if id == "" {
 		return "", fmt.Errorf("the %s create returned no %s", typeName, r.Create.Identifier[property])
 	}
+	// The service's answer is what the instance is called: some lowercase
+	// the name they are sent.
+	if _, sent := values[property]; sent {
+		values[property] = id
+	}
 	rest := map[string]any{}
 	for p, v := range values {
 		if !slices.Contains(r.Create.Properties, p) {

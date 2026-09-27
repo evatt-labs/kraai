@@ -11,10 +11,12 @@ import (
 	"maps"
 	"net/http"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
 	"time"
+	"unicode"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -31,9 +33,11 @@ var updateLifecycle = flag.Bool("update-lifecycle", false, "merge this run into 
 // Cloud Control. Runs only with KRAAI_ALLOW_MUTATE=1; every instance is
 // named kraai-lifecycle-* and deleted when the test ends, however it ends.
 //
-// A vector property naming {kmsKeyArn} runs only when
-// KRAAI_LIFECYCLE_KMS_KEY_ARN names a key the service may use, as a key
-// bills while it exists.
+// A vector may name a resource made for the harness, such as a key that
+// bills while it exists or a subnet a type needs: {kmsKeyArn} is read from
+// KRAAI_LIFECYCLE_KMS_KEY_ARN, {subnetIdA} from KRAAI_LIFECYCLE_SUBNET_ID_A.
+// An update naming one that is unset is skipped, and a type whose create
+// names one is skipped and records nothing.
 //
 //	KRAAI_ALLOW_MUTATE=1 go test -tags integration ./internal/provider/aws/direct -run TestLifecycleParity [-args -update-lifecycle]
 func TestLifecycleParity(t *testing.T) {
@@ -67,13 +71,15 @@ func TestLifecycleParity(t *testing.T) {
 			t.Fatal(err)
 		}
 		e := TypeLifecycle{Type: o.Type, Date: time.Now().UTC().Format("2006-01-02"), Override: hash, Outcome: "parity"}
-		ran := false
+		ran, skipped := false, false
 		passed := t.Run(o.Type, func(t *testing.T) {
 			ran = true
+			defer func() { skipped = t.Skipped() }()
 			e = lifecycle(ctx, t, cc, client, o, e)
 		})
-		// A type -run leaves out is not evidence either way.
-		if !ran {
+		// A type -run leaves out, or that could not run, is not evidence
+		// either way.
+		if !ran || skipped {
 			continue
 		}
 		// A step that stops the subtest, such as a failed create, never
@@ -106,9 +112,20 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 	name := fmt.Sprintf("kraai-lifecycle-%s-%d", strings.ToLower(o.Type[strings.LastIndex(o.Type, ":")+1:]), time.Now().Unix())
 	nameTag := map[string]any{"Key": "kraai:resource-name", "Value": name}
 	// A vector may name the instance, {name}, where, {account} and
-	// {region}, and a key made for the harness, {kmsKeyArn}.
-	kmsKey := os.Getenv("KRAAI_LIFECYCLE_KMS_KEY_ARN")
-	vars := strings.NewReplacer("{name}", name, "{account}", account, "{region}", client.Region, "{kmsKeyArn}", kmsKey)
+	// {region}, and resources made for the harness, from the environment.
+	pairs := []string{"{name}", name, "{account}", account, "{region}", client.Region}
+	unset := map[string]bool{}
+	for _, v := range vectorVars(o.Lifecycle) {
+		if value := os.Getenv(envName(v)); value != "" {
+			pairs = append(pairs, "{"+v+"}", value)
+		} else {
+			unset[v] = true
+		}
+	}
+	vars := strings.NewReplacer(pairs...)
+	if missing := namesUnset(o.Lifecycle.Create, unset); missing != "" {
+		t.Skipf("the create needs %s, which is unset", missing)
+	}
 	desired := fill(o.Lifecycle.Create, vars).(map[string]any)
 	desired["Tags"] = append([]any{nameTag}, asList(desired["Tags"])...)
 
@@ -140,8 +157,8 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 	// rest.
 	shown := maps.Clone(desired)
 	for _, property := range sortedKeys(o.Lifecycle.Update) {
-		if kmsKey == "" && strings.Contains(fmt.Sprint(o.Lifecycle.Update[property]), "{kmsKeyArn}") {
-			t.Logf("%s: skipped, KRAAI_LIFECYCLE_KMS_KEY_ARN is unset", property)
+		if missing := namesUnset(o.Lifecycle.Update[property], unset); missing != "" {
+			t.Logf("%s: skipped, %s is unset", property, missing)
 			continue
 		}
 		value := fill(o.Lifecycle.Update[property], vars)
@@ -224,4 +241,44 @@ func fill(v any, vars *strings.Replacer) any {
 		return out
 	}
 	return v
+}
+
+// vectorPlaceholder is a {camelName} in a vector.
+var vectorPlaceholder = regexp.MustCompile(`\{([a-z][A-Za-z0-9]*)\}`)
+
+// vectorVars lists the variables a vector names, beyond those the harness
+// fills itself.
+func vectorVars(l *Lifecycle) []string {
+	seen := map[string]bool{"name": true, "account": true, "region": true}
+	var out []string
+	for _, m := range vectorPlaceholder.FindAllStringSubmatch(fmt.Sprint(l.Create, l.Update), -1) {
+		if !seen[m[1]] {
+			seen[m[1]] = true
+			out = append(out, m[1])
+		}
+	}
+	return out
+}
+
+// envName is the environment variable a vector variable is read from:
+// subnetIdA is KRAAI_LIFECYCLE_SUBNET_ID_A.
+func envName(v string) string {
+	var b strings.Builder
+	for i, r := range v {
+		if i > 0 && unicode.IsUpper(r) {
+			b.WriteByte('_')
+		}
+		b.WriteRune(unicode.ToUpper(r))
+	}
+	return "KRAAI_LIFECYCLE_" + b.String()
+}
+
+// namesUnset is the first unset variable v names, or "".
+func namesUnset(v any, unset map[string]bool) string {
+	for _, m := range vectorPlaceholder.FindAllStringSubmatch(fmt.Sprint(v), -1) {
+		if unset[m[1]] {
+			return envName(m[1])
+		}
+	}
+	return ""
 }
