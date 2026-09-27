@@ -978,7 +978,7 @@
     {
       "type": "AWS::Events::Rule",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 3,
@@ -997,7 +997,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "b92fb921772706605a49953c9b894f3d1b2834a3483619b08115776347b51a0f"
+      "override": "264795ad8436c3812f76702e816c818e5f3753f278b08b92e6ea7fe9c0138b2a"
     },
     {
       "type": "AWS::Forecast::DatasetGroup",

@@ -200,7 +200,9 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 // property is not being set is left out. The filters are json, a value
 // sent as its JSON text; string, a number or boolean sent as text;
 // entries, a list of Key/Value structures sent as a map; keys, a list of
-// names sent as structures naming each, {Key: name}; wire, a value
+// names sent as structures naming each, {Key: name}; arnName and arnParent,
+// the last and next-to-last segments of an ARN's resource, left out when
+// empty; wire, a value
 // sent in the shape the read maps it from, each nested property under its
 // member name; and only, the one element of a list. A whole placeholder may
 // chain filters, applied in order: {Property:only:json}. Update and delete
@@ -216,6 +218,14 @@ type Mutation struct {
 	// made again shortly, such as a name still held after a delete; the
 	// call is retried within the mutation's wait.
 	RetryErrors []string `yaml:"retryErrors,omitempty"`
+	// FailedCount is the output member counting entries the call could not
+	// apply, for a call that answers success with some failed; above zero
+	// it is an error.
+	FailedCount string `yaml:"failedCount,omitempty"`
+	// Clear, on a delete only, names list-routed properties whose every
+	// element is removed before the delete, for a service that refuses to
+	// delete an instance still holding them.
+	Clear []string `yaml:"clear,omitempty"`
 }
 
 // Create is the call that creates an instance, and where its identifier is
@@ -248,8 +258,22 @@ type UpdateCall struct {
 	// call that replaces them all: an unchanged one as it was read, and
 	// one not read, or read empty when optional, left unset. One filling a
 	// member the operation requires must have been read.
-	Together bool  `yaml:"together,omitempty"`
-	Tags     *Tags `yaml:"tags,omitempty"`
+	Together bool       `yaml:"together,omitempty"`
+	Tags     *Tags      `yaml:"tags,omitempty"`
+	List     *ListRoute `yaml:"list,omitempty"`
+}
+
+// ListRoute updates a list property by the elements added or changed, {added},
+// and the elements removed, {removed}, matched by Key: the members naming
+// an element. With one key member, {removedKeys} is the removed elements'
+// keys. Removal runs before addition. An element whose key matches but
+// whose members differ is added again, as changed; one that drops a member
+// is left as it is, as every update is set-only.
+type ListRoute struct {
+	Property string   `yaml:"property"`
+	Key      []string `yaml:"key"`
+	Add      Mutation `yaml:"add"`
+	Remove   Mutation `yaml:"remove"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

@@ -214,7 +214,7 @@
     "eventbridge/service/2015-10-07/eventbridge-2015-10-07.json": {
       "file": "models/eventbridge-2015-10-07.json",
       "sourceSha256": "47054e3cf1572673a5dc9931c0a6cddc1fc29b9338d9b124bc4ad8a0ec3bb2e7",
-      "subsetSha256": "a8b11b433d219bf96465bbf3ab19a885afe8ddd71f4662483578c7b1da3a684a"
+      "subsetSha256": "10c2136bab2e8ea02b5914ca4085c1c4697d1734a7b59968a7a022a4cf1b5fb6"
     },
     "forecast/service/2018-06-26/forecast-2018-06-26.json": {
       "file": "models/forecast-2018-06-26.json",

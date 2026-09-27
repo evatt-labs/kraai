@@ -26,7 +26,8 @@ func render(template any, values map[string]any, wireAs func(name string, v any)
 				return nil, false, nil
 			}
 			v, err := applyFilters(m[1], filterChain(m[2]), v, wireAs)
-			return v, err == nil, err
+			// A filter that finds nothing to send leaves the member out.
+			return v, err == nil && v != nil, err
 		}
 		complete := true
 		out := placeholderName.ReplaceAllStringFunc(t, func(p string) string {
@@ -122,6 +123,14 @@ func filter(name string, v any) (any, bool) {
 			raw, err := json.Marshal(t)
 			return string(raw), err == nil
 		}
+	case "arnName", "arnParent":
+		// A part of an ARN; a default-bus rule's ARN has no parent, and a
+		// part that is empty is not sent.
+		text, _ := v.(string)
+		if part := placeholderFilters[name](text); part != "" {
+			return part, true
+		}
+		return nil, true
 	case "keys":
 		// A list of names sent as structures naming each, as EC2's
 		// DeleteTags takes the tags it removes.

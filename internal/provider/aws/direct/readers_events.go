@@ -80,7 +80,15 @@ func init() {
 				{Property: "ScheduleExpression", Member: "ScheduleExpression", Kind: "scalar"},
 				{Property: "State", Member: "State", Kind: "scalar"},
 			},
-			AbsentIDs: []string{"arn:aws:events:{region}:{account}:rule/kraai-absent-probe"},
+			AbsentIDs:         []string{"arn:aws:events:{region}:{account}:rule/kraai-absent-probe"},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "PutRule", Target: "AWSEvents.PutRule", NameProperty: "Name", NameTag: "kraai:resource-name", Input: map[string]any{"Description": "{Description}", "EventBusName": "{EventBusName}", "EventPattern": "{EventPattern:json}", "Name": "{Name}", "RoleArn": "{RoleArn}", "ScheduleExpression": "{ScheduleExpression}", "State": "{State}", "Tags": "{Tags}"}, Properties: []string{"Description", "EventBusName", "EventPattern", "Name", "RoleArn", "ScheduleExpression", "State", "Tags"}, Identifier: map[string]string{"Arn": "RuleArn"}},
+			Delete:            &MutationCall{Operation: "DeleteRule", Target: "AWSEvents.DeleteRule", Input: map[string]any{"EventBusName": "{Arn:arnParent}", "Name": "{Arn:arnName}"}, AbsentErrors: []string{"ResourceNotFoundException"}, Clear: []string{"Targets"}},
+			Update: []MutationCall{
+				MutationCall{Operation: "PutRule", Target: "AWSEvents.PutRule", Input: map[string]any{"Description": "{Description}", "EventBusName": "{Arn:arnParent}", "EventPattern": "{EventPattern:json}", "Name": "{Arn:arnName}", "RoleArn": "{RoleArn}", "ScheduleExpression": "{ScheduleExpression}", "State": "{State}"}, Properties: []string{"Description", "EventPattern", "RoleArn", "ScheduleExpression", "State"}, Together: true},
+				MutationCall{ListProperty: "Targets", Key: []string{"Id"}, Add: &MutationCall{Operation: "PutTargets", Target: "AWSEvents.PutTargets", TagProperty: "Targets", FailedCount: "FailedEntryCount", Input: map[string]any{"EventBusName": "{Arn:arnParent}", "Rule": "{Arn:arnName}", "Targets": "{added:wire}"}}, Remove: &MutationCall{Operation: "RemoveTargets", Target: "AWSEvents.RemoveTargets", TagProperty: "Targets", FailedCount: "FailedEntryCount", Input: map[string]any{"EventBusName": "{Arn:arnParent}", "Ids": "{removedKeys}", "Rule": "{Arn:arnName}"}}},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "TagResource", Target: "AWSEvents.TagResource", TagProperty: "Tags", Input: map[string]any{"ResourceARN": "{Arn}", "Tags": "{added}"}}, Remove: &MutationCall{Operation: "UntagResource", Target: "AWSEvents.UntagResource", Input: map[string]any{"ResourceARN": "{Arn}", "TagKeys": "{removed}"}}},
+			},
 			Also: []Reader{
 				{
 					Type:        "AWS::Events::Rule",
@@ -261,6 +269,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

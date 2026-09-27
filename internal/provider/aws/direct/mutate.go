@@ -100,7 +100,7 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 		return err
 	}
 	return c.waitFor(ctx, typeName, identifier, func(props map[string]any, err error) bool {
-		return err == nil && covers(changes, props) && c.settled(ctx, r, identifier)
+		return err == nil && covers(changes, props) && listsMatch(r, changes, props) && c.settled(ctx, r, identifier)
 	})
 }
 
@@ -109,11 +109,21 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 // no call sets is refused before any call is made.
 func (c *Client) apply(ctx context.Context, r Reader, address, current, changes map[string]any) error {
 	for p := range changes {
-		if !slices.ContainsFunc(r.Update, func(u MutationCall) bool { return u.TagProperty == p || slices.Contains(u.Properties, p) }) {
+		if !slices.ContainsFunc(r.Update, func(u MutationCall) bool {
+			return u.TagProperty == p || u.ListProperty == p || slices.Contains(u.Properties, p)
+		}) {
 			return fmt.Errorf("%s has no direct update for %s", r.Type, p)
 		}
 	}
 	for _, u := range r.Update {
+		if u.ListProperty != "" {
+			if desired, changed := changes[u.ListProperty]; changed {
+				if err := c.applyList(ctx, r, u, address, current[u.ListProperty], desired); err != nil {
+					return err
+				}
+			}
+			continue
+		}
 		if u.TagProperty != "" {
 			desired, changed := changes[u.TagProperty]
 			if !changed {
@@ -184,6 +194,15 @@ func (c *Client) Delete(ctx context.Context, typeName, identifier string) error 
 	if err != nil {
 		return err
 	}
+	if len(r.Delete.Clear) > 0 {
+		err = c.clearLists(ctx, r, identifier, values)
+		if errors.Is(err, ErrAbsent) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+	}
 	_, err = c.mutate(ctx, r, *r.Delete, values)
 	var api *APIError
 	if errors.As(err, &api) && slices.Contains(r.Delete.AbsentErrors, api.Code) {
@@ -235,15 +254,15 @@ func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values ma
 	call := Reader{Type: r.Type, Protocol: r.Protocol, SigningName: r.SigningName, Host: r.Host, SigningRegion: r.SigningRegion,
 		Action: m.Operation, Version: r.Version}
 	wireAs := func(name string, v any) (any, error) {
-		// A tag call's added tags are shaped as its tag property is.
-		if name == "added" && m.TagProperty != "" {
+		// A tag or list call's elements are shaped as its property is.
+		if (name == "added" || name == "removed") && m.TagProperty != "" {
 			name = m.TagProperty
 		}
-		i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == name })
-		if i < 0 {
+		f, ok := readField(r, name)
+		if !ok {
 			return nil, fmt.Errorf("the %s call %s: %s has no read mapping to send it by", r.Type, m.Operation, name)
 		}
-		w, err := wire(r.Fields[i], v)
+		w, err := wire(f, v)
 		if err != nil {
 			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
 		}
@@ -297,7 +316,7 @@ func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values ma
 	if err := json.Unmarshal(body, &obj); err != nil {
 		return nil, fmt.Errorf("decoding the %s call %s: %w", r.Type, m.Operation, err)
 	}
-	return obj, nil
+	return obj, failedEntries(r, m, obj)
 }
 
 // waitFor reads the instance until done accepts the read, or the wait is

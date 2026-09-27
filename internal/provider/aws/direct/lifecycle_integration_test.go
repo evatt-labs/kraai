@@ -210,7 +210,9 @@ func ccShows(ctx context.Context, cc *cloudcontrol.Client, typeName, id string, 
 			continue
 		}
 		last = nil
-		if json.Unmarshal([]byte(aws.ToString(out.ResourceDescription.Properties)), &last) == nil && covers(want, last) {
+		// A list-routed property must hold exactly the desired keys; a
+		// subset match would pass with an element the removal missed.
+		if json.Unmarshal([]byte(aws.ToString(out.ResourceDescription.Properties)), &last) == nil && covers(want, last) && listsMatch(readers[typeName], want, last) {
 			return nil
 		}
 	}
