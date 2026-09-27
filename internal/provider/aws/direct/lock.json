@@ -184,7 +184,7 @@
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
       "sourceSha256": "039c1877a9b6b6997819988c4f8f7e9f063bcfe6afa6c431d2da45fc8422eace",
-      "subsetSha256": "01cbeaeca01e38d0d9b88455e7cf4faec5afa4893048088dd7dd8a32cc968537"
+      "subsetSha256": "bc9c6d7e9c7ea5a727c037ed054b3139f6feb4d268242cbe28778d19c0e1c3ef"
     },
     "elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json": {
       "file": "models/elastic-load-balancing-v2-2015-12-01.json",

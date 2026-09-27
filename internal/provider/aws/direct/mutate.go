@@ -37,7 +37,8 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		return "", err
 	}
 	property := r.Identifier[0].Property
-	id, _ := out[r.Create.Identifier[property]].(string)
+	v, _ := at(out, strings.Split(r.Create.Identifier[property], "."))
+	id, _ := v.(string)
 	if id == "" {
 		return "", fmt.Errorf("the %s create returned no %s", typeName, r.Create.Identifier[property])
 	}
@@ -124,9 +125,28 @@ func (c *Client) Delete(ctx context.Context, typeName, identifier string) error 
 // the decoded output.
 func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values map[string]any) (map[string]any, error) {
 	call := Reader{Type: r.Type, Protocol: r.Protocol, SigningName: r.SigningName, Host: r.Host, SigningRegion: r.SigningRegion}
+	wireAs := func(name string, v any) (any, error) {
+		// A tag call's added tags are shaped as its tag property is.
+		if name == "added" && m.TagProperty != "" {
+			name = m.TagProperty
+		}
+		i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == name })
+		if i < 0 {
+			return nil, fmt.Errorf("the %s call %s: %s has no read mapping to send it by", r.Type, m.Operation, name)
+		}
+		w, err := wire(r.Fields[i], v)
+		if err != nil {
+			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
+		}
+		return w, nil
+	}
 	var bindings []Binding
 	for _, member := range sortedKeys(m.Input) {
-		if v, ok := render(m.Input[member], values); ok {
+		v, ok, err := render(m.Input[member], values, wireAs)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
 			bindings = append(bindings, Binding{Member: member, Location: "body", Structured: v})
 		}
 	}
@@ -200,16 +220,22 @@ func retryable(err error, codes []string) bool {
 var wholePlaceholder = regexp.MustCompile(`^\{([A-Za-z0-9]+)(?::([A-Za-z]+))?\}$`)
 
 // render fills template from values; ok is false when it names a value
-// not being set, and a map or list leaves out each such entry.
-func render(template any, values map[string]any) (any, bool) {
+// not being set, and a map or list leaves out each such entry. A {name:wire}
+// placeholder is rewritten by wireAs, which may fail.
+func render(template any, values map[string]any, wireAs func(name string, v any) (any, error)) (any, bool, error) {
 	switch t := template.(type) {
 	case string:
 		if m := wholePlaceholder.FindStringSubmatch(t); m != nil {
 			v, ok := values[m[1]]
 			if !ok || v == nil {
-				return nil, false
+				return nil, false, nil
 			}
-			return filter(m[2], v)
+			if m[2] == "wire" {
+				w, err := wireAs(m[1], v)
+				return w, err == nil, err
+			}
+			v, ok = filter(m[2], v)
+			return v, ok, nil
 		}
 		complete := true
 		out := placeholderName.ReplaceAllStringFunc(t, func(p string) string {
@@ -222,25 +248,33 @@ func render(template any, values map[string]any) (any, bool) {
 			s, _ := filter("string", v)
 			return fmt.Sprint(s)
 		})
-		return out, complete
+		return out, complete, nil
 	case map[string]any:
 		out := map[string]any{}
 		for k, item := range t {
-			if v, ok := render(item, values); ok {
+			v, ok, err := render(item, values, wireAs)
+			if err != nil {
+				return nil, false, err
+			}
+			if ok {
 				out[k] = v
 			}
 		}
-		return out, len(out) > 0 || len(t) == 0
+		return out, len(out) > 0 || len(t) == 0, nil
 	case []any:
 		var out []any
 		for _, item := range t {
-			if v, ok := render(item, values); ok {
+			v, ok, err := render(item, values, wireAs)
+			if err != nil {
+				return nil, false, err
+			}
+			if ok {
 				out = append(out, v)
 			}
 		}
-		return out, len(out) > 0 || len(t) == 0
+		return out, len(out) > 0 || len(t) == 0, nil
 	}
-	return template, true
+	return template, true, nil
 }
 
 // filter applies a template filter to a value.

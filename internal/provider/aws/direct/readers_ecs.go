@@ -548,6 +548,13 @@ func init() {
 				Items:     []string{"taskDefinitionArns"},
 				Property:  "TaskDefinitionArn",
 			},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "RegisterTaskDefinition", Target: "AmazonEC2ContainerServiceV20141113.RegisterTaskDefinition", NameProperty: "Family", NameTag: "kraai:resource-name", Input: map[string]any{"containerDefinitions": "{ContainerDefinitions:wire}", "cpu": "{Cpu}", "enableFaultInjection": "{EnableFaultInjection}", "ephemeralStorage": "{EphemeralStorage:wire}", "executionRoleArn": "{ExecutionRoleArn}", "family": "{Family}", "inferenceAccelerators": "{InferenceAccelerators:wire}", "ipcMode": "{IpcMode}", "memory": "{Memory}", "networkMode": "{NetworkMode}", "pidMode": "{PidMode}", "placementConstraints": "{PlacementConstraints:wire}", "proxyConfiguration": "{ProxyConfiguration:wire}", "requiresCompatibilities": "{RequiresCompatibilities}", "runtimePlatform": "{RuntimePlatform:wire}", "tags": "{Tags:wire}", "taskRoleArn": "{TaskRoleArn}", "volumes": "{Volumes:wire}"}, Identifier: map[string]string{"TaskDefinitionArn": "taskDefinition.taskDefinitionArn"}},
+			Delete:            &MutationCall{Operation: "DeregisterTaskDefinition", Target: "AmazonEC2ContainerServiceV20141113.DeregisterTaskDefinition", Input: map[string]any{"taskDefinition": "{TaskDefinitionArn}"}},
+			Update: []MutationCall{
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "TagResource", Target: "AmazonEC2ContainerServiceV20141113.TagResource", TagProperty: "Tags", Input: map[string]any{"resourceArn": "{TaskDefinitionArn}", "tags": "{added:wire}"}}, Remove: &MutationCall{Operation: "UntagResource", Target: "AmazonEC2ContainerServiceV20141113.UntagResource", Input: map[string]any{"resourceArn": "{TaskDefinitionArn}", "tagKeys": "{removed}"}}},
+			},
+			Mutable: true,
 		},
 	})
 }
