@@ -127,8 +127,10 @@ delete:
 # The schema leaves the class updatable, but Cloud Control refuses a change:
 # NotUpdatable, "LogGroupClass is a Create-Only Property".
 createOnly: [LogGroupClass]
-# A key costs money, so KmsKeyId is routed but not exercised. The group is
-# made protected and unprotected by an update, so the delete can run.
+# A key bills while it exists, so KmsKeyId is exercised only with a key
+# named by KRAAI_LIFECYCLE_KMS_KEY_ARN whose policy lets logs use it. The
+# group is made protected and unprotected by an update, so the delete can
+# run.
 lifecycle:
   create:
     DeletionProtectionEnabled: true
@@ -152,6 +154,7 @@ lifecycle:
     DeletionProtectionEnabled: false
     FieldIndexPolicies:
       - Fields: [requestId]
+    KmsKeyId: "{kmsKeyArn}"
     ResourcePolicyDocument:
       Version: "2012-10-17"
       Statement:

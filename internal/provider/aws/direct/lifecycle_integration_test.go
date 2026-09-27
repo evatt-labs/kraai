@@ -30,6 +30,10 @@ var updateLifecycle = flag.Bool("update-lifecycle", false, "merge this run into 
 // Cloud Control. Runs only with KRAAI_ALLOW_MUTATE=1; every instance is
 // named kraai-lifecycle-* and deleted when the test ends, however it ends.
 //
+// A vector property naming {kmsKeyArn} runs only when
+// KRAAI_LIFECYCLE_KMS_KEY_ARN names a key the service may use, as a key
+// bills while it exists.
+//
 //	KRAAI_ALLOW_MUTATE=1 go test -tags integration ./internal/provider/aws/direct -run TestLifecycleParity [-args -update-lifecycle]
 func TestLifecycleParity(t *testing.T) {
 	if os.Getenv("KRAAI_ALLOW_MUTATE") != "1" {
@@ -95,8 +99,10 @@ func TestLifecycleParity(t *testing.T) {
 func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, client *Client, o Override, e TypeLifecycle) TypeLifecycle {
 	name := fmt.Sprintf("kraai-lifecycle-%s-%d", strings.ToLower(o.Type[strings.LastIndex(o.Type, ":")+1:]), time.Now().Unix())
 	nameTag := map[string]any{"Key": "kraai:resource-name", "Value": name}
-	// A vector may name the instance: {name}, {account} and {region}.
-	vars := strings.NewReplacer("{name}", name, "{account}", account, "{region}", client.Region)
+	// A vector may name the instance, {name}, where, {account} and
+	// {region}, and a key made for the harness, {kmsKeyArn}.
+	kmsKey := os.Getenv("KRAAI_LIFECYCLE_KMS_KEY_ARN")
+	vars := strings.NewReplacer("{name}", name, "{account}", account, "{region}", client.Region, "{kmsKeyArn}", kmsKey)
 	desired := fill(o.Lifecycle.Create, vars).(map[string]any)
 	desired["Tags"] = append([]any{nameTag}, asList(desired["Tags"])...)
 
@@ -124,6 +130,10 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 		fail("create read through Cloud Control", err)
 	}
 	for _, property := range sortedKeys(o.Lifecycle.Update) {
+		if kmsKey == "" && strings.Contains(fmt.Sprint(o.Lifecycle.Update[property]), "{kmsKeyArn}") {
+			t.Logf("%s: skipped, KRAAI_LIFECYCLE_KMS_KEY_ARN is unset", property)
+			continue
+		}
 		value := fill(o.Lifecycle.Update[property], vars)
 		if property == "Tags" {
 			value = append([]any{nameTag}, asList(value)...)
