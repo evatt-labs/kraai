@@ -18,17 +18,18 @@ type MutationCall struct {
 	// Properties is what an update call sets.
 	Properties []string
 	// Identifier maps, for a create, each primary identifier property to
-	// the output member carrying it.
+	// the output member carrying it, a dotted path into nested structures.
 	Identifier map[string]string
 	// NameProperty and NameTag are a create's Create.Name.
 	NameProperty, NameTag string
-	// TagProperty, Add and Remove are an update call's Tags.
+	// TagProperty, Add and Remove are an update call's Tags; an Add call
+	// carries TagProperty too, to shape its added tags by.
 	TagProperty string
 	Add, Remove *MutationCall
 }
 
 // mutationFilters are the template filters a mutation's input may use.
-var mutationFilters = map[string]bool{"": true, "json": true, "entries": true, "string": true}
+var mutationFilters = map[string]bool{"": true, "json": true, "entries": true, "string": true, "wire": true}
 
 // compileMutations checks an override's create, update and delete calls
 // against its model and schema, and fills r's mutations and
@@ -61,7 +62,8 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	for _, p := range schema.PrimaryIdentifier {
 		identifier[strings.TrimPrefix(p, "/properties/")] = true
 	}
-	call := func(m Mutation, at string, extra map[string]bool) *MutationCall {
+	// tags is the tag property an add call's {added} is shaped as.
+	call := func(m Mutation, at string, extra map[string]bool, tags string) *MutationCall {
 		op, ok := model.Shapes[namespace+m.Operation]
 		if !ok || op.Type != "operation" {
 			fail("%s operation %s is not in the model", at, m.Operation)
@@ -78,7 +80,19 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 					fail("%s input %s names {%s}, which is not a property of %s", at, member, name, o.Type)
 				}
 				if !mutationFilters[filter] {
-					fail("%s input %s filters {%s} by %s; the filters are json, entries and string", at, member, name, filter)
+					fail("%s input %s filters {%s} by %s; the filters are json, entries, string and wire", at, member, name, filter)
+				}
+				if filter == "wire" {
+					property := name
+					if name == "added" && tags != "" {
+						property = tags
+					}
+					i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == property })
+					if i < 0 {
+						fail("%s input %s sends {%s:wire}, which the read does not map", at, member, name)
+					} else if err := wireable(r.Fields[i]); err != nil {
+						fail("%s input %s sends {%s:wire}, which cannot be mapped back: %v", at, member, name, err)
+					}
 				}
 			}
 		}
@@ -94,13 +108,13 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	}
 
 	if o.Create != nil {
-		c := call(o.Create.Mutation, "create", nil)
+		c := call(o.Create.Mutation, "create", nil, "")
 		if c != nil {
 			op := model.Shapes[namespace+o.Create.Operation]
 			output := model.Shapes[ref(op.Output)]
 			for property := range identifier {
-				member, ok := o.Create.Identifier[property]
-				if m, has := output.Members[member]; !ok || !has || targetType(model.Shapes[m.Target].Type, m.Target) != "string" {
+				path, ok := o.Create.Identifier[property]
+				if !ok || outputMember(model, output, path) != "string" {
 					fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 				}
 			}
@@ -131,14 +145,15 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			for p := range keys {
 				tagKeys[p] = true
 			}
-			add, remove := call(u.Tags.Add, at+" add", tagKeys), call(u.Tags.Remove, at+" remove", tagKeys)
+			add, remove := call(u.Tags.Add, at+" add", tagKeys, u.Tags.Property), call(u.Tags.Remove, at+" remove", tagKeys, "")
 			if add != nil && remove != nil {
+				add.TagProperty = u.Tags.Property
 				r.Update = append(r.Update, MutationCall{TagProperty: u.Tags.Property, Add: add, Remove: remove})
 				routed[u.Tags.Property] = true
 			}
 			continue
 		}
-		c := call(u.Mutation, at, keys)
+		c := call(u.Mutation, at, keys, "")
 		if c == nil {
 			continue
 		}
@@ -158,7 +173,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		r.Update = append(r.Update, *c)
 	}
 	if o.Delete != nil {
-		r.Delete = call(*o.Delete, "delete", keys)
+		r.Delete = call(*o.Delete, "delete", keys, "")
 	}
 	// Complete when every property an update can change has a call: not
 	// the read-only, create-only or write-only ones.
@@ -173,6 +188,25 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		}
 	}
 	return errs
+}
+
+// outputMember is the type of the member a dotted path names from the
+// structure shape, or "" when the path leaves the model.
+func outputMember(model smithyModel, shape smithyShape, path string) string {
+	steps := strings.Split(path, ".")
+	for i, step := range steps {
+		m, ok := shape.Members[step]
+		if !ok {
+			return ""
+		}
+		// Only a structure has members to step into; any other shape ends
+		// the path at the next step.
+		shape = model.Shapes[m.Target]
+		if i == len(steps)-1 {
+			return targetType(shape.Type, m.Target)
+		}
+	}
+	return ""
 }
 
 // templateRefs lists the {Property:filter} placeholders a template names,

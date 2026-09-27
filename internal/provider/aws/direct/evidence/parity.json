@@ -828,7 +828,7 @@
     {
       "type": "AWS::ECS::TaskDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 20,
@@ -850,7 +850,7 @@
       ],
       "absence": "parity",
       "probed": 20,
-      "override": "e565a22467295986ae5e2c8c6b12c6700e1a27989e2df1e1e44817a615eef061"
+      "override": "71702d9da96b3e3d41f7eeccc99c4f8d7366f890eff4a75b4f0f02287fad2584"
     },
     {
       "type": "AWS::EMR::SecurityConfiguration",

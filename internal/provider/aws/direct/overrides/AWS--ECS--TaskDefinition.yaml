@@ -259,3 +259,65 @@ properties:
           FileSystemArn: fileSystemArn
           RootDirectory: rootDirectory
           TransitEncryptionPort: transitEncryptionPort
+create:
+  operation: RegisterTaskDefinition
+  # A revision's family is named by kraai's identity tag, as Cloud Control
+  # would otherwise generate one.
+  name:
+    property: Family
+    tag: kraai:resource-name
+  input:
+    family: "{Family}"
+    containerDefinitions: "{ContainerDefinitions:wire}"
+    cpu: "{Cpu}"
+    enableFaultInjection: "{EnableFaultInjection}"
+    ephemeralStorage: "{EphemeralStorage:wire}"
+    executionRoleArn: "{ExecutionRoleArn}"
+    inferenceAccelerators: "{InferenceAccelerators:wire}"
+    ipcMode: "{IpcMode}"
+    memory: "{Memory}"
+    networkMode: "{NetworkMode}"
+    pidMode: "{PidMode}"
+    placementConstraints: "{PlacementConstraints:wire}"
+    proxyConfiguration: "{ProxyConfiguration:wire}"
+    requiresCompatibilities: "{RequiresCompatibilities}"
+    runtimePlatform: "{RuntimePlatform:wire}"
+    tags: "{Tags:wire}"
+    taskRoleArn: "{TaskRoleArn}"
+    volumes: "{Volumes:wire}"
+  identifier:
+    TaskDefinitionArn: taskDefinition.taskDefinitionArn
+# Every other property is create-only: a change registers a new revision.
+update:
+  - tags:
+      property: Tags
+      add:
+        operation: TagResource
+        input:
+          resourceArn: "{TaskDefinitionArn}"
+          tags: "{added:wire}"
+      remove:
+        operation: UntagResource
+        input:
+          resourceArn: "{TaskDefinitionArn}"
+          tagKeys: "{removed}"
+# A deregistered revision reads as INACTIVE, which is absent.
+delete:
+  operation: DeregisterTaskDefinition
+  input:
+    taskDefinition: "{TaskDefinitionArn}"
+lifecycle:
+  create:
+    RequiresCompatibilities: [FARGATE]
+    NetworkMode: awsvpc
+    Cpu: "256"
+    Memory: "512"
+    ContainerDefinitions:
+      - Name: noop
+        Image: public.ecr.aws/docker/library/busybox:stable
+        Essential: true
+        Environment:
+          - Name: MODE
+            Value: lifecycle
+  update:
+    Tags: [{Key: team, Value: kraai}]

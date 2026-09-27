@@ -1,8 +1,17 @@
 {
   "types": [
     {
+      "type": "AWS::ECS::TaskDefinition",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "Tags"
+      ],
+      "override": "71702d9da96b3e3d41f7eeccc99c4f8d7366f890eff4a75b4f0f02287fad2584"
+    },
+    {
       "type": "AWS::SQS::Queue",
-      "date": "2026-09-26",
+      "date": "2026-09-27",
       "outcome": "parity",
       "updated": [
         "DelaySeconds",

@@ -189,8 +189,10 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 // input as templates: a string that is exactly {Property} or
 // {Property:filter} is that property's desired value, and a template whose
 // property is not being set is left out. The filters are json, a value
-// sent as its JSON text; string, a number or boolean sent as text; and
-// entries, a list of Key/Value structures sent as a map.
+// sent as its JSON text; string, a number or boolean sent as text;
+// entries, a list of Key/Value structures sent as a map; and wire, a value
+// sent in the shape the read maps it from, each nested property under its
+// member name.
 type Mutation struct {
 	Operation string         `yaml:"operation"`
 	Input     map[string]any `yaml:"input,omitempty"`
@@ -208,7 +210,7 @@ type Mutation struct {
 type Create struct {
 	Mutation `yaml:",inline"`
 	// Identifier maps the primary identifier to the output member that
-	// carries it.
+	// carries it, a dotted path when the member is nested.
 	Identifier map[string]string `yaml:"identifier"`
 	// Name fills a name property the manifest leaves unset from the value
 	// of a tag the desired state carries, so a create that is retried names
@@ -231,7 +233,7 @@ type UpdateCall struct {
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,
-// {added:entries}, and the keys removed, {removed}.
+// {added:entries} or {added:wire}, and the keys removed, {removed}.
 type Tags struct {
 	Property string   `yaml:"property"`
 	Add      Mutation `yaml:"add"`
