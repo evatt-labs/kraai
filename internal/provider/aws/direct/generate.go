@@ -415,6 +415,9 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	if m.Together {
 		b.WriteString("Together: true, ")
 	}
+	if m.Required != nil {
+		fmt.Fprintf(b, "Required: %#v, ", m.Required)
+	}
 	for _, f := range []struct {
 		name string
 		call *MutationCall

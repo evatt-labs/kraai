@@ -106,6 +106,14 @@ func init() {
 			Capture: []Field{
 				{Property: "Arn", Member: "AlarmArn", Kind: "scalar"},
 			},
+			LifecycleComplete: true,
+			MutationCaptures:  true,
+			Create:            &MutationCall{Operation: "PutMetricAlarm", Target: "GraniteServiceVersion20100801.PutMetricAlarm", NameProperty: "AlarmName", NameTag: "kraai:resource-name", Input: map[string]any{"ActionsEnabled": "{ActionsEnabled}", "AlarmActions": "{AlarmActions}", "AlarmDescription": "{AlarmDescription}", "AlarmName": "{AlarmName}", "ComparisonOperator": "{ComparisonOperator}", "DatapointsToAlarm": "{DatapointsToAlarm}", "Dimensions": "{Dimensions:wire}", "EvaluateLowSampleCountPercentile": "{EvaluateLowSampleCountPercentile}", "EvaluationCriteria": "{EvaluationCriteria:wire}", "EvaluationInterval": "{EvaluationInterval}", "EvaluationPeriods": "{EvaluationPeriods}", "EvaluationWindow": "{EvaluationWindow:wire}", "ExtendedStatistic": "{ExtendedStatistic}", "InsufficientDataActions": "{InsufficientDataActions}", "MetricName": "{MetricName}", "Metrics": "{Metrics:wire}", "Namespace": "{Namespace}", "OKActions": "{OKActions}", "Period": "{Period}", "Statistic": "{Statistic}", "Tags": "{Tags}", "Threshold": "{Threshold}", "ThresholdMetricId": "{ThresholdMetricId}", "TreatMissingData": "{TreatMissingData}", "Unit": "{Unit}", "WarmUpConfiguration": "{WarmUpConfiguration:wire}"}, Properties: []string{"ActionsEnabled", "AlarmActions", "AlarmDescription", "AlarmName", "ComparisonOperator", "DatapointsToAlarm", "Dimensions", "EvaluateLowSampleCountPercentile", "EvaluationCriteria", "EvaluationInterval", "EvaluationPeriods", "EvaluationWindow", "ExtendedStatistic", "InsufficientDataActions", "MetricName", "Metrics", "Namespace", "OKActions", "Period", "Statistic", "Tags", "Threshold", "ThresholdMetricId", "TreatMissingData", "Unit", "WarmUpConfiguration"}, Identifier: map[string]string{"AlarmName": "{AlarmName}"}},
+			Delete:            &MutationCall{Operation: "DeleteAlarms", Target: "GraniteServiceVersion20100801.DeleteAlarms", Input: map[string]any{"AlarmNames": []any{"{AlarmName}"}}},
+			Update: []MutationCall{
+				MutationCall{Operation: "PutMetricAlarm", Target: "GraniteServiceVersion20100801.PutMetricAlarm", Input: map[string]any{"ActionsEnabled": "{ActionsEnabled}", "AlarmActions": "{AlarmActions}", "AlarmDescription": "{AlarmDescription}", "AlarmName": "{AlarmName}", "ComparisonOperator": "{ComparisonOperator}", "DatapointsToAlarm": "{DatapointsToAlarm}", "Dimensions": "{Dimensions:wire}", "EvaluateLowSampleCountPercentile": "{EvaluateLowSampleCountPercentile}", "EvaluationCriteria": "{EvaluationCriteria:wire}", "EvaluationInterval": "{EvaluationInterval}", "EvaluationPeriods": "{EvaluationPeriods}", "EvaluationWindow": "{EvaluationWindow:wire}", "ExtendedStatistic": "{ExtendedStatistic}", "InsufficientDataActions": "{InsufficientDataActions}", "MetricName": "{MetricName}", "Metrics": "{Metrics:wire}", "Namespace": "{Namespace}", "OKActions": "{OKActions}", "Period": "{Period}", "Statistic": "{Statistic}", "Threshold": "{Threshold}", "ThresholdMetricId": "{ThresholdMetricId}", "TreatMissingData": "{TreatMissingData}", "Unit": "{Unit}", "WarmUpConfiguration": "{WarmUpConfiguration:wire}"}, Properties: []string{"ActionsEnabled", "AlarmActions", "AlarmDescription", "ComparisonOperator", "DatapointsToAlarm", "Dimensions", "EvaluateLowSampleCountPercentile", "EvaluationCriteria", "EvaluationInterval", "EvaluationPeriods", "EvaluationWindow", "ExtendedStatistic", "InsufficientDataActions", "MetricName", "Metrics", "Namespace", "OKActions", "Period", "Statistic", "Threshold", "ThresholdMetricId", "TreatMissingData", "Unit", "WarmUpConfiguration"}, Together: true},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "TagResource", Target: "GraniteServiceVersion20100801.TagResource", TagProperty: "Tags", Input: map[string]any{"ResourceARN": "{Arn}", "Tags": "{added}"}}, Remove: &MutationCall{Operation: "UntagResource", Target: "GraniteServiceVersion20100801.UntagResource", Input: map[string]any{"ResourceARN": "{Arn}", "TagKeys": "{removed}"}}},
+			},
 			Also: []Reader{
 				{
 					Type:        "AWS::CloudWatch::Alarm",
@@ -126,6 +134,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

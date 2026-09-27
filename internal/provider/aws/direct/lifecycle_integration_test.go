@@ -8,6 +8,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"maps"
 	"net/http"
 	"os"
 	"sort"
@@ -67,13 +68,18 @@ func TestLifecycleParity(t *testing.T) {
 		}
 		e := TypeLifecycle{Type: o.Type, Date: time.Now().UTC().Format("2006-01-02"), Override: hash, Outcome: "parity"}
 		ran := false
-		t.Run(o.Type, func(t *testing.T) {
+		passed := t.Run(o.Type, func(t *testing.T) {
 			ran = true
 			e = lifecycle(ctx, t, cc, client, o, e)
 		})
 		// A type -run leaves out is not evidence either way.
 		if !ran {
 			continue
+		}
+		// A step that stops the subtest, such as a failed create, never
+		// returns its outcome.
+		if !passed {
+			e.Outcome = "differs"
 		}
 		t.Logf("%s: lifecycle %s, updated %v", o.Type, e.Outcome, e.Updated)
 		run.Types = append(run.Types, e)
@@ -129,6 +135,10 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 	if err := ccShows(ctx, cc, o.Type, id, desired); err != nil {
 		fail("create read through Cloud Control", err)
 	}
+	// Every update must keep what came before it, not only set its own
+	// property: a call that replaces the whole instance could reset the
+	// rest.
+	shown := maps.Clone(desired)
 	for _, property := range sortedKeys(o.Lifecycle.Update) {
 		if kmsKey == "" && strings.Contains(fmt.Sprint(o.Lifecycle.Update[property]), "{kmsKeyArn}") {
 			t.Logf("%s: skipped, KRAAI_LIFECYCLE_KMS_KEY_ARN is unset", property)
@@ -148,7 +158,8 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 			fail("update "+property, err)
 			continue
 		}
-		if err := ccShows(ctx, cc, o.Type, id, changes); err != nil {
+		shown[property] = value
+		if err := ccShows(ctx, cc, o.Type, id, shown); err != nil {
 			fail("update "+property+" read through Cloud Control", err)
 			continue
 		}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"math/big"
 	"slices"
 	"strings"
 	"time"
@@ -143,11 +144,17 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 					continue
 				}
 				v, read := current[p]
-				if !read {
-					// Left out, the call would fail or clear it.
+				required := slices.Contains(u.Required, p)
+				if !read && required {
+					// Left out, the call would be refused.
 					return fmt.Errorf("%s's %s sends %s with what changed, but it was not read", r.Type, u.Operation, p)
 				}
-				values[p] = v
+				// An optional property read back empty is unset: a service
+				// can refuse an empty one beside another, such as an alarm's
+				// dimensions beside its metrics.
+				if read && (required || !empty(v)) {
+					values[p] = v
+				}
 			}
 		}
 		if _, err := c.mutate(ctx, r, u, values); err != nil {
@@ -398,6 +405,12 @@ func covers(desired, current any) bool {
 				}
 			}
 			return true
+		case json.Number:
+			// A number is its value, however written: 1 and 1.0 are one.
+			cn, ok := c.(json.Number)
+			x, xok := new(big.Rat).SetString(dt.String())
+			y, yok := new(big.Rat).SetString(cn.String())
+			return ok && xok && yok && x.Cmp(y) == 0
 		default:
 			return fmt.Sprint(d) == fmt.Sprint(c)
 		}
@@ -419,6 +432,19 @@ func jsonValue(v any) any {
 		return v
 	}
 	return out
+}
+
+// empty reports a value with nothing in it: nil, or an empty list or map.
+func empty(v any) bool {
+	switch t := v.(type) {
+	case nil:
+		return true
+	case []any:
+		return len(t) == 0
+	case map[string]any:
+		return len(t) == 0
+	}
+	return false
 }
 
 // alsoFields is every property the read's further calls map.

@@ -243,8 +243,10 @@ type NameFrom struct {
 type UpdateCall struct {
 	Mutation   `yaml:",inline"`
 	Properties []string `yaml:"properties,omitempty"`
-	// Together sends every one of Properties whenever any changes, an
-	// unchanged one as it was read, for a call that requires them all.
+	// Together sends every one of Properties whenever any changes, for a
+	// call that replaces them all: an unchanged one as it was read, and
+	// one not read, or read empty when optional, left unset. One filling a
+	// member the operation requires must have been read.
 	Together bool  `yaml:"together,omitempty"`
 	Tags     *Tags `yaml:"tags,omitempty"`
 }
