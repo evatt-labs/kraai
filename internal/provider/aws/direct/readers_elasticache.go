@@ -29,6 +29,14 @@ func init() {
 			Capture: []Field{
 				{Property: "Arn", Member: "ARN", Kind: "scalar", XMLName: "ARN", Scalar: "string"},
 			},
+			LifecycleComplete: true,
+			MutationCaptures:  true,
+			Create:            &MutationCall{Operation: "CreateCacheSubnetGroup", Target: "AmazonElastiCacheV9.CreateCacheSubnetGroup", NameProperty: "CacheSubnetGroupName", NameTag: "kraai:resource-name", Input: map[string]any{"CacheSubnetGroupDescription": "{Description}", "CacheSubnetGroupName": "{CacheSubnetGroupName}", "SubnetIds": "{SubnetIds}", "Tags": "{Tags}"}, Properties: []string{"CacheSubnetGroupName", "Description", "SubnetIds", "Tags"}, Identifier: map[string]string{"CacheSubnetGroupName": "CreateCacheSubnetGroupResult.CacheSubnetGroup.CacheSubnetGroupName"}, Form: map[string]FormStep{"CacheSubnetGroupDescription": {Key: "CacheSubnetGroupDescription", Kind: "scalar"}, "CacheSubnetGroupName": {Key: "CacheSubnetGroupName", Kind: "scalar"}, "SubnetIds": {Key: "SubnetIds", Kind: "list", Item: "SubnetIdentifier"}, "SubnetIds[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tags", Kind: "list", Item: "Tag"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}},
+			Delete:            &MutationCall{Operation: "DeleteCacheSubnetGroup", Target: "AmazonElastiCacheV9.DeleteCacheSubnetGroup", Input: map[string]any{"CacheSubnetGroupName": "{CacheSubnetGroupName}"}, AbsentErrors: []string{"CacheSubnetGroupNotFoundFault"}, Form: map[string]FormStep{"CacheSubnetGroupName": {Key: "CacheSubnetGroupName", Kind: "scalar"}}},
+			Update: []MutationCall{
+				MutationCall{Operation: "ModifyCacheSubnetGroup", Target: "AmazonElastiCacheV9.ModifyCacheSubnetGroup", Input: map[string]any{"CacheSubnetGroupDescription": "{Description}", "CacheSubnetGroupName": "{CacheSubnetGroupName}", "SubnetIds": "{SubnetIds}"}, Properties: []string{"Description", "SubnetIds"}, Form: map[string]FormStep{"CacheSubnetGroupDescription": {Key: "CacheSubnetGroupDescription", Kind: "scalar"}, "CacheSubnetGroupName": {Key: "CacheSubnetGroupName", Kind: "scalar"}, "SubnetIds": {Key: "SubnetIds", Kind: "list", Item: "SubnetIdentifier"}, "SubnetIds[]": {Key: "", Kind: "scalar"}}, Together: true},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "AddTagsToResource", Target: "AmazonElastiCacheV9.AddTagsToResource", TagProperty: "Tags", Input: map[string]any{"ResourceName": "{Arn}", "Tags": "{added}"}, Form: map[string]FormStep{"ResourceName": {Key: "ResourceName", Kind: "scalar"}, "Tags": {Key: "Tags", Kind: "list", Item: "Tag"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "RemoveTagsFromResource", Target: "AmazonElastiCacheV9.RemoveTagsFromResource", Input: map[string]any{"ResourceName": "{Arn}", "TagKeys": "{removed}"}, Form: map[string]FormStep{"ResourceName": {Key: "ResourceName", Kind: "scalar"}, "TagKeys": {Key: "TagKeys", Kind: "list", Item: "member"}, "TagKeys[]": {Key: "", Kind: "scalar"}}}},
+			},
 			Also: []Reader{
 				{
 					Type:        "AWS::ElastiCache::SubnetGroup",
@@ -51,6 +59,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

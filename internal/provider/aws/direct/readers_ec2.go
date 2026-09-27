@@ -62,7 +62,14 @@ func init() {
 				},
 				{Property: "VpcId", Member: "VpcId", Kind: "scalar", XMLName: "vpcId", Scalar: "string"},
 			},
-			AbsentIDs: []string{"rtb-0a1b2c3d4e5f60718"},
+			AbsentIDs:         []string{"rtb-0a1b2c3d4e5f60718"},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "CreateRouteTable", Target: "AmazonEC2.CreateRouteTable", Input: map[string]any{"TagSpecifications": []any{map[string]any{"ResourceType": "route-table", "Tags": "{Tags:wire}"}}, "VpcId": "{VpcId}"}, Properties: []string{"Tags", "VpcId"}, Identifier: map[string]string{"RouteTableId": "routeTable.routeTableId"}, Form: map[string]FormStep{"TagSpecifications": {Key: "TagSpecification", Kind: "list"}, "TagSpecifications[]": {Key: "", Kind: "structure"}, "TagSpecifications[].ResourceType": {Key: "ResourceType", Kind: "scalar"}, "TagSpecifications[].Tags": {Key: "Tag", Kind: "list"}, "TagSpecifications[].Tags[]": {Key: "", Kind: "structure"}, "TagSpecifications[].Tags[].Key": {Key: "Key", Kind: "scalar"}, "TagSpecifications[].Tags[].Value": {Key: "Value", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
+			Delete:            &MutationCall{Operation: "DeleteRouteTable", Target: "AmazonEC2.DeleteRouteTable", Input: map[string]any{"RouteTableId": "{RouteTableId}"}, AbsentErrors: []string{"InvalidRouteTableID.NotFound"}, Form: map[string]FormStep{"RouteTableId": {Key: "RouteTableId", Kind: "scalar"}}},
+			Update: []MutationCall{
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "CreateTags", Target: "AmazonEC2.CreateTags", TagProperty: "Tags", Input: map[string]any{"Resources": []any{"{RouteTableId}"}, "Tags": "{added:wire}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "DeleteTags", Target: "AmazonEC2.DeleteTags", Input: map[string]any{"Resources": []any{"{RouteTableId}"}, "Tags": "{removed:keys}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}},
+			},
+			Mutable: true,
 		},
 		"AWS::EC2::SecurityGroup": {
 			Type:        "AWS::EC2::SecurityGroup",
@@ -232,7 +239,11 @@ func init() {
 				{Property: "RouteTableId", Member: "RouteTableId", Kind: "scalar", XMLName: "routeTableId", Scalar: "string"},
 				{Property: "SubnetId", Member: "SubnetId", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}}, XMLName: "subnetId", Scalar: "string"},
 			},
-			AbsentIDs: []string{"rtbassoc-0a1b2c3d4e5f60718"},
+			AbsentIDs:         []string{"rtbassoc-0a1b2c3d4e5f60718"},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "AssociateRouteTable", Target: "AmazonEC2.AssociateRouteTable", Input: map[string]any{"RouteTableId": "{RouteTableId}", "SubnetId": "{SubnetId}"}, Properties: []string{"RouteTableId", "SubnetId"}, Identifier: map[string]string{"Id": "associationId"}, Form: map[string]FormStep{"RouteTableId": {Key: "RouteTableId", Kind: "scalar"}, "SubnetId": {Key: "SubnetId", Kind: "scalar"}}},
+			Delete:            &MutationCall{Operation: "DisassociateRouteTable", Target: "AmazonEC2.DisassociateRouteTable", Input: map[string]any{"AssociationId": "{Id}"}, AbsentErrors: []string{"InvalidAssociationID.NotFound"}, Form: map[string]FormStep{"AssociationId": {Key: "AssociationId", Kind: "scalar"}}},
+			Mutable:           true,
 		},
 		"AWS::EC2::VPC": {
 			Type:        "AWS::EC2::VPC",
@@ -323,7 +334,16 @@ func init() {
 				},
 				{Property: "VpcId", Member: "VpcId", Kind: "scalar", XMLName: "vpcId", Scalar: "string"},
 			},
-			AbsentIDs: []string{"vpc-0a1b2c3d4e5f60718"},
+			AbsentIDs:         []string{"vpc-0a1b2c3d4e5f60718"},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "CreateVpc", Target: "AmazonEC2.CreateVpc", Input: map[string]any{"CidrBlock": "{CidrBlock}", "InstanceTenancy": "{InstanceTenancy}", "Ipv4IpamPoolId": "{Ipv4IpamPoolId}", "Ipv4NetmaskLength": "{Ipv4NetmaskLength}", "TagSpecifications": []any{map[string]any{"ResourceType": "vpc", "Tags": "{Tags:wire}"}}, "VpcEncryptionControl": map[string]any{"EgressOnlyInternetGatewayExclusion": "{VpcEncryptionControl.EgressOnlyInternetGatewayExclusion}", "ElasticFileSystemExclusion": "{VpcEncryptionControl.ElasticFileSystemExclusion}", "InternetGatewayExclusion": "{VpcEncryptionControl.InternetGatewayExclusion}", "LambdaExclusion": "{VpcEncryptionControl.LambdaExclusion}", "Mode": "{VpcEncryptionControl.Mode}", "NatGatewayExclusion": "{VpcEncryptionControl.NatGatewayExclusion}", "VirtualPrivateGatewayExclusion": "{VpcEncryptionControl.VirtualPrivateGatewayExclusion}", "VpcLatticeExclusion": "{VpcEncryptionControl.VpcLatticeExclusion}", "VpcPeeringExclusion": "{VpcEncryptionControl.VpcPeeringExclusion}"}}, Properties: []string{"CidrBlock", "InstanceTenancy", "Ipv4IpamPoolId", "Ipv4NetmaskLength", "Tags", "VpcEncryptionControl"}, Identifier: map[string]string{"VpcId": "vpc.vpcId"}, Form: map[string]FormStep{"CidrBlock": {Key: "CidrBlock", Kind: "scalar"}, "InstanceTenancy": {Key: "InstanceTenancy", Kind: "scalar"}, "Ipv4IpamPoolId": {Key: "Ipv4IpamPoolId", Kind: "scalar"}, "Ipv4NetmaskLength": {Key: "Ipv4NetmaskLength", Kind: "scalar"}, "TagSpecifications": {Key: "TagSpecification", Kind: "list"}, "TagSpecifications[]": {Key: "", Kind: "structure"}, "TagSpecifications[].ResourceType": {Key: "ResourceType", Kind: "scalar"}, "TagSpecifications[].Tags": {Key: "Tag", Kind: "list"}, "TagSpecifications[].Tags[]": {Key: "", Kind: "structure"}, "TagSpecifications[].Tags[].Key": {Key: "Key", Kind: "scalar"}, "TagSpecifications[].Tags[].Value": {Key: "Value", Kind: "scalar"}, "VpcEncryptionControl": {Key: "VpcEncryptionControl", Kind: "structure"}, "VpcEncryptionControl.EgressOnlyInternetGatewayExclusion": {Key: "EgressOnlyInternetGatewayExclusion", Kind: "scalar"}, "VpcEncryptionControl.ElasticFileSystemExclusion": {Key: "ElasticFileSystemExclusion", Kind: "scalar"}, "VpcEncryptionControl.InternetGatewayExclusion": {Key: "InternetGatewayExclusion", Kind: "scalar"}, "VpcEncryptionControl.LambdaExclusion": {Key: "LambdaExclusion", Kind: "scalar"}, "VpcEncryptionControl.Mode": {Key: "Mode", Kind: "scalar"}, "VpcEncryptionControl.NatGatewayExclusion": {Key: "NatGatewayExclusion", Kind: "scalar"}, "VpcEncryptionControl.VirtualPrivateGatewayExclusion": {Key: "VirtualPrivateGatewayExclusion", Kind: "scalar"}, "VpcEncryptionControl.VpcLatticeExclusion": {Key: "VpcLatticeExclusion", Kind: "scalar"}, "VpcEncryptionControl.VpcPeeringExclusion": {Key: "VpcPeeringExclusion", Kind: "scalar"}}},
+			Delete:            &MutationCall{Operation: "DeleteVpc", Target: "AmazonEC2.DeleteVpc", Input: map[string]any{"VpcId": "{VpcId}"}, AbsentErrors: []string{"InvalidVpcID.NotFound"}, Form: map[string]FormStep{"VpcId": {Key: "VpcId", Kind: "scalar"}}},
+			Update: []MutationCall{
+				MutationCall{Operation: "ModifyVpcAttribute", Target: "AmazonEC2.ModifyVpcAttribute", Input: map[string]any{"EnableDnsSupport": map[string]any{"Value": "{EnableDnsSupport}"}, "VpcId": "{VpcId}"}, Properties: []string{"EnableDnsSupport"}, Form: map[string]FormStep{"EnableDnsSupport": {Key: "EnableDnsSupport", Kind: "structure"}, "EnableDnsSupport.Value": {Key: "Value", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
+				MutationCall{Operation: "ModifyVpcAttribute", Target: "AmazonEC2.ModifyVpcAttribute", Input: map[string]any{"EnableDnsHostnames": map[string]any{"Value": "{EnableDnsHostnames}"}, "VpcId": "{VpcId}"}, Properties: []string{"EnableDnsHostnames"}, Form: map[string]FormStep{"EnableDnsHostnames": {Key: "EnableDnsHostnames", Kind: "structure"}, "EnableDnsHostnames.Value": {Key: "Value", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
+				MutationCall{Operation: "ModifyVpcTenancy", Target: "AmazonEC2.ModifyVpcTenancy", Input: map[string]any{"InstanceTenancy": "{InstanceTenancy}", "VpcId": "{VpcId}"}, Properties: []string{"InstanceTenancy"}, Form: map[string]FormStep{"InstanceTenancy": {Key: "InstanceTenancy", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "CreateTags", Target: "AmazonEC2.CreateTags", TagProperty: "Tags", Input: map[string]any{"Resources": []any{"{VpcId}"}, "Tags": "{added:wire}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "DeleteTags", Target: "AmazonEC2.DeleteTags", Input: map[string]any{"Resources": []any{"{VpcId}"}, "Tags": "{removed:keys}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}},
+			},
 			Also: []Reader{
 				{
 					Type:        "AWS::EC2::VPC",
@@ -404,6 +424,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

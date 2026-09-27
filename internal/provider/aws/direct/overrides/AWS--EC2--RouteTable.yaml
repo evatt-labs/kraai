@@ -15,5 +15,37 @@ properties:
       Key: Key
       Value: Value
   VpcId: VpcId
+create:
+  operation: CreateRouteTable
+  input:
+    VpcId: "{VpcId}"
+    TagSpecifications:
+      - ResourceType: route-table
+        Tags: "{Tags:wire}"
+  identifier:
+    RouteTableId: RouteTable.RouteTableId
+update:
+  - tags:
+      property: Tags
+      add:
+        operation: CreateTags
+        input:
+          Resources: ["{RouteTableId}"]
+          Tags: "{added:wire}"
+      remove:
+        operation: DeleteTags
+        input:
+          Resources: ["{RouteTableId}"]
+          Tags: "{removed:keys}"
+delete:
+  operation: DeleteRouteTable
+  input:
+    RouteTableId: "{RouteTableId}"
+  absentErrors: [InvalidRouteTableID.NotFound]
+lifecycle:
+  create:
+    VpcId: "{vpcId}"
+  update:
+    Tags: [{Key: team, Value: kraai}]
 absentIds:
   - rtb-0a1b2c3d4e5f60718

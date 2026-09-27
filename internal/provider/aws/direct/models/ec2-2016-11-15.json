@@ -3,16 +3,31 @@
     "com.amazonaws.ec2#AmazonEC2": {
       "operations": [
         {
+          "target": "com.amazonaws.ec2#AssociateRouteTable"
+        },
+        {
           "target": "com.amazonaws.ec2#CreateInternetGateway"
+        },
+        {
+          "target": "com.amazonaws.ec2#CreateRouteTable"
         },
         {
           "target": "com.amazonaws.ec2#CreateTags"
         },
         {
+          "target": "com.amazonaws.ec2#CreateVpc"
+        },
+        {
           "target": "com.amazonaws.ec2#DeleteInternetGateway"
         },
         {
+          "target": "com.amazonaws.ec2#DeleteRouteTable"
+        },
+        {
           "target": "com.amazonaws.ec2#DeleteTags"
+        },
+        {
+          "target": "com.amazonaws.ec2#DeleteVpc"
         },
         {
           "target": "com.amazonaws.ec2#DescribeInternetGateways"
@@ -37,6 +52,15 @@
         },
         {
           "target": "com.amazonaws.ec2#DescribeVpcs"
+        },
+        {
+          "target": "com.amazonaws.ec2#DisassociateRouteTable"
+        },
+        {
+          "target": "com.amazonaws.ec2#ModifyVpcAttribute"
+        },
+        {
+          "target": "com.amazonaws.ec2#ModifyVpcTenancy"
         }
       ],
       "traits": {
@@ -398,6 +422,77 @@
       "type": "service",
       "version": "2016-11-15"
     },
+    "com.amazonaws.ec2#AssociateRouteTable": {
+      "input": {
+        "target": "com.amazonaws.ec2#AssociateRouteTableRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#AssociateRouteTableResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#AssociateRouteTableRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "GatewayId": {
+          "target": "com.amazonaws.ec2#RouteGatewayId",
+          "traits": {}
+        },
+        "PublicIpv4Pool": {
+          "target": "com.amazonaws.ec2#Ipv4PoolEc2Id",
+          "traits": {}
+        },
+        "RouteTableId": {
+          "target": "com.amazonaws.ec2#RouteTableId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteTableId",
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "routeTableId"
+          }
+        },
+        "SubnetId": {
+          "target": "com.amazonaws.ec2#SubnetId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "SubnetId",
+            "smithy.api#xmlName": "subnetId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#AssociateRouteTableResult": {
+      "members": {
+        "AssociationId": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssociationId",
+            "smithy.api#xmlName": "associationId"
+          }
+        },
+        "AssociationState": {
+          "target": "com.amazonaws.ec2#RouteTableAssociationState",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssociationState",
+            "smithy.api#xmlName": "associationState"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ec2#AttachmentStatus": {
       "members": {
         "attached": {
@@ -534,6 +629,74 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ec2#CreateRouteTable": {
+      "input": {
+        "target": "com.amazonaws.ec2#CreateRouteTableRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#CreateRouteTableResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#CreateRouteTableRequest": {
+      "members": {
+        "ClientToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "smithy.api#idempotencyToken": {}
+          }
+        },
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "TagSpecifications": {
+          "target": "com.amazonaws.ec2#TagSpecificationList",
+          "traits": {
+            "smithy.api#xmlName": "TagSpecification"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#VpcId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "vpcId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#CreateRouteTableResult": {
+      "members": {
+        "ClientToken": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {
+            "aws.protocols#ec2QueryName": "ClientToken",
+            "smithy.api#xmlName": "clientToken"
+          }
+        },
+        "RouteTable": {
+          "target": "com.amazonaws.ec2#RouteTable",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteTable",
+            "smithy.api#xmlName": "routeTable"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ec2#CreateTags": {
       "input": {
         "target": "com.amazonaws.ec2#CreateTagsRequest"
@@ -575,6 +738,102 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ec2#CreateVpc": {
+      "input": {
+        "target": "com.amazonaws.ec2#CreateVpcRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#CreateVpcResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#CreateVpcRequest": {
+      "members": {
+        "AmazonProvidedIpv6CidrBlock": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AmazonProvidedIpv6CidrBlock",
+            "smithy.api#xmlName": "amazonProvidedIpv6CidrBlock"
+          }
+        },
+        "CidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        },
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "InstanceTenancy": {
+          "target": "com.amazonaws.ec2#Tenancy",
+          "traits": {
+            "aws.protocols#ec2QueryName": "InstanceTenancy",
+            "smithy.api#xmlName": "instanceTenancy"
+          }
+        },
+        "Ipv4IpamPoolId": {
+          "target": "com.amazonaws.ec2#IpamPoolId",
+          "traits": {}
+        },
+        "Ipv4NetmaskLength": {
+          "target": "com.amazonaws.ec2#NetmaskLength",
+          "traits": {}
+        },
+        "Ipv6CidrBlock": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        },
+        "Ipv6CidrBlockNetworkBorderGroup": {
+          "target": "com.amazonaws.ec2#String",
+          "traits": {}
+        },
+        "Ipv6IpamPoolId": {
+          "target": "com.amazonaws.ec2#IpamPoolId",
+          "traits": {}
+        },
+        "Ipv6NetmaskLength": {
+          "target": "com.amazonaws.ec2#NetmaskLength",
+          "traits": {}
+        },
+        "Ipv6Pool": {
+          "target": "com.amazonaws.ec2#Ipv6PoolEc2Id",
+          "traits": {}
+        },
+        "TagSpecifications": {
+          "target": "com.amazonaws.ec2#TagSpecificationList",
+          "traits": {
+            "smithy.api#xmlName": "TagSpecification"
+          }
+        },
+        "VpcEncryptionControl": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlConfiguration",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#CreateVpcResult": {
+      "members": {
+        "Vpc": {
+          "target": "com.amazonaws.ec2#Vpc",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Vpc",
+            "smithy.api#xmlName": "vpc"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ec2#DeleteInternetGateway": {
       "input": {
         "target": "com.amazonaws.ec2#DeleteInternetGatewayRequest"
@@ -601,6 +860,40 @@
             "smithy.api#clientOptional": {},
             "smithy.api#required": {},
             "smithy.api#xmlName": "internetGatewayId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DeleteRouteTable": {
+      "input": {
+        "target": "com.amazonaws.ec2#DeleteRouteTableRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DeleteRouteTableRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "RouteTableId": {
+          "target": "com.amazonaws.ec2#RouteTableId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "RouteTableId",
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "routeTableId"
           }
         }
       },
@@ -642,6 +935,38 @@
           "traits": {
             "aws.protocols#ec2QueryName": "Tag",
             "smithy.api#xmlName": "tag"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#DeleteVpc": {
+      "input": {
+        "target": "com.amazonaws.ec2#DeleteVpcRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DeleteVpcRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#VpcId",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
           }
         }
       },
@@ -1416,6 +1741,40 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ec2#DisassociateRouteTable": {
+      "input": {
+        "target": "com.amazonaws.ec2#DisassociateRouteTableRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#DisassociateRouteTableRequest": {
+      "members": {
+        "AssociationId": {
+          "target": "com.amazonaws.ec2#RouteTableAssociationId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "AssociationId",
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "associationId"
+          }
+        },
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "DryRun",
+            "smithy.api#xmlName": "dryRun"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ec2#Filter": {
       "members": {
         "Name": {
@@ -1699,6 +2058,12 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ec2#IpamPoolId": {
+      "type": "string"
+    },
+    "com.amazonaws.ec2#Ipv4PoolEc2Id": {
+      "type": "string"
+    },
     "com.amazonaws.ec2#Ipv6AddressAttribute": {
       "members": {
         "private": {
@@ -1715,6 +2080,9 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.ec2#Ipv6PoolEc2Id": {
+      "type": "string"
     },
     "com.amazonaws.ec2#Ipv6Range": {
       "members": {
@@ -1744,6 +2112,99 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.ec2#ModifyVpcAttribute": {
+      "input": {
+        "target": "com.amazonaws.ec2#ModifyVpcAttributeRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#ModifyVpcAttributeRequest": {
+      "members": {
+        "EnableDnsHostnames": {
+          "target": "com.amazonaws.ec2#AttributeBooleanValue",
+          "traits": {}
+        },
+        "EnableDnsSupport": {
+          "target": "com.amazonaws.ec2#AttributeBooleanValue",
+          "traits": {}
+        },
+        "EnableNetworkAddressUsageMetrics": {
+          "target": "com.amazonaws.ec2#AttributeBooleanValue",
+          "traits": {}
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#VpcId",
+          "traits": {
+            "aws.protocols#ec2QueryName": "VpcId",
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "vpcId"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#ModifyVpcTenancy": {
+      "input": {
+        "target": "com.amazonaws.ec2#ModifyVpcTenancyRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ec2#ModifyVpcTenancyResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ec2#ModifyVpcTenancyRequest": {
+      "members": {
+        "DryRun": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {}
+        },
+        "InstanceTenancy": {
+          "target": "com.amazonaws.ec2#VpcTenancy",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "VpcId": {
+          "target": "com.amazonaws.ec2#VpcId",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#ModifyVpcTenancyResult": {
+      "members": {
+        "ReturnValue": {
+          "target": "com.amazonaws.ec2#Boolean",
+          "traits": {
+            "aws.protocols#ec2QueryName": "Return",
+            "smithy.api#xmlName": "return"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ec2#NetmaskLength": {
+      "type": "integer"
     },
     "com.amazonaws.ec2#NetworkAcl": {
       "members": {
@@ -2888,6 +3349,9 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ec2#RouteGatewayId": {
+      "type": "string"
+    },
     "com.amazonaws.ec2#RouteList": {
       "member": {
         "target": "com.amazonaws.ec2#Route",
@@ -3058,6 +3522,9 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.ec2#RouteTableAssociationId": {
+      "type": "string"
     },
     "com.amazonaws.ec2#RouteTableAssociationList": {
       "member": {
@@ -4131,6 +4598,51 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ec2#VpcEncryptionControlConfiguration": {
+      "members": {
+        "EgressOnlyInternetGatewayExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        },
+        "ElasticFileSystemExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        },
+        "InternetGatewayExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        },
+        "LambdaExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        },
+        "Mode": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlMode",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "NatGatewayExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        },
+        "VirtualPrivateGatewayExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        },
+        "VpcLatticeExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        },
+        "VpcPeeringExclusion": {
+          "target": "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.ec2#VpcEncryptionControlExclusion": {
       "members": {
         "State": {
@@ -4175,6 +4687,23 @@
           "target": "smithy.api#Unit",
           "traits": {
             "smithy.api#enumValue": "enabling"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#VpcEncryptionControlExclusionStateInput": {
+      "members": {
+        "disable": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "disable"
+          }
+        },
+        "enable": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "enable"
           }
         }
       },
@@ -4424,6 +4953,17 @@
           "target": "smithy.api#Unit",
           "traits": {
             "smithy.api#enumValue": "pending"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ec2#VpcTenancy": {
+      "members": {
+        "default": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "default"
           }
         }
       },

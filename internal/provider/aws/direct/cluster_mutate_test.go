@@ -27,7 +27,9 @@ type fakeCluster struct {
 	// refuse is how many further changes are refused as busy with a change
 	// made elsewhere.
 	refuse int
-	calls  map[string][]map[string]any
+	// lower stores the name lowercased, as some services do.
+	lower bool
+	calls map[string][]map[string]any
 }
 
 func (f *fakeCluster) serve(t *testing.T) *Client {
@@ -64,7 +66,11 @@ func (f *fakeCluster) serve(t *testing.T) *Client {
 		}
 		switch op {
 		case "CreateCluster":
-			f.cluster = map[string]any{"clusterName": in["clusterName"]}
+			name, _ := in["clusterName"].(string)
+			if f.lower {
+				name = strings.ToLower(name)
+			}
+			f.cluster = map[string]any{"clusterName": name}
 			for _, k := range []string{"capacityProviders", "defaultCapacityProviderStrategy", "settings", "tags"} {
 				if v, ok := in[k]; ok {
 					f.cluster[k] = v
@@ -109,6 +115,19 @@ func TestCreateClusterWaitsForAttachments(t *testing.T) {
 	sent := f.calls["CreateCluster"][0]
 	if got, want := sent["serviceConnectDefaults"], map[string]any{"namespace": "kraai"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("serviceConnectDefaults = %v, want %v", got, want)
+	}
+}
+
+// A service that lowercases the name it is sent answers with the name the
+// instance has; the create returns that, and its wait compares with it.
+func TestCreateTakesTheNameTheServiceAnswers(t *testing.T) {
+	f := &fakeCluster{lower: true}
+	client := f.serve(t)
+	id, err := client.Create(context.Background(), clusterType, map[string]any{
+		"Tags": []any{map[string]any{"Key": "kraai:resource-name", "Value": "Kraai-E-Cluster"}},
+	})
+	if err != nil || id != "kraai-e-cluster" {
+		t.Fatalf("Create = %q, %v; want the lowercased name", id, err)
 	}
 }
 
