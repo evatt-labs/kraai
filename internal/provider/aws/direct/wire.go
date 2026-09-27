@@ -15,6 +15,9 @@ func wireable(f Field) error {
 		return fmt.Errorf("%s is read through a selection or reshaping", f.Property)
 	case f.Transform != "":
 		return fmt.Errorf("%s is read through the %s transform", f.Property, f.Transform)
+	case f.Kind == "map" && len(f.Fields) > 0:
+		// wire sends a map's values as they are.
+		return fmt.Errorf("%s is a map of structures", f.Property)
 	case f.Kind == "timestamp":
 		// CloudFormation writes a timestamp as text; awsJson sends seconds.
 		return fmt.Errorf("%s is a timestamp", f.Property)

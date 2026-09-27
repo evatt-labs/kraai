@@ -213,9 +213,10 @@ func TestCompileRefusesABadWire(t *testing.T) {
 
 func TestWireable(t *testing.T) {
 	for name, f := range map[string]Field{
-		"a selection":      {Property: "P", Kind: "list", Where: []Match{{}}},
-		"a nested reshape": {Property: "P", Kind: "structure", Fields: []Field{{Property: "Q", Kind: "map", Entries: []string{"K", "V"}}}},
-		"a timestamp":      {Property: "P", Kind: "timestamp"},
+		"a selection":         {Property: "P", Kind: "list", Where: []Match{{}}},
+		"a nested reshape":    {Property: "P", Kind: "structure", Fields: []Field{{Property: "Q", Kind: "map", Entries: []string{"K", "V"}}}},
+		"a timestamp":         {Property: "P", Kind: "timestamp"},
+		"a map of structures": {Property: "P", Kind: "map", Fields: []Field{{Property: "Q", Member: "q", Kind: "scalar"}}},
 	} {
 		if wireable(f) == nil {
 			t.Errorf("%s: wireable = nil, want a refusal", name)

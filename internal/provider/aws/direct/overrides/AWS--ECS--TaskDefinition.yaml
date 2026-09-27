@@ -301,7 +301,8 @@ update:
         input:
           resourceArn: "{TaskDefinitionArn}"
           tagKeys: "{removed}"
-# A deregistered revision reads as INACTIVE, which is absent.
+# A deregistered revision reads as INACTIVE, which is absent; deregistering
+# it again succeeds, so a retried delete needs no absent error.
 delete:
   operation: DeregisterTaskDefinition
   input:
