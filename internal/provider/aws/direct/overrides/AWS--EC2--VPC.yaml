@@ -118,6 +118,22 @@ create:
     TagSpecifications:
       - ResourceType: vpc
         Tags: "{Tags:wire}"
+    # CreateVpc's own encryption control member is flat, unlike the read's
+    # nested ResourceExclusions.<Service>.State; the schema's exclusions are
+    # flat siblings of Mode too, so a dotted placeholder per member sends
+    # every one it can. The exclusions are write-only and the read never
+    # carries them back, so a create that sets one never finishes waiting:
+    # see the lifecycle note below.
+    VpcEncryptionControl:
+      Mode: "{VpcEncryptionControl.Mode}"
+      EgressOnlyInternetGatewayExclusion: "{VpcEncryptionControl.EgressOnlyInternetGatewayExclusion}"
+      ElasticFileSystemExclusion: "{VpcEncryptionControl.ElasticFileSystemExclusion}"
+      InternetGatewayExclusion: "{VpcEncryptionControl.InternetGatewayExclusion}"
+      LambdaExclusion: "{VpcEncryptionControl.LambdaExclusion}"
+      NatGatewayExclusion: "{VpcEncryptionControl.NatGatewayExclusion}"
+      VirtualPrivateGatewayExclusion: "{VpcEncryptionControl.VirtualPrivateGatewayExclusion}"
+      VpcLatticeExclusion: "{VpcEncryptionControl.VpcLatticeExclusion}"
+      VpcPeeringExclusion: "{VpcEncryptionControl.VpcPeeringExclusion}"
   identifier:
     VpcId: Vpc.VpcId
 update:
@@ -159,6 +175,11 @@ delete:
 lifecycle:
   create:
     CidrBlock: 10.99.0.0/16
+  # The harness sets these one at a time in sorted-key order:
+  # EnableDnsHostnames before EnableDnsSupport. Unverified: whether
+  # disabling DNS support after enabling DNS hostnames is refused, given
+  # only the reverse order ("enabling hostnames needs support already on")
+  # is documented.
   update:
     EnableDnsHostnames: true
     EnableDnsSupport: false

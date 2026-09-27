@@ -26,6 +26,7 @@ type fakeVPC struct {
 	gone                     bool
 	cidr, tenancy            string
 	dnsSupport, dnsHostnames bool
+	encryptionMode           string
 	tags                     map[string]string
 	calls                    map[string][]url.Values
 }
@@ -65,6 +66,7 @@ func (f *fakeVPC) serve(t *testing.T) *Client {
 			if v := form.Get("InstanceTenancy"); v != "" {
 				f.tenancy = v
 			}
+			f.encryptionMode = form.Get("VpcEncryptionControl.Mode")
 			for i := 1; form.Get("TagSpecification.1.Tag."+strconv.Itoa(i)+".Key") != ""; i++ {
 				f.tags[form.Get("TagSpecification.1.Tag."+strconv.Itoa(i)+".Key")] = form.Get("TagSpecification.1.Tag." + strconv.Itoa(i) + ".Value")
 			}
@@ -102,7 +104,11 @@ func (f *fakeVPC) serve(t *testing.T) *Client {
 				notFound()
 				return
 			}
-			_, _ = io.WriteString(w, `<DescribeVpcsResponse><vpcSet><item><vpcId>`+f.id+`</vpcId><cidrBlock>`+f.cidr+`</cidrBlock><instanceTenancy>`+f.tenancy+`</instanceTenancy>`+tagXML()+`</item></vpcSet></DescribeVpcsResponse>`)
+			encryption := ""
+			if f.encryptionMode != "" {
+				encryption = `<encryptionControl><mode>` + f.encryptionMode + `</mode></encryptionControl>`
+			}
+			_, _ = io.WriteString(w, `<DescribeVpcsResponse><vpcSet><item><vpcId>`+f.id+`</vpcId><cidrBlock>`+f.cidr+`</cidrBlock><instanceTenancy>`+f.tenancy+`</instanceTenancy>`+encryption+tagXML()+`</item></vpcSet></DescribeVpcsResponse>`)
 		case "DescribeNetworkAcls":
 			_, _ = io.WriteString(w, `<DescribeNetworkAclsResponse><networkAclSet><item><networkAclId>acl-1</networkAclId></item></networkAclSet></DescribeNetworkAclsResponse>`)
 		case "DescribeSecurityGroups":
@@ -138,6 +144,30 @@ func TestCreateVPCSendsCidrAndTagSpecification(t *testing.T) {
 	}
 	if sent.Get("TagSpecification.1.ResourceType") != "vpc" || sent.Get("TagSpecification.1.Tag.1.Key") != "kraai:resource-name" || sent.Get("TagSpecification.1.Tag.1.Value") != "kraai-e-vpc" {
 		t.Fatalf("CreateVpc tags = %v", sent)
+	}
+	if sent.Has("VpcEncryptionControl.Mode") {
+		t.Fatalf("CreateVpc sent VpcEncryptionControl unset, form = %v", sent)
+	}
+}
+
+// A create that sets the encryption control's mode sends only the member
+// set, dotted onto CreateVpc's own (flat) encryption control input.
+func TestCreateVPCSendsEncryptionControlMode(t *testing.T) {
+	f := &fakeVPC{}
+	client := f.serve(t)
+	id, err := client.Create(context.Background(), vpcType, map[string]any{
+		"CidrBlock":            "10.99.0.0/16",
+		"VpcEncryptionControl": map[string]any{"Mode": "monitor"},
+	})
+	if err != nil || id != "vpc-0123" {
+		t.Fatalf("Create = %q, %v", id, err)
+	}
+	sent := f.calls["CreateVpc"][0]
+	if sent.Get("VpcEncryptionControl.Mode") != "monitor" {
+		t.Fatalf("CreateVpc form = %v", sent)
+	}
+	if sent.Has("VpcEncryptionControl.InternetGatewayExclusion") {
+		t.Fatalf("CreateVpc sent an exclusion unset, form = %v", sent)
 	}
 }
 
