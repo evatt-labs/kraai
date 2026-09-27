@@ -89,6 +89,19 @@
       "override": "e56590977af954e47d4f000b5af1426306e811451250ed7b60e91f34b98c828c"
     },
     {
+      "type": "AWS::Events::Rule",
+      "date": "2026-09-27",
+      "outcome": "parity",
+      "updated": [
+        "Description",
+        "ScheduleExpression",
+        "State",
+        "Tags",
+        "Targets"
+      ],
+      "override": "264795ad8436c3812f76702e816c818e5f3753f278b08b92e6ea7fe9c0138b2a"
+    },
+    {
       "type": "AWS::Logs::LogGroup",
       "date": "2026-09-27",
       "outcome": "parity",

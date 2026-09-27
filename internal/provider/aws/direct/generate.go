@@ -391,7 +391,8 @@ func provenTypes(files fs.FS) (map[string]bool, error) {
 func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	b.WriteString("MutationCall{")
 	for _, f := range []struct{ name, value string }{{"Operation", m.Operation}, {"Target", m.Target},
-		{"NameProperty", m.NameProperty}, {"NameTag", m.NameTag}, {"TagProperty", m.TagProperty}} {
+		{"NameProperty", m.NameProperty}, {"NameTag", m.NameTag}, {"TagProperty", m.TagProperty},
+		{"ListProperty", m.ListProperty}, {"FailedCount", m.FailedCount}} {
 		if f.value != "" {
 			fmt.Fprintf(b, "%s: %q, ", f.name, f.value)
 		}
@@ -404,7 +405,8 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	for _, f := range []struct {
 		name  string
 		value []string
-	}{{"AbsentErrors", m.AbsentErrors}, {"RetryErrors", m.RetryErrors}, {"Properties", m.Properties}} {
+	}{{"AbsentErrors", m.AbsentErrors}, {"RetryErrors", m.RetryErrors}, {"Properties", m.Properties},
+		{"Key", m.Key}, {"Clear", m.Clear}} {
 		if f.value != nil {
 			fmt.Fprintf(b, "%s: %#v, ", f.name, f.value)
 		}

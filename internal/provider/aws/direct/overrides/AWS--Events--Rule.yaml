@@ -156,5 +156,96 @@ also:
         properties:
           Key: Key
           Value: Value
+create:
+  operation: PutRule
+  name:
+    property: Name
+    tag: kraai:resource-name
+  input:
+    Name: "{Name}"
+    EventBusName: "{EventBusName}"
+    Description: "{Description}"
+    EventPattern: "{EventPattern:json}"
+    RoleArn: "{RoleArn}"
+    ScheduleExpression: "{ScheduleExpression}"
+    State: "{State}"
+    Tags: "{Tags}"
+  identifier:
+    Arn: RuleArn
+update:
+  # PutRule sets every field it is not sent to null, so all of them go on
+  # any change. The rule is addressed by its ARN: its name, and its bus
+  # unless it is the default one.
+  - operation: PutRule
+    properties: [Description, EventPattern, RoleArn, ScheduleExpression, State]
+    together: true
+    input:
+      Name: "{Arn:arnName}"
+      EventBusName: "{Arn:arnParent}"
+      Description: "{Description}"
+      EventPattern: "{EventPattern:json}"
+      RoleArn: "{RoleArn}"
+      ScheduleExpression: "{ScheduleExpression}"
+      State: "{State}"
+  # Targets are put and removed by Id, each call answering success with a
+  # count of the entries it failed.
+  - list:
+      property: Targets
+      key: [Id]
+      add:
+        operation: PutTargets
+        failedCount: FailedEntryCount
+        input:
+          Rule: "{Arn:arnName}"
+          EventBusName: "{Arn:arnParent}"
+          Targets: "{added:wire}"
+      remove:
+        operation: RemoveTargets
+        failedCount: FailedEntryCount
+        input:
+          Rule: "{Arn:arnName}"
+          EventBusName: "{Arn:arnParent}"
+          Ids: "{removedKeys}"
+  - tags:
+      property: Tags
+      add:
+        operation: TagResource
+        input:
+          ResourceARN: "{Arn}"
+          Tags: "{added}"
+      remove:
+        operation: UntagResource
+        input:
+          ResourceARN: "{Arn}"
+          TagKeys: "{removed}"
+# A rule with targets cannot be deleted: "Rule can't be deleted since it has
+# targets." They are removed first.
+delete:
+  operation: DeleteRule
+  input:
+    Name: "{Arn:arnName}"
+    EventBusName: "{Arn:arnParent}"
+  absentErrors: [ResourceNotFoundException]
+  clear: [Targets]
+# The schema lists the bus as conditionally create-only; the rule's ARN, its
+# identifier, names it.
+createOnly: [EventBusName]
+# The targets are a queue made for the harness: PutTargets accepts one with
+# no queue policy.
+lifecycle:
+  create:
+    Description: kraai lifecycle probe
+    ScheduleExpression: rate(5 minutes)
+    State: DISABLED
+    Targets:
+      - {Id: q1, Arn: "{queueArn}"}
+      - {Id: q2, Arn: "{queueArn}"}
+  update:
+    Description: kraai lifecycle probe, updated
+    ScheduleExpression: rate(10 minutes)
+    State: ENABLED
+    Tags: [{Key: team, Value: kraai}]
+    Targets:
+      - {Id: q1, Arn: "{queueArn}"}
 absentIds:
   - arn:aws:events:{region}:{account}:rule/kraai-absent-probe

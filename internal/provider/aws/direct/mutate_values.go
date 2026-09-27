@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"slices"
 	"strings"
 )
 
@@ -162,6 +163,17 @@ func readableValue(f Field, v any) any {
 		return out
 	}
 	return v
+}
+
+// readField is the read mapping of property, from the read itself or one
+// of its further calls.
+func readField(r Reader, property string) (Field, bool) {
+	for _, f := range append(slices.Clone(r.Fields), alsoFields(r)...) {
+		if f.Property == property {
+			return f, true
+		}
+	}
+	return Field{}, false
 }
 
 // alsoFields is every property the read's further calls map.

@@ -3,6 +3,9 @@
     "com.amazonaws.eventbridge#AWSEvents": {
       "operations": [
         {
+          "target": "com.amazonaws.eventbridge#DeleteRule"
+        },
+        {
           "target": "com.amazonaws.eventbridge#DescribeEndpoint"
         },
         {
@@ -13,6 +16,21 @@
         },
         {
           "target": "com.amazonaws.eventbridge#ListTargetsByRule"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#PutRule"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#PutTargets"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#RemoveTargets"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#TagResource"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#UntagResource"
         }
       ],
       "traits": {
@@ -827,6 +845,17 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.eventbridge#ConcurrentModificationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.eventbridge#CreatedBy": {
       "traits": {
         "smithy.api#length": {
@@ -862,6 +891,54 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#DeleteRule": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ManagedRuleException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#DeleteRuleRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#DeleteRuleRequest": {
+      "members": {
+        "EventBusName": {
+          "target": "com.amazonaws.eventbridge#EventBusNameOrArn",
+          "traits": {}
+        },
+        "Force": {
+          "target": "com.amazonaws.eventbridge#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.eventbridge#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
       "type": "structure"
     },
     "com.amazonaws.eventbridge#DescribeEndpoint": {
@@ -1259,6 +1336,9 @@
       },
       "type": "string"
     },
+    "com.amazonaws.eventbridge#ErrorCode": {
+      "type": "string"
+    },
     "com.amazonaws.eventbridge#ErrorMessage": {
       "type": "string"
     },
@@ -1439,6 +1519,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.eventbridge#InvalidEventPatternException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.eventbridge#KinesisParameters": {
       "members": {
         "PartitionKeyPath": {
@@ -1473,6 +1564,17 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.eventbridge#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.eventbridge#LimitMax100": {
       "traits": {
@@ -1603,6 +1705,17 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.eventbridge#ManagedRuleException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.eventbridge#MaximumEventAgeInSeconds": {
       "traits": {
@@ -1805,6 +1918,183 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.eventbridge#PutRule": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#InvalidEventPatternException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ManagedRuleException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#PutRuleRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#PutRuleResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#PutRuleRequest": {
+      "members": {
+        "Description": {
+          "target": "com.amazonaws.eventbridge#RuleDescription",
+          "traits": {}
+        },
+        "EventBusName": {
+          "target": "com.amazonaws.eventbridge#EventBusNameOrArn",
+          "traits": {}
+        },
+        "EventPattern": {
+          "target": "com.amazonaws.eventbridge#EventPattern",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.eventbridge#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RoleArn": {
+          "target": "com.amazonaws.eventbridge#RoleArn",
+          "traits": {}
+        },
+        "ScheduleExpression": {
+          "target": "com.amazonaws.eventbridge#ScheduleExpression",
+          "traits": {}
+        },
+        "State": {
+          "target": "com.amazonaws.eventbridge#RuleState",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.eventbridge#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PutRuleResponse": {
+      "members": {
+        "RuleArn": {
+          "target": "com.amazonaws.eventbridge#RuleArn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PutTargets": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ManagedRuleException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#PutTargetsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#PutTargetsResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#PutTargetsRequest": {
+      "members": {
+        "EventBusName": {
+          "target": "com.amazonaws.eventbridge#EventBusNameOrArn",
+          "traits": {}
+        },
+        "Rule": {
+          "target": "com.amazonaws.eventbridge#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Targets": {
+          "target": "com.amazonaws.eventbridge#TargetList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PutTargetsResponse": {
+      "members": {
+        "FailedEntries": {
+          "target": "com.amazonaws.eventbridge#PutTargetsResultEntryList",
+          "traits": {}
+        },
+        "FailedEntryCount": {
+          "target": "com.amazonaws.eventbridge#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PutTargetsResultEntry": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.eventbridge#ErrorCode",
+          "traits": {}
+        },
+        "ErrorMessage": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage",
+          "traits": {}
+        },
+        "TargetId": {
+          "target": "com.amazonaws.eventbridge#TargetId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#PutTargetsResultEntryList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#PutTargetsResultEntry"
+      },
+      "type": "list"
+    },
     "com.amazonaws.eventbridge#QueryStringKey": {
       "traits": {
         "smithy.api#length": {
@@ -1890,6 +2180,102 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.eventbridge#RemoveTargets": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ManagedRuleException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#RemoveTargetsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#RemoveTargetsResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#RemoveTargetsRequest": {
+      "members": {
+        "EventBusName": {
+          "target": "com.amazonaws.eventbridge#EventBusNameOrArn",
+          "traits": {}
+        },
+        "Force": {
+          "target": "com.amazonaws.eventbridge#Boolean",
+          "traits": {
+            "smithy.api#default": false
+          }
+        },
+        "Ids": {
+          "target": "com.amazonaws.eventbridge#TargetIdList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Rule": {
+          "target": "com.amazonaws.eventbridge#RuleName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RemoveTargetsResponse": {
+      "members": {
+        "FailedEntries": {
+          "target": "com.amazonaws.eventbridge#RemoveTargetsResultEntryList",
+          "traits": {}
+        },
+        "FailedEntryCount": {
+          "target": "com.amazonaws.eventbridge#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RemoveTargetsResultEntry": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.eventbridge#ErrorCode",
+          "traits": {}
+        },
+        "ErrorMessage": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage",
+          "traits": {}
+        },
+        "TargetId": {
+          "target": "com.amazonaws.eventbridge#TargetId",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#RemoveTargetsResultEntryList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#RemoveTargetsResultEntry"
+      },
+      "type": "list"
     },
     "com.amazonaws.eventbridge#ReplicationConfig": {
       "members": {
@@ -2265,11 +2651,68 @@
       },
       "type": "string"
     },
+    "com.amazonaws.eventbridge#TagKeyList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#TagKey"
+      },
+      "type": "list"
+    },
     "com.amazonaws.eventbridge#TagList": {
       "member": {
         "target": "com.amazonaws.eventbridge#Tag"
       },
       "type": "list"
+    },
+    "com.amazonaws.eventbridge#TagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ManagedRuleException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#TagResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#TagResourceResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#TagResourceRequest": {
+      "members": {
+        "ResourceARN": {
+          "target": "com.amazonaws.eventbridge#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.eventbridge#TagList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#TagResourceResponse": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.eventbridge#TagValue": {
       "traits": {
@@ -2377,6 +2820,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.eventbridge#TargetIdList": {
+      "member": {
+        "target": "com.amazonaws.eventbridge#TargetId"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
     "com.amazonaws.eventbridge#TargetInput": {
       "traits": {
         "smithy.api#length": {
@@ -2442,6 +2897,57 @@
       "value": {
         "target": "com.amazonaws.eventbridge#TargetInputPath"
       }
+    },
+    "com.amazonaws.eventbridge#UntagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.eventbridge#ConcurrentModificationException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#InternalException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ManagedRuleException"
+        },
+        {
+          "target": "com.amazonaws.eventbridge#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.eventbridge#UntagResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.eventbridge#UntagResourceResponse"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.eventbridge#UntagResourceRequest": {
+      "members": {
+        "ResourceARN": {
+          "target": "com.amazonaws.eventbridge#Arn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.eventbridge#TagKeyList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.eventbridge#UntagResourceResponse": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

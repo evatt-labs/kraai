@@ -17,7 +17,12 @@ type MutationCall struct {
 	AbsentErrors      []string
 	RetryErrors       []string
 	// Properties is what an update call sets, or what a create sends.
-	Properties []string
+	Properties   []string
+	ListProperty string
+	Key          []string
+	// FailedCount and Clear are Mutation.FailedCount and Mutation.Clear.
+	FailedCount string
+	Clear       []string
 	// Form is how a query protocol sends the input, by path; see FormStep.
 	Form map[string]FormStep
 	// Together is UpdateCall.Together; Required is the properties of such
@@ -32,13 +37,15 @@ type MutationCall struct {
 	// NameProperty and NameTag are a create's Create.Name.
 	NameProperty, NameTag string
 	// TagProperty, Add and Remove are an update call's Tags; an Add call
-	// carries TagProperty too, to shape its added tags by.
+	// carries TagProperty too, to shape its added tags by. A list route
+	// sets ListProperty and Key instead, and its Add and Remove calls carry
+	// TagProperty as the property their elements are shaped as.
 	TagProperty string
 	Add, Remove *MutationCall
 }
 
 // mutationFilters are the template filters a mutation's input may use.
-var mutationFilters = map[string]bool{"json": true, "entries": true, "keys": true, "string": true, "wire": true, "only": true}
+var mutationFilters = map[string]bool{"json": true, "entries": true, "keys": true, "string": true, "wire": true, "only": true, "arnName": true, "arnParent": true}
 
 // mutationPlaceholder matches a placeholder, a property or a dotted path
 // into an object property, with any chain of filters.
@@ -109,18 +116,18 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				}
 				for _, filter := range chain {
 					if !mutationFilters[filter] {
-						fail("%s input %s filters {%s} by %s; the filters are json, entries, keys, string, wire and only", at, member, name, filter)
+						fail("%s input %s filters {%s} by %s; the filters are json, entries, keys, string, wire, only, arnName and arnParent", at, member, name, filter)
 					}
 				}
 				if slices.Contains(chain, "wire") {
 					property := path
-					if name == "added" && tags != "" {
+					if (name == "added" || name == "removed") && tags != "" {
 						property = tags
 					}
-					i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == property })
-					if i < 0 {
+					f, found := readField(*r, property)
+					if !found {
 						fail("%s input %s sends {%s:wire}, which the read does not map", at, member, name)
-					} else if err := wireable(r.Fields[i]); err != nil {
+					} else if err := wireable(f); err != nil {
 						fail("%s input %s sends {%s:wire}, which cannot be mapped back: %v", at, member, name, err)
 					}
 				}
@@ -140,7 +147,17 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			}
 		}
 		c := &MutationCall{Operation: m.Operation, Target: service[len(namespace):] + "." + m.Operation,
-			Input: m.Input, AbsentErrors: m.AbsentErrors, RetryErrors: m.RetryErrors}
+			Input: m.Input, AbsentErrors: m.AbsentErrors, RetryErrors: m.RetryErrors, FailedCount: m.FailedCount}
+		if m.FailedCount != "" {
+			switch outputMember(model, model.Shapes[ref(op.Output)], m.FailedCount) {
+			case "integer", "long", "short":
+			default:
+				fail("%s counts failed entries by %s, which is not a number in %s's output", at, m.FailedCount, m.Operation)
+			}
+		}
+		if len(m.Clear) > 0 && at != "delete" {
+			fail("%s clears %v, but only a delete clears", at, m.Clear)
+		}
 		if isQuery(r.Protocol) {
 			c.Form = formTable(&model, r.Protocol, input, sortedKeys(m.Input), func(format string, args ...any) {
 				fail("%s "+format, append([]any{at}, args...)...)
@@ -221,6 +238,13 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			}
 			continue
 		}
+		if u.List != nil {
+			if c := compileListRoute(schema, *u.List, at, keys, call, fail); c != nil {
+				r.Update = append(r.Update, *c)
+				routed[u.List.Property] = true
+			}
+			continue
+		}
 		c := call(u.Mutation, at, keys, "")
 		if c == nil {
 			continue
@@ -253,6 +277,14 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	}
 	if o.Delete != nil {
 		r.Delete = call(*o.Delete, "delete", keys, "")
+		for _, property := range o.Delete.Clear {
+			if !slices.ContainsFunc(r.Update, func(u MutationCall) bool { return u.ListProperty == property }) {
+				fail("delete clears %s, which has no list route", property)
+			}
+		}
+		if r.Delete != nil {
+			r.Delete.Clear = o.Delete.Clear
+		}
 	}
 	// Complete when every property an update can change has a call, not
 	// the read-only, create-only or write-only ones, and every property a
@@ -315,6 +347,9 @@ func mutations(o Override) []Mutation {
 		out = append(out, u.Mutation)
 		if u.Tags != nil {
 			out = append(out, u.Tags.Add, u.Tags.Remove)
+		}
+		if u.List != nil {
+			out = append(out, u.List.Add, u.List.Remove)
 		}
 	}
 	if o.Delete != nil {

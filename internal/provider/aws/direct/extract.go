@@ -68,6 +68,14 @@ type override struct {
 				Operation string `yaml:"operation"`
 			} `yaml:"remove"`
 		} `yaml:"tags"`
+		List *struct {
+			Add struct {
+				Operation string `yaml:"operation"`
+			} `yaml:"add"`
+			Remove struct {
+				Operation string `yaml:"operation"`
+			} `yaml:"remove"`
+		} `yaml:"list"`
 	} `yaml:"update"`
 	Delete *struct {
 		Operation string `yaml:"operation"`
@@ -136,9 +144,12 @@ func run() error {
 			ops[o.Read.Model] = append(ops[o.Read.Model], o.Delete.Operation)
 		}
 		for _, u := range o.Update {
-			if u.Tags != nil {
+			switch {
+			case u.Tags != nil:
 				ops[o.Read.Model] = append(ops[o.Read.Model], u.Tags.Add.Operation, u.Tags.Remove.Operation)
-			} else {
+			case u.List != nil:
+				ops[o.Read.Model] = append(ops[o.Read.Model], u.List.Add.Operation, u.List.Remove.Operation)
+			default:
 				ops[o.Read.Model] = append(ops[o.Read.Model], u.Operation)
 			}
 		}
