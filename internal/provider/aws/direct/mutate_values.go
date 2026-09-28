@@ -1,6 +1,8 @@
 package direct
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -21,6 +23,19 @@ func tagValue(desired map[string]any, key string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+// shortName is name when it fits in maxLength, or no limit is set, and
+// otherwise its head, a hyphen and eight hex digits of its SHA-256: two
+// long names that share a head stay apart, and one name always shortens
+// the same way, so a retried create names the instance it made.
+func shortName(name string, maxLength int) string {
+	if maxLength == 0 || len(name) <= maxLength {
+		return name
+	}
+	sum := sha256.Sum256([]byte(name))
+	head := strings.TrimRight(name[:maxLength-9], "-")
+	return head + "-" + hex.EncodeToString(sum[:4])
 }
 
 // tagChanges is the tags desired adds or changes over current, as a

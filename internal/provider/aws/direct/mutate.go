@@ -31,7 +31,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		if !found {
 			return "", fmt.Errorf("%s is named by its %s tag, which the desired state does not carry", typeName, r.Create.NameTag)
 		}
-		values[p] = name
+		values[p] = shortName(name, r.Create.NameMaxLength)
 	}
 	out, err := c.mutate(ctx, r, *r.Create, values)
 	if err != nil {

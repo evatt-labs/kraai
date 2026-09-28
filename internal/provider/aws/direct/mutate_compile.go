@@ -34,8 +34,9 @@ type MutationCall struct {
 	// Identifier maps, for a create, each primary identifier property to
 	// the output member carrying it, a dotted path into nested structures.
 	Identifier map[string]string
-	// NameProperty and NameTag are a create's Create.Name.
+	// NameProperty, NameTag and NameMaxLength are a create's Create.Name.
 	NameProperty, NameTag string
+	NameMaxLength         int
 	// TagProperty, Add and Remove are an update call's Tags; an Add call
 	// carries TagProperty too, to shape its added tags by. A list route
 	// sets ListProperty and Key instead, and its Add and Remove calls carry
@@ -205,7 +206,10 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				if _, ok := schema.Properties[n.Property]; !ok || n.Tag == "" {
 					fail("create names %s from tag %q; both must be set, the property in the schema", n.Property, n.Tag)
 				}
-				c.NameProperty, c.NameTag = n.Property, n.Tag
+				if n.MaxLength != 0 && n.MaxLength < 16 {
+					fail("create names %s at most %d long; a name cut shorter than 16 is mostly hash", n.Property, n.MaxLength)
+				}
+				c.NameProperty, c.NameTag, c.NameMaxLength = n.Property, n.Tag, n.MaxLength
 			}
 			r.Create = c
 		}
@@ -278,8 +282,8 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	if o.Delete != nil {
 		r.Delete = call(*o.Delete, "delete", keys, "")
 		for _, property := range o.Delete.Clear {
-			if !slices.ContainsFunc(r.Update, func(u MutationCall) bool { return u.ListProperty == property }) {
-				fail("delete clears %s, which has no list route", property)
+			if !slices.ContainsFunc(r.Update, func(u MutationCall) bool { return u.ListProperty == property && u.Remove != nil }) {
+				fail("delete clears %s, which has no list route that removes", property)
 			}
 		}
 		if r.Delete != nil {
@@ -349,7 +353,10 @@ func mutations(o Override) []Mutation {
 			out = append(out, u.Tags.Add, u.Tags.Remove)
 		}
 		if u.List != nil {
-			out = append(out, u.List.Add, u.List.Remove)
+			out = append(out, u.List.Add)
+			if u.List.Remove != nil {
+				out = append(out, *u.List.Remove)
+			}
 		}
 	}
 	if o.Delete != nil {

@@ -148,7 +148,10 @@ func run() error {
 			case u.Tags != nil:
 				ops[o.Read.Model] = append(ops[o.Read.Model], u.Tags.Add.Operation, u.Tags.Remove.Operation)
 			case u.List != nil:
-				ops[o.Read.Model] = append(ops[o.Read.Model], u.List.Add.Operation, u.List.Remove.Operation)
+				ops[o.Read.Model] = append(ops[o.Read.Model], u.List.Add.Operation)
+				if u.List.Remove.Operation != "" {
+					ops[o.Read.Model] = append(ops[o.Read.Model], u.List.Remove.Operation)
+				}
 			default:
 				ops[o.Read.Model] = append(ops[o.Read.Model], u.Operation)
 			}

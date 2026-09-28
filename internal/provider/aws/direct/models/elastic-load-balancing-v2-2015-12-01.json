@@ -1,5 +1,67 @@
 {
   "shapes": {
+    "com.amazonaws.elasticloadbalancingv2#AddTags": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#DuplicateTagKeysException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#ListenerNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#LoadBalancerNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#RuleNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TooManyTagsException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TrustStoreNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#AddTagsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#AddTagsOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#AddTagsInput": {
+      "members": {
+        "ResourceArns": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ResourceArns",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TagList",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#AddTagsOutput": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#AdministrativeOverride": {
       "members": {
         "Description": {
@@ -48,6 +110,209 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CreateTargetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#DuplicateTargetGroupNameException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#InvalidConfigurationRequestException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TooManyTagsException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TooManyTargetGroupsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#CreateTargetGroupInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#CreateTargetGroupOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CreateTargetGroupInput": {
+      "members": {
+        "HealthCheckEnabled": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckEnabled",
+          "traits": {}
+        },
+        "HealthCheckIntervalSeconds": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckIntervalSeconds",
+          "traits": {}
+        },
+        "HealthCheckPath": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Path",
+          "traits": {}
+        },
+        "HealthCheckPort": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckPort",
+          "traits": {}
+        },
+        "HealthCheckProtocol": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ProtocolEnum",
+          "traits": {}
+        },
+        "HealthCheckTimeoutSeconds": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckTimeoutSeconds",
+          "traits": {}
+        },
+        "HealthyThresholdCount": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckThresholdCount",
+          "traits": {}
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupIpAddressTypeEnum",
+          "traits": {}
+        },
+        "Matcher": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Matcher",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupName",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Port": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Port",
+          "traits": {}
+        },
+        "Protocol": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ProtocolEnum",
+          "traits": {}
+        },
+        "ProtocolVersion": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ProtocolVersion",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TagList",
+          "traits": {}
+        },
+        "TargetControlPort": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetControlPort",
+          "traits": {}
+        },
+        "TargetType": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetTypeEnum",
+          "traits": {}
+        },
+        "UnhealthyThresholdCount": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckThresholdCount",
+          "traits": {}
+        },
+        "VpcId": {
+          "target": "com.amazonaws.elasticloadbalancingv2#VpcId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CreateTargetGroupOutput": {
+      "members": {
+        "TargetGroups": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroups",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DeleteTargetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#ResourceInUseException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DeleteTargetGroupInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DeleteTargetGroupOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DeleteTargetGroupInput": {
+      "members": {
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DeleteTargetGroupOutput": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DeregisterTargets": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#InvalidTargetException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DeregisterTargetsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#DeregisterTargetsOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DeregisterTargetsInput": {
+      "members": {
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Targets": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetDescriptions",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DeregisterTargetsOutput": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#DescribeTags": {
       "errors": [
@@ -337,8 +602,52 @@
     "com.amazonaws.elasticloadbalancingv2#Description": {
       "type": "string"
     },
+    "com.amazonaws.elasticloadbalancingv2#DuplicateTagKeysException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateTagKeys",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DuplicateTargetGroupNameException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateTargetGroupName",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#ElasticLoadBalancing_v10": {
       "operations": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#AddTags"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#CreateTargetGroup"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#DeleteTargetGroup"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#DeregisterTargets"
+        },
         {
           "target": "com.amazonaws.elasticloadbalancingv2#DescribeTags"
         },
@@ -350,6 +659,18 @@
         },
         {
           "target": "com.amazonaws.elasticloadbalancingv2#DescribeTargetHealth"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroup"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupAttributes"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#RegisterTargets"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#RemoveTags"
         }
       ],
       "traits": {
@@ -770,6 +1091,22 @@
     "com.amazonaws.elasticloadbalancingv2#HttpCode": {
       "type": "string"
     },
+    "com.amazonaws.elasticloadbalancingv2#InvalidConfigurationRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidConfigurationRequest",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#InvalidTargetException": {
       "members": {
         "Message": {
@@ -866,6 +1203,139 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#InvalidConfigurationRequestException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupAttributes": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#InvalidConfigurationRequestException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupAttributesInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupAttributesOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupAttributesInput": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributes",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupAttributesOutput": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupAttributes",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupInput": {
+      "members": {
+        "HealthCheckEnabled": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckEnabled",
+          "traits": {}
+        },
+        "HealthCheckIntervalSeconds": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckIntervalSeconds",
+          "traits": {}
+        },
+        "HealthCheckPath": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Path",
+          "traits": {}
+        },
+        "HealthCheckPort": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckPort",
+          "traits": {}
+        },
+        "HealthCheckProtocol": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ProtocolEnum",
+          "traits": {}
+        },
+        "HealthCheckTimeoutSeconds": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckTimeoutSeconds",
+          "traits": {}
+        },
+        "HealthyThresholdCount": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckThresholdCount",
+          "traits": {}
+        },
+        "Matcher": {
+          "target": "com.amazonaws.elasticloadbalancingv2#Matcher",
+          "traits": {}
+        },
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "UnhealthyThresholdCount": {
+          "target": "com.amazonaws.elasticloadbalancingv2#HealthCheckThresholdCount",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ModifyTargetGroupOutput": {
+      "members": {
+        "TargetGroups": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroups",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#PageSize": {
       "traits": {
@@ -965,6 +1435,118 @@
       },
       "type": "string"
     },
+    "com.amazonaws.elasticloadbalancingv2#RegisterTargets": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#InvalidTargetException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TooManyRegistrationsForTargetIdException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TooManyTargetsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#RegisterTargetsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#RegisterTargetsOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RegisterTargetsInput": {
+      "members": {
+        "TargetGroupArn": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Targets": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetDescriptions",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RegisterTargetsOutput": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RemoveTags": {
+      "errors": [
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#ListenerNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#LoadBalancerNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#RuleNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TooManyTagsException"
+        },
+        {
+          "target": "com.amazonaws.elasticloadbalancingv2#TrustStoreNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.elasticloadbalancingv2#RemoveTagsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.elasticloadbalancingv2#RemoveTagsOutput"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RemoveTagsInput": {
+      "members": {
+        "ResourceArns": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ResourceArns",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.elasticloadbalancingv2#TagKeys",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RemoveTagsOutput": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#ResourceArn": {
       "type": "string"
     },
@@ -973,6 +1555,22 @@
         "target": "com.amazonaws.elasticloadbalancingv2#ResourceArn"
       },
       "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#ResourceInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceInUse",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#RuleNotFoundException": {
       "members": {
@@ -1036,6 +1634,12 @@
         "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
       },
       "type": "string"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TagKeys": {
+      "member": {
+        "target": "com.amazonaws.elasticloadbalancingv2#TagKey"
+      },
+      "type": "list"
     },
     "com.amazonaws.elasticloadbalancingv2#TagList": {
       "member": {
@@ -1533,6 +2137,70 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyRegistrationsForTargetIdException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyRegistrationsForTargetId",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyTagsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyTags",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyTargetGroupsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyTargetGroups",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyTargetsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyTargets",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#TrustStoreNotFoundException": {
       "members": {
