@@ -76,6 +76,7 @@ func init() {
 			Protocol:    "ec2Query",
 			SigningName: "ec2",
 			Complete:    true,
+			Production:  true,
 			Host:        "ec2.{region}.amazonaws.com",
 			Action:      "DescribeSecurityGroups",
 			Version:     "2016-11-15",
@@ -152,6 +153,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 		"AWS::EC2::Subnet": {
 			Type:        "AWS::EC2::Subnet",
