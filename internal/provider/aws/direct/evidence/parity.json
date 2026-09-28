@@ -710,7 +710,7 @@
     {
       "type": "AWS::EC2::SecurityGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-28",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 4,
@@ -726,7 +726,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "db012227787be49ba9ebc9679c5df19d2d28ec880c65989b889090ffc0bb68d2"
+      "override": "c3311f3f567fdc24b344a260e63ab8bc5c7f2a90377a07fa3bbcc3f063e3d682"
     },
     {
       "type": "AWS::EC2::Subnet",

@@ -72,43 +72,63 @@ func keysOf(key []string, list any) []string {
 }
 
 // applyList sends a list route's remove call, when it has one, for the
-// elements no longer desired, then its add call for those new or changed.
+// elements no longer desired, then its change call for those changed, and
+// its add call for those new, or changed when it has no change call.
 func (c *Client) applyList(ctx context.Context, r Reader, u MutationCall, address map[string]any, current, desired any) error {
-	added, removed, err := listChanges(u.Key, current, desired)
+	var added, removed, changed []any
+	var err error
+	if len(u.Match) > 0 {
+		var pairs [][2]any
+		added, removed, pairs, err = matchChanges(u.Match, current, desired)
+		for _, p := range pairs {
+			if u.Change != nil {
+				changed = append(changed, p[0])
+				continue
+			}
+			// Without a change call, a changed element is replaced.
+			added, removed = append(added, p[0]), append(removed, p[1])
+		}
+	} else {
+		added, removed, err = listChanges(u.Key, current, desired)
+	}
 	if err != nil {
 		return fmt.Errorf("%s's %s: %w", r.Type, u.ListProperty, err)
 	}
-	if len(removed) > 0 && u.Remove != nil {
-		if _, err := c.mutate(ctx, r, *u.Remove, listValues(u.Key, address, nil, removed)); err != nil {
-			return err
+	for _, step := range []struct {
+		call  *MutationCall
+		elems []any
+		name  string
+	}{{u.Remove, removed, "removed"}, {u.Change, changed, "changed"}, {u.Add, added, "added"}} {
+		if step.call == nil || len(step.elems) == 0 {
+			continue
 		}
-	}
-	if len(added) > 0 {
-		if _, err := c.mutate(ctx, r, *u.Add, listValues(u.Key, address, added, nil)); err != nil {
+		values, err := listValues(u, address, step.name, step.elems)
+		if err != nil {
+			return fmt.Errorf("%s's %s: %w", r.Type, u.ListProperty, err)
+		}
+		if _, err := c.mutate(ctx, r, *step.call, values); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// listValues is what a list route's calls are rendered from.
-func listValues(key []string, address map[string]any, added, removed []any) map[string]any {
+// listValues is what a list route's call for the elements named added,
+// removed or changed is rendered from, each shaped by the route's element
+// template.
+func listValues(u MutationCall, address map[string]any, name string, elems []any) (map[string]any, error) {
 	values := maps.Clone(address)
-	if added != nil {
-		values["added"] = added
-	}
-	if removed != nil {
-		values["removed"] = removed
-		if len(key) == 1 {
-			var keys []any
-			for _, elem := range removed {
-				obj, _ := elem.(map[string]any)
-				keys = append(keys, obj[key[0]])
-			}
-			values["removedKeys"] = keys
+	if name == "removed" && len(u.Key) == 1 {
+		var keys []any
+		for _, elem := range elems {
+			obj, _ := elem.(map[string]any)
+			keys = append(keys, obj[u.Key[0]])
 		}
+		values["removedKeys"] = keys
 	}
-	return values
+	elems, err := shaped(u, elems)
+	values[name] = elems
+	return values, err
 }
 
 // listsMatch reports whether every list-routed property changes sets
@@ -119,6 +139,12 @@ func listsMatch(r Reader, changes, props map[string]any) bool {
 	for _, u := range r.Update {
 		desired, changed := changes[u.ListProperty]
 		if u.ListProperty == "" || u.Remove == nil || !changed {
+			continue
+		}
+		if len(u.Match) > 0 {
+			if !matchedExactly(u.Match, props[u.ListProperty], desired) {
+				return false
+			}
 			continue
 		}
 		if !slices.Equal(keysOf(u.Key, desired), keysOf(u.Key, props[u.ListProperty])) {
@@ -142,7 +168,11 @@ func (c *Client) clearLists(ctx context.Context, r Reader, identifier string, ad
 		}
 		u := r.Update[i]
 		if elems := asList(current[property]); len(elems) > 0 {
-			if _, err := c.mutate(ctx, r, *u.Remove, listValues(u.Key, address, nil, elems)); err != nil {
+			values, err := listValues(u, address, "removed", elems)
+			if err != nil {
+				return err
+			}
+			if _, err := c.mutate(ctx, r, *u.Remove, values); err != nil {
 				return err
 			}
 		}

@@ -39,6 +39,17 @@
       "override": "403ee44a1c3df9c5c85e74af0d94626ee577adb4de54cc4752fd8776c2a30614"
     },
     {
+      "type": "AWS::EC2::SecurityGroup",
+      "date": "2026-09-28",
+      "outcome": "parity",
+      "updated": [
+        "SecurityGroupEgress",
+        "SecurityGroupIngress",
+        "Tags"
+      ],
+      "override": "c3311f3f567fdc24b344a260e63ab8bc5c7f2a90377a07fa3bbcc3f063e3d682"
+    },
+    {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
       "date": "2026-09-27",
       "outcome": "parity",

@@ -20,6 +20,10 @@ type MutationCall struct {
 	Properties   []string
 	ListProperty string
 	Key          []string
+	// Match, Element and Change are a list route's ListRoute fields.
+	Match   []string
+	Element map[string]any
+	Change  *MutationCall
 	// FailedCount and Clear are Mutation.FailedCount and Mutation.Clear.
 	FailedCount string
 	Clear       []string
@@ -354,8 +358,10 @@ func mutations(o Override) []Mutation {
 		}
 		if u.List != nil {
 			out = append(out, u.List.Add)
-			if u.List.Remove != nil {
-				out = append(out, *u.List.Remove)
+			for _, m := range []*Mutation{u.List.Remove, u.List.Change} {
+				if m != nil {
+					out = append(out, *m)
+				}
 			}
 		}
 	}

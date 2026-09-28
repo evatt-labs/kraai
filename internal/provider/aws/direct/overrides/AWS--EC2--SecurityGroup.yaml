@@ -55,5 +55,128 @@ also:
           SourceSecurityGroupId: ReferencedGroupInfo.GroupId
           SourceSecurityGroupOwnerId: ReferencedGroupInfo.UserId
           ToPort: ToPort
+create:
+  operation: CreateSecurityGroup
+  name:
+    property: GroupName
+    tag: kraai:resource-name
+  input:
+    GroupName: "{GroupName}"
+    Description: "{GroupDescription}"
+    VpcId: "{VpcId}"
+    TagSpecifications:
+      - ResourceType: security-group
+        Tags: "{Tags:wire}"
+  identifier:
+    Id: GroupId
+# A rule has no key of its own: it is which protocol, ports and one source
+# or destination it allows, and the read fills in what the manifest may
+# leave out, the port range -1 of a rule for every protocol and a source
+# group's owner. The calls take a rule nested by the kind of its source.
+# Each list's rules are matched, revoked, described and authorized in that
+# order; a create in a VPC holds a default egress rule, which a desired
+# egress list without it revokes, as CloudFormation does.
+update:
+  - list:
+      property: SecurityGroupIngress
+      # SourceSecurityGroupName names a group only outside a VPC, which
+      # nothing kraai makes is.
+      match: [IpProtocol, FromPort, ToPort, CidrIp, CidrIpv6, SourcePrefixListId, SourceSecurityGroupId, SourceSecurityGroupOwnerId]
+      element:
+        IpProtocol: "{IpProtocol}"
+        FromPort: "{FromPort}"
+        ToPort: "{ToPort}"
+        IpRanges: [{CidrIp: "{CidrIp}", Description: "{Description}"}]
+        Ipv6Ranges: [{CidrIpv6: "{CidrIpv6}", Description: "{Description}"}]
+        PrefixListIds: [{PrefixListId: "{SourcePrefixListId}", Description: "{Description}"}]
+        UserIdGroupPairs: [{GroupId: "{SourceSecurityGroupId}", UserId: "{SourceSecurityGroupOwnerId}", Description: "{Description}"}]
+      add:
+        operation: AuthorizeSecurityGroupIngress
+        input:
+          GroupId: "{Id}"
+          IpPermissions: "{added}"
+      remove:
+        operation: RevokeSecurityGroupIngress
+        input:
+          GroupId: "{Id}"
+          IpPermissions: "{removed}"
+      change:
+        operation: UpdateSecurityGroupRuleDescriptionsIngress
+        input:
+          GroupId: "{Id}"
+          IpPermissions: "{changed}"
+  - list:
+      property: SecurityGroupEgress
+      match: [IpProtocol, FromPort, ToPort, CidrIp, CidrIpv6, DestinationPrefixListId, DestinationSecurityGroupId]
+      element:
+        IpProtocol: "{IpProtocol}"
+        FromPort: "{FromPort}"
+        ToPort: "{ToPort}"
+        IpRanges: [{CidrIp: "{CidrIp}", Description: "{Description}"}]
+        Ipv6Ranges: [{CidrIpv6: "{CidrIpv6}", Description: "{Description}"}]
+        PrefixListIds: [{PrefixListId: "{DestinationPrefixListId}", Description: "{Description}"}]
+        UserIdGroupPairs: [{GroupId: "{DestinationSecurityGroupId}", Description: "{Description}"}]
+      add:
+        operation: AuthorizeSecurityGroupEgress
+        input:
+          GroupId: "{Id}"
+          IpPermissions: "{added}"
+      remove:
+        operation: RevokeSecurityGroupEgress
+        input:
+          GroupId: "{Id}"
+          IpPermissions: "{removed}"
+      change:
+        operation: UpdateSecurityGroupRuleDescriptionsEgress
+        input:
+          GroupId: "{Id}"
+          IpPermissions: "{changed}"
+  - tags:
+      property: Tags
+      add:
+        operation: CreateTags
+        input:
+          Resources: ["{Id}"]
+          Tags: "{added:wire}"
+      remove:
+        operation: DeleteTags
+        input:
+          Resources: ["{Id}"]
+          Tags: "{removed:keys}"
+delete:
+  operation: DeleteSecurityGroup
+  input:
+    GroupId: "{Id}"
+  absentErrors: [InvalidGroup.NotFound]
+# The rules mirror the aws-free fixture's, one of each source and
+# destination kind; the peer is its PEER group.
+lifecycle:
+  create:
+    GroupDescription: kraai lifecycle probe
+    VpcId: "{vpcId}"
+    SecurityGroupIngress:
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 10.94.0.0/16, Description: https from the vpc}
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIpv6: "::/0"}
+      - {IpProtocol: tcp, FromPort: 8080, ToPort: 8080, SourceSecurityGroupId: "{peerGroupId}"}
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, SourcePrefixListId: pl-63a5400a}
+      - {IpProtocol: "-1", CidrIp: 10.94.1.0/24}
+    SecurityGroupEgress:
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: https out}
+      - {IpProtocol: tcp, FromPort: 5432, ToPort: 5432, DestinationSecurityGroupId: "{peerGroupId}"}
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, DestinationPrefixListId: pl-02cd2c6b}
+  # One rule's description changes, one is dropped and one added, in each
+  # direction.
+  update:
+    SecurityGroupIngress:
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 10.94.0.0/16, Description: https from the vpc, updated}
+      - {IpProtocol: tcp, FromPort: 8080, ToPort: 8080, SourceSecurityGroupId: "{peerGroupId}"}
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, SourcePrefixListId: pl-63a5400a}
+      - {IpProtocol: "-1", CidrIp: 10.94.1.0/24}
+      - {IpProtocol: tcp, FromPort: 22, ToPort: 22, CidrIp: 10.94.0.0/24}
+    SecurityGroupEgress:
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: https out, updated}
+      - {IpProtocol: tcp, FromPort: 5432, ToPort: 5432, DestinationSecurityGroupId: "{peerGroupId}"}
+      - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIpv6: "::/0"}
+    Tags: [{Key: team, Value: kraai}]
 absentIds:
   - sg-0a1b2c3d4e5f60718

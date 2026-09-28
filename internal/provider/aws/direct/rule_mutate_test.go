@@ -258,9 +258,13 @@ func TestCompileRefusesABadListRoute(t *testing.T) {
 			d.Clear = []string{"Tags"}
 			o.Delete = &d
 		}, "delete clears Tags, which has no list route"},
-		"clearing a route that never removes": {withList(func(l *ListRoute) { l.Remove = nil }), "delete clears Targets, which has no list route that removes"},
-		"a failed count that is not a number": {withList(func(l *ListRoute) { l.Add.FailedCount = "FailedEntries" }), "counts failed entries by FailedEntries"},
-		"an update that clears":               {withList(func(l *ListRoute) { l.Add.Clear = []string{"Targets"} }), "only a delete clears"},
+		"a key and a match":                    {withList(func(l *ListRoute) { l.Match = []string{"Arn"} }), "neither or both of a key and a match"},
+		"a change without a match":             {withList(func(l *ListRoute) { l.Change = &l.Add }), "only a matched list has a change call"},
+		"an element naming what elements lack": {withList(func(l *ListRoute) { l.Element = map[string]any{"Id": "{Nope}"} }), "shapes Targets's elements from {Nope}"},
+		"an element that wires":                {withList(func(l *ListRoute) { l.Element = map[string]any{"Id": "{Id:wire}"} }), "an element template is its own shape"},
+		"clearing a route that never removes":  {withList(func(l *ListRoute) { l.Remove = nil }), "delete clears Targets, which has no list route that removes"},
+		"a failed count that is not a number":  {withList(func(l *ListRoute) { l.Add.FailedCount = "FailedEntries" }), "counts failed entries by FailedEntries"},
+		"an update that clears":                {withList(func(l *ListRoute) { l.Add.Clear = []string{"Targets"} }), "only a delete clears"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {

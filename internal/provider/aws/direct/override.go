@@ -274,11 +274,24 @@ type UpdateCall struct {
 // is left as it is, as every update is set-only. A route with no remove,
 // for a list the service only sets, such as attributes it always returns
 // in full, leaves an element no longer desired as it is.
+//
+// A list whose elements have no key of their own, such as security group
+// rules, names Match instead: the members that say which element it is,
+// any of them optional. A desired element pairs with the current one each
+// member it sets equals, so a member only the read fills in, such as a
+// port range of -1, does not unpair them. A paired element whose other
+// members differ is sent to Change, {changed}, or without one removed and
+// added again. Element reshapes each element into what the calls send,
+// its placeholders naming the element's members; a structure in it that
+// names Match members is sent only when one of them is set.
 type ListRoute struct {
-	Property string    `yaml:"property"`
-	Key      []string  `yaml:"key"`
-	Add      Mutation  `yaml:"add"`
-	Remove   *Mutation `yaml:"remove,omitempty"`
+	Property string         `yaml:"property"`
+	Key      []string       `yaml:"key,omitempty"`
+	Match    []string       `yaml:"match,omitempty"`
+	Element  map[string]any `yaml:"element,omitempty"`
+	Add      Mutation       `yaml:"add"`
+	Remove   *Mutation      `yaml:"remove,omitempty"`
+	Change   *Mutation      `yaml:"change,omitempty"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

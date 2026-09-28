@@ -64,9 +64,16 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		if err := c.waitFor(ctx, typeName, id, func(_ map[string]any, err error) bool { return err == nil && c.settled(ctx, r, id) }); err != nil {
 			return id, err
 		}
-		address, err := c.addressOf(ctx, r, id)
+		// What the create made is the current state the rest is set
+		// against, such as a security group's default egress rule, which
+		// a desired egress list must remove.
+		current, err := c.ReadByID(ctx, typeName, id)
+		var address map[string]any
 		if err == nil {
-			err = c.apply(ctx, r, address, nil, rest)
+			address, err = c.addressOf(ctx, r, id)
+		}
+		if err == nil {
+			err = c.apply(ctx, r, address, current, rest)
 		}
 		if err != nil {
 			return id, err
