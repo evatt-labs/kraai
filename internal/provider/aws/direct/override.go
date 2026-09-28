@@ -243,10 +243,13 @@ type Create struct {
 	Name *NameFrom `yaml:"name,omitempty"`
 }
 
-// NameFrom is a name property filled from a tag's value.
+// NameFrom is a name property filled from a tag's value. A value longer
+// than MaxLength, a service's name limit the schema does not state, is
+// cut and suffixed with a hash of the whole, so it stays one name.
 type NameFrom struct {
-	Property string `yaml:"property"`
-	Tag      string `yaml:"tag"`
+	Property  string `yaml:"property"`
+	Tag       string `yaml:"tag"`
+	MaxLength int    `yaml:"maxLength,omitempty"`
 }
 
 // UpdateCall is one call that sets the named properties, or, for Tags, the
@@ -268,12 +271,14 @@ type UpdateCall struct {
 // an element. With one key member, {removedKeys} is the removed elements'
 // keys. Removal runs before addition. An element whose key matches but
 // whose members differ is added again, as changed; one that drops a member
-// is left as it is, as every update is set-only.
+// is left as it is, as every update is set-only. A route with no remove,
+// for a list the service only sets, such as attributes it always returns
+// in full, leaves an element no longer desired as it is.
 type ListRoute struct {
-	Property string   `yaml:"property"`
-	Key      []string `yaml:"key"`
-	Add      Mutation `yaml:"add"`
-	Remove   Mutation `yaml:"remove"`
+	Property string    `yaml:"property"`
+	Key      []string  `yaml:"key"`
+	Add      Mutation  `yaml:"add"`
+	Remove   *Mutation `yaml:"remove,omitempty"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

@@ -71,14 +71,14 @@ func keysOf(key []string, list any) []string {
 	return out
 }
 
-// applyList sends a list route's remove call for the elements no longer
-// desired, then its add call for those new or changed.
+// applyList sends a list route's remove call, when it has one, for the
+// elements no longer desired, then its add call for those new or changed.
 func (c *Client) applyList(ctx context.Context, r Reader, u MutationCall, address map[string]any, current, desired any) error {
 	added, removed, err := listChanges(u.Key, current, desired)
 	if err != nil {
 		return fmt.Errorf("%s's %s: %w", r.Type, u.ListProperty, err)
 	}
-	if len(removed) > 0 {
+	if len(removed) > 0 && u.Remove != nil {
 		if _, err := c.mutate(ctx, r, *u.Remove, listValues(u.Key, address, nil, removed)); err != nil {
 			return err
 		}
@@ -113,11 +113,12 @@ func listValues(key []string, address map[string]any, added, removed []any) map[
 
 // listsMatch reports whether every list-routed property changes sets
 // holds exactly the desired keys in props: a subset match would pass with
-// an element the removal missed still there.
+// an element the removal missed still there. A route that never removes
+// is left to the subset match.
 func listsMatch(r Reader, changes, props map[string]any) bool {
 	for _, u := range r.Update {
 		desired, changed := changes[u.ListProperty]
-		if u.ListProperty == "" || !changed {
+		if u.ListProperty == "" || u.Remove == nil || !changed {
 			continue
 		}
 		if !slices.Equal(keysOf(u.Key, desired), keysOf(u.Key, props[u.ListProperty])) {
@@ -136,8 +137,8 @@ func (c *Client) clearLists(ctx context.Context, r Reader, identifier string, ad
 	}
 	for _, property := range r.Delete.Clear {
 		i := slices.IndexFunc(r.Update, func(u MutationCall) bool { return u.ListProperty == property })
-		if i < 0 {
-			return fmt.Errorf("%s clears %s, which has no list route", r.Type, property)
+		if i < 0 || r.Update[i].Remove == nil {
+			return fmt.Errorf("%s clears %s, which has no list route that removes", r.Type, property)
 		}
 		u := r.Update[i]
 		if elems := asList(current[property]); len(elems) > 0 {

@@ -7,6 +7,7 @@ import (
 // compileListRoute checks a list route: its property, a key the schema's
 // element carries, and its add and remove calls, which may name the
 // elements added and removed, and with a one-member key the removed keys.
+// The remove call is optional.
 func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]bool,
 	call func(Mutation, string, map[string]bool, string) *MutationCall, fail func(string, ...any)) *MutationCall {
 	p, ok := schema.Properties[l.Property]
@@ -35,10 +36,17 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 	for p := range keys {
 		extra[p] = true
 	}
-	add, remove := call(l.Add, at+" add", extra, l.Property), call(l.Remove, at+" remove", extra, l.Property)
-	if add == nil || remove == nil {
+	add := call(l.Add, at+" add", extra, l.Property)
+	if add == nil {
 		return nil
 	}
-	add.TagProperty, remove.TagProperty = l.Property, l.Property
-	return &MutationCall{ListProperty: l.Property, Key: slices.Clone(l.Key), Add: add, Remove: remove}
+	add.TagProperty = l.Property
+	route := &MutationCall{ListProperty: l.Property, Key: slices.Clone(l.Key), Add: add}
+	if l.Remove != nil {
+		if route.Remove = call(*l.Remove, at+" remove", extra, l.Property); route.Remove == nil {
+			return nil
+		}
+		route.Remove.TagProperty = l.Property
+	}
+	return route
 }

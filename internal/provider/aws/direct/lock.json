@@ -189,7 +189,7 @@
     "elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json": {
       "file": "models/elastic-load-balancing-v2-2015-12-01.json",
       "sourceSha256": "b8e2667dc02196215c863ecab13f2aecd8d9520262c85de1edbe80fd95e74d2f",
-      "subsetSha256": "8eb6a59601980026de9b8b283bf584535aba15086d2691331a96d2f6449a1d9a"
+      "subsetSha256": "3d03d447911e3ff762e667eecd82feab46a6198c57bf1c52618a167ed4942829"
     },
     "elasticache/service/2015-02-02/elasticache-2015-02-02.json": {
       "file": "models/elasticache-2015-02-02.json",

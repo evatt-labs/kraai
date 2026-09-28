@@ -68,5 +68,112 @@ also:
           Id: Id
           Port: Port
           QuicServerId: QuicServerId
+create:
+  operation: CreateTargetGroup
+  # A derived name is up to 63 long; ELBv2 takes 32.
+  name:
+    property: Name
+    tag: kraai:resource-name
+    maxLength: 32
+  input:
+    Name: "{Name}"
+    Protocol: "{Protocol}"
+    ProtocolVersion: "{ProtocolVersion}"
+    Port: "{Port}"
+    VpcId: "{VpcId}"
+    HealthCheckProtocol: "{HealthCheckProtocol}"
+    HealthCheckPort: "{HealthCheckPort}"
+    HealthCheckEnabled: "{HealthCheckEnabled}"
+    HealthCheckPath: "{HealthCheckPath}"
+    HealthCheckIntervalSeconds: "{HealthCheckIntervalSeconds}"
+    HealthCheckTimeoutSeconds: "{HealthCheckTimeoutSeconds}"
+    HealthyThresholdCount: "{HealthyThresholdCount}"
+    UnhealthyThresholdCount: "{UnhealthyThresholdCount}"
+    Matcher: "{Matcher:wire}"
+    TargetType: "{TargetType}"
+    Tags: "{Tags}"
+    IpAddressType: "{IpAddressType}"
+    TargetControlPort: "{TargetControlPort}"
+  identifier:
+    TargetGroupArn: TargetGroups.TargetGroupArn
+update:
+  - operation: ModifyTargetGroup
+    properties: [HealthCheckEnabled, HealthCheckIntervalSeconds, HealthCheckPath, HealthCheckPort,
+      HealthCheckProtocol, HealthCheckTimeoutSeconds, HealthyThresholdCount, Matcher, UnhealthyThresholdCount]
+    input:
+      TargetGroupArn: "{TargetGroupArn}"
+      HealthCheckEnabled: "{HealthCheckEnabled}"
+      HealthCheckIntervalSeconds: "{HealthCheckIntervalSeconds}"
+      HealthCheckPath: "{HealthCheckPath}"
+      HealthCheckPort: "{HealthCheckPort}"
+      HealthCheckProtocol: "{HealthCheckProtocol}"
+      HealthCheckTimeoutSeconds: "{HealthCheckTimeoutSeconds}"
+      HealthyThresholdCount: "{HealthyThresholdCount}"
+      Matcher: "{Matcher:wire}"
+      UnhealthyThresholdCount: "{UnhealthyThresholdCount}"
+  # The read returns every attribute, defaults included, and none can be
+  # removed, only set: one left out of the manifest keeps its value.
+  - list:
+      property: TargetGroupAttributes
+      key: [Key]
+      add:
+        operation: ModifyTargetGroupAttributes
+        input:
+          TargetGroupArn: "{TargetGroupArn}"
+          Attributes: "{added:wire}"
+  # A target is registered once per port, so Port is part of its key and a
+  # target must state it, even the group's own. Its members are named as
+  # the service's, so it is sent as it is.
+  - list:
+      property: Targets
+      key: [Id, Port]
+      add:
+        operation: RegisterTargets
+        input:
+          TargetGroupArn: "{TargetGroupArn}"
+          Targets: "{added}"
+      remove:
+        operation: DeregisterTargets
+        input:
+          TargetGroupArn: "{TargetGroupArn}"
+          Targets: "{removed}"
+  - tags:
+      property: Tags
+      add:
+        operation: AddTags
+        input:
+          ResourceArns: ["{TargetGroupArn}"]
+          Tags: "{added}"
+      remove:
+        operation: RemoveTags
+        input:
+          ResourceArns: ["{TargetGroupArn}"]
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteTargetGroup
+  input:
+    TargetGroupArn: "{TargetGroupArn}"
+  absentErrors: [TargetGroupNotFound]
+# The targets are addresses in the harness's VPC; a group with no load
+# balancer registers them without anything listening, and deregisters them
+# at once rather than draining.
+lifecycle:
+  create:
+    Protocol: HTTP
+    Port: 8080
+    TargetType: ip
+    VpcId: "{vpcId}"
+    HealthCheckPath: /healthz
+    Targets:
+      - {Id: 10.94.0.10, Port: 8080}
+      - {Id: 10.94.0.11, Port: 8081}
+  update:
+    HealthCheckIntervalSeconds: 60
+    Matcher: {HttpCode: 200-299}
+    Tags: [{Key: team, Value: kraai}]
+    TargetGroupAttributes:
+      - {Key: deregistration_delay.timeout_seconds, Value: "0"}
+    Targets:
+      - {Id: 10.94.0.10, Port: 8080}
 absentIds:
   - arn:aws:elasticloadbalancing:{region}:{account}:targetgroup/kraai-absent-probe/0123456789abcdef
