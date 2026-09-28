@@ -405,11 +405,16 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 		literal(b, map[string]any(m.Input))
 		b.WriteString(", ")
 	}
+	if m.Element != nil {
+		b.WriteString("Element: ")
+		literal(b, m.Element)
+		b.WriteString(", ")
+	}
 	for _, f := range []struct {
 		name  string
 		value []string
 	}{{"AbsentErrors", m.AbsentErrors}, {"RetryErrors", m.RetryErrors}, {"Properties", m.Properties},
-		{"Key", m.Key}, {"Clear", m.Clear}} {
+		{"Key", m.Key}, {"Match", m.Match}, {"Clear", m.Clear}} {
 		if f.value != nil {
 			fmt.Fprintf(b, "%s: %#v, ", f.name, f.value)
 		}
@@ -440,7 +445,7 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	for _, f := range []struct {
 		name string
 		call *MutationCall
-	}{{"Add", m.Add}, {"Remove", m.Remove}} {
+	}{{"Add", m.Add}, {"Remove", m.Remove}, {"Change", m.Change}} {
 		if f.call != nil {
 			fmt.Fprintf(b, "%s: &", f.name)
 			mutationLiteral(b, *f.call)
