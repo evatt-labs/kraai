@@ -154,6 +154,9 @@ delete:
   input:
     TargetGroupArn: "{TargetGroupArn}"
   absentErrors: [TargetGroupNotFound]
+# The schema leaves TargetControlPort updatable, but only CreateTargetGroup
+# takes it: no ELBv2 call changes it.
+createOnly: [TargetControlPort]
 # The targets are addresses in the harness's VPC; a group with no load
 # balancer registers them without anything listening, and deregisters them
 # at once rather than draining.

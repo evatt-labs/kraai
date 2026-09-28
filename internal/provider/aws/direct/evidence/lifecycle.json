@@ -89,6 +89,19 @@
       "override": "e56590977af954e47d4f000b5af1426306e811451250ed7b60e91f34b98c828c"
     },
     {
+      "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "date": "2026-09-28",
+      "outcome": "parity",
+      "updated": [
+        "HealthCheckIntervalSeconds",
+        "Matcher",
+        "Tags",
+        "TargetGroupAttributes",
+        "Targets"
+      ],
+      "override": "758fdbde0b390d4c631428a0411606b1b5050372011a3de79932d67cfb95aeb5"
+    },
+    {
       "type": "AWS::Events::Rule",
       "date": "2026-09-27",
       "outcome": "parity",

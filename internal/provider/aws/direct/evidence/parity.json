@@ -882,7 +882,7 @@
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-09-28",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 4,
@@ -913,7 +913,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "36b6e7a6653a2a11195d348d28799737bf70ce33a09a5d2a3da88213e808c3c7"
+      "override": "758fdbde0b390d4c631428a0411606b1b5050372011a3de79932d67cfb95aeb5"
     },
     {
       "type": "AWS::ElementalInference::Dictionary",
