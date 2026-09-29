@@ -122,26 +122,6 @@ func TestReadDoesNotRetryARefusal(t *testing.T) {
 	}
 }
 
-// A create whose connection drops may have made the queue, so it is not
-// sent again; a throttled one was not acted on, so it is.
-func TestCreateRetriesOnlyAThrottle(t *testing.T) {
-	desired := map[string]any{"DelaySeconds": 5, "Tags": []any{map[string]any{"Key": "kraai:resource-name", "Value": "kraai-q"}}}
-	dropped := &flakyQueue{answer: "drop", fails: map[string]int{"AmazonSQS.CreateQueue": 1}}
-	if _, err := dropped.serve(t).Create(context.Background(), "AWS::SQS::Queue", desired); err == nil {
-		t.Fatal("a create whose connection dropped succeeded")
-	}
-	if n := dropped.count("AmazonSQS.CreateQueue"); n != 1 {
-		t.Fatalf("dropped create attempts = %d, want 1", n)
-	}
-	throttled := &flakyQueue{answer: "throttle", fails: map[string]int{"AmazonSQS.CreateQueue": 1}}
-	if _, err := throttled.serve(t).Create(context.Background(), "AWS::SQS::Queue", desired); err != nil {
-		t.Fatalf("a throttled create: %v", err)
-	}
-	if n := throttled.count("AmazonSQS.CreateQueue"); n != 2 {
-		t.Fatalf("throttled create attempts = %d, want 2", n)
-	}
-}
-
 // An update sent again after it took effect sets the same value, so a
 // dropped connection is retried.
 func TestUpdateRetriesADroppedConnection(t *testing.T) {

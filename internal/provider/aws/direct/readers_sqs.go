@@ -9,7 +9,6 @@ func init() {
 			Protocol:    "awsJson1_0",
 			SigningName: "sqs",
 			Complete:    true,
-			Production:  true,
 			Host:        "sqs.{region}.amazonaws.com",
 			Target:      "AmazonSQS.GetQueueAttributes",
 			Identifier: []Binding{
@@ -40,7 +39,7 @@ func init() {
 			},
 			AbsentIDs:         []string{"https://sqs.{region}.amazonaws.com/{account}/kraai-absent-probe"},
 			LifecycleComplete: true,
-			Create:            &MutationCall{Operation: "CreateQueue", Target: "AmazonSQS.CreateQueue", NameProperty: "QueueName", NameTag: "kraai:resource-name", Input: map[string]any{"Attributes": map[string]any{"ContentBasedDeduplication": "{ContentBasedDeduplication:string}", "DeduplicationScope": "{DeduplicationScope}", "DelaySeconds": "{DelaySeconds:string}", "FifoQueue": "{FifoQueue:string}", "FifoThroughputLimit": "{FifoThroughputLimit}", "KmsDataKeyReusePeriodSeconds": "{KmsDataKeyReusePeriodSeconds:string}", "KmsMasterKeyId": "{KmsMasterKeyId}", "MaximumMessageSize": "{MaximumMessageSize:string}", "MessageRetentionPeriod": "{MessageRetentionPeriod:string}", "ReceiveMessageWaitTimeSeconds": "{ReceiveMessageWaitTimeSeconds:string}", "RedriveAllowPolicy": "{RedriveAllowPolicy:json}", "RedrivePolicy": "{RedrivePolicy:json}", "SqsManagedSseEnabled": "{SqsManagedSseEnabled:string}", "VisibilityTimeout": "{VisibilityTimeout:string}"}, "QueueName": "{QueueName}", "tags": "{Tags:entries}"}, RetryErrors: []string{"QueueDeletedRecently"}, Properties: []string{"ContentBasedDeduplication", "DeduplicationScope", "DelaySeconds", "FifoQueue", "FifoThroughputLimit", "KmsDataKeyReusePeriodSeconds", "KmsMasterKeyId", "MaximumMessageSize", "MessageRetentionPeriod", "QueueName", "ReceiveMessageWaitTimeSeconds", "RedriveAllowPolicy", "RedrivePolicy", "SqsManagedSseEnabled", "Tags", "VisibilityTimeout"}, Identifier: map[string]string{"QueueUrl": "QueueUrl"}},
+			Create:            &MutationCall{Operation: "CreateQueue", Target: "AmazonSQS.CreateQueue", NameProperty: "QueueName", NameTag: "kraai:resource-name", Input: map[string]any{"Attributes": map[string]any{"ContentBasedDeduplication": "{ContentBasedDeduplication:string}", "DeduplicationScope": "{DeduplicationScope}", "DelaySeconds": "{DelaySeconds:string}", "FifoQueue": "{FifoQueue:string}", "FifoThroughputLimit": "{FifoThroughputLimit}", "KmsDataKeyReusePeriodSeconds": "{KmsDataKeyReusePeriodSeconds:string}", "KmsMasterKeyId": "{KmsMasterKeyId}", "MaximumMessageSize": "{MaximumMessageSize:string}", "MessageRetentionPeriod": "{MessageRetentionPeriod:string}", "ReceiveMessageWaitTimeSeconds": "{ReceiveMessageWaitTimeSeconds:string}", "RedriveAllowPolicy": "{RedriveAllowPolicy:json}", "RedrivePolicy": "{RedrivePolicy:json}", "SqsManagedSseEnabled": "{SqsManagedSseEnabled:string}", "VisibilityTimeout": "{VisibilityTimeout:string}"}, "QueueName": "{QueueName}", "tags": "{Tags:entries}"}, RetryErrors: []string{"QueueDeletedRecently"}, Properties: []string{"ContentBasedDeduplication", "DeduplicationScope", "DelaySeconds", "FifoQueue", "FifoThroughputLimit", "KmsDataKeyReusePeriodSeconds", "KmsMasterKeyId", "MaximumMessageSize", "MessageRetentionPeriod", "QueueName", "ReceiveMessageWaitTimeSeconds", "RedriveAllowPolicy", "RedrivePolicy", "SqsManagedSseEnabled", "Tags", "VisibilityTimeout"}, Identifier: map[string]string{"QueueUrl": "QueueUrl"}, Idempotent: true},
 			Delete:            &MutationCall{Operation: "DeleteQueue", Target: "AmazonSQS.DeleteQueue", Input: map[string]any{"QueueUrl": "{QueueUrl}"}, AbsentErrors: []string{"QueueDoesNotExist"}},
 			Update: []MutationCall{
 				MutationCall{Operation: "SetQueueAttributes", Target: "AmazonSQS.SetQueueAttributes", Input: map[string]any{"Attributes": map[string]any{"ContentBasedDeduplication": "{ContentBasedDeduplication:string}", "DeduplicationScope": "{DeduplicationScope}", "DelaySeconds": "{DelaySeconds:string}", "FifoThroughputLimit": "{FifoThroughputLimit}", "KmsDataKeyReusePeriodSeconds": "{KmsDataKeyReusePeriodSeconds:string}", "KmsMasterKeyId": "{KmsMasterKeyId}", "MaximumMessageSize": "{MaximumMessageSize:string}", "MessageRetentionPeriod": "{MessageRetentionPeriod:string}", "ReceiveMessageWaitTimeSeconds": "{ReceiveMessageWaitTimeSeconds:string}", "RedriveAllowPolicy": "{RedriveAllowPolicy:json}", "RedrivePolicy": "{RedrivePolicy:json}", "SqsManagedSseEnabled": "{SqsManagedSseEnabled:string}", "VisibilityTimeout": "{VisibilityTimeout:string}"}, "QueueUrl": "{QueueUrl}"}, Properties: []string{"ContentBasedDeduplication", "DeduplicationScope", "DelaySeconds", "FifoThroughputLimit", "KmsDataKeyReusePeriodSeconds", "KmsMasterKeyId", "MaximumMessageSize", "MessageRetentionPeriod", "ReceiveMessageWaitTimeSeconds", "RedriveAllowPolicy", "RedrivePolicy", "SqsManagedSseEnabled", "VisibilityTimeout"}},
@@ -61,7 +60,6 @@ func init() {
 					},
 				},
 			},
-			Mutable: true,
 		},
 	})
 }

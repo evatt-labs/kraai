@@ -241,6 +241,13 @@ type Create struct {
 	// of a tag the desired state carries, so a create that is retried names
 	// the instance it made rather than a second one.
 	Name *NameFrom `yaml:"name,omitempty"`
+	// Idempotent says a repeat of the create with the same name makes no
+	// second instance and is not refused: the service answers as for the
+	// first, or replaces the instance with the same input. Set it only from
+	// the service's documentation; a create refused as already existing, or
+	// making a new revision, is not idempotent. The create then takes the
+	// retries a read does.
+	Idempotent bool `yaml:"idempotent,omitempty"`
 }
 
 // NameFrom is a name property filled from a tag's value. A value longer

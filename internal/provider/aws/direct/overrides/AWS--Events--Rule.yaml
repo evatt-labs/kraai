@@ -158,6 +158,8 @@ also:
           Value: Value
 create:
   operation: PutRule
+  # Creates or replaces the rule by name, so the same input again is a no-op.
+  idempotent: true
   name:
     property: Name
     tag: kraai:resource-name
