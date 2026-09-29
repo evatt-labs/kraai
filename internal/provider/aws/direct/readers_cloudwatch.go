@@ -9,6 +9,7 @@ func init() {
 			Protocol:    "awsJson1_0",
 			SigningName: "monitoring",
 			Complete:    true,
+			Production:  true,
 			Host:        "monitoring.{region}.amazonaws.com",
 			Target:      "GraniteServiceVersion20100801.DescribeAlarms",
 			Identifier: []Binding{
@@ -133,6 +134,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

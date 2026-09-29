@@ -9,6 +9,7 @@ func init() {
 			Protocol:    "awsJson1_0",
 			SigningName: "sqs",
 			Complete:    true,
+			Production:  true,
 			Host:        "sqs.{region}.amazonaws.com",
 			Target:      "AmazonSQS.GetQueueAttributes",
 			Identifier: []Binding{
@@ -60,6 +61,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

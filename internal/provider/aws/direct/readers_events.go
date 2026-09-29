@@ -58,6 +58,7 @@ func init() {
 			Protocol:    "awsJson1_1",
 			SigningName: "events",
 			Complete:    true,
+			Production:  true,
 			Host:        "events.{region}.amazonaws.com",
 			Target:      "AWSEvents.DescribeRule",
 			Identifier: []Binding{
@@ -268,6 +269,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

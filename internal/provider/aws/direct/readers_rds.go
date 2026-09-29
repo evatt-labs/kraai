@@ -9,6 +9,7 @@ func init() {
 			Protocol:    "awsQuery",
 			SigningName: "rds",
 			Complete:    true,
+			Production:  true,
 			Host:        "rds.{region}.amazonaws.com",
 			Action:      "DescribeDBClusterParameterGroups",
 			Version:     "2014-10-31",

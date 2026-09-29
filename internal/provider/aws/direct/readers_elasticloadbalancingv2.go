@@ -9,6 +9,7 @@ func init() {
 			Protocol:    "awsQuery",
 			SigningName: "elasticloadbalancing",
 			Complete:    true,
+			Production:  true,
 			Host:        "elasticloadbalancing.{region}.amazonaws.com",
 			Action:      "DescribeTargetGroups",
 			Version:     "2015-12-01",
@@ -122,6 +123,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }
