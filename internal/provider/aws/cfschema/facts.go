@@ -53,13 +53,17 @@ type Facts struct {
 	// applies tags in a second call after the resource exists. kraai still
 	// passes the tag in the create request; the window between the two
 	// handler calls is the provider's, not kraai's.
-	TagOnCreate bool       `json:"tagOnCreate,omitempty"`
-	CreateOnly  []string   `json:"createOnly,omitempty"`
-	WriteOnly   []string   `json:"writeOnly,omitempty"`
-	ReadOnly    []string   `json:"readOnly,omitempty"`
-	ListScope   [][]string `json:"listScope,omitempty"`
-	HasUpdate   bool       `json:"hasUpdate"`
-	Permissions []string   `json:"permissions,omitempty"`
+	TagOnCreate bool     `json:"tagOnCreate,omitempty"`
+	CreateOnly  []string `json:"createOnly,omitempty"`
+	// ConditionalCreateOnly is the schema's conditionalCreateOnlyProperties:
+	// create-only under conditions the schema does not express, so a change
+	// may be refused.
+	ConditionalCreateOnly []string   `json:"conditionalCreateOnly,omitempty"`
+	WriteOnly             []string   `json:"writeOnly,omitempty"`
+	ReadOnly              []string   `json:"readOnly,omitempty"`
+	ListScope             [][]string `json:"listScope,omitempty"`
+	HasUpdate             bool       `json:"hasUpdate"`
+	Permissions           []string   `json:"permissions,omitempty"`
 	// Unordered is the pointer of every array the schema declares
 	// insertionOrder false, with "*" for each array it is nested in, such
 	// as /properties/ContainerDefinitions/*/Environment: an array whose
@@ -70,14 +74,15 @@ type Facts struct {
 // Derive computes a type's Facts from its schema.
 func Derive(doc Document) Facts {
 	f := Facts{
-		TypeName:          doc.TypeName,
-		PrimaryIdentifier: doc.PrimaryIdentifier,
-		CreateOnly:        doc.CreateOnlyProperties,
-		WriteOnly:         doc.WriteOnlyProperties,
-		ReadOnly:          doc.ReadOnlyProperties,
-		ListScope:         listScope(doc),
-		Permissions:       permissions(doc),
-		Unordered:         unordered(doc),
+		TypeName:              doc.TypeName,
+		PrimaryIdentifier:     doc.PrimaryIdentifier,
+		CreateOnly:            doc.CreateOnlyProperties,
+		ConditionalCreateOnly: doc.ConditionalCreateOnlyProperties,
+		WriteOnly:             doc.WriteOnlyProperties,
+		ReadOnly:              doc.ReadOnlyProperties,
+		ListScope:             listScope(doc),
+		Permissions:           permissions(doc),
+		Unordered:             unordered(doc),
 	}
 	f.HasUpdate = hasHandler(doc, "update")
 	f.TagProperty, f.TagShape, f.TagOnCreate = tagPlacement(doc)

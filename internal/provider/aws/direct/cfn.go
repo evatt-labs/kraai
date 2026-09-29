@@ -11,6 +11,9 @@ type cfnSchema struct {
 	WriteOnlyPointers  []string               `json:"writeOnlyProperties"`
 	ReadOnlyProperties []string               `json:"readOnlyProperties"`
 	CreateOnly         []string               `json:"createOnlyProperties"`
+	// ConditionalCreateOnly cannot be changed under some conditions the
+	// schema does not express, so no update route is required for it.
+	ConditionalCreateOnly []string `json:"conditionalCreateOnlyProperties"`
 	// elsewhere is the nested properties, as dotted paths, that a call
 	// made per element maps, which the read itself need not.
 	elsewhere map[string]bool

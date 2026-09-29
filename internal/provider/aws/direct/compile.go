@@ -109,6 +109,9 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		}
 	}
 	r.AbsentIDs = o.AbsentIDs
+	for _, p := range o.CreateOnly {
+		r.CreateOnly = append(r.CreateOnly, "/properties/"+p)
+	}
 	if o.Create != nil || o.Update != nil || o.Delete != nil {
 		errs = append(errs, compileMutations(files, lock, o, &r)...)
 	}

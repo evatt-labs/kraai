@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -174,4 +175,14 @@ func sortedUnique(list []string) bool {
 		}
 	}
 	return true
+}
+
+func TestDeriveReadsConditionalCreateOnly(t *testing.T) {
+	f := Derive(load(t, "AWS::DynamoDB::Table"))
+	if want := []string{"/properties/KeySchema"}; !reflect.DeepEqual(f.ConditionalCreateOnly, want) {
+		t.Fatalf("ConditionalCreateOnly = %v, want %v", f.ConditionalCreateOnly, want)
+	}
+	if slices.Contains(f.CreateOnly, "/properties/KeySchema") {
+		t.Errorf("CreateOnly %v holds the conditional property", f.CreateOnly)
+	}
 }

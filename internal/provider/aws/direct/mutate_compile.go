@@ -298,7 +298,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	// the read-only, create-only or write-only ones, and every property a
 	// create can set is sent by it or set by a call after it.
 	unchangeable := map[string]bool{}
-	for _, p := range append(append(append([]string{}, schema.ReadOnlyProperties...), schema.CreateOnly...), schema.WriteOnlyPointers...) {
+	for _, p := range slices.Concat(schema.ReadOnlyProperties, schema.CreateOnly, schema.ConditionalCreateOnly, schema.WriteOnlyPointers) {
 		unchangeable[strings.TrimPrefix(p, "/properties/")] = true
 	}
 	for _, p := range o.CreateOnly {
