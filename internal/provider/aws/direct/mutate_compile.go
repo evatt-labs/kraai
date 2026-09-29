@@ -23,6 +23,7 @@ type MutationCall struct {
 	// Match, Element and Change are a list route's ListRoute fields.
 	Match   []string
 	Element map[string]any
+	Chunk   int
 	Change  *MutationCall
 	// FailedCount and Clear are Mutation.FailedCount and Mutation.Clear.
 	FailedCount string

@@ -82,7 +82,13 @@
           "target": "com.amazonaws.rds#AddTagsToResource"
         },
         {
+          "target": "com.amazonaws.rds#CreateDBClusterParameterGroup"
+        },
+        {
           "target": "com.amazonaws.rds#CreateDBSubnetGroup"
+        },
+        {
+          "target": "com.amazonaws.rds#DeleteDBClusterParameterGroup"
         },
         {
           "target": "com.amazonaws.rds#DeleteDBSubnetGroup"
@@ -100,10 +106,16 @@
           "target": "com.amazonaws.rds#ListTagsForResource"
         },
         {
+          "target": "com.amazonaws.rds#ModifyDBClusterParameterGroup"
+        },
+        {
           "target": "com.amazonaws.rds#ModifyDBSubnetGroup"
         },
         {
           "target": "com.amazonaws.rds#RemoveTagsFromResource"
+        },
+        {
+          "target": "com.amazonaws.rds#ResetDBClusterParameterGroup"
         }
       ],
       "traits": {
@@ -511,6 +523,68 @@
     "com.amazonaws.rds#Boolean": {
       "type": "boolean"
     },
+    "com.amazonaws.rds#CreateDBClusterParameterGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBParameterGroupAlreadyExistsFault"
+        },
+        {
+          "target": "com.amazonaws.rds#DBParameterGroupQuotaExceededFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#CreateDBClusterParameterGroupMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#CreateDBClusterParameterGroupResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#CreateDBClusterParameterGroupMessage": {
+      "members": {
+        "DBClusterParameterGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "DBParameterGroupFamily": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.rds#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#CreateDBClusterParameterGroupResult": {
+      "members": {
+        "DBClusterParameterGroup": {
+          "target": "com.amazonaws.rds#DBClusterParameterGroup"
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#CreateDBSubnetGroup": {
       "errors": [
         {
@@ -643,6 +717,16 @@
       },
       "type": "list"
     },
+    "com.amazonaws.rds#DBClusterParameterGroupNameMessage": {
+      "members": {
+        "DBClusterParameterGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBClusterParameterGroupsMessage": {
       "members": {
         "DBClusterParameterGroups": {
@@ -675,6 +759,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBParameterGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBParameterGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBParameterGroupNotFoundFault": {
       "members": {
         "message": {
@@ -688,6 +788,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBParameterGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBParameterGroupQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -923,6 +1039,39 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DeleteDBClusterParameterGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBParameterGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBParameterGroupStateFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#DeleteDBClusterParameterGroupMessage"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#DeleteDBClusterParameterGroupMessage": {
+      "members": {
+        "DBClusterParameterGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
       },
       "type": "structure"
     },
@@ -1221,6 +1370,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#InvalidDBParameterGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBParameterGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#InvalidDBSubnetGroupStateFault": {
       "members": {
         "message": {
@@ -1328,6 +1493,46 @@
         },
         "ResourceName": {
           "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ModifyDBClusterParameterGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBParameterGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBParameterGroupStateFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#ModifyDBClusterParameterGroupMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#DBClusterParameterGroupNameMessage"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#ModifyDBClusterParameterGroupMessage": {
+      "members": {
+        "DBClusterParameterGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.rds#ParametersList",
           "traits": {
             "smithy.api#clientOptional": {},
             "smithy.api#required": {}
@@ -1547,6 +1752,47 @@
             "smithy.api#clientOptional": {},
             "smithy.api#required": {}
           }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ResetDBClusterParameterGroup": {
+      "errors": [
+        {
+          "target": "com.amazonaws.rds#DBParameterGroupNotFoundFault"
+        },
+        {
+          "target": "com.amazonaws.rds#InvalidDBParameterGroupStateFault"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.rds#ResetDBClusterParameterGroupMessage"
+      },
+      "output": {
+        "target": "com.amazonaws.rds#DBClusterParameterGroupNameMessage"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.rds#ResetDBClusterParameterGroupMessage": {
+      "members": {
+        "DBClusterParameterGroupName": {
+          "target": "com.amazonaws.rds#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Parameters": {
+          "target": "com.amazonaws.rds#ParametersList",
+          "traits": {}
+        },
+        "ResetAllParameters": {
+          "target": "com.amazonaws.rds#Boolean",
+          "traits": {}
         }
       },
       "traits": {
