@@ -11,7 +11,7 @@ func TestCoversUnorderedArrays(t *testing.T) {
 		}
 		return out
 	}
-	unordered := map[string]bool{"/properties/Env": true, "/properties/Containers/*/Env": true}
+	unordered := listRules{unordered: map[string]bool{"/properties/Env": true, "/properties/Containers/*/Env": true}}
 	cases := map[string]struct {
 		pointer          string
 		desired, current any

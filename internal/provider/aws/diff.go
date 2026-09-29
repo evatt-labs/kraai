@@ -48,9 +48,12 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		return resource.Same, err
 	}
 
-	unordered := map[string]bool{}
+	rules := listRules{unordered: map[string]bool{}, subset: map[string]bool{}}
 	for _, pointer := range append(schema.Unordered, returnedSorted[r.typeName]...) {
-		unordered[pointer] = true
+		rules.unordered[pointer] = true
+	}
+	for _, pointer := range returnedWithDefaults[r.typeName] {
+		rules.subset[pointer] = true
 	}
 
 	createOnly := map[string]bool{}
@@ -79,7 +82,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
 
-		if !covers(desiredNorm, currentNorm, pointer, unordered) {
+		if !covers(desiredNorm, currentNorm, pointer, rules) {
 			return resource.Immutable, nil
 		}
 	}
@@ -106,7 +109,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		if err != nil {
 			return resource.Same, kerrors.Wrap(err, kerrors.CodeUnexpected, "normalizing current %s for %s", pointer, r.typeName)
 		}
-		if !covers(desiredNorm, currentNorm, pointer, unordered) {
+		if !covers(desiredNorm, currentNorm, pointer, rules) {
 			if schema.HasUpdate {
 				return resource.Mutable, nil
 			}
@@ -125,6 +128,30 @@ var returnedSorted = map[string][]string{
 	"AWS::DynamoDB::Table": {"/properties/AttributeDefinitions"},
 }
 
+// listRules names, by pointer, the arrays covers compares other than in
+// order and at equal length.
+type listRules struct {
+	// unordered arrays match in any order.
+	unordered map[string]bool
+	// subset arrays, those in returnedWithDefaults, need each desired
+	// element covered by a different current one; elements only current
+	// has are the vendor's.
+	subset map[string]bool
+}
+
+// returnedWithDefaults is, by type, the key/value attribute lists a service
+// returns in full, defaults included, however few were set, and has no call
+// to remove one: compared at equal length, a manifest setting one attribute
+// would plan an update on every run. Each entry is observed. Not every
+// array the schema marks arrayType AttributeList qualifies: an RDS option
+// group returns only the options added, and removing one is a real call.
+var returnedWithDefaults = map[string][]string{
+	// DescribeTargetGroupAttributes returns every attribute, defaults
+	// included (14 read on one group); only ModifyTargetGroupAttributes
+	// changes them.
+	"AWS::ElasticLoadBalancingV2::TargetGroup": {"/properties/TargetGroupAttributes"},
+}
+
 // covers reports whether current carries everything desired sets, applying
 // compare's top-level rule at every depth: a key only current has is the
 // vendor's default, and a key current does not return is not compared.
@@ -132,10 +159,12 @@ var returnedSorted = map[string][]string{
 // those unordered names, the pointers of arrays the schema declares
 // insertionOrder false: their elements match in any order, each desired
 // element covered by a different current one, since the service may
-// return them in another order than they were written. pointer is the
+// return them in another order than they were written. The rules' subset
+// arrays match likewise but current may be longer.
+// pointer is the
 // value's own, with "*" for an array's elements, as
 // cfschema.Facts.Unordered writes them.
-func covers(desired, current any, pointer string, unordered map[string]bool) bool {
+func covers(desired, current any, pointer string, rules listRules) bool {
 	switch d := desired.(type) {
 	case map[string]any:
 		c, ok := current.(map[string]any)
@@ -143,22 +172,28 @@ func covers(desired, current any, pointer string, unordered map[string]bool) boo
 			return false
 		}
 		for k, dv := range d {
-			if cv, ok := c[k]; ok && !covers(dv, cv, pointer+"/"+k, unordered) {
+			if cv, ok := c[k]; ok && !covers(dv, cv, pointer+"/"+k, rules) {
 				return false
 			}
 		}
 		return true
 	case []any:
 		c, ok := current.([]any)
-		if !ok || len(c) != len(d) {
+		if !ok {
 			return false
 		}
 		item := pointer + "/*"
-		if unordered[pointer] {
-			return matchAll(len(d), func(i, j int) bool { return covers(d[i], c[j], item, unordered) })
+		if rules.subset[pointer] {
+			return matchAll(len(d), len(c), func(i, j int) bool { return covers(d[i], c[j], item, rules) })
+		}
+		if len(c) != len(d) {
+			return false
+		}
+		if rules.unordered[pointer] {
+			return matchAll(len(d), len(c), func(i, j int) bool { return covers(d[i], c[j], item, rules) })
 		}
 		for i := range d {
-			if !covers(d[i], c[i], item, unordered) {
+			if !covers(d[i], c[i], item, rules) {
 				return false
 			}
 		}
@@ -169,18 +204,18 @@ func covers(desired, current any, pointer string, unordered map[string]bool) boo
 }
 
 // matchAll reports whether n desired elements can each be paired with a
-// different one of n current elements such that fits(desired, current)
-// holds for every pair: a perfect bipartite matching, found by augmenting
+// different one of m current elements such that fits(desired, current)
+// holds for every pair: a bipartite matching saturating n, found by augmenting
 // paths. A greedy pairing is not enough, since covers is partial and one
 // current element can fit several desired ones.
-func matchAll(n int, fits func(desired, current int) bool) bool {
-	owner := make([]int, n)
+func matchAll(n, m int, fits func(desired, current int) bool) bool {
+	owner := make([]int, m)
 	for j := range owner {
 		owner[j] = -1
 	}
 	var augment func(i int, seen []bool) bool
 	augment = func(i int, seen []bool) bool {
-		for j := range n {
+		for j := range m {
 			if seen[j] || !fits(i, j) {
 				continue
 			}
@@ -193,7 +228,7 @@ func matchAll(n int, fits func(desired, current int) bool) bool {
 		return false
 	}
 	for i := range n {
-		if !augment(i, make([]bool, n)) {
+		if !augment(i, make([]bool, m)) {
 			return false
 		}
 	}
