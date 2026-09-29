@@ -25,18 +25,20 @@ type FormStep struct {
 
 // formBindings encodes a rendered input member into the form pairs a query
 // protocol sends, by the call's form table. A member the table does not
-// name is an error, never dropped.
-func formBindings(form map[string]FormStep, member string, v any) ([]Binding, error) {
+// name is an error, never dropped. An empty list is sent as the SDK sends it:
+// awsQuery sends the list's key with an empty value, so an empty list stays
+// distinct from an absent one; ec2Query sends nothing.
+func formBindings(protocol string, form map[string]FormStep, member string, v any) ([]Binding, error) {
 	step, ok := form[member]
 	if !ok {
 		return nil, fmt.Errorf("the input member %s has no form encoding", member)
 	}
 	var out []Binding
-	err := encodeForm(form, member, step.Key, v, &out)
+	err := encodeForm(protocol, form, member, step.Key, v, &out)
 	return out, err
 }
 
-func encodeForm(form map[string]FormStep, path, key string, v any, out *[]Binding) error {
+func encodeForm(protocol string, form map[string]FormStep, path, key string, v any, out *[]Binding) error {
 	step := form[path]
 	switch step.Kind {
 	case "structure":
@@ -49,7 +51,7 @@ func encodeForm(form map[string]FormStep, path, key string, v any, out *[]Bindin
 			if !ok {
 				return fmt.Errorf("%s.%s has no form encoding", path, name)
 			}
-			if err := encodeForm(form, path+"."+name, key+"."+child.Key, obj[name], out); err != nil {
+			if err := encodeForm(protocol, form, path+"."+name, key+"."+child.Key, obj[name], out); err != nil {
 				return err
 			}
 		}
@@ -58,11 +60,14 @@ func encodeForm(form map[string]FormStep, path, key string, v any, out *[]Bindin
 		if !ok {
 			return fmt.Errorf("%s is not a list", path)
 		}
+		if len(items) == 0 && protocol == "awsQuery" {
+			*out = append(*out, Binding{Location: "form", Name: key})
+		}
 		if step.Item != "" {
 			key += "." + step.Item
 		}
 		for i, item := range items {
-			if err := encodeForm(form, path+"[]", fmt.Sprintf("%s.%d", key, i+1), item, out); err != nil {
+			if err := encodeForm(protocol, form, path+"[]", fmt.Sprintf("%s.%d", key, i+1), item, out); err != nil {
 				return err
 			}
 		}
@@ -77,7 +82,7 @@ func encodeForm(form map[string]FormStep, path, key string, v any, out *[]Bindin
 		for i, name := range sortedKeys(obj) {
 			entry := fmt.Sprintf("%s.%d", key, i+1)
 			*out = append(*out, Binding{Location: "form", Name: entry + "." + step.MapKey, Value: name})
-			if err := encodeForm(form, path+"{}", entry+"."+step.MapValue, obj[name], out); err != nil {
+			if err := encodeForm(protocol, form, path+"{}", entry+"."+step.MapValue, obj[name], out); err != nil {
 				return err
 			}
 		}

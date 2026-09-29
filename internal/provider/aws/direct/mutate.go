@@ -296,7 +296,7 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 			bindings = append(bindings, Binding{Member: member, Location: "body", Structured: v})
 			continue
 		}
-		pairs, err := formBindings(m.Form, member, v)
+		pairs, err := formBindings(r.Protocol, m.Form, member, v)
 		if err != nil {
 			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
 		}
