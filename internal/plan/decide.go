@@ -12,14 +12,14 @@ import (
 
 // getWave runs Get for every item in one wave, bounded by p.concurrency,
 // and returns one Action per item in the same order.
-func (p *Planner) getWave(ctx context.Context, items []plannedItem, attrs *resource.AttributeIndex) []Action {
+func (p *Planner) getWave(ctx context.Context, items []plannedItem, attrs *resource.AttributeIndex, failed failedProducers) []Action {
 	actions := make([]Action, len(items))
 
 	g := &errgroup.Group{}
 	g.SetLimit(p.concurrency)
 	for i, it := range items {
 		g.Go(func() error {
-			actions[i] = decide(ctx, it, attrs)
+			actions[i] = decide(ctx, it, attrs, failed)
 			// Always nil: one failed Get must never cancel or skip its
 			// siblings. The failure is already in actions[i].
 			return nil
@@ -31,7 +31,7 @@ func (p *Planner) getWave(ctx context.Context, items []plannedItem, attrs *resou
 }
 
 // decide runs Get for one item and turns the result into an Action.
-func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex) Action {
+func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex, failed failedProducers) Action {
 	action := Action{Item: it.Item, Ref: it.ref, Spec: it.spec}
 
 	// Only an item whose values reference another binding reads what that
@@ -51,6 +51,17 @@ func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex)
 				"validating %s/%s %q", it.Provider, it.Type, it.ref.Name)
 			return action
 		}
+	}
+
+	// A producer that failed published nothing, so a value naming it would
+	// diff as unresolved and read as a change that may never happen. Nothing
+	// can be said about this resource until that one is fixed.
+	if dep, ok := failed.blocking(it); ok {
+		action.Kind = ActionFailed
+		action.Err = kerrors.Validation(
+			"%s/%s %q: cannot be planned because %s in binding %q failed (see its error)",
+			it.Provider, it.Type, it.ref.Name, dep.typeKey, dep.binding)
+		return action
 	}
 
 	if noter, ok := it.res.(Noter); ok {
@@ -146,4 +157,33 @@ func describeImport(imp *resource.Import) string {
 		return "id " + strconv.Quote(imp.ID)
 	}
 	return "name " + strconv.Quote(imp.Name)
+}
+
+// producer identifies the resource an explicit reference names: its type in
+// a binding of one service, the same address the dependency graph uses.
+type producer struct {
+	service, binding, typeKey string
+}
+
+// failedProducers is the set of resources an earlier wave could not plan.
+// Written between waves and read within one, so it needs no lock.
+type failedProducers map[producer]struct{}
+
+func (f failedProducers) add(a Action) {
+	f[producer{a.ServiceKey, a.Binding, a.Ref.Key()}] = struct{}{}
+}
+
+// blocking returns the first failed producer it names by an explicit
+// reference. Reads of a whole binding are not references and never block.
+func (f failedProducers) blocking(it plannedItem) (producer, bool) {
+	for _, edge := range it.reads {
+		if edge.typeKey == "" {
+			continue
+		}
+		p := producer{it.ServiceKey, edge.binding, edge.typeKey}
+		if _, ok := f[p]; ok {
+			return p, true
+		}
+	}
+	return producer{}, false
 }
