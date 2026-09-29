@@ -227,6 +227,9 @@ delete:
     EventBusName: "{Arn:arnParent}"
   absentErrors: [ResourceNotFoundException]
   clear: [Targets]
+# The schema lists the bus as conditionally create-only; the rule's ARN, its
+# identifier, names it.
+createOnly: [EventBusName]
 # The targets are a queue made for the harness: PutTargets accepts one with
 # no queue policy.
 lifecycle:

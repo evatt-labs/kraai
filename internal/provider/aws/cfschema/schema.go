@@ -18,11 +18,8 @@ type Document struct {
 	PrimaryIdentifier    []string                   `json:"primaryIdentifier"`
 	ReadOnlyProperties   []string                   `json:"readOnlyProperties"`
 	CreateOnlyProperties []string                   `json:"createOnlyProperties"`
-	// ConditionalCreateOnlyProperties are create-only under conditions the
-	// schema does not express.
-	ConditionalCreateOnlyProperties []string                   `json:"conditionalCreateOnlyProperties"`
-	WriteOnlyProperties             []string                   `json:"writeOnlyProperties"`
-	Handlers                        map[string]json.RawMessage `json:"handlers"`
+	WriteOnlyProperties  []string                   `json:"writeOnlyProperties"`
+	Handlers             map[string]json.RawMessage `json:"handlers"`
 	// Tagging is nil when the schema omits the block, which the
 	// specification treats as taggable through a top-level Tags property.
 	Tagging *Tagging `json:"tagging"`

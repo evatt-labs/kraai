@@ -43,11 +43,11 @@ func (r *resourceType) translated(ctx context.Context, spec resource.Spec) (reso
 }
 
 // createOnly is every property whose change is a replacement: the schema's
-// create-only ones, its conditionally create-only ones (replaced whenever
-// they change, since the conditions are not expressed), and the ones the
-// type's direct override declares.
+// create-only ones and the ones the type's direct override declares. The
+// schema's conditionally create-only ones are not: CloudFormation tries an
+// update and replaces only when the service cannot make it.
 func (r *resourceType) createOnly(schema cfschema.Facts) []string {
-	return slices.Concat(schema.CreateOnly, schema.ConditionalCreateOnly, direct.CreateOnly(r.typeName))
+	return slices.Concat(schema.CreateOnly, direct.CreateOnly(r.typeName))
 }
 
 // compare is Diff after translation: spec.Config is already the vendor's

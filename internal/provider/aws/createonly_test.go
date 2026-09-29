@@ -20,20 +20,24 @@ func realTypeFixture(t *testing.T, typeName string) *resourceType {
 	}
 }
 
-// A property the schema calls conditionally create-only, or that only an
-// override knows the service refuses to change, plans a replacement.
-func TestDiffTreatsConditionalAndOverrideCreateOnlyAsReplace(t *testing.T) {
+// A property an override declares create-only replaces, though the schema
+// leaves it updatable. One the schema lists as conditionally create-only
+// updates: CloudFormation tries the update and replaces only if the
+// service cannot make it.
+func TestDiffCreateOnlySources(t *testing.T) {
 	cases := []struct {
 		name     string
 		typeName string
 		property string
 		desired  any
 		current  any
+		want     resource.Difference
 	}{
-		{"override createOnly", "AWS::Logs::LogGroup", "LogGroupClass", "INFREQUENT_ACCESS", "STANDARD"},
-		{"override createOnly on a target group", "AWS::ElasticLoadBalancingV2::TargetGroup", "TargetControlPort", float64(1), float64(2)},
-		{"schema conditionalCreateOnly", "AWS::Events::Rule", "EventBusName", "other", "default"},
-		{"schema conditionalCreateOnly on a VPC", "AWS::EC2::VPC", "InstanceTenancy", "dedicated", "default"},
+		{"override createOnly", "AWS::Logs::LogGroup", "LogGroupClass", "INFREQUENT_ACCESS", "STANDARD", resource.Immutable},
+		{"override createOnly on a target group", "AWS::ElasticLoadBalancingV2::TargetGroup", "TargetControlPort", float64(1), float64(2), resource.Immutable},
+		{"override promotes a conditional property", "AWS::Events::Rule", "EventBusName", "other", "default", resource.Immutable},
+		{"conditional VPC tenancy", "AWS::EC2::VPC", "InstanceTenancy", "default", "dedicated", resource.Mutable},
+		{"conditional engine", "AWS::RDS::DBInstance", "Engine", "postgres", "mysql", resource.Mutable},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -42,15 +46,9 @@ func TestDiffTreatsConditionalAndOverrideCreateOnlyAsReplace(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if got != resource.Immutable {
-				t.Errorf("%s.%s change = %v, want Immutable", tc.typeName, tc.property, got)
+			if got != tc.want {
+				t.Errorf("%s.%s change = %v, want %v", tc.typeName, tc.property, got, tc.want)
 			}
 		})
-	}
-	// A property none of the three lists still updates in place.
-	r := realTypeFixture(t, "AWS::Logs::LogGroup")
-	got, err := r.compare(specWith(map[string]any{"RetentionInDays": float64(7)}), stateWith(map[string]any{"RetentionInDays": float64(14)}))
-	if err != nil || got != resource.Mutable {
-		t.Errorf("RetentionInDays change = %v, %v; want Mutable", got, err)
 	}
 }
