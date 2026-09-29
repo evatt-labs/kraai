@@ -32,21 +32,27 @@ func (c *Client) call(ctx context.Context, r Reader, method, uri, target string,
 	return out, nil
 }
 
-// send sends one signed request and returns the body of a successful
-// response.
+// send sends a signed request and returns the body of a successful
+// response, retrying a transient failure.
 func (c *Client) send(ctx context.Context, r Reader, method, uri, target string, values []Binding) ([]byte, error) {
+	return c.sendRetrying(ctx, retryTransient, r, method, uri, target, values)
+}
+
+// sendOnce sends one signed request and returns the body of a successful
+// response.
+func (c *Client) sendOnce(ctx context.Context, r Reader, method, uri, target string, values []Binding) ([]byte, error) {
 	req, err := c.request(ctx, r, method, uri, target, values)
 	if err != nil {
 		return nil, err
 	}
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, &sendError{err}
 	}
 	defer func() { _ = resp.Body.Close() }()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, &sendError{err}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		if isXML(r.Protocol) {

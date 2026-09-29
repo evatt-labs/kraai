@@ -33,7 +33,9 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		}
 		values[p] = shortName(name, r.Create.NameMaxLength)
 	}
-	out, err := c.mutate(ctx, r, *r.Create, values)
+	// A create whose response was lost may have made the instance, so only
+	// a throttle, which the service answered without acting on, is retried.
+	out, err := c.mutateWith(ctx, retryThrottled, r, *r.Create, values)
 	if err != nil {
 		return "", err
 	}
@@ -256,8 +258,14 @@ func (c *Client) settled(ctx context.Context, r Reader, identifier string) bool 
 }
 
 // mutate sends one mutation, its input rendered from values, and returns
-// the decoded output.
+// the decoded output, retrying a transient failure: sent again after it
+// took effect, an update or delete does nothing or is refused.
 func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values map[string]any) (map[string]any, error) {
+	return c.mutateWith(ctx, retryTransient, r, m, values)
+}
+
+// mutateWith is mutate retrying only what policy allows.
+func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m MutationCall, values map[string]any) (map[string]any, error) {
 	call := Reader{Type: r.Type, Protocol: r.Protocol, SigningName: r.SigningName, Host: r.Host, SigningRegion: r.SigningRegion,
 		Action: m.Operation, Version: r.Version}
 	wireAs := func(name string, v any) (any, error) {
@@ -295,14 +303,14 @@ func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values ma
 		bindings = append(bindings, pairs...)
 	}
 	// Many mutations answer with no body at all.
-	body, err := c.send(ctx, call, "", "", m.Target, bindings)
+	body, err := c.sendRetrying(ctx, policy, call, "", "", m.Target, bindings)
 	for deadline := time.Now().Add(c.wait()); retryable(err, m.RetryErrors) && time.Now().Before(deadline); {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case <-time.After(c.poll()):
 		}
-		body, err = c.send(ctx, call, "", "", m.Target, bindings)
+		body, err = c.sendRetrying(ctx, policy, call, "", "", m.Target, bindings)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
