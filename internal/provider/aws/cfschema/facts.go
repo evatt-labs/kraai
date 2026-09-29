@@ -65,6 +65,11 @@ type Facts struct {
 	// as /properties/ContainerDefinitions/*/Environment: an array whose
 	// order means nothing, so two orders of it are the same value.
 	Unordered []string `json:"unordered,omitempty"`
+	// AttributeLists is the pointer of every array the schema marks
+	// arrayType AttributeList, in Unordered's notation: a list of key/value
+	// attributes that services return in full, defaults included, however
+	// few were set.
+	AttributeLists []string `json:"attributeLists,omitempty"`
 }
 
 // Derive computes a type's Facts from its schema.
@@ -77,7 +82,8 @@ func Derive(doc Document) Facts {
 		ReadOnly:          doc.ReadOnlyProperties,
 		ListScope:         listScope(doc),
 		Permissions:       permissions(doc),
-		Unordered:         unordered(doc),
+		Unordered:         arrays(doc, func(f fragment) bool { return f.InsertionOrder != nil && !*f.InsertionOrder }),
+		AttributeLists:    arrays(doc, func(f fragment) bool { return f.ArrayType == "AttributeList" }),
 	}
 	f.HasUpdate = hasHandler(doc, "update")
 	f.TagProperty, f.TagShape, f.TagOnCreate = tagPlacement(doc)
@@ -236,10 +242,11 @@ func permissions(doc Document) []string {
 	return out
 }
 
-// unordered walks doc's properties, through definitions, for the arrays
-// Facts.Unordered records. A definition already being walked is not walked
-// again, so a recursive schema ends.
-func unordered(doc Document) []string {
+// arrays walks doc's properties, through definitions, for the arrays keep
+// accepts, as Facts.Unordered and Facts.AttributeLists record them. A
+// definition already being walked is not walked again, so a recursive
+// schema ends.
+func arrays(doc Document, keep func(fragment) bool) []string {
 	var out []string
 	var walk func(pointer string, raw json.RawMessage, open map[string]bool)
 	walk = func(pointer string, raw json.RawMessage, open map[string]bool) {
@@ -259,7 +266,7 @@ func unordered(doc Document) []string {
 			return
 		}
 		if len(frag.Items) > 0 {
-			if frag.InsertionOrder != nil && !*frag.InsertionOrder {
+			if keep(frag) {
 				out = append(out, pointer)
 			}
 			walk(pointer+"/*", frag.Items, open)

@@ -97,7 +97,10 @@ type fragment struct {
 	Type string `json:"type"`
 	// InsertionOrder false declares an array's order meaningless; absent
 	// means true, the specification's default.
-	InsertionOrder       *bool                      `json:"insertionOrder"`
+	InsertionOrder *bool `json:"insertionOrder"`
+	// ArrayType is CloudFormation's own annotation of what an array holds;
+	// "AttributeList" marks a list of key/value attributes.
+	ArrayType            string                     `json:"arrayType"`
 	Items                json.RawMessage            `json:"items"`
 	Properties           map[string]json.RawMessage `json:"properties"`
 	PatternProperties    map[string]json.RawMessage `json:"patternProperties"`
