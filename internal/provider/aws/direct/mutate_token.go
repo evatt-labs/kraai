@@ -20,7 +20,7 @@ func tokenBindings(protocol string, m MutationCall) ([]Binding, error) {
 	if !isQuery(protocol) {
 		return []Binding{{Member: m.TokenMember, Location: "body", Structured: token}}, nil
 	}
-	return formBindings(m.Form, m.TokenMember, token)
+	return formBindings(protocol, m.Form, m.TokenMember, token)
 }
 
 // createPolicy is which failures a create may be sent again after. One
