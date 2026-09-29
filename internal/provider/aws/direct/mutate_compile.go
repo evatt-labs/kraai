@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"maps"
 	"regexp"
 	"slices"
 	"strings"
@@ -296,16 +297,22 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	}
 	// Complete when every property an update can change has a call, not
 	// the read-only, create-only or write-only ones, and every property a
-	// create can set is sent by it or set by a call after it.
-	unchangeable := map[string]bool{}
-	for _, p := range append(append(append([]string{}, schema.ReadOnlyProperties...), schema.CreateOnly...), schema.WriteOnlyPointers...) {
+	// create can set is sent by it or set by a call after it. A
+	// conditionally create-only property needs no route either, but an
+	// override may still declare it create-only outright.
+	unchangeable, fixed := map[string]bool{}, map[string]bool{}
+	for _, p := range slices.Concat(schema.ReadOnlyProperties, schema.CreateOnly, schema.WriteOnlyPointers) {
+		fixed[strings.TrimPrefix(p, "/properties/")] = true
+	}
+	for _, p := range schema.ConditionalCreateOnly {
 		unchangeable[strings.TrimPrefix(p, "/properties/")] = true
 	}
+	maps.Copy(unchangeable, fixed)
 	for _, p := range o.CreateOnly {
 		switch _, known := schema.Properties[p]; {
 		case !known:
 			fail("createOnly %s is not a property of %s", p, o.Type)
-		case unchangeable[p]:
+		case fixed[p]:
 			fail("createOnly %s is already read-only, create-only or write-only in the schema", p)
 		case routed[p]:
 			fail("createOnly %s has an update call", p)

@@ -81,6 +81,7 @@ func init() {
 				{Property: "State", Member: "State", Kind: "scalar"},
 			},
 			AbsentIDs:         []string{"arn:aws:events:{region}:{account}:rule/kraai-absent-probe"},
+			CreateOnly:        []string{"/properties/EventBusName"},
 			LifecycleComplete: true,
 			Create:            &MutationCall{Operation: "PutRule", Target: "AWSEvents.PutRule", NameProperty: "Name", NameTag: "kraai:resource-name", Input: map[string]any{"Description": "{Description}", "EventBusName": "{EventBusName}", "EventPattern": "{EventPattern:json}", "Name": "{Name}", "RoleArn": "{RoleArn}", "ScheduleExpression": "{ScheduleExpression}", "State": "{State}", "Tags": "{Tags}"}, Properties: []string{"Description", "EventBusName", "EventPattern", "Name", "RoleArn", "ScheduleExpression", "State", "Tags"}, Identifier: map[string]string{"Arn": "RuleArn"}},
 			Delete:            &MutationCall{Operation: "DeleteRule", Target: "AWSEvents.DeleteRule", Input: map[string]any{"EventBusName": "{Arn:arnParent}", "Name": "{Arn:arnName}"}, AbsentErrors: []string{"ResourceNotFoundException"}, Clear: []string{"Targets"}},

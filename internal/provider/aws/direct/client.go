@@ -352,6 +352,10 @@ func (r Reader) responsePath() string {
 // Control's read: see Reader.Production.
 func CanRead(typeName string) bool { return readers[typeName].Production }
 
+// CreateOnly is the schema pointers of the properties typeName's override
+// declares create-only, beyond the schema's own; nil when it declares none.
+func CreateOnly(typeName string) []string { return readers[typeName].CreateOnly }
+
 // ReadByID is Read for a type with a single primary identifier, given as
 // Cloud Control gives it.
 func (c *Client) ReadByID(ctx context.Context, typeName, identifier string) (map[string]any, error) {

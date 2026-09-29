@@ -3,8 +3,11 @@ package aws
 import (
 	"context"
 	"reflect"
+	"slices"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -39,6 +42,14 @@ func (r *resourceType) translated(ctx context.Context, spec resource.Spec) (reso
 	return r.translate(ctx, spec)
 }
 
+// createOnly is every property whose change is a replacement: the schema's
+// create-only ones and the ones the type's direct override declares. The
+// schema's conditionally create-only ones are not: CloudFormation tries an
+// update and replaces only when the service cannot make it.
+func (r *resourceType) createOnly(schema cfschema.Facts) []string {
+	return slices.Concat(schema.CreateOnly, direct.CreateOnly(r.typeName))
+}
+
 // compare is Diff after translation: spec.Config is already the vendor's
 // property vocabulary. A type whose Diff narrows what it compares shapes the
 // Config itself and calls this.
@@ -57,7 +68,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 	}
 
 	createOnly := map[string]bool{}
-	for _, pointer := range schema.CreateOnly {
+	for _, pointer := range r.createOnly(schema) {
 		path := schemaPropertyPath(pointer)
 		if len(path) == 0 {
 			continue

@@ -43,6 +43,10 @@ type Reader struct {
 	Create *MutationCall
 	Update []MutationCall
 	Delete *MutationCall
+	// CreateOnly is the override's createOnly properties as schema
+	// pointers: ones the schema leaves updatable but the service refuses to
+	// change, so a change is a replacement.
+	CreateOnly []string
 	// LifecycleComplete is true when every property an update can change
 	// has an update call: with Production and lifecycle evidence, the only
 	// readers a mutation may use in place of Cloud Control.

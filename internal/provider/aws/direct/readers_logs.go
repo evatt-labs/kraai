@@ -67,6 +67,7 @@ func init() {
 			Capture: []Field{
 				{Property: "Arn", Member: "logGroupArn", Kind: "scalar"},
 			},
+			CreateOnly:        []string{"/properties/LogGroupClass"},
 			LifecycleComplete: true,
 			MutationCaptures:  true,
 			Create:            &MutationCall{Operation: "CreateLogGroup", Target: "Logs_20140328.CreateLogGroup", NameProperty: "LogGroupName", NameTag: "kraai:resource-name", Input: map[string]any{"deletionProtectionEnabled": "{DeletionProtectionEnabled}", "kmsKeyId": "{KmsKeyId}", "logGroupClass": "{LogGroupClass}", "logGroupName": "{LogGroupName}", "tags": "{Tags:entries}"}, Properties: []string{"DeletionProtectionEnabled", "KmsKeyId", "LogGroupClass", "LogGroupName", "Tags"}, Identifier: map[string]string{"LogGroupName": "{LogGroupName}"}},
