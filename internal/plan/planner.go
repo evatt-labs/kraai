@@ -134,15 +134,19 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 	// that will be created or replaced publishes nothing here: its values
 	// are not known until apply.
 	attrs := resource.NewAttributeIndex()
+	failed := failedProducers{}
 	var actions []Action
 	for _, group := range byWave {
 		if len(group) == 0 {
 			continue
 		}
 		waveCtx, end := resource.StartWave(ctx, "plan", group[0].Wave, len(group))
-		wave := p.getWave(waveCtx, group, attrs)
+		wave := p.getWave(waveCtx, group, attrs, failed)
 		end()
 		for _, a := range wave {
+			if a.Kind == ActionFailed {
+				failed.add(a)
+			}
 			if a.Current == nil {
 				continue
 			}

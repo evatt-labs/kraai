@@ -76,7 +76,7 @@ func TestFormFollowsTheProtocol(t *testing.T) {
 			form := formTable(model, protocol, input, members, func(format string, args ...any) { t.Errorf(format, args...) })
 			got := map[string]string{}
 			for _, member := range members {
-				pairs, err := formBindings(form, member, v[member])
+				pairs, err := formBindings(protocol, form, member, v[member])
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -96,7 +96,7 @@ func TestFormFollowsTheProtocol(t *testing.T) {
 func TestFormRefuses(t *testing.T) {
 	model, input := queryModel()
 	form := formTable(model, "awsQuery", input, []string{"Spec"}, func(string, ...any) {})
-	if _, err := formBindings(form, "Spec", map[string]any{"Nope": "x"}); err == nil || !strings.Contains(err.Error(), "Spec.Nope has no form encoding") {
+	if _, err := formBindings("awsQuery", form, "Spec", map[string]any{"Nope": "x"}); err == nil || !strings.Contains(err.Error(), "Spec.Nope has no form encoding") {
 		t.Fatalf("formBindings = %v", err)
 	}
 	var refused []string
@@ -197,5 +197,34 @@ func TestInternetGatewayOverEC2Query(t *testing.T) {
 	del := f.calls["DeleteTags"][0]
 	if del.Get("ResourceId.1") != "igw-0123" || del.Get("Tag.1.Key") != "team" || del.Has("Tag.1.Value") {
 		t.Fatalf("DeleteTags form = %v", del)
+	}
+}
+
+// An empty list is what the SDK sends for it: awsQuery the list's key with
+// an empty value, wrapped or flattened, and ec2Query nothing at all.
+func TestFormEmptyListFollowsTheProtocol(t *testing.T) {
+	model, input := queryModel()
+	members := []string{"Names", "Flat", "Labeled"}
+	cases := map[string]map[string]string{
+		"awsQuery": {"Names": "", "Flat": "", "Labeled": ""},
+		"ec2Query": {},
+	}
+	for protocol, want := range cases {
+		t.Run(protocol, func(t *testing.T) {
+			form := formTable(model, protocol, input, members, func(format string, args ...any) { t.Errorf(format, args...) })
+			got := map[string]string{}
+			for _, member := range members {
+				pairs, err := formBindings(protocol, form, member, []any{})
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, p := range pairs {
+					got[p.Name] = p.Value
+				}
+			}
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("form = %v\nwant %v", got, want)
+			}
+		})
 	}
 }

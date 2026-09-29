@@ -168,6 +168,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if len(r.CreateOnly) > 0 {
+		fmt.Fprintf(b, "CreateOnly: %#v,\n", r.CreateOnly)
+	}
 	if r.LifecycleComplete {
 		b.WriteString("LifecycleComplete: true,\n")
 	}

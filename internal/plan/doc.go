@@ -30,11 +30,13 @@
 // # Partial failure
 //
 // A resource whose Get fails becomes an ActionFailed entry in its correct
-// wave, not a dropped resource and not a fatal error: omitting a resource
-// kraai could not read would be worse than reporting it wrong, and aborting
-// over one unreachable API would hide every other answer. Planner.Plan
-// returns a non-nil error only when the walk itself could not be built. Call
-// Plan.HasFailures before treating a Plan as complete.
+// wave (as is one that fails validation, and one that explicitly references
+// a failed resource, which is reported failed naming it rather than as a
+// change its unresolved value would imply), not a dropped resource and not a
+// fatal error: omitting a resource kraai could not read would be worse than
+// reporting it wrong, and aborting over one unreachable API would hide every
+// other answer. Planner.Plan returns a non-nil error only when the walk
+// itself could not be built. Call Plan.HasFailures before treating a Plan as complete.
 //
 // # Concurrency
 //

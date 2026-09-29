@@ -331,7 +331,7 @@ func (n *nativeResource) Diff(spec resource.Spec, state *resource.State) (resour
 			return resource.Same, err
 		}
 		for _, property := range unknown {
-			if slices.Contains(schema.CreateOnly, "/properties/"+property) {
+			if slices.Contains(n.createOnly(schema), "/properties/"+property) {
 				return resource.Immutable, nil
 			}
 		}
