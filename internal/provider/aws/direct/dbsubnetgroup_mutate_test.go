@@ -280,3 +280,42 @@ func TestDeleteDBSubnetGroupAlreadyGone(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// ModifyDBSubnetGroup requires SubnetIds, so a group read back with none
+// still sends the empty list beside a changed description: awsQuery sends
+// the list's key with an empty value, as the SDK does, not nothing.
+func TestUpdateDBSubnetGroupSendsAnEmptyRequiredListTogether(t *testing.T) {
+	f := &fakeDBSubnetGroups{exists: true, name: "kraai-e-subnets", description: "old"}
+	client := f.serve(t)
+	current := map[string]any{"DBSubnetGroupDescription": "old", "SubnetIds": []any{}}
+	if err := client.Update(context.Background(), dbSubnetGroupType, "kraai-e-subnets", current, map[string]any{"DBSubnetGroupDescription": "new"}); err != nil {
+		t.Fatal(err)
+	}
+	sent := f.calls["ModifyDBSubnetGroup"][0]
+	if v, ok := sent["SubnetIds"]; !ok || !reflect.DeepEqual(v, []string{""}) {
+		t.Fatalf("SubnetIds = %v (sent %v), want the key with an empty value", v, ok)
+	}
+}
+
+// The same call under ec2Query sends no key for an empty list.
+func TestUpdateEmptyRequiredListUnderEC2Query(t *testing.T) {
+	r := readers[dbSubnetGroupType]
+	r.Type, r.Protocol = "Test::EC2Query::Subnets", "ec2Query"
+	readers[r.Type] = r
+	t.Cleanup(func() { delete(readers, r.Type) })
+	f := &fakeDBSubnetGroups{exists: true, name: "kraai-e-subnets", description: "old"}
+	client := f.serve(t)
+	current := map[string]any{"DBSubnetGroupDescription": "old", "SubnetIds": []any{}}
+	if err := client.Update(context.Background(), r.Type, "kraai-e-subnets", current, map[string]any{"DBSubnetGroupDescription": "new"}); err != nil {
+		t.Fatal(err)
+	}
+	sent := f.calls["ModifyDBSubnetGroup"][0]
+	if got := sent.Get("DBSubnetGroupDescription"); got != "new" {
+		t.Fatalf("DBSubnetGroupDescription = %q, want new", got)
+	}
+	for k := range sent {
+		if strings.HasPrefix(k, "SubnetIds") {
+			t.Fatalf("sent %s = %v, want no key for an empty list", k, sent[k])
+		}
+	}
+}
