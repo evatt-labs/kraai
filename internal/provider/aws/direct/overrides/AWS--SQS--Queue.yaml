@@ -61,6 +61,8 @@ also:
         entries: [Key, Value]
 create:
   operation: CreateQueue
+  # The same name and attributes again answers with the existing queue's URL.
+  idempotent: true
   # A queue is named by kraai's identity tag, so a retried create names the
   # queue it made; the name cannot be reused for a minute after a delete.
   name:

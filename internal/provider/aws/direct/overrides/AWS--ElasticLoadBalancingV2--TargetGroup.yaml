@@ -70,6 +70,8 @@ also:
           QuicServerId: QuicServerId
 create:
   operation: CreateTargetGroup
+  # The operation is documented as idempotent: the same settings again succeed.
+  idempotent: true
   # A derived name is up to 63 long; ELBv2 takes 32.
   name:
     property: Name

@@ -17,8 +17,9 @@ const (
 	// nothing or is refused, may take it.
 	retryTransient retryPolicy = iota
 	// retryThrottled retries only a throttle, which the service answered
-	// without acting on. A create takes it: sent again after a response
-	// that was lost, an unnamed create would make a second instance.
+	// without acting on. A create with no token and no idempotent name
+	// takes it: sent again after a response that was lost, it would make
+	// a second instance.
 	retryThrottled
 )
 
