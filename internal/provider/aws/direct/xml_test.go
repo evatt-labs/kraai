@@ -275,7 +275,7 @@ func TestReadXMLErrors(t *testing.T) {
 		typeName, body, code string
 	}{
 		"ec2Query": {subnets, `<Response><Errors><Error><Code>UnauthorizedOperation</Code><Message>gone</Message></Error></Errors><RequestID>r</RequestID></Response>`, "UnauthorizedOperation"},
-		"awsQuery": {targetGroups, `<ErrorResponse><Error><Type>Sender</Type><Code>Throttling</Code><Message>gone</Message></Error></ErrorResponse>`, "Throttling"},
+		"awsQuery": {targetGroups, `<ErrorResponse><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>gone</Message></Error></ErrorResponse>`, "AccessDenied"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
