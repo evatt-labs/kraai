@@ -52,7 +52,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 	for _, pointer := range append(schema.Unordered, returnedSorted[r.typeName]...) {
 		rules.unordered[pointer] = true
 	}
-	for _, pointer := range schema.AttributeLists {
+	for _, pointer := range returnedWithDefaults[r.typeName] {
 		rules.subset[pointer] = true
 	}
 
@@ -133,10 +133,27 @@ var returnedSorted = map[string][]string{
 type listRules struct {
 	// unordered arrays match in any order.
 	unordered map[string]bool
-	// subset arrays are attribute lists a service returns in full, defaults
-	// included: each desired element need only be covered by a different
+	// subset arrays are those in returnedWithDefaults: each desired element need only be covered by a different
 	// current one, and elements only current has are the vendor's.
 	subset map[string]bool
+}
+
+// returnedWithDefaults is, by type, the key/value attribute lists a service
+// returns in full, defaults included, however few were set, and has no call
+// to remove one: compared at equal length, a manifest setting one attribute
+// would plan an update on every run. Each entry is observed. Not every
+// array the schema marks arrayType AttributeList qualifies: an RDS option
+// group returns only the options added, and removing one is a real call.
+var returnedWithDefaults = map[string][]string{
+	// DescribeTargetGroupAttributes returns every attribute of the target
+	// group; only ModifyTargetGroupAttributes changes them.
+	"AWS::ElasticLoadBalancingV2::TargetGroup": {"/properties/TargetGroupAttributes"},
+	// DescribeLoadBalancerAttributes returns every attribute of the load
+	// balancer; only ModifyLoadBalancerAttributes changes them.
+	"AWS::ElasticLoadBalancingV2::LoadBalancer": {"/properties/LoadBalancerAttributes"},
+	// DescribeListenerAttributes returns every attribute of the listener;
+	// only ModifyListenerAttributes changes them.
+	"AWS::ElasticLoadBalancingV2::Listener": {"/properties/ListenerAttributes"},
 }
 
 // covers reports whether current carries everything desired sets, applying
@@ -146,8 +163,8 @@ type listRules struct {
 // those unordered names, the pointers of arrays the schema declares
 // insertionOrder false: their elements match in any order, each desired
 // element covered by a different current one, since the service may
-// return them in another order than they were written. Attribute lists,
-// the rules' subset pointers, match likewise but current may be longer.
+// return them in another order than they were written. The rules' subset
+// arrays match likewise but current may be longer.
 // pointer is the
 // value's own, with "*" for an array's elements, as
 // cfschema.Facts.Unordered writes them.

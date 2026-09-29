@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"os"
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
@@ -9,19 +8,11 @@ import (
 )
 
 // A target group reads back every attribute, defaults included, so a manifest
-// setting one planned an update on every run. Facts come from the real schema.
+// setting one planned an update on every run.
 func TestDiffTargetGroupAttributesAreASubset(t *testing.T) {
-	raw, err := os.ReadFile("cfschema/testdata/AWS--ElasticLoadBalancingV2--TargetGroup.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	doc, err := cfschema.Parse(raw)
-	if err != nil {
-		t.Fatal(err)
-	}
 	r := &resourceType{
 		provider: Provider, typeName: "AWS::ElasticLoadBalancingV2::TargetGroup", lookup: resource.LookupByName,
-		client: &fakeClient{}, schema: cfschema.Derive(doc), schemaLoaded: true,
+		client: &fakeClient{}, schema: cfschema.Facts{HasUpdate: true}, schemaLoaded: true,
 	}
 
 	attr := func(k, v string) map[string]any { return map[string]any{"Key": k, "Value": v} }
@@ -81,5 +72,24 @@ func TestCoversAttributeListSubset(t *testing.T) {
 				t.Fatalf("covers = %v, want %v", got, c.want)
 			}
 		})
+	}
+}
+
+// An AttributeList in the schema is not enough: an RDS option group returns
+// only the options added, so dropping one from the manifest must still plan
+// an update.
+func TestDiffAttributeListOutsideTheTableKeepsItsLength(t *testing.T) {
+	r := &resourceType{
+		provider: Provider, typeName: "AWS::RDS::OptionGroup", lookup: resource.LookupByName,
+		client: &fakeClient{}, schema: cfschema.Facts{HasUpdate: true}, schemaLoaded: true,
+	}
+	opt := func(n string) map[string]any { return map[string]any{"OptionName": n} }
+	got, err := r.Diff(specWith(map[string]any{"OptionConfigurations": []any{opt("A")}}),
+		stateWith(map[string]any{"OptionConfigurations": []any{opt("A"), opt("B")}}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != resource.Mutable {
+		t.Fatalf("dropping an option planned %v, want mutable", got)
 	}
 }

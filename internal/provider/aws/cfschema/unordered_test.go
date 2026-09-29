@@ -44,12 +44,3 @@ func TestUnordered(t *testing.T) {
 		t.Fatalf("Unordered = %v\nwant        %v", got, want)
 	}
 }
-
-func TestAttributeLists(t *testing.T) {
-	if got, want := Derive(load(t, "AWS::ElasticLoadBalancingV2::TargetGroup")).AttributeLists, []string{"/properties/TargetGroupAttributes"}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("AttributeLists = %v, want %v", got, want)
-	}
-	if got := Derive(load(t, "AWS::DynamoDB::Table")).AttributeLists; got != nil {
-		t.Fatalf("a type with no attribute list has AttributeLists %v", got)
-	}
-}
