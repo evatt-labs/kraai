@@ -64,7 +64,7 @@ func init() {
 			},
 			AbsentIDs:         []string{"rtb-0a1b2c3d4e5f60718"},
 			LifecycleComplete: true,
-			Create:            &MutationCall{Operation: "CreateRouteTable", Target: "AmazonEC2.CreateRouteTable", Input: map[string]any{"TagSpecifications": []any{map[string]any{"ResourceType": "route-table", "Tags": "{Tags:wire}"}}, "VpcId": "{VpcId}"}, Properties: []string{"Tags", "VpcId"}, Identifier: map[string]string{"RouteTableId": "routeTable.routeTableId"}, Form: map[string]FormStep{"TagSpecifications": {Key: "TagSpecification", Kind: "list"}, "TagSpecifications[]": {Key: "", Kind: "structure"}, "TagSpecifications[].ResourceType": {Key: "ResourceType", Kind: "scalar"}, "TagSpecifications[].Tags": {Key: "Tag", Kind: "list"}, "TagSpecifications[].Tags[]": {Key: "", Kind: "structure"}, "TagSpecifications[].Tags[].Key": {Key: "Key", Kind: "scalar"}, "TagSpecifications[].Tags[].Value": {Key: "Value", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
+			Create:            &MutationCall{Operation: "CreateRouteTable", Target: "AmazonEC2.CreateRouteTable", TokenMember: "ClientToken", Input: map[string]any{"TagSpecifications": []any{map[string]any{"ResourceType": "route-table", "Tags": "{Tags:wire}"}}, "VpcId": "{VpcId}"}, Properties: []string{"Tags", "VpcId"}, Identifier: map[string]string{"RouteTableId": "routeTable.routeTableId"}, Form: map[string]FormStep{"ClientToken": {Key: "ClientToken", Kind: "scalar"}, "TagSpecifications": {Key: "TagSpecification", Kind: "list"}, "TagSpecifications[]": {Key: "", Kind: "structure"}, "TagSpecifications[].ResourceType": {Key: "ResourceType", Kind: "scalar"}, "TagSpecifications[].Tags": {Key: "Tag", Kind: "list"}, "TagSpecifications[].Tags[]": {Key: "", Kind: "structure"}, "TagSpecifications[].Tags[].Key": {Key: "Key", Kind: "scalar"}, "TagSpecifications[].Tags[].Value": {Key: "Value", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
 			Delete:            &MutationCall{Operation: "DeleteRouteTable", Target: "AmazonEC2.DeleteRouteTable", Input: map[string]any{"RouteTableId": "{RouteTableId}"}, AbsentErrors: []string{"InvalidRouteTableID.NotFound"}, Form: map[string]FormStep{"RouteTableId": {Key: "RouteTableId", Kind: "scalar"}}},
 			Update: []MutationCall{
 				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "CreateTags", Target: "AmazonEC2.CreateTags", TagProperty: "Tags", Input: map[string]any{"Resources": []any{"{RouteTableId}"}, "Tags": "{added:wire}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "DeleteTags", Target: "AmazonEC2.DeleteTags", Input: map[string]any{"Resources": []any{"{RouteTableId}"}, "Tags": "{removed:keys}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}},
@@ -241,6 +241,9 @@ func init() {
 			Absent: []Condition{
 				{Field: Field{Property: "Associations[RouteTableAssociationId={Id}].Main", Member: "Main", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}}, XMLName: "main", Scalar: "boolean"}, Values: []string{"true"}},
 			},
+			Busy: []Condition{
+				{Field: Field{Property: "Associations[RouteTableAssociationId={Id}].AssociationState.State", Member: "State", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}, {Name: "associationState"}}, XMLName: "state", Scalar: "string"}, Values: []string{"associating"}},
+			},
 			PageToken: []string{"nextToken"},
 			Response:  []Step{{Name: "routeTableSet", List: true, Item: "item"}},
 			Fields: []Field{
@@ -265,6 +268,9 @@ func init() {
 			Version:     "2016-11-15",
 			Identifier: []Binding{
 				{Property: "VpcId", Member: "VpcIds", Location: "form", Name: "VpcId.1", List: true},
+			},
+			Busy: []Condition{
+				{Field: Field{Property: "State", Member: "State", Kind: "scalar", XMLName: "state", Scalar: "string"}, Values: []string{"pending"}},
 			},
 			AbsentErrors: []string{"InvalidVpcID.NotFound"},
 			PageToken:    []string{"nextToken"},

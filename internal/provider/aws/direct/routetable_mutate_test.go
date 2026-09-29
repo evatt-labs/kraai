@@ -249,11 +249,10 @@ func TestUpdateRefusesAnAssociationChange(t *testing.T) {
 	}
 }
 
-// EC2 answers in XML, and the compiler refuses a busy condition under any
-// XML protocol; the association's AssociationState settling is therefore
-// not modeled as Read.Busy, and any attempt to add it fails to compile
-// rather than silently doing nothing.
-func TestCompileRefusesBusyOnTheAssociation(t *testing.T) {
+// The association's AssociationState settling is a busy condition under
+// ec2Query, checked against the model's enum: a value the state does not
+// have fails to compile.
+func TestCompileChecksBusyOnTheAssociation(t *testing.T) {
 	lock, err := LoadLock()
 	if err != nil {
 		t.Fatal(err)
@@ -272,8 +271,13 @@ func TestCompileRefusesBusyOnTheAssociation(t *testing.T) {
 	if !found {
 		t.Fatalf("%s has no override", subnetRouteTableAssociation)
 	}
-	o.Read.Busy = map[string][]string{"Associations[RouteTableAssociationId={Id}].AssociationState.State": {"associating", "disassociating"}}
-	if _, errs := compileOne(files, lock, o); !containsErr(errs, "busy is not supported under ec2Query") {
-		t.Fatalf("errors = %v, want one refusing busy under ec2Query", errs)
+	path := "Associations[RouteTableAssociationId={Id}].AssociationState.State"
+	o.Read.Busy = map[string][]string{path: {"associating", "disassociating"}}
+	if r, errs := compileOne(files, lock, o); len(errs) > 0 || len(r.Busy) != 1 {
+		t.Fatalf("compile = %d busy conditions, %v", len(r.Busy), errs)
+	}
+	o.Read.Busy = map[string][]string{path: {"settling"}}
+	if _, errs := compileOne(files, lock, o); !containsErr(errs, "not one of") {
+		t.Fatalf("errors = %v, want one refusing a value the enum lacks", errs)
 	}
 }

@@ -28,8 +28,11 @@ type fakeVPC struct {
 	cidr, tenancy            string
 	dnsSupport, dnsHostnames bool
 	encryptionMode           string
-	tags                     map[string]string
-	calls                    map[string][]url.Values
+	// pending is how many reads still answer the pending state, and
+	// createPending how many a create starts it with.
+	pending, createPending int
+	tags                   map[string]string
+	calls                  map[string][]url.Values
 }
 
 func (f *fakeVPC) serve(t *testing.T) *Client {
@@ -63,6 +66,7 @@ func (f *fakeVPC) serve(t *testing.T) *Client {
 		switch key {
 		case "CreateVpc":
 			f.id, f.gone, f.tags = "vpc-0123", false, map[string]string{}
+			f.pending = f.createPending
 			f.cidr = form.Get("CidrBlock")
 			if v := form.Get("InstanceTenancy"); v != "" {
 				f.tenancy = v
@@ -109,7 +113,12 @@ func (f *fakeVPC) serve(t *testing.T) *Client {
 			if f.encryptionMode != "" {
 				encryption = `<encryptionControl><mode>` + f.encryptionMode + `</mode></encryptionControl>`
 			}
-			_, _ = io.WriteString(w, `<DescribeVpcsResponse><vpcSet><item><vpcId>`+f.id+`</vpcId><cidrBlock>`+f.cidr+`</cidrBlock><instanceTenancy>`+f.tenancy+`</instanceTenancy>`+encryption+tagXML()+`</item></vpcSet></DescribeVpcsResponse>`)
+			state := ""
+			if f.pending > 0 {
+				f.pending--
+				state = `<state>pending</state>`
+			}
+			_, _ = io.WriteString(w, `<DescribeVpcsResponse><vpcSet><item><vpcId>`+f.id+`</vpcId>`+state+`<cidrBlock>`+f.cidr+`</cidrBlock><instanceTenancy>`+f.tenancy+`</instanceTenancy>`+encryption+tagXML()+`</item></vpcSet></DescribeVpcsResponse>`)
 		case "DescribeNetworkAcls":
 			_, _ = io.WriteString(w, `<DescribeNetworkAclsResponse><networkAclSet><item><networkAclId>acl-1</networkAclId></item></networkAclSet></DescribeNetworkAclsResponse>`)
 		case "DescribeSecurityGroups":

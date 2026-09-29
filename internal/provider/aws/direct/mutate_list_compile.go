@@ -17,11 +17,19 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 		return nil
 	}
 	elem := schema.resolve(p)
-	if elem.Items == nil {
-		fail("%s lists %s, which is not a list", at, l.Property)
+	var members map[string]cfnProperty
+	switch {
+	case elem.Items != nil:
+		members = schema.resolve(*elem.Items).Properties
+	case isMap(elem):
+		members = map[string]cfnProperty{"Key": {}, "Value": {}}
+	default:
+		fail("%s lists %s, which is not a list or a map", at, l.Property)
 		return nil
 	}
-	members := schema.resolve(*elem.Items).Properties
+	if l.Chunk < 0 {
+		fail("%s chunks %s by %d; it must be positive", at, l.Property, l.Chunk)
+	}
 	if (len(l.Key) == 0) == (len(l.Match) == 0) {
 		fail("%s lists %s with neither or both of a key and a match; it takes one", at, l.Property)
 	}
@@ -53,7 +61,7 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 		return nil
 	}
 	add.TagProperty = l.Property
-	route := &MutationCall{ListProperty: l.Property, Key: slices.Clone(l.Key), Match: slices.Clone(l.Match), Element: l.Element, Add: add}
+	route := &MutationCall{ListProperty: l.Property, Key: slices.Clone(l.Key), Match: slices.Clone(l.Match), Element: l.Element, Chunk: l.Chunk, Add: add}
 	for _, c := range []struct {
 		m    *Mutation
 		name string

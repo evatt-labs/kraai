@@ -252,7 +252,7 @@ func TestCompileRefusesABadListRoute(t *testing.T) {
 	}{
 		"a key the elements lack":             {withList(func(l *ListRoute) { l.Key = []string{"Nope"} }), "keys Targets by Nope"},
 		"removed keys under a two-member key": {withList(func(l *ListRoute) { l.Key = []string{"Id", "Arn"} }), "names {removedKeys}"},
-		"a property that is not a list":       {withList(func(l *ListRoute) { l.Property = "Description" }), "lists Description, which is not a list"},
+		"a property that is not a list":       {withList(func(l *ListRoute) { l.Property = "Description" }), "lists Description, which is not a list or a map"},
 		"clearing an unrouted property": {func(o *Override) {
 			d := *o.Delete
 			d.Clear = []string{"Tags"}

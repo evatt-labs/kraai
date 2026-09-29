@@ -24,6 +24,7 @@ type MutationCall struct {
 	// Match, Element and Change are a list route's ListRoute fields.
 	Match   []string
 	Element map[string]any
+	Chunk   int
 	Change  *MutationCall
 	// FailedCount and Clear are Mutation.FailedCount and Mutation.Clear.
 	FailedCount string
@@ -36,6 +37,11 @@ type MutationCall struct {
 	// read empty is unset, and left out.
 	Together bool
 	Required []string
+	// TokenMember is the input member the model marks as an idempotency
+	// token, which the client fills once per call. Idempotent is
+	// Create.Idempotent.
+	TokenMember string
+	Idempotent  bool
 	// Identifier maps, for a create, each primary identifier property to
 	// the output member carrying it, a dotted path into nested structures.
 	Identifier map[string]string
@@ -142,7 +148,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		var required []string
 		for _, name := range sortedKeys(input.Members) {
 			if input.Members[name].Traits["smithy.api#required"] != nil {
-				if _, bound := m.Input[name]; !bound {
+				if _, bound := m.Input[name]; !bound && !isIdempotencyToken(input.Members[name]) {
 					fail("%s operation %s requires %s, which the input does not set", at, m.Operation, name)
 				}
 				for _, ref := range templateRefs(m.Input[name]) {
@@ -164,8 +170,13 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		if len(m.Clear) > 0 && at != "delete" {
 			fail("%s clears %v, but only a delete clears", at, m.Clear)
 		}
+		if found := idempotencyTokenMembers(input, m.Input); len(found) > 1 {
+			fail("%s operation %s has several idempotency token members %v, which the client cannot fill", at, m.Operation, found)
+		} else if len(found) == 1 {
+			c.TokenMember = found[0]
+		}
 		if isQuery(r.Protocol) {
-			c.Form = formTable(&model, r.Protocol, input, sortedKeys(m.Input), func(format string, args ...any) {
+			c.Form = formTable(&model, r.Protocol, input, tokenFormMembers(sortedKeys(m.Input), c.TokenMember), func(format string, args ...any) {
 				fail("%s "+format, append([]any{at}, args...)...)
 			})
 		}
@@ -215,6 +226,12 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 					fail("create names %s at most %d long; a name cut shorter than 16 is mostly hash", n.Property, n.MaxLength)
 				}
 				c.NameProperty, c.NameTag, c.NameMaxLength = n.Property, n.Tag, n.MaxLength
+			}
+			if o.Create.Idempotent {
+				if o.Create.Name == nil && !sent {
+					fail("create is idempotent, but neither names %s from a tag nor sends its identifier", o.Type)
+				}
+				c.Idempotent = true
 			}
 			r.Create = c
 		}

@@ -241,6 +241,13 @@ type Create struct {
 	// of a tag the desired state carries, so a create that is retried names
 	// the instance it made rather than a second one.
 	Name *NameFrom `yaml:"name,omitempty"`
+	// Idempotent says a repeat of the create with the same name makes no
+	// second instance and is not refused: the service answers as for the
+	// first, or replaces the instance with the same input. Set it only from
+	// the service's documentation; a create refused as already existing, or
+	// making a new revision, is not idempotent. The create then takes the
+	// retries a read does.
+	Idempotent bool `yaml:"idempotent,omitempty"`
 }
 
 // NameFrom is a name property filled from a tag's value. A value longer
@@ -284,14 +291,21 @@ type UpdateCall struct {
 // added again. Element reshapes each element into what the calls send,
 // its placeholders naming the element's members; a structure in it that
 // names Match members is sent only when one of them is set.
+//
+// A property the schema types as a free-form object is a map, routed as a
+// list of {Key, Value} elements.
 type ListRoute struct {
 	Property string         `yaml:"property"`
 	Key      []string       `yaml:"key,omitempty"`
 	Match    []string       `yaml:"match,omitempty"`
 	Element  map[string]any `yaml:"element,omitempty"`
-	Add      Mutation       `yaml:"add"`
-	Remove   *Mutation      `yaml:"remove,omitempty"`
-	Change   *Mutation      `yaml:"change,omitempty"`
+	// Chunk, when set, sends each of the route's calls for at most that
+	// many elements at a time, one call per chunk, for a service that caps
+	// a call's list.
+	Chunk  int       `yaml:"chunk,omitempty"`
+	Add    Mutation  `yaml:"add"`
+	Remove *Mutation `yaml:"remove,omitempty"`
+	Change *Mutation `yaml:"change,omitempty"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

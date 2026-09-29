@@ -12,6 +12,10 @@ read:
   # reads it as absent.
   absent:
     Associations[RouteTableAssociationId={Id}].Main: ["true"]
+  # A new association answers associating until it is in effect. Only a
+  # delete leaves it disassociating, and that waits for absence instead.
+  busy:
+    Associations[RouteTableAssociationId={Id}].AssociationState.State: [associating]
 properties:
   Id: Associations[RouteTableAssociationId={Id}].RouteTableAssociationId
   RouteTableId: RouteTableId

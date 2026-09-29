@@ -2,7 +2,7 @@
   "types": [
     {
       "type": "AWS::CloudWatch::Alarm",
-      "date": "2026-09-27",
+      "date": "2026-09-29",
       "outcome": "parity",
       "updated": [
         "ActionsEnabled",
@@ -18,7 +18,7 @@
         "TreatMissingData",
         "Unit"
       ],
-      "override": "faf9273e307fc9e772ff1dc6ebbb548de18889fb3de9260ed7b396bca7705f0d"
+      "override": "833223e45f893a3843fd1b936ba8ea744a2b505181eb14d0027bf5b20bf37ea7"
     },
     {
       "type": "AWS::EC2::InternetGateway",
@@ -31,7 +31,7 @@
     },
     {
       "type": "AWS::EC2::RouteTable",
-      "date": "2026-09-27",
+      "date": "2026-09-29",
       "outcome": "parity",
       "updated": [
         "Tags"
@@ -51,20 +51,20 @@
     },
     {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
-      "date": "2026-09-27",
+      "date": "2026-09-29",
       "outcome": "parity",
-      "override": "56a3edd1cc4f0c29814ce14f7055c526ef200be4e718e3311ff6e542e66ce0cb"
+      "override": "17ed2a37cd47818f1afeac91609a9944eb862cc7c2ffc8761b9c0168373d59b7"
     },
     {
       "type": "AWS::EC2::VPC",
-      "date": "2026-09-27",
+      "date": "2026-09-29",
       "outcome": "parity",
       "updated": [
         "EnableDnsHostnames",
         "EnableDnsSupport",
         "Tags"
       ],
-      "override": "d05ad033f8f885db54504e84d346fa01a81f2404344605b9e7a005b10bebcc41"
+      "override": "a96171f0c7ce9d52b4142e2a948fa565df0efb6c09c55bc0b2ef5e0eb42ee71c"
     },
     {
       "type": "AWS::ECS::Cluster",
@@ -101,7 +101,7 @@
     },
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "date": "2026-09-28",
+      "date": "2026-09-29",
       "outcome": "parity",
       "updated": [
         "HealthCheckIntervalSeconds",
@@ -110,11 +110,11 @@
         "TargetGroupAttributes",
         "Targets"
       ],
-      "override": "758fdbde0b390d4c631428a0411606b1b5050372011a3de79932d67cfb95aeb5"
+      "override": "227b3672474b9b3b24852d04b2a51f15a96499460d01719204ccbb144b0b9ce3"
     },
     {
       "type": "AWS::Events::Rule",
-      "date": "2026-09-27",
+      "date": "2026-09-29",
       "outcome": "parity",
       "updated": [
         "Description",
@@ -123,7 +123,7 @@
         "Tags",
         "Targets"
       ],
-      "override": "264795ad8436c3812f76702e816c818e5f3753f278b08b92e6ea7fe9c0138b2a"
+      "override": "1bcdc157cddae219b98b88216317d77d2f573a148b91cca3b37d9c9dcf7871e3"
     },
     {
       "type": "AWS::Logs::LogGroup",
@@ -142,6 +142,12 @@
       "override": "da24fc3739aa297da750bffc9d88a647319764993b0196e8fa42e8cbe2afd41f"
     },
     {
+      "type": "AWS::RDS::DBClusterParameterGroup",
+      "date": "2026-09-29",
+      "outcome": "differs",
+      "override": "e88f5f7f09b153e4e145b39a19c68912d911304d39e134916fb52e420df9b211"
+    },
+    {
       "type": "AWS::RDS::DBSubnetGroup",
       "date": "2026-09-27",
       "outcome": "parity",
@@ -154,7 +160,7 @@
     },
     {
       "type": "AWS::SQS::Queue",
-      "date": "2026-09-27",
+      "date": "2026-09-29",
       "outcome": "parity",
       "updated": [
         "DelaySeconds",
@@ -166,7 +172,7 @@
         "Tags",
         "VisibilityTimeout"
       ],
-      "override": "1bb077f67919c05f72278a3d5997da0090e34ae1ab62b94397aec250d1bc013a"
+      "override": "de4d6d10211d0ef46af202f79babd5cac230202a76d84790a1e90dedbe9a9407"
     }
   ]
 }

@@ -194,10 +194,6 @@ func (c *callCompiler) fields() {
 // and those under which it is busy settling a change.
 func (c *callCompiler) absent() {
 	c.r.Absent = c.conditions("absent", c.o.Read.Absent)
-	if len(c.o.Read.Busy) > 0 && isXML(c.r.Protocol) {
-		c.fail("busy is not supported under %s yet", c.r.Protocol)
-		return
-	}
 	c.r.Busy = c.conditions("busy", c.o.Read.Busy)
 }
 

@@ -33,9 +33,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		}
 		values[p] = shortName(name, r.Create.NameMaxLength)
 	}
-	// A create whose response was lost may have made the instance, so only
-	// a throttle, which the service answered without acting on, is retried.
-	out, err := c.mutateWith(ctx, retryThrottled, r, *r.Create, values)
+	out, err := c.mutateWith(ctx, createPolicy(*r.Create), r, *r.Create, values)
 	if err != nil {
 		return "", err
 	}
@@ -301,6 +299,13 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
 		}
 		bindings = append(bindings, pairs...)
+	}
+	if m.TokenMember != "" {
+		token, err := tokenBindings(r.Protocol, m)
+		if err != nil {
+			return nil, fmt.Errorf("the %s call %s: filling its idempotency token: %w", r.Type, m.Operation, err)
+		}
+		bindings = append(bindings, token...)
 	}
 	// Many mutations answer with no body at all.
 	body, err := c.sendRetrying(ctx, policy, call, "", "", m.Target, bindings)

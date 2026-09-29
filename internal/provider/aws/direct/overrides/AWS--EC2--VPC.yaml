@@ -7,6 +7,9 @@ read:
     VpcId: VpcIds
   # DescribeVpcs filters by a list of ids and answers with a list.
   response: Vpcs[]
+  # A new VPC answers pending until it is usable.
+  busy:
+    State: [pending]
 properties:
   CidrBlock: CidrBlock
   CidrBlockAssociations:

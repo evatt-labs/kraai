@@ -184,9 +184,7 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		if err != nil {
 			return nil, nil, false, r.absence(err)
 		}
-		// The compiler refuses busy conditions under an XML protocol.
-		props, captured, err := r.readXML(body, &walk{vars: identifier})
-		return props, captured, false, err
+		return r.readXML(body, &walk{vars: identifier})
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {

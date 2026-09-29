@@ -395,13 +395,16 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	b.WriteString("MutationCall{")
 	for _, f := range []struct{ name, value string }{{"Operation", m.Operation}, {"Target", m.Target},
 		{"NameProperty", m.NameProperty}, {"NameTag", m.NameTag}, {"TagProperty", m.TagProperty},
-		{"ListProperty", m.ListProperty}, {"FailedCount", m.FailedCount}} {
+		{"ListProperty", m.ListProperty}, {"FailedCount", m.FailedCount}, {"TokenMember", m.TokenMember}} {
 		if f.value != "" {
 			fmt.Fprintf(b, "%s: %q, ", f.name, f.value)
 		}
 	}
 	if m.NameMaxLength != 0 {
 		fmt.Fprintf(b, "NameMaxLength: %d, ", m.NameMaxLength)
+	}
+	if m.Chunk != 0 {
+		fmt.Fprintf(b, "Chunk: %d, ", m.Chunk)
 	}
 	if m.Input != nil {
 		b.WriteString("Input: ")
@@ -441,6 +444,9 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	}
 	if m.Together {
 		b.WriteString("Together: true, ")
+	}
+	if m.Idempotent {
+		b.WriteString("Idempotent: true, ")
 	}
 	if m.Required != nil {
 		fmt.Fprintf(b, "Required: %#v, ", m.Required)
