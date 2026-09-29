@@ -46,6 +46,7 @@ func xmlServer(t *testing.T, status int, body string) (*Client, *[]url.Values) {
 		Region:      "us-east-1",
 		Endpoint:    func(string) string { return srv.URL },
 		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
+		RetryDelay:  time.Millisecond,
 	}, &forms
 }
 
@@ -88,7 +89,7 @@ func xmlServerBy(t *testing.T, byAction map[string]string) (*Client, *[]url.Valu
 	t.Cleanup(srv.Close)
 	return &Client{
 		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, RetryDelay: time.Millisecond,
 	}, &forms
 }
 
@@ -211,7 +212,7 @@ func TestReadAWSQuery(t *testing.T) {
 	t.Cleanup(srv.Close)
 	client := &Client{
 		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, RetryDelay: time.Millisecond,
 	}
 	got, err := client.Read(context.Background(), targetGroups, map[string]string{"TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc"})
 	if err != nil {
@@ -461,7 +462,7 @@ func TestReadRestXMLError(t *testing.T) {
 	t.Cleanup(srv.Close)
 	client := &Client{
 		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
+		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, RetryDelay: time.Millisecond,
 	}
 	_, err := client.Read(context.Background(), cachePolicies, map[string]string{"Id": "x"})
 	var apiErr *APIError

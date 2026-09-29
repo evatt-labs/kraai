@@ -29,6 +29,9 @@ type Client struct {
 	// Wait bounds how long a mutation waits for a read to show it, and Poll
 	// is how often it reads meanwhile; zero is two minutes and two seconds.
 	Wait, Poll time.Duration
+	// RetryDelay, when set, replaces the backoff between attempts of a
+	// request that failed transiently.
+	RetryDelay time.Duration
 }
 
 // APIError is a service's refusal of a read.
