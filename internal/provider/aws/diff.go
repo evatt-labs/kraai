@@ -133,8 +133,9 @@ var returnedSorted = map[string][]string{
 type listRules struct {
 	// unordered arrays match in any order.
 	unordered map[string]bool
-	// subset arrays are those in returnedWithDefaults: each desired element need only be covered by a different
-	// current one, and elements only current has are the vendor's.
+	// subset arrays, those in returnedWithDefaults, need each desired
+	// element covered by a different current one; elements only current
+	// has are the vendor's.
 	subset map[string]bool
 }
 
@@ -145,15 +146,10 @@ type listRules struct {
 // array the schema marks arrayType AttributeList qualifies: an RDS option
 // group returns only the options added, and removing one is a real call.
 var returnedWithDefaults = map[string][]string{
-	// DescribeTargetGroupAttributes returns every attribute of the target
-	// group; only ModifyTargetGroupAttributes changes them.
+	// DescribeTargetGroupAttributes returns every attribute, defaults
+	// included (14 read on one group); only ModifyTargetGroupAttributes
+	// changes them.
 	"AWS::ElasticLoadBalancingV2::TargetGroup": {"/properties/TargetGroupAttributes"},
-	// DescribeLoadBalancerAttributes returns every attribute of the load
-	// balancer; only ModifyLoadBalancerAttributes changes them.
-	"AWS::ElasticLoadBalancingV2::LoadBalancer": {"/properties/LoadBalancerAttributes"},
-	// DescribeListenerAttributes returns every attribute of the listener;
-	// only ModifyListenerAttributes changes them.
-	"AWS::ElasticLoadBalancingV2::Listener": {"/properties/ListenerAttributes"},
 }
 
 // covers reports whether current carries everything desired sets, applying
