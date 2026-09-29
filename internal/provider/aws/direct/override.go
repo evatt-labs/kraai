@@ -291,14 +291,21 @@ type UpdateCall struct {
 // added again. Element reshapes each element into what the calls send,
 // its placeholders naming the element's members; a structure in it that
 // names Match members is sent only when one of them is set.
+//
+// A property the schema types as a free-form object is a map, routed as a
+// list of {Key, Value} elements.
 type ListRoute struct {
 	Property string         `yaml:"property"`
 	Key      []string       `yaml:"key,omitempty"`
 	Match    []string       `yaml:"match,omitempty"`
 	Element  map[string]any `yaml:"element,omitempty"`
-	Add      Mutation       `yaml:"add"`
-	Remove   *Mutation      `yaml:"remove,omitempty"`
-	Change   *Mutation      `yaml:"change,omitempty"`
+	// Chunk, when set, sends each of the route's calls for at most that
+	// many elements at a time, one call per chunk, for a service that caps
+	// a call's list.
+	Chunk  int       `yaml:"chunk,omitempty"`
+	Add    Mutation  `yaml:"add"`
+	Remove *Mutation `yaml:"remove,omitempty"`
+	Change *Mutation `yaml:"change,omitempty"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

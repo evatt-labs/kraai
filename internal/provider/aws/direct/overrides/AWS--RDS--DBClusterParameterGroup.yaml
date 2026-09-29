@@ -36,5 +36,69 @@ also:
         properties:
           Key: Key
           Value: Value
+create:
+  operation: CreateDBClusterParameterGroup
+  name:
+    property: DBClusterParameterGroupName
+    tag: kraai:resource-name
+  # The create takes no parameters; they are set by the update call once the
+  # group reads.
+  input:
+    DBClusterParameterGroupName: "{DBClusterParameterGroupName}"
+    DBParameterGroupFamily: "{Family}"
+    Description: "{Description}"
+    Tags: "{Tags}"
+  # The service lowercases the name it stores; the output carries what it
+  # actually made.
+  identifier:
+    DBClusterParameterGroupName: DBClusterParameterGroup.DBClusterParameterGroupName
+update:
+  # The parameters are a map of name to value, routed as {Key, Value}
+  # elements. pending-reboot is valid for dynamic and static parameters
+  # alike; immediate only for dynamic ones. Both calls take at most 20
+  # parameters, which the model does not state.
+  - list:
+      property: Parameters
+      key: [Key]
+      chunk: 20
+      element:
+        ParameterName: "{Key}"
+        ParameterValue: "{Value:string}"
+        ApplyMethod: pending-reboot
+      add:
+        operation: ModifyDBClusterParameterGroup
+        input:
+          DBClusterParameterGroupName: "{DBClusterParameterGroupName}"
+          Parameters: "{added}"
+      remove:
+        operation: ResetDBClusterParameterGroup
+        input:
+          DBClusterParameterGroupName: "{DBClusterParameterGroupName}"
+          Parameters: "{removed}"
+  - tags:
+      property: Tags
+      add:
+        operation: AddTagsToResource
+        input:
+          ResourceName: "{Arn}"
+          Tags: "{added}"
+      remove:
+        operation: RemoveTagsFromResource
+        input:
+          ResourceName: "{Arn}"
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteDBClusterParameterGroup
+  input:
+    DBClusterParameterGroupName: "{DBClusterParameterGroupName}"
+  absentErrors: [DBParameterGroupNotFound]
+lifecycle:
+  create:
+    Description: kraai lifecycle probe
+    Family: aurora-postgresql16
+    Parameters: {timezone: UTC, log_statement: ddl, log_min_duration_statement: "5000"}
+  update:
+    Parameters: {timezone: US/Pacific, log_statement: ddl, statement_timeout: "60000"}
+    Tags: [{Key: team, Value: kraai}]
 absentIds:
   - kraai-absent-probe

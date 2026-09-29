@@ -77,6 +77,7 @@ func keysOf(key []string, list any) []string {
 func (c *Client) applyList(ctx context.Context, r Reader, u MutationCall, address map[string]any, current, desired any) error {
 	var added, removed, changed []any
 	var err error
+	current, desired = entriesOf(current), entriesOf(desired)
 	if len(u.Match) > 0 {
 		var pairs [][2]any
 		added, removed, pairs, err = matchChanges(u.Match, current, desired)
@@ -102,11 +103,7 @@ func (c *Client) applyList(ctx context.Context, r Reader, u MutationCall, addres
 		if step.call == nil || len(step.elems) == 0 {
 			continue
 		}
-		values, err := listValues(u, address, step.name, step.elems)
-		if err != nil {
-			return fmt.Errorf("%s's %s: %w", r.Type, u.ListProperty, err)
-		}
-		if _, err := c.mutate(ctx, r, *step.call, values); err != nil {
+		if err := c.sendElements(ctx, r, u, *step.call, address, step.name, step.elems); err != nil {
 			return err
 		}
 	}
@@ -141,13 +138,14 @@ func listsMatch(r Reader, changes, props map[string]any) bool {
 		if u.ListProperty == "" || u.Remove == nil || !changed {
 			continue
 		}
+		desired, have := entriesOf(desired), entriesOf(props[u.ListProperty])
 		if len(u.Match) > 0 {
-			if !matchedExactly(u.Match, props[u.ListProperty], desired) {
+			if !matchedExactly(u.Match, have, desired) {
 				return false
 			}
 			continue
 		}
-		if !slices.Equal(keysOf(u.Key, desired), keysOf(u.Key, props[u.ListProperty])) {
+		if !slices.Equal(keysOf(u.Key, desired), keysOf(u.Key, have)) {
 			return false
 		}
 	}
@@ -167,12 +165,8 @@ func (c *Client) clearLists(ctx context.Context, r Reader, identifier string, ad
 			return fmt.Errorf("%s clears %s, which has no list route that removes", r.Type, property)
 		}
 		u := r.Update[i]
-		if elems := asList(current[property]); len(elems) > 0 {
-			values, err := listValues(u, address, "removed", elems)
-			if err != nil {
-				return err
-			}
-			if _, err := c.mutate(ctx, r, *u.Remove, values); err != nil {
+		if elems := asList(entriesOf(current[property])); len(elems) > 0 {
+			if err := c.sendElements(ctx, r, u, *u.Remove, address, "removed", elems); err != nil {
 				return err
 			}
 		}

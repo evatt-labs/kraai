@@ -400,6 +400,9 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	if m.NameMaxLength != 0 {
 		fmt.Fprintf(b, "NameMaxLength: %d, ", m.NameMaxLength)
 	}
+	if m.Chunk != 0 {
+		fmt.Fprintf(b, "Chunk: %d, ", m.Chunk)
+	}
 	if m.Input != nil {
 		b.WriteString("Input: ")
 		literal(b, map[string]any(m.Input))
