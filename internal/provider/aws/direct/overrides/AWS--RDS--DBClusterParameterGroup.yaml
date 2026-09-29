@@ -92,13 +92,15 @@ delete:
   input:
     DBClusterParameterGroupName: "{DBClusterParameterGroupName}"
   absentErrors: [DBParameterGroupNotFound]
+# Cluster-level parameters of the family, all dynamic: the update changes
+# one, keeps one, resets one and adds one.
 lifecycle:
   create:
     Description: kraai lifecycle probe
     Family: aurora-postgresql16
-    Parameters: {timezone: UTC, log_statement: ddl, log_min_duration_statement: "5000"}
+    Parameters: {timezone: UTC, rds.force_ssl: "1", log_autovacuum_min_duration: "5000"}
   update:
-    Parameters: {timezone: US/Pacific, log_statement: ddl, statement_timeout: "60000"}
+    Parameters: {timezone: US/Pacific, rds.force_ssl: "1", client_encoding: UTF8}
     Tags: [{Key: team, Value: kraai}]
 absentIds:
   - kraai-absent-probe
