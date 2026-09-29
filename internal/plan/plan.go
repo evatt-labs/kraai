@@ -19,7 +19,8 @@ const (
 	// on a field the registered type cannot reconcile with Update.
 	ActionReplace
 	// ActionFailed means Get itself failed: no outcome could be decided for
-	// this resource. See Action.Err.
+	// this resource, or a resource it explicitly references failed and so
+	// nothing can be said about it. See Action.Err.
 	ActionFailed
 	// ActionUpdate means the resource exists and its desired spec differs
 	// only in properties the registered type can change in place. Appended
