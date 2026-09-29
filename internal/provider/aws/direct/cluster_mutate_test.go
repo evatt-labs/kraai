@@ -247,9 +247,9 @@ func TestCompileRefusesABadClusterMutation(t *testing.T) {
 		"busy on a member the resource lacks": {clusterType, func(o *Override) {
 			o.Read.Busy = map[string][]string{"nope": {"X"}}
 		}, "busy names nope"},
-		"busy under an XML protocol": {"AWS::ElastiCache::SubnetGroup", func(o *Override) {
-			o.Read.Busy = map[string][]string{"CacheSubnetGroupName": {"X"}}
-		}, "busy is not supported under awsQuery"},
+		"busy on a member an XML resource lacks": {"AWS::ElastiCache::SubnetGroup", func(o *Override) {
+			o.Read.Busy = map[string][]string{"nope": {"X"}}
+		}, "busy names nope"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {

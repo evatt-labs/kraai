@@ -227,7 +227,6 @@ func init() {
 			Protocol:    "ec2Query",
 			SigningName: "ec2",
 			Complete:    true,
-			Production:  true,
 			Host:        "ec2.{region}.amazonaws.com",
 			Action:      "DescribeRouteTables",
 			Version:     "2016-11-15",
@@ -241,6 +240,9 @@ func init() {
 			Absent: []Condition{
 				{Field: Field{Property: "Associations[RouteTableAssociationId={Id}].Main", Member: "Main", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}}, XMLName: "main", Scalar: "boolean"}, Values: []string{"true"}},
 			},
+			Busy: []Condition{
+				{Field: Field{Property: "Associations[RouteTableAssociationId={Id}].AssociationState.State", Member: "State", Kind: "scalar", Via: []Step{{Name: "associationSet", List: true, Item: "item", Where: "routeTableAssociationId", Equals: "{Id}"}, {Name: "associationState"}}, XMLName: "state", Scalar: "string"}, Values: []string{"associating"}},
+			},
 			PageToken: []string{"nextToken"},
 			Response:  []Step{{Name: "routeTableSet", List: true, Item: "item"}},
 			Fields: []Field{
@@ -252,19 +254,20 @@ func init() {
 			LifecycleComplete: true,
 			Create:            &MutationCall{Operation: "AssociateRouteTable", Target: "AmazonEC2.AssociateRouteTable", Input: map[string]any{"RouteTableId": "{RouteTableId}", "SubnetId": "{SubnetId}"}, Properties: []string{"RouteTableId", "SubnetId"}, Identifier: map[string]string{"Id": "associationId"}, Form: map[string]FormStep{"RouteTableId": {Key: "RouteTableId", Kind: "scalar"}, "SubnetId": {Key: "SubnetId", Kind: "scalar"}}},
 			Delete:            &MutationCall{Operation: "DisassociateRouteTable", Target: "AmazonEC2.DisassociateRouteTable", Input: map[string]any{"AssociationId": "{Id}"}, AbsentErrors: []string{"InvalidAssociationID.NotFound"}, Form: map[string]FormStep{"AssociationId": {Key: "AssociationId", Kind: "scalar"}}},
-			Mutable:           true,
 		},
 		"AWS::EC2::VPC": {
 			Type:        "AWS::EC2::VPC",
 			Protocol:    "ec2Query",
 			SigningName: "ec2",
 			Complete:    true,
-			Production:  true,
 			Host:        "ec2.{region}.amazonaws.com",
 			Action:      "DescribeVpcs",
 			Version:     "2016-11-15",
 			Identifier: []Binding{
 				{Property: "VpcId", Member: "VpcIds", Location: "form", Name: "VpcId.1", List: true},
+			},
+			Busy: []Condition{
+				{Field: Field{Property: "State", Member: "State", Kind: "scalar", XMLName: "state", Scalar: "string"}, Values: []string{"pending"}},
 			},
 			AbsentErrors: []string{"InvalidVpcID.NotFound"},
 			PageToken:    []string{"nextToken"},
@@ -433,7 +436,6 @@ func init() {
 					},
 				},
 			},
-			Mutable: true,
 		},
 	})
 }
