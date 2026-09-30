@@ -52,3 +52,15 @@ func TestDiffCreateOnlySources(t *testing.T) {
 		})
 	}
 }
+
+// A create-only property the read never returns, such as a table's import
+// source, cannot be compared: planned against its absence, every run would
+// replace the table.
+func TestDiffSkipsAWriteOnlyCreateOnlyProperty(t *testing.T) {
+	r := realTypeFixture(t, "AWS::DynamoDB::Table")
+	spec := resource.Spec{Config: map[string]any{"TableName": "t", "ImportSourceSpecification": map[string]any{"InputFormat": "CSV"}}}
+	state := &resource.State{Attributes: map[string]any{"TableName": "t"}}
+	if d, err := r.compare(spec, state); err != nil || d != resource.Same {
+		t.Fatalf("compare = %v, %v; want same", d, err)
+	}
+}

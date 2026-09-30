@@ -68,10 +68,21 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		rules.subset[pointer] = true
 	}
 
+	writeOnly := map[string]bool{}
+	for _, pointer := range schema.WriteOnly {
+		writeOnly[pointer] = true
+	}
+
 	createOnly := map[string]bool{}
 	for _, pointer := range r.createOnly(schema) {
 		path := schemaPropertyPath(pointer)
 		if len(path) == 0 {
+			continue
+		}
+		// A read never returns a write-only property, so its absence says
+		// nothing: compared, it would replace the resource on every plan.
+		if writeOnly[pointer] {
+			createOnly[pointer] = true
 			continue
 		}
 		createOnly[pointer] = true
@@ -97,11 +108,6 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		if !covers(desiredNorm, currentNorm, pointer, rules) {
 			return resource.Immutable, nil
 		}
-	}
-
-	writeOnly := map[string]bool{}
-	for _, pointer := range schema.WriteOnly {
-		writeOnly[pointer] = true
 	}
 
 	for property, desiredVal := range spec.Config {
