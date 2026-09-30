@@ -80,10 +80,10 @@ func TestCreateSetsAPropertyAnUpdateCallSets(t *testing.T) {
 func TestCreateRefusesAnUnsupportedProperty(t *testing.T) {
 	f := newTableFake()
 	_, err := f.client(t).Create(context.Background(), ddbTable, map[string]any{
-		"TableName": "t", "StreamSpecification": map[string]any{"StreamViewType": "NEW_IMAGE", "Tags": []any{}},
+		"TableName": "t", "GlobalSecondaryIndexes": []any{map[string]any{"IndexName": "g", "ContributorInsightsSpecification": map[string]any{"Enabled": true}}},
 	})
-	if err == nil || !strings.Contains(err.Error(), "StreamSpecification.Tags") {
-		t.Fatalf("Create = %v; want a refusal naming StreamSpecification.Tags", err)
+	if err == nil || !strings.Contains(err.Error(), "GlobalSecondaryIndexes[].ContributorInsightsSpecification") {
+		t.Fatalf("Create = %v; want a refusal naming an index's contributor insights", err)
 	}
 	if len(f.calls) != 0 {
 		t.Fatalf("calls made before the refusal: %v", f.calls)
@@ -101,8 +101,8 @@ func TestCanMutateWith(t *testing.T) {
 	}{
 		"nothing unsupported": {map[string]any{"TableClass": "STANDARD"}, true},
 		"a top-level one":     {map[string]any{"TableClass": "STANDARD", "KinesisStreamSpecification": map[string]any{}}, false},
-		"a nested one":        {map[string]any{"StreamSpecification": map[string]any{"StreamViewType": "NEW_IMAGE", "ResourcePolicy": map[string]any{}}}, false},
-		"its parent alone":    {map[string]any{"StreamSpecification": map[string]any{"StreamViewType": "NEW_IMAGE"}}, true},
+		"one in a list":       {map[string]any{"GlobalSecondaryIndexes": []any{map[string]any{"IndexName": "a"}, map[string]any{"IndexName": "b", "ContributorInsightsSpecification": map[string]any{"Enabled": true}}}}, false},
+		"its list alone":      {map[string]any{"GlobalSecondaryIndexes": []any{map[string]any{"IndexName": "a"}}}, true},
 		"null is not naming":  {map[string]any{"KinesisStreamSpecification": nil}, true},
 	} {
 		t.Run(name, func(t *testing.T) {

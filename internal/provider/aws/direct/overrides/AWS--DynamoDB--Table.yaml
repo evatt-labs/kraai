@@ -266,27 +266,17 @@ create:
       Enabled: "{SSESpecification.SSEEnabled}"
       SSEType: "{SSESpecification.SSEType}"
       KMSMasterKeyId: "{SSESpecification.KMSMasterKeyId}"
-    StreamSpecification:
-      StreamEnabled: true
-      StreamViewType: "{StreamSpecification.StreamViewType}"
     TableClass: "{TableClass}"
     DeletionProtectionEnabled: "{DeletionProtectionEnabled}"
     ResourcePolicy: "{ResourcePolicy.PolicyDocument:json}"
     Tags: "{Tags}"
   identifier:
     TableName: TableDescription.TableName
-# Every call but the capacity group and the stream is its own call: the API
-# takes one kind of change per UpdateTable, and waits for the table between
-# them. Capacity is not sent together: a switch to on-demand would resend
-# the provisioned throughput read back, which the API refuses.
-#
-# Not routed, so the type is not lifecycle complete:
-# ContributorInsightsSpecification, KinesisStreamSpecification
-# and ImportSourceSpecification, which CreateTable has no member for.
-# StreamSpecification is set, never changed: enabling a stream on a table
-# that has one is refused, so a new view type needs a disable first, which
-# nothing here does. The stream's own ResourcePolicy and Tags are not
-# written either.
+# Every call but the capacity group is its own call: the API takes one kind
+# of change per UpdateTable, and waits for the table between them. Capacity
+# is not sent together: a switch to on-demand would resend the provisioned
+# throughput read back, which the API refuses. What no call here sets is
+# declared unsupported below, and goes through Cloud Control.
 update:
   - operation: UpdateTable
     properties: [BillingMode, ProvisionedThroughput, OnDemandThroughput]
@@ -303,13 +293,6 @@ update:
         Enabled: "{SSESpecification.SSEEnabled}"
         SSEType: "{SSESpecification.SSEType}"
         KMSMasterKeyId: "{SSESpecification.KMSMasterKeyId}"
-  - operation: UpdateTable
-    properties: [StreamSpecification]
-    input:
-      TableName: "{TableName}"
-      StreamSpecification:
-        StreamEnabled: true
-        StreamViewType: "{StreamSpecification.StreamViewType}"
   - operation: UpdateTable
     properties: [TableClass]
     input:
@@ -432,8 +415,8 @@ unsupported:
   ContributorInsightsSpecification: no call sets it yet; UpdateContributorInsights takes an enum, not a boolean
   KinesisStreamSpecification: enabling a destination is a separate call pair with no route yet
   ImportSourceSpecification: CreateTable has no member for it; a table is imported with ImportTable
-  StreamSpecification.ResourcePolicy: a stream's policy is put by the stream's ARN, which no call here writes
-  StreamSpecification.Tags: a stream is tagged by its ARN, which no call here writes
+  StreamSpecification: a new view type on a streaming table needs the stream disabled first, and its policy and tags are written by the stream's ARN
+  GlobalSecondaryIndexes[].ContributorInsightsSpecification: an index's contributor insights take UpdateContributorInsights, which no call here makes
 # The harness sets one property per update, in name order, so deletion
 # protection, on at create, goes off first and the delete at the end is never
 # refused. A capacity switch needs two properties in one change, so only the
@@ -464,7 +447,6 @@ lifecycle:
             Action: dynamodb:GetItem
             Resource: "arn:aws:dynamodb:{region}:{account}:table/{name}"
     SSESpecification: {SSEEnabled: true, SSEType: KMS, KMSMasterKeyId: "{kmsKeyArn}"}
-    StreamSpecification: {StreamViewType: NEW_AND_OLD_IMAGES}
     TableClass: STANDARD_INFREQUENT_ACCESS
     Tags: [{Key: team, Value: kraai}]
     TimeToLiveSpecification: {Enabled: true, AttributeName: expires}

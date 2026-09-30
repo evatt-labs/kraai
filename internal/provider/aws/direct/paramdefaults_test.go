@@ -32,3 +32,20 @@ func TestUpdateDBClusterParameterGroupNoticesAMissedReset(t *testing.T) {
 		t.Fatalf("Update = %v, want the wait to refuse a read still holding b", err)
 	}
 }
+
+// A service can leave a list out of its answer once it is emptied, as
+// DynamoDB does for a table's last index; the emptied list is shown.
+func TestCoversAnEmptiedList(t *testing.T) {
+	for _, c := range []struct {
+		desired, current any
+		want             bool
+	}{
+		{map[string]any{"GlobalSecondaryIndexes": []any{}}, map[string]any{}, true},
+		{map[string]any{"GlobalSecondaryIndexes": []any{map[string]any{"IndexName": "a"}}}, map[string]any{}, false},
+		{map[string]any{"GlobalSecondaryIndexes": []any{}}, map[string]any{"GlobalSecondaryIndexes": "x"}, false},
+	} {
+		if got := covers(c.desired, c.current); got != c.want {
+			t.Errorf("covers(%v, %v) = %v, want %v", c.desired, c.current, got, c.want)
+		}
+	}
+}

@@ -326,8 +326,6 @@ func TestUpdateDynamoDBTableBodies(t *testing.T) {
 			map[string]any{"TableName": "t", "BillingMode": "PAY_PER_REQUEST"}},
 		"sse is renamed": {map[string]any{"SSESpecification": map[string]any{"SSEEnabled": true, "SSEType": "KMS", "KMSMasterKeyId": "k"}}, "UpdateTable",
 			map[string]any{"TableName": "t", "SSESpecification": map[string]any{"Enabled": true, "SSEType": "KMS", "KMSMasterKeyId": "k"}}},
-		"stream is enabled": {map[string]any{"StreamSpecification": map[string]any{"StreamViewType": "NEW_IMAGE"}}, "UpdateTable",
-			map[string]any{"TableName": "t", "StreamSpecification": map[string]any{"StreamEnabled": true, "StreamViewType": "NEW_IMAGE"}}},
 		"table class":         {map[string]any{"TableClass": "STANDARD_INFREQUENT_ACCESS"}, "UpdateTable", map[string]any{"TableName": "t", "TableClass": "STANDARD_INFREQUENT_ACCESS"}},
 		"deletion protection": {map[string]any{"DeletionProtectionEnabled": false}, "UpdateTable", map[string]any{"TableName": "t", "DeletionProtectionEnabled": false}},
 		"warm throughput": {map[string]any{"WarmThroughput": map[string]any{"ReadUnitsPerSecond": float64(13000)}}, "UpdateTable",
@@ -365,12 +363,12 @@ func TestUpdateDynamoDBTableTags(t *testing.T) {
 // A change to a property no call sets is refused before any call is made;
 // the key schema and local indexes have none because UpdateTable has no
 // member for either. The attribute definitions are lent to the index route,
-// so changed alone they have none, and the table is not lifecycle complete
-// while contributor insights and Kinesis streaming have no route either.
-func TestDynamoDBTableIsNotLifecycleComplete(t *testing.T) {
+// so changed alone they have none. Every other property is routed or
+// declared unsupported, so the table is lifecycle complete.
+func TestDynamoDBTableIsLifecycleComplete(t *testing.T) {
 	r := readers[ddbTable]
-	if r.LifecycleComplete || CanMutate(ddbTable) {
-		t.Fatalf("LifecycleComplete = %v, CanMutate = %v; contributor insights and Kinesis are not routed", r.LifecycleComplete, CanMutate(ddbTable))
+	if !r.LifecycleComplete {
+		t.Fatal("LifecycleComplete = false; every property is routed, create-only or unsupported")
 	}
 	if got := CreateOnly(ddbTable); !reflect.DeepEqual(got, []string{"/properties/KeySchema", "/properties/LocalSecondaryIndexes"}) {
 		t.Fatalf("CreateOnly = %v", got)
@@ -437,7 +435,6 @@ func TestCreateDynamoDBTable(t *testing.T) {
 		"BillingMode":                      "PAY_PER_REQUEST",
 		"DeletionProtectionEnabled":        true,
 		"SSESpecification":                 map[string]any{"SSEEnabled": true, "SSEType": "KMS", "KMSMasterKeyId": "k"},
-		"StreamSpecification":              map[string]any{"StreamViewType": "KEYS_ONLY"},
 		"ResourcePolicy":                   map[string]any{"PolicyDocument": policy},
 		"Tags":                             []any{map[string]any{"Key": "kraai:resource-name", "Value": "kraai-t"}},
 		"PointInTimeRecoverySpecification": map[string]any{"PointInTimeRecoveryEnabled": true},
@@ -457,7 +454,6 @@ func TestCreateDynamoDBTable(t *testing.T) {
 		"BillingMode":               "PAY_PER_REQUEST",
 		"DeletionProtectionEnabled": true,
 		"SSESpecification":          map[string]any{"Enabled": true, "SSEType": "KMS", "KMSMasterKeyId": "k"},
-		"StreamSpecification":       map[string]any{"StreamEnabled": true, "StreamViewType": "KEYS_ONLY"},
 		"ResourcePolicy":            string(policyText),
 		"Tags":                      desired["Tags"],
 	})

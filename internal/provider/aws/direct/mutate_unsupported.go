@@ -23,11 +23,27 @@ func CanMutateWith(typeName string, properties map[string]any) bool {
 // properties name, and why.
 func unsupportedIn(r Reader, properties map[string]any) (path, reason string) {
 	for _, p := range sortedKeys(r.Unsupported) {
-		if v, present := at(properties, strings.Split(p, ".")); present && v != nil {
+		if named(properties, strings.Split(p, ".")) {
 			return p, r.Unsupported[p]
 		}
 	}
 	return "", ""
+}
+
+// named reports whether v sets the member path names; a step ending "[]"
+// is a list, named when any element sets the rest.
+func named(v any, path []string) bool {
+	if len(path) == 0 {
+		return v != nil
+	}
+	obj, ok := v.(map[string]any)
+	if !ok {
+		return false
+	}
+	if name, isList := strings.CutSuffix(path[0], "[]"); isList {
+		return slices.ContainsFunc(asList(obj[name]), func(item any) bool { return named(item, path[1:]) })
+	}
+	return named(obj[path[0]], path[1:])
 }
 
 // settable reports whether an update call sets p when changes are applied.
