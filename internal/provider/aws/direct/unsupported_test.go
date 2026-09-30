@@ -94,7 +94,7 @@ func TestCanMutateWith(t *testing.T) {
 	if CanMutateWith(ddbTable, map[string]any{}) {
 		t.Fatal("a type that is not Mutable can mutate with nothing named")
 	}
-	t.Cleanup(ForceMutableForTest(ddbTable))
+	withReader(t, ddbTable, func(r *Reader) { r.Mutable = true })
 	for name, c := range map[string]struct {
 		props map[string]any
 		want  bool

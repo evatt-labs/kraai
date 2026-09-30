@@ -24,7 +24,6 @@ const dynamoTable = "AWS::DynamoDB::Table"
 // Cloud Control that succeeds.
 func unsupportedClient(t *testing.T) (*Client, *fakeCC, func() []string) {
 	t.Helper()
-	t.Cleanup(direct.ForceMutableForTest(dynamoTable))
 	var mu sync.Mutex
 	var ops []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -45,20 +44,21 @@ func unsupportedClient(t *testing.T) (*Client, *fakeCC, func() []string) {
 	}
 	c := &Client{cc: cc, direct: &direct.Client{HTTP: srv.Client(),
 		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region:      "us-east-1", Endpoint: func(string) string { return srv.URL }}}
+		Region:      "us-east-1", Endpoint: func(string) string { return srv.URL }},
+		// Stands for direct.CanMutateWith: a property named Marker is one the
+		// direct calls cannot set.
+		canMutate: func(_ string, props map[string]any) bool { return props["Marker"] == nil }}
 	testPollTimings()(c)
 	return c, cc, func() []string { mu.Lock(); defer mu.Unlock(); return append([]string(nil), ops...) }
 }
-
-var unsupportedStream = map[string]any{"StreamViewType": "NEW_IMAGE", "ResourcePolicy": map[string]any{"PolicyDocument": map[string]any{"Version": "2012-10-17"}}}
 
 // A create naming an unsupported property makes no direct call: Cloud
 // Control creates it. One that does not goes direct.
 func TestCreateNamingAnUnsupportedPropertyFallsBackToCloudControl(t *testing.T) {
 	ctx := context.Background()
 	for name, desired := range map[string]map[string]any{
-		"a top-level property": {"TableName": "t", "ContributorInsightsSpecification": map[string]any{"Enabled": true}},
-		"a nested member":      {"TableName": "t", "StreamSpecification": unsupportedStream},
+		"a top-level property": {"TableName": "t", "Marker": true},
+		"a second property":    {"TableName": "t", "Marker": map[string]any{"Nested": 1}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			c, cc, ops := unsupportedClient(t)
@@ -86,7 +86,7 @@ func TestCreateNamingAnUnsupportedPropertyFallsBackToCloudControl(t *testing.T) 
 // before any direct call, and the patch it is sent is the one given.
 func TestUpdateNamingAnUnsupportedPropertyFallsBackToCloudControl(t *testing.T) {
 	ctx := context.Background()
-	patch := `[{"op":"replace","path":"/StreamSpecification","value":{"StreamViewType":"NEW_IMAGE","ResourcePolicy":{"PolicyDocument":{"Version":"2012-10-17"}}}}]`
+	patch := `[{"op":"replace","path":"/Marker","value":true},{"op":"replace","path":"/TableClass","value":"STANDARD"}]`
 	c, cc, ops := unsupportedClient(t)
 	if _, err := c.UpdateResource(ctx, dynamoTable, "t", []byte(patch)); err != nil {
 		t.Fatalf("UpdateResource: %v", err)

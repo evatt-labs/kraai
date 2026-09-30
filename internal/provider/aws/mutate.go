@@ -13,7 +13,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
-	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 )
 
 // CreateResource submits desiredState for creation and polls to a terminal
@@ -27,7 +26,7 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 	// not repopulate the cache with the world as it was.
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.direct != nil && direct.CanMutateWith(typeName, desiredState) {
+	if c.mutatesDirectly(typeName, desiredState) {
 		directMutation(ctx, typeName, "create")
 		identifier, err := c.direct.Create(ctx, typeName, desiredState)
 		if err != nil {
@@ -84,14 +83,14 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.direct != nil && direct.CanMutate(typeName) {
+	if c.mutatesDirectly(typeName, nil) {
 		changes, err := patchChanges(typeName, identifier, patch)
 		if err != nil {
 			return nil, err
 		}
 		// A change the direct calls cannot make is Cloud Control's, decided
 		// before any call: half of a direct update cannot be retried there.
-		if direct.CanMutateWith(typeName, changes) {
+		if c.mutatesDirectly(typeName, changes) {
 			directMutation(ctx, typeName, "update")
 			return c.updateDirect(ctx, typeName, identifier, changes)
 		}
@@ -130,7 +129,7 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string) error {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.direct != nil && direct.CanMutate(typeName) {
+	if c.mutatesDirectly(typeName, nil) {
 		directMutation(ctx, typeName, "delete")
 		if err := c.direct.Delete(ctx, typeName, identifier); err != nil {
 			return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting %s %q", typeName, identifier)
@@ -208,4 +207,10 @@ func directMutation(ctx context.Context, typeName, kind string) {
 		attribute.String("kraai.type", typeName),
 		attribute.String("kraai.mutation", kind),
 	))
+}
+
+// mutatesDirectly reports whether a mutation of typeName naming properties
+// goes through the type's own API rather than Cloud Control.
+func (c *Client) mutatesDirectly(typeName string, properties map[string]any) bool {
+	return c.direct != nil && c.canMutate != nil && c.canMutate(typeName, properties)
 }
