@@ -318,6 +318,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	// A property only lent to list routes is routed for completeness, but
 	// another call may still set it alone.
 	maps.Copy(routed, withRouted)
+	errs = append(errs, compileUnsupported(o, &schema, routed, r)...)
 	if o.Delete != nil {
 		r.Delete = call(*o.Delete, "delete", keys, "")
 		for _, property := range o.Delete.Clear {

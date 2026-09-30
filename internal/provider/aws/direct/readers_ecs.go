@@ -78,6 +78,7 @@ func init() {
 			Capture: []Field{
 				{Property: "Arn", Member: "clusterArn", Kind: "scalar"},
 			},
+			WriteOnly:         []string{"ServiceConnectDefaults"},
 			LifecycleComplete: true,
 			MutationCaptures:  true,
 			Create:            &MutationCall{Operation: "CreateCluster", Target: "AmazonEC2ContainerServiceV20141113.CreateCluster", NameProperty: "ClusterName", NameTag: "kraai:resource-name", Input: map[string]any{"capacityProviders": "{CapacityProviders}", "clusterName": "{ClusterName}", "configuration": "{Configuration:wire}", "defaultCapacityProviderStrategy": "{DefaultCapacityProviderStrategy:wire}", "serviceConnectDefaults": map[string]any{"namespace": "{ServiceConnectDefaults.Namespace}"}, "settings": "{ClusterSettings:wire}", "tags": "{Tags:wire}"}, Properties: []string{"CapacityProviders", "ClusterName", "ClusterSettings", "Configuration", "DefaultCapacityProviderStrategy", "ServiceConnectDefaults", "Tags"}, Identifier: map[string]string{"ClusterName": "cluster.clusterName"}},

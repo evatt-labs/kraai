@@ -41,6 +41,11 @@ type Override struct {
 	// service cannot change, so an update of one fails as Cloud Control's
 	// does; they need no update call to be lifecycle complete.
 	CreateOnly []string `yaml:"createOnly,omitempty"`
+	// Unsupported names, by property or dotted path into object
+	// properties, what the direct calls cannot set, and why. A create or
+	// update naming one makes no direct call: Cloud Control makes it. A
+	// top-level entry counts as routed for lifecycle completeness.
+	Unsupported map[string]string `yaml:"unsupported,omitempty"`
 	// Lifecycle is the values the lifecycle harness creates an instance
 	// with, then sets one property at a time.
 	Lifecycle *Lifecycle `yaml:"lifecycle,omitempty"`

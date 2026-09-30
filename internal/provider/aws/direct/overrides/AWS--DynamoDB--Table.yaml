@@ -369,6 +369,13 @@ delete:
 # The key schema and local secondary indexes cannot change: UpdateTable has
 # no member for either.
 createOnly: [KeySchema, LocalSecondaryIndexes]
+# A create or update naming one of these goes to Cloud Control instead.
+unsupported:
+  ContributorInsightsSpecification: no call sets it yet; UpdateContributorInsights takes an enum, not a boolean
+  KinesisStreamSpecification: enabling a destination is a separate call pair with no route yet
+  ImportSourceSpecification: CreateTable has no member for it; a table is imported with ImportTable
+  StreamSpecification.ResourcePolicy: a stream's policy is put by the stream's ARN, which no call here writes
+  StreamSpecification.Tags: a stream is tagged by its ARN, which no call here writes
 # The harness sets one property per update, in name order, so deletion
 # protection, on at create, goes off first and the delete at the end is never
 # refused. A capacity switch needs two properties in one change, so only the

@@ -51,6 +51,13 @@ type Reader struct {
 	// pointers: ones the schema leaves updatable but the service refuses to
 	// change, so a change is a replacement.
 	CreateOnly []string
+	// Unsupported is the override's unsupported paths and reasons: see
+	// Override.Unsupported.
+	Unsupported map[string]string
+	// WriteOnly is the schema's write-only properties no update call sets.
+	// A write-only property is never read back, so an update always finds
+	// it changed; apply leaves these out.
+	WriteOnly []string
 	// LifecycleComplete is true when every property an update can change
 	// has an update call: with Production and lifecycle evidence, the only
 	// readers a mutation may use in place of Cloud Control.

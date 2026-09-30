@@ -9,7 +9,6 @@ func init() {
 			Protocol:    "awsJson1_0",
 			SigningName: "dynamodb",
 			Complete:    true,
-			Production:  true,
 			Host:        "dynamodb.{region}.amazonaws.com",
 			Target:      "DynamoDB_20120810.DescribeTable",
 			Identifier: []Binding{
@@ -155,6 +154,8 @@ func init() {
 				{Property: "StreamArn", Member: "LatestStreamArn", Kind: "scalar"},
 			},
 			CreateOnly:       []string{"/properties/KeySchema", "/properties/LocalSecondaryIndexes"},
+			Unsupported:      map[string]string{"ContributorInsightsSpecification": "no call sets it yet; UpdateContributorInsights takes an enum, not a boolean", "ImportSourceSpecification": "CreateTable has no member for it; a table is imported with ImportTable", "KinesisStreamSpecification": "enabling a destination is a separate call pair with no route yet", "StreamSpecification.ResourcePolicy": "a stream's policy is put by the stream's ARN, which no call here writes", "StreamSpecification.Tags": "a stream is tagged by its ARN, which no call here writes"},
+			WriteOnly:        []string{"ImportSourceSpecification"},
 			MutationCaptures: true,
 			Create:           &MutationCall{Operation: "CreateTable", Target: "DynamoDB_20120810.CreateTable", NameProperty: "TableName", NameTag: "kraai:resource-name", NameMaxLength: 255, Input: map[string]any{"AttributeDefinitions": "{AttributeDefinitions}", "BillingMode": "{BillingMode}", "DeletionProtectionEnabled": "{DeletionProtectionEnabled}", "GlobalSecondaryIndexes": "{GlobalSecondaryIndexes}", "KeySchema": "{KeySchema}", "LocalSecondaryIndexes": "{LocalSecondaryIndexes}", "OnDemandThroughput": "{OnDemandThroughput}", "ProvisionedThroughput": "{ProvisionedThroughput}", "ResourcePolicy": "{ResourcePolicy.PolicyDocument:json}", "SSESpecification": map[string]any{"Enabled": "{SSESpecification.SSEEnabled}", "KMSMasterKeyId": "{SSESpecification.KMSMasterKeyId}", "SSEType": "{SSESpecification.SSEType}"}, "StreamSpecification": map[string]any{"StreamEnabled": true, "StreamViewType": "{StreamSpecification.StreamViewType}"}, "TableClass": "{TableClass}", "TableName": "{TableName}", "Tags": "{Tags}", "VectorIndexes": "{VectorIndexes}", "WarmThroughput": "{WarmThroughput}"}, Properties: []string{"AttributeDefinitions", "BillingMode", "DeletionProtectionEnabled", "GlobalSecondaryIndexes", "KeySchema", "LocalSecondaryIndexes", "OnDemandThroughput", "ProvisionedThroughput", "ResourcePolicy", "SSESpecification", "StreamSpecification", "TableClass", "TableName", "Tags", "VectorIndexes", "WarmThroughput"}, Identifier: map[string]string{"TableName": "TableDescription.TableName"}},
 			Delete:           &MutationCall{Operation: "DeleteTable", Target: "DynamoDB_20120810.DeleteTable", Input: map[string]any{"TableName": "{TableName}"}, AbsentErrors: []string{"ResourceNotFoundException"}, RetryErrors: []string{"ResourceInUseException"}},
