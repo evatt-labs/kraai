@@ -27,7 +27,8 @@ type Client struct {
 	// Now is the signing clock; nil is time.Now.
 	Now func() time.Time
 	// Wait bounds how long a mutation waits for a read to show it, and Poll
-	// is how often it reads meanwhile; zero is two minutes and two seconds.
+	// is how often it reads meanwhile; zero is the type's wait, or two
+	// minutes, and two seconds.
 	Wait, Poll time.Duration
 	// RetryDelay, when set, replaces the backoff between attempts of a
 	// request that failed transiently.
@@ -298,11 +299,20 @@ func errIncomplete(typeName string) error {
 // condition's member from the response.
 func (r Reader) busy(value func(Field) (any, bool)) bool {
 	for _, c := range r.Busy {
-		if got, present := value(c.Field); present && slices.Contains(c.Values, fmt.Sprint(got)) {
+		if got, present := value(c.Field); present && c.holds(got) {
 			return true
 		}
 	}
 	return false
+}
+
+// holds reports whether the member's value got is one of c's values; of a
+// member read through a list step, whether any element's is.
+func (c Condition) holds(got any) bool {
+	if items, ok := got.([]any); ok {
+		return slices.ContainsFunc(items, c.holds)
+	}
+	return slices.Contains(c.Values, fmt.Sprint(got))
 }
 
 // ErrAbsent is Read's answer for an instance the service still returns
@@ -315,7 +325,7 @@ var ErrAbsent = errors.New("the instance is absent")
 func (r Reader) finish(translate func(fields []Field, fromRoot bool) map[string]any) (map[string]any, error) {
 	for _, c := range r.Absent {
 		got, present := translate([]Field{c.Field}, false)[c.Field.Property]
-		if present && slices.Contains(c.Values, fmt.Sprint(got)) {
+		if present && c.holds(got) {
 			return nil, ErrAbsent
 		}
 	}

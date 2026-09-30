@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // Reader is a compiled override: everything a client needs to read one
@@ -31,6 +32,9 @@ type Reader struct {
 	// Busy is every condition under which an instance is still settling a
 	// change; see Read.Busy.
 	Busy []Condition
+	// Wait is the type's ceiling for a mutation's retries and for waiting
+	// for a read to show it; zero is the client's default.
+	Wait time.Duration
 	// AbsentErrors is every error code that means the instance is gone.
 	AbsentErrors []string
 	// Probe lists identifiers that must read as absent, for the harness.

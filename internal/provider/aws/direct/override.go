@@ -14,6 +14,10 @@ type Override struct {
 	// Type is the CloudFormation type name, such as AWS::XRay::Group.
 	Type string `yaml:"type"`
 	Read Read   `yaml:"read"`
+	// Wait is a Go duration, such as 20m: the ceiling for the type's
+	// mutation retries, for a read to show a mutation and for the instance
+	// to settle, for a service whose changes take longer than two minutes.
+	Wait string `yaml:"wait,omitempty"`
 	// List, when set, names the operation that lists every instance.
 	List *List `yaml:"list,omitempty"`
 	// Probe lists identifiers Cloud Control reads as absent although the

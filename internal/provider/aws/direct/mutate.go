@@ -73,7 +73,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 			address, err = c.addressOf(ctx, r, id)
 		}
 		if err == nil {
-			err = c.apply(ctx, r, address, current, rest)
+			err = c.apply(ctx, r, address, current, rest, true)
 		}
 		if err != nil {
 			return id, err
@@ -101,7 +101,7 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 	}
 	address, err := c.addressOf(ctx, r, identifier)
 	if err == nil {
-		err = c.apply(ctx, r, address, current, changes)
+		err = c.apply(ctx, r, address, current, changes, false)
 	}
 	if err != nil {
 		return err
@@ -113,8 +113,20 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 
 // apply sends the update calls that set changes, current being how the
 // instance was read and address what its calls are addressed by. A change
-// no call sets is refused before any call is made.
-func (c *Client) apply(ctx context.Context, r Reader, address, current, changes map[string]any) error {
+// no call sets is refused before any call is made. A type with Busy
+// conditions is waited on before each call; settled says the instance just
+// was, which spares the first call that read.
+func (c *Client) apply(ctx context.Context, r Reader, address, current, changes map[string]any, settled bool) error {
+	send := func(m MutationCall, values map[string]any) error {
+		if !settled {
+			if err := c.settle(ctx, r, address); err != nil {
+				return err
+			}
+		}
+		settled = false
+		_, err := c.mutate(ctx, r, m, values)
+		return err
+	}
 	for p := range changes {
 		if !slices.ContainsFunc(r.Update, func(u MutationCall) bool {
 			return u.TagProperty == p || u.ListProperty == p || slices.Contains(u.Properties, p)
@@ -125,6 +137,8 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 	for _, u := range r.Update {
 		if u.ListProperty != "" {
 			if desired, changed := changes[u.ListProperty]; changed {
+				// Its calls settle the instance themselves.
+				settled = false
 				if err := c.applyList(ctx, r, u, address, current[u.ListProperty], desired); err != nil {
 					return err
 				}
@@ -140,12 +154,12 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 			values := maps.Clone(address)
 			values["added"], values["removed"] = added, removed
 			if len(added) > 0 {
-				if _, err := c.mutate(ctx, r, *u.Add, values); err != nil {
+				if err := send(*u.Add, values); err != nil {
 					return err
 				}
 			}
 			if len(removed) > 0 {
-				if _, err := c.mutate(ctx, r, *u.Remove, values); err != nil {
+				if err := send(*u.Remove, values); err != nil {
 					return err
 				}
 			}
@@ -179,7 +193,7 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 				}
 			}
 		}
-		if _, err := c.mutate(ctx, r, u, values); err != nil {
+		if err := send(u, values); err != nil {
 			return err
 		}
 	}
@@ -309,7 +323,7 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 	}
 	// Many mutations answer with no body at all.
 	body, err := c.sendRetrying(ctx, policy, call, "", "", m.Target, bindings)
-	for deadline := time.Now().Add(c.wait()); retryable(err, m.RetryErrors) && time.Now().Before(deadline); {
+	for deadline := time.Now().Add(c.wait(r)); retryable(err, m.RetryErrors) && time.Now().Before(deadline); {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
@@ -342,7 +356,7 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 // waitFor reads the instance until done accepts the read, or the wait is
 // over: a service can take seconds to show what a call changed.
 func (c *Client) waitFor(ctx context.Context, typeName, identifier string, done func(map[string]any, error) bool) error {
-	wait, poll := c.wait(), c.poll()
+	wait, poll := c.wait(readers[typeName]), c.poll()
 	deadline := time.Now().Add(wait)
 	for {
 		props, err := c.ReadByID(ctx, typeName, identifier)
@@ -361,13 +375,6 @@ func (c *Client) waitFor(ctx context.Context, typeName, identifier string, done 
 		case <-time.After(poll):
 		}
 	}
-}
-
-func (c *Client) wait() time.Duration {
-	if c.Wait == 0 {
-		return 2 * time.Minute
-	}
-	return c.Wait
 }
 
 func (c *Client) poll() time.Duration {

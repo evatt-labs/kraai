@@ -204,7 +204,7 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 // ccShows polls Cloud Control's read of id until it covers want.
 func ccShows(ctx context.Context, cc *cloudcontrol.Client, typeName, id string, want map[string]any) error {
 	var last map[string]any
-	for deadline := time.Now().Add(2 * time.Minute); time.Now().Before(deadline); time.Sleep(3 * time.Second) {
+	for deadline := time.Now().Add(readers[typeName].ceiling()); time.Now().Before(deadline); time.Sleep(3 * time.Second) {
 		out, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(typeName), Identifier: aws.String(id)})
 		if err != nil {
 			continue
@@ -222,7 +222,7 @@ func ccShows(ctx context.Context, cc *cloudcontrol.Client, typeName, id string, 
 
 // ccAbsent polls Cloud Control until it reads id as absent.
 func ccAbsent(ctx context.Context, cc *cloudcontrol.Client, typeName, id string) error {
-	for deadline := time.Now().Add(2 * time.Minute); time.Now().Before(deadline); time.Sleep(3 * time.Second) {
+	for deadline := time.Now().Add(readers[typeName].ceiling()); time.Now().Before(deadline); time.Sleep(3 * time.Second) {
 		_, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(typeName), Identifier: aws.String(id)})
 		var notFound *cctypes.ResourceNotFoundException
 		if errors.As(err, &notFound) {

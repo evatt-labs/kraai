@@ -124,6 +124,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if r.Wait > 0 {
+		fmt.Fprintf(b, "Wait: %d,\n", r.Wait)
+	}
 	if len(r.AbsentErrors) > 0 {
 		fmt.Fprintf(b, "AbsentErrors: %#v,\n", r.AbsentErrors)
 	}
