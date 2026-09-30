@@ -78,6 +78,9 @@ type override struct {
 			Change struct {
 				Operation string `yaml:"operation"`
 			} `yaml:"change"`
+			Changes []struct {
+				Operation string `yaml:"operation"`
+			} `yaml:"changes"`
 		} `yaml:"list"`
 	} `yaml:"update"`
 	Delete *struct {
@@ -156,6 +159,9 @@ func run() error {
 					if op != "" {
 						ops[o.Read.Model] = append(ops[o.Read.Model], op)
 					}
+				}
+				for _, c := range u.List.Changes {
+					ops[o.Read.Model] = append(ops[o.Read.Model], c.Operation)
 				}
 			default:
 				ops[o.Read.Model] = append(ops[o.Read.Model], u.Operation)

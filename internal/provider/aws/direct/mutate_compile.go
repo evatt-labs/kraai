@@ -26,6 +26,11 @@ type MutationCall struct {
 	Element map[string]any
 	Chunk   int
 	Change  *MutationCall
+	// OneAtATime, Immutable, With and Changes are ListRoute's.
+	OneAtATime bool
+	Immutable  []string
+	With       []string
+	Changes    []ChangeRoute
 	// FailedCount and Clear are Mutation.FailedCount and Mutation.Clear.
 	FailedCount string
 	Clear       []string
@@ -54,6 +59,12 @@ type MutationCall struct {
 	// TagProperty as the property their elements are shaped as.
 	TagProperty string
 	Add, Remove *MutationCall
+}
+
+// ChangeRoute is a compiled ChangeCall.
+type ChangeRoute struct {
+	Members []string
+	Call    *MutationCall
 }
 
 // mutationFilters are the template filters a mutation's input may use.
@@ -245,7 +256,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	for name := range captures {
 		keys[name] = true
 	}
-	routed := map[string]bool{}
+	routed, withRouted := map[string]bool{}, map[string]bool{}
 	for i, u := range o.Update {
 		at := fmt.Sprintf("update[%d]", i)
 		if u.Tags != nil {
@@ -268,6 +279,9 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			if c := compileListRoute(schema, *u.List, at, keys, call, fail); c != nil {
 				r.Update = append(r.Update, *c)
 				routed[u.List.Property] = true
+				for _, p := range u.List.With {
+					withRouted[p] = true
+				}
 			}
 			continue
 		}
@@ -301,6 +315,9 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		}
 		r.Update = append(r.Update, *c)
 	}
+	// A property only lent to list routes is routed for completeness, but
+	// another call may still set it alone.
+	maps.Copy(routed, withRouted)
 	if o.Delete != nil {
 		r.Delete = call(*o.Delete, "delete", keys, "")
 		for _, property := range o.Delete.Clear {
@@ -386,6 +403,9 @@ func mutations(o Override) []Mutation {
 				if m != nil {
 					out = append(out, *m)
 				}
+			}
+			for _, c := range u.List.Changes {
+				out = append(out, c.Mutation)
 			}
 		}
 	}

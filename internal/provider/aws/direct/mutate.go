@@ -129,7 +129,7 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 	}
 	for p := range changes {
 		if !slices.ContainsFunc(r.Update, func(u MutationCall) bool {
-			return u.TagProperty == p || u.ListProperty == p || slices.Contains(u.Properties, p)
+			return u.TagProperty == p || u.ListProperty == p || slices.Contains(u.Properties, p) || lends(u, p, changes)
 		}) {
 			return fmt.Errorf("%s has no direct update for %s", r.Type, p)
 		}
@@ -139,7 +139,7 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 			if desired, changed := changes[u.ListProperty]; changed {
 				// Its calls settle the instance themselves.
 				settled = false
-				if err := c.applyList(ctx, r, u, address, current[u.ListProperty], desired); err != nil {
+				if err := c.applyList(ctx, r, u, withAddress(u, address, current, changes), current[u.ListProperty], desired); err != nil {
 					return err
 				}
 			}

@@ -298,6 +298,19 @@ type UpdateCall struct {
 //
 // A property the schema types as a free-form object is a map, routed as a
 // list of {Key, Value} elements.
+//
+// OneAtATime sends each call for one element, for a service that takes one
+// per call; a keyed route sends them in key order, and a template may take
+// {added:only}. It excludes Chunk. Immutable names members a paired element
+// may not change: one that differs is refused before any call is made. A
+// keyed route pairs elements too, and sends the paired ones to Change or
+// Changes. Changes picks the call by which members differ: an element
+// differing in the members of two entries is sent to both, one differing
+// in a member no entry lists is refused before any call, and Change and
+// Changes exclude each other. With names sibling properties the calls'
+// templates may use: the desired value when this update changes it, else
+// the value as read. A With property counts as routed, and is set only
+// along with the list.
 type ListRoute struct {
 	Property string         `yaml:"property"`
 	Key      []string       `yaml:"key,omitempty"`
@@ -306,10 +319,21 @@ type ListRoute struct {
 	// Chunk, when set, sends each of the route's calls for at most that
 	// many elements at a time, one call per chunk, for a service that caps
 	// a call's list.
-	Chunk  int       `yaml:"chunk,omitempty"`
-	Add    Mutation  `yaml:"add"`
-	Remove *Mutation `yaml:"remove,omitempty"`
-	Change *Mutation `yaml:"change,omitempty"`
+	Chunk      int          `yaml:"chunk,omitempty"`
+	OneAtATime bool         `yaml:"oneAtATime,omitempty"`
+	Immutable  []string     `yaml:"immutable,omitempty"`
+	With       []string     `yaml:"with,omitempty"`
+	Add        Mutation     `yaml:"add"`
+	Remove     *Mutation    `yaml:"remove,omitempty"`
+	Change     *Mutation    `yaml:"change,omitempty"`
+	Changes    []ChangeCall `yaml:"changes,omitempty"`
+}
+
+// ChangeCall is the call for a paired element that differs in any of
+// Members.
+type ChangeCall struct {
+	Mutation `yaml:",inline"`
+	Members  []string `yaml:"members"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,
