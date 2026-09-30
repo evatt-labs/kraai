@@ -1,6 +1,7 @@
 package direct
 
 import (
+	"fmt"
 	"slices"
 )
 
@@ -46,9 +47,7 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 			fail("%s shapes %s's elements from {%s:wire}; an element template is its own shape", at, l.Property, ref[0])
 		}
 	}
-	if l.Change != nil && len(l.Match) == 0 {
-		fail("%s changes %s's elements, but only a matched list has a change call", at, l.Property)
-	}
+	checkListOptions(schema, l, members, at, fail)
 	extra := map[string]bool{"added": true, "removed": true, "changed": true}
 	if len(l.Key) == 1 {
 		extra["removedKeys"] = true
@@ -56,12 +55,16 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 	for p := range keys {
 		extra[p] = true
 	}
+	for _, p := range l.With {
+		extra[p] = true
+	}
 	add := call(l.Add, at+" add", extra, l.Property)
 	if add == nil {
 		return nil
 	}
 	add.TagProperty = l.Property
-	route := &MutationCall{ListProperty: l.Property, Key: slices.Clone(l.Key), Match: slices.Clone(l.Match), Element: l.Element, Chunk: l.Chunk, Add: add}
+	route := &MutationCall{ListProperty: l.Property, Key: slices.Clone(l.Key), Match: slices.Clone(l.Match), Element: l.Element, Chunk: l.Chunk, Add: add,
+		OneAtATime: l.OneAtATime, Immutable: slices.Clone(l.Immutable), With: slices.Clone(l.With)}
 	for _, c := range []struct {
 		m    *Mutation
 		name string
@@ -75,5 +78,66 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 		}
 		(*c.to).TagProperty = l.Property
 	}
+	for i, c := range l.Changes {
+		compiled := call(c.Mutation, fmt.Sprintf("%s changes[%d]", at, i), extra, l.Property)
+		if compiled == nil {
+			return nil
+		}
+		compiled.TagProperty = l.Property
+		route.Changes = append(route.Changes, ChangeRoute{Members: slices.Clone(c.Members), Call: compiled})
+	}
 	return route
+}
+
+// checkListOptions refuses the combinations of a list route's OneAtATime,
+// Immutable, With, Change and Changes that cannot work: members its
+// elements lack, a member two rules claim, and a property borrowed that
+// the schema does not have.
+func checkListOptions(schema cfnSchema, l ListRoute, members map[string]cfnProperty, at string, fail func(string, ...any)) {
+	if l.OneAtATime && l.Chunk > 0 {
+		fail("%s sends %s one at a time and in chunks of %d; it takes one", at, l.Property, l.Chunk)
+	}
+	if l.Change != nil && len(l.Changes) > 0 {
+		fail("%s changes %s by both change and changes; it takes one", at, l.Property)
+	}
+	identity := append(slices.Clone(l.Key), l.Match...)
+	claimed := map[string]string{}
+	for _, m := range l.Immutable {
+		if _, ok := members[m]; !ok {
+			fail("%s makes %s's %s immutable, which its elements do not have", at, l.Property, m)
+		}
+		if slices.Contains(identity, m) {
+			fail("%s makes %s's %s immutable, which is part of its key or match", at, l.Property, m)
+		}
+		claimed[m] = "immutable"
+	}
+	for i, c := range l.Changes {
+		if len(c.Members) == 0 {
+			fail("%s changes[%d] names no members", at, i)
+		}
+		for _, m := range c.Members {
+			if _, ok := members[m]; !ok {
+				fail("%s changes[%d] names %s, which %s's elements do not have", at, i, m, l.Property)
+			}
+			if slices.Contains(identity, m) {
+				fail("%s changes[%d] names %s, which is part of its key or match", at, i, m)
+			}
+			if by, dup := claimed[m]; dup {
+				fail("%s names %s's %s twice, as %s and in changes[%d]", at, l.Property, m, by, i)
+			}
+			claimed[m] = fmt.Sprintf("changes[%d]", i)
+		}
+	}
+	seen := map[string]bool{}
+	for _, p := range l.With {
+		switch _, ok := schema.Properties[p]; {
+		case !ok:
+			fail("%s borrows %s, which is not a property", at, p)
+		case p == l.Property:
+			fail("%s borrows %s for itself", at, p)
+		case seen[p]:
+			fail("%s borrows %s twice", at, p)
+		}
+		seen[p] = true
+	}
 }

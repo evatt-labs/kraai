@@ -44,6 +44,11 @@ func compileAll(files fs.FS) ([]Reader, error) {
 
 func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	r, errs := compileCall(files, lock, o, nil, nil, "")
+	wait, err := compileWait(o)
+	if err != nil {
+		errs = append(errs, err)
+	}
+	r.Wait = wait
 	captured := map[string]bool{}
 	for name := range o.Read.Capture {
 		captured[name] = true

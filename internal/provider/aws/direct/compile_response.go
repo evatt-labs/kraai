@@ -203,12 +203,16 @@ func (c *callCompiler) conditions(label string, spec map[string][]string) []Cond
 	var out []Condition
 	for _, path := range sortedKeys(spec) {
 		// A dotted path reaches the member through structures, or through a
-		// list by selecting the one element, such as a selected association.
+		// list by selecting the one element, such as a selected association,
+		// or by stepping into every element with [], such as any index.
 		steps := strings.Split(path, ".")
 		holder, via, walked := c.resource, []Step{}, true
 		for _, step := range steps[:len(steps)-1] {
 			var where, equals string
-			if sel := selection.FindStringSubmatch(step); sel != nil {
+			every := false
+			if name, ok := strings.CutSuffix(step, "[]"); ok {
+				step, every = name, true
+			} else if sel := selection.FindStringSubmatch(step); sel != nil {
 				step, where, equals = sel[1], sel[2], sel[3]
 			}
 			pm, ok := c.model.Shapes[holder].Members[step]
@@ -218,8 +222,8 @@ func (c *callCompiler) conditions(label string, spec map[string][]string) []Cond
 				break
 			}
 			next, isList := pm.Target, targetType(c.model.Shapes[pm.Target].Type, pm.Target) == "list"
-			if isList != (where != "") {
-				c.fail(label+" names %s, but %s must select one element of a list or be a structure", path, step)
+			if isList != (where != "" || every) {
+				c.fail(label+" names %s, but %s must select one element of a list, step into every element with [], or be a structure", path, step)
 				walked = false
 				break
 			}

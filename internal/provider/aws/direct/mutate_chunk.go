@@ -33,10 +33,16 @@ func (c *Client) sendElements(ctx context.Context, r Reader, u MutationCall, cal
 	if u.Chunk > 0 {
 		size = u.Chunk
 	}
+	if u.OneAtATime {
+		size = 1
+	}
 	for part := range slices.Chunk(elems, size) {
 		values, err := listValues(u, address, name, part)
 		if err != nil {
 			return fmt.Errorf("%s's %s: %w", r.Type, u.ListProperty, err)
+		}
+		if err := c.settle(ctx, r, address); err != nil {
+			return err
 		}
 		if _, err := c.mutate(ctx, r, call, values); err != nil {
 			return err
