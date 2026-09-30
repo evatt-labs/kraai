@@ -67,7 +67,7 @@ func (f *tableFake) serve(op, raw string) (int, string) {
 	}
 	switch op {
 	case "CreateTable":
-		f.exists, f.busy, f.status = true, 3, "CREATING"
+		f.exists, f.busy, f.status = true, 30, "CREATING"
 		f.table = map[string]any{"TableName": body["TableName"], "TableArn": tableARN}
 		f.merge(body)
 		if v, ok := body["Tags"]; ok {
