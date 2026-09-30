@@ -75,34 +75,11 @@ func keysOf(key []string, list any) []string {
 // elements no longer desired, then its change call for those changed, and
 // its add call for those new, or changed when it has no change call.
 func (c *Client) applyList(ctx context.Context, r Reader, u MutationCall, address map[string]any, current, desired any) error {
-	var added, removed, changed []any
-	var err error
-	current, desired = entriesOf(current), entriesOf(desired)
-	if len(u.Match) > 0 {
-		var pairs [][2]any
-		added, removed, pairs, err = matchChanges(u.Match, current, desired)
-		for _, p := range pairs {
-			if u.Change != nil {
-				changed = append(changed, p[0])
-				continue
-			}
-			// Without a change call, a changed element is replaced.
-			added, removed = append(added, p[0]), append(removed, p[1])
-		}
-	} else {
-		added, removed, err = listChanges(u.Key, current, desired)
-	}
+	steps, err := listSteps(u, current, desired)
 	if err != nil {
 		return fmt.Errorf("%s's %s: %w", r.Type, u.ListProperty, err)
 	}
-	for _, step := range []struct {
-		call  *MutationCall
-		elems []any
-		name  string
-	}{{u.Remove, removed, "removed"}, {u.Change, changed, "changed"}, {u.Add, added, "added"}} {
-		if step.call == nil || len(step.elems) == 0 {
-			continue
-		}
+	for _, step := range steps {
 		if err := c.sendElements(ctx, r, u, *step.call, address, step.name, step.elems); err != nil {
 			return err
 		}
@@ -202,7 +179,7 @@ func (c *Client) clearLists(ctx context.Context, r Reader, identifier string, ad
 		}
 		u := r.Update[i]
 		if elems := asList(entriesOf(current[property])); len(elems) > 0 {
-			if err := c.sendElements(ctx, r, u, *u.Remove, address, "removed", elems); err != nil {
+			if err := c.sendElements(ctx, r, u, *u.Remove, withAddress(u, address, current, nil), "removed", elems); err != nil {
 				return err
 			}
 		}

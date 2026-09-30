@@ -420,7 +420,7 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 		name  string
 		value []string
 	}{{"AbsentErrors", m.AbsentErrors}, {"RetryErrors", m.RetryErrors}, {"Properties", m.Properties},
-		{"Key", m.Key}, {"Match", m.Match}, {"Clear", m.Clear}} {
+		{"Key", m.Key}, {"Match", m.Match}, {"Clear", m.Clear}, {"Immutable", m.Immutable}, {"With", m.With}} {
 		if f.value != nil {
 			fmt.Fprintf(b, "%s: %#v, ", f.name, f.value)
 		}
@@ -442,6 +442,9 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 		}
 		b.WriteString("}, ")
 	}
+	if m.OneAtATime {
+		b.WriteString("OneAtATime: true, ")
+	}
 	if m.Together {
 		b.WriteString("Together: true, ")
 	}
@@ -460,6 +463,15 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 			mutationLiteral(b, *f.call)
 			b.WriteString(", ")
 		}
+	}
+	if len(m.Changes) > 0 {
+		b.WriteString("Changes: []ChangeRoute{")
+		for _, c := range m.Changes {
+			fmt.Fprintf(b, "{Members: %#v, Call: &", c.Members)
+			mutationLiteral(b, *c.Call)
+			b.WriteString("}, ")
+		}
+		b.WriteString("}, ")
 	}
 	b.WriteString("}")
 }
