@@ -13,7 +13,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
-	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 )
 
 // CreateResource submits desiredState for creation and polls to a terminal
@@ -27,7 +26,7 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 	// not repopulate the cache with the world as it was.
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.direct != nil && direct.CanMutate(typeName) {
+	if c.mutatesDirectly(typeName, desiredState) {
 		directMutation(ctx, typeName, "create")
 		identifier, err := c.direct.Create(ctx, typeName, desiredState)
 		if err != nil {
@@ -84,9 +83,17 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.direct != nil && direct.CanMutate(typeName) {
-		directMutation(ctx, typeName, "update")
-		return c.updateDirect(ctx, typeName, identifier, patch)
+	if c.mutatesDirectly(typeName, nil) {
+		changes, err := patchChanges(typeName, identifier, patch)
+		if err != nil {
+			return nil, err
+		}
+		// A change the direct calls cannot make is Cloud Control's, decided
+		// before any call: half of a direct update cannot be retried there.
+		if c.mutatesDirectly(typeName, changes) {
+			directMutation(ctx, typeName, "update")
+			return c.updateDirect(ctx, typeName, identifier, changes)
+		}
 	}
 	out, err := c.cc.UpdateResource(ctx, &cloudcontrol.UpdateResourceInput{
 		TypeName:      aws.String(typeName),
@@ -122,7 +129,7 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string) error {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.direct != nil && direct.CanMutate(typeName) {
+	if c.mutatesDirectly(typeName, nil) {
 		directMutation(ctx, typeName, "delete")
 		if err := c.direct.Delete(ctx, typeName, identifier); err != nil {
 			return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting %s %q", typeName, identifier)
@@ -157,11 +164,9 @@ func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string
 	return translateFailure("deleting", typeName, identifier, event)
 }
 
-// updateDirect applies patch, the add and replace operations buildPatch
-// writes, through the type's direct update calls. A failed direct mutation
-// is an error, never retried through Cloud Control: half of it may have
-// been made.
-func (c *Client) updateDirect(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
+// patchChanges is the properties patch, the add and replace operations
+// buildPatch writes, sets, with their values.
+func patchChanges(typeName, identifier string, patch []byte) (map[string]any, error) {
 	var ops []patchOp
 	if err := json.Unmarshal(patch, &ops); err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding the patch for %s %q", typeName, identifier)
@@ -174,6 +179,13 @@ func (c *Client) updateDirect(ctx context.Context, typeName, identifier string, 
 		}
 		changes[property] = op.Value
 	}
+	return changes, nil
+}
+
+// updateDirect sets changes through the type's direct update calls. A
+// failed direct mutation is an error, never retried through Cloud Control:
+// half of it may have been made.
+func (c *Client) updateDirect(ctx context.Context, typeName, identifier string, changes map[string]any) (map[string]any, error) {
 	current, err := c.direct.ReadByID(ctx, typeName, identifier)
 	if err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s %q to update it", typeName, identifier)
@@ -195,4 +207,10 @@ func directMutation(ctx context.Context, typeName, kind string) {
 		attribute.String("kraai.type", typeName),
 		attribute.String("kraai.mutation", kind),
 	))
+}
+
+// mutatesDirectly reports whether a mutation of typeName naming properties
+// goes through the type's own API rather than Cloud Control.
+func (c *Client) mutatesDirectly(typeName string, properties map[string]any) bool {
+	return c.direct != nil && c.canMutate != nil && c.canMutate(typeName, properties)
 }

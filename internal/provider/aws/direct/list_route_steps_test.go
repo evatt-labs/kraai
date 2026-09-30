@@ -265,6 +265,36 @@ func TestListRouteChangesRefuseAnUnlistedMember(t *testing.T) {
 	}
 }
 
+// A change entry's element shapes the elements its call is sent, and the
+// add call keeps the route's.
+func TestListRouteChangeElement(t *testing.T) {
+	edit := func(l *ListRoute) {
+		l.Element = map[string]any{"Id": "{Id}", "Arn": "{Arn}", "RoleArn": "{RoleArn}"}
+		l.Changes = []ChangeCall{{Members: []string{"RoleArn"}, Element: map[string]any{"Id": "{Id}", "RoleArn": "{RoleArn}"},
+			Mutation: Mutation{Operation: "PutTargets", Input: map[string]any{"Rule": "{Arn:arnName}", "Targets": "{changed}"}}}}
+	}
+	r := mustCompileRoute(t, edit)
+	f := &recordingEvents{}
+	current := []any{tgt("x", "arn:x", "r")}
+	desired := []any{tgt("x", "arn:x", "r2"), tgt("n", "arn:n", "r")}
+	if err := f.serve(t).apply(context.Background(), r, ruleAddress, map[string]any{"Targets": current}, map[string]any{"Targets": desired}, false); err != nil {
+		t.Fatal(err)
+	}
+	want := []any{map[string]any{"Id": "x", "RoleArn": "r2"}}
+	if got := f.calls[0].body["Targets"]; !reflect.DeepEqual(got, want) {
+		t.Fatalf("change sent %v, want %v", got, want)
+	}
+	if got := f.calls[1].body["Targets"]; !reflect.DeepEqual(got, []any{tgt("n", "arn:n", "r")}) {
+		t.Fatalf("add sent %v, want the route's element", got)
+	}
+	bad := func(l *ListRoute) {
+		l.Changes = []ChangeCall{{Members: []string{"RoleArn"}, Element: map[string]any{"Id": "{Nope}"}, Mutation: putRule()}}
+	}
+	if _, errs := compileRoute(t, bad); !containsErr(errs, "changes[0] shapes Targets's elements from {Nope}") {
+		t.Fatalf("errors = %v, want the unknown member refused", errs)
+	}
+}
+
 // A borrowed property is the desired value when the update changes it, and
 // as read otherwise.
 func TestListRouteWithValues(t *testing.T) {

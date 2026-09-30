@@ -96,6 +96,10 @@ func covers(desired, current any) bool {
 			return true
 		case []any:
 			cl, ok := c.([]any)
+			if !ok && len(dt) == 0 && c == nil {
+				// A service can leave an emptied list out of its answer.
+				return true
+			}
 			if !ok || len(cl) < len(dt) {
 				return false
 			}

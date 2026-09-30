@@ -19,7 +19,9 @@ func CanMutate(typeName string) bool { return readers[typeName].Mutable }
 // Create creates an instance of typeName with the desired properties and
 // returns its identifier once a read shows it. Properties the create call
 // does not send are set by the update calls once the instance reads; when
-// one of those fails, the identifier is returned with the error.
+// one of those fails, the identifier is returned with the error. A
+// property neither the create nor an update call can set is refused before
+// any call is made.
 func (c *Client) Create(ctx context.Context, typeName string, desired map[string]any) (string, error) {
 	r, ok := readers[typeName]
 	if !ok || r.Create == nil || len(r.Identifier) != 1 {
@@ -32,6 +34,9 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 			return "", fmt.Errorf("%s is named by its %s tag, which the desired state does not carry", typeName, r.Create.NameTag)
 		}
 		values[p] = shortName(name, r.Create.NameMaxLength)
+	}
+	if err := checkCreatable(r, values); err != nil {
+		return "", err
 	}
 	out, err := c.mutateWith(ctx, createPolicy(*r.Create), r, *r.Create, values)
 	if err != nil {
@@ -55,7 +60,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		values[property] = id
 	}
 	rest := map[string]any{}
-	for p, v := range values {
+	for p, v := range withoutUnsettable(r, values) {
 		if !slices.Contains(r.Create.Properties, p) {
 			rest[p] = v
 		}
@@ -106,6 +111,8 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 	if err != nil {
 		return err
 	}
+	// A write-only property is never read back, so the wait cannot see it.
+	changes = withoutWriteOnly(r, changes)
 	return c.waitFor(ctx, typeName, identifier, func(props map[string]any, err error) bool {
 		return err == nil && covers(shown(r, changes, props), props) && listsMatch(r, changes, props) && c.settled(ctx, r, identifier)
 	})
@@ -127,10 +134,9 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 		_, err := c.mutate(ctx, r, m, values)
 		return err
 	}
+	changes = withoutUnsettable(r, changes)
 	for p := range changes {
-		if !slices.ContainsFunc(r.Update, func(u MutationCall) bool {
-			return u.TagProperty == p || u.ListProperty == p || slices.Contains(u.Properties, p) || lends(u, p, changes)
-		}) {
+		if !settable(r, p, changes) {
 			return fmt.Errorf("%s has no direct update for %s", r.Type, p)
 		}
 	}

@@ -114,6 +114,10 @@ type Client struct {
 	// SDK's instrumented transport and credentials.
 	direct *direct.Client
 
+	// canMutate decides whether a create or update, given its desired state
+	// or changes, goes through direct; nil means never.
+	canMutate func(typeName string, properties map[string]any) bool
+
 	// region is the SDK's resolved region, which every ARN this package
 	// builds is against. Taken from the loaded config rather than
 	// Settings.Region, which may be empty and deferred to the SDK's chain.
@@ -223,6 +227,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		ssm:              ssm.NewFromConfig(cfg),
 		tagging:          resourcegroupstaggingapi.NewFromConfig(cfg),
 		direct:           &direct.Client{HTTP: httpClient, Credentials: cfg.Credentials, Region: cfg.Region},
+		canMutate:        direct.CanMutateWith,
 		region:           cfg.Region,
 		pollInitialDelay: defaultPollInitialDelay,
 		pollMaxDelay:     defaultPollMaxDelay,

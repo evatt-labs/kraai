@@ -21,6 +21,22 @@
       "override": "833223e45f893a3843fd1b936ba8ea744a2b505181eb14d0027bf5b20bf37ea7"
     },
     {
+      "type": "AWS::DynamoDB::Table",
+      "date": "2026-09-30",
+      "outcome": "parity",
+      "updated": [
+        "DeletionProtectionEnabled",
+        "GlobalSecondaryIndexes",
+        "OnDemandThroughput",
+        "PointInTimeRecoverySpecification",
+        "ResourcePolicy",
+        "TableClass",
+        "Tags",
+        "TimeToLiveSpecification"
+      ],
+      "override": "02ac4be1685e2c6b0a8a1a82773216b69fb85981c607b92bc4aeb05e00087371"
+    },
+    {
       "type": "AWS::EC2::InternetGateway",
       "date": "2026-09-27",
       "outcome": "parity",
