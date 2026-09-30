@@ -174,7 +174,7 @@
     "dynamodb/service/2012-08-10/dynamodb-2012-08-10.json": {
       "file": "models/dynamodb-2012-08-10.json",
       "sourceSha256": "551882dda390dbce7e3d2001e85017a58b76fdcfaf1bc152b6ecf063efc70705",
-      "subsetSha256": "aa976803b980a672e61a73d573f513e6adc169dd1887f970bef95487edca7ae4"
+      "subsetSha256": "feca4bd61c63eec44bf1a04130f5d6287053207ae5c5ac83c70b3f02f23be72f"
     },
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",

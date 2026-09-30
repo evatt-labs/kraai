@@ -114,6 +114,15 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.dynamodb#BooleanObject": {
+      "type": "boolean"
+    },
+    "com.amazonaws.dynamodb#ConfirmRemoveSelfResourceAccess": {
+      "traits": {
+        "smithy.api#default": false
+      },
+      "type": "boolean"
+    },
     "com.amazonaws.dynamodb#ContinuousBackupsDescription": {
       "members": {
         "ContinuousBackupsStatus": {
@@ -146,6 +155,17 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.dynamodb#ContinuousBackupsUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.dynamodb#ContributorInsightsMode": {
       "members": {
@@ -211,8 +231,361 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.dynamodb#CreateGlobalSecondaryIndexAction": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "KeySchema": {
+          "target": "com.amazonaws.dynamodb#KeySchema",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OnDemandThroughput": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughput",
+          "traits": {}
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProvisionedThroughput": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughput",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#CreateGlobalTableWitnessGroupMemberAction": {
+      "members": {
+        "RegionName": {
+          "target": "com.amazonaws.dynamodb#RegionName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#CreateReplicationGroupMemberAction": {
+      "members": {
+        "GlobalSecondaryIndexes": {
+          "target": "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexList",
+          "traits": {}
+        },
+        "KMSMasterKeyId": {
+          "target": "com.amazonaws.dynamodb#KMSMasterKeyId",
+          "traits": {}
+        },
+        "OnDemandThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
+          "traits": {}
+        },
+        "ProvisionedThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughputOverride",
+          "traits": {}
+        },
+        "RegionName": {
+          "target": "com.amazonaws.dynamodb#RegionName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableClassOverride": {
+          "target": "com.amazonaws.dynamodb#TableClass",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#CreateTable": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceInUseException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#CreateTableInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#CreateTableOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#CreateTableInput": {
+      "members": {
+        "AttributeDefinitions": {
+          "target": "com.amazonaws.dynamodb#AttributeDefinitions",
+          "traits": {}
+        },
+        "BillingMode": {
+          "target": "com.amazonaws.dynamodb#BillingMode",
+          "traits": {}
+        },
+        "DeletionProtectionEnabled": {
+          "target": "com.amazonaws.dynamodb#DeletionProtectionEnabled",
+          "traits": {}
+        },
+        "GlobalSecondaryIndexes": {
+          "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexList",
+          "traits": {}
+        },
+        "GlobalTableSettingsReplicationMode": {
+          "target": "com.amazonaws.dynamodb#GlobalTableSettingsReplicationMode",
+          "traits": {}
+        },
+        "GlobalTableSourceArn": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {}
+        },
+        "KeySchema": {
+          "target": "com.amazonaws.dynamodb#KeySchema",
+          "traits": {}
+        },
+        "LocalSecondaryIndexes": {
+          "target": "com.amazonaws.dynamodb#LocalSecondaryIndexList",
+          "traits": {}
+        },
+        "OnDemandThroughput": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughput",
+          "traits": {}
+        },
+        "ProvisionedThroughput": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughput",
+          "traits": {}
+        },
+        "ResourcePolicy": {
+          "target": "com.amazonaws.dynamodb#ResourcePolicy",
+          "traits": {}
+        },
+        "SSESpecification": {
+          "target": "com.amazonaws.dynamodb#SSESpecification",
+          "traits": {}
+        },
+        "StreamSpecification": {
+          "target": "com.amazonaws.dynamodb#StreamSpecification",
+          "traits": {}
+        },
+        "TableClass": {
+          "target": "com.amazonaws.dynamodb#TableClass",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.dynamodb#TagList",
+          "traits": {}
+        },
+        "VectorIndexes": {
+          "target": "com.amazonaws.dynamodb#VectorIndexList",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#CreateTableOutput": {
+      "members": {
+        "TableDescription": {
+          "target": "com.amazonaws.dynamodb#TableDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#CreateVectorIndexAction": {
+      "members": {
+        "Dimensions": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DistanceFunction": {
+          "target": "com.amazonaws.dynamodb#VectorDistanceFunction",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SearchSchema": {
+          "target": "com.amazonaws.dynamodb#SearchSchema",
+          "traits": {}
+        },
+        "VectorAttribute": {
+          "target": "com.amazonaws.dynamodb#VectorAttributeDefinition",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#Date": {
       "type": "timestamp"
+    },
+    "com.amazonaws.dynamodb#DeleteGlobalSecondaryIndexAction": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DeleteGlobalTableWitnessGroupMemberAction": {
+      "members": {
+        "RegionName": {
+          "target": "com.amazonaws.dynamodb#RegionName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DeleteReplicationGroupMemberAction": {
+      "members": {
+        "RegionName": {
+          "target": "com.amazonaws.dynamodb#RegionName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DeleteTable": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceInUseException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#DeleteTableInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#DeleteTableOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#DeleteTableInput": {
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DeleteTableOutput": {
+      "members": {
+        "TableDescription": {
+          "target": "com.amazonaws.dynamodb#TableDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#DeleteVectorIndexAction": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.dynamodb#DeletionProtectionEnabled": {
       "type": "boolean"
@@ -645,6 +1018,12 @@
     "com.amazonaws.dynamodb#DynamoDB_20120810": {
       "operations": [
         {
+          "target": "com.amazonaws.dynamodb#CreateTable"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#DeleteTable"
+        },
+        {
           "target": "com.amazonaws.dynamodb#DescribeContinuousBackups"
         },
         {
@@ -664,6 +1043,24 @@
         },
         {
           "target": "com.amazonaws.dynamodb#ListTagsOfResource"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#PutResourcePolicy"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#TagResource"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#UntagResource"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#UpdateContinuousBackups"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#UpdateTable"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#UpdateTimeToLive"
         }
       ],
       "traits": {
@@ -2716,6 +3113,42 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndex": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "KeySchema": {
+          "target": "com.amazonaws.dynamodb#KeySchema",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OnDemandThroughput": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughput",
+          "traits": {}
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ProvisionedThroughput": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughput",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#GlobalSecondaryIndexDescription": {
       "members": {
         "Backfilling": {
@@ -2769,6 +3202,36 @@
     "com.amazonaws.dynamodb#GlobalSecondaryIndexDescriptionList": {
       "member": {
         "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndexList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#GlobalSecondaryIndex"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndexUpdate": {
+      "members": {
+        "Create": {
+          "target": "com.amazonaws.dynamodb#CreateGlobalSecondaryIndexAction",
+          "traits": {}
+        },
+        "Delete": {
+          "target": "com.amazonaws.dynamodb#DeleteGlobalSecondaryIndexAction",
+          "traits": {}
+        },
+        "Update": {
+          "target": "com.amazonaws.dynamodb#UpdateGlobalSecondaryIndexAction",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GlobalSecondaryIndexUpdateList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexUpdate"
       },
       "type": "list"
     },
@@ -2830,6 +3293,32 @@
     "com.amazonaws.dynamodb#GlobalTableWitnessDescriptionList": {
       "member": {
         "target": "com.amazonaws.dynamodb#GlobalTableWitnessDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#GlobalTableWitnessGroupUpdate": {
+      "members": {
+        "Create": {
+          "target": "com.amazonaws.dynamodb#CreateGlobalTableWitnessGroupMemberAction",
+          "traits": {}
+        },
+        "Delete": {
+          "target": "com.amazonaws.dynamodb#DeleteGlobalTableWitnessGroupMemberAction",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#GlobalTableWitnessGroupUpdateList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#GlobalTableWitnessGroupUpdate"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1,
+          "min": 1
+        }
       },
       "type": "list"
     },
@@ -2988,6 +3477,18 @@
     "com.amazonaws.dynamodb#LastUpdateDateTime": {
       "type": "timestamp"
     },
+    "com.amazonaws.dynamodb#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#ListTagsOfResource": {
       "errors": [
         {
@@ -3050,6 +3551,30 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.dynamodb#LocalSecondaryIndex": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "KeySchema": {
+          "target": "com.amazonaws.dynamodb#KeySchema",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#LocalSecondaryIndexDescription": {
       "members": {
         "IndexArn": {
@@ -3083,6 +3608,12 @@
     "com.amazonaws.dynamodb#LocalSecondaryIndexDescriptionList": {
       "member": {
         "target": "com.amazonaws.dynamodb#LocalSecondaryIndexDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#LocalSecondaryIndexList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#LocalSecondaryIndex"
       },
       "type": "list"
     },
@@ -3184,6 +3715,22 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.dynamodb#PointInTimeRecoverySpecification": {
+      "members": {
+        "PointInTimeRecoveryEnabled": {
+          "target": "com.amazonaws.dynamodb#BooleanObject",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "RecoveryPeriodInDays": {
+          "target": "com.amazonaws.dynamodb#RecoveryPeriodInDays",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#PointInTimeRecoveryStatus": {
       "members": {
         "DISABLED": {
@@ -3266,6 +3813,24 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.dynamodb#ProvisionedThroughput": {
+      "members": {
+        "ReadCapacityUnits": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "WriteCapacityUnits": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#ProvisionedThroughputDescription": {
       "members": {
         "LastDecreaseDateTime": {
@@ -3300,6 +3865,86 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#PutResourcePolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#PolicyNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceInUseException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#PutResourcePolicyInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#PutResourcePolicyOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#PutResourcePolicyInput": {
+      "members": {
+        "ConfirmRemoveSelfResourceAccess": {
+          "target": "com.amazonaws.dynamodb#ConfirmRemoveSelfResourceAccess",
+          "traits": {
+            "smithy.api#default": false,
+            "smithy.api#httpHeader": "x-amz-confirm-remove-self-resource-access"
+          }
+        },
+        "ExpectedRevisionId": {
+          "target": "com.amazonaws.dynamodb#PolicyRevisionId",
+          "traits": {}
+        },
+        "Policy": {
+          "target": "com.amazonaws.dynamodb#ResourcePolicy",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceArn": {
+          "target": "com.amazonaws.dynamodb#ResourceArnString",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#PutResourcePolicyOutput": {
+      "members": {
+        "RevisionId": {
+          "target": "com.amazonaws.dynamodb#PolicyRevisionId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
       "type": "structure"
     },
     "com.amazonaws.dynamodb#RecoveryPeriodInDays": {
@@ -3377,6 +4022,26 @@
       },
       "type": "list"
     },
+    "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndex": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OnDemandThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
+          "traits": {}
+        },
+        "ProvisionedThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughputOverride",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexDescription": {
       "members": {
         "IndexName": {
@@ -3402,6 +4067,17 @@
     "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexDescriptionList": {
       "member": {
         "target": "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexDescription"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndex"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
       },
       "type": "list"
     },
@@ -3476,6 +4152,35 @@
     "com.amazonaws.dynamodb#ReplicaStatusPercentProgress": {
       "type": "string"
     },
+    "com.amazonaws.dynamodb#ReplicationGroupUpdate": {
+      "members": {
+        "Create": {
+          "target": "com.amazonaws.dynamodb#CreateReplicationGroupMemberAction",
+          "traits": {}
+        },
+        "Delete": {
+          "target": "com.amazonaws.dynamodb#DeleteReplicationGroupMemberAction",
+          "traits": {}
+        },
+        "Update": {
+          "target": "com.amazonaws.dynamodb#UpdateReplicationGroupMemberAction",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#ReplicationGroupUpdateList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#ReplicationGroupUpdate"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "list"
+    },
     "com.amazonaws.dynamodb#ResourceArnString": {
       "traits": {
         "smithy.api#length": {
@@ -3484,6 +4189,18 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.dynamodb#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.dynamodb#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.dynamodb#ResourceNotFoundException": {
       "members": {
@@ -3545,6 +4262,27 @@
         },
         "Status": {
           "target": "com.amazonaws.dynamodb#SSEStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#SSEEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.dynamodb#SSESpecification": {
+      "members": {
+        "Enabled": {
+          "target": "com.amazonaws.dynamodb#SSEEnabled",
+          "traits": {}
+        },
+        "KMSMasterKeyId": {
+          "target": "com.amazonaws.dynamodb#KMSMasterKeyId",
+          "traits": {}
+        },
+        "SSEType": {
+          "target": "com.amazonaws.dynamodb#SSEType",
           "traits": {}
         }
       },
@@ -4010,6 +4748,12 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.dynamodb#TagKeyList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#TagKeyString"
+      },
+      "type": "list"
+    },
     "com.amazonaws.dynamodb#TagKeyString": {
       "traits": {
         "smithy.api#length": {
@@ -4024,6 +4768,60 @@
         "target": "com.amazonaws.dynamodb#Tag"
       },
       "type": "list"
+    },
+    "com.amazonaws.dynamodb#TagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceInUseException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#TagResourceInput"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#TagResourceInput": {
+      "members": {
+        "ResourceArn": {
+          "target": "com.amazonaws.dynamodb#ResourceArnString",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.dynamodb#TagList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.dynamodb#TagValueString": {
       "traits": {
@@ -4057,6 +4855,27 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.dynamodb#TimeToLiveEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.dynamodb#TimeToLiveSpecification": {
+      "members": {
+        "AttributeName": {
+          "target": "com.amazonaws.dynamodb#TimeToLiveAttributeName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Enabled": {
+          "target": "com.amazonaws.dynamodb#TimeToLiveEnabled",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.dynamodb#TimeToLiveStatus": {
       "members": {
         "DISABLED": {
@@ -4085,6 +4904,365 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.dynamodb#UntagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceInUseException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#UntagResourceInput"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#UntagResourceInput": {
+      "members": {
+        "ResourceArn": {
+          "target": "com.amazonaws.dynamodb#ResourceArnString",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.dynamodb#TagKeyList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateContinuousBackups": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#ContinuousBackupsUnavailableException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#TableNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#UpdateContinuousBackupsInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#UpdateContinuousBackupsOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#UpdateContinuousBackupsInput": {
+      "members": {
+        "PointInTimeRecoverySpecification": {
+          "target": "com.amazonaws.dynamodb#PointInTimeRecoverySpecification",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateContinuousBackupsOutput": {
+      "members": {
+        "ContinuousBackupsDescription": {
+          "target": "com.amazonaws.dynamodb#ContinuousBackupsDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateGlobalSecondaryIndexAction": {
+      "members": {
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OnDemandThroughput": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughput",
+          "traits": {}
+        },
+        "ProvisionedThroughput": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughput",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateReplicationGroupMemberAction": {
+      "members": {
+        "GlobalSecondaryIndexes": {
+          "target": "com.amazonaws.dynamodb#ReplicaGlobalSecondaryIndexList",
+          "traits": {}
+        },
+        "KMSMasterKeyId": {
+          "target": "com.amazonaws.dynamodb#KMSMasterKeyId",
+          "traits": {}
+        },
+        "OnDemandThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughputOverride",
+          "traits": {}
+        },
+        "ProvisionedThroughputOverride": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughputOverride",
+          "traits": {}
+        },
+        "RegionName": {
+          "target": "com.amazonaws.dynamodb#RegionName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableClassOverride": {
+          "target": "com.amazonaws.dynamodb#TableClass",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateTable": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceInUseException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#UpdateTableInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#UpdateTableOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#UpdateTableInput": {
+      "members": {
+        "AttributeDefinitions": {
+          "target": "com.amazonaws.dynamodb#AttributeDefinitions",
+          "traits": {}
+        },
+        "BillingMode": {
+          "target": "com.amazonaws.dynamodb#BillingMode",
+          "traits": {}
+        },
+        "DeletionProtectionEnabled": {
+          "target": "com.amazonaws.dynamodb#DeletionProtectionEnabled",
+          "traits": {}
+        },
+        "GlobalSecondaryIndexUpdates": {
+          "target": "com.amazonaws.dynamodb#GlobalSecondaryIndexUpdateList",
+          "traits": {}
+        },
+        "GlobalTableSettingsReplicationMode": {
+          "target": "com.amazonaws.dynamodb#GlobalTableSettingsReplicationMode",
+          "traits": {}
+        },
+        "GlobalTableWitnessUpdates": {
+          "target": "com.amazonaws.dynamodb#GlobalTableWitnessGroupUpdateList",
+          "traits": {}
+        },
+        "MultiRegionConsistency": {
+          "target": "com.amazonaws.dynamodb#MultiRegionConsistency",
+          "traits": {}
+        },
+        "OnDemandThroughput": {
+          "target": "com.amazonaws.dynamodb#OnDemandThroughput",
+          "traits": {}
+        },
+        "ProvisionedThroughput": {
+          "target": "com.amazonaws.dynamodb#ProvisionedThroughput",
+          "traits": {}
+        },
+        "ReplicaUpdates": {
+          "target": "com.amazonaws.dynamodb#ReplicationGroupUpdateList",
+          "traits": {}
+        },
+        "SSESpecification": {
+          "target": "com.amazonaws.dynamodb#SSESpecification",
+          "traits": {}
+        },
+        "StreamSpecification": {
+          "target": "com.amazonaws.dynamodb#StreamSpecification",
+          "traits": {}
+        },
+        "TableClass": {
+          "target": "com.amazonaws.dynamodb#TableClass",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        },
+        "VectorIndexUpdates": {
+          "target": "com.amazonaws.dynamodb#VectorIndexUpdateList",
+          "traits": {}
+        },
+        "WarmThroughput": {
+          "target": "com.amazonaws.dynamodb#WarmThroughput",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateTableOutput": {
+      "members": {
+        "TableDescription": {
+          "target": "com.amazonaws.dynamodb#TableDescription",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateTimeToLive": {
+      "errors": [
+        {
+          "target": "com.amazonaws.dynamodb#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#InvalidEndpointException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#LimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceInUseException"
+        },
+        {
+          "target": "com.amazonaws.dynamodb#ResourceNotFoundException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.dynamodb#UpdateTimeToLiveInput"
+      },
+      "output": {
+        "target": "com.amazonaws.dynamodb#UpdateTimeToLiveOutput"
+      },
+      "traits": {
+        "aws.api#clientDiscoveredEndpoint": {
+          "required": false
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.dynamodb#UpdateTimeToLiveInput": {
+      "members": {
+        "TableName": {
+          "target": "com.amazonaws.dynamodb#TableArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "ResourceArn"
+            }
+          }
+        },
+        "TimeToLiveSpecification": {
+          "target": "com.amazonaws.dynamodb#TimeToLiveSpecification",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#UpdateTimeToLiveOutput": {
+      "members": {
+        "TimeToLiveSpecification": {
+          "target": "com.amazonaws.dynamodb#TimeToLiveSpecification",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.dynamodb#VectorAttributeDefinition": {
       "members": {
@@ -4129,6 +5307,46 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.dynamodb#VectorIndex": {
+      "members": {
+        "Dimensions": {
+          "target": "com.amazonaws.dynamodb#PositiveLongObject",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "DistanceFunction": {
+          "target": "com.amazonaws.dynamodb#VectorDistanceFunction",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "IndexName": {
+          "target": "com.amazonaws.dynamodb#IndexName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Projection": {
+          "target": "com.amazonaws.dynamodb#Projection",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "SearchSchema": {
+          "target": "com.amazonaws.dynamodb#SearchSchema",
+          "traits": {}
+        },
+        "VectorAttribute": {
+          "target": "com.amazonaws.dynamodb#VectorAttributeDefinition",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.dynamodb#VectorIndexDescription": {
       "members": {
@@ -4185,6 +5403,46 @@
         "target": "com.amazonaws.dynamodb#VectorIndexDescription"
       },
       "type": "list"
+    },
+    "com.amazonaws.dynamodb#VectorIndexList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#VectorIndex"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#VectorIndexUpdate": {
+      "members": {
+        "Create": {
+          "target": "com.amazonaws.dynamodb#CreateVectorIndexAction",
+          "traits": {}
+        },
+        "Delete": {
+          "target": "com.amazonaws.dynamodb#DeleteVectorIndexAction",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.dynamodb#VectorIndexUpdateList": {
+      "member": {
+        "target": "com.amazonaws.dynamodb#VectorIndexUpdate"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.dynamodb#WarmThroughput": {
+      "members": {
+        "ReadUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        },
+        "WriteUnitsPerSecond": {
+          "target": "com.amazonaws.dynamodb#LongObject",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.dynamodb#WitnessStatus": {
       "members": {

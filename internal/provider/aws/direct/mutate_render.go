@@ -43,14 +43,25 @@ func render(template any, values map[string]any, wireAs func(name string, v any)
 		return out, complete, nil
 	case map[string]any:
 		out := map[string]any{}
+		// A structure whose every placeholder is unset is not being set,
+		// whatever constants it holds beside them, such as a stream's
+		// StreamEnabled.
+		bound, wanted := false, false
 		for k, item := range t {
 			v, ok, err := render(item, values, wireAs)
 			if err != nil {
 				return nil, false, err
 			}
+			if len(templateRefs(item)) > 0 {
+				wanted = true
+				bound = bound || ok
+			}
 			if ok {
 				out[k] = v
 			}
+		}
+		if wanted && !bound {
+			return nil, false, nil
 		}
 		return out, len(out) > 0 || len(t) == 0, nil
 	case []any:
