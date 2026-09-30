@@ -138,6 +138,17 @@ func listsMatch(r Reader, changes, props map[string]any) bool {
 		if u.ListProperty == "" || u.Remove == nil || !changed {
 			continue
 		}
+		if want, isMap := desired.(map[string]any); isMap {
+			// An entry the read omits is at its default, so only an entry
+			// read that is not desired is one the removal missed.
+			have, _ := props[u.ListProperty].(map[string]any)
+			for k := range have {
+				if _, ok := want[k]; !ok {
+					return false
+				}
+			}
+			continue
+		}
 		desired, have := entriesOf(desired), entriesOf(props[u.ListProperty])
 		if len(u.Match) > 0 {
 			if !matchedExactly(u.Match, have, desired) {
@@ -150,6 +161,31 @@ func listsMatch(r Reader, changes, props map[string]any) bool {
 		}
 	}
 	return true
+}
+
+// shown is want without the entries of a list-routed map the read omits: a
+// service can leave out an entry set to its default, such as a parameter
+// group's parameter, which then reads as never set.
+func shown(r Reader, want, props map[string]any) map[string]any {
+	out, cloned := want, false
+	for _, u := range r.Update {
+		m, isMap := want[u.ListProperty].(map[string]any)
+		if u.ListProperty == "" || !isMap {
+			continue
+		}
+		have, _ := props[u.ListProperty].(map[string]any)
+		kept := map[string]any{}
+		for k, v := range m {
+			if _, read := have[k]; read {
+				kept[k] = v
+			}
+		}
+		if !cloned {
+			out, cloned = maps.Clone(want), true
+		}
+		out[u.ListProperty] = kept
+	}
+	return out
 }
 
 // clearLists removes every element of the delete's Clear properties before

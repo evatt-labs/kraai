@@ -88,7 +88,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		}
 	}
 	return id, c.waitFor(ctx, typeName, id, func(props map[string]any, err error) bool {
-		return err == nil && covers(readable, props) && c.settled(ctx, r, id)
+		return err == nil && covers(shown(r, readable, props), props) && c.settled(ctx, r, id)
 	})
 }
 
@@ -107,7 +107,7 @@ func (c *Client) Update(ctx context.Context, typeName, identifier string, curren
 		return err
 	}
 	return c.waitFor(ctx, typeName, identifier, func(props map[string]any, err error) bool {
-		return err == nil && covers(changes, props) && listsMatch(r, changes, props) && c.settled(ctx, r, identifier)
+		return err == nil && covers(shown(r, changes, props), props) && listsMatch(r, changes, props) && c.settled(ctx, r, identifier)
 	})
 }
 

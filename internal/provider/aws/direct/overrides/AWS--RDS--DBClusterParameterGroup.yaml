@@ -65,16 +65,20 @@ update:
         ParameterName: "{Key}"
         ParameterValue: "{Value:string}"
         ApplyMethod: pending-reboot
+      # A call right after another is refused while the group applies the
+      # first: "has pending changes".
       add:
         operation: ModifyDBClusterParameterGroup
         input:
           DBClusterParameterGroupName: "{DBClusterParameterGroupName}"
           Parameters: "{added}"
+        retryErrors: [InvalidDBParameterGroupState]
       remove:
         operation: ResetDBClusterParameterGroup
         input:
           DBClusterParameterGroupName: "{DBClusterParameterGroupName}"
           Parameters: "{removed}"
+        retryErrors: [InvalidDBParameterGroupState]
   - tags:
       property: Tags
       add:

@@ -2103,7 +2103,7 @@
     {
       "type": "AWS::RDS::DBClusterParameterGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-29",
+      "date": "2026-09-30",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 2,
@@ -2116,7 +2116,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "e88f5f7f09b153e4e145b39a19c68912d911304d39e134916fb52e420df9b211"
+      "override": "e24ede4b84fc02a064d497de5e9aed9fc282d73c8ca1ec9ba2075b236d547125"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",

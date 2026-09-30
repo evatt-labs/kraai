@@ -149,8 +149,11 @@ func TestCoversComparesNumbersByValue(t *testing.T) {
 		{1, json.Number("1.0"), true},
 		{0.5, json.Number("0.50"), true},
 		{1, json.Number("1.5"), false},
-		// A number is not the text of one.
-		{1, "1", false},
+		// A service that keeps a value as text answers the number's text.
+		{1, "1", true},
+		{100, "100.0", true},
+		{1, "1.5", false},
+		{1, "one", false},
 		{map[string]any{"n": 2}, map[string]any{"n": json.Number("2.00")}, true},
 	} {
 		if got := covers(c.desired, c.current); got != c.want {

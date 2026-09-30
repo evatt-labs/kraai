@@ -30,7 +30,12 @@ type fakeClusterParams struct {
 	name   string
 	params map[string]string
 	tags   map[string]string
-	calls  map[string][]url.Values
+	// defaults are the engine's values: a parameter modified to its
+	// default is not described as user-set, as RDS answers.
+	defaults map[string]string
+	// ignoreReset answers a Reset with success and resets nothing.
+	ignoreReset bool
+	calls       map[string][]url.Values
 }
 
 func (f *fakeClusterParams) arn() string { return "arn:aws:rds:us-east-1:1:cluster-pg:" + f.name }
@@ -78,9 +83,12 @@ func (f *fakeClusterParams) serve(t *testing.T) *Client {
 				return
 			}
 			for _, p := range ps {
-				if op == "ModifyDBClusterParameterGroup" {
+				switch {
+				case op == "ModifyDBClusterParameterGroup" && f.defaults[p["name"]] == p["value"]:
+					delete(f.params, p["name"])
+				case op == "ModifyDBClusterParameterGroup":
 					f.params[p["name"]] = p["value"]
-				} else {
+				case !f.ignoreReset:
 					delete(f.params, p["name"])
 				}
 			}
