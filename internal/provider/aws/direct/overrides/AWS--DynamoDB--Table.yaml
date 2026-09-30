@@ -280,9 +280,8 @@ create:
 # them. Capacity is not sent together: a switch to on-demand would resend
 # the provisioned throughput read back, which the API refuses.
 #
-# Not routed, so the type is not lifecycle complete: global secondary and
-# vector indexes, which need one call per index with the table settled
-# between them, ContributorInsightsSpecification, KinesisStreamSpecification
+# Not routed, so the type is not lifecycle complete:
+# ContributorInsightsSpecification, KinesisStreamSpecification
 # and ImportSourceSpecification, which CreateTable has no member for.
 # StreamSpecification is set, never changed: enabling a stream on a table
 # that has one is refused, so a new view type needs a disable first, which
@@ -326,6 +325,65 @@ update:
     input:
       TableName: "{TableName}"
       WarmThroughput: "{WarmThroughput}"
+  # UpdateTable takes one index created or deleted per call, and refuses
+  # both beside a table change, so each is its own call with the table
+  # settled between them. The index's key attributes must be among the
+  # call's AttributeDefinitions, which the route lends. An index's
+  # ContributorInsightsSpecification is in no call: an element differing
+  # only there is refused before any call, and a new index is created
+  # without it.
+  - list:
+      property: GlobalSecondaryIndexes
+      key: [IndexName]
+      oneAtATime: true
+      immutable: [KeySchema, Projection]
+      with: [AttributeDefinitions]
+      element:
+        IndexName: "{IndexName}"
+        KeySchema: "{KeySchema}"
+        Projection: "{Projection}"
+        ProvisionedThroughput: "{ProvisionedThroughput}"
+        OnDemandThroughput: "{OnDemandThroughput}"
+        WarmThroughput: "{WarmThroughput}"
+      add:
+        operation: UpdateTable
+        input:
+          TableName: "{TableName}"
+          AttributeDefinitions: "{AttributeDefinitions}"
+          GlobalSecondaryIndexUpdates: [{Create: "{added:only}"}]
+      remove:
+        operation: UpdateTable
+        input:
+          TableName: "{TableName}"
+          GlobalSecondaryIndexUpdates: [{Delete: {IndexName: "{removedKeys:only}"}}]
+      changes:
+        - members: [ProvisionedThroughput, OnDemandThroughput, WarmThroughput]
+          element:
+            IndexName: "{IndexName}"
+            ProvisionedThroughput: "{ProvisionedThroughput}"
+            OnDemandThroughput: "{OnDemandThroughput}"
+            WarmThroughput: "{WarmThroughput}"
+          operation: UpdateTable
+          input:
+            TableName: "{TableName}"
+            GlobalSecondaryIndexUpdates: [{Update: "{changed:only}"}]
+  # A vector index is created or deleted, never changed: one that differs
+  # from the index of its name is refused.
+  - list:
+      property: VectorIndexes
+      key: [IndexName]
+      oneAtATime: true
+      immutable: [Dimensions, DistanceFunction, Projection, SearchSchema, VectorAttribute]
+      add:
+        operation: UpdateTable
+        input:
+          TableName: "{TableName}"
+          VectorIndexUpdates: [{Create: "{added:only}"}]
+      remove:
+        operation: UpdateTable
+        input:
+          TableName: "{TableName}"
+          VectorIndexUpdates: [{Delete: {IndexName: "{removedKeys:only}"}}]
   - tags:
       property: Tags
       add:
@@ -372,16 +430,22 @@ createOnly: [KeySchema, LocalSecondaryIndexes]
 # The harness sets one property per update, in name order, so deletion
 # protection, on at create, goes off first and the delete at the end is never
 # refused. A capacity switch needs two properties in one change, so only the
-# on-demand ceiling is exercised; a global secondary or vector index is not
-# routed yet. The time to live is set once, as it changes once an hour.
+# on-demand ceiling is exercised. The time to live is set once, as it changes
+# once an hour. The index added by the update is keyed by the sort key the
+# table is created with, so the attribute it needs is already defined; a
+# table may not define an attribute no key uses.
 lifecycle:
   create:
-    AttributeDefinitions: [{AttributeName: pk, AttributeType: S}]
-    KeySchema: [{AttributeName: pk, KeyType: HASH}]
+    AttributeDefinitions: [{AttributeName: pk, AttributeType: S}, {AttributeName: sk, AttributeType: S}]
+    KeySchema: [{AttributeName: pk, KeyType: HASH}, {AttributeName: sk, KeyType: RANGE}]
     BillingMode: PAY_PER_REQUEST
     DeletionProtectionEnabled: true
   update:
     DeletionProtectionEnabled: false
+    GlobalSecondaryIndexes:
+      - IndexName: by-sk
+        KeySchema: [{AttributeName: sk, KeyType: HASH}]
+        Projection: {ProjectionType: KEYS_ONLY}
     OnDemandThroughput: {MaxReadRequestUnits: 5, MaxWriteRequestUnits: 5}
     PointInTimeRecoverySpecification: {PointInTimeRecoveryEnabled: true}
     ResourcePolicy:
