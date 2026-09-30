@@ -91,6 +91,7 @@ func TestCreateRefusesAnUnsupportedProperty(t *testing.T) {
 }
 
 func TestCanMutateWith(t *testing.T) {
+	withReader(t, ddbTable, func(r *Reader) { r.Mutable = false })
 	if CanMutateWith(ddbTable, map[string]any{}) {
 		t.Fatal("a type that is not Mutable can mutate with nothing named")
 	}

@@ -72,7 +72,7 @@ func TestCreateNamingAnUnsupportedPropertyFallsBackToCloudControl(t *testing.T) 
 	}
 	t.Run("a supported property goes direct", func(t *testing.T) {
 		c, cc, ops := unsupportedClient(t)
-		desired := map[string]any{"TableName": "t", "StreamSpecification": map[string]any{"StreamViewType": "NEW_IMAGE"}}
+		desired := map[string]any{"TableName": "t", "TableClass": "STANDARD"}
 		if _, _, err := c.CreateResource(ctx, dynamoTable, desired); err == nil {
 			t.Fatal("CreateResource succeeded against a service that refuses every call")
 		}
