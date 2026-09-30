@@ -162,6 +162,10 @@ type Mapping struct {
 	// equals the value, such as the ingress rules of a list holding both
 	// directions. {Property} stands for an identifier property's value.
 	Where map[string]string `yaml:"where,omitempty"`
+	// Default is a top-level property's value when the response carries
+	// no member for it, as Cloud Control reports one, such as a table's
+	// billing mode, which DynamoDB answers only once it has been set.
+	Default any `yaml:"default,omitempty"`
 }
 
 // UnmarshalYAML accepts a bare member name for a mapping with no nested
@@ -183,7 +187,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 {
+	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Default == nil {
 		return m.Member, nil
 	}
 	type plain Mapping
