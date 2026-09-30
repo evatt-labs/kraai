@@ -6,10 +6,18 @@ read:
     TableName: TableName
   response: Table
   absentErrors: [ResourceNotFoundException]
+  # A table, or one of its indexes, is refused every change but a delete
+  # while it settles the last one.
+  busy:
+    TableStatus: [CREATING, UPDATING, DELETING, ARCHIVING]
+    GlobalSecondaryIndexes[].IndexStatus: [CREATING, UPDATING, DELETING]
+    VectorIndexes[].IndexStatus: [CREATING, UPDATING, DELETING]
   # Tags and resource policies are read by ARN.
   capture:
     Arn: TableArn
     StreamArn: LatestStreamArn
+# A global secondary index takes minutes to backfill even on an empty table.
+wait: 20m
 properties:
   Arn: TableArn
   AttributeDefinitions:
@@ -232,6 +240,163 @@ also:
         properties:
           Key: Key
           Value: Value
+create:
+  operation: CreateTable
+  # A table is named by kraai's identity tag, so a retried create names the
+  # table it made. The API allows 255 characters.
+  name:
+    property: TableName
+    tag: kraai:resource-name
+    maxLength: 255
+  # A global secondary index is sent as the manifest has it; a per-index
+  # ContributorInsightsSpecification is not a CreateTable member, and no
+  # call sets it yet.
+  input:
+    TableName: "{TableName}"
+    AttributeDefinitions: "{AttributeDefinitions}"
+    KeySchema: "{KeySchema}"
+    BillingMode: "{BillingMode}"
+    ProvisionedThroughput: "{ProvisionedThroughput}"
+    OnDemandThroughput: "{OnDemandThroughput}"
+    WarmThroughput: "{WarmThroughput}"
+    GlobalSecondaryIndexes: "{GlobalSecondaryIndexes}"
+    LocalSecondaryIndexes: "{LocalSecondaryIndexes}"
+    VectorIndexes: "{VectorIndexes}"
+    SSESpecification:
+      Enabled: "{SSESpecification.SSEEnabled}"
+      SSEType: "{SSESpecification.SSEType}"
+      KMSMasterKeyId: "{SSESpecification.KMSMasterKeyId}"
+    StreamSpecification:
+      StreamEnabled: true
+      StreamViewType: "{StreamSpecification.StreamViewType}"
+    TableClass: "{TableClass}"
+    DeletionProtectionEnabled: "{DeletionProtectionEnabled}"
+    ResourcePolicy: "{ResourcePolicy.PolicyDocument:json}"
+    Tags: "{Tags}"
+  identifier:
+    TableName: TableDescription.TableName
+# Every call but the capacity group and the stream is its own call: the API
+# takes one kind of change per UpdateTable, and waits for the table between
+# them. Capacity is not sent together: a switch to on-demand would resend
+# the provisioned throughput read back, which the API refuses.
+#
+# Not routed, so the type is not lifecycle complete: global secondary and
+# vector indexes, which need one call per index with the table settled
+# between them, ContributorInsightsSpecification, KinesisStreamSpecification
+# and ImportSourceSpecification, which CreateTable has no member for.
+# StreamSpecification is set, never changed: enabling a stream on a table
+# that has one is refused, so a new view type needs a disable first, which
+# nothing here does. The stream's own ResourcePolicy and Tags are not
+# written either.
+update:
+  - operation: UpdateTable
+    properties: [BillingMode, ProvisionedThroughput, OnDemandThroughput]
+    input:
+      TableName: "{TableName}"
+      BillingMode: "{BillingMode}"
+      ProvisionedThroughput: "{ProvisionedThroughput}"
+      OnDemandThroughput: "{OnDemandThroughput}"
+  - operation: UpdateTable
+    properties: [SSESpecification]
+    input:
+      TableName: "{TableName}"
+      SSESpecification:
+        Enabled: "{SSESpecification.SSEEnabled}"
+        SSEType: "{SSESpecification.SSEType}"
+        KMSMasterKeyId: "{SSESpecification.KMSMasterKeyId}"
+  - operation: UpdateTable
+    properties: [StreamSpecification]
+    input:
+      TableName: "{TableName}"
+      StreamSpecification:
+        StreamEnabled: true
+        StreamViewType: "{StreamSpecification.StreamViewType}"
+  - operation: UpdateTable
+    properties: [TableClass]
+    input:
+      TableName: "{TableName}"
+      TableClass: "{TableClass}"
+  - operation: UpdateTable
+    properties: [DeletionProtectionEnabled]
+    input:
+      TableName: "{TableName}"
+      DeletionProtectionEnabled: "{DeletionProtectionEnabled}"
+  - operation: UpdateTable
+    properties: [WarmThroughput]
+    input:
+      TableName: "{TableName}"
+      WarmThroughput: "{WarmThroughput}"
+  - tags:
+      property: Tags
+      add:
+        operation: TagResource
+        input:
+          ResourceArn: "{Arn}"
+          Tags: "{added}"
+      remove:
+        operation: UntagResource
+        input:
+          ResourceArn: "{Arn}"
+          TagKeys: "{removed}"
+  # A policy dropped from the manifest is left in place.
+  - operation: PutResourcePolicy
+    properties: [ResourcePolicy]
+    input:
+      ResourceArn: "{Arn}"
+      Policy: "{ResourcePolicy.PolicyDocument:json}"
+  # Backups are not available for a moment after the table is created.
+  - operation: UpdateContinuousBackups
+    properties: [PointInTimeRecoverySpecification]
+    retryErrors: [ContinuousBackupsUnavailableException]
+    input:
+      TableName: "{TableName}"
+      PointInTimeRecoverySpecification: "{PointInTimeRecoverySpecification}"
+  # A table's time to live changes once an hour; a second change is the
+  # API's own refusal, not retried.
+  - operation: UpdateTimeToLive
+    properties: [TimeToLiveSpecification]
+    input:
+      TableName: "{TableName}"
+      TimeToLiveSpecification: "{TimeToLiveSpecification}"
+delete:
+  operation: DeleteTable
+  input:
+    TableName: "{TableName}"
+  absentErrors: [ResourceNotFoundException]
+  # A table cannot be deleted while it is being created or has an index
+  # being built.
+  retryErrors: [ResourceInUseException]
+# The key schema and local secondary indexes cannot change: UpdateTable has
+# no member for either.
+createOnly: [KeySchema, LocalSecondaryIndexes]
+# The harness sets one property per update, in name order, so deletion
+# protection, on at create, goes off first and the delete at the end is never
+# refused. A capacity switch needs two properties in one change, so only the
+# on-demand ceiling is exercised; a global secondary or vector index is not
+# routed yet. The time to live is set once, as it changes once an hour.
+lifecycle:
+  create:
+    AttributeDefinitions: [{AttributeName: pk, AttributeType: S}]
+    KeySchema: [{AttributeName: pk, KeyType: HASH}]
+    BillingMode: PAY_PER_REQUEST
+    DeletionProtectionEnabled: true
+  update:
+    DeletionProtectionEnabled: false
+    OnDemandThroughput: {MaxReadRequestUnits: 5, MaxWriteRequestUnits: 5}
+    PointInTimeRecoverySpecification: {PointInTimeRecoveryEnabled: true}
+    ResourcePolicy:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {AWS: "arn:aws:iam::{account}:root"}
+            Action: dynamodb:GetItem
+            Resource: "arn:aws:dynamodb:{region}:{account}:table/{name}"
+    SSESpecification: {SSEEnabled: true, SSEType: KMS, KMSMasterKeyId: "{kmsKeyArn}"}
+    StreamSpecification: {StreamViewType: NEW_AND_OLD_IMAGES}
+    TableClass: STANDARD_INFREQUENT_ACCESS
+    Tags: [{Key: team, Value: kraai}]
+    TimeToLiveSpecification: {Enabled: true, AttributeName: expires}
 absentIds:
   - kraai-absent-probe-table
 

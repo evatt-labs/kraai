@@ -9,12 +9,17 @@ func init() {
 			Protocol:    "awsJson1_0",
 			SigningName: "dynamodb",
 			Complete:    true,
-			Production:  true,
 			Host:        "dynamodb.{region}.amazonaws.com",
 			Target:      "DynamoDB_20120810.DescribeTable",
 			Identifier: []Binding{
 				{Property: "TableName", Member: "TableName", Location: "body"},
 			},
+			Busy: []Condition{
+				{Field: Field{Property: "GlobalSecondaryIndexes[].IndexStatus", Member: "IndexStatus", Kind: "scalar", Via: []Step{{Name: "GlobalSecondaryIndexes", List: true}}}, Values: []string{"CREATING", "UPDATING", "DELETING"}},
+				{Field: Field{Property: "TableStatus", Member: "TableStatus", Kind: "scalar"}, Values: []string{"CREATING", "UPDATING", "DELETING", "ARCHIVING"}},
+				{Field: Field{Property: "VectorIndexes[].IndexStatus", Member: "IndexStatus", Kind: "scalar", Via: []Step{{Name: "VectorIndexes", List: true}}}, Values: []string{"CREATING", "UPDATING", "DELETING"}},
+			},
+			Wait:         1200000000000,
 			AbsentErrors: []string{"ResourceNotFoundException"},
 			Response:     []Step{{Name: "Table"}},
 			Fields: []Field{
@@ -147,6 +152,22 @@ func init() {
 			Capture: []Field{
 				{Property: "Arn", Member: "TableArn", Kind: "scalar"},
 				{Property: "StreamArn", Member: "LatestStreamArn", Kind: "scalar"},
+			},
+			CreateOnly:       []string{"/properties/KeySchema", "/properties/LocalSecondaryIndexes"},
+			MutationCaptures: true,
+			Create:           &MutationCall{Operation: "CreateTable", Target: "DynamoDB_20120810.CreateTable", NameProperty: "TableName", NameTag: "kraai:resource-name", NameMaxLength: 255, Input: map[string]any{"AttributeDefinitions": "{AttributeDefinitions}", "BillingMode": "{BillingMode}", "DeletionProtectionEnabled": "{DeletionProtectionEnabled}", "GlobalSecondaryIndexes": "{GlobalSecondaryIndexes}", "KeySchema": "{KeySchema}", "LocalSecondaryIndexes": "{LocalSecondaryIndexes}", "OnDemandThroughput": "{OnDemandThroughput}", "ProvisionedThroughput": "{ProvisionedThroughput}", "ResourcePolicy": "{ResourcePolicy.PolicyDocument:json}", "SSESpecification": map[string]any{"Enabled": "{SSESpecification.SSEEnabled}", "KMSMasterKeyId": "{SSESpecification.KMSMasterKeyId}", "SSEType": "{SSESpecification.SSEType}"}, "StreamSpecification": map[string]any{"StreamEnabled": true, "StreamViewType": "{StreamSpecification.StreamViewType}"}, "TableClass": "{TableClass}", "TableName": "{TableName}", "Tags": "{Tags}", "VectorIndexes": "{VectorIndexes}", "WarmThroughput": "{WarmThroughput}"}, Properties: []string{"AttributeDefinitions", "BillingMode", "DeletionProtectionEnabled", "GlobalSecondaryIndexes", "KeySchema", "LocalSecondaryIndexes", "OnDemandThroughput", "ProvisionedThroughput", "ResourcePolicy", "SSESpecification", "StreamSpecification", "TableClass", "TableName", "Tags", "VectorIndexes", "WarmThroughput"}, Identifier: map[string]string{"TableName": "TableDescription.TableName"}},
+			Delete:           &MutationCall{Operation: "DeleteTable", Target: "DynamoDB_20120810.DeleteTable", Input: map[string]any{"TableName": "{TableName}"}, AbsentErrors: []string{"ResourceNotFoundException"}, RetryErrors: []string{"ResourceInUseException"}},
+			Update: []MutationCall{
+				MutationCall{Operation: "UpdateTable", Target: "DynamoDB_20120810.UpdateTable", Input: map[string]any{"BillingMode": "{BillingMode}", "OnDemandThroughput": "{OnDemandThroughput}", "ProvisionedThroughput": "{ProvisionedThroughput}", "TableName": "{TableName}"}, Properties: []string{"BillingMode", "ProvisionedThroughput", "OnDemandThroughput"}},
+				MutationCall{Operation: "UpdateTable", Target: "DynamoDB_20120810.UpdateTable", Input: map[string]any{"SSESpecification": map[string]any{"Enabled": "{SSESpecification.SSEEnabled}", "KMSMasterKeyId": "{SSESpecification.KMSMasterKeyId}", "SSEType": "{SSESpecification.SSEType}"}, "TableName": "{TableName}"}, Properties: []string{"SSESpecification"}},
+				MutationCall{Operation: "UpdateTable", Target: "DynamoDB_20120810.UpdateTable", Input: map[string]any{"StreamSpecification": map[string]any{"StreamEnabled": true, "StreamViewType": "{StreamSpecification.StreamViewType}"}, "TableName": "{TableName}"}, Properties: []string{"StreamSpecification"}},
+				MutationCall{Operation: "UpdateTable", Target: "DynamoDB_20120810.UpdateTable", Input: map[string]any{"TableClass": "{TableClass}", "TableName": "{TableName}"}, Properties: []string{"TableClass"}},
+				MutationCall{Operation: "UpdateTable", Target: "DynamoDB_20120810.UpdateTable", Input: map[string]any{"DeletionProtectionEnabled": "{DeletionProtectionEnabled}", "TableName": "{TableName}"}, Properties: []string{"DeletionProtectionEnabled"}},
+				MutationCall{Operation: "UpdateTable", Target: "DynamoDB_20120810.UpdateTable", Input: map[string]any{"TableName": "{TableName}", "WarmThroughput": "{WarmThroughput}"}, Properties: []string{"WarmThroughput"}},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "TagResource", Target: "DynamoDB_20120810.TagResource", TagProperty: "Tags", Input: map[string]any{"ResourceArn": "{Arn}", "Tags": "{added}"}}, Remove: &MutationCall{Operation: "UntagResource", Target: "DynamoDB_20120810.UntagResource", Input: map[string]any{"ResourceArn": "{Arn}", "TagKeys": "{removed}"}}},
+				MutationCall{Operation: "PutResourcePolicy", Target: "DynamoDB_20120810.PutResourcePolicy", Input: map[string]any{"Policy": "{ResourcePolicy.PolicyDocument:json}", "ResourceArn": "{Arn}"}, Properties: []string{"ResourcePolicy"}},
+				MutationCall{Operation: "UpdateContinuousBackups", Target: "DynamoDB_20120810.UpdateContinuousBackups", Input: map[string]any{"PointInTimeRecoverySpecification": "{PointInTimeRecoverySpecification}", "TableName": "{TableName}"}, RetryErrors: []string{"ContinuousBackupsUnavailableException"}, Properties: []string{"PointInTimeRecoverySpecification"}},
+				MutationCall{Operation: "UpdateTimeToLive", Target: "DynamoDB_20120810.UpdateTimeToLive", Input: map[string]any{"TableName": "{TableName}", "TimeToLiveSpecification": "{TimeToLiveSpecification}"}, Properties: []string{"TimeToLiveSpecification"}},
 			},
 			Also: []Reader{
 				{
