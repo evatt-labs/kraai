@@ -114,11 +114,20 @@ func covers(desired, current any) bool {
 			}
 			return true
 		case json.Number:
-			// A number is its value, however written: 1 and 1.0 are one.
-			cn, ok := c.(json.Number)
+			// A number is its value, however written: 1 and 1.0 are one,
+			// and so is a service's "1" for a value it keeps as text.
+			var text string
+			switch ct := c.(type) {
+			case json.Number:
+				text = ct.String()
+			case string:
+				text = ct
+			default:
+				return false
+			}
 			x, xok := new(big.Rat).SetString(dt.String())
-			y, yok := new(big.Rat).SetString(cn.String())
-			return ok && xok && yok && x.Cmp(y) == 0
+			y, yok := new(big.Rat).SetString(text)
+			return xok && yok && x.Cmp(y) == 0
 		default:
 			return fmt.Sprint(d) == fmt.Sprint(c)
 		}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"slices"
+	"strconv"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
@@ -210,8 +211,26 @@ func covers(desired, current any, pointer string, rules listRules) bool {
 		}
 		return true
 	default:
-		return reflect.DeepEqual(desired, current)
+		return reflect.DeepEqual(desired, current) || sameText(desired, current)
 	}
+}
+
+// sameText reports a desired number or boolean that a service keeps as
+// text, such as a parameter group's values: 100 and "100" are one value.
+func sameText(desired, current any) bool {
+	text, ok := current.(string)
+	if !ok {
+		return false
+	}
+	switch d := desired.(type) {
+	case float64:
+		n, err := strconv.ParseFloat(text, 64)
+		return err == nil && n == d
+	case bool:
+		b, err := strconv.ParseBool(text)
+		return err == nil && b == d
+	}
+	return false
 }
 
 // matchAll reports whether n desired elements can each be paired with a

@@ -143,9 +143,13 @@
     },
     {
       "type": "AWS::RDS::DBClusterParameterGroup",
-      "date": "2026-09-29",
-      "outcome": "differs",
-      "override": "e88f5f7f09b153e4e145b39a19c68912d911304d39e134916fb52e420df9b211"
+      "date": "2026-09-30",
+      "outcome": "parity",
+      "updated": [
+        "Parameters",
+        "Tags"
+      ],
+      "override": "e24ede4b84fc02a064d497de5e9aed9fc282d73c8ca1ec9ba2075b236d547125"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",

@@ -211,8 +211,9 @@ func ccShows(ctx context.Context, cc *cloudcontrol.Client, typeName, id string, 
 		}
 		last = nil
 		// A list-routed property must hold exactly the desired keys; a
-		// subset match would pass with an element the removal missed.
-		if json.Unmarshal([]byte(aws.ToString(out.ResourceDescription.Properties)), &last) == nil && covers(want, last) && listsMatch(readers[typeName], want, last) {
+		// subset match would pass with an element the removal missed. A
+		// map entry at its default is omitted, by Cloud Control as well.
+		if json.Unmarshal([]byte(aws.ToString(out.ResourceDescription.Properties)), &last) == nil && covers(shown(readers[typeName], want, last), last) && listsMatch(readers[typeName], want, last) {
 			return nil
 		}
 	}
