@@ -9,6 +9,7 @@ func init() {
 			Protocol:    "awsJson1_0",
 			SigningName: "dynamodb",
 			Complete:    true,
+			Production:  true,
 			Host:        "dynamodb.{region}.amazonaws.com",
 			Target:      "DynamoDB_20120810.DescribeTable",
 			Identifier: []Binding{
@@ -343,6 +344,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }
