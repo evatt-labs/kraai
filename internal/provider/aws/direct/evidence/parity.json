@@ -651,17 +651,22 @@
       "date": "2026-09-30",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 2,
+      "instances": 1,
       "compared": [
         "Arn",
         "AttributeDefinitions",
         "BillingMode",
         "ContributorInsightsSpecification",
         "DeletionProtectionEnabled",
+        "GlobalSecondaryIndexes",
         "KeySchema",
+        "LocalSecondaryIndexes",
+        "OnDemandThroughput",
         "PointInTimeRecoverySpecification",
-        "ProvisionedThroughput",
         "SSESpecification",
+        "StreamArn",
+        "StreamSpecification",
+        "TableClass",
         "TableName",
         "Tags",
         "TimeToLiveSpecification",
@@ -669,7 +674,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "5d864385e8dbab39751d20cc3ae424a62f8015fe7d0fe9a12f726a551d876f89"
+      "override": "6ac4ea46424d1ec05867c1e1d1da15f3a5e16ed7b7216b4200166e9280a79e76"
     },
     {
       "type": "AWS::EC2::InternetGateway",
