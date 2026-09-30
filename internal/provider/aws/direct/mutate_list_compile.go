@@ -84,6 +84,12 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 			return nil
 		}
 		compiled.TagProperty = l.Property
+		for _, ref := range templateRefs(c.Element) {
+			if _, ok := members[ref[0]]; !ok {
+				fail("%s changes[%d] shapes %s's elements from {%s}, which they do not have", at, i, l.Property, ref[0])
+			}
+		}
+		compiled.Element = c.Element
 		route.Changes = append(route.Changes, ChangeRoute{Members: slices.Clone(c.Members), Call: compiled})
 	}
 	return route

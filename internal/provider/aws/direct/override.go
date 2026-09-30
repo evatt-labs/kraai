@@ -316,7 +316,8 @@ type UpdateCall struct {
 // Changes. Changes picks the call by which members differ: an element
 // differing in the members of two entries is sent to both, one differing
 // in a member no entry lists is refused before any call, and Change and
-// Changes exclude each other. With names sibling properties the calls'
+// Changes exclude each other, and an entry's Element shapes the elements
+// sent to its call in place of the route's. With names sibling properties the calls'
 // templates may use: the desired value when this update changes it, else
 // the value as read. A With property counts as routed, and is set only
 // along with the list.
@@ -343,6 +344,9 @@ type ListRoute struct {
 type ChangeCall struct {
 	Mutation `yaml:",inline"`
 	Members  []string `yaml:"members"`
+	// Element shapes the elements this call is sent, in place of the
+	// route's, for a call whose structure is not the add call's.
+	Element map[string]any `yaml:"element,omitempty"`
 }
 
 // Tags updates a Key/Value tag list property by the tags added or changed,

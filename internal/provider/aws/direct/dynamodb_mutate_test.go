@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -21,10 +23,14 @@ const ddbTable = "AWS::DynamoDB::Table"
 // each change, as the real one does, and records any change made while it
 // is busy.
 type tableFake struct {
-	mu         sync.Mutex
-	exists     bool
-	busy       int // reads left that answer a status other than ACTIVE
-	gsiBusy    int // reads left that answer an index still being built
+	mu      sync.Mutex
+	exists  bool
+	busy    int // reads left that answer a status other than ACTIVE
+	gsiBusy int // reads left that answer an index still being built
+	// indexWait is, per index name, the reads left that answer it CREATING
+	// or, once deleted, DELETING; a deleted index is gone after them.
+	indexWait  map[string]int
+	deleted    map[string]bool
 	status     string
 	table      map[string]any
 	tags       any
@@ -39,7 +45,8 @@ type tableFake struct {
 }
 
 func newTableFake() *tableFake {
-	return &tableFake{bodies: map[string][]map[string]any{}, failOnce: map[string]string{}, tags: []any{}}
+	return &tableFake{bodies: map[string][]map[string]any{}, failOnce: map[string]string{}, tags: []any{},
+		indexWait: map[string]int{}, deleted: map[string]bool{}}
 }
 
 // serve answers as the fake service; every mutating call made while the
@@ -61,7 +68,7 @@ func (f *tableFake) serve(op, raw string) (int, string) {
 			}
 			return 400, `{"__type":"com.amazonaws.dynamodb.v20120810#` + code + `","message":"x"}`
 		}
-		if f.exists && op != "CreateTable" && (f.busy > 0 || f.gsiBusy > 0) {
+		if f.exists && op != "CreateTable" && (f.busy > 0 || f.gsiBusy > 0 || len(f.indexWait) > 0) {
 			f.violations = append(f.violations, op)
 		}
 	}
@@ -78,7 +85,11 @@ func (f *tableFake) serve(op, raw string) (int, string) {
 		}
 		return 200, `{"TableDescription":{"TableName":"` + body["TableName"].(string) + `"}}`
 	case "UpdateTable":
-		f.busy, f.status = 2, "UPDATING"
+		// An index change is busy on the index alone, so a test can tell
+		// the index's status from the table's.
+		if body["GlobalSecondaryIndexUpdates"] == nil && body["VectorIndexUpdates"] == nil {
+			f.busy, f.status = 2, "UPDATING"
+		}
 		f.merge(body)
 		return 200, `{"TableDescription":{"TableName":"t"}}`
 	case "TagResource":
@@ -120,6 +131,11 @@ func (f *tableFake) serve(op, raw string) (int, string) {
 		if f.busy > 0 {
 			f.busy--
 			out["TableStatus"] = f.status
+		}
+		for _, field := range []string{"GlobalSecondaryIndexes", "VectorIndexes"} {
+			if list := f.describeIndexes(field); list != nil {
+				out[field] = list
+			}
 		}
 		if f.gsiBusy > 0 {
 			f.gsiBusy--
@@ -166,6 +182,7 @@ func (f *tableFake) merge(body map[string]any) {
 			f.table[m] = v
 		}
 	}
+	f.indexUpdates(body)
 	if v, ok := body["BillingMode"]; ok {
 		f.table["BillingModeSummary"] = map[string]any{"BillingMode": v}
 	}
@@ -179,6 +196,67 @@ func (f *tableFake) merge(body map[string]any) {
 		f.table["StreamSpecification"] = map[string]any{"StreamViewType": st["StreamViewType"]}
 		f.table["LatestStreamArn"] = streamARN
 	}
+}
+
+// indexUpdates applies the index actions an UpdateTable carries: a created
+// index is CREATING for a few reads, a deleted one DELETING until it is gone.
+func (f *tableFake) indexUpdates(body map[string]any) {
+	for _, kind := range []struct{ member, field string }{{"GlobalSecondaryIndexUpdates", "GlobalSecondaryIndexes"}, {"VectorIndexUpdates", "VectorIndexes"}} {
+		list, _ := f.table[kind.field].([]any)
+		updates, _ := body[kind.member].([]any)
+		for _, u := range updates {
+			for action, raw := range u.(map[string]any) {
+				spec := raw.(map[string]any)
+				name := spec["IndexName"].(string)
+				switch action {
+				case "Create":
+					list = slices.DeleteFunc(list, func(e any) bool { return e.(map[string]any)["IndexName"] == name })
+					list = append(list, maps.Clone(spec))
+					delete(f.deleted, name)
+					f.indexWait[name] = 3
+				case "Delete":
+					f.deleted[name] = true
+					f.indexWait[name] = 3
+				case "Update":
+					for _, e := range list {
+						if e.(map[string]any)["IndexName"] == name {
+							maps.Copy(e.(map[string]any), spec)
+						}
+					}
+				}
+			}
+		}
+		if list != nil {
+			f.table[kind.field] = list
+		}
+	}
+}
+
+// describeIndexes is the field's indexes with the status each has now, one
+// read on; nil when there are none.
+func (f *tableFake) describeIndexes(field string) []any {
+	list, _ := f.table[field].([]any)
+	var out []any
+	for _, e := range list {
+		index := maps.Clone(e.(map[string]any))
+		name := index["IndexName"].(string)
+		status := "ACTIVE"
+		if f.indexWait[name] > 0 {
+			status = "CREATING"
+			if f.deleted[name] {
+				status = "DELETING"
+			}
+			if f.indexWait[name]--; f.indexWait[name] == 0 {
+				delete(f.indexWait, name)
+			}
+		}
+		if f.deleted[name] && f.indexWait[name] == 0 {
+			continue
+		}
+		index["IndexStatus"] = status
+		out = append(out, index)
+	}
+	return out
 }
 
 func (f *tableFake) client(t *testing.T) *Client {
@@ -286,12 +364,13 @@ func TestUpdateDynamoDBTableTags(t *testing.T) {
 
 // A change to a property no call sets is refused before any call is made;
 // the key schema and local indexes have none because UpdateTable has no
-// member for either, and the table is not lifecycle complete while its
-// global indexes have no route either.
+// member for either. The attribute definitions are lent to the index route,
+// so changed alone they have none, and the table is not lifecycle complete
+// while contributor insights and Kinesis streaming have no route either.
 func TestDynamoDBTableIsNotLifecycleComplete(t *testing.T) {
 	r := readers[ddbTable]
 	if r.LifecycleComplete || CanMutate(ddbTable) {
-		t.Fatalf("LifecycleComplete = %v, CanMutate = %v; index routes are not declared", r.LifecycleComplete, CanMutate(ddbTable))
+		t.Fatalf("LifecycleComplete = %v, CanMutate = %v; contributor insights and Kinesis are not routed", r.LifecycleComplete, CanMutate(ddbTable))
 	}
 	if got := CreateOnly(ddbTable); !reflect.DeepEqual(got, []string{"/properties/KeySchema", "/properties/LocalSecondaryIndexes"}) {
 		t.Fatalf("CreateOnly = %v", got)
@@ -301,7 +380,7 @@ func TestDynamoDBTableIsNotLifecycleComplete(t *testing.T) {
 	}
 	f := newTableFake().existing()
 	client := f.client(t)
-	for _, p := range []string{"KeySchema", "LocalSecondaryIndexes", "GlobalSecondaryIndexes"} {
+	for _, p := range []string{"KeySchema", "LocalSecondaryIndexes", "AttributeDefinitions"} {
 		err := client.Update(context.Background(), ddbTable, "t", map[string]any{}, map[string]any{p: []any{}})
 		if err == nil || !strings.Contains(err.Error(), "has no direct update for "+p) {
 			t.Fatalf("update of %s error = %v", p, err)
