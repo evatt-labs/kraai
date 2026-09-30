@@ -25,7 +25,7 @@ func init() {
 						{Property: "AttributeType", Member: "AttributeType", Kind: "scalar"},
 					},
 				},
-				{Property: "BillingMode", Member: "BillingMode", Kind: "scalar", Via: []Step{{Name: "BillingModeSummary"}}},
+				{Property: "BillingMode", Member: "BillingMode", Kind: "scalar", Via: []Step{{Name: "BillingModeSummary"}}, Default: "PROVISIONED"},
 				{Property: "DeletionProtectionEnabled", Member: "DeletionProtectionEnabled", Kind: "scalar"},
 				{Property: "GlobalSecondaryIndexes", Member: "GlobalSecondaryIndexes", Kind: "list",
 					Fields: []Field{
@@ -97,7 +97,7 @@ func init() {
 						{Property: "WriteCapacityUnits", Member: "WriteCapacityUnits", Kind: "scalar"},
 					},
 				},
-				{Property: "SSESpecification", Member: "SSEDescription", Kind: "structure",
+				{Property: "SSESpecification", Member: "SSEDescription", Kind: "structure", Default: map[string]any{"SSEEnabled": false},
 					Fields: []Field{
 						{Property: "KMSMasterKeyId", Member: "KMSMasterKeyArn", Kind: "scalar"},
 						{Property: "SSEEnabled", Member: "Status", Kind: "scalar", TrueWhen: []string{"ENABLED", "UPDATING"}},

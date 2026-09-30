@@ -325,6 +325,10 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	if f.TrueWhen != nil {
 		fmt.Fprintf(b, ", TrueWhen: %#v", f.TrueWhen)
 	}
+	if f.Default != nil {
+		b.WriteString(", Default: ")
+		literal(b, f.Default)
+	}
 	if len(f.Unless) > 0 {
 		b.WriteString(", Unless: []Condition{")
 		for _, c := range f.Unless {

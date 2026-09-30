@@ -17,7 +17,12 @@ properties:
     properties:
       AttributeName: AttributeName
       AttributeType: AttributeType
-  BillingMode: BillingModeSummary.BillingMode
+  # DescribeTable carries no billing summary for a table created with
+  # provisioned capacity and never switched; Cloud Control reads it as
+  # PROVISIONED.
+  BillingMode:
+    member: BillingModeSummary.BillingMode
+    default: PROVISIONED
   DeletionProtectionEnabled: DeletionProtectionEnabled
   GlobalSecondaryIndexes:
     member: GlobalSecondaryIndexes
@@ -78,8 +83,11 @@ properties:
     properties:
       ReadCapacityUnits: ReadCapacityUnits
       WriteCapacityUnits: WriteCapacityUnits
+  # A table encrypted with the AWS-owned key, the default, carries no
+  # SSEDescription; Cloud Control reads it as not enabled.
   SSESpecification:
     member: SSEDescription
+    default: {SSEEnabled: false}
     properties:
       KMSMasterKeyId: KMSMasterKeyArn
       SSEType: SSEType

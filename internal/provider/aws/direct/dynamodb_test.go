@@ -160,6 +160,14 @@ func TestCompileRefusesABadDynamoDBShape(t *testing.T) {
 		},
 			"TableClass reads trueWhen, but the schema does not type it a boolean"},
 		"each of a scalar": {func(o *Override) { o.Also[len(o.Also)-1].Each = "TableName" }, "is made for each TableName, which is not a structure or list of structures"},
+		"a default on a nested property": {func(o *Override) {
+			m := o.Properties["SSESpecification"]
+			m.Properties = maps.Clone(m.Properties)
+			sse := m.Properties["SSEType"]
+			sse.Default = "AES256"
+			m.Properties["SSEType"] = sse
+			o.Properties["SSESpecification"] = m
+		}, "only a top-level property takes one"},
 		"unless of a structure": {func(o *Override) {
 			m := o.Properties["ProvisionedThroughput"]
 			m.Unless = map[string][]string{"SSESpecification": {"x"}}
@@ -174,6 +182,37 @@ func TestCompileRefusesABadDynamoDBShape(t *testing.T) {
 			c.edit(&o)
 			if _, errs := compileOne(files, lock, o); !containsErr(errs, c.want) {
 				t.Fatalf("errors = %v\nwant one containing %q", errs, c.want)
+			}
+		})
+	}
+}
+
+// A table created with provisioned capacity and the AWS-owned key carries
+// neither a billing summary nor an SSE description; the read reports what
+// Cloud Control does for it, and a table that carries them keeps its own.
+func TestReadDynamoDBTableDefaults(t *testing.T) {
+	for name, c := range map[string]struct {
+		table      string
+		billing    any
+		sseEnabled any
+	}{
+		"absent":  {`{"Table":{"TableName":"t","TableArn":"` + tableARN + `"}}`, "PROVISIONED", false},
+		"present": {`{"Table":{"TableName":"t","TableArn":"` + tableARN + `","BillingModeSummary":{"BillingMode":"PAY_PER_REQUEST"},"SSEDescription":{"Status":"ENABLED","SSEType":"KMS"}}}`, "PAY_PER_REQUEST", true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			client, _ := ddbServer(t, func(op, body string) (int, string) {
+				if op == "DescribeTable" {
+					return 200, c.table
+				}
+				return ddbAnswer(op, body)
+			})
+			got, err := client.Read(context.Background(), "AWS::DynamoDB::Table", map[string]string{"TableName": "t"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			sse, _ := got["SSESpecification"].(map[string]any)
+			if got["BillingMode"] != c.billing || sse["SSEEnabled"] != c.sseEnabled {
+				t.Fatalf("BillingMode = %v, SSESpecification = %v; want %v and SSEEnabled %v", got["BillingMode"], got["SSESpecification"], c.billing, c.sseEnabled)
 			}
 		})
 	}

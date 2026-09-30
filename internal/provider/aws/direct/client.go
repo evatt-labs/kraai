@@ -334,6 +334,11 @@ func (r Reader) finish(translate func(fields []Field, fromRoot bool) map[string]
 		}
 	}
 	unless(props, r.Fields, props)
+	for _, f := range r.Fields {
+		if _, read := props[f.Property]; !read && f.Default != nil {
+			props[f.Property] = jsonValue(f.Default)
+		}
+	}
 	return props, nil
 }
 

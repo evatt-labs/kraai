@@ -267,6 +267,12 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		for _, property := range sortedKeys(mapping.Unless) {
 			f.Unless = append(f.Unless, Condition{Field: Field{Property: property}, Values: mapping.Unless[property]})
 		}
+		if mapping.Default != nil {
+			if strings.Contains(strings.TrimPrefix(at, "$."), ".") {
+				fail("%s%s has a default, but only a top-level property takes one", at, name)
+			}
+			f.Default = mapping.Default
+		}
 		fields = append(fields, f)
 	}
 	return fields
