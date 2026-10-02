@@ -1,6 +1,31 @@
 {
   "types": [
     {
+      "type": "AWS::ApiGatewayV2::Api",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "ApiEndpoint",
+        "ApiId",
+        "ApiKeySelectionExpression",
+        "CorsConfiguration",
+        "Description",
+        "DisableExecuteApiEndpoint",
+        "IpAddressType",
+        "Name",
+        "ProtocolType",
+        "RouteSelectionExpression",
+        "Tags",
+        "Version"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "8c5fa12c731141fa8a6b694d5b39d0c89e03531c0208d4a8ef4d128e775d7cdf"
+    },
+    {
       "type": "AWS::AppConfig::DeploymentStrategy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -1139,6 +1164,28 @@
       "override": "81a1085934f53482e7686159bbdda6cf36e16e77ba8a5a9c11baf4f331bb9e0c"
     },
     {
+      "type": "AWS::IAM::Role",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 20,
+      "compared": [
+        "Arn",
+        "AssumeRolePolicyDocument",
+        "Description",
+        "ManagedPolicyArns",
+        "MaxSessionDuration",
+        "Path",
+        "Policies",
+        "RoleId",
+        "RoleName"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
+    },
+    {
       "type": "AWS::IVS::Channel",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -1525,6 +1572,40 @@
       "instances": 0,
       "compared": [],
       "override": "85f1014984bb6e76cbd229423c850618977c19048b99956060bb08f7488379e7"
+    },
+    {
+      "type": "AWS::Lambda::Function",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "Architectures",
+        "Arn",
+        "Code",
+        "Description",
+        "Environment",
+        "EphemeralStorage",
+        "FileSystemConfigs",
+        "FunctionName",
+        "Handler",
+        "LoggingConfig",
+        "MemorySize",
+        "PackageType",
+        "RecursiveLoop",
+        "ReservedConcurrentExecutions",
+        "Role",
+        "Runtime",
+        "RuntimeManagementConfig",
+        "SnapStartResponse",
+        "Tags",
+        "Timeout",
+        "TracingConfig"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "24c0f62fd9886b0eaf960560d39ebac39de6d5f95b9da9023c13a3ef52e5c4a4"
     },
     {
       "type": "AWS::Lambda::MicrovmImage",
@@ -2425,6 +2506,25 @@
       "override": "98e11cc83a1dff3a8f44f0cd414c444249e27badf54396b44f7725b8968081b3"
     },
     {
+      "type": "AWS::SSM::Parameter",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "Arn",
+        "DataType",
+        "Name",
+        "Tags",
+        "Type",
+        "Value"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+    },
+    {
       "type": "AWS::SSM::ServiceSetting",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -2643,6 +2743,24 @@
         "Arn"
       ],
       "override": "4ba5284ac22f533d7ee86f9ad10bf72d38abd59e3cc6f3222905ebfd1a9f1522"
+    },
+    {
+      "type": "AWS::SecretsManager::Secret",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "Description",
+        "Id",
+        "Name",
+        "ReplicaRegions",
+        "Tags"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
     },
     {
       "type": "AWS::SecurityAgent::Application",

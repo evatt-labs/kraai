@@ -73,6 +73,55 @@ func init() {
 				{Property: "WindowId", Member: "WindowId", Kind: "scalar"},
 			},
 		},
+		"AWS::SSM::Parameter": {
+			Type:        "AWS::SSM::Parameter",
+			Protocol:    "awsJson1_1",
+			SigningName: "ssm",
+			Complete:    true,
+			Production:  true,
+			Host:        "ssm.{region}.amazonaws.com",
+			Target:      "AmazonSSM.GetParameter",
+			Identifier: []Binding{
+				{Property: "Name", Member: "Name", Location: "body"},
+			},
+			AbsentErrors: []string{"ParameterNotFound"},
+			Response:     []Step{{Name: "Parameter"}},
+			Fields: []Field{
+				{Property: "Arn", Member: "ARN", Kind: "scalar"},
+				{Property: "DataType", Member: "DataType", Kind: "scalar"},
+				{Property: "Name", Member: "Name", Kind: "scalar"},
+				{Property: "Type", Member: "Type", Kind: "scalar"},
+				{Property: "Value", Member: "Value", Kind: "scalar"},
+			},
+			AbsentIDs:         []string{"kraai-absent-probe-parameter"},
+			WriteOnly:         []string{"AllowedPattern", "Description", "Policies", "Tier"},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "PutParameter", Target: "AmazonSSM.PutParameter", NameProperty: "Name", NameTag: "kraai:resource-name", Input: map[string]any{"AllowedPattern": "{AllowedPattern}", "DataType": "{DataType}", "Description": "{Description}", "Name": "{Name}", "Policies": "{Policies}", "Tags": "{Tags:pairs}", "Tier": "{Tier}", "Type": "{Type}", "Value": "{Value}"}, Properties: []string{"AllowedPattern", "DataType", "Description", "Name", "Policies", "Tags", "Tier", "Type", "Value"}, Identifier: map[string]string{"Name": "{Name}"}},
+			Delete:            &MutationCall{Operation: "DeleteParameter", Target: "AmazonSSM.DeleteParameter", Input: map[string]any{"Name": "{Name}"}, AbsentErrors: []string{"ParameterNotFound"}},
+			Update: []MutationCall{
+				MutationCall{Operation: "PutParameter", Target: "AmazonSSM.PutParameter", Input: map[string]any{"AllowedPattern": "{AllowedPattern}", "DataType": "{DataType}", "Description": "{Description}", "Name": "{Name}", "Overwrite": true, "Policies": "{Policies}", "Tier": "{Tier}", "Type": "{Type}", "Value": "{Value}"}, Properties: []string{"Type", "Value", "Description", "AllowedPattern", "Policies", "Tier", "DataType"}, Together: true, Required: []string{"Value"}},
+				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "AddTagsToResource", Target: "AmazonSSM.AddTagsToResource", TagProperty: "Tags", Input: map[string]any{"ResourceId": "{Name}", "ResourceType": "Parameter", "Tags": "{added}"}}, Remove: &MutationCall{Operation: "RemoveTagsFromResource", Target: "AmazonSSM.RemoveTagsFromResource", Input: map[string]any{"ResourceId": "{Name}", "ResourceType": "Parameter", "TagKeys": "{removed}"}}},
+			},
+			Also: []Reader{
+				{
+					Type:        "AWS::SSM::Parameter",
+					Protocol:    "awsJson1_1",
+					SigningName: "ssm",
+					Host:        "ssm.{region}.amazonaws.com",
+					Target:      "AmazonSSM.ListTagsForResource",
+					Identifier: []Binding{
+						{Property: "Name", Member: "ResourceId", Location: "body"},
+					},
+					Input: []Binding{
+						Binding{Location: "body", Member: "ResourceType", Value: "Parameter"},
+					},
+					Fields: []Field{
+						{Property: "Tags", Member: "TagList", Kind: "list", Keyed: []string{"Key", "Value"}},
+					},
+				},
+			},
+			Mutable: true,
+		},
 		"AWS::SSM::ServiceSetting": {
 			Type:        "AWS::SSM::ServiceSetting",
 			Protocol:    "awsJson1_1",

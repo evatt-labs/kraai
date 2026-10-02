@@ -3,6 +3,7 @@ package direct
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -102,6 +103,10 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 			v = entryList(f.Entries, entries)
 		}
 	case "list":
+		if items, ok := v.([]any); ok && f.Wrap != "" {
+			v = wrapped(f.Wrap, items)
+			break
+		}
 		if items, ok := v.([]any); ok && f.Keyed != nil {
 			keyed := map[string]any{}
 			for _, item := range items {
@@ -131,6 +136,16 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 		}
 	}
 	return truth(f, transform(f.Transform, v)), true
+}
+
+// wrapped is a list of scalars as a list of structures holding each as the
+// property named.
+func wrapped(property string, items []any) []any {
+	out := make([]any, len(items))
+	for i, item := range items {
+		out[i] = map[string]any{property: item}
+	}
+	return out
 }
 
 // truth is v read as a boolean for a field that reads trueWhen, and v
@@ -167,6 +182,14 @@ func transform(name string, v any) any {
 		if parts := strings.SplitN(text, ":", 6); len(parts) == 6 {
 			return parts[5]
 		}
+	case "urlJson":
+		// A malformed escape leaves the text as it is, for the comparison
+		// to report.
+		decoded, err := url.PathUnescape(text)
+		if err != nil {
+			return v
+		}
+		return transform("json", decoded)
 	case "json":
 		dec := json.NewDecoder(strings.NewReader(text))
 		dec.UseNumber()

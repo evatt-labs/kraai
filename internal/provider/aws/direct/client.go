@@ -77,42 +77,54 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 		merges []elementResult
 	)
 	g, gctx := errgroup.WithContext(ctx)
+	// eachCall makes a call once per element of the list or structure
+	// property it is made for. Each element's results are merged into it
+	// once every call is done: several calls may be made for the same
+	// element.
+	eachCall := func(g *errgroup.Group, gctx context.Context, also Reader) {
+		items, _ := props[also.Each].([]any)
+		if one, ok := props[also.Each].(map[string]any); ok {
+			items = []any{one}
+		}
+		for _, item := range items {
+			element, ok := item.(map[string]any)
+			if !ok {
+				continue
+			}
+			elementVars := maps.Clone(vars)
+			for k, v := range element {
+				if s, ok := v.(string); ok {
+					elementVars[k] = s
+				}
+			}
+			g.Go(func() error {
+				more, _, _, err := c.readCall(gctx, also, elementVars)
+				if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
+					return nil
+				}
+				if err != nil {
+					return fmt.Errorf("the %s call %s for an element of %s: %w", typeName, also.Action+also.Target+also.URI, also.Each, err)
+				}
+				mu.Lock()
+				merges = append(merges, elementResult{element, more})
+				mu.Unlock()
+				return nil
+			})
+		}
+	}
+	// A call for each element of a property only another further call
+	// reads, such as the policy names a list call returns, waits for it.
+	var later []Reader
 	for i, also := range r.Also {
 		if !made(also.When, props) {
 			continue
 		}
 		if also.Each != "" {
-			// Each element's calls are merged into it once every call is
-			// done: several calls may be made for the same element.
-			items, _ := props[also.Each].([]any)
-			if one, ok := props[also.Each].(map[string]any); ok {
-				items = []any{one}
+			if _, read := props[also.Each]; !read {
+				later = append(later, also)
+				continue
 			}
-			for _, item := range items {
-				element, ok := item.(map[string]any)
-				if !ok {
-					continue
-				}
-				elementVars := maps.Clone(vars)
-				for k, v := range element {
-					if s, ok := v.(string); ok {
-						elementVars[k] = s
-					}
-				}
-				g.Go(func() error {
-					more, _, _, err := c.readCall(gctx, also, elementVars)
-					if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
-						return nil
-					}
-					if err != nil {
-						return fmt.Errorf("the %s call %s for an element of %s: %w", typeName, also.Action+also.Target+also.URI, also.Each, err)
-					}
-					mu.Lock()
-					merges = append(merges, elementResult{element, more})
-					mu.Unlock()
-					return nil
-				})
-			}
+			eachCall(g, gctx, also)
 			continue
 		}
 		g.Go(func() error {
@@ -135,6 +147,15 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	for _, more := range results {
 		for k, v := range more {
 			props[k] = v
+		}
+	}
+	if len(later) > 0 {
+		g, gctx = errgroup.WithContext(ctx)
+		for _, also := range later {
+			eachCall(g, gctx, also)
+		}
+		if err := g.Wait(); err != nil {
+			return nil, err
 		}
 	}
 	for _, m := range merges {

@@ -127,7 +127,7 @@ func (c *callCompiler) fields() {
 		}
 	}
 	for name, p := range top {
-		if c.each == "" && c.schema.writeOnly(name) || elsewhere[name] || c.only != nil && !c.only[name] {
+		if c.each == "" && (c.schema.writeOnly(name) || c.schema.onlyWriteOnlyMembers(name)) || elsewhere[name] || c.only != nil && !c.only[name] {
 			continue
 		}
 		readable[name] = p

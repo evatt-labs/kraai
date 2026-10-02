@@ -346,6 +346,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	if f.TrueWhen != nil {
 		fmt.Fprintf(b, ", TrueWhen: %#v", f.TrueWhen)
 	}
+	if f.Wrap != "" {
+		fmt.Fprintf(b, ", Wrap: %q", f.Wrap)
+	}
 	if f.Default != nil {
 		b.WriteString(", Default: ")
 		literal(b, f.Default)

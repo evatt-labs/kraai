@@ -73,7 +73,8 @@ type Call struct {
 	// maps, or once for a structure property, its input's {Property}
 	// placeholders naming that element's properties, and maps its
 	// properties into the element: per-index settings a service reads one
-	// index at a time.
+	// index at a time. The list is mapped by the read or by a call before
+	// this one.
 	Each string `yaml:"each,omitempty"`
 	// When makes the call only for an instance whose read property has one
 	// of the values given, for an operation the service refuses on others,
@@ -156,9 +157,15 @@ type Mapping struct {
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
 	Skip       map[string]string  `yaml:"skip,omitempty"`
 	// Transform names a function applied to the value read: arnResource,
-	// an ARN's resource part; or json, number or boolean, parsing a string
-	// the service returns for a property the schema types otherwise.
+	// an ARN's resource part; json, number or boolean, parsing a string
+	// the service returns for a property the schema types otherwise; or
+	// urlJson, parsing JSON a service returns percent-encoded, as IAM does
+	// its policy documents.
 	Transform string `yaml:"transform,omitempty"`
+	// Wrap reads a list of strings as a list of structures, each holding
+	// the string as the property named, for names a further call made for
+	// each element fills out, such as the inline policies IAM lists by name.
+	Wrap string `yaml:"wrap,omitempty"`
 	// Entries reads a map as a list of structures, each holding one entry
 	// under the two property names given, key first, such as tags returned
 	// as a map for a schema's [{Key, Value}].
@@ -204,7 +211,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Default == nil {
+	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && m.Default == nil {
 		return m.Member, nil
 	}
 	type plain Mapping
@@ -220,7 +227,8 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 // member of an object property, never through a list, and a template whose
 // property is not being set is left out. The filters are json, a value
 // sent as its JSON text; string, a number or boolean sent as text;
-// entries, a list of Key/Value structures sent as a map; keys, a list of
+// entries, a list of Key/Value structures sent as a map; pairs, a map sent
+// as a list of Key/Value structures; keys, a list of
 // names sent as structures naming each, {Key: name}; arnName and arnParent,
 // the last and next-to-last segments of an ARN's resource, left out when
 // empty; wire, a value
@@ -322,11 +330,14 @@ type UpdateCall struct {
 // names Match members is sent only when one of them is set.
 //
 // A property the schema types as a free-form object is a map, routed as a
-// list of {Key, Value} elements.
+// list of {Key, Value} elements. A list of strings is routed with the key
+// ".", each string its own key.
 //
 // OneAtATime sends each call for one element, for a service that takes one
 // per call; a keyed route sends them in key order, and a template may take
-// {added:only}. It excludes Chunk. Immutable names members a paired element
+// {added:only}, or name the element sent, {element}, and a member of it,
+// {element.Member}, which are the removed element for a remove call. It
+// excludes Chunk. Immutable names members a paired element
 // may not change: one that differs is refused before any call is made. A
 // keyed route pairs elements too, and sends the paired ones to Change or
 // Changes. Changes picks the call by which members differ: an element

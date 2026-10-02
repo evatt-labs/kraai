@@ -3,6 +3,7 @@ package direct
 import (
 	"fmt"
 	"slices"
+	"strings"
 )
 
 // compileListRoute checks a list route: its property, a key or match the
@@ -19,7 +20,18 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 	}
 	elem := schema.resolve(p)
 	var members map[string]cfnProperty
+	scalar := scalarKey(l.Key)
 	switch {
+	case scalar:
+		// A list of strings: each is its own key, with no members.
+		if elem.Items == nil || !schema.types(*elem.Items)["string"] || len(schema.resolve(*elem.Items).Properties) > 0 {
+			fail("%s keys %s by \".\", which needs a list of strings", at, l.Property)
+			return nil
+		}
+		if len(l.Match) > 0 || l.Element != nil || l.Change != nil || len(l.Changes) > 0 || len(l.Immutable) > 0 {
+			fail("%s lists the strings of %s, which take no match, element, change or immutable", at, l.Property)
+		}
+		members = map[string]cfnProperty{".": {}}
 	case elem.Items != nil:
 		members = schema.resolve(*elem.Items).Properties
 	case isMap(elem):
@@ -48,7 +60,11 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 		}
 	}
 	checkListOptions(schema, l, members, at, fail)
+	checkElementRefs(l, scalar, members, at, fail)
 	extra := map[string]bool{"added": true, "removed": true, "changed": true}
+	if l.OneAtATime {
+		extra["element"] = true
+	}
 	if len(l.Key) == 1 {
 		extra["removedKeys"] = true
 	}
@@ -93,6 +109,30 @@ func compileListRoute(schema cfnSchema, l ListRoute, at string, keys map[string]
 		route.Changes = append(route.Changes, ChangeRoute{Members: slices.Clone(c.Members), Call: compiled})
 	}
 	return route
+}
+
+// checkElementRefs refuses an {element} placeholder the route cannot fill:
+// a member of a list of strings, or one its elements do not have.
+func checkElementRefs(l ListRoute, scalar bool, members map[string]cfnProperty, at string, fail func(string, ...any)) {
+	calls := []Mutation{l.Add}
+	for _, m := range []*Mutation{l.Remove, l.Change} {
+		if m != nil {
+			calls = append(calls, *m)
+		}
+	}
+	for _, c := range l.Changes {
+		calls = append(calls, c.Mutation)
+	}
+	for _, m := range calls {
+		for _, ref := range templateRefs(m.Input) {
+			if ref[0] != "element" || ref[2] == "element" {
+				continue
+			}
+			if _, ok := members[strings.TrimPrefix(ref[2], "element.")]; scalar || !ok {
+				fail("%s names {%s}, which %s's elements do not have", at, ref[2], l.Property)
+			}
+		}
+	}
 }
 
 // checkListOptions refuses the combinations of a list route's OneAtATime,

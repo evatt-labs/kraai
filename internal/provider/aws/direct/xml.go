@@ -265,6 +265,9 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 				list = append(list, xmlScalar(item.text, f.Scalar))
 			}
 		}
+		if f.Wrap != "" {
+			list = wrapped(f.Wrap, list)
+		}
 		v = list
 	case "map":
 		c := n.child(f.XMLName)
