@@ -334,7 +334,7 @@
     "lambda/service/2015-03-31/lambda-2015-03-31.json": {
       "file": "models/lambda-2015-03-31.json",
       "sourceSha256": "595dcd2bd52005ed888323578f9239a4e5b5ccccebf49ee3ab1e0057ce387c54",
-      "subsetSha256": "f6eaeaf1fb950c9eaddeb1541fbc2569284c2e222df24c6763470f5fbbdc29e1"
+      "subsetSha256": "30676903035702f52233885cc497d680f8209a945b1c7c6d4c05068a7ad4df13"
     },
     "license-manager/service/2018-08-01/license-manager-2018-08-01.json": {
       "file": "models/license-manager-2018-08-01.json",
@@ -1282,6 +1282,11 @@
       "file": "schemas/AWS--Lambda--CodeSigningConfig.json",
       "sourceSha256": "32b79a170cb73e8185fe406c2731bf3f82bcd78ec65c3049cd2dcd981802b8bb",
       "subsetSha256": "41ddd2cfd21f5e01dd46f5951b2c5347ce8bc54df2771301eff7e31c742c0184"
+    },
+    "AWS::Lambda::Function": {
+      "file": "schemas/AWS--Lambda--Function.json",
+      "sourceSha256": "d2d6c4a2aa7da49c36097d3ee4273aa641b52a024a264fa9d3da3d2a9bff1b9c",
+      "subsetSha256": "2960061d1b2641668a2e824580f626d897289c429100122ffabfb00942e2ba0e"
     },
     "AWS::Lambda::MicrovmImage": {
       "file": "schemas/AWS--Lambda--MicrovmImage.json",

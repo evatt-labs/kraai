@@ -40,6 +40,24 @@ func (s *cfnSchema) writeOnly(name string) bool {
 	return false
 }
 
+// onlyWriteOnlyMembers reports whether name is an object whose every
+// declared member is write-only, such as a function's Code: a read has
+// nothing of it to map, and the service's own answer for it, which is not
+// what was written, must not be read as it.
+func (s *cfnSchema) onlyWriteOnlyMembers(name string) bool {
+	p, ok := s.Properties[name]
+	if !ok || s.resolve(p).Items != nil {
+		return false
+	}
+	nested := s.nested(p)
+	for child := range nested {
+		if !s.writeOnlyAt(name + "." + child) {
+			return false
+		}
+	}
+	return len(nested) > 0
+}
+
 // writeOnlyAt reports whether the nested property at the dotted path, such
 // as SecurityGroupIngress.SourceSecurityGroupName, is write-only: a pointer
 // matches with its array steps, /*, left out.
