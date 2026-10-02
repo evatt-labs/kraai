@@ -1,5 +1,81 @@
 # Changelog
 
+## [0.6.19](https://github.com/evatt-labs/kraai/compare/v0.6.18...v0.6.19) (2026-10-02)
+
+
+### Features
+
+* **aws:** address a further call by a value the read captured ([#373](https://github.com/evatt-labs/kraai/issues/373)) ([0a1a392](https://github.com/evatt-labs/kraai/commit/0a1a392ef2f299bdee07bc66cc2fe92daef2d78d))
+* **aws:** create, update and delete DynamoDB tables directly, short of indexes and streaming ([#440](https://github.com/evatt-labs/kraai/issues/440)) ([a63b25a](https://github.com/evatt-labs/kraai/commit/a63b25a87d137857ccd413186fb221325ab6adc9))
+* **aws:** create, update and delete ECS clusters directly ([#406](https://github.com/evatt-labs/kraai/issues/406)) ([c84082d](https://github.com/evatt-labs/kraai/commit/c84082d21de0630c8364fd839dbcfe43722af3f8))
+* **aws:** create, update and delete ELBv2 target groups directly ([#424](https://github.com/evatt-labs/kraai/issues/424)) ([9bd7910](https://github.com/evatt-labs/kraai/commit/9bd7910a6219f56dc9265f073eab04c9781b8ecb))
+* **aws:** create, update and delete IAM roles directly ([#448](https://github.com/evatt-labs/kraai/issues/448)) ([5ef57f8](https://github.com/evatt-labs/kraai/commit/5ef57f823e8e3b9bda435593b2d8571dc26ade5e))
+* **aws:** create, update and delete log groups directly ([#404](https://github.com/evatt-labs/kraai/issues/404)) ([e470fc0](https://github.com/evatt-labs/kraai/commit/e470fc0d67b45e5f36a8d52ac7e9b6ca6ad0001f))
+* **aws:** create, update and delete Secrets Manager secrets directly ([#450](https://github.com/evatt-labs/kraai/issues/450)) ([ebad660](https://github.com/evatt-labs/kraai/commit/ebad66026222e18c9c0ff3d99ab71fc14124f473))
+* **aws:** create, update and delete security groups directly ([#426](https://github.com/evatt-labs/kraai/issues/426)) ([0272d63](https://github.com/evatt-labs/kraai/commit/0272d63c51b21905e3c430af8b08bcd971fc73df))
+* **aws:** create, update and delete SQS queues directly on lifecycle evidence ([#389](https://github.com/evatt-labs/kraai/issues/389)) ([c5b243d](https://github.com/evatt-labs/kraai/commit/c5b243d249961a6f9f8b51ecc9d6f7e7176dc889))
+* **aws:** create, update and delete SSM parameters directly ([#444](https://github.com/evatt-labs/kraai/issues/444)) ([23bc9a7](https://github.com/evatt-labs/kraai/commit/23bc9a740e0a78f1f10eba602ee427e750ef9ed0))
+* **aws:** create, update and delete subnets, routes and gateway attachments directly ([#451](https://github.com/evatt-labs/kraai/issues/451)) ([7e983a1](https://github.com/evatt-labs/kraai/commit/7e983a1989dbf3d0898e1795334ea9db1f2951cc))
+* **aws:** create, update and delete VPCs, route tables and subnet groups directly ([#411](https://github.com/evatt-labs/kraai/issues/411)) ([049d7b5](https://github.com/evatt-labs/kraai/commit/049d7b506b10cc1d52623979d391f2b1d688aeef))
+* **aws:** join CloudFormation schemas to Smithy models for 239 direct readers ([#348](https://github.com/evatt-labs/kraai/issues/348)) ([c0f3ca3](https://github.com/evatt-labs/kraai/commit/c0f3ca3112aef10639b3e3aa7670d40b7820a786))
+* **aws:** list ECS task definitions through ECS, proven at read parity ([#347](https://github.com/evatt-labs/kraai/issues/347)) ([13344e5](https://github.com/evatt-labs/kraai/commit/13344e503017c1526f6bcc56f9b0cffaa14ba4f4))
+* **aws:** mutate DynamoDB tables directly, falling back to Cloud Control for what no call sets ([#442](https://github.com/evatt-labs/kraai/issues/442)) ([bbde4fe](https://github.com/evatt-labs/kraai/commit/bbde4fe48a5d7653de99c66eb08ababaf4fe03d8))
+* **aws:** mutate event buses and log resource policies directly, selecting a read's resource from a list ([#446](https://github.com/evatt-labs/kraai/issues/446)) ([d7c1481](https://github.com/evatt-labs/kraai/commit/d7c148129839fcd4337c8b8446f3596f790e881c))
+* **aws:** mutate over the query protocols, starting with internet gateways ([#408](https://github.com/evatt-labs/kraai/issues/408)) ([67a3be5](https://github.com/evatt-labs/kraai/commit/67a3be5cfca8b277249d6ce28cb07a37b14f9d25))
+* **aws:** mutate RDS cluster parameter groups directly, reading an omitted parameter as its default ([#437](https://github.com/evatt-labs/kraai/issues/437)) ([4f02c75](https://github.com/evatt-labs/kraai/commit/4f02c75e7c917d8355d7b8d559e61f018db24a7c))
+* **aws:** per-type waits, settling between calls, and stepwise list routes ([#439](https://github.com/evatt-labs/kraai/issues/439)) ([57f927a](https://github.com/evatt-labs/kraai/commit/57f927a8304693590c6fff4109a405c36a928f23))
+* **aws:** prove a direct read agrees with Cloud Control on absence, and read ECS tags ([#351](https://github.com/evatt-labs/kraai/issues/351)) ([7eeeb78](https://github.com/evatt-labs/kraai/commit/7eeeb789f263013e0da6396c176cd99f766e322e))
+* **aws:** put and delete CloudWatch alarms directly ([#407](https://github.com/evatt-labs/kraai/issues/407)) ([f5886be](https://github.com/evatt-labs/kraai/commit/f5886be335dd599bcd6ea3d1926673104f044e77))
+* **aws:** put, update and delete EventBridge rules directly, diffing targets by key ([#420](https://github.com/evatt-labs/kraai/issues/420)) ([a377d61](https://github.com/evatt-labs/kraai/commit/a377d6122f436fcd9f424dfa7ec442ea7429ac26))
+* **aws:** read a type through several calls, and serve target groups directly ([#357](https://github.com/evatt-labs/kraai/issues/357)) ([003cc40](https://github.com/evatt-labs/kraai/commit/003cc40856abe618a81e199900197d41a229c7a4))
+* **aws:** read API Gateway v2 APIs directly, at read and absence parity ([#445](https://github.com/evatt-labs/kraai/issues/445)) ([83e7d77](https://github.com/evatt-labs/kraai/commit/83e7d77095bc1465a4462dba9e9eb77951b393c4))
+* **aws:** read CloudWatch alarms directly, reading Smithy unions as structures ([#384](https://github.com/evatt-labs/kraai/issues/384)) ([214e1e0](https://github.com/evatt-labs/kraai/commit/214e1e03617d0cec589fce6add7eacb25ce0fc12))
+* **aws:** read DynamoDB tables directly, choosing each operation's endpoint ([#383](https://github.com/evatt-labs/kraai/issues/383)) ([a0fd69d](https://github.com/evatt-labs/kraai/commit/a0fd69d1d47a32b6d7b193e16aad222da4fc2f7d))
+* **aws:** read Lambda functions directly ([#449](https://github.com/evatt-labs/kraai/issues/449)) ([98afa86](https://github.com/evatt-labs/kraai/commit/98afa86aebb0a06e804540f2ae99ac49ca01b851))
+* **aws:** read Lambda permissions and function URLs directly ([#447](https://github.com/evatt-labs/kraai/issues/447)) ([3ce86ce](https://github.com/evatt-labs/kraai/commit/3ce86ce730c824bddf0054606b44c456d74d56b9))
+* **aws:** read map-shaped and string-encoded responses directly ([#374](https://github.com/evatt-labs/kraai/issues/374)) ([b2e7acc](https://github.com/evatt-labs/kraai/commit/b2e7acc3431cd1d1b05eba0fd7af2ce024986dbf))
+* **aws:** read proven types through their own service instead of Cloud Control ([#354](https://github.com/evatt-labs/kraai/issues/354)) ([3a0ceeb](https://github.com/evatt-labs/kraai/commit/3a0ceeb80c36d1162a1a443226e147a997222874))
+* **aws:** read resources over awsQuery and ec2Query ([#349](https://github.com/evatt-labs/kraai/issues/349)) ([12a5ba5](https://github.com/evatt-labs/kraai/commit/12a5ba59b862a994e0274fecba286ed737b69ca0))
+* **aws:** read resources over restXml, with endpoints taken from the rule set ([#350](https://github.com/evatt-labs/kraai/issues/350)) ([863acc7](https://github.com/evatt-labs/kraai/commit/863acc790908e419e748f368459c17c42d2025bd))
+* **aws:** read resources whose identifier is an ARN taken apart or a filter value ([#381](https://github.com/evatt-labs/kraai/issues/381)) ([9867dae](https://github.com/evatt-labs/kraai/commit/9867dae07066fe262bc6227cf0e0577f1d1e205f))
+* **aws:** read route tables and ECS clusters directly in production ([#365](https://github.com/evatt-labs/kraai/issues/365)) ([cdd9076](https://github.com/evatt-labs/kraai/commit/cdd90767776d50d309c58f882055036dfc3e371c))
+* **aws:** read security groups directly in production ([#363](https://github.com/evatt-labs/kraai/issues/363)) ([406929f](https://github.com/evatt-labs/kraai/commit/406929fcf5b213cc18951aa7266cbe57b33b59b7))
+* **aws:** read security groups directly, filtering a list by its elements' members ([#362](https://github.com/evatt-labs/kraai/issues/362)) ([4c7579f](https://github.com/evatt-labs/kraai/commit/4c7579f3f521664fce9f655ccf6e5b58d871eff2))
+* **aws:** read VPCs and internet gateways directly in production ([#364](https://github.com/evatt-labs/kraai/issues/364)) ([5f59e8a](https://github.com/evatt-labs/kraai/commit/5f59e8a5e78a246f37e853e658cb3a4f646de369))
+* **aws:** redeploy a function when a secret it reads has a new version ([#339](https://github.com/evatt-labs/kraai/issues/339)) ([6238667](https://github.com/evatt-labs/kraai/commit/6238667e983c977d9323bbdc0418ddf81b2a9f58))
+* **aws:** register and deregister ECS task definitions directly ([#400](https://github.com/evatt-labs/kraai/issues/400)) ([ff3e2a9](https://github.com/evatt-labs/kraai/commit/ff3e2a95fa736ff0e5905ee44038b4438b5afa36))
+* **aws:** send structured inputs and select a list element, and read a subnet's network ACL association ([#359](https://github.com/evatt-labs/kraai/issues/359)) ([ac58761](https://github.com/evatt-labs/kraai/commit/ac587615da6d8dcfa1652f08f2d77f89a29b4bd8))
+* **aws:** wait out busy states over XML, retry creates that cannot duplicate, and route map properties ([#435](https://github.com/evatt-labs/kraai/issues/435)) ([26c310a](https://github.com/evatt-labs/kraai/commit/26c310a8ba6ae0d32e4e8819563c9b149582c409))
+* **dev:** add declcheck and splitdecls for verifiable file splits ([#399](https://github.com/evatt-labs/kraai/issues/399)) ([b8ad5e2](https://github.com/evatt-labs/kraai/commit/b8ad5e2cc5b660f02a613fb54024c9c27cf6f604))
+
+
+### Bug Fixes
+
+* **aws:** compare a DynamoDB table's attribute definitions in any order ([#385](https://github.com/evatt-labs/kraai/issues/385)) ([b5c686e](https://github.com/evatt-labs/kraai/commit/b5c686ee7118c3de9afa0b005af3123ed2920d3f))
+* **aws:** compare arrays the schema declares unordered in any order ([#353](https://github.com/evatt-labs/kraai/issues/353)) ([3e8d321](https://github.com/evatt-labs/kraai/commit/3e8d32183317f8235d70ae5b7f5958961fc87780))
+* **aws:** compare target group attributes as a subset when planning ([#430](https://github.com/evatt-labs/kraai/issues/430)) ([d114ca4](https://github.com/evatt-labs/kraai/commit/d114ca48f0824c4197224a4978d63da6877c6bb6))
+* **aws:** do not replace a resource over a write-only create-only property ([#441](https://github.com/evatt-labs/kraai/issues/441)) ([b828d50](https://github.com/evatt-labs/kraai/commit/b828d50c07d05ea3a3f5c86050a3049a22235a7d))
+* **aws:** follow DescribeParameters pages when reading or setting a secret parameter ([#360](https://github.com/evatt-labs/kraai/issues/360)) ([f417e8c](https://github.com/evatt-labs/kraai/commit/f417e8c683c24debcffeb0b45d9a42735922dc75)), closes [#346](https://github.com/evatt-labs/kraai/issues/346)
+* **aws:** give a native FIFO queue's derived name the .fifo suffix ([#379](https://github.com/evatt-labs/kraai/issues/379)) ([957598b](https://github.com/evatt-labs/kraai/commit/957598b215e09c76331794d8a27ad248a3d8e7ac))
+* **aws:** pass over listed entries Cloud Control refuses to read when matching ([#378](https://github.com/evatt-labs/kraai/issues/378)) ([3968386](https://github.com/evatt-labs/kraai/commit/396838661b359f41a1f196e22ff8672f1ffe68c6))
+* **aws:** plan a replacement for an override's create-only property ([#432](https://github.com/evatt-labs/kraai/issues/432)) ([251c027](https://github.com/evatt-labs/kraai/commit/251c027b837d471f9e19ef4a4a0770dd2ea9b546))
+* **aws:** prove absence only by a direct read that reports it ([#376](https://github.com/evatt-labs/kraai/issues/376)) ([6b881c1](https://github.com/evatt-labs/kraai/commit/6b881c1b8b7f443fef8afcdec7b47ee512522a7d))
+* **aws:** read a DynamoDB table's default billing mode and encryption as Cloud Control does ([#438](https://github.com/evatt-labs/kraai/issues/438)) ([a338c9f](https://github.com/evatt-labs/kraai/commit/a338c9fd3efcdcdadddd05e45433cfa8b269b831))
+* **aws:** retry transient failures of direct calls with the SDK's classifiers ([#427](https://github.com/evatt-labs/kraai/issues/427)) ([7c1cf78](https://github.com/evatt-labs/kraai/commit/7c1cf780d0b0d8156e3789b1fe397f7c77cad7e7))
+* **aws:** send an empty list as the query protocol does ([#431](https://github.com/evatt-labs/kraai/issues/431)) ([8976861](https://github.com/evatt-labs/kraai/commit/897686150f14e68c87a490a9f223d2def27f8653))
+* **aws:** stop nested vendor defaults planning an unchanged resource as a replace ([#344](https://github.com/evatt-labs/kraai/issues/344)) ([7a19aa5](https://github.com/evatt-labs/kraai/commit/7a19aa54ce013302df67dc4014a3af4827bda368))
+* **aws:** treat a direct read answered with a page token as incomplete ([#361](https://github.com/evatt-labs/kraai/issues/361)) ([5f01bd7](https://github.com/evatt-labs/kraai/commit/5f01bd798e79451c80f35628c6b93ccd5c9e3123))
+* **direct:** draft an ARN identifier into a name input through its last segment ([#387](https://github.com/evatt-labs/kraai/issues/387)) ([ee5183b](https://github.com/evatt-labs/kraai/commit/ee5183b9b6b17f172dfbad380a610d5ff30a20b2))
+* **direct:** extract writes all or nothing and keeps locked schemas ([#377](https://github.com/evatt-labs/kraai/issues/377)) ([80e1365](https://github.com/evatt-labs/kraai/commit/80e1365747c94c701ef08581e40cc748a699fc33))
+* **direct:** read ARN-identified drafts by the name or id their input takes ([#388](https://github.com/evatt-labs/kraai/issues/388)) ([5e1d924](https://github.com/evatt-labs/kraai/commit/5e1d924bab0ca2d682c341d1802f86b5d374cbcf))
+* **plan:** report a dependent of a failed resource as failed, not as an update ([#429](https://github.com/evatt-labs/kraai/issues/429)) ([3db7c7c](https://github.com/evatt-labs/kraai/commit/3db7c7cf9984901b77837d19d274876e519f0e96))
+
+
+### Performance Improvements
+
+* **aws:** take a tagging-index hit on every command, walking only on a miss ([#356](https://github.com/evatt-labs/kraai/issues/356)) ([1ca8dd8](https://github.com/evatt-labs/kraai/commit/1ca8dd8388a00ddd1a217dc9784f9f81cc3c78d0))
+* **aws:** trust a settled tagging index's miss on every command ([#358](https://github.com/evatt-labs/kraai/issues/358)) ([6965ad3](https://github.com/evatt-labs/kraai/commit/6965ad3c11f26fc0540aed8e1ceaa6dce42209fb))
+
 ## [0.6.18](https://github.com/evatt-labs/kraai/compare/v0.6.17...v0.6.18) (2026-09-24)
 
 
