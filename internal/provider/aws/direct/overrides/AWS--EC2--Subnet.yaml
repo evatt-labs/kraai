@@ -17,6 +17,12 @@ properties:
       InternetGatewayBlockMode: InternetGatewayBlockMode
   CidrBlock: CidrBlock
   EnableDns64: EnableDns64
+  # Cloud Control reports only the block in the associated state: a
+  # disassociated one, which the API keeps listing, is left out. It reads
+  # the first, and a subnet has one at a time.
+  Ipv6CidrBlock: Ipv6CidrBlockAssociationSet[Ipv6CidrBlockState/State=associated].Ipv6CidrBlock
+  Ipv6CidrBlocks:
+    member: Ipv6CidrBlockAssociationSet[Ipv6CidrBlockState/State=associated]*.Ipv6CidrBlock
   Ipv6Native: Ipv6Native
   MapPublicIpOnLaunch: MapPublicIpOnLaunch
   OutpostArn: OutpostArn
@@ -33,9 +39,6 @@ properties:
       Key: Key
       Value: Value
   VpcId: VpcId
-skip:
-  Ipv6CidrBlock: which association's block Cloud Control reports is unproven; no subnet parity has run against holds an IPv6 block
-  Ipv6CidrBlocks: whether Cloud Control reports disassociated blocks is unproven; no subnet parity has run against holds an IPv6 block
 also:
   # The subnet's network ACL association, found by filtering the ACLs on
   # it; Cloud Control reports the association's id, not the ACL's.
@@ -48,5 +51,101 @@ also:
     properties:
       NetworkAclAssociationId:
         member: Associations[SubnetId={SubnetId}].NetworkAclAssociationId
+create:
+  operation: CreateSubnet
+  input:
+    VpcId: "{VpcId}"
+    CidrBlock: "{CidrBlock}"
+    AvailabilityZone: "{AvailabilityZone}"
+    AvailabilityZoneId: "{AvailabilityZoneId}"
+    Ipv6CidrBlock: "{Ipv6CidrBlock}"
+    Ipv6Native: "{Ipv6Native}"
+    TagSpecifications:
+      - ResourceType: subnet
+        Tags: "{Tags:wire}"
+  identifier:
+    SubnetId: Subnet.SubnetId
+update:
+  # ModifySubnetAttribute takes one attribute per call.
+  - operation: ModifySubnetAttribute
+    properties: [AssignIpv6AddressOnCreation]
+    input:
+      SubnetId: "{SubnetId}"
+      AssignIpv6AddressOnCreation: {Value: "{AssignIpv6AddressOnCreation}"}
+  - operation: ModifySubnetAttribute
+    properties: [MapPublicIpOnLaunch]
+    input:
+      SubnetId: "{SubnetId}"
+      MapPublicIpOnLaunch: {Value: "{MapPublicIpOnLaunch}"}
+  - operation: ModifySubnetAttribute
+    properties: [EnableDns64]
+    input:
+      SubnetId: "{SubnetId}"
+      EnableDns64: {Value: "{EnableDns64}"}
+  # The three DNS options are three attributes, so three calls; one for a
+  # member the desired structure leaves out is not sent.
+  - operation: ModifySubnetAttribute
+    properties: [PrivateDnsNameOptionsOnLaunch]
+    input:
+      SubnetId: "{SubnetId}"
+      PrivateDnsHostnameTypeOnLaunch: "{PrivateDnsNameOptionsOnLaunch.HostnameType}"
+  - operation: ModifySubnetAttribute
+    properties: [PrivateDnsNameOptionsOnLaunch]
+    input:
+      SubnetId: "{SubnetId}"
+      EnableResourceNameDnsARecordOnLaunch: {Value: "{PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsARecord}"}
+  - operation: ModifySubnetAttribute
+    properties: [PrivateDnsNameOptionsOnLaunch]
+    input:
+      SubnetId: "{SubnetId}"
+      EnableResourceNameDnsAAAARecordOnLaunch: {Value: "{PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsAAAARecord}"}
+  # A subnet takes an IPv6 block once; the schema leaves it updatable only
+  # while the subnet has none.
+  - operation: AssociateSubnetCidrBlock
+    properties: [Ipv6CidrBlock]
+    input:
+      SubnetId: "{SubnetId}"
+      Ipv6CidrBlock: "{Ipv6CidrBlock}"
+  - tags:
+      property: Tags
+      add:
+        operation: CreateTags
+        input:
+          Resources: ["{SubnetId}"]
+          Tags: "{added:wire}"
+      remove:
+        operation: DeleteTags
+        input:
+          Resources: ["{SubnetId}"]
+          Tags: "{removed:keys}"
+delete:
+  operation: DeleteSubnet
+  input:
+    SubnetId: "{SubnetId}"
+  absentErrors: [InvalidSubnetID.NotFound]
+unsupported:
+  Ipv4IpamPoolId: an IPAM pool bills for each active address, so no direct call has been proven against one
+  Ipv4NetmaskLength: an IPAM pool bills for each active address, so no direct call has been proven against one
+  Ipv6IpamPoolId: an IPAM pool bills for each active address, so no direct call has been proven against one
+  Ipv6NetmaskLength: an IPAM pool bills for each active address, so no direct call has been proven against one
+  OutpostArn: an Outpost is not available to prove a direct call against
+  EnableLniAtDeviceIndex: an attribute of Outpost subnets, which are not available to prove a direct call against
+lifecycle:
+  create:
+    VpcId: "{vpcId}"
+    CidrBlock: 10.99.5.0/24
+    AvailabilityZone: us-east-1a
+    # An IPv6 block of the harness VPC, which must have one: the IPv6
+    # attributes below are refused for a subnet with none.
+    Ipv6CidrBlock: "{subnetIpv6Cidr}"
+  update:
+    AssignIpv6AddressOnCreation: true
+    EnableDns64: true
+    MapPublicIpOnLaunch: true
+    PrivateDnsNameOptionsOnLaunch:
+      HostnameType: resource-name
+      EnableResourceNameDnsARecord: true
+      EnableResourceNameDnsAAAARecord: true
+    Tags: [{Key: team, Value: kraai}]
 absentIds:
   - subnet-0123456789abcdef0

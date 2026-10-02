@@ -13,6 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 )
 
 // CreateResource submits desiredState for creation and polls to a terminal
@@ -83,7 +84,7 @@ func (c *Client) CreateResource(ctx context.Context, typeName string, desiredSta
 func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string, patch []byte) (map[string]any, error) {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.mutatesDirectly(typeName, nil) {
+	if c.mutatesDirectly(typeName, nil) && direct.Serves(typeName, identifier) {
 		changes, err := patchChanges(typeName, identifier, patch)
 		if err != nil {
 			return nil, err
@@ -129,7 +130,7 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 func (c *Client) DeleteResource(ctx context.Context, typeName, identifier string) error {
 	c.reads.forget(typeName)
 	defer c.reads.forget(typeName)
-	if c.mutatesDirectly(typeName, nil) {
+	if c.mutatesDirectly(typeName, nil) && direct.Serves(typeName, identifier) {
 		directMutation(ctx, typeName, "delete")
 		if err := c.direct.Delete(ctx, typeName, identifier); err != nil {
 			return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting %s %q", typeName, identifier)

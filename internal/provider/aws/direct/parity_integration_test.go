@@ -109,6 +109,12 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 			e.Outcome, e.Note = "direct-unreadable", "the direct list failed"
 			return e
 		}
+	} else if parent, ok := scopedLists[r.Type]; ok {
+		var err error
+		if ids, err = listWithin(ctx, cc, r.Type, parent, perType); err != nil {
+			e.Outcome, e.Note = "unlisted", "Cloud Control could not list the type within "+parent[0]
+			return e
+		}
 	} else {
 		listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(r.Type), MaxResults: aws.Int32(int32(perType))})
 		if err != nil {
@@ -141,7 +147,7 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 		if err := json.Unmarshal([]byte(aws.ToString(got.ResourceDescription.Properties)), &viaCC); err != nil {
 			t.Fatal(err)
 		}
-		direct, err := client.Read(ctx, r.Type, map[string]string{r.Identifier[0].Property: id})
+		direct, err := client.ReadByID(ctx, r.Type, id)
 		if err != nil {
 			// Printed to this run's log only, never to evidence.
 			t.Errorf("direct read failed: %v", err)
@@ -189,6 +195,38 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 	return e
 }
 
+// scopedLists names, for a type whose Cloud Control list needs a property
+// of another type, that type and the property: the type is listed within
+// each instance of it.
+var scopedLists = map[string][2]string{"AWS::EC2::Route": {"AWS::EC2::RouteTable", "RouteTableId"}}
+
+// listWithin lists typeName within each instance of its parent type, up to
+// limit identifiers.
+func listWithin(ctx context.Context, cc *cloudcontrol.Client, typeName string, parent [2]string, limit int) ([]string, error) {
+	var ids []string
+	parents := cloudcontrol.NewListResourcesPaginator(cc, &cloudcontrol.ListResourcesInput{TypeName: aws.String(parent[0])})
+	for parents.HasMorePages() && len(ids) < limit {
+		page, err := parents.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, d := range page.ResourceDescriptions {
+			model, err := json.Marshal(map[string]string{parent[1]: aws.ToString(d.Identifier)})
+			if err != nil {
+				return nil, err
+			}
+			listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(typeName), ResourceModel: aws.String(string(model))})
+			if err != nil {
+				return nil, err
+			}
+			for _, d := range listed.ResourceDescriptions {
+				ids = append(ids, aws.ToString(d.Identifier))
+			}
+		}
+	}
+	return ids, nil
+}
+
 // absenceParity reads up to perType identifiers r's probe lists, each of
 // which Cloud Control must read as absent, and checks the direct read does
 // not find one present. An identifier Cloud Control finds proves nothing
@@ -208,7 +246,18 @@ func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, c
 		}
 	}
 	for _, id := range r.AbsentIDs {
-		ids = append(ids, strings.NewReplacer("{account}", account, "{region}", client.Region).Replace(id))
+		// A variable the harness environment names, as a lifecycle vector
+		// does, such as a route table the missing route is looked for in;
+		// an identifier naming one that is unset is left out.
+		unset := false
+		id = vectorPlaceholder.ReplaceAllStringFunc(strings.NewReplacer("{account}", account, "{region}", client.Region).Replace(id), func(p string) string {
+			value := os.Getenv(envName(p[1 : len(p)-1]))
+			unset = unset || value == ""
+			return value
+		})
+		if !unset {
+			ids = append(ids, id)
+		}
 	}
 	if len(ids) > perType {
 		ids = ids[:perType]
@@ -228,7 +277,7 @@ func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, c
 		}
 		e.Probed++
 		// Printed to this run's log only, never to evidence.
-		switch _, err := client.Read(ctx, r.Type, map[string]string{r.Identifier[0].Property: id}); {
+		switch _, err := client.ReadByID(ctx, r.Type, id); {
 		case err == nil:
 			t.Errorf("Cloud Control reads %s as absent, the direct read finds it", id)
 			present++

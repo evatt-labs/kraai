@@ -1,0 +1,60 @@
+type: AWS::EC2::VPCGatewayAttachment
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeInternetGateways
+  absentErrors: [InvalidInternetGatewayID.NotFound]
+  # The attachment is found through the gateway attached to the VPC. Only an
+  # internet gateway is read this way; a VPN gateway's attachment, whose
+  # identifier says VPN, is Cloud Control's.
+  input:
+    Filters:
+      - Name: attachment.vpc-id
+        Values: ["{VpcId}"]
+  response: InternetGateways[]
+  serves:
+    AttachmentType: [IGW]
+  unserved:
+    VpnGatewayId: only a VPN gateway attachment has one
+  # An update detaches the gateway the VPC has before attaching the next.
+  capture:
+    CurrentInternetGatewayId: InternetGatewayId
+properties:
+  AttachmentType: "{AttachmentType}"
+  InternetGatewayId: InternetGatewayId
+  VpcId: "{VpcId}"
+create:
+  operation: AttachInternetGateway
+  input:
+    InternetGatewayId: "{InternetGatewayId}"
+    VpcId: "{VpcId}"
+  identifier:
+    AttachmentType: =IGW
+    VpcId: "{VpcId}"
+update:
+  - operation: AttachInternetGateway
+    properties: [InternetGatewayId]
+    input:
+      InternetGatewayId: "{InternetGatewayId}"
+      VpcId: "{VpcId}"
+    before:
+      operation: DetachInternetGateway
+      input:
+        InternetGatewayId: "{CurrentInternetGatewayId}"
+        VpcId: "{VpcId}"
+      absentErrors: [Gateway.NotAttached]
+delete:
+  operation: DetachInternetGateway
+  input:
+    InternetGatewayId: "{CurrentInternetGatewayId}"
+    VpcId: "{VpcId}"
+  absentErrors: [Gateway.NotAttached, InvalidInternetGatewayID.NotFound]
+unsupported:
+  VpnGatewayId: the attachment of a VPN gateway, which is free only while unattached, is made through Cloud Control
+lifecycle:
+  create:
+    VpcId: "{attachVpcId}"
+    InternetGatewayId: "{internetGatewayIdA}"
+  update:
+    InternetGatewayId: "{internetGatewayIdB}"
+absentIds:
+  - IGW|vpc-0a1b2c3d4e5f60718

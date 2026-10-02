@@ -34,6 +34,21 @@ func arnSegments(arn string) []string {
 	return []string{arn}
 }
 
+// selectedBy matches the value a selection step compares its member to.
+var selectedBy = regexp.MustCompile(`\[[A-Za-z0-9/|]+=([^\]]+)\]`)
+
+// selectionPlaceholders is the {Property} names a response path selects a
+// list element by.
+func selectionPlaceholders(response string) map[string]bool {
+	out := map[string]bool{}
+	for _, m := range selectedBy.FindAllStringSubmatch(response, -1) {
+		for _, name := range placeholders(m[1]) {
+			out[name] = true
+		}
+	}
+	return out
+}
+
 // placeholders lists the {Property} names in every string of value.
 func placeholders(value any) []string {
 	var out []string

@@ -195,11 +195,18 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		return nil, nil, false, errIncomplete(typeName)
 	}
 	root, _ := out.(map[string]any)
+	w := &walk{vars: identifier}
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
 		out = obj[step.Name]
 		if step.List {
 			items, _ := out.([]any)
+			if step.Where != "" {
+				items = slices.DeleteFunc(slices.Clone(items), func(item any) bool {
+					m, ok := item.(map[string]any)
+					return !ok || !w.selects(step, func(path string) any { return memberAt(m, path) })
+				})
+			}
 			if len(items) == 0 {
 				return nil, nil, false, ErrAbsent
 			}
@@ -213,7 +220,6 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if !ok {
 		return nil, nil, false, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
-	w := &walk{vars: identifier}
 	props, err = r.finish(func(fields []Field, fromRoot bool) map[string]any {
 		if fromRoot {
 			return r.translate(w, root, fields)
@@ -369,12 +375,19 @@ func CanRead(typeName string) bool { return readers[typeName].Production }
 // declares create-only, beyond the schema's own; nil when it declares none.
 func CreateOnly(typeName string) []string { return readers[typeName].CreateOnly }
 
-// ReadByID is Read for a type with a single primary identifier, given as
-// Cloud Control gives it.
+// ReadByID is Read for an identifier given as Cloud Control gives it: the
+// one property's value, or a composite identifier's values joined by |.
 func (c *Client) ReadByID(ctx context.Context, typeName, identifier string) (map[string]any, error) {
 	r, ok := readers[typeName]
-	if !ok || len(r.Identifier) != 1 {
-		return nil, fmt.Errorf("%s has no direct reader with a single identifier", typeName)
+	if !ok {
+		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
-	return c.Read(ctx, typeName, map[string]string{r.Identifier[0].Property: identifier})
+	values, err := r.identifierValues(identifier)
+	if err != nil {
+		return nil, err
+	}
+	if !r.serves(values) {
+		return nil, ErrUnserved
+	}
+	return c.Read(ctx, typeName, values)
 }

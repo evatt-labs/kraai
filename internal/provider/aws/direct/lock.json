@@ -179,7 +179,7 @@
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
-      "subsetSha256": "c086b6012b6ebf8a8eb0f4dfa01d043c96c268e847f3dd74ad5b95ade00563af"
+      "subsetSha256": "e449bde810b443c813ec7ceffad327839693dfad77b3932c9ac782c2ee017b3f"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
@@ -938,6 +938,11 @@
       "sourceSha256": "cd19ef77815ff53dcc05fb1cd97100c5bf2f959d345b1152b57340e6f91e7b7b",
       "subsetSha256": "b1349607719b4dc64ec2040d98deb16aad58db63dca04b4605f5fb9b2654a966"
     },
+    "AWS::EC2::Route": {
+      "file": "schemas/AWS--EC2--Route.json",
+      "sourceSha256": "36076380f9aa017aaac7a0993fca4f7ce78e1ba2626f4f76e98f4021f820d90e",
+      "subsetSha256": "a9d8fb3e9b9655c318c45b9f1126c7ccb5a7a300fff13a49652a61bede337498"
+    },
     "AWS::EC2::RouteTable": {
       "file": "schemas/AWS--EC2--RouteTable.json",
       "sourceSha256": "a79ec11baf881707a4d8ca9648edf6e5a0939a50e93275cd41472ba2e1f48d29",
@@ -962,6 +967,11 @@
       "file": "schemas/AWS--EC2--VPC.json",
       "sourceSha256": "2168d5fa501c524d2663184a94de4bb0872a6ff62c038753024f56ebdcdd48b4",
       "subsetSha256": "90ffce310e820b9dde5d8b8677044ce41b94a2afe37a4a53c6b3646b9bba4050"
+    },
+    "AWS::EC2::VPCGatewayAttachment": {
+      "file": "schemas/AWS--EC2--VPCGatewayAttachment.json",
+      "sourceSha256": "ad9c28fd443e7e29219ce2ae0ca4361f255678074c8cb4d1a785f40b6d2013e1",
+      "subsetSha256": "cd5c8b7765ab11f1fe5a26b6c27e811e1bc0dbdde4a19d15e7a6c6642ea3d317"
     },
     "AWS::ECS::Cluster": {
       "file": "schemas/AWS--ECS--Cluster.json",

@@ -49,6 +49,20 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		errs = append(errs, err)
 	}
 	r.Wait = wait
+	for _, property := range sortedKeys(o.Read.Serves) {
+		if !slices.Contains(r.IdentifierOrder, property) || len(o.Read.Serves[property]) == 0 {
+			errs = append(errs, fmt.Errorf("serves %s, which is not a property of a composite identifier, or names no value", property))
+		}
+	}
+	r.Serves = o.Read.Serves
+	for _, property := range sortedKeys(o.Read.Unserved) {
+		if len(o.Read.Serves) == 0 || o.Read.Unserved[property] == "" || slices.Contains(r.IdentifierOrder, property) {
+			errs = append(errs, fmt.Errorf("unserved %s must be a property of an identifier the reader does not serve, with a reason, beside serves; it is not an identifier property", property))
+		}
+		if _, mapped := o.Properties[property]; mapped {
+			errs = append(errs, fmt.Errorf("unserved %s is also mapped", property))
+		}
+	}
 	captured := map[string]bool{}
 	for name := range o.Read.Capture {
 		captured[name] = true

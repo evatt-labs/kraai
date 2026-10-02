@@ -193,6 +193,29 @@ func readableValue(f Field, v any) any {
 	return v
 }
 
+// sendsChange reports whether update call m, rendered from values, sends a
+// member that carries what it sets. A structure property a service sets
+// member by member, such as a subnet's DNS options, has one call to each
+// member, and a call has nothing to send for a member the desired structure
+// leaves out. A call that names no property in its input sends always.
+func sendsChange(m MutationCall, address, values map[string]any) bool {
+	carries := false
+	for _, member := range sortedKeys(m.Input) {
+		set := slices.ContainsFunc(templateRefs(m.Input[member]), func(ref [3]string) bool {
+			_, addressed := address[ref[0]]
+			return !addressed
+		})
+		if !set {
+			continue
+		}
+		carries = true
+		if _, ok, _ := render(m.Input[member], values, func(_ string, v any) (any, error) { return v, nil }); ok {
+			return true
+		}
+	}
+	return !carries
+}
+
 // readField is the read mapping of property, from the read itself or one
 // of its further calls.
 func readField(r Reader, property string) (Field, bool) {

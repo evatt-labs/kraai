@@ -24,7 +24,7 @@ func CanMutate(typeName string) bool { return readers[typeName].Mutable }
 // any call is made.
 func (c *Client) Create(ctx context.Context, typeName string, desired map[string]any) (string, error) {
 	r, ok := readers[typeName]
-	if !ok || r.Create == nil || len(r.Identifier) != 1 {
+	if !ok || r.Create == nil || !r.addressable() {
 		return "", fmt.Errorf("%s has no direct create", typeName)
 	}
 	values := maps.Clone(desired)
@@ -42,22 +42,16 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 	if err != nil {
 		return "", err
 	}
-	property := r.Identifier[0].Property
-	var v any
-	if wholePlaceholder.MatchString(r.Create.Identifier[property]) {
-		// The create answers with no identifier; it is the one sent.
-		v = values[property]
-	} else {
-		v, _ = at(out, strings.Split(r.Create.Identifier[property], "."))
-	}
-	id, _ := v.(string)
-	if id == "" {
-		return "", fmt.Errorf("the %s create returned no %s", typeName, r.Create.Identifier[property])
+	id, err := r.createdIdentifier(out, values)
+	if err != nil {
+		return "", err
 	}
 	// The service's answer is what the instance is called: some lowercase
 	// the name they are sent.
-	if _, sent := values[property]; sent {
-		values[property] = id
+	if property := r.Identifier[0].Property; len(r.IdentifierOrder) == 0 {
+		if _, sent := values[property]; sent {
+			values[property] = id
+		}
 	}
 	rest := map[string]any{}
 	for p, v := range withoutUnsettable(r, values) {
@@ -101,7 +95,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 // current being how it was read, and returns once a read shows them.
 func (c *Client) Update(ctx context.Context, typeName, identifier string, current, changes map[string]any) error {
 	r, ok := readers[typeName]
-	if !ok || len(r.Identifier) != 1 {
+	if !ok || !r.addressable() {
 		return fmt.Errorf("%s has no direct update", typeName)
 	}
 	address, err := c.addressOf(ctx, r, identifier)
@@ -199,6 +193,14 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 				}
 			}
 		}
+		if !sendsChange(u, address, values) {
+			continue
+		}
+		if u.Before != nil {
+			if err := send(*u.Before, values); err != nil {
+				return err
+			}
+		}
 		if err := send(u, values); err != nil {
 			return err
 		}
@@ -210,7 +212,7 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 // finds it absent.
 func (c *Client) Delete(ctx context.Context, typeName, identifier string) error {
 	r, ok := readers[typeName]
-	if !ok || r.Delete == nil || len(r.Identifier) != 1 {
+	if !ok || r.Delete == nil || !r.addressable() {
 		return fmt.Errorf("%s has no direct delete", typeName)
 	}
 	values, err := c.addressOf(ctx, r, identifier)
@@ -248,12 +250,23 @@ func (c *Client) Delete(ctx context.Context, typeName, identifier string) error 
 // read's captures, such as an ARN the schema does not carry, what a read
 // captures.
 func (c *Client) addressOf(ctx context.Context, r Reader, identifier string) (map[string]any, error) {
-	property := r.Identifier[0].Property
-	values := map[string]any{property: identifier}
+	parts, err := r.identifierValues(identifier)
+	if err != nil {
+		return nil, err
+	}
+	// Read as nothing, an instance the reader does not serve would be taken
+	// for one already gone.
+	if !r.serves(parts) {
+		return nil, ErrUnserved
+	}
+	values := map[string]any{}
+	for property, value := range parts {
+		values[property] = value
+	}
 	if !r.MutationCaptures {
 		return values, nil
 	}
-	_, captured, _, err := c.readCall(ctx, r, map[string]string{property: identifier})
+	_, captured, _, err := c.readCall(ctx, r, parts)
 	if err != nil {
 		return nil, fmt.Errorf("reading the %s %s to address its mutation: %w", r.Type, identifier, err)
 	}
@@ -271,7 +284,11 @@ func (c *Client) settled(ctx context.Context, r Reader, identifier string) bool 
 	if len(r.Busy) == 0 {
 		return true
 	}
-	_, _, busy, err := c.readCall(ctx, r, map[string]string{r.Identifier[0].Property: identifier})
+	parts, err := r.identifierValues(identifier)
+	if err != nil {
+		return false
+	}
+	_, _, busy, err := c.readCall(ctx, r, parts)
 	return err == nil && !busy
 }
 

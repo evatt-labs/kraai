@@ -2,6 +2,7 @@ package direct
 
 import (
 	"encoding/json"
+	"strings"
 )
 
 // xmlName is the element a structure member is read from under an XML
@@ -12,6 +13,21 @@ func xmlName(member string, m smithyMember) string {
 		return name
 	}
 	return member
+}
+
+// xmlSelector is a selection's member, as selectable checks it, by the
+// elements it is read from.
+func xmlSelector(model *smithyModel, element, where string) string {
+	alternatives := strings.Split(where, "|")
+	for i, alternative := range alternatives {
+		holder, steps := element, strings.Split(alternative, "/")
+		for j, name := range steps {
+			m := model.Shapes[holder].Members[name]
+			steps[j], holder = xmlName(name, m), m.Target
+		}
+		alternatives[i] = strings.Join(steps, "/")
+	}
+	return strings.Join(alternatives, "|")
 }
 
 // itemName is the element wrapping each item of the list m targets, or ""
@@ -49,7 +65,7 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 				holder = ref(listShape.Member)
 			}
 			if step.Where != "" {
-				f.Via[j].Where = xmlName(step.Where, model.Shapes[holder].Members[step.Where])
+				f.Via[j].Where = xmlSelector(model, holder, step.Where)
 			}
 		}
 		if f.Member == "." {
