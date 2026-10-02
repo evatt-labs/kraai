@@ -6,6 +6,11 @@
       "sourceSha256": "4f2e27af9601556e61e14d7250cf57fcc303acd82b36e066a793381582966e81",
       "subsetSha256": "ee43dafe7f049121bf2e92cc6feb01edd9575347f7aad70f255ea1fa67f66ec2"
     },
+    "apigatewayv2/service/2018-11-29/apigatewayv2-2018-11-29.json": {
+      "file": "models/apigatewayv2-2018-11-29.json",
+      "sourceSha256": "423a8e8562ca06a12ee6c90f8d0b39ae05e184354de4d83c74d8118d9179fcc4",
+      "subsetSha256": "da5f624a65cae58e2d5bdfa2b882925f8ad80aab5e057650afc6bb2ca945cb81"
+    },
     "appconfig/service/2019-10-09/appconfig-2019-10-09.json": {
       "file": "models/appconfig-2019-10-09.json",
       "sourceSha256": "ae80951fcaa00840d0b273ee198998789aafb452cd34107599fb48590c9428e3",
@@ -643,6 +648,11 @@
     }
   },
   "schemas": {
+    "AWS::ApiGatewayV2::Api": {
+      "file": "schemas/AWS--ApiGatewayV2--Api.json",
+      "sourceSha256": "3f154e3972128c7d700924036f596eb083e0d22e6feca77726634d11d363abc0",
+      "subsetSha256": "339331601e9cb34f0088581f27205e510bb850a6b94f2ecdf10b5e419cc4e4da"
+    },
     "AWS::AppConfig::DeploymentStrategy": {
       "file": "schemas/AWS--AppConfig--DeploymentStrategy.json",
       "sourceSha256": "40e5e783ec5c982e3330f6d87ed18abe28d224e1815f1b458a3bbd70f6268741",
