@@ -36,6 +36,7 @@ func init() {
 			Protocol:    "restJson1",
 			SigningName: "lambda",
 			Complete:    true,
+			Production:  true,
 			Host:        "lambda.{region}.amazonaws.com",
 			Method:      "GET",
 			URI:         "/2015-03-31/functions/{FunctionName}",
