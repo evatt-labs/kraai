@@ -10,10 +10,15 @@ import (
 	"strings"
 )
 
-// tagValue is the value of the tag key in any Key/Value list desired
-// carries.
+// tagValue is the value of the tag key in any Key/Value list or string map
+// desired carries.
 func tagValue(desired map[string]any, key string) (string, bool) {
 	for _, v := range desired {
+		if tags, isMap := v.(map[string]any); isMap {
+			if s, ok := tags[key].(string); ok {
+				return s, true
+			}
+		}
 		items, _ := v.([]any)
 		for _, item := range items {
 			if m, ok := item.(map[string]any); ok && m["Key"] == key {
@@ -40,8 +45,10 @@ func shortName(name string, maxLength int) string {
 
 // tagChanges is the tags desired adds or changes over current, as a
 // Key/Value list, and the keys it removes. A tag AWS manages, aws:*, is
-// never removed.
+// never removed. Either side may be a string map, as a schema that types
+// its tags as an object holds them, or a Key/Value list.
 func tagChanges(current, desired any) (added []any, removed []any) {
+	current, desired = entriesOf(current), entriesOf(desired)
 	have := map[string]any{}
 	for _, item := range asList(current) {
 		if m, ok := item.(map[string]any); ok {

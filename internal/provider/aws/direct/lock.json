@@ -584,7 +584,7 @@
     "ssm/service/2014-11-06/ssm-2014-11-06.json": {
       "file": "models/ssm-2014-11-06.json",
       "sourceSha256": "23a5af746171632c4e9eabd6e5c7ea32cfc3c772307fb81e8cc920b17992a61c",
-      "subsetSha256": "adec9465dcbbcdbefa10ff53668eb1dc4771a4c210f03826611f3ddf00222989"
+      "subsetSha256": "789f71ce16e9a88b4cc3bc1564a4397514322c46294f36801539cedd9dcefebf"
     },
     "sso-admin/service/2020-07-20/sso-admin-2020-07-20.json": {
       "file": "models/sso-admin-2020-07-20.json",
@@ -1682,6 +1682,11 @@
       "file": "schemas/AWS--SSM--MaintenanceWindow.json",
       "sourceSha256": "5493a8de7ed8d9ff3c4ed6abb4908aca1ea5786521298341a829b43e78d355fd",
       "subsetSha256": "4378513d277eaf41223b085fbccf36bdec5f0f20665aebeb14aaa40f5f66f8be"
+    },
+    "AWS::SSM::Parameter": {
+      "file": "schemas/AWS--SSM--Parameter.json",
+      "sourceSha256": "dd6be175bfce6c77a5f759ae750baa380933f03cb91f1a93af6ab74693083717",
+      "subsetSha256": "a69a56a88d990c8afbe9839a1becd81212875e8a33ac16e39b0b5ecb738bf132"
     },
     "AWS::SSM::ServiceSetting": {
       "file": "schemas/AWS--SSM--ServiceSetting.json",
