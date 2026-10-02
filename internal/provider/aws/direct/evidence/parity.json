@@ -2632,6 +2632,24 @@
       "override": "4ba5284ac22f533d7ee86f9ad10bf72d38abd59e3cc6f3222905ebfd1a9f1522"
     },
     {
+      "type": "AWS::SecretsManager::Secret",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "Description",
+        "Id",
+        "Name",
+        "ReplicaRegions",
+        "Tags"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
+    },
+    {
       "type": "AWS::SecurityAgent::Application",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",

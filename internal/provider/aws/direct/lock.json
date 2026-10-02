@@ -531,6 +531,11 @@
       "sourceSha256": "801f795ec5f7973bcd2c6bae14dc03859c3e54e718f3e4b85b8445f47d798a68",
       "subsetSha256": "6a1eba34610d1ea5350ac54ea03e5b314b5b7c85d04b65f7a005565293b07997"
     },
+    "secrets-manager/service/2017-10-17/secrets-manager-2017-10-17.json": {
+      "file": "models/secrets-manager-2017-10-17.json",
+      "sourceSha256": "2738bd8ded2b25834c71089cf71232738972d78befa80fa168ea476978ac8604",
+      "subsetSha256": "cacc6d116fc05e8bf4edfb9773f7c5d0c967fb00a0b1f6434c6106c0757fa940"
+    },
     "securityagent/service/2025-09-06/securityagent-2025-09-06.json": {
       "file": "models/securityagent-2025-09-06.json",
       "sourceSha256": "26c14d384f79c859a5528aa7f6e361c801f68ff171a309380ace454f8a5fcdb1",
@@ -1797,6 +1802,11 @@
       "file": "schemas/AWS--Scheduler--ScheduleGroup.json",
       "sourceSha256": "607803b13ffe2061134f1d99105c3cb20eb58de66ad682e09068ca35ca3899b5",
       "subsetSha256": "b9fbefa444bee84864962200385eeb48526307a6a3290b9759c28b4e3004edda"
+    },
+    "AWS::SecretsManager::Secret": {
+      "file": "schemas/AWS--SecretsManager--Secret.json",
+      "sourceSha256": "dba2dda3682e449edb8835e568081c793a5cabdc743be06d35634f56f3a76814",
+      "subsetSha256": "1d1f8d7805514a322ff99dc64a8a92f4bd0104a5f2723588ad1eacf892c9db11"
     },
     "AWS::SecurityAgent::Application": {
       "file": "schemas/AWS--SecurityAgent--Application.json",
