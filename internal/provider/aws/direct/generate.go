@@ -153,6 +153,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 			if st.Item != "" {
 				fmt.Fprintf(b, ", Item: %q", st.Item)
 			}
+			if st.Where != "" {
+				fmt.Fprintf(b, ", Where: %q, Equals: %q", st.Where, st.Equals)
+			}
 			b.WriteString("}, ")
 		}
 		b.WriteString("},\n")

@@ -200,6 +200,13 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		out = obj[step.Name]
 		if step.List {
 			items, _ := out.([]any)
+			if step.Where != "" {
+				w := &walk{vars: identifier}
+				items = slices.DeleteFunc(slices.Clone(items), func(item any) bool {
+					m, _ := item.(map[string]any)
+					return !w.selects(step, m[step.Where])
+				})
+			}
 			if len(items) == 0 {
 				return nil, nil, false, ErrAbsent
 			}

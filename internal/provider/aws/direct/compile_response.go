@@ -24,6 +24,10 @@ func (c *callCompiler) response() {
 	}
 	if c.o.Read.Response != "" {
 		for i, step := range strings.Split(c.o.Read.Response, ".") {
+			var where, equals string
+			if sel := selection.FindStringSubmatch(step); sel != nil {
+				step, where, equals = sel[1]+"[]", sel[2], sel[3]
+			}
 			step, list := strings.CutSuffix(step, "[]")
 			m, ok := c.model.Shapes[c.resource].Members[step]
 			if !ok {
@@ -53,6 +57,9 @@ func (c *callCompiler) response() {
 				if isXML(c.r.Protocol) {
 					st.Item = itemName(m, listShape)
 				}
+				if where != "" {
+					c.selectResource(&st, next, where, equals)
+				}
 			}
 			if i > 0 || step != c.payload {
 				c.r.Response = append(c.r.Response, st)
@@ -75,6 +82,32 @@ func (c *callCompiler) response() {
 	if c.model.Shapes[c.resource].Type != "structure" {
 		c.fail("response path %q does not end at a structure", c.o.Read.Response)
 	}
+}
+
+// selectResource makes st pick, from the list it walks, the one element
+// whose scalar member where equals equals, such as a policy among those a
+// call answers for the whole account.
+func (c *callCompiler) selectResource(st *Step, element, where, equals string) {
+	if isXML(c.r.Protocol) {
+		c.fail("response path %s selects by %s, which is read from JSON only", c.o.Read.Response, where)
+		return
+	}
+	m, ok := c.model.Shapes[element].Members[where]
+	if !ok {
+		c.fail("response path %s: %s has no member %s", c.o.Read.Response, element, where)
+		return
+	}
+	if kind := kindOf(c.model.Shapes[m.Target].Type, m.Target); kind != "scalar" {
+		c.fail("response path %s selects by %s, which is a %s, not a scalar", c.o.Read.Response, where, kind)
+	}
+	for _, p := range placeholders(equals) {
+		if !c.want[p] {
+			c.fail("response path %s selects by {%s}, which is not the primary identifier", c.o.Read.Response, p)
+		}
+	}
+	var jsonName string
+	_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &jsonName)
+	st.Where, st.Equals = c.r.wire(where, jsonName), equals
 }
 
 // fields compiles the properties the call maps, from the resource and

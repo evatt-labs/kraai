@@ -129,6 +129,18 @@
       "override": "227b3672474b9b3b24852d04b2a51f15a96499460d01719204ccbb144b0b9ce3"
     },
     {
+      "type": "AWS::Events::EventBus",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "Description",
+        "LogConfig",
+        "Policy",
+        "Tags"
+      ],
+      "override": "d7c50d69723b362df8f603ea3946ed56aa9e871f09850c29597954a3f9a1062f"
+    },
+    {
       "type": "AWS::Events::Rule",
       "date": "2026-09-29",
       "outcome": "parity",
@@ -156,6 +168,15 @@
         "Tags"
       ],
       "override": "da24fc3739aa297da750bffc9d88a647319764993b0196e8fa42e8cbe2afd41f"
+    },
+    {
+      "type": "AWS::Logs::ResourcePolicy",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "PolicyDocument"
+      ],
+      "override": "4496f0927f2f1daa8e309aaf80e423e07a3c496bcaf5718e651550bac4c0a50b"
     },
     {
       "type": "AWS::RDS::DBClusterParameterGroup",

@@ -142,6 +142,34 @@ func init() {
 			},
 			Mutable: true,
 		},
+		"AWS::Logs::ResourcePolicy": {
+			Type:        "AWS::Logs::ResourcePolicy",
+			Protocol:    "awsJson1_1",
+			SigningName: "logs",
+			Complete:    true,
+			Production:  true,
+			Host:        "logs.{region}.amazonaws.com",
+			Target:      "Logs_20140328.DescribeResourcePolicies",
+			Identifier: []Binding{
+				{Property: "PolicyName", Member: "", Location: "placeholder"},
+			},
+			Input: []Binding{
+				Binding{Location: "body", Member: "policyScope", Value: "ACCOUNT"},
+			},
+			Response: []Step{{Name: "resourcePolicies", List: true, Where: "policyName", Equals: "{PolicyName}"}},
+			Fields: []Field{
+				{Property: "PolicyDocument", Member: "policyDocument", Kind: "scalar"},
+				{Property: "PolicyName", Member: "policyName", Kind: "scalar"},
+			},
+			AbsentIDs:         []string{"kraai-absent-probe"},
+			LifecycleComplete: true,
+			Create:            &MutationCall{Operation: "PutResourcePolicy", Target: "Logs_20140328.PutResourcePolicy", Input: map[string]any{"policyDocument": "{PolicyDocument:json}", "policyName": "{PolicyName}"}, Properties: []string{"PolicyDocument", "PolicyName"}, Identifier: map[string]string{"PolicyName": "{PolicyName}"}, Idempotent: true},
+			Delete:            &MutationCall{Operation: "DeleteResourcePolicy", Target: "Logs_20140328.DeleteResourcePolicy", Input: map[string]any{"policyName": "{PolicyName}"}, AbsentErrors: []string{"ResourceNotFoundException"}},
+			Update: []MutationCall{
+				MutationCall{Operation: "PutResourcePolicy", Target: "Logs_20140328.PutResourcePolicy", Input: map[string]any{"policyDocument": "{PolicyDocument:json}", "policyName": "{PolicyName}"}, Properties: []string{"PolicyDocument"}},
+			},
+			Mutable: true,
+		},
 		"AWS::Logs::ScheduledQuery": {
 			Type:        "AWS::Logs::ScheduledQuery",
 			Protocol:    "awsJson1_1",

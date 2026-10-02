@@ -227,6 +227,9 @@ func (c *callCompiler) identifier() {
 	// its input rather than an input member of its own.
 	// A further call may instead be addressed by a value the read captured.
 	inInput, byCapture := map[string]bool{}, false
+	for _, name := range placeholders(c.o.Read.Response) {
+		inInput[name] = true
+	}
 	for _, value := range c.o.Read.Input {
 		for _, name := range placeholders(value) {
 			inInput[name] = true

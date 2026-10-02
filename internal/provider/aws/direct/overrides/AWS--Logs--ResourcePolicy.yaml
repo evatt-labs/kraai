@@ -1,0 +1,47 @@
+type: AWS::Logs::ResourcePolicy
+read:
+  model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
+  operation: DescribeResourcePolicies
+  # The account's policies, not those of one log group's resource. The call
+  # has no filter by name, so the policy is selected from the list.
+  input:
+    policyScope: ACCOUNT
+  response: resourcePolicies[policyName={PolicyName}]
+properties:
+  PolicyDocument: policyDocument
+  PolicyName: policyName
+absentIds:
+  - kraai-absent-probe
+create:
+  operation: PutResourcePolicy
+  # Creates or replaces the policy by name, so the same input again is a
+  # no-op.
+  idempotent: true
+  input:
+    policyName: "{PolicyName}"
+    policyDocument: "{PolicyDocument:json}"
+  identifier:
+    PolicyName: "{PolicyName}"
+update:
+  - operation: PutResourcePolicy
+    properties: [PolicyDocument]
+    input:
+      policyName: "{PolicyName}"
+      policyDocument: "{PolicyDocument:json}"
+delete:
+  operation: DeleteResourcePolicy
+  input:
+    policyName: "{PolicyName}"
+  absentErrors: [ResourceNotFoundException]
+# The schema types the document object or string, and Cloud Control reads it
+# back as the text it was given, so the vector gives text. The policy lets
+# the logs delivery service write to this harness's log groups, from this
+# account only. An account holds at most 10 such policies. The service
+# stores a one-element list as its element, so the update gives a bare
+# action: written as a list it would never read back as sent.
+lifecycle:
+  create:
+    PolicyName: "{name}"
+    PolicyDocument: '{"Version":"2012-10-17","Statement":[{"Sid":"delivery","Effect":"Allow","Principal":{"Service":"delivery.logs.amazonaws.com"},"Action":["logs:CreateLogStream","logs:PutLogEvents"],"Resource":"arn:aws:logs:{region}:{account}:log-group:kraai-lifecycle-*:log-stream:*","Condition":{"StringEquals":{"aws:SourceAccount":"{account}"}}}]}'
+  update:
+    PolicyDocument: '{"Version":"2012-10-17","Statement":[{"Sid":"delivery","Effect":"Allow","Principal":{"Service":"delivery.logs.amazonaws.com"},"Action":"logs:CreateLogStream","Resource":"arn:aws:logs:{region}:{account}:log-group:kraai-lifecycle-*:log-stream:*","Condition":{"StringEquals":{"aws:SourceAccount":"{account}"}}}]}'

@@ -976,6 +976,22 @@
       "override": "3d94745273e59a5e25e94703f31157fe77316fe920f54b627318e294d1b394dd"
     },
     {
+      "type": "AWS::Events::EventBus",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "Arn",
+        "Name",
+        "Tags"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "d7c50d69723b362df8f603ea3946ed56aa9e871f09850c29597954a3f9a1062f"
+    },
+    {
       "type": "AWS::Events::Rule",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-29",
@@ -1583,6 +1599,21 @@
       "absence": "parity",
       "probed": 1,
       "override": "da24fc3739aa297da750bffc9d88a647319764993b0196e8fa42e8cbe2afd41f"
+    },
+    {
+      "type": "AWS::Logs::ResourcePolicy",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "PolicyDocument",
+        "PolicyName"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "4496f0927f2f1daa8e309aaf80e423e07a3c496bcaf5718e651550bac4c0a50b"
     },
     {
       "type": "AWS::Logs::ScheduledQuery",
