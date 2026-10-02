@@ -78,8 +78,9 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				break
 			}
 			var where, equals string
+			many := false
 			if sel := selection.FindStringSubmatch(step); sel != nil {
-				step, where, equals = sel[1]+"[]", sel[2], sel[3]
+				step, where, equals, many = sel[1]+"[]", sel[2], sel[3], sel[4] == "*"
 			}
 			step, list := strings.CutSuffix(step, "[]")
 			pm, ok := model.Shapes[holder].Members[step]
@@ -110,16 +111,16 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				fail("%s%s maps through %s, whose jsonName a path does not follow", at, name, step)
 			}
 			if where != "" {
-				if wm, ok := model.Shapes[next].Members[where]; !ok || !slices.Contains([]string{"string", "enum"}, targetType(model.Shapes[wm.Target].Type, wm.Target)) {
+				if !selectable(model, next, where) {
 					fail("%s%s selects by %s, which is not a string member of %s", at, name, where, next)
 					walked = false
 					break
 				}
-				selected = true
+				selected, projected = selected || !many, projected || many
 			} else {
 				projected = projected || list
 			}
-			via, holder = append(via, Step{Name: step, List: list, Where: where, Equals: equals}), next
+			via, holder = append(via, Step{Name: step, List: list, Where: where, Equals: equals, Many: many}), next
 		}
 		if !walked {
 			continue
@@ -412,6 +413,32 @@ func compileWhere(model *smithyModel, f Field, element string, where map[string]
 		matches = append(matches, Match{Member: member, Equals: value})
 	}
 	return matches
+}
+
+// selectable reports whether where, a selection's member, names in each of
+// its alternatives a string or enum member of element, reached through
+// structures.
+func selectable(model *smithyModel, element, where string) bool {
+	for _, alternative := range strings.Split(where, "|") {
+		holder, steps := element, strings.Split(alternative, "/")
+		for i, name := range steps {
+			m, ok := model.Shapes[holder].Members[name]
+			if !ok {
+				return false
+			}
+			if i < len(steps)-1 {
+				if !isStructure(model.Shapes[m.Target]) {
+					return false
+				}
+				holder = m.Target
+				continue
+			}
+			if !slices.Contains([]string{"string", "enum"}, targetType(model.Shapes[m.Target].Type, m.Target)) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // compileWrap checks a list of strings read as a list of structures: the

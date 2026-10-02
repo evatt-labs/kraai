@@ -717,6 +717,26 @@
       "override": "b8fd938fc8608160eb9fba2a669dd397056ffad22db1b5aa088e00f6fd30563f"
     },
     {
+      "type": "AWS::EC2::Route",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 10,
+      "compared": [
+        "CidrBlock",
+        "DestinationCidrBlock",
+        "DestinationIpv6CidrBlock",
+        "DestinationPrefixListId",
+        "GatewayId",
+        "RouteTableId",
+        "VpcEndpointId"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "e28bfdb1cd2ed0f4c10f764ffca33b3e2c8b0386404073a75882ba6caf7ab9fb"
+    },
+    {
       "type": "AWS::EC2::RouteTable",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-27",
@@ -756,10 +776,10 @@
     {
       "type": "AWS::EC2::Subnet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-10-02",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 8,
+      "instances": 7,
       "compared": [
         "AssignIpv6AddressOnCreation",
         "AvailabilityZone",
@@ -767,6 +787,8 @@
         "BlockPublicAccessStates",
         "CidrBlock",
         "EnableDns64",
+        "Ipv6CidrBlock",
+        "Ipv6CidrBlocks",
         "Ipv6Native",
         "MapPublicIpOnLaunch",
         "NetworkAclAssociationId",
@@ -777,7 +799,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "67a438cdf632932a77941bb00c7120807bc6d645f9e7ad54ba2f246bb4a7e3e4"
+      "override": "b389a677c53c89c76816adecfdf15efeb92fb3536f9172f116bf579ac77de585"
     },
     {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
@@ -819,6 +841,22 @@
       "absence": "parity",
       "probed": 1,
       "override": "a96171f0c7ce9d52b4142e2a948fa565df0efb6c09c55bc0b2ef5e0eb42ee71c"
+    },
+    {
+      "type": "AWS::EC2::VPCGatewayAttachment",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "AttachmentType",
+        "InternetGatewayId",
+        "VpcId"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "151fbb92a2abda37584d73f7eb95e47fffb609346d533194a036c2f5f84517b3"
     },
     {
       "type": "AWS::ECS::Cluster",

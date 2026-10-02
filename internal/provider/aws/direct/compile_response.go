@@ -24,7 +24,21 @@ func (c *callCompiler) response() {
 	}
 	if c.o.Read.Response != "" {
 		for i, step := range strings.Split(c.o.Read.Response, ".") {
+			// A step may select, from a list, the element whose member equals
+			// a value, such as a route found by its destination.
+			var where, equals string
 			step, list := strings.CutSuffix(step, "[]")
+			if sel := selection.FindStringSubmatch(step); sel != nil {
+				step, where, equals, list = sel[1], sel[2], sel[3], true
+				if sel[4] != "" {
+					c.fail("response path %s keeps every element; it must be one", c.o.Read.Response)
+				}
+				for _, p := range placeholders(equals) {
+					if !c.want[p] {
+						c.fail("response path %s selects by {%s}, which is not the primary identifier", c.o.Read.Response, p)
+					}
+				}
+			}
 			m, ok := c.model.Shapes[c.resource].Members[step]
 			if !ok {
 				c.fail("response path %s: %s has no member %s", c.o.Read.Response, c.resource, step)
@@ -52,6 +66,16 @@ func (c *callCompiler) response() {
 				next = ref(listShape.Member)
 				if isXML(c.r.Protocol) {
 					st.Item = itemName(m, listShape)
+				}
+				if where != "" {
+					if !selectable(&c.model, next, where) {
+						c.fail("response path %s selects by %s, not a string member of %s", c.o.Read.Response, where, next)
+						break
+					}
+					st.Where, st.Equals = where, equals
+					if isXML(c.r.Protocol) {
+						st.Where = xmlSelector(&c.model, next, where)
+					}
 				}
 			}
 			if i > 0 || step != c.payload {
@@ -214,6 +238,9 @@ func (c *callCompiler) conditions(label string, spec map[string][]string) []Cond
 				step, every = name, true
 			} else if sel := selection.FindStringSubmatch(step); sel != nil {
 				step, where, equals = sel[1], sel[2], sel[3]
+				if sel[4] != "" {
+					c.fail(label+" names %s, which keeps every element; a condition selects one", path)
+				}
 			}
 			pm, ok := c.model.Shapes[holder].Members[step]
 			if !ok {
@@ -232,6 +259,11 @@ func (c *callCompiler) conditions(label string, spec map[string][]string) []Cond
 			}
 			if !isStructure(c.model.Shapes[next]) {
 				c.fail(label+" names %s, but %s is not a structure", path, step)
+				walked = false
+				break
+			}
+			if where != "" && !selectable(&c.model, next, where) {
+				c.fail(label+" names %s, which selects by %s, not a string member of %s", path, where, next)
 				walked = false
 				break
 			}

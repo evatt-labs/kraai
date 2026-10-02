@@ -114,6 +114,14 @@ type Read struct {
 	// that does not exist, such as InvalidGroup.NotFound, which the reader
 	// reports as absence rather than as an error.
 	AbsentErrors []string `yaml:"absentErrors,omitempty"`
+	// Serves limits a composite identifier's property to the values the
+	// read answers for, such as a gateway attachment's type: an identifier
+	// with another value is not read directly, and not created, updated
+	// or deleted directly either, since the read would find nothing for it.
+	Serves map[string][]string `yaml:"serves,omitempty"`
+	// Unserved names each property only an identifier the reader does not
+	// serve has, and why: it is neither read nor skipped.
+	Unserved map[string]string `yaml:"unserved,omitempty"`
 	// Capture names string members of the resource structure, as dotted
 	// paths, that a further call's input may use as {Name}: a value only
 	// the read's own response carries, such as the ARN a tag call takes.
@@ -256,7 +264,10 @@ type Create struct {
 	// Identifier maps the primary identifier to the output member that
 	// carries it, a dotted path when the member is nested, or to
 	// {Property} when the output carries none and the identifier is the
-	// value the create sent.
+	// value the create sent. A composite identifier maps each of its
+	// properties so: {A|B} is whichever of A and B the create sent, such
+	// as a route's destination, and =VALUE a value the same for every
+	// create, such as a gateway attachment's type.
 	Identifier map[string]string `yaml:"identifier"`
 	// Name fills a name property the manifest leaves unset from the value
 	// of a tag the desired state carries, so a create that is retried names
@@ -292,6 +303,11 @@ type UpdateCall struct {
 	Together bool       `yaml:"together,omitempty"`
 	Tags     *Tags      `yaml:"tags,omitempty"`
 	List     *ListRoute `yaml:"list,omitempty"`
+	// Before is a call made first, whenever any of Properties changes, for
+	// a change the service takes as two calls, such as detaching the
+	// gateway a VPC has before attaching another. It is addressed as the
+	// call is, and may name what the read captured: the old value.
+	Before *Mutation `yaml:"before,omitempty"`
 }
 
 // ListRoute updates a list property by the elements added or changed, {added},

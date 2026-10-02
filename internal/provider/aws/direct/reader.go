@@ -25,6 +25,12 @@ type Reader struct {
 	// Wrapper the element awsQuery wraps its output in.
 	Action, Version, Wrapper string
 	Identifier               []Binding
+	// IdentifierOrder is a composite primary identifier's properties in the
+	// order Cloud Control joins their values with | into the identifier
+	// string; empty when the identifier is a single property.
+	IdentifierOrder []string
+	// Serves is Read.Serves.
+	Serves map[string][]string
 	// Input is every fixed input, each with its Value.
 	Input []Binding
 	// Absent is every condition under which a returned instance is gone.
@@ -131,8 +137,12 @@ type Step struct {
 	Item string
 	// Where and Equals select, from a list, the one element whose member
 	// Where equals Equals, with {Property} standing for that identifier
-	// property's value: a selection, not a projection.
+	// property's value: a selection, not a projection. Where names a member
+	// of the element, a path through structures as A/B, or alternatives, any
+	// of which may equal as A|B. Many keeps every element that passes, a
+	// projection of the selected.
 	Where, Equals string
+	Many          bool
 }
 
 // Match is a member of a list element and the value it must equal, with
@@ -142,8 +152,10 @@ type Match struct {
 }
 
 // selection matches a path step that selects one element of a list, such
-// as Associations[SubnetId={SubnetId}].
-var selection = regexp.MustCompile(`^([A-Za-z0-9]+)\[([A-Za-z0-9]+)=(.+)\]$`)
+// as Associations[SubnetId={SubnetId}], or with a trailing * every element
+// that passes. Its member may be a path through structures, A/B, or
+// alternatives, A|B.
+var selection = regexp.MustCompile(`^([A-Za-z0-9]+)\[([A-Za-z0-9/|]+)=(.+)\](\*?)$`)
 
 // Binding places one primary identifier property in the request.
 type Binding struct {

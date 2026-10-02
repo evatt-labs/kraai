@@ -51,6 +51,11 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 		return Reader{}, []error{err}
 	}
 	schema.elsewhere = map[string]bool{}
+	if only == nil {
+		for property := range o.Read.Unserved {
+			schema.elsewhere[property] = true
+		}
+	}
 
 	c := &callCompiler{o: o, only: only, captured: captured, each: each, model: model, schema: schema, r: Reader{Type: o.Type}}
 	c.address()
@@ -233,10 +238,13 @@ func (c *callCompiler) identifier() {
 			byCapture = byCapture || c.captured[name]
 		}
 	}
+	// A response that selects the resource by the identifier binds it too,
+	// such as a route found in its table by its destination.
+	selecting := selectionPlaceholders(c.o.Read.Response)
 	for _, property := range sortedKeys(c.want) {
 		_, bound := c.o.Read.Identifier[property]
 		switch {
-		case !bound && inInput[property]:
+		case !bound && (inInput[property] || selecting[property] || len(c.o.Read.Serves[property]) > 0):
 			// Sent only through the input's placeholders, but still what
 			// the reader is addressed by.
 			c.r.Identifier = append(c.r.Identifier, Binding{Property: property, Location: "placeholder"})
@@ -247,6 +255,14 @@ func (c *callCompiler) identifier() {
 	for _, name := range sortedKeys(input.Members) {
 		if input.Members[name].Traits["smithy.api#required"] != nil && !bound[name] {
 			c.fail("the input requires %s, which the identifier does not bind", name)
+		}
+	}
+	if c.only == nil && len(c.schema.PrimaryIdentifier) > 1 {
+		for _, p := range c.schema.PrimaryIdentifier {
+			c.r.IdentifierOrder = append(c.r.IdentifierOrder, strings.TrimPrefix(p, "/properties/"))
+		}
+		if len(c.r.Identifier) != len(c.r.IdentifierOrder) {
+			c.fail("the composite identifier %v is not bound property by property", c.schema.PrimaryIdentifier)
 		}
 	}
 }

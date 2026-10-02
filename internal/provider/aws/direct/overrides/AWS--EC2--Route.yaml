@@ -1,0 +1,117 @@
+type: AWS::EC2::Route
+read:
+  model: ec2/service/2016-11-15/ec2-2016-11-15.json
+  operation: DescribeRouteTables
+  # A route table that does not exist is an error here, as it is for Cloud
+  # Control, which answers GeneralServiceException rather than NotFound: only
+  # a table that exists without the route is absence.
+  identifier:
+    RouteTableId: RouteTableIds
+  # A route is found in its table by its destination, whichever kind the
+  # identifier's CidrBlock holds: an IPv4 or IPv6 block, or a prefix list.
+  response: RouteTables[].Routes[DestinationCidrBlock|DestinationIpv6CidrBlock|DestinationPrefixListId={CidrBlock}]
+  # An update and a delete name the destination by the member that holds it.
+  capture:
+    DestinationCidrBlock: DestinationCidrBlock
+    DestinationIpv6CidrBlock: DestinationIpv6CidrBlock
+    DestinationPrefixListId: DestinationPrefixListId
+properties:
+  CarrierGatewayId: CarrierGatewayId
+  CidrBlock: "{CidrBlock}"
+  CoreNetworkArn: CoreNetworkArn
+  DestinationCidrBlock: DestinationCidrBlock
+  DestinationIpv6CidrBlock: DestinationIpv6CidrBlock
+  DestinationPrefixListId: DestinationPrefixListId
+  EgressOnlyInternetGatewayId: EgressOnlyInternetGatewayId
+  GatewayId: GatewayId
+  InstanceId: InstanceId
+  LocalGatewayId: LocalGatewayId
+  NatGatewayId: NatGatewayId
+  NetworkInterfaceId: NetworkInterfaceId
+  OdbNetworkArn: OdbNetworkArn
+  RouteTableId: "{RouteTableId}"
+  TransitGatewayId: TransitGatewayId
+  VpcPeeringConnectionId: VpcPeeringConnectionId
+  # Cloud Control reports the gateway the route names as the endpoint too,
+  # an internet gateway's id or local included, since the API names a
+  # gateway endpoint's route by GatewayId.
+  VpcEndpointId: GatewayId
+create:
+  operation: CreateRoute
+  input:
+    RouteTableId: "{RouteTableId}"
+    DestinationCidrBlock: "{DestinationCidrBlock}"
+    DestinationIpv6CidrBlock: "{DestinationIpv6CidrBlock}"
+    DestinationPrefixListId: "{DestinationPrefixListId}"
+    CarrierGatewayId: "{CarrierGatewayId}"
+    CoreNetworkArn: "{CoreNetworkArn}"
+    EgressOnlyInternetGatewayId: "{EgressOnlyInternetGatewayId}"
+    GatewayId: "{GatewayId}"
+    InstanceId: "{InstanceId}"
+    LocalGatewayId: "{LocalGatewayId}"
+    NatGatewayId: "{NatGatewayId}"
+    NetworkInterfaceId: "{NetworkInterfaceId}"
+    OdbNetworkArn: "{OdbNetworkArn}"
+    TransitGatewayId: "{TransitGatewayId}"
+    VpcEndpointId: "{VpcEndpointId}"
+    VpcPeeringConnectionId: "{VpcPeeringConnectionId}"
+  # The create answers only that it succeeded; the identifier is the table
+  # and whichever destination it was sent.
+  identifier:
+    RouteTableId: "{RouteTableId}"
+    CidrBlock: "{DestinationCidrBlock|DestinationIpv6CidrBlock|DestinationPrefixListId}"
+update:
+  # ReplaceRoute names the route by its table and destination and sets its
+  # target; the destination is not an updatable property, so it is the one
+  # the read captured.
+  - operation: ReplaceRoute
+    properties:
+      - CarrierGatewayId
+      - CoreNetworkArn
+      - EgressOnlyInternetGatewayId
+      - GatewayId
+      - InstanceId
+      - LocalGatewayId
+      - NatGatewayId
+      - NetworkInterfaceId
+      - OdbNetworkArn
+      - TransitGatewayId
+      - VpcEndpointId
+      - VpcPeeringConnectionId
+    input:
+      RouteTableId: "{RouteTableId}"
+      DestinationCidrBlock: "{DestinationCidrBlock}"
+      DestinationIpv6CidrBlock: "{DestinationIpv6CidrBlock}"
+      DestinationPrefixListId: "{DestinationPrefixListId}"
+      CarrierGatewayId: "{CarrierGatewayId}"
+      CoreNetworkArn: "{CoreNetworkArn}"
+      EgressOnlyInternetGatewayId: "{EgressOnlyInternetGatewayId}"
+      GatewayId: "{GatewayId}"
+      InstanceId: "{InstanceId}"
+      LocalGatewayId: "{LocalGatewayId}"
+      NatGatewayId: "{NatGatewayId}"
+      NetworkInterfaceId: "{NetworkInterfaceId}"
+      OdbNetworkArn: "{OdbNetworkArn}"
+      TransitGatewayId: "{TransitGatewayId}"
+      VpcEndpointId: "{VpcEndpointId}"
+      VpcPeeringConnectionId: "{VpcPeeringConnectionId}"
+delete:
+  operation: DeleteRoute
+  input:
+    RouteTableId: "{RouteTableId}"
+    DestinationCidrBlock: "{DestinationCidrBlock}"
+    DestinationIpv6CidrBlock: "{DestinationIpv6CidrBlock}"
+    DestinationPrefixListId: "{DestinationPrefixListId}"
+  absentErrors: [InvalidRoute.NotFound]
+lifecycle:
+  create:
+    RouteTableId: "{routeTableId}"
+    DestinationCidrBlock: 10.50.0.0/16
+    GatewayId: "{internetGatewayId}"
+  # The same gateway, set through ReplaceRoute: a second target that is
+  # free to hold would need a peering connection or a NAT gateway.
+  update:
+    GatewayId: "{internetGatewayId}"
+# A route the table the harness names does not hold.
+absentIds:
+  - "{routeTableId}|10.77.0.0/16"
