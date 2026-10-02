@@ -1,0 +1,46 @@
+type: AWS::Lambda::Permission
+read:
+  model: lambda/service/2015-03-31/lambda-2015-03-31.json
+  operation: GetPolicy
+  # The identifier is the function, as named when the permission was made,
+  # then the statement's ID: the one policy holds every statement of a
+  # function (or of one of its aliases or versions, when named with it), and
+  # the ID selects this one.
+  identifier:
+    FunctionName: FunctionName
+  absentErrors: [ResourceNotFoundException]
+properties:
+  FunctionName: "{FunctionName}"
+  # The policy is one JSON document in a string. A statement that is not in
+  # it is a permission that is gone.
+  Id:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Sid"]
+  Action:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Action"]
+  # A service principal is a Service, anything else an AWS principal.
+  Principal:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Principal.Service", "Statement[Sid={Id}].Principal.AWS"]
+  SourceArn:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Condition.ArnLike.AWS:SourceArn"]
+  SourceAccount:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Condition.StringEquals.AWS:SourceAccount"]
+  PrincipalOrgID:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Condition.StringEquals.aws:PrincipalOrgID"]
+  EventSourceToken:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Condition.StringEquals.lambda:EventSourceToken"]
+  FunctionUrlAuthType:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Condition.StringEquals.lambda:FunctionUrlAuthType"]
+  InvokedViaFunctionUrl:
+    member: Policy
+    extract: ["Statement[Sid={Id}].Condition.Bool.lambda:InvokedViaFunctionUrl"]
+    transform: boolean
+absentIds:
+  - kraai-absent-probe|kraai-absent-statement

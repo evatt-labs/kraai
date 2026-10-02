@@ -95,6 +95,20 @@ func TestReadParity(t *testing.T) {
 	}
 }
 
+// harnessIDs are the identifiers of typeName's instances the environment
+// names, for a type Cloud Control cannot list: KRAAI_PARITY_IDS_<TYPE>, the
+// type uppercased with its colons as underscores (AWS_LAMBDA_URL), holds
+// them comma-separated.
+func harnessIDs(typeName string) []string {
+	var ids []string
+	for _, id := range strings.Split(os.Getenv("KRAAI_PARITY_IDS_"+strings.ToUpper(strings.ReplaceAll(typeName, "::", "_"))), ",") {
+		if id != "" {
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
 // readParity compares up to perType instances of r's type and returns e
 // with the outcome. A difference or a failed direct read fails t; what
 // only Cloud Control could not do is recorded as inconclusive instead.
@@ -118,18 +132,23 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 	} else {
 		listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(r.Type), MaxResults: aws.Int32(int32(perType))})
 		if err != nil {
-			// The error code alone: a throttle and a refusal read
-			// differently, and neither names an instance.
-			code := "unknown"
-			var apiErr smithy.APIError
-			if errors.As(err, &apiErr) {
-				code = apiErr.ErrorCode()
+			// A type Cloud Control lists only under a parent, such as a
+			// function, is given its instances by the environment.
+			if ids = harnessIDs(r.Type); len(ids) == 0 {
+				// The error code alone: a throttle and a refusal read
+				// differently, and neither names an instance.
+				code := "unknown"
+				var apiErr smithy.APIError
+				if errors.As(err, &apiErr) {
+					code = apiErr.ErrorCode()
+				}
+				e.Outcome, e.Note = "unlisted", "Cloud Control could not list the type: "+code
+				return e
 			}
-			e.Outcome, e.Note = "unlisted", "Cloud Control could not list the type: "+code
-			return e
-		}
-		for _, d := range listed.ResourceDescriptions {
-			ids = append(ids, aws.ToString(d.Identifier))
+		} else {
+			for _, d := range listed.ResourceDescriptions {
+				ids = append(ids, aws.ToString(d.Identifier))
+			}
 		}
 	}
 	if len(ids) > perType {

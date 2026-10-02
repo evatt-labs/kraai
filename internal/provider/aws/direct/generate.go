@@ -349,6 +349,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	if f.Wrap != "" {
 		fmt.Fprintf(b, ", Wrap: %q", f.Wrap)
 	}
+	if f.Extract != nil {
+		fmt.Fprintf(b, ", Extract: %#v", f.Extract)
+	}
 	if f.Default != nil {
 		b.WriteString(", Default: ")
 		literal(b, f.Default)

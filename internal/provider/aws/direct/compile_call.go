@@ -232,6 +232,14 @@ func (c *callCompiler) identifier() {
 	// its input rather than an input member of its own.
 	// A further call may instead be addressed by a value the read captured.
 	inInput, byCapture := map[string]bool{}, false
+	// A document extraction selects by the identifier as well.
+	for _, m := range c.o.Properties {
+		for _, path := range m.Extract {
+			for _, name := range placeholders(path) {
+				inInput[name] = true
+			}
+		}
+	}
 	for _, value := range c.o.Read.Input {
 		for _, name := range placeholders(value) {
 			inInput[name] = true

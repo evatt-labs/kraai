@@ -247,6 +247,9 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		}
 		return r.translate(w, obj, fields)
 	})
+	if err == nil && w.absent {
+		return nil, nil, false, ErrAbsent
+	}
 	if err == nil {
 		captured = r.translate(w, obj, r.Capture)
 		busy = r.busy(func(f Field) (any, bool) {

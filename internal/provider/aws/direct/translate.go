@@ -87,6 +87,9 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 	if !ok || v == nil {
 		return nil, false
 	}
+	if f.Extract != nil {
+		return r.extract(w, f, v)
+	}
 	if f.Key != "" {
 		entries, _ := v.(map[string]any)
 		if v, ok = entries[f.Key]; !ok || v == nil {
@@ -135,7 +138,11 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 			v = translated
 		}
 	}
-	return truth(f, transform(f.Transform, v)), true
+	v, ok = transform(f.Transform, v)
+	if !ok {
+		return nil, false
+	}
+	return truth(f, v), true
 }
 
 // wrapped is a list of scalars as a list of structures holding each as the
@@ -167,27 +174,37 @@ func entryList(names []string, entries map[string]any) []any {
 	return list
 }
 
-// transform applies a field's named transform to a value read for it.
-// arnResource keeps an ARN's resource part, everything after its fifth
-// colon, such as targetgroup/name/0123 from an ELB target group's ARN.
-// json, number and boolean parse a string; text that does not parse stays
-// text, for the comparison to report rather than hide.
-func transform(name string, v any) any {
+// transform applies a field's named transform to a value read for it, and
+// reports whether it left a value: arnPart:N leaves none when the text has
+// no Nth part. arnResource keeps an ARN's resource part, everything after
+// its fifth colon, such as targetgroup/name/0123 from an ELB target group's
+// ARN. arnPart:N keeps the Nth part of a text split on colons, counting
+// from 0, such as 6 for a Lambda function's name and 7 for its alias. json,
+// number and boolean parse a string; text that does not parse stays text,
+// for the comparison to report rather than hide.
+func transform(name string, v any) (any, bool) {
 	text, ok := v.(string)
 	if !ok {
-		return v
+		return v, true
+	}
+	if n, isPart := arnPartIndex(name); isPart {
+		parts := strings.Split(text, ":")
+		if n >= len(parts) || parts[n] == "" {
+			return nil, false
+		}
+		return parts[n], true
 	}
 	switch name {
 	case "arnResource":
 		if parts := strings.SplitN(text, ":", 6); len(parts) == 6 {
-			return parts[5]
+			return parts[5], true
 		}
 	case "urlJson":
 		// A malformed escape leaves the text as it is, for the comparison
 		// to report.
 		decoded, err := url.PathUnescape(text)
 		if err != nil {
-			return v
+			return v, true
 		}
 		return transform("json", decoded)
 	case "json":
@@ -195,18 +212,28 @@ func transform(name string, v any) any {
 		dec.UseNumber()
 		var parsed any
 		if dec.Decode(&parsed) == nil && !dec.More() {
-			return parsed
+			return parsed, true
 		}
 	case "number":
 		if _, err := strconv.ParseFloat(text, 64); err == nil {
-			return json.Number(text)
+			return json.Number(text), true
 		}
 	case "boolean":
 		if b, err := strconv.ParseBool(text); err == nil {
-			return b
+			return b, true
 		}
 	}
-	return v
+	return v, true
+}
+
+// arnPartIndex is N of a transform named arnPart:N.
+func arnPartIndex(name string) (int, bool) {
+	digits, ok := strings.CutPrefix(name, "arnPart:")
+	if !ok || digits == "" || len(digits) > 3 || strings.Trim(digits, "0123456789") != "" {
+		return 0, false
+	}
+	n, err := strconv.Atoi(digits)
+	return n, err == nil
 }
 
 // substitute replaces each {Property} in every string of v with that
@@ -250,6 +277,9 @@ func substitute(v any, identifier map[string]string) any {
 type walk struct {
 	vars map[string]string
 	errs []error
+	// absent is set when a document selection found no element: the
+	// instance is gone.
+	absent bool
 }
 
 // keeps reports whether a list element passes every match, reading each

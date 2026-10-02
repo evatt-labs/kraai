@@ -1,0 +1,35 @@
+type: AWS::Lambda::Url
+read:
+  model: lambda/service/2015-03-31/lambda-2015-03-31.json
+  operation: GetFunctionUrlConfig
+  # The identifier is the function's ARN, qualified with the alias when the
+  # URL is on one; the call takes either as the function.
+  identifier:
+    FunctionArn: FunctionName
+  absentErrors: [ResourceNotFoundException]
+properties:
+  FunctionArn: FunctionArn
+  FunctionUrl: FunctionUrl
+  AuthType: AuthType
+  InvokeMode: InvokeMode
+  # Cloud Control reads the target as the bare function name and the
+  # qualifier as the alias, both taken from the ARN: its parts 6 and 7 when
+  # split on colons. A function with no alias has no seventh part, and
+  # reads no qualifier.
+  TargetFunctionArn:
+    member: FunctionArn
+    transform: arnPart:6
+  Qualifier:
+    member: FunctionArn
+    transform: arnPart:7
+  Cors:
+    member: Cors
+    properties:
+      AllowCredentials: AllowCredentials
+      AllowHeaders: AllowHeaders
+      AllowMethods: AllowMethods
+      AllowOrigins: AllowOrigins
+      ExposeHeaders: ExposeHeaders
+      MaxAge: MaxAge
+absentIds:
+  - arn:aws:lambda:{region}:{account}:function:kraai-absent-probe

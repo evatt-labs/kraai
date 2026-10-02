@@ -483,7 +483,7 @@ func TestTransformURLJSON(t *testing.T) {
 		"not a string":    {42, 42},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := transform("urlJson", c.in)
+			got, _ := transform("urlJson", c.in)
 			if !covers(c.want, got) || !covers(got, c.want) {
 				t.Fatalf("transform = %#v, want %#v", got, c.want)
 			}
