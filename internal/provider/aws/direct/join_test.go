@@ -252,6 +252,10 @@ func TestEndpointOf(t *testing.T) {
 			ep{"https://widgets.cn-north-1.amazonaws.com.cn", ""}), "widgets.{region}.amazonaws.com", "", ""},
 		"global beside another partition's global": {rules(ep{"https://widgets.{PartitionResult#dnsSuffix}", "us-east-1"},
 			ep{"https://widgets.us-gov.amazonaws.com", "us-gov-west-1"}), "widgets.amazonaws.com", "us-east-1", ""},
+		"a global host beside the implicit-region form": {rules(ep{"https://widgets.amazonaws.com", "us-east-1"},
+			ep{"https://widgets.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dnsSuffix}", "{PartitionResult#implicitGlobalRegion}"}), "widgets.amazonaws.com", "us-east-1", ""},
+		"a global host signed elsewhere beside the implicit-region form": {rules(ep{"https://widgets.amazonaws.com", "us-west-2"},
+			ep{"https://widgets.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dnsSuffix}", "{PartitionResult#implicitGlobalRegion}"}), "", "", "2 standard endpoints"},
 		"a form that needs a parameter": {rules(regional, ep{"https://{AccountId}.widgets.{Region}.{PartitionResult#dnsSuffix}", ""}), "widgets.{region}.amazonaws.com", "", ""},
 		"no rule set":                   {nil, "", "", "no endpoint rule set"},
 	}

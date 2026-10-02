@@ -241,6 +241,11 @@
       "sourceSha256": "e0c324d26e877ff05a37ef087a68def9d29b0736941f9a263e2182fd0d4ad608",
       "subsetSha256": "0f0758774bcd1e5a059e533887e7f4d2bd95513b8b014812b588c8e59c7563c8"
     },
+    "iam/service/2010-05-08/iam-2010-05-08.json": {
+      "file": "models/iam-2010-05-08.json",
+      "sourceSha256": "c1f74d3eda269e4fa2f00b57d57ed19c0e0a6d7fc7c70d4e351e319d178430f9",
+      "subsetSha256": "0f8a4cde5b1bab579b112abe341a2430417b002a42ce89dfec0330ee1b84d6b7"
+    },
     "imagebuilder/service/2019-12-02/imagebuilder-2019-12-02.json": {
       "file": "models/imagebuilder-2019-12-02.json",
       "sourceSha256": "61991b5b1aea5f8530e847ebfdcd42d863f42d824cf0e0f366692a41145cfc80",
@@ -1077,6 +1082,11 @@
       "file": "schemas/AWS--HealthImaging--Datastore.json",
       "sourceSha256": "073fbcde11c74388e665abd6a5f55aa1dc7580f0dc23ac29adf6b146609b4152",
       "subsetSha256": "beab0793e4538682755228255e8a7c8d4e04a1982938b189a346f87a42d32d39"
+    },
+    "AWS::IAM::Role": {
+      "file": "schemas/AWS--IAM--Role.json",
+      "sourceSha256": "8cb295ac84c3050630b9aefe412c9dfe895833214a5c5e085fc8b53c5bac57b6",
+      "subsetSha256": "045abf2856d61b1a7ea2d9070665455ece6c2ade84b6122dd371aeb1bc022065"
     },
     "AWS::IVS::Channel": {
       "file": "schemas/AWS--IVS--Channel.json",

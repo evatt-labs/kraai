@@ -1,0 +1,183 @@
+type: AWS::IAM::Role
+read:
+  model: iam/service/2010-05-08/iam-2010-05-08.json
+  operation: GetRole
+  absentErrors: [NoSuchEntity]
+  identifier:
+    RoleName: RoleName
+  response: Role
+properties:
+  Arn: Arn
+  # The trust policy is returned URL-encoded.
+  AssumeRolePolicyDocument:
+    member: AssumeRolePolicyDocument
+    transform: urlJson
+  Description: Description
+  MaxSessionDuration: MaxSessionDuration
+  Path: Path
+  PermissionsBoundary: PermissionsBoundary.PermissionsBoundaryArn
+  RoleId: RoleId
+  RoleName: RoleName
+  Tags:
+    member: Tags
+    properties:
+      Key: Key
+      Value: Value
+also:
+  - operation: ListAttachedRolePolicies
+    identifier:
+      RoleName: RoleName
+    properties:
+      ManagedPolicyArns:
+        member: AttachedPolicies[].PolicyArn
+  # The inline policies are listed by name, then each read for its document.
+  - operation: ListRolePolicies
+    identifier:
+      RoleName: RoleName
+    properties:
+      Policies:
+        member: PolicyNames
+        wrap: PolicyName
+  - operation: GetRolePolicy
+    each: Policies
+    absentErrors: [NoSuchEntity]
+    input:
+      RoleName: "{RoleName}"
+      PolicyName: "{PolicyName}"
+    properties:
+      PolicyDocument:
+        member: PolicyDocument
+        transform: urlJson
+create:
+  operation: CreateRole
+  name:
+    property: RoleName
+    tag: kraai:resource-name
+    maxLength: 64
+  input:
+    Path: "{Path}"
+    RoleName: "{RoleName}"
+    AssumeRolePolicyDocument: "{AssumeRolePolicyDocument:json}"
+    Description: "{Description}"
+    MaxSessionDuration: "{MaxSessionDuration}"
+    PermissionsBoundary: "{PermissionsBoundary}"
+    Tags: "{Tags}"
+  identifier:
+    RoleName: Role.RoleName
+# IAM is eventually consistent: a call naming a role made a moment ago can
+# answer that it does not exist.
+update:
+  - operation: UpdateAssumeRolePolicy
+    properties: [AssumeRolePolicyDocument]
+    input:
+      RoleName: "{RoleName}"
+      PolicyDocument: "{AssumeRolePolicyDocument:json}"
+    retryErrors: [NoSuchEntity]
+  - operation: UpdateRole
+    properties: [Description, MaxSessionDuration]
+    input:
+      RoleName: "{RoleName}"
+      Description: "{Description}"
+      MaxSessionDuration: "{MaxSessionDuration}"
+    retryErrors: [NoSuchEntity]
+  - operation: PutRolePermissionsBoundary
+    properties: [PermissionsBoundary]
+    input:
+      RoleName: "{RoleName}"
+      PermissionsBoundary: "{PermissionsBoundary}"
+    retryErrors: [NoSuchEntity]
+  - list:
+      property: ManagedPolicyArns
+      key: ["."]
+      oneAtATime: true
+      add:
+        operation: AttachRolePolicy
+        input:
+          RoleName: "{RoleName}"
+          PolicyArn: "{element}"
+        retryErrors: [NoSuchEntity]
+      remove:
+        operation: DetachRolePolicy
+        input:
+          RoleName: "{RoleName}"
+          PolicyArn: "{element}"
+  - list:
+      property: Policies
+      key: [PolicyName]
+      oneAtATime: true
+      add:
+        operation: PutRolePolicy
+        input:
+          RoleName: "{RoleName}"
+          PolicyName: "{element.PolicyName}"
+          PolicyDocument: "{element.PolicyDocument:json}"
+        retryErrors: [NoSuchEntity]
+      remove:
+        operation: DeleteRolePolicy
+        input:
+          RoleName: "{RoleName}"
+          PolicyName: "{element.PolicyName}"
+  - tags:
+      property: Tags
+      add:
+        operation: TagRole
+        input:
+          RoleName: "{RoleName}"
+          Tags: "{added}"
+        retryErrors: [NoSuchEntity]
+      remove:
+        operation: UntagRole
+        input:
+          RoleName: "{RoleName}"
+          TagKeys: "{removed}"
+        retryErrors: [NoSuchEntity]
+# A role with policies cannot be deleted: they are detached and deleted
+# first.
+delete:
+  operation: DeleteRole
+  input:
+    RoleName: "{RoleName}"
+  absentErrors: [NoSuchEntity]
+  retryErrors: [DeleteConflict]
+  clear: [ManagedPolicyArns, Policies]
+lifecycle:
+  create:
+    Description: kraai lifecycle probe
+    MaxSessionDuration: 3600
+    AssumeRolePolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Principal: {Service: lambda.amazonaws.com}
+          Action: sts:AssumeRole
+    ManagedPolicyArns: [arn:aws:iam::aws:policy/ReadOnlyAccess]
+    Policies:
+      - PolicyName: kraai-lifecycle-a
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: logs:DescribeLogGroups
+              Resource: "*"
+  update:
+    Description: kraai lifecycle probe, updated
+    MaxSessionDuration: 7200
+    AssumeRolePolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Principal: {Service: events.amazonaws.com}
+          Action: sts:AssumeRole
+    ManagedPolicyArns: [arn:aws:iam::aws:policy/job-function/ViewOnlyAccess]
+    PermissionsBoundary: arn:aws:iam::aws:policy/ReadOnlyAccess
+    Policies:
+      - PolicyName: kraai-lifecycle-b
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: logs:DescribeLogGroups
+              Resource: "*"
+    Tags: [{Key: team, Value: kraai}]
+absentIds:
+  - kraai-absent-probe
