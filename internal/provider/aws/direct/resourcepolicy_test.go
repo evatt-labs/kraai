@@ -29,8 +29,8 @@ const (
 func TestReadResourcePolicySelectsByName(t *testing.T) {
 	client, seen := targetServer(t, map[string]string{
 		"DescribeResourcePolicies": `{"resourcePolicies":[` +
-			`{"policyName":"other","policyDocument":` + jsonText(policyDocA) + `},` +
-			`{"policyName":"kraai-p","policyDocument":` + jsonText(policyDocB) + `}]}`,
+			`{"policyName":"other","policyDocument":` + quoted(policyDocA) + `},` +
+			`{"policyName":"kraai-p","policyDocument":` + quoted(policyDocB) + `}]}`,
 	})
 	got, err := client.Read(context.Background(), resourcePolicyType, map[string]string{"PolicyName": "kraai-p"})
 	if err != nil {
@@ -127,13 +127,13 @@ func TestCreateUpdateAndDeleteResourcePolicy(t *testing.T) {
 	if id != "kraai-p" {
 		t.Fatalf("id = %q, want the name sent", id)
 	}
-	if want := []string{`{"policyDocument":` + jsonText(policyDocA) + `,"policyName":"kraai-p"}`}; !reflect.DeepEqual(puts, want) {
+	if want := []string{`{"policyDocument":` + quoted(policyDocA) + `,"policyName":"kraai-p"}`}; !reflect.DeepEqual(puts, want) {
 		t.Fatalf("create sent %v, want %v", puts, want)
 	}
 	if err := client.Update(ctx, resourcePolicyType, "kraai-p", map[string]any{}, map[string]any{"PolicyDocument": policyDocB}); err != nil {
 		t.Fatal(err)
 	}
-	if want := `{"policyDocument":` + jsonText(policyDocB) + `,"policyName":"kraai-p"}`; puts[len(puts)-1] != want {
+	if want := `{"policyDocument":` + quoted(policyDocB) + `,"policyName":"kraai-p"}`; puts[len(puts)-1] != want {
 		t.Fatalf("update sent %s, want %s", puts[len(puts)-1], want)
 	}
 	if err := client.Delete(ctx, resourcePolicyType, "kraai-p"); err != nil {
@@ -149,7 +149,7 @@ func TestCreateUpdateAndDeleteResourcePolicy(t *testing.T) {
 }
 
 func TestCompileRefusesABadResponseSelection(t *testing.T) {
-	const policy, subnet = "AWS--Logs--ResourcePolicy.yaml", "AWS--EC2--Subnet.yaml"
+	const policy = "AWS--Logs--ResourcePolicy.yaml"
 	for name, c := range map[string]struct {
 		files fstest.MapFS
 		want  string
@@ -157,9 +157,7 @@ func TestCompileRefusesABadResponseSelection(t *testing.T) {
 		"a placeholder that is not the identifier": {edit(t, policy, "policyName={PolicyName}", "policyName={Other}"),
 			"selects by {Other}, which is not the primary identifier"},
 		"a member the element lacks": {edit(t, policy, "policyName={PolicyName}", "nope={PolicyName}"),
-			"has no member nope"},
-		"a selection under XML": {edit(t, subnet, "response: Subnets[]", "response: Subnets[SubnetId={SubnetId}]"),
-			"read from JSON only"},
+			"selects by nope, not a string member"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			_, err := compileAll(c.files)
@@ -171,7 +169,7 @@ func TestCompileRefusesABadResponseSelection(t *testing.T) {
 }
 
 // jsonText is s as a JSON string literal.
-func jsonText(s string) string {
+func quoted(s string) string {
 	raw, _ := json.Marshal(s)
 	return string(raw)
 }

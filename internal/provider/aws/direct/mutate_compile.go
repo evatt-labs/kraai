@@ -59,6 +59,8 @@ type MutationCall struct {
 	// TagProperty as the property their elements are shaped as.
 	TagProperty string
 	Add, Remove *MutationCall
+	// Before is an update call's UpdateCall.Before.
+	Before *MutationCall
 }
 
 // ChangeRoute is a compiled ChangeCall.
@@ -68,7 +70,7 @@ type ChangeRoute struct {
 }
 
 // mutationFilters are the template filters a mutation's input may use.
-var mutationFilters = map[string]bool{"json": true, "entries": true, "keys": true, "string": true, "wire": true, "only": true, "arnName": true, "arnParent": true}
+var mutationFilters = map[string]bool{"json": true, "entries": true, "pairs": true, "keys": true, "string": true, "wire": true, "only": true, "arnName": true, "arnParent": true}
 
 // mutationPlaceholder matches a placeholder, a property or a dotted path
 // into an object property, with any chain of filters.
@@ -131,7 +133,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				if _, known := schema.Properties[name]; !known && !extra[name] {
 					fail("%s input %s names {%s}, which is not a property of %s", at, member, name, o.Type)
 				}
-				if path != name && !schemaPath(&schema, path) {
+				if path != name && name != "element" && !schemaPath(&schema, path) {
 					fail("%s input %s names {%s}, which is not a path through %s's object properties", at, member, path, o.Type)
 				}
 				if captures[name] && extra[name] {
@@ -139,7 +141,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				}
 				for _, filter := range chain {
 					if !mutationFilters[filter] {
-						fail("%s input %s filters {%s} by %s; the filters are json, entries, keys, string, wire, only, arnName and arnParent", at, member, name, filter)
+						fail("%s input %s filters {%s} by %s; the filters are json, entries, pairs, keys, string, wire, only, arnName and arnParent", at, member, name, filter)
 					}
 				}
 				if slices.Contains(chain, "wire") {
@@ -201,9 +203,26 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			op := model.Shapes[namespace+o.Create.Operation]
 			output := model.Shapes[ref(op.Output)]
 			sent := slices.ContainsFunc(templateRefs(o.Create.Input), func(m [3]string) bool { return identifier[m[0]] })
-			for property := range identifier {
+			sentProperty := func(name string) bool {
+				return slices.ContainsFunc(templateRefs(o.Create.Input), func(m [3]string) bool { return m[0] == name })
+			}
+			ids := map[string]string{}
+			for _, property := range sortedKeys(identifier) {
 				path, ok := o.Create.Identifier[property]
+				ids[property] = path
 				switch {
+				case ok && strings.HasPrefix(path, "="):
+					if len(path) == 1 {
+						fail("create takes the identifier %s as =, which names no value", property)
+					}
+				case ok && strings.HasPrefix(path, "{") && strings.Contains(path, "|"):
+					// The first of several properties the create sends, such as
+					// the one destination of a route.
+					for _, name := range strings.Split(strings.Trim(path, "{}"), "|") {
+						if _, known := schema.Properties[name]; !known || !sentProperty(name) {
+							fail("create takes the identifier %s as %s; %s must be a property the input sends", property, path, name)
+						}
+					}
 				case ok && strings.HasPrefix(path, "{"):
 					// The identifier is the value sent, which the create must send.
 					if path != "{"+property+"}" || !sent {
@@ -215,14 +234,12 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 					if !found {
 						fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 					}
-					c.Identifier = map[string]string{property: xmlPath}
+					ids[property] = xmlPath
 				case !ok || outputMember(model, output, path) != "string":
 					fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 				}
 			}
-			if c.Identifier == nil {
-				c.Identifier = o.Create.Identifier
-			}
+			c.Identifier = ids
 			for _, ref := range templateRefs(o.Create.Input) {
 				if _, ok := schema.Properties[ref[0]]; ok && !slices.Contains(c.Properties, ref[0]) {
 					c.Properties = append(c.Properties, ref[0])
@@ -256,7 +273,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	for name := range captures {
 		keys[name] = true
 	}
-	routed, withRouted := map[string]bool{}, map[string]bool{}
+	routed, withRouted, wholeRouted := map[string]bool{}, map[string]bool{}, map[string]bool{}
 	for i, u := range o.Update {
 		at := fmt.Sprintf("update[%d]", i)
 		if u.Tags != nil {
@@ -296,15 +313,21 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			if !slices.ContainsFunc(templateRefs(u.Input), func(m [3]string) bool { return m[0] == property }) {
 				fail("%s sets %s, which its input does not send", at, property)
 			}
-			if routed[property] {
+			// Calls may share a structure property only member by member.
+			whole := slices.ContainsFunc(templateRefs(u.Input), func(m [3]string) bool { return m[0] == property && m[2] == property })
+			if routed[property] && (whole || wholeRouted[property]) {
 				fail("%s sets %s, which another update call already sets", at, property)
 			}
 			routed[property] = true
+			wholeRouted[property] = wholeRouted[property] || whole
 		}
 		if u.Together && len(u.Properties) < 2 {
 			fail("%s sets its properties together, but has only %d", at, len(u.Properties))
 		}
 		c.Properties, c.Together = u.Properties, u.Together
+		if u.Before != nil {
+			c.Before = call(*u.Before, at+" before", keys, "")
+		}
 		if u.Together {
 			for _, p := range requiredBy[c] {
 				if slices.Contains(u.Properties, p) {
@@ -395,6 +418,9 @@ func mutations(o Override) []Mutation {
 	var out []Mutation
 	for _, u := range o.Update {
 		out = append(out, u.Mutation)
+		if u.Before != nil {
+			out = append(out, *u.Before)
+		}
 		if u.Tags != nil {
 			out = append(out, u.Tags.Add, u.Tags.Remove)
 		}

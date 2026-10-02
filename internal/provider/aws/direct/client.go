@@ -77,42 +77,54 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 		merges []elementResult
 	)
 	g, gctx := errgroup.WithContext(ctx)
+	// eachCall makes a call once per element of the list or structure
+	// property it is made for. Each element's results are merged into it
+	// once every call is done: several calls may be made for the same
+	// element.
+	eachCall := func(g *errgroup.Group, gctx context.Context, also Reader) {
+		items, _ := props[also.Each].([]any)
+		if one, ok := props[also.Each].(map[string]any); ok {
+			items = []any{one}
+		}
+		for _, item := range items {
+			element, ok := item.(map[string]any)
+			if !ok {
+				continue
+			}
+			elementVars := maps.Clone(vars)
+			for k, v := range element {
+				if s, ok := v.(string); ok {
+					elementVars[k] = s
+				}
+			}
+			g.Go(func() error {
+				more, _, _, err := c.readCall(gctx, also, elementVars)
+				if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
+					return nil
+				}
+				if err != nil {
+					return fmt.Errorf("the %s call %s for an element of %s: %w", typeName, also.Action+also.Target+also.URI, also.Each, err)
+				}
+				mu.Lock()
+				merges = append(merges, elementResult{element, more})
+				mu.Unlock()
+				return nil
+			})
+		}
+	}
+	// A call for each element of a property only another further call
+	// reads, such as the policy names a list call returns, waits for it.
+	var later []Reader
 	for i, also := range r.Also {
 		if !made(also.When, props) {
 			continue
 		}
 		if also.Each != "" {
-			// Each element's calls are merged into it once every call is
-			// done: several calls may be made for the same element.
-			items, _ := props[also.Each].([]any)
-			if one, ok := props[also.Each].(map[string]any); ok {
-				items = []any{one}
+			if _, read := props[also.Each]; !read {
+				later = append(later, also)
+				continue
 			}
-			for _, item := range items {
-				element, ok := item.(map[string]any)
-				if !ok {
-					continue
-				}
-				elementVars := maps.Clone(vars)
-				for k, v := range element {
-					if s, ok := v.(string); ok {
-						elementVars[k] = s
-					}
-				}
-				g.Go(func() error {
-					more, _, _, err := c.readCall(gctx, also, elementVars)
-					if errors.Is(err, ErrAbsent) && len(also.AbsentErrors) > 0 {
-						return nil
-					}
-					if err != nil {
-						return fmt.Errorf("the %s call %s for an element of %s: %w", typeName, also.Action+also.Target+also.URI, also.Each, err)
-					}
-					mu.Lock()
-					merges = append(merges, elementResult{element, more})
-					mu.Unlock()
-					return nil
-				})
-			}
+			eachCall(g, gctx, also)
 			continue
 		}
 		g.Go(func() error {
@@ -135,6 +147,15 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	for _, more := range results {
 		for k, v := range more {
 			props[k] = v
+		}
+	}
+	if len(later) > 0 {
+		g, gctx = errgroup.WithContext(ctx)
+		for _, also := range later {
+			eachCall(g, gctx, also)
+		}
+		if err := g.Wait(); err != nil {
+			return nil, err
 		}
 	}
 	for _, m := range merges {
@@ -195,16 +216,16 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		return nil, nil, false, errIncomplete(typeName)
 	}
 	root, _ := out.(map[string]any)
+	w := &walk{vars: identifier}
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
 		out = obj[step.Name]
 		if step.List {
 			items, _ := out.([]any)
 			if step.Where != "" {
-				w := &walk{vars: identifier}
 				items = slices.DeleteFunc(slices.Clone(items), func(item any) bool {
-					m, _ := item.(map[string]any)
-					return !w.selects(step, m[step.Where])
+					m, ok := item.(map[string]any)
+					return !ok || !w.selects(step, func(path string) any { return memberAt(m, path) })
 				})
 			}
 			if len(items) == 0 {
@@ -220,7 +241,6 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if !ok {
 		return nil, nil, false, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
-	w := &walk{vars: identifier}
 	props, err = r.finish(func(fields []Field, fromRoot bool) map[string]any {
 		if fromRoot {
 			return r.translate(w, root, fields)
@@ -376,12 +396,19 @@ func CanRead(typeName string) bool { return readers[typeName].Production }
 // declares create-only, beyond the schema's own; nil when it declares none.
 func CreateOnly(typeName string) []string { return readers[typeName].CreateOnly }
 
-// ReadByID is Read for a type with a single primary identifier, given as
-// Cloud Control gives it.
+// ReadByID is Read for an identifier given as Cloud Control gives it: the
+// one property's value, or a composite identifier's values joined by |.
 func (c *Client) ReadByID(ctx context.Context, typeName, identifier string) (map[string]any, error) {
 	r, ok := readers[typeName]
-	if !ok || len(r.Identifier) != 1 {
-		return nil, fmt.Errorf("%s has no direct reader with a single identifier", typeName)
+	if !ok {
+		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
-	return c.Read(ctx, typeName, map[string]string{r.Identifier[0].Property: identifier})
+	values, err := r.identifierValues(identifier)
+	if err != nil {
+		return nil, err
+	}
+	if !r.serves(values) {
+		return nil, ErrUnserved
+	}
+	return c.Read(ctx, typeName, values)
 }

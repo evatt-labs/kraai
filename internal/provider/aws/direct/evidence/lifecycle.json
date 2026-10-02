@@ -46,6 +46,15 @@
       "override": "b8fd938fc8608160eb9fba2a669dd397056ffad22db1b5aa088e00f6fd30563f"
     },
     {
+      "type": "AWS::EC2::Route",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "GatewayId"
+      ],
+      "override": "e28bfdb1cd2ed0f4c10f764ffca33b3e2c8b0386404073a75882ba6caf7ab9fb"
+    },
+    {
       "type": "AWS::EC2::RouteTable",
       "date": "2026-09-29",
       "outcome": "parity",
@@ -66,6 +75,19 @@
       "override": "c3311f3f567fdc24b344a260e63ab8bc5c7f2a90377a07fa3bbcc3f063e3d682"
     },
     {
+      "type": "AWS::EC2::Subnet",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "AssignIpv6AddressOnCreation",
+        "EnableDns64",
+        "MapPublicIpOnLaunch",
+        "PrivateDnsNameOptionsOnLaunch",
+        "Tags"
+      ],
+      "override": "b389a677c53c89c76816adecfdf15efeb92fb3536f9172f116bf579ac77de585"
+    },
+    {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
       "date": "2026-09-29",
       "outcome": "parity",
@@ -81,6 +103,15 @@
         "Tags"
       ],
       "override": "a96171f0c7ce9d52b4142e2a948fa565df0efb6c09c55bc0b2ef5e0eb42ee71c"
+    },
+    {
+      "type": "AWS::EC2::VPCGatewayAttachment",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "InternetGatewayId"
+      ],
+      "override": "151fbb92a2abda37584d73f7eb95e47fffb609346d533194a036c2f5f84517b3"
     },
     {
       "type": "AWS::ECS::Cluster",
@@ -154,6 +185,21 @@
       "override": "1bcdc157cddae219b98b88216317d77d2f573a148b91cca3b37d9c9dcf7871e3"
     },
     {
+      "type": "AWS::IAM::Role",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "AssumeRolePolicyDocument",
+        "Description",
+        "ManagedPolicyArns",
+        "MaxSessionDuration",
+        "PermissionsBoundary",
+        "Policies",
+        "Tags"
+      ],
+      "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
+    },
+    {
       "type": "AWS::Logs::LogGroup",
       "date": "2026-09-27",
       "outcome": "parity",
@@ -214,6 +260,33 @@
         "VisibilityTimeout"
       ],
       "override": "de4d6d10211d0ef46af202f79babd5cac230202a76d84790a1e90dedbe9a9407"
+    },
+    {
+      "type": "AWS::SSM::Parameter",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "AllowedPattern",
+        "Description",
+        "Tags",
+        "Tier",
+        "Type",
+        "Value"
+      ],
+      "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+    },
+    {
+      "type": "AWS::SecretsManager::Secret",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "Description",
+        "KmsKeyId",
+        "ReplicaRegions",
+        "SecretString",
+        "Tags"
+      ],
+      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
     }
   ]
 }

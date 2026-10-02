@@ -1,0 +1,101 @@
+type: AWS::SSM::Parameter
+read:
+  model: ssm/service/2014-11-06/ssm-2014-11-06.json
+  operation: GetParameter
+  absentErrors: [ParameterNotFound]
+  identifier:
+    Name: Name
+  # Not decrypted: the type holds String and StringList only, and a
+  # SecureString reads as its ciphertext.
+  response: Parameter
+properties:
+  Arn: ARN
+  DataType: DataType
+  Name: Name
+  Type: Type
+  Value: Value
+# Description, Tier, AllowedPattern and Policies are write-only in the
+# schema, so no read returns them and none is mapped.
+also:
+  - operation: ListTagsForResource
+    identifier:
+      Name: ResourceId
+    input:
+      ResourceType: Parameter
+    properties:
+      Tags:
+        member: TagList
+        keyed: [Key, Value]
+create:
+  operation: PutParameter
+  name:
+    property: Name
+    tag: kraai:resource-name
+  input:
+    Name: "{Name}"
+    Type: "{Type}"
+    Value: "{Value}"
+    Description: "{Description}"
+    AllowedPattern: "{AllowedPattern}"
+    Policies: "{Policies}"
+    Tier: "{Tier}"
+    DataType: "{DataType}"
+    Tags: "{Tags:pairs}"
+  # The create answers with the version and tier only; a parameter is its
+  # name. A name already taken fails the create, as it does through Cloud
+  # Control.
+  identifier:
+    Name: "{Name}"
+update:
+  # With Overwrite the call sets what it is sent and keeps the rest, but
+  # always requires the value, so it is sent as read when only another
+  # property changes. Tags are refused beside Overwrite.
+  - operation: PutParameter
+    together: true
+    properties: [Type, Value, Description, AllowedPattern, Policies, Tier, DataType]
+    input:
+      Name: "{Name}"
+      Overwrite: true
+      Type: "{Type}"
+      Value: "{Value}"
+      Description: "{Description}"
+      AllowedPattern: "{AllowedPattern}"
+      Policies: "{Policies}"
+      Tier: "{Tier}"
+      DataType: "{DataType}"
+  - tags:
+      property: Tags
+      add:
+        operation: AddTagsToResource
+        input:
+          ResourceType: Parameter
+          ResourceId: "{Name}"
+          Tags: "{added}"
+      remove:
+        operation: RemoveTagsFromResource
+        input:
+          ResourceType: Parameter
+          ResourceId: "{Name}"
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteParameter
+  input:
+    Name: "{Name}"
+  absentErrors: [ParameterNotFound]
+# Advanced tier bills per parameter and policies need it, so neither is
+# exercised; an image data type needs a real AMI. The write-only properties
+# are sent but no read returns them.
+lifecycle:
+  create:
+    Type: String
+    Value: kraai-lifecycle-v1
+    Description: kraai lifecycle probe
+  update:
+    AllowedPattern: "^[a-z0-9,-]+$"
+    Description: kraai lifecycle probe, updated
+    Tags: {team: kraai}
+    Tier: Intelligent-Tiering
+    Type: StringList
+    Value: kraai-lifecycle-v2,kraai-lifecycle-v3
+absentIds:
+  - kraai-absent-probe-parameter

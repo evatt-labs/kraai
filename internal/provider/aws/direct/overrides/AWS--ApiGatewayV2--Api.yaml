@@ -1,0 +1,38 @@
+type: AWS::ApiGatewayV2::Api
+read:
+  model: apigatewayv2/service/2018-11-29/apigatewayv2-2018-11-29.json
+  operation: GetApi
+  absentErrors: [NotFoundException]
+  identifier:
+    ApiId: ApiId
+properties:
+  ApiEndpoint: ApiEndpoint
+  ApiId: ApiId
+  # GetApi reports the default API key expression of an HTTP API, which has
+  # no API keys; Cloud Control reports it for a WebSocket API only.
+  ApiKeySelectionExpression:
+    member: ApiKeySelectionExpression
+    unless:
+      ProtocolType: [HTTP]
+  CorsConfiguration:
+    member: CorsConfiguration
+    properties:
+      AllowCredentials: AllowCredentials
+      AllowHeaders: AllowHeaders
+      AllowMethods: AllowMethods
+      AllowOrigins: AllowOrigins
+      ExposeHeaders: ExposeHeaders
+      MaxAge: MaxAge
+  Description: Description
+  DisableExecuteApiEndpoint: DisableExecuteApiEndpoint
+  IpAddressType: IpAddressType
+  Name: Name
+  ProtocolType: ProtocolType
+  RouteSelectionExpression: RouteSelectionExpression
+  # The schema types Tags as a flat map, which is what the API returns.
+  Tags: Tags
+  Version: Version
+skip:
+  ExecuteApiArn: Cloud Control builds it from the account and region, which GetApi's output carries neither of.
+absentIds:
+  - abcde12345

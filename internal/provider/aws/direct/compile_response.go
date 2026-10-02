@@ -24,11 +24,21 @@ func (c *callCompiler) response() {
 	}
 	if c.o.Read.Response != "" {
 		for i, step := range strings.Split(c.o.Read.Response, ".") {
+			// A step may select, from a list, the element whose member equals
+			// a value, such as a route found by its destination.
 			var where, equals string
-			if sel := selection.FindStringSubmatch(step); sel != nil {
-				step, where, equals = sel[1]+"[]", sel[2], sel[3]
-			}
 			step, list := strings.CutSuffix(step, "[]")
+			if sel := selection.FindStringSubmatch(step); sel != nil {
+				step, where, equals, list = sel[1], sel[2], sel[3], true
+				if sel[4] != "" {
+					c.fail("response path %s keeps every element; it must be one", c.o.Read.Response)
+				}
+				for _, p := range placeholders(equals) {
+					if !c.want[p] {
+						c.fail("response path %s selects by {%s}, which is not the primary identifier", c.o.Read.Response, p)
+					}
+				}
+			}
 			m, ok := c.model.Shapes[c.resource].Members[step]
 			if !ok {
 				c.fail("response path %s: %s has no member %s", c.o.Read.Response, c.resource, step)
@@ -58,7 +68,14 @@ func (c *callCompiler) response() {
 					st.Item = itemName(m, listShape)
 				}
 				if where != "" {
-					c.selectResource(&st, next, where, equals)
+					if !selectable(&c.model, next, where) {
+						c.fail("response path %s selects by %s, not a string member of %s", c.o.Read.Response, where, next)
+						break
+					}
+					st.Where, st.Equals = where, equals
+					if isXML(c.r.Protocol) {
+						st.Where = xmlSelector(&c.model, next, where)
+					}
 				}
 			}
 			if i > 0 || step != c.payload {
@@ -82,32 +99,6 @@ func (c *callCompiler) response() {
 	if c.model.Shapes[c.resource].Type != "structure" {
 		c.fail("response path %q does not end at a structure", c.o.Read.Response)
 	}
-}
-
-// selectResource makes st pick, from the list it walks, the one element
-// whose scalar member where equals equals, such as a policy among those a
-// call answers for the whole account.
-func (c *callCompiler) selectResource(st *Step, element, where, equals string) {
-	if isXML(c.r.Protocol) {
-		c.fail("response path %s selects by %s, which is read from JSON only", c.o.Read.Response, where)
-		return
-	}
-	m, ok := c.model.Shapes[element].Members[where]
-	if !ok {
-		c.fail("response path %s: %s has no member %s", c.o.Read.Response, element, where)
-		return
-	}
-	if kind := kindOf(c.model.Shapes[m.Target].Type, m.Target); kind != "scalar" {
-		c.fail("response path %s selects by %s, which is a %s, not a scalar", c.o.Read.Response, where, kind)
-	}
-	for _, p := range placeholders(equals) {
-		if !c.want[p] {
-			c.fail("response path %s selects by {%s}, which is not the primary identifier", c.o.Read.Response, p)
-		}
-	}
-	var jsonName string
-	_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &jsonName)
-	st.Where, st.Equals = c.r.wire(where, jsonName), equals
 }
 
 // fields compiles the properties the call maps, from the resource and
@@ -136,7 +127,7 @@ func (c *callCompiler) fields() {
 		}
 	}
 	for name, p := range top {
-		if c.each == "" && c.schema.writeOnly(name) || elsewhere[name] || c.only != nil && !c.only[name] {
+		if c.each == "" && (c.schema.writeOnly(name) || c.schema.onlyWriteOnlyMembers(name)) || elsewhere[name] || c.only != nil && !c.only[name] {
 			continue
 		}
 		readable[name] = p
@@ -247,6 +238,9 @@ func (c *callCompiler) conditions(label string, spec map[string][]string) []Cond
 				step, every = name, true
 			} else if sel := selection.FindStringSubmatch(step); sel != nil {
 				step, where, equals = sel[1], sel[2], sel[3]
+				if sel[4] != "" {
+					c.fail(label+" names %s, which keeps every element; a condition selects one", path)
+				}
 			}
 			pm, ok := c.model.Shapes[holder].Members[step]
 			if !ok {
@@ -265,6 +259,11 @@ func (c *callCompiler) conditions(label string, spec map[string][]string) []Cond
 			}
 			if !isStructure(c.model.Shapes[next]) {
 				c.fail(label+" names %s, but %s is not a structure", path, step)
+				walked = false
+				break
+			}
+			if where != "" && !selectable(&c.model, next, where) {
+				c.fail(label+" names %s, which selects by %s, not a string member of %s", path, where, next)
 				walked = false
 				break
 			}
