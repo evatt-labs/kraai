@@ -207,6 +207,19 @@
         "Value"
       ],
       "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+    },
+    {
+      "type": "AWS::SecretsManager::Secret",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "Description",
+        "KmsKeyId",
+        "ReplicaRegions",
+        "SecretString",
+        "Tags"
+      ],
+      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
     }
   ]
 }

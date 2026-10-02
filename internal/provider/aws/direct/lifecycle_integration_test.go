@@ -217,8 +217,8 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 // ccShows polls Cloud Control's read of id until it covers want.
 func ccShows(ctx context.Context, cc *cloudcontrol.Client, typeName, id string, want map[string]any) error {
 	var last map[string]any
-	// Cloud Control never returns a write-only property, so there is
-	// nothing for it to show.
+	// A write-only property is never read back, and may be a secret that
+	// must not be printed in the failure below.
 	want = withoutWriteOnly(readers[typeName], want)
 	for deadline := time.Now().Add(readers[typeName].ceiling()); time.Now().Before(deadline); time.Sleep(3 * time.Second) {
 		out, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(typeName), Identifier: aws.String(id)})
