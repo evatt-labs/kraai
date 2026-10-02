@@ -189,6 +189,8 @@ type Field struct {
 	// Unless is Mapping.Unless: the read properties, and their values, for
 	// which the field is left unread.
 	Unless []Condition
+	// Wrap is Mapping.Wrap.
+	Wrap string
 	// Default is Mapping.Default.
 	Default any
 	// Root reads the member from the operation's whole output rather than

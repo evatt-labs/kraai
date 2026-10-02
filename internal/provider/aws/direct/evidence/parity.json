@@ -1126,6 +1126,28 @@
       "override": "81a1085934f53482e7686159bbdda6cf36e16e77ba8a5a9c11baf4f331bb9e0c"
     },
     {
+      "type": "AWS::IAM::Role",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 20,
+      "compared": [
+        "Arn",
+        "AssumeRolePolicyDocument",
+        "Description",
+        "ManagedPolicyArns",
+        "MaxSessionDuration",
+        "Path",
+        "Policies",
+        "RoleId",
+        "RoleName"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
+    },
+    {
       "type": "AWS::IVS::Channel",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",

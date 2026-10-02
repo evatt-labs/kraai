@@ -142,6 +142,21 @@
       "override": "1bcdc157cddae219b98b88216317d77d2f573a148b91cca3b37d9c9dcf7871e3"
     },
     {
+      "type": "AWS::IAM::Role",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "AssumeRolePolicyDocument",
+        "Description",
+        "ManagedPolicyArns",
+        "MaxSessionDuration",
+        "PermissionsBoundary",
+        "Policies",
+        "Tags"
+      ],
+      "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
+    },
+    {
       "type": "AWS::Logs::LogGroup",
       "date": "2026-09-27",
       "outcome": "parity",

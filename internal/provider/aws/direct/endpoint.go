@@ -86,7 +86,10 @@ func endpointOf(ruleSet json.RawMessage, static map[string]any) (host, signingRe
 		}
 		return false
 	}
-	type candidate struct{ host, signingRegion string }
+	type candidate struct {
+		host, signingRegion string
+		implicit            bool
+	}
 	tiers := map[string]map[candidate]bool{"amazonaws.com": {}, "api.aws": {}}
 	var walk func(any)
 	walk = func(v any) {
@@ -108,7 +111,7 @@ func endpointOf(ruleSet json.RawMessage, static map[string]any) (host, signingRe
 				h, ok := strings.CutPrefix(partitionValues.Replace(url), "https://")
 				if ok && !strings.ContainsAny(strings.ReplaceAll(h, "{region}", ""), "{}/") &&
 					!fips(h) && !otherPartition(h) {
-					c := candidate{host: h}
+					c := candidate{host: h, implicit: strings.Contains(url, "{PartitionResult#implicitGlobalRegion}")}
 					if !strings.Contains(h, "{region}") {
 						c.signingRegion = partitionValues.Replace(signing)
 					}
@@ -143,6 +146,21 @@ func endpointOf(ruleSet json.RawMessage, static map[string]any) (host, signingRe
 			rest, ok := strings.CutPrefix(other.host, prefix+".")
 			if ok && strings.HasSuffix(rest, "."+suffix) && !strings.Contains(strings.TrimSuffix(rest, "."+suffix), ".") && other != c {
 				delete(found, other)
+			}
+		}
+	}
+	// A host built from the partition's implicit global region is the rule
+	// for partitions the set names no endpoint of; the aws partition's own
+	// global host, signed for the same region, is the one that applies, as
+	// IAM's iam.amazonaws.com beside iam.us-east-1.amazonaws.com.
+	for c := range found {
+		if !c.implicit {
+			continue
+		}
+		for other := range found {
+			if !other.implicit && !strings.Contains(other.host, "{region}") && other.signingRegion == c.signingRegion {
+				delete(found, c)
+				break
 			}
 		}
 	}
