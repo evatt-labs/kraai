@@ -227,6 +227,14 @@ func (c *callCompiler) identifier() {
 	// its input rather than an input member of its own.
 	// A further call may instead be addressed by a value the read captured.
 	inInput, byCapture := map[string]bool{}, false
+	// A document extraction selects by the identifier as well.
+	for _, m := range c.o.Properties {
+		for _, path := range m.Extract {
+			for _, name := range placeholders(path) {
+				inInput[name] = true
+			}
+		}
+	}
 	for _, value := range c.o.Read.Input {
 		for _, name := range placeholders(value) {
 			inInput[name] = true
@@ -244,6 +252,8 @@ func (c *callCompiler) identifier() {
 			c.fail("identifier does not bind %s", property)
 		}
 	}
+	// A composite identifier's parts are joined in the schema's order.
+	sortByPrimaryIdentifier(c.r.Identifier, c.schema.PrimaryIdentifier)
 	for _, name := range sortedKeys(input.Members) {
 		if input.Members[name].Traits["smithy.api#required"] != nil && !bound[name] {
 			c.fail("the input requires %s, which the identifier does not bind", name)

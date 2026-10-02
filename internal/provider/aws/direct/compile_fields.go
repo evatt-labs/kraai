@@ -175,6 +175,13 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			}
 			continue
 		}
+		if len(mapping.Extract) > 0 {
+			if extract := compileExtract(model, schema, props[name], valueTarget, mapping, at+name, via, key, fail); extract != nil {
+				f.Kind, f.Extract = "scalar", extract
+				fields = append(fields, f)
+			}
+			continue
+		}
 		parsed := false
 		switch mapping.Transform {
 		case "":
@@ -184,7 +191,13 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			}
 			parsed = mapping.Transform != "arnResource"
 		default:
-			fail("%s%s names transform %q; it is one of arnResource, json, number and boolean", at, name, mapping.Transform)
+			if _, isPart := arnPartIndex(mapping.Transform); isPart {
+				if targetType(model.Shapes[valueTarget].Type, valueTarget) != "string" {
+					fail("%s%s transforms %s, which is not a string", at, name, mapping.Member)
+				}
+				break
+			}
+			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, number and boolean", at, name, mapping.Transform)
 		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]

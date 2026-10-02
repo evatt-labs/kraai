@@ -39,7 +39,7 @@ func Generate() (map[string][]byte, error) {
 		b.WriteString("func init() {\nregister(map[string]Reader{\n")
 		for _, r := range rs {
 			fmt.Fprintf(&b, "%s: {\n", strconv.Quote(r.Type))
-			production := r.Complete && proven[r.Type] && len(r.Identifier) == 1
+			production := r.Complete && proven[r.Type] && len(r.Identifier) > 0
 			readerBody(&b, r, production)
 			if production && r.LifecycleComplete && lived[r.Type] {
 				b.WriteString("Mutable: true,\n")
@@ -333,6 +333,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	}
 	if f.TrueWhen != nil {
 		fmt.Fprintf(b, ", TrueWhen: %#v", f.TrueWhen)
+	}
+	if f.Extract != nil {
+		fmt.Fprintf(b, ", Extract: %#v", f.Extract)
 	}
 	if f.Default != nil {
 		b.WriteString(", Default: ")

@@ -191,6 +191,8 @@ type Field struct {
 	Unless []Condition
 	// Default is Mapping.Default.
 	Default any
+	// Extract is Mapping.Extract.
+	Extract []string
 	// Root reads the member from the operation's whole output rather than
 	// the resource, for a value carried beside it.
 	Root bool

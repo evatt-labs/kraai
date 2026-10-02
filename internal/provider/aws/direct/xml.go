@@ -288,7 +288,11 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 		}
 		v = xmlScalar(c.text, f.Scalar)
 	}
-	return truth(f, transform(f.Transform, v)), true
+	v, ok := transform(f.Transform, v)
+	if !ok {
+		return nil, false
+	}
+	return truth(f, v), true
 }
 
 // xmlScalar types text as scalar says. Text that is not what the model

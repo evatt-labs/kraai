@@ -52,7 +52,7 @@ func TestTransformArnResource(t *testing.T) {
 		"not-an-arn":                                                  "not-an-arn",
 		42:                                                            42,
 	} {
-		if got := transform("arnResource", in); got != want {
+		if got, ok := transform("arnResource", in); !ok || got != want {
 			t.Errorf("transform(%v) = %v, want %v", in, got, want)
 		}
 	}

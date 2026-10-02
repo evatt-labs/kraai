@@ -148,8 +148,11 @@ type Mapping struct {
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
 	Skip       map[string]string  `yaml:"skip,omitempty"`
 	// Transform names a function applied to the value read: arnResource,
-	// an ARN's resource part; or json, number or boolean, parsing a string
-	// the service returns for a property the schema types otherwise.
+	// an ARN's resource part; arnPart:N, the Nth colon-separated part of a
+	// string counted from 0, such as 6 and 7 of a Lambda function's ARN for
+	// its name and alias, leaving the property unread when there is none;
+	// or json, number or boolean, parsing a string the service returns for
+	// a property the schema types otherwise.
 	Transform string `yaml:"transform,omitempty"`
 	// Entries reads a map as a list of structures, each holding one entry
 	// under the two property names given, key first, such as tags returned
@@ -171,6 +174,15 @@ type Mapping struct {
 	// equals the value, such as the ingress rules of a list holding both
 	// directions. {Property} stands for an identifier property's value.
 	Where map[string]string `yaml:"where,omitempty"`
+	// Extract reads a top-level property out of the JSON document a string
+	// member holds, such as a function's resource policy: the first of
+	// these paths that finds a value. A step is an object key, or
+	// key[member=value], the one element of the array key (or of a lone
+	// object) whose string member equals value, {Property} standing for an
+	// identifier property's value. A selection that finds no element says
+	// the instance is gone; one that finds several is an error. A key with
+	// a dot in it cannot be named.
+	Extract []string `yaml:"extract,omitempty"`
 	// Default is a top-level property's value when the response carries
 	// no member for it, as Cloud Control reports one, such as a table's
 	// billing mode, which DynamoDB answers only once it has been set.
@@ -196,7 +208,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Default == nil {
+	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && len(m.Extract) == 0 && m.Default == nil {
 		return m.Member, nil
 	}
 	type plain Mapping

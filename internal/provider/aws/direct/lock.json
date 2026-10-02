@@ -329,7 +329,7 @@
     "lambda/service/2015-03-31/lambda-2015-03-31.json": {
       "file": "models/lambda-2015-03-31.json",
       "sourceSha256": "595dcd2bd52005ed888323578f9239a4e5b5ccccebf49ee3ab1e0057ce387c54",
-      "subsetSha256": "f6eaeaf1fb950c9eaddeb1541fbc2569284c2e222df24c6763470f5fbbdc29e1"
+      "subsetSha256": "eeb253d3617a5e1f318e4e785f87e31750812da93f2a435619288eb14e19da50"
     },
     "license-manager/service/2018-08-01/license-manager-2018-08-01.json": {
       "file": "models/license-manager-2018-08-01.json",
@@ -1272,6 +1272,16 @@
       "file": "schemas/AWS--Lambda--MicrovmImage.json",
       "sourceSha256": "7ead841005af188095acae79ca5fb117e3cf0dfabd4d5a3238c931526d9dc7dd",
       "subsetSha256": "65c23927d9d9f21fe7e5e2d2e59778f7bc13be7e8265f0d462186588839f3a69"
+    },
+    "AWS::Lambda::Permission": {
+      "file": "schemas/AWS--Lambda--Permission.json",
+      "sourceSha256": "328e40aefdeb2ed164d7a5b61d42f49323c0197c3af247af39bfe5c8ac95e8a4",
+      "subsetSha256": "a418bad611d137fd0c1e460a8ec6de95eb6dfab7b7746d7d650b817db14ed45e"
+    },
+    "AWS::Lambda::Url": {
+      "file": "schemas/AWS--Lambda--Url.json",
+      "sourceSha256": "d0e46f797982ee46545638ca76c327354ce7395ed6c246a5869037b2841ea26a",
+      "subsetSha256": "97d42c7246cadde3c53ffe2287a3a2364518dc6690d387944623b0c2e87b9051"
     },
     "AWS::LicenseManager::Grant": {
       "file": "schemas/AWS--LicenseManager--Grant.json",

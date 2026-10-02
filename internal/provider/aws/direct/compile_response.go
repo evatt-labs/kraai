@@ -132,6 +132,13 @@ func (c *callCompiler) fields() {
 	c.r.Complete = !skipsAny(c.o.Skip, c.o.Properties) && c.only == nil
 	c.r.Fields = compileFields(&c.model, &c.schema, ownProps, c.resource, ownMapped, c.o.Skip, "", c.fail)
 	if isXML(c.r.Protocol) {
+		for _, f := range c.r.Fields {
+			if f.Extract != nil {
+				c.fail("%s extracts from a document, which this client does not read under %s", f.Property, c.r.Protocol)
+			}
+		}
+	}
+	if isXML(c.r.Protocol) {
 		xmlFields(&c.model, c.resource, c.r.Fields, "", c.fail)
 	}
 	for _, code := range c.o.Read.AbsentErrors {
@@ -151,6 +158,13 @@ func (c *callCompiler) fields() {
 				for _, p := range placeholders(st.Equals) {
 					if !c.want[p] && !c.captured[p] {
 						c.fail("%s selects by {%s}, which is not the primary identifier", f.Property, p)
+					}
+				}
+			}
+			for _, path := range f.Extract {
+				for _, p := range placeholders(path) {
+					if !c.want[p] && !c.captured[p] {
+						c.fail("%s extracts by {%s}, which is not the primary identifier", f.Property, p)
 					}
 				}
 			}
