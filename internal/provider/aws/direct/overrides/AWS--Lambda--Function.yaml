@@ -1,0 +1,130 @@
+type: AWS::Lambda::Function
+read:
+  model: lambda/service/2015-03-31/lambda-2015-03-31.json
+  operation: GetFunction
+  identifier:
+    FunctionName: FunctionName
+  response: Configuration
+  absentErrors: [ResourceNotFoundException]
+properties:
+  Architectures: Architectures
+  Arn: FunctionArn
+  CapacityProviderConfig:
+    member: CapacityProviderConfig
+    properties:
+      LambdaManagedInstancesCapacityProviderConfig:
+        member: LambdaManagedInstancesCapacityProviderConfig
+        properties:
+          CapacityProviderArn: CapacityProviderArn
+          ExecutionEnvironmentMemoryGiBPerVCpu: ExecutionEnvironmentMemoryGiBPerVCpu
+          PerExecutionEnvironmentMaxConcurrency: PerExecutionEnvironmentMaxConcurrency
+  DeadLetterConfig:
+    member: DeadLetterConfig
+    properties:
+      TargetArn: TargetArn
+  Description: Description
+  DurableConfig:
+    member: DurableConfig
+    properties:
+      ExecutionTimeout: ExecutionTimeout
+      KMSKeyArn: KMSKeyArn
+      RetentionPeriodInDays: RetentionPeriodInDays
+  Environment:
+    member: Environment
+    properties:
+      Variables: Variables
+  EphemeralStorage:
+    member: EphemeralStorage
+    properties:
+      Size: Size
+  FileSystemConfigs:
+    member: FileSystemConfigs
+    properties:
+      Arn: Arn
+      LocalMountPath: LocalMountPath
+      S3FilesConfig:
+        member: S3FilesConfig
+        properties:
+          DirectS3Read: DirectS3Read
+  FunctionName: FunctionName
+  Handler: Handler
+  ImageConfig:
+    member: ImageConfigResponse.ImageConfig
+    properties:
+      Command: Command
+      EntryPoint: EntryPoint
+      WorkingDirectory: WorkingDirectory
+  KmsKeyArn: KMSKeyArn
+  Layers: Layers[].Arn
+  LoggingConfig:
+    member: LoggingConfig
+    properties:
+      ApplicationLogLevel: ApplicationLogLevel
+      LogFormat: LogFormat
+      LogGroup: LogGroup
+      SystemLogLevel: SystemLogLevel
+  MemorySize: MemorySize
+  PackageType: PackageType
+  Role: Role
+  Runtime: Runtime
+  SnapStartResponse:
+    member: SnapStart
+    properties:
+      ApplyOn: ApplyOn
+      OptimizationStatus: OptimizationStatus
+  # Tags and the reserved concurrency come beside the configuration.
+  ReservedConcurrentExecutions: $.Concurrency.ReservedConcurrentExecutions
+  Tags:
+    member: $.Tags
+    entries: [Key, Value]
+  TenancyConfig:
+    member: TenancyConfig
+    properties:
+      TenantIsolationMode: TenantIsolationMode
+  Timeout: Timeout
+  TracingConfig:
+    member: TracingConfig
+    properties:
+      Mode: Mode
+  VpcConfig:
+    member: VpcConfig
+    properties:
+      Ipv6AllowedForDualStack: Ipv6AllowedForDualStack
+      SecurityGroupIds: SecurityGroupIds
+      SubnetIds: SubnetIds
+also:
+  - operation: GetFunctionCodeSigningConfig
+    identifier:
+      FunctionName: FunctionName
+    properties:
+      CodeSigningConfigArn: CodeSigningConfigArn
+  - operation: GetFunctionRecursionConfig
+    identifier:
+      FunctionName: FunctionName
+    properties:
+      RecursiveLoop: RecursiveLoop
+  - operation: GetRuntimeManagementConfig
+    identifier:
+      FunctionName: FunctionName
+    properties:
+      RuntimeManagementConfig:
+        member: "."
+        properties:
+          RuntimeVersionArn: RuntimeVersionArn
+          UpdateRuntimeOn: UpdateRuntimeOn
+  # Only a function on managed instances has a scaling configuration; any
+  # other answers that it does not exist.
+  - operation: GetFunctionScalingConfig
+    identifier:
+      FunctionName: FunctionName
+    input:
+      Qualifier: $LATEST.PUBLISHED
+    absentErrors: [ResourceNotFoundException]
+    properties:
+      FunctionScalingConfig:
+        member: RequestedFunctionScalingConfig
+        properties:
+          MaxExecutionEnvironments: MaxExecutionEnvironments
+          MinExecutionEnvironments: MinExecutionEnvironments
+absentIds:
+  - kraai-nonexistent-function-zzz
