@@ -155,7 +155,7 @@ func TestCompositeIdentifiers(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(got, map[string]string{"FunctionName": "arn:aws:lambda:us-east-1:1:function:fn:live", "Id": "sid-1"}) {
 		t.Fatalf("identifierValues = %v, %v", got, err)
 	}
-	for _, bad := range []string{"fn", "fn|", "|sid", "fn|sid|more", ""} {
+	for _, bad := range []string{"fn", "fn|sid|more", ""} {
 		if _, err := r.identifierValues(bad); err == nil {
 			t.Errorf("identifierValues(%q) succeeded, want an error", bad)
 		}
@@ -163,18 +163,6 @@ func TestCompositeIdentifiers(t *testing.T) {
 	single := readers["AWS::Lambda::Url"]
 	if got, err := single.identifierValues("a|b"); err != nil || got["FunctionArn"] != "a|b" {
 		t.Errorf("a single identifier containing a bar = %v, %v; want it kept whole", got, err)
-	}
-}
-
-// A composite identifier's parts are joined in the order the schema lists
-// them, not the order the bindings were made in.
-func TestIdentifierBindingsFollowTheSchemaOrder(t *testing.T) {
-	bindings := []Binding{{Property: "B"}, {Property: "C"}, {Property: "A"}}
-	sortByPrimaryIdentifier(bindings, []string{"/properties/C", "/properties/A", "/properties/B"})
-	r := Reader{Type: "T", Identifier: bindings}
-	values, err := r.identifierValues("c|a|b")
-	if err != nil || values["C"] != "c" || values["A"] != "a" || values["B"] != "b" {
-		t.Fatalf("identifierValues = %v, %v; want C first, then A, then B", values, err)
 	}
 }
 

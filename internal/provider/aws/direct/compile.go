@@ -1,6 +1,7 @@
 package direct
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -49,6 +50,20 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		errs = append(errs, err)
 	}
 	r.Wait = wait
+	for _, property := range sortedKeys(o.Read.Serves) {
+		if !slices.Contains(r.IdentifierOrder, property) || len(o.Read.Serves[property]) == 0 {
+			errs = append(errs, fmt.Errorf("serves %s, which is not a property of a composite identifier, or names no value", property))
+		}
+	}
+	r.Serves = o.Read.Serves
+	for _, property := range sortedKeys(o.Read.Unserved) {
+		if len(o.Read.Serves) == 0 || o.Read.Unserved[property] == "" || slices.Contains(r.IdentifierOrder, property) {
+			errs = append(errs, fmt.Errorf("unserved %s must be a property of an identifier the reader does not serve, with a reason, beside serves; it is not an identifier property", property))
+		}
+		if _, mapped := o.Properties[property]; mapped {
+			errs = append(errs, fmt.Errorf("unserved %s is also mapped", property))
+		}
+	}
 	captured := map[string]bool{}
 	for name := range o.Read.Capture {
 		captured[name] = true
@@ -67,11 +82,17 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		callCaptured := captured
 		if call.Each != "" {
 			callCaptured = maps.Clone(captured)
-			i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == call.Each })
-			if i < 0 || r.Fields[i].Kind != "list" && r.Fields[i].Kind != "structure" || len(r.Fields[i].Fields) == 0 {
+			// The property is the read's, or an earlier further call's.
+			fields := slices.Concat(r.Fields, alsoFields(r))
+			i := slices.IndexFunc(fields, func(f Field) bool { return f.Property == call.Each })
+			switch {
+			case i >= 0 && fields[i].Wrap != "":
+				// The element's one property is the name wrapped.
+				callCaptured[fields[i].Wrap] = true
+			case i < 0 || fields[i].Kind != "list" && fields[i].Kind != "structure" || len(fields[i].Fields) == 0:
 				errs = append(errs, fmt.Errorf("also %s is made for each %s, which is not a structure or list of structures the read maps", call.Operation, call.Each))
-			} else {
-				for _, f := range r.Fields[i].Fields {
+			default:
+				for _, f := range fields[i].Fields {
 					if f.Kind == "scalar" {
 						callCaptured[f.Property] = true
 					}
@@ -99,6 +120,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		}
 		r.Also = append(r.Also, also)
 	}
+	errs = append(errs, checkWrapped(files, lock, o, append(slices.Clone(r.Fields), alsoFields(r)...))...)
 	for _, name := range sortedKeys(o.Read.Capture) {
 		named := false
 		for _, call := range o.Also {
@@ -134,4 +156,30 @@ func skipsAny(skip map[string]string, mapped map[string]Mapping) bool {
 		}
 	}
 	return false
+}
+
+// checkWrapped refuses a wrapped list whose elements have a property no
+// call made for each element reads: the names alone would pass for the
+// whole element.
+func checkWrapped(files fs.FS, lock Lock, o Override, fields []Field) []error {
+	var errs []error
+	for _, f := range fields {
+		if f.Wrap == "" {
+			continue
+		}
+		var schema cfnSchema
+		if raw, err := fs.ReadFile(files, lock.Schemas[o.Type].File); err != nil || json.Unmarshal(raw, &schema) != nil {
+			return []error{fmt.Errorf("%s has no readable locked schema", o.Type)}
+		}
+		for _, name := range sortedKeys(schema.nested(schema.Properties[f.Property])) {
+			read := schema.writeOnlyAt(f.Property+"."+name) || name == f.Wrap || slices.ContainsFunc(o.Also, func(c Call) bool {
+				_, mapped := c.Properties[name]
+				return c.Each == f.Property && mapped
+			})
+			if !read {
+				errs = append(errs, fmt.Errorf("%s wraps names as %s, but no call made for each element reads its %s", f.Property, f.Wrap, name))
+			}
+		}
+	}
+	return errs
 }

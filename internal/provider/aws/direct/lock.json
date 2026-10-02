@@ -6,6 +6,11 @@
       "sourceSha256": "4f2e27af9601556e61e14d7250cf57fcc303acd82b36e066a793381582966e81",
       "subsetSha256": "ee43dafe7f049121bf2e92cc6feb01edd9575347f7aad70f255ea1fa67f66ec2"
     },
+    "apigatewayv2/service/2018-11-29/apigatewayv2-2018-11-29.json": {
+      "file": "models/apigatewayv2-2018-11-29.json",
+      "sourceSha256": "423a8e8562ca06a12ee6c90f8d0b39ae05e184354de4d83c74d8118d9179fcc4",
+      "subsetSha256": "da5f624a65cae58e2d5bdfa2b882925f8ad80aab5e057650afc6bb2ca945cb81"
+    },
     "appconfig/service/2019-10-09/appconfig-2019-10-09.json": {
       "file": "models/appconfig-2019-10-09.json",
       "sourceSha256": "ae80951fcaa00840d0b273ee198998789aafb452cd34107599fb48590c9428e3",
@@ -179,7 +184,7 @@
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
-      "subsetSha256": "c086b6012b6ebf8a8eb0f4dfa01d043c96c268e847f3dd74ad5b95ade00563af"
+      "subsetSha256": "e449bde810b443c813ec7ceffad327839693dfad77b3932c9ac782c2ee017b3f"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
@@ -240,6 +245,11 @@
       "file": "models/greengrassv2-2020-11-30.json",
       "sourceSha256": "e0c324d26e877ff05a37ef087a68def9d29b0736941f9a263e2182fd0d4ad608",
       "subsetSha256": "0f0758774bcd1e5a059e533887e7f4d2bd95513b8b014812b588c8e59c7563c8"
+    },
+    "iam/service/2010-05-08/iam-2010-05-08.json": {
+      "file": "models/iam-2010-05-08.json",
+      "sourceSha256": "c1f74d3eda269e4fa2f00b57d57ed19c0e0a6d7fc7c70d4e351e319d178430f9",
+      "subsetSha256": "0f8a4cde5b1bab579b112abe341a2430417b002a42ce89dfec0330ee1b84d6b7"
     },
     "imagebuilder/service/2019-12-02/imagebuilder-2019-12-02.json": {
       "file": "models/imagebuilder-2019-12-02.json",
@@ -329,7 +339,7 @@
     "lambda/service/2015-03-31/lambda-2015-03-31.json": {
       "file": "models/lambda-2015-03-31.json",
       "sourceSha256": "595dcd2bd52005ed888323578f9239a4e5b5ccccebf49ee3ab1e0057ce387c54",
-      "subsetSha256": "eeb253d3617a5e1f318e4e785f87e31750812da93f2a435619288eb14e19da50"
+      "subsetSha256": "2a056a9cb7eb0256f82295462319de72b9828a7f496cbcfdeab95a49547bf58f"
     },
     "license-manager/service/2018-08-01/license-manager-2018-08-01.json": {
       "file": "models/license-manager-2018-08-01.json",
@@ -526,6 +536,11 @@
       "sourceSha256": "801f795ec5f7973bcd2c6bae14dc03859c3e54e718f3e4b85b8445f47d798a68",
       "subsetSha256": "6a1eba34610d1ea5350ac54ea03e5b314b5b7c85d04b65f7a005565293b07997"
     },
+    "secrets-manager/service/2017-10-17/secrets-manager-2017-10-17.json": {
+      "file": "models/secrets-manager-2017-10-17.json",
+      "sourceSha256": "2738bd8ded2b25834c71089cf71232738972d78befa80fa168ea476978ac8604",
+      "subsetSha256": "cacc6d116fc05e8bf4edfb9773f7c5d0c967fb00a0b1f6434c6106c0757fa940"
+    },
     "securityagent/service/2025-09-06/securityagent-2025-09-06.json": {
       "file": "models/securityagent-2025-09-06.json",
       "sourceSha256": "26c14d384f79c859a5528aa7f6e361c801f68ff171a309380ace454f8a5fcdb1",
@@ -584,7 +599,7 @@
     "ssm/service/2014-11-06/ssm-2014-11-06.json": {
       "file": "models/ssm-2014-11-06.json",
       "sourceSha256": "23a5af746171632c4e9eabd6e5c7ea32cfc3c772307fb81e8cc920b17992a61c",
-      "subsetSha256": "adec9465dcbbcdbefa10ff53668eb1dc4771a4c210f03826611f3ddf00222989"
+      "subsetSha256": "789f71ce16e9a88b4cc3bc1564a4397514322c46294f36801539cedd9dcefebf"
     },
     "sso-admin/service/2020-07-20/sso-admin-2020-07-20.json": {
       "file": "models/sso-admin-2020-07-20.json",
@@ -643,6 +658,11 @@
     }
   },
   "schemas": {
+    "AWS::ApiGatewayV2::Api": {
+      "file": "schemas/AWS--ApiGatewayV2--Api.json",
+      "sourceSha256": "3f154e3972128c7d700924036f596eb083e0d22e6feca77726634d11d363abc0",
+      "subsetSha256": "339331601e9cb34f0088581f27205e510bb850a6b94f2ecdf10b5e419cc4e4da"
+    },
     "AWS::AppConfig::DeploymentStrategy": {
       "file": "schemas/AWS--AppConfig--DeploymentStrategy.json",
       "sourceSha256": "40e5e783ec5c982e3330f6d87ed18abe28d224e1815f1b458a3bbd70f6268741",
@@ -938,6 +958,11 @@
       "sourceSha256": "cd19ef77815ff53dcc05fb1cd97100c5bf2f959d345b1152b57340e6f91e7b7b",
       "subsetSha256": "b1349607719b4dc64ec2040d98deb16aad58db63dca04b4605f5fb9b2654a966"
     },
+    "AWS::EC2::Route": {
+      "file": "schemas/AWS--EC2--Route.json",
+      "sourceSha256": "36076380f9aa017aaac7a0993fca4f7ce78e1ba2626f4f76e98f4021f820d90e",
+      "subsetSha256": "a9d8fb3e9b9655c318c45b9f1126c7ccb5a7a300fff13a49652a61bede337498"
+    },
     "AWS::EC2::RouteTable": {
       "file": "schemas/AWS--EC2--RouteTable.json",
       "sourceSha256": "a79ec11baf881707a4d8ca9648edf6e5a0939a50e93275cd41472ba2e1f48d29",
@@ -962,6 +987,11 @@
       "file": "schemas/AWS--EC2--VPC.json",
       "sourceSha256": "2168d5fa501c524d2663184a94de4bb0872a6ff62c038753024f56ebdcdd48b4",
       "subsetSha256": "90ffce310e820b9dde5d8b8677044ce41b94a2afe37a4a53c6b3646b9bba4050"
+    },
+    "AWS::EC2::VPCGatewayAttachment": {
+      "file": "schemas/AWS--EC2--VPCGatewayAttachment.json",
+      "sourceSha256": "ad9c28fd443e7e29219ce2ae0ca4361f255678074c8cb4d1a785f40b6d2013e1",
+      "subsetSha256": "cd5c8b7765ab11f1fe5a26b6c27e811e1bc0dbdde4a19d15e7a6c6642ea3d317"
     },
     "AWS::ECS::Cluster": {
       "file": "schemas/AWS--ECS--Cluster.json",
@@ -1077,6 +1107,11 @@
       "file": "schemas/AWS--HealthImaging--Datastore.json",
       "sourceSha256": "073fbcde11c74388e665abd6a5f55aa1dc7580f0dc23ac29adf6b146609b4152",
       "subsetSha256": "beab0793e4538682755228255e8a7c8d4e04a1982938b189a346f87a42d32d39"
+    },
+    "AWS::IAM::Role": {
+      "file": "schemas/AWS--IAM--Role.json",
+      "sourceSha256": "8cb295ac84c3050630b9aefe412c9dfe895833214a5c5e085fc8b53c5bac57b6",
+      "subsetSha256": "045abf2856d61b1a7ea2d9070665455ece6c2ade84b6122dd371aeb1bc022065"
     },
     "AWS::IVS::Channel": {
       "file": "schemas/AWS--IVS--Channel.json",
@@ -1267,6 +1302,11 @@
       "file": "schemas/AWS--Lambda--CodeSigningConfig.json",
       "sourceSha256": "32b79a170cb73e8185fe406c2731bf3f82bcd78ec65c3049cd2dcd981802b8bb",
       "subsetSha256": "41ddd2cfd21f5e01dd46f5951b2c5347ce8bc54df2771301eff7e31c742c0184"
+    },
+    "AWS::Lambda::Function": {
+      "file": "schemas/AWS--Lambda--Function.json",
+      "sourceSha256": "d2d6c4a2aa7da49c36097d3ee4273aa641b52a024a264fa9d3da3d2a9bff1b9c",
+      "subsetSha256": "2960061d1b2641668a2e824580f626d897289c429100122ffabfb00942e2ba0e"
     },
     "AWS::Lambda::MicrovmImage": {
       "file": "schemas/AWS--Lambda--MicrovmImage.json",
@@ -1693,6 +1733,11 @@
       "sourceSha256": "5493a8de7ed8d9ff3c4ed6abb4908aca1ea5786521298341a829b43e78d355fd",
       "subsetSha256": "4378513d277eaf41223b085fbccf36bdec5f0f20665aebeb14aaa40f5f66f8be"
     },
+    "AWS::SSM::Parameter": {
+      "file": "schemas/AWS--SSM--Parameter.json",
+      "sourceSha256": "dd6be175bfce6c77a5f759ae750baa380933f03cb91f1a93af6ab74693083717",
+      "subsetSha256": "a69a56a88d990c8afbe9839a1becd81212875e8a33ac16e39b0b5ecb738bf132"
+    },
     "AWS::SSM::ServiceSetting": {
       "file": "schemas/AWS--SSM--ServiceSetting.json",
       "sourceSha256": "3557bba15e4242a974f5bb1f36c55b4005a06d63bc96918e2ce13da35df58711",
@@ -1797,6 +1842,11 @@
       "file": "schemas/AWS--Scheduler--ScheduleGroup.json",
       "sourceSha256": "607803b13ffe2061134f1d99105c3cb20eb58de66ad682e09068ca35ca3899b5",
       "subsetSha256": "b9fbefa444bee84864962200385eeb48526307a6a3290b9759c28b4e3004edda"
+    },
+    "AWS::SecretsManager::Secret": {
+      "file": "schemas/AWS--SecretsManager--Secret.json",
+      "sourceSha256": "dba2dda3682e449edb8835e568081c793a5cabdc743be06d35634f56f3a76814",
+      "subsetSha256": "1d1f8d7805514a322ff99dc64a8a92f4bd0104a5f2723588ad1eacf892c9db11"
     },
     "AWS::SecurityAgent::Application": {
       "file": "schemas/AWS--SecurityAgent--Application.json",

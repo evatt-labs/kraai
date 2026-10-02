@@ -39,7 +39,7 @@ func Generate() (map[string][]byte, error) {
 		b.WriteString("func init() {\nregister(map[string]Reader{\n")
 		for _, r := range rs {
 			fmt.Fprintf(&b, "%s: {\n", strconv.Quote(r.Type))
-			production := r.Complete && proven[r.Type] && len(r.Identifier) > 0
+			production := r.Complete && proven[r.Type] && (len(r.Identifier) == 1 || len(r.IdentifierOrder) == len(r.Identifier))
 			readerBody(&b, r, production)
 			if production && r.LifecycleComplete && lived[r.Type] {
 				b.WriteString("Mutable: true,\n")
@@ -99,6 +99,12 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if len(r.IdentifierOrder) > 0 {
+		fmt.Fprintf(b, "IdentifierOrder: %#v,\n", r.IdentifierOrder)
+	}
+	if len(r.Serves) > 0 {
+		fmt.Fprintf(b, "Serves: %#v,\n", r.Serves)
+	}
 	if len(r.Input) > 0 {
 		b.WriteString("Input: []Binding{\n")
 		for _, in := range r.Input {
@@ -152,6 +158,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 			}
 			if st.Item != "" {
 				fmt.Fprintf(b, ", Item: %q", st.Item)
+			}
+			if st.Where != "" {
+				fmt.Fprintf(b, ", Where: %q, Equals: %q", st.Where, st.Equals)
 			}
 			b.WriteString("}, ")
 		}
@@ -315,6 +324,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 			if st.Where != "" {
 				fmt.Fprintf(b, ", Where: %q, Equals: %q", st.Where, st.Equals)
 			}
+			if st.Many {
+				b.WriteString(", Many: true")
+			}
 			b.WriteString("}, ")
 		}
 		b.WriteString("}")
@@ -333,6 +345,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	}
 	if f.TrueWhen != nil {
 		fmt.Fprintf(b, ", TrueWhen: %#v", f.TrueWhen)
+	}
+	if f.Wrap != "" {
+		fmt.Fprintf(b, ", Wrap: %q", f.Wrap)
 	}
 	if f.Extract != nil {
 		fmt.Fprintf(b, ", Extract: %#v", f.Extract)
@@ -473,7 +488,7 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	for _, f := range []struct {
 		name string
 		call *MutationCall
-	}{{"Add", m.Add}, {"Remove", m.Remove}, {"Change", m.Change}} {
+	}{{"Add", m.Add}, {"Remove", m.Remove}, {"Change", m.Change}, {"Before", m.Before}} {
 		if f.call != nil {
 			fmt.Fprintf(b, "%s: &", f.name)
 			mutationLiteral(b, *f.call)

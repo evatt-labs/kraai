@@ -49,12 +49,12 @@ func (c *Client) settle(ctx context.Context, r Reader, address map[string]any) e
 	if len(r.Busy) == 0 {
 		return nil
 	}
-	property := r.Identifier[0].Property
-	id, _ := address[property].(string)
+	parts := r.identifierOf(address)
+	id := r.identifierString(parts)
 	wait, poll := c.wait(r), c.poll()
 	deadline := time.Now().Add(wait)
 	for {
-		_, _, busy, err := c.readCall(ctx, r, map[string]string{property: id})
+		_, _, busy, err := c.readCall(ctx, r, parts)
 		if err == nil && !busy {
 			return nil
 		}

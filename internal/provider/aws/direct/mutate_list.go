@@ -42,8 +42,18 @@ func listChanges(key []string, current, desired any) (added, removed []any, err 
 	return added, removed, nil
 }
 
+// scalarKey reports the key of a list of scalars, each its own key.
+func scalarKey(key []string) bool { return len(key) == 1 && key[0] == "." }
+
 // keyOf is an element's key members joined, compared as JSON values.
 func keyOf(key []string, elem any) (string, bool) {
+	if scalarKey(key) {
+		switch elem.(type) {
+		case nil, map[string]any, []any:
+			return "", false
+		}
+		return fmt.Sprint(elem), true
+	}
 	obj, ok := jsonValue(elem).(map[string]any)
 	if !ok {
 		return "", false
@@ -96,12 +106,19 @@ func listValues(u MutationCall, address map[string]any, name string, elems []any
 		var keys []any
 		for _, elem := range elems {
 			obj, _ := elem.(map[string]any)
-			keys = append(keys, obj[u.Key[0]])
+			if scalarKey(u.Key) {
+				keys = append(keys, elem)
+			} else {
+				keys = append(keys, obj[u.Key[0]])
+			}
 		}
 		values["removedKeys"] = keys
 	}
 	elems, err := shaped(u, elems)
 	values[name] = elems
+	if u.OneAtATime && len(elems) == 1 {
+		values["element"] = elems[0]
+	}
 	return values, err
 }
 

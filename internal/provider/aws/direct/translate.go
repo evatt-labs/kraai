@@ -3,6 +3,7 @@ package direct
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -44,11 +45,11 @@ func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[strin
 				}
 				items, _ := v.([]any)
 				for _, item := range items {
-					if m, ok := item.(map[string]any); ok && w.selects(step, m[step.Where]) {
+					if m, ok := item.(map[string]any); ok && w.selects(step, func(path string) any { return memberAt(m, path) }) {
 						next = append(next, m)
 					}
 				}
-				if step.Where == "" {
+				if step.Where == "" || step.Many {
 					projected = true
 				} else if len(next) > 1 {
 					w.errs = append(w.errs, fmt.Errorf("%s selects %d elements of %s, not one", f.Property, len(next), step.Name))
@@ -105,6 +106,10 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 			v = entryList(f.Entries, entries)
 		}
 	case "list":
+		if items, ok := v.([]any); ok && f.Wrap != "" {
+			v = wrapped(f.Wrap, items)
+			break
+		}
 		if items, ok := v.([]any); ok && f.Keyed != nil {
 			keyed := map[string]any{}
 			for _, item := range items {
@@ -138,6 +143,16 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 		return nil, false
 	}
 	return truth(f, v), true
+}
+
+// wrapped is a list of scalars as a list of structures holding each as the
+// property named.
+func wrapped(property string, items []any) []any {
+	out := make([]any, len(items))
+	for i, item := range items {
+		out[i] = map[string]any{property: item}
+	}
+	return out
 }
 
 // truth is v read as a boolean for a field that reads trueWhen, and v
@@ -184,6 +199,14 @@ func transform(name string, v any) (any, bool) {
 		if parts := strings.SplitN(text, ":", 6); len(parts) == 6 {
 			return parts[5], true
 		}
+	case "urlJson":
+		// A malformed escape leaves the text as it is, for the comparison
+		// to report.
+		decoded, err := url.PathUnescape(text)
+		if err != nil {
+			return v, true
+		}
+		return transform("json", decoded)
 	case "json":
 		dec := json.NewDecoder(strings.NewReader(text))
 		dec.UseNumber()
@@ -271,11 +294,32 @@ func (w *walk) keeps(where []Match, get func(member string) (string, bool)) bool
 	return true
 }
 
-// selects reports whether a list element whose Where member is got passes
-// step's selection; every element passes a step that selects nothing.
-func (w *walk) selects(step Step, got any) bool {
+// selects reports whether a list element passes step's selection, get
+// reading the member a path names; every element passes a step that selects
+// nothing.
+func (w *walk) selects(step Step, get func(path string) any) bool {
 	if step.Where == "" {
 		return true
 	}
-	return got == substitute(step.Equals, w.vars)
+	want := substitute(step.Equals, w.vars)
+	for _, alternative := range strings.Split(step.Where, "|") {
+		if get(alternative) == want {
+			return true
+		}
+	}
+	return false
+}
+
+// memberAt is the member of obj a path through structures, A/B, names; nil
+// when any step is absent.
+func memberAt(obj map[string]any, path string) any {
+	var v any = obj
+	for _, name := range strings.Split(path, "/") {
+		m, ok := v.(map[string]any)
+		if !ok {
+			return nil
+		}
+		v = m[name]
+	}
+	return v
 }

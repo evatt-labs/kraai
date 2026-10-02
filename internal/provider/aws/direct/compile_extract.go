@@ -22,7 +22,7 @@ func compileExtract(model *smithyModel, schema *cfnSchema, prop cfnProperty, val
 		problem("extracts from a document and also reshapes it; it takes only a transform")
 	}
 	switch m.Transform {
-	case "", "json", "number", "boolean", "arnResource":
+	case "", "json", "urlJson", "number", "boolean", "arnResource":
 	default:
 		if _, part := arnPartIndex(m.Transform); !part {
 			problem("names transform %q", m.Transform)

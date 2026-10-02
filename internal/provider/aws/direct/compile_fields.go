@@ -78,8 +78,9 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				break
 			}
 			var where, equals string
+			many := false
 			if sel := selection.FindStringSubmatch(step); sel != nil {
-				step, where, equals = sel[1]+"[]", sel[2], sel[3]
+				step, where, equals, many = sel[1]+"[]", sel[2], sel[3], sel[4] == "*"
 			}
 			step, list := strings.CutSuffix(step, "[]")
 			pm, ok := model.Shapes[holder].Members[step]
@@ -110,16 +111,16 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				fail("%s%s maps through %s, whose jsonName a path does not follow", at, name, step)
 			}
 			if where != "" {
-				if wm, ok := model.Shapes[next].Members[where]; !ok || !slices.Contains([]string{"string", "enum"}, targetType(model.Shapes[wm.Target].Type, wm.Target)) {
+				if !selectable(model, next, where) {
 					fail("%s%s selects by %s, which is not a string member of %s", at, name, where, next)
 					walked = false
 					break
 				}
-				selected = true
+				selected, projected = selected || !many, projected || many
 			} else {
 				projected = projected || list
 			}
-			via, holder = append(via, Step{Name: step, List: list, Where: where, Equals: equals}), next
+			via, holder = append(via, Step{Name: step, List: list, Where: where, Equals: equals, Many: many}), next
 		}
 		if !walked {
 			continue
@@ -182,10 +183,17 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			}
 			continue
 		}
+		if mapping.Wrap != "" {
+			if compileWrap(model, schema, props[name], mapping, valueTarget, at+name, fail) {
+				f.Kind, f.Wrap = "list", mapping.Wrap
+				fields = append(fields, f)
+			}
+			continue
+		}
 		parsed := false
 		switch mapping.Transform {
 		case "":
-		case "arnResource", "json", "number", "boolean":
+		case "arnResource", "json", "urlJson", "number", "boolean":
 			if targetType(model.Shapes[valueTarget].Type, valueTarget) != "string" {
 				fail("%s%s transforms %s, which is not a string", at, name, mapping.Member)
 			}
@@ -197,7 +205,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				}
 				break
 			}
-			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, number and boolean", at, name, mapping.Transform)
+			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, urlJson, number and boolean", at, name, mapping.Transform)
 		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]
@@ -215,7 +223,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		target := model.Shapes[valueTarget]
 		switch {
 		case parsed:
-			want := map[string][]string{"json": {"object", "array", "string"}, "number": {"integer", "number"}, "boolean": {"boolean"}}[mapping.Transform]
+			want := map[string][]string{"json": {"object", "array", "string"}, "urlJson": {"object", "array", "string"}, "number": {"integer", "number"}, "boolean": {"boolean"}}[mapping.Transform]
 			if !slices.ContainsFunc(want, func(t string) bool { return types[t] }) {
 				fail("%s%s is %v in the schema, which transform %s does not produce", at, name, sortedSet(types), mapping.Transform)
 			}
@@ -418,4 +426,50 @@ func compileWhere(model *smithyModel, f Field, element string, where map[string]
 		matches = append(matches, Match{Member: member, Equals: value})
 	}
 	return matches
+}
+
+// selectable reports whether where, a selection's member, names in each of
+// its alternatives a string or enum member of element, reached through
+// structures.
+func selectable(model *smithyModel, element, where string) bool {
+	for _, alternative := range strings.Split(where, "|") {
+		holder, steps := element, strings.Split(alternative, "/")
+		for i, name := range steps {
+			m, ok := model.Shapes[holder].Members[name]
+			if !ok {
+				return false
+			}
+			if i < len(steps)-1 {
+				if !isStructure(model.Shapes[m.Target]) {
+					return false
+				}
+				holder = m.Target
+				continue
+			}
+			if !slices.Contains([]string{"string", "enum"}, targetType(model.Shapes[m.Target].Type, m.Target)) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// compileWrap checks a list of strings read as a list of structures: the
+// schema's items are objects with the property named, a string, and the
+// mapping says nothing else of the list.
+func compileWrap(model *smithyModel, schema *cfnSchema, prop cfnProperty, mapping Mapping, shape, at string, fail func(string, ...any)) bool {
+	list := model.Shapes[shape]
+	switch {
+	case targetType(list.Type, shape) != "list" || list.Member == nil || targetType(model.Shapes[ref(list.Member)].Type, ref(list.Member)) != "string":
+		fail("%s wraps %s, which is not a list of strings", at, mapping.Member)
+	case !schema.types(prop)["array"]:
+		fail("%s wraps a list into structures, but the schema does not type it an array", at)
+	case !schema.types(schema.nested(prop)[mapping.Wrap])["string"]:
+		fail("%s wraps strings as %s, which is not a string property of its items", at, mapping.Wrap)
+	case mapping.Transform != "" || len(mapping.Properties) > 0 || len(mapping.Skip) > 0 || len(mapping.Where) > 0:
+		fail("%s wraps a list, which takes no transform, properties or filter beside it", at)
+	default:
+		return true
+	}
+	return false
 }

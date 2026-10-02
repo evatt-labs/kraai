@@ -11,7 +11,7 @@ import (
 // by renaming members alone.
 func wireable(f Field) error {
 	switch {
-	case len(f.Via) > 0, len(f.Where) > 0, f.Key != "", len(f.Entries) > 0, len(f.Keyed) > 0, len(f.TrueWhen) > 0, len(f.Unless) > 0, len(f.Extract) > 0:
+	case len(f.Via) > 0, len(f.Where) > 0, f.Key != "", len(f.Entries) > 0, len(f.Keyed) > 0, len(f.TrueWhen) > 0, len(f.Unless) > 0, f.Wrap != "", len(f.Extract) > 0:
 		return fmt.Errorf("%s is read through a selection or reshaping", f.Property)
 	case f.Transform != "":
 		return fmt.Errorf("%s is read through the %s transform", f.Property, f.Transform)

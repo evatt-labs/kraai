@@ -131,9 +131,22 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 	// A type with no tags, such as a route table association, is not named
 	// by one.
 	r := readers[o.Type]
-	tagged := slices.ContainsFunc(append(slices.Clone(r.Fields), alsoFields(r)...), func(f Field) bool { return f.Property == "Tags" })
+	tagIndex := slices.IndexFunc(append(slices.Clone(r.Fields), alsoFields(r)...), func(f Field) bool { return f.Property == "Tags" })
+	tagged := tagIndex >= 0
+	// A schema that types its tags as a map reads them keyed; the others
+	// are Key/Value lists.
+	tagsAsMap := tagged && append(slices.Clone(r.Fields), alsoFields(r)...)[tagIndex].Keyed != nil
+	withName := func(tags any) any {
+		if tagsAsMap {
+			out := map[string]any{"kraai:resource-name": name}
+			given, _ := tags.(map[string]any)
+			maps.Copy(out, given)
+			return out
+		}
+		return append([]any{nameTag}, asList(tags)...)
+	}
 	if tagged {
-		desired["Tags"] = append([]any{nameTag}, asList(desired["Tags"])...)
+		desired["Tags"] = withName(desired["Tags"])
 	}
 
 	id, err := client.Create(ctx, o.Type, desired)
@@ -170,7 +183,7 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 		}
 		value := fill(o.Lifecycle.Update[property], vars)
 		if property == "Tags" {
-			value = append([]any{nameTag}, asList(value)...)
+			value = withName(value)
 		}
 		current, err := client.ReadByID(ctx, o.Type, id)
 		if err != nil {
@@ -204,6 +217,9 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 // ccShows polls Cloud Control's read of id until it covers want.
 func ccShows(ctx context.Context, cc *cloudcontrol.Client, typeName, id string, want map[string]any) error {
 	var last map[string]any
+	// A write-only property is never read back, and may be a secret that
+	// must not be printed in the failure below.
+	want = withoutWriteOnly(readers[typeName], want)
 	for deadline := time.Now().Add(readers[typeName].ceiling()); time.Now().Before(deadline); time.Sleep(3 * time.Second) {
 		out, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(typeName), Identifier: aws.String(id)})
 		if err != nil {

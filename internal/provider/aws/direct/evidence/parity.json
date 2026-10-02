@@ -1,6 +1,31 @@
 {
   "types": [
     {
+      "type": "AWS::ApiGatewayV2::Api",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "ApiEndpoint",
+        "ApiId",
+        "ApiKeySelectionExpression",
+        "CorsConfiguration",
+        "Description",
+        "DisableExecuteApiEndpoint",
+        "IpAddressType",
+        "Name",
+        "ProtocolType",
+        "RouteSelectionExpression",
+        "Tags",
+        "Version"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "8c5fa12c731141fa8a6b694d5b39d0c89e03531c0208d4a8ef4d128e775d7cdf"
+    },
+    {
       "type": "AWS::AppConfig::DeploymentStrategy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -692,6 +717,26 @@
       "override": "b8fd938fc8608160eb9fba2a669dd397056ffad22db1b5aa088e00f6fd30563f"
     },
     {
+      "type": "AWS::EC2::Route",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 10,
+      "compared": [
+        "CidrBlock",
+        "DestinationCidrBlock",
+        "DestinationIpv6CidrBlock",
+        "DestinationPrefixListId",
+        "GatewayId",
+        "RouteTableId",
+        "VpcEndpointId"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "e28bfdb1cd2ed0f4c10f764ffca33b3e2c8b0386404073a75882ba6caf7ab9fb"
+    },
+    {
       "type": "AWS::EC2::RouteTable",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-27",
@@ -731,10 +776,10 @@
     {
       "type": "AWS::EC2::Subnet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-26",
+      "date": "2026-10-02",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 8,
+      "instances": 7,
       "compared": [
         "AssignIpv6AddressOnCreation",
         "AvailabilityZone",
@@ -742,6 +787,8 @@
         "BlockPublicAccessStates",
         "CidrBlock",
         "EnableDns64",
+        "Ipv6CidrBlock",
+        "Ipv6CidrBlocks",
         "Ipv6Native",
         "MapPublicIpOnLaunch",
         "NetworkAclAssociationId",
@@ -752,7 +799,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "67a438cdf632932a77941bb00c7120807bc6d645f9e7ad54ba2f246bb4a7e3e4"
+      "override": "b389a677c53c89c76816adecfdf15efeb92fb3536f9172f116bf579ac77de585"
     },
     {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
@@ -794,6 +841,22 @@
       "absence": "parity",
       "probed": 1,
       "override": "a96171f0c7ce9d52b4142e2a948fa565df0efb6c09c55bc0b2ef5e0eb42ee71c"
+    },
+    {
+      "type": "AWS::EC2::VPCGatewayAttachment",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "AttachmentType",
+        "InternetGatewayId",
+        "VpcId"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "151fbb92a2abda37584d73f7eb95e47fffb609346d533194a036c2f5f84517b3"
     },
     {
       "type": "AWS::ECS::Cluster",
@@ -1099,6 +1162,28 @@
       "instances": 0,
       "compared": [],
       "override": "81a1085934f53482e7686159bbdda6cf36e16e77ba8a5a9c11baf4f331bb9e0c"
+    },
+    {
+      "type": "AWS::IAM::Role",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 20,
+      "compared": [
+        "Arn",
+        "AssumeRolePolicyDocument",
+        "Description",
+        "ManagedPolicyArns",
+        "MaxSessionDuration",
+        "Path",
+        "Policies",
+        "RoleId",
+        "RoleName"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
     },
     {
       "type": "AWS::IVS::Channel",
@@ -1487,6 +1572,40 @@
       "instances": 0,
       "compared": [],
       "override": "85f1014984bb6e76cbd229423c850618977c19048b99956060bb08f7488379e7"
+    },
+    {
+      "type": "AWS::Lambda::Function",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "Architectures",
+        "Arn",
+        "Code",
+        "Description",
+        "Environment",
+        "EphemeralStorage",
+        "FileSystemConfigs",
+        "FunctionName",
+        "Handler",
+        "LoggingConfig",
+        "MemorySize",
+        "PackageType",
+        "RecursiveLoop",
+        "ReservedConcurrentExecutions",
+        "Role",
+        "Runtime",
+        "RuntimeManagementConfig",
+        "SnapStartResponse",
+        "Tags",
+        "Timeout",
+        "TracingConfig"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "24c0f62fd9886b0eaf960560d39ebac39de6d5f95b9da9023c13a3ef52e5c4a4"
     },
     {
       "type": "AWS::Lambda::MicrovmImage",
@@ -2430,6 +2549,25 @@
       "override": "98e11cc83a1dff3a8f44f0cd414c444249e27badf54396b44f7725b8968081b3"
     },
     {
+      "type": "AWS::SSM::Parameter",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "Arn",
+        "DataType",
+        "Name",
+        "Tags",
+        "Type",
+        "Value"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+    },
+    {
       "type": "AWS::SSM::ServiceSetting",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",
@@ -2648,6 +2786,24 @@
         "Arn"
       ],
       "override": "4ba5284ac22f533d7ee86f9ad10bf72d38abd59e3cc6f3222905ebfd1a9f1522"
+    },
+    {
+      "type": "AWS::SecretsManager::Secret",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 2,
+      "compared": [
+        "Description",
+        "Id",
+        "Name",
+        "ReplicaRegions",
+        "Tags"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
     },
     {
       "type": "AWS::SecurityAgent::Application",

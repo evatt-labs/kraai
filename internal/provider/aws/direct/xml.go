@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
+	"strings"
 )
 
 // xmlNode is one element of an XML response, by local name: XML carries no
@@ -16,6 +18,17 @@ type xmlNode struct {
 	name string
 	text string
 	kids []*xmlNode
+}
+
+// member is the text of the element a path through child elements, A/B,
+// names; nil when any is absent.
+func (n *xmlNode) member(path string) any {
+	for _, name := range strings.Split(path, "/") {
+		if n = n.child(name); n == nil {
+			return nil
+		}
+	}
+	return n.text
 }
 
 func parseXML(body []byte) (*xmlNode, error) {
@@ -120,6 +133,9 @@ func (r Reader) readXML(body []byte, w *walk) (props, captured map[string]any, b
 			continue
 		}
 		items, _ := node.items(step.Name, step.Item)
+		if step.Where != "" {
+			items = slices.DeleteFunc(slices.Clone(items), func(item *xmlNode) bool { return !w.selects(step, item.member) })
+		}
 		if len(items) == 0 {
 			return nil, nil, false, ErrAbsent
 		}
@@ -173,15 +189,11 @@ func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 				}
 				items, _ := h.items(step.Name, step.Item)
 				for _, item := range items {
-					var got any
-					if c := item.child(step.Where); c != nil {
-						got = c.text
-					}
-					if w.selects(step, got) {
+					if w.selects(step, item.member) {
 						next = append(next, item)
 					}
 				}
-				if step.Where == "" {
+				if step.Where == "" || step.Many {
 					projected = true
 				} else if len(next) > 1 {
 					w.errs = append(w.errs, fmt.Errorf("%s selects %d elements of %s, not one", f.Property, len(next), step.Name))
@@ -252,6 +264,9 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 			} else {
 				list = append(list, xmlScalar(item.text, f.Scalar))
 			}
+		}
+		if f.Wrap != "" {
+			list = wrapped(f.Wrap, list)
 		}
 		v = list
 	case "map":

@@ -109,12 +109,12 @@ func TestGetResourceFallsBackToCloudControl(t *testing.T) {
 
 // A type not proven is read through Cloud Control, never directly.
 func TestGetResourceLeavesUnprovenTypesToCloudControl(t *testing.T) {
-	const subnet = "AWS::EC2::Subnet"
+	const subnet = "AWS::Scheduler::ScheduleGroup"
 	if direct.CanRead(subnet) {
-		t.Fatal("AWS::EC2::Subnet skips properties, so it must not be a production reader")
+		t.Fatal("AWS::Scheduler::ScheduleGroup differs from Cloud Control, so it must not be a production reader")
 	}
 	c, cc, directCalls := directClient(t, 200, `<never/>`)
-	if _, _, err := c.GetResource(context.Background(), subnet, "subnet-1"); err != nil || cc.gets.Load() != 1 || directCalls.Load() != 0 {
+	if _, _, err := c.GetResource(context.Background(), subnet, "g"); err != nil || cc.gets.Load() != 1 || directCalls.Load() != 0 {
 		t.Fatalf("err %v, Cloud Control calls %d, direct calls %d", err, cc.gets.Load(), directCalls.Load())
 	}
 }

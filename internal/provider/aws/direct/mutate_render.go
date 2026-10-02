@@ -150,6 +150,11 @@ func filter(name string, v any) (any, bool) {
 			out = append(out, map[string]any{"Key": name})
 		}
 		return out, true
+	case "pairs":
+		// A string map sent as the Key/Value list a call takes for tags
+		// the schema types as a map.
+		m, ok := v.(map[string]any)
+		return entriesOf(m), ok
 	case "entries":
 		out := map[string]any{}
 		items, _ := v.([]any)
