@@ -9,7 +9,6 @@ func init() {
 			Protocol:      "awsQuery",
 			SigningName:   "iam",
 			Complete:      true,
-			Production:    true,
 			Host:          "iam.amazonaws.com",
 			SigningRegion: "us-east-1",
 			Action:        "GetRole",
@@ -39,7 +38,7 @@ func init() {
 			AbsentIDs:         []string{"kraai-absent-probe"},
 			LifecycleComplete: true,
 			Create:            &MutationCall{Operation: "CreateRole", Target: "AWSIdentityManagementV20100508.CreateRole", NameProperty: "RoleName", NameTag: "kraai:resource-name", NameMaxLength: 64, Input: map[string]any{"AssumeRolePolicyDocument": "{AssumeRolePolicyDocument:json}", "Description": "{Description}", "MaxSessionDuration": "{MaxSessionDuration}", "Path": "{Path}", "PermissionsBoundary": "{PermissionsBoundary}", "RoleName": "{RoleName}", "Tags": "{Tags}"}, Properties: []string{"AssumeRolePolicyDocument", "Description", "MaxSessionDuration", "Path", "PermissionsBoundary", "RoleName", "Tags"}, Identifier: map[string]string{"RoleName": "CreateRoleResult.Role.RoleName"}, Form: map[string]FormStep{"AssumeRolePolicyDocument": {Key: "AssumeRolePolicyDocument", Kind: "scalar"}, "Description": {Key: "Description", Kind: "scalar"}, "MaxSessionDuration": {Key: "MaxSessionDuration", Kind: "scalar"}, "Path": {Key: "Path", Kind: "scalar"}, "PermissionsBoundary": {Key: "PermissionsBoundary", Kind: "scalar"}, "RoleName": {Key: "RoleName", Kind: "scalar"}, "Tags": {Key: "Tags", Kind: "list", Item: "member"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}},
-			Delete:            &MutationCall{Operation: "DeleteRole", Target: "AWSIdentityManagementV20100508.DeleteRole", Input: map[string]any{"RoleName": "{RoleName}"}, AbsentErrors: []string{"NoSuchEntity"}, RetryErrors: []string{"DeleteConflict"}, Clear: []string{"ManagedPolicyArns", "Policies"}, Form: map[string]FormStep{"RoleName": {Key: "RoleName", Kind: "scalar"}}},
+			Delete:            &MutationCall{Operation: "DeleteRole", Target: "AWSIdentityManagementV20100508.DeleteRole", Input: map[string]any{"RoleName": "{RoleName}"}, AbsentErrors: []string{"NoSuchEntity"}, Clear: []string{"ManagedPolicyArns", "Policies"}, Form: map[string]FormStep{"RoleName": {Key: "RoleName", Kind: "scalar"}}},
 			Update: []MutationCall{
 				MutationCall{Operation: "UpdateAssumeRolePolicy", Target: "AWSIdentityManagementV20100508.UpdateAssumeRolePolicy", Input: map[string]any{"PolicyDocument": "{AssumeRolePolicyDocument:json}", "RoleName": "{RoleName}"}, RetryErrors: []string{"NoSuchEntity"}, Properties: []string{"AssumeRolePolicyDocument"}, Form: map[string]FormStep{"PolicyDocument": {Key: "PolicyDocument", Kind: "scalar"}, "RoleName": {Key: "RoleName", Kind: "scalar"}}},
 				MutationCall{Operation: "UpdateRole", Target: "AWSIdentityManagementV20100508.UpdateRole", Input: map[string]any{"Description": "{Description}", "MaxSessionDuration": "{MaxSessionDuration}", "RoleName": "{RoleName}"}, RetryErrors: []string{"NoSuchEntity"}, Properties: []string{"Description", "MaxSessionDuration"}, Form: map[string]FormStep{"Description": {Key: "Description", Kind: "scalar"}, "MaxSessionDuration": {Key: "MaxSessionDuration", Kind: "scalar"}, "RoleName": {Key: "RoleName", Kind: "scalar"}}},
@@ -106,7 +105,6 @@ func init() {
 					},
 				},
 			},
-			Mutable: true,
 		},
 	})
 }

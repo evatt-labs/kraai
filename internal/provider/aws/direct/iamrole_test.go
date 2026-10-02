@@ -423,11 +423,9 @@ func TestIAMRoleChangedInlinePolicyIsPutNotDeleted(t *testing.T) {
 }
 
 // IAM refuses to delete a role that still has policies: they are detached
-// and deleted first, then the role, and a DeleteConflict it answers while
-// that settles is made again.
+// and deleted first, then the role.
 func TestIAMRoleDeleteClearsPoliciesFirst(t *testing.T) {
 	f := existingRole(t)
-	f.conflicts = 2
 	client := f.serve(t)
 	if err := client.Delete(context.Background(), iamRoleType, "kraai-r"); err != nil {
 		t.Fatal(err)
@@ -441,8 +439,28 @@ func TestIAMRoleDeleteClearsPoliciesFirst(t *testing.T) {
 			t.Fatalf("calls %v, want %s before DeleteRole", f.order, op)
 		}
 	}
-	if n := len(f.calls["DeleteRole"]); n != 3 {
-		t.Fatalf("DeleteRole made %d times, want 3: two answered DeleteConflict, then done", n)
+}
+
+// A role IAM will not delete, such as one still in an instance profile,
+// answers DeleteConflict and stays: the error surfaces at once, as Cloud
+// Control's does, rather than being retried through the whole wait.
+func TestIAMRoleDeleteConflictSurfacesAtOnce(t *testing.T) {
+	f := existingRole(t)
+	f.inline, f.managed = nil, nil
+	f.conflicts = 1000
+	client := f.serve(t)
+	client.Wait = 30 * time.Second
+	start := time.Now()
+	err := client.Delete(context.Background(), iamRoleType, "kraai-r")
+	var api *APIError
+	if !errors.As(err, &api) || api.Code != "DeleteConflict" {
+		t.Fatalf("Delete = %v, want the DeleteConflict error", err)
+	}
+	if n := len(f.calls["DeleteRole"]); n != 1 {
+		t.Fatalf("DeleteRole made %d times, want once", n)
+	}
+	if time.Since(start) > 5*time.Second {
+		t.Fatalf("Delete took %s, want an immediate failure", time.Since(start))
 	}
 }
 

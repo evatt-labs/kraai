@@ -138,7 +138,6 @@ delete:
   input:
     RoleName: "{RoleName}"
   absentErrors: [NoSuchEntity]
-  retryErrors: [DeleteConflict]
   clear: [ManagedPolicyArns, Policies]
 lifecycle:
   create:
