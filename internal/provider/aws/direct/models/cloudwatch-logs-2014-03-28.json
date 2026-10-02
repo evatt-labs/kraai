@@ -433,6 +433,50 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatchlogs#DeleteResourcePolicy": {
+      "errors": [
+        {
+          "target": "com.amazonaws.cloudwatchlogs#InvalidParameterException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#OperationAbortedException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#ServiceUnavailableException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.cloudwatchlogs#DeleteResourcePolicyRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.cloudwatchlogs#DeleteResourcePolicyRequest": {
+      "members": {
+        "expectedRevisionId": {
+          "target": "com.amazonaws.cloudwatchlogs#ExpectedRevisionId",
+          "traits": {}
+        },
+        "policyName": {
+          "target": "com.amazonaws.cloudwatchlogs#PolicyName",
+          "traits": {}
+        },
+        "resourceArn": {
+          "target": "com.amazonaws.cloudwatchlogs#Arn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#DeleteWithKeys": {
       "member": {
         "target": "com.amazonaws.cloudwatchlogs#WithKey"
@@ -1769,6 +1813,9 @@
         },
         {
           "target": "com.amazonaws.cloudwatchlogs#DeleteLogGroup"
+        },
+        {
+          "target": "com.amazonaws.cloudwatchlogs#DeleteResourcePolicy"
         },
         {
           "target": "com.amazonaws.cloudwatchlogs#DescribeIndexPolicies"
