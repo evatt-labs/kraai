@@ -15,6 +15,66 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ssm#AddTagsToResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidResourceId"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidResourceType"
+        },
+        {
+          "target": "com.amazonaws.ssm#TooManyTagsError"
+        },
+        {
+          "target": "com.amazonaws.ssm#TooManyUpdates"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#AddTagsToResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#AddTagsToResourceResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#AddTagsToResourceRequest": {
+      "members": {
+        "ResourceId": {
+          "target": "com.amazonaws.ssm#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.ssm#ResourceTypeForTagging",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.ssm#TagList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AddTagsToResourceResult": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#Alarm": {
       "members": {
         "Name": {
@@ -97,8 +157,23 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ssm#AllowedPattern": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.ssm#AmazonSSM": {
       "operations": [
+        {
+          "target": "com.amazonaws.ssm#AddTagsToResource"
+        },
+        {
+          "target": "com.amazonaws.ssm#DeleteParameter"
+        },
         {
           "target": "com.amazonaws.ssm#DescribeAssociation"
         },
@@ -106,7 +181,19 @@
           "target": "com.amazonaws.ssm#GetMaintenanceWindow"
         },
         {
+          "target": "com.amazonaws.ssm#GetParameter"
+        },
+        {
           "target": "com.amazonaws.ssm#GetServiceSetting"
+        },
+        {
+          "target": "com.amazonaws.ssm#ListTagsForResource"
+        },
+        {
+          "target": "com.amazonaws.ssm#PutParameter"
+        },
+        {
+          "target": "com.amazonaws.ssm#RemoveTagsFromResource"
         }
       ],
       "traits": {
@@ -813,6 +900,45 @@
     "com.amazonaws.ssm#DateTime": {
       "type": "timestamp"
     },
+    "com.amazonaws.ssm#DeleteParameter": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#ParameterNotFound"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#DeleteParameterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#DeleteParameterResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#DeleteParameterRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ssm#PSParameterName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DeleteParameterResult": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#DescribeAssociation": {
       "errors": [
         {
@@ -1067,6 +1193,62 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#GetParameter": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidKeyId"
+        },
+        {
+          "target": "com.amazonaws.ssm#ParameterNotFound"
+        },
+        {
+          "target": "com.amazonaws.ssm#ParameterVersionNotFound"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#GetParameterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#GetParameterResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#GetParameterRequest": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ssm#PSParameterName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "WithDecryption": {
+          "target": "com.amazonaws.ssm#Boolean",
+          "traits": {
+            "smithy.api#default": null
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#GetParameterResult": {
+      "members": {
+        "Parameter": {
+          "target": "com.amazonaws.ssm#Parameter",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#GetServiceSetting": {
       "errors": [
         {
@@ -1111,6 +1293,53 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#HierarchyLevelLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "HierarchyLevelLimitExceededException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#HierarchyTypeMismatchException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "HierarchyTypeMismatchException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#IncompatiblePolicyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IncompatiblePolicyException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#InstanceAssociationOutputLocation": {
       "members": {
         "S3Location": {
@@ -1145,6 +1374,22 @@
           "httpResponseCode": 500
         },
         "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidAllowedPatternException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAllowedPatternException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
@@ -1191,6 +1436,132 @@
           "httpResponseCode": 404
         },
         "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidKeyId": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidKeyId",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidPolicyAttributeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidPolicyAttributeException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidPolicyTypeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidPolicyTypeException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidResourceId": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidResourceId",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidResourceType": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidResourceType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#KeyList": {
+      "member": {
+        "target": "com.amazonaws.ssm#TagKey"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#ListTagsForResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidResourceId"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidResourceType"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#ListTagsForResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#ListTagsForResourceResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#ListTagsForResourceRequest": {
+      "members": {
+        "ResourceId": {
+          "target": "com.amazonaws.ssm#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.ssm#ResourceTypeForTagging",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ListTagsForResourceResult": {
+      "members": {
+        "TagList": {
+          "target": "com.amazonaws.ssm#TagList",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
       },
       "type": "structure"
     },
@@ -1299,8 +1670,241 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ssm#PSParameterName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#PSParameterSelector": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#PSParameterValue": {
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#PSParameterVersion": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "long"
+    },
+    "com.amazonaws.ssm#Parameter": {
+      "members": {
+        "ARN": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        },
+        "DataType": {
+          "target": "com.amazonaws.ssm#ParameterDataType",
+          "traits": {}
+        },
+        "LastModifiedDate": {
+          "target": "com.amazonaws.ssm#DateTime",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.ssm#PSParameterName",
+          "traits": {}
+        },
+        "Selector": {
+          "target": "com.amazonaws.ssm#PSParameterSelector",
+          "traits": {}
+        },
+        "SourceResult": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.ssm#ParameterType",
+          "traits": {}
+        },
+        "Value": {
+          "target": "com.amazonaws.ssm#PSParameterValue",
+          "traits": {}
+        },
+        "Version": {
+          "target": "com.amazonaws.ssm#PSParameterVersion",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ParameterAlreadyExists": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ParameterAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ParameterDataType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterDescription": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1024,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterKeyId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-zA-Z0-9:/_-]+)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterLimitExceeded": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ParameterLimitExceeded",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ParameterMaxVersionLimitExceeded": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ParameterMaxVersionLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#ParameterName": {
       "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterNotFound": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ParameterNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ParameterPatternMismatchException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ParameterPatternMismatchException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ParameterPolicies": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 4096,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ParameterTier": {
+      "members": {
+        "ADVANCED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Advanced"
+          }
+        },
+        "INTELLIGENT_TIERING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Intelligent-Tiering"
+          }
+        },
+        "STANDARD": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Standard"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.ssm#ParameterType": {
+      "members": {
+        "SECURE_STRING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SecureString"
+          }
+        },
+        "STRING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "String"
+          }
+        },
+        "STRING_LIST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "StringList"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.ssm#ParameterValue": {
       "type": "string"
@@ -1310,6 +1914,21 @@
         "target": "com.amazonaws.ssm#ParameterValue"
       },
       "type": "list"
+    },
+    "com.amazonaws.ssm#ParameterVersionNotFound": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ParameterVersionNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#Parameters": {
       "key": {
@@ -1322,6 +1941,154 @@
       "value": {
         "target": "com.amazonaws.ssm#ParameterValueList"
       }
+    },
+    "com.amazonaws.ssm#PoliciesLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "PoliciesLimitExceededException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#PutParameter": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#HierarchyLevelLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.ssm#HierarchyTypeMismatchException"
+        },
+        {
+          "target": "com.amazonaws.ssm#IncompatiblePolicyException"
+        },
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidAllowedPatternException"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidKeyId"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidPolicyAttributeException"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidPolicyTypeException"
+        },
+        {
+          "target": "com.amazonaws.ssm#ParameterAlreadyExists"
+        },
+        {
+          "target": "com.amazonaws.ssm#ParameterLimitExceeded"
+        },
+        {
+          "target": "com.amazonaws.ssm#ParameterMaxVersionLimitExceeded"
+        },
+        {
+          "target": "com.amazonaws.ssm#ParameterPatternMismatchException"
+        },
+        {
+          "target": "com.amazonaws.ssm#PoliciesLimitExceededException"
+        },
+        {
+          "target": "com.amazonaws.ssm#TooManyUpdates"
+        },
+        {
+          "target": "com.amazonaws.ssm#UnsupportedParameterType"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#PutParameterRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#PutParameterResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#PutParameterRequest": {
+      "members": {
+        "AllowedPattern": {
+          "target": "com.amazonaws.ssm#AllowedPattern",
+          "traits": {}
+        },
+        "DataType": {
+          "target": "com.amazonaws.ssm#ParameterDataType",
+          "traits": {}
+        },
+        "Description": {
+          "target": "com.amazonaws.ssm#ParameterDescription",
+          "traits": {}
+        },
+        "KeyId": {
+          "target": "com.amazonaws.ssm#ParameterKeyId",
+          "traits": {}
+        },
+        "Name": {
+          "target": "com.amazonaws.ssm#PSParameterName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Overwrite": {
+          "target": "com.amazonaws.ssm#Boolean",
+          "traits": {
+            "smithy.api#default": null
+          }
+        },
+        "Policies": {
+          "target": "com.amazonaws.ssm#ParameterPolicies",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.ssm#TagList",
+          "traits": {}
+        },
+        "Tier": {
+          "target": "com.amazonaws.ssm#ParameterTier",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.ssm#ParameterType",
+          "traits": {}
+        },
+        "Value": {
+          "target": "com.amazonaws.ssm#PSParameterValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#PutParameterResult": {
+      "members": {
+        "Tier": {
+          "target": "com.amazonaws.ssm#ParameterTier",
+          "traits": {}
+        },
+        "Version": {
+          "target": "com.amazonaws.ssm#PSParameterVersion",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#Region": {
       "type": "string"
@@ -1337,6 +2104,131 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.ssm#RemoveTagsFromResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.ssm#InternalServerError"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidResourceId"
+        },
+        {
+          "target": "com.amazonaws.ssm#InvalidResourceType"
+        },
+        {
+          "target": "com.amazonaws.ssm#TooManyUpdates"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.ssm#RemoveTagsFromResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.ssm#RemoveTagsFromResourceResult"
+      },
+      "traits": {},
+      "type": "operation"
+    },
+    "com.amazonaws.ssm#RemoveTagsFromResourceRequest": {
+      "members": {
+        "ResourceId": {
+          "target": "com.amazonaws.ssm#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.ssm#ResourceTypeForTagging",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.ssm#KeyList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#RemoveTagsFromResourceResult": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceId": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ResourceTypeForTagging": {
+      "members": {
+        "ASSOCIATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Association"
+          }
+        },
+        "AUTOMATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Automation"
+          }
+        },
+        "CLOUD_CONNECTOR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CloudConnector"
+          }
+        },
+        "DOCUMENT": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Document"
+          }
+        },
+        "MAINTENANCE_WINDOW": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MaintenanceWindow"
+          }
+        },
+        "MANAGED_INSTANCE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ManagedInstance"
+          }
+        },
+        "OPSMETADATA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OpsMetadata"
+          }
+        },
+        "OPS_ITEM": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OpsItem"
+          }
+        },
+        "PARAMETER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Parameter"
+          }
+        },
+        "PATCH_BASELINE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PatchBaseline"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.ssm#S3BucketName": {
       "traits": {
@@ -1486,6 +2378,56 @@
       "type": "string"
     },
     "com.amazonaws.ssm#String": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#Tag": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.ssm#TagKey",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Value": {
+          "target": "com.amazonaws.ssm#TagValue",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#TagKey": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#TagList": {
+      "member": {
+        "target": "com.amazonaws.ssm#Tag"
+      },
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 0
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#TagValue": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
       "type": "string"
     },
     "com.amazonaws.ssm#Target": {
@@ -1658,6 +2600,47 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.ssm#TooManyTagsError": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyTagsError",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#TooManyUpdates": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyUpdates",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedParameterType": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedParameterType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

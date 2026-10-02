@@ -219,7 +219,8 @@ func (m Mapping) String() string { return fmt.Sprintf("member %s", m.Member) }
 // member of an object property, never through a list, and a template whose
 // property is not being set is left out. The filters are json, a value
 // sent as its JSON text; string, a number or boolean sent as text;
-// entries, a list of Key/Value structures sent as a map; keys, a list of
+// entries, a list of Key/Value structures sent as a map; pairs, a map sent
+// as a list of Key/Value structures; keys, a list of
 // names sent as structures naming each, {Key: name}; arnName and arnParent,
 // the last and next-to-last segments of an ARN's resource, left out when
 // empty; wire, a value
