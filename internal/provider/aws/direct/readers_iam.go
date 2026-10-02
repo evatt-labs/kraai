@@ -9,6 +9,7 @@ func init() {
 			Protocol:      "awsQuery",
 			SigningName:   "iam",
 			Complete:      true,
+			Production:    true,
 			Host:          "iam.amazonaws.com",
 			SigningRegion: "us-east-1",
 			Action:        "GetRole",
@@ -105,6 +106,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }
