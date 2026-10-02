@@ -1,0 +1,696 @@
+{
+  "shapes": {
+    "com.amazonaws.apigatewayv2#ApiGatewayV2": {
+      "operations": [
+        {
+          "target": "com.amazonaws.apigatewayv2#GetApi"
+        }
+      ],
+      "traits": {
+        "aws.api#service": {
+          "arnNamespace": "apigateway",
+          "cloudFormationName": "ApiGatewayV2",
+          "cloudTrailEventSource": "apigatewayv2.amazonaws.com",
+          "endpointPrefix": "apigateway",
+          "sdkId": "ApiGatewayV2"
+        },
+        "aws.auth#sigv4": {
+          "name": "apigateway"
+        },
+        "aws.protocols#restJson1": {},
+        "smithy.api#auth": [
+          "aws.auth#sigv4"
+        ],
+        "smithy.api#title": "AmazonApiGatewayV2",
+        "smithy.rules#endpointRuleSet": {
+          "parameters": {
+            "Endpoint": {
+              "builtIn": "SDK::Endpoint",
+              "documentation": "Override the endpoint used to send this request",
+              "required": false,
+              "type": "string"
+            },
+            "Region": {
+              "builtIn": "AWS::Region",
+              "documentation": "The AWS region used to dispatch the request.",
+              "required": false,
+              "type": "string"
+            },
+            "UseDualStack": {
+              "builtIn": "AWS::UseDualStack",
+              "default": false,
+              "documentation": "When true, use the dual-stack endpoint. If the configured endpoint does not support dual-stack, dispatching the request MAY return an error.",
+              "required": true,
+              "type": "boolean"
+            },
+            "UseFIPS": {
+              "builtIn": "AWS::UseFIPS",
+              "default": false,
+              "documentation": "When true, send this request to the FIPS-compliant regional endpoint. If the configured endpoint does not have a FIPS compliant endpoint, dispatching the request will return an error.",
+              "required": true,
+              "type": "boolean"
+            }
+          },
+          "rules": [
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Endpoint"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseFIPS"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: FIPS and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "UseDualStack"
+                        },
+                        true
+                      ],
+                      "fn": "booleanEquals"
+                    }
+                  ],
+                  "error": "Invalid Configuration: Dualstack and custom endpoint are not supported",
+                  "type": "error"
+                },
+                {
+                  "conditions": [],
+                  "endpoint": {
+                    "headers": {},
+                    "properties": {},
+                    "url": {
+                      "ref": "Endpoint"
+                    }
+                  },
+                  "type": "endpoint"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [
+                {
+                  "argv": [
+                    {
+                      "ref": "Region"
+                    }
+                  ],
+                  "fn": "isSet"
+                }
+              ],
+              "rules": [
+                {
+                  "conditions": [
+                    {
+                      "argv": [
+                        {
+                          "ref": "Region"
+                        }
+                      ],
+                      "assign": "PartitionResult",
+                      "fn": "aws.partition"
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        },
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            },
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://apigateway-fips.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS and DualStack are enabled, but this partition does not support one or both",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseFIPS"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsFIPS"
+                                  ],
+                                  "fn": "getAttr"
+                                },
+                                true
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://apigateway-fips.{Region}.{PartitionResult#dnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "FIPS is enabled but this partition does not support FIPS",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [
+                        {
+                          "argv": [
+                            {
+                              "ref": "UseDualStack"
+                            },
+                            true
+                          ],
+                          "fn": "booleanEquals"
+                        }
+                      ],
+                      "rules": [
+                        {
+                          "conditions": [
+                            {
+                              "argv": [
+                                true,
+                                {
+                                  "argv": [
+                                    {
+                                      "ref": "PartitionResult"
+                                    },
+                                    "supportsDualStack"
+                                  ],
+                                  "fn": "getAttr"
+                                }
+                              ],
+                              "fn": "booleanEquals"
+                            }
+                          ],
+                          "rules": [
+                            {
+                              "conditions": [],
+                              "endpoint": {
+                                "headers": {},
+                                "properties": {},
+                                "url": "https://apigateway.{Region}.{PartitionResult#dualStackDnsSuffix}"
+                              },
+                              "type": "endpoint"
+                            }
+                          ],
+                          "type": "tree"
+                        },
+                        {
+                          "conditions": [],
+                          "error": "DualStack is enabled but this partition does not support DualStack",
+                          "type": "error"
+                        }
+                      ],
+                      "type": "tree"
+                    },
+                    {
+                      "conditions": [],
+                      "endpoint": {
+                        "headers": {},
+                        "properties": {},
+                        "url": "https://apigateway.{Region}.{PartitionResult#dnsSuffix}"
+                      },
+                      "type": "endpoint"
+                    }
+                  ],
+                  "type": "tree"
+                }
+              ],
+              "type": "tree"
+            },
+            {
+              "conditions": [],
+              "error": "Invalid Configuration: Missing Region",
+              "type": "error"
+            }
+          ],
+          "version": "1.0"
+        }
+      },
+      "type": "service",
+      "version": "2018-11-29"
+    },
+    "com.amazonaws.apigatewayv2#Cors": {
+      "members": {
+        "AllowCredentials": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "allowCredentials"
+          }
+        },
+        "AllowHeaders": {
+          "target": "com.amazonaws.apigatewayv2#CorsHeaderList",
+          "traits": {
+            "smithy.api#jsonName": "allowHeaders"
+          }
+        },
+        "AllowMethods": {
+          "target": "com.amazonaws.apigatewayv2#CorsMethodList",
+          "traits": {
+            "smithy.api#jsonName": "allowMethods"
+          }
+        },
+        "AllowOrigins": {
+          "target": "com.amazonaws.apigatewayv2#CorsOriginList",
+          "traits": {
+            "smithy.api#jsonName": "allowOrigins"
+          }
+        },
+        "ExposeHeaders": {
+          "target": "com.amazonaws.apigatewayv2#CorsHeaderList",
+          "traits": {
+            "smithy.api#jsonName": "exposeHeaders"
+          }
+        },
+        "MaxAge": {
+          "target": "com.amazonaws.apigatewayv2#IntegerWithLengthBetweenMinus1And86400",
+          "traits": {
+            "smithy.api#jsonName": "maxAge"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#CorsHeaderList": {
+      "member": {
+        "target": "com.amazonaws.apigatewayv2#__string"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.apigatewayv2#CorsMethodList": {
+      "member": {
+        "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.apigatewayv2#CorsOriginList": {
+      "member": {
+        "target": "com.amazonaws.apigatewayv2#__string"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.apigatewayv2#GetApi": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apigatewayv2#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apigatewayv2#GetApiRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.apigatewayv2#GetApiResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/v2/apis/{ApiId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.apigatewayv2#GetApiRequest": {
+      "members": {
+        "ApiId": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#GetApiResponse": {
+      "members": {
+        "ApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "apiEndpoint"
+          }
+        },
+        "ApiGatewayManaged": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "apiGatewayManaged"
+          }
+        },
+        "ApiId": {
+          "target": "com.amazonaws.apigatewayv2#Id",
+          "traits": {
+            "smithy.api#jsonName": "apiId"
+          }
+        },
+        "ApiKeySelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "apiKeySelectionExpression"
+          }
+        },
+        "CorsConfiguration": {
+          "target": "com.amazonaws.apigatewayv2#Cors",
+          "traits": {
+            "smithy.api#jsonName": "corsConfiguration"
+          }
+        },
+        "CreatedDate": {
+          "target": "com.amazonaws.apigatewayv2#__timestampIso8601",
+          "traits": {
+            "smithy.api#jsonName": "createdDate"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween0And1024",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "DisableExecuteApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableExecuteApiEndpoint"
+          }
+        },
+        "DisableSchemaValidation": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableSchemaValidation"
+          }
+        },
+        "ImportInfo": {
+          "target": "com.amazonaws.apigatewayv2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "importInfo"
+          }
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.apigatewayv2#IpAddressType",
+          "traits": {
+            "smithy.api#jsonName": "ipAddressType"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And128",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "ProtocolType": {
+          "target": "com.amazonaws.apigatewayv2#ProtocolType",
+          "traits": {
+            "smithy.api#jsonName": "protocolType"
+          }
+        },
+        "RouteSelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "routeSelectionExpression"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.apigatewayv2#Tags",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64",
+          "traits": {
+            "smithy.api#jsonName": "version"
+          }
+        },
+        "Warnings": {
+          "target": "com.amazonaws.apigatewayv2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "warnings"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#Id": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#IntegerWithLengthBetweenMinus1And86400": {
+      "traits": {
+        "smithy.api#range": {
+          "max": 86400,
+          "min": -1
+        }
+      },
+      "type": "integer"
+    },
+    "com.amazonaws.apigatewayv2#IpAddressType": {
+      "members": {
+        "dualstack": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "dualstack"
+          }
+        },
+        "ipv4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ipv4"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.apigatewayv2#NotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "resourceType"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#ProtocolType": {
+      "members": {
+        "HTTP": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "HTTP"
+          }
+        },
+        "WEBSOCKET": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "WEBSOCKET"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.apigatewayv2#SelectionExpression": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#StringWithLengthBetween0And1024": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#StringWithLengthBetween1And128": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#StringWithLengthBetween1And1600": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#Tags": {
+      "key": {
+        "target": "com.amazonaws.apigatewayv2#__string"
+      },
+      "traits": {},
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And1600"
+      }
+    },
+    "com.amazonaws.apigatewayv2#TooManyRequestsException": {
+      "members": {
+        "LimitType": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "limitType"
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#__boolean": {
+      "type": "boolean"
+    },
+    "com.amazonaws.apigatewayv2#__listOf__string": {
+      "member": {
+        "target": "com.amazonaws.apigatewayv2#__string"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.apigatewayv2#__string": {
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#__timestampIso8601": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    }
+  },
+  "smithy": "2.0"
+}

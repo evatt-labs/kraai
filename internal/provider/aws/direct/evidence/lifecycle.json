@@ -193,6 +193,19 @@
         "VisibilityTimeout"
       ],
       "override": "de4d6d10211d0ef46af202f79babd5cac230202a76d84790a1e90dedbe9a9407"
+    },
+    {
+      "type": "AWS::SecretsManager::Secret",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "Description",
+        "KmsKeyId",
+        "ReplicaRegions",
+        "SecretString",
+        "Tags"
+      ],
+      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
     }
   ]
 }
