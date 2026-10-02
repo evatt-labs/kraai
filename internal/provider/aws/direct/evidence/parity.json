@@ -2446,6 +2446,25 @@
       "override": "98e11cc83a1dff3a8f44f0cd414c444249e27badf54396b44f7725b8968081b3"
     },
     {
+      "type": "AWS::SSM::Parameter",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-02",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "Arn",
+        "DataType",
+        "Name",
+        "Tags",
+        "Type",
+        "Value"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+    },
+    {
       "type": "AWS::SSM::ServiceSetting",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",

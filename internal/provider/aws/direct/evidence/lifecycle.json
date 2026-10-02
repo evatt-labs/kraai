@@ -195,6 +195,20 @@
       "override": "de4d6d10211d0ef46af202f79babd5cac230202a76d84790a1e90dedbe9a9407"
     },
     {
+      "type": "AWS::SSM::Parameter",
+      "date": "2026-10-02",
+      "outcome": "parity",
+      "updated": [
+        "AllowedPattern",
+        "Description",
+        "Tags",
+        "Tier",
+        "Type",
+        "Value"
+      ],
+      "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+    },
+    {
       "type": "AWS::SecretsManager::Secret",
       "date": "2026-10-02",
       "outcome": "parity",
