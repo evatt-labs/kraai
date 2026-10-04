@@ -93,14 +93,16 @@ func matchKeys(spec resource.Spec) []string {
 // Notes implements plan.Noter. An instance found by its match values is
 // found by nothing else: an edited value finds nothing, plans a new
 // instance, and leaves the old one unmanaged, whether or not the property
-// is create-only.
+// is create-only. A seed property set is noted too.
 func (n *nativeResource) Notes(spec resource.Spec) []string {
+	properties, _ := spec.Config[nativePropertiesKey].(map[string]any)
+	notes := seedNotes(n.typeName, properties)
 	keys := matchKeys(spec)
 	if len(keys) == 0 {
-		return nil
+		return notes
 	}
-	return []string{"found by " + strings.Join(keys, ", ") + ": changing a value creates a new " +
-		n.typeName + " and leaves the old one unmanaged, destroy included"}
+	return append([]string{"found by " + strings.Join(keys, ", ") + ": changing a value creates a new " +
+		n.typeName + " and leaves the old one unmanaged, destroy included"}, notes...)
 }
 
 func allSet(properties map[string]any, names []string) bool {

@@ -153,7 +153,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		}
 	}
 
-	patch, err := buildPatch(properties, spec.Config)
+	patch, err := buildPatch(properties, withoutSeeds(r.typeName, spec.Config))
 	if err != nil {
 		return nil, err
 	}
