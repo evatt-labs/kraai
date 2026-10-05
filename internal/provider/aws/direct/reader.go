@@ -60,9 +60,10 @@ type Reader struct {
 	// Unsupported is the override's unsupported paths and reasons: see
 	// Override.Unsupported.
 	Unsupported map[string]string
-	// WriteOnly is the schema's write-only properties no update call sets.
-	// A write-only property is never read back, so an update always finds
-	// it changed; apply leaves these out.
+	// WriteOnly is the schema's top-level write-only properties and objects
+	// whose every member is write-only. None is ever read back, so an update
+	// always finds them changed: apply leaves out those no update call sets,
+	// and no wait holds to any of them.
 	WriteOnly []string
 	// LifecycleComplete is true when every property an update can change
 	// has an update call: with Production and lifecycle evidence, the only
