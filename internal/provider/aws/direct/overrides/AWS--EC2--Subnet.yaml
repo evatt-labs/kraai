@@ -149,3 +149,5 @@ lifecycle:
     Tags: [{Key: team, Value: kraai}]
 absentIds:
   - subnet-0123456789abcdef0
+undeclaredErrors:
+  InvalidSubnetID.NotFound: EC2's model declares no errors. DescribeSubnets and DeleteSubnet answer it for a subnet that does not exist.

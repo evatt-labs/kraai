@@ -200,7 +200,7 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 			continue
 		}
 		if u.Before != nil {
-			if err := send(*u.Before, values); err != nil {
+			if err := send(*u.Before, values); err != nil && !c.absent(u.Before.AbsentErrors, err) {
 				return err
 			}
 		}
@@ -236,11 +236,7 @@ func (c *Client) Delete(ctx context.Context, typeName, identifier string) error 
 		}
 	}
 	_, err = c.mutate(ctx, r, *r.Delete, values)
-	var api *APIError
-	if errors.As(err, &api) && slices.Contains(r.Delete.AbsentErrors, api.Code) {
-		err = nil
-	}
-	if err != nil {
+	if err != nil && !c.absent(r.Delete.AbsentErrors, err) {
 		return err
 	}
 	return c.waitFor(ctx, typeName, identifier, func(_ map[string]any, err error) bool {

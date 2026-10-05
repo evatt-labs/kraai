@@ -54,6 +54,14 @@ type Override struct {
 	// type whose service never describes a gone instance. {account} and
 	// {region} stand for the account and region the harness runs in.
 	AbsentIDs []string `yaml:"absentIds,omitempty"`
+	// UndeclaredErrors names, with why, each absentErrors or retryErrors
+	// code the service answers but its model declares on no error shape,
+	// such as EC2's InvalidVpcID.NotFound: EC2's model declares no errors.
+	// Every other code must be one the model declares, so a misspelled
+	// code is refused rather than never matching. An undeclared code a
+	// read or delete answers for absence must also be observed by the
+	// harness before the type is production or mutable.
+	UndeclaredErrors map[string]string `yaml:"undeclaredErrors,omitempty"`
 }
 
 // Call is one further call of a read: an operation of the same model,
@@ -328,7 +336,9 @@ type UpdateCall struct {
 	// Before is a call made first, whenever any of Properties changes, for
 	// a change the service takes as two calls, such as detaching the
 	// gateway a VPC has before attaching another. It is addressed as the
-	// call is, and may name what the read captured: the old value.
+	// call is, and may name what the read captured: the old value. Its
+	// absentErrors are the codes that mean there was nothing to undo, such
+	// as no gateway attached, and the update goes on.
 	Before *Mutation `yaml:"before,omitempty"`
 }
 

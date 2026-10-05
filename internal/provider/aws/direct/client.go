@@ -36,6 +36,10 @@ type Client struct {
 	// Account returns the account id, for a property built from it that
 	// no read returns; nil leaves such a property unread.
 	Account func(context.Context) (string, error)
+	// Observe, when set, is told each error code a call answered that the
+	// override lists as meaning absence, for the harness to record as
+	// evidence. Further calls run concurrently, so it may be too.
+	Observe func(code string)
 }
 
 // APIError is a service's refusal of a read.
@@ -211,13 +215,13 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
-			return nil, nil, false, r.absence(err)
+			return nil, nil, false, c.absence(r.AbsentErrors, err)
 		}
 		return r.readXML(body, &walk{vars: vars})
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
-		return nil, nil, false, r.absence(err)
+		return nil, nil, false, c.absence(r.AbsentErrors, err)
 	}
 	if token, _ := at(out, r.PageToken); len(r.PageToken) > 0 && token != nil && token != "" {
 		return nil, nil, false, errIncomplete(typeName)
@@ -273,14 +277,26 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	return props, captured, busy, nil
 }
 
-// absence is err, or ErrAbsent when err is an error code r's service
-// answers for an instance that does not exist.
-func (r Reader) absence(err error) error {
-	var api *APIError
-	if errors.As(err, &api) && slices.Contains(r.AbsentErrors, api.Code) {
+// absence is err, or ErrAbsent when absent(codes, err).
+func (c *Client) absence(codes []string, err error) error {
+	if c.absent(codes, err) {
 		return ErrAbsent
 	}
 	return err
+}
+
+// absent reports whether err is one of codes: an error code the service
+// answers for an instance, or an undoing, that is not there. A match is
+// reported to c.Observe.
+func (c *Client) absent(codes []string, err error) bool {
+	var api *APIError
+	if !errors.As(err, &api) || !slices.Contains(codes, api.Code) {
+		return false
+	}
+	if c.Observe != nil {
+		c.Observe(api.Code)
+	}
+	return true
 }
 
 // unless removes, at every depth of v, each field whose Unless conditions

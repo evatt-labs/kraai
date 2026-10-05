@@ -180,3 +180,5 @@ lifecycle:
     Tags: [{Key: team, Value: kraai}]
 absentIds:
   - sg-0a1b2c3d4e5f60718
+undeclaredErrors:
+  InvalidGroup.NotFound: EC2's model declares no errors. DescribeSecurityGroups and DeleteSecurityGroup answer it for a group that does not exist.

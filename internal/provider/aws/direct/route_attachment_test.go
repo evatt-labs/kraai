@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -34,6 +35,11 @@ type fakeNetwork struct {
 	attach map[string]string // vpc id to the internet gateway attached to it
 	calls  map[string][]url.Values
 	order  []string
+	// attachFails, when set, is the code every attach is refused with.
+	attachFails string
+	// detachRaced detaches the gateway just before a detach arrives, as
+	// another client would between the read and the call.
+	detachRaced bool
 }
 
 // xmlLower is a form member's element name: its first letter lowercased.
@@ -123,6 +129,10 @@ func (f *fakeNetwork) serve(t *testing.T) *Client {
 			_, _ = io.WriteString(w, `<DescribeInternetGatewaysResponse><internetGatewaySet><item><internetGatewayId>`+igw+
 				`</internetGatewayId><attachmentSet><item><state>available</state><vpcId>`+vpc+`</vpcId></item></attachmentSet></item></internetGatewaySet></DescribeInternetGatewaysResponse>`)
 		case "AttachInternetGateway":
+			if f.attachFails != "" {
+				fail(w, f.attachFails)
+				return
+			}
 			if _, taken := f.attach[form.Get("VpcId")]; taken {
 				fail(w, "Resource.AlreadyAssociated")
 				return
@@ -130,6 +140,9 @@ func (f *fakeNetwork) serve(t *testing.T) *Client {
 			f.attach[form.Get("VpcId")] = form.Get("InternetGatewayId")
 			ok(op)
 		case "DetachInternetGateway":
+			if f.detachRaced {
+				delete(f.attach, form.Get("VpcId"))
+			}
 			if f.attach[form.Get("VpcId")] != form.Get("InternetGatewayId") {
 				fail(w, "Gateway.NotAttached")
 				return
@@ -308,5 +321,49 @@ func TestUpdatingAGatewayAttachmentDetachesTheOldGatewayFirst(t *testing.T) {
 	}
 	if f.attach["vpc-1"] != "igw-2" {
 		t.Fatalf("attached = %v", f.attach)
+	}
+}
+
+// A gateway detached by someone else between the update's read and its
+// detach is nothing to undo: the before call's Gateway.NotAttached lets the attach go ahead,
+// and is reported as observed.
+func TestUpdatingAGatewayAttachmentAlreadyDetachedAttachesTheNewOne(t *testing.T) {
+	f := &fakeNetwork{attach: map[string]string{"vpc-1": "igw-1"}}
+	client := f.serve(t)
+	var observed []string
+	client.Observe = func(code string) { observed = append(observed, code) }
+	ctx := context.Background()
+	current, err := client.ReadByID(ctx, attachmentType, "IGW|vpc-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.detachRaced = true
+	observed = nil
+	if err := client.Update(ctx, attachmentType, "IGW|vpc-1", current, map[string]any{"InternetGatewayId": "igw-2"}); err != nil {
+		t.Fatalf("Update: %v\ncalls: %v", err, f.order)
+	}
+	if f.attach["vpc-1"] != "igw-2" {
+		t.Fatalf("attached = %v, want igw-2", f.attach)
+	}
+	if !slices.Contains(observed, "Gateway.NotAttached") {
+		t.Fatalf("observed = %v, want Gateway.NotAttached", observed)
+	}
+}
+
+// The before call's absent codes are its own: the same code from the
+// update's own call still fails the update.
+func TestABeforeCallsAbsentCodeDoesNotExcuseTheUpdate(t *testing.T) {
+	f := &fakeNetwork{attach: map[string]string{"vpc-1": "igw-1"}}
+	client := f.serve(t)
+	ctx := context.Background()
+	current, err := client.ReadByID(ctx, attachmentType, "IGW|vpc-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.attachFails = "Gateway.NotAttached"
+	err = client.Update(ctx, attachmentType, "IGW|vpc-1", current, map[string]any{"InternetGatewayId": "igw-2"})
+	var api *APIError
+	if !errors.As(err, &api) || api.Code != "Gateway.NotAttached" {
+		t.Fatalf("Update = %v, want the attach's Gateway.NotAttached", err)
 	}
 }

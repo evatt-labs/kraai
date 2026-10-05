@@ -115,3 +115,5 @@ lifecycle:
 # A route the table the harness names does not hold.
 absentIds:
   - "{routeTableId}|10.77.0.0/16"
+undeclaredErrors:
+  InvalidRoute.NotFound: EC2's model declares no errors. DeleteRoute answers it for a route the table does not have.

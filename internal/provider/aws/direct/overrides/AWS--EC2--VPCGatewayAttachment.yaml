@@ -58,3 +58,6 @@ lifecycle:
     InternetGatewayId: "{internetGatewayIdB}"
 absentIds:
   - IGW|vpc-0a1b2c3d4e5f60718
+undeclaredErrors:
+  InvalidInternetGatewayID.NotFound: EC2's model declares no errors. DescribeInternetGateways and DetachInternetGateway answer it for a gateway that does not exist.
+  Gateway.NotAttached: EC2's model declares no errors. DetachInternetGateway answers it for a gateway the VPC no longer has attached.

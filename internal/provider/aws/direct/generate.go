@@ -180,6 +180,12 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if len(r.UndeclaredReadErrors) > 0 {
+		fmt.Fprintf(b, "UndeclaredReadErrors: %#v,\n", r.UndeclaredReadErrors)
+	}
+	if len(r.UndeclaredDeleteErrors) > 0 {
+		fmt.Fprintf(b, "UndeclaredDeleteErrors: %#v,\n", r.UndeclaredDeleteErrors)
+	}
 	if len(r.CreateOnly) > 0 {
 		fmt.Fprintf(b, "CreateOnly: %#v,\n", r.CreateOnly)
 	}
