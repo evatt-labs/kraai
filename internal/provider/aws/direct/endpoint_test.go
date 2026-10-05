@@ -2,8 +2,11 @@ package direct
 
 import (
 	"encoding/json"
+	"maps"
 	"strings"
 	"testing"
+
+	"github.com/aws/smithy-go/endpoints/private/rulesfn"
 )
 
 // regionalRules is a rule set giving url, a template over Region and the
@@ -79,7 +82,8 @@ func TestEndpointOf(t *testing.T) {
 			if c.rules != nil {
 				raw, _ = json.Marshal(c.rules)
 			}
-			host, signing, reason := endpointOf(raw, c.static, "widgets")
+			e, reason := endpointOf(raw, c.static, "widgets", "")
+			host, signing := e.Host, e.SigningRegion
 			if c.refused != "" {
 				if !strings.Contains(reason, c.refused) || host != "" {
 					t.Fatalf("endpointOf = %q, %q, %q; want refused with %q", host, signing, reason, c.refused)
@@ -167,36 +171,91 @@ func TestEndpointsHoldInEveryRegion(t *testing.T) {
 		}
 		mutations(r.Delete)
 		for op, call := range calls {
-			var static map[string]struct{ Value any }
-			_ = json.Unmarshal(m.Shapes[namespace+op].Traits["smithy.rules#staticContextParams"], &static)
+			params, member := endpointParams(o.EndpointParams, staticParams(m.Shapes[namespace+op]))
+			// A parameter bound from an input member is tried with names
+			// a rule set might branch on: dotted, shortest and longest.
+			values := []string{""}
+			if member != "" {
+				values = []string{"my-bucket", "a.b.c", "abc", strings.Repeat("k", 63)}
+			}
 			for _, region := range regions {
-				params := map[string]any{"Region": region}
-				for name, p := range static {
-					params[name] = p.Value
+				for _, value := range values {
+					p := maps.Clone(params)
+					p["Region"] = region
+					path := ""
+					for name, v := range p {
+						if v == endpointBound {
+							p[name], path = value, "/"+rulesfn.URIEncode(value)
+						}
+					}
+					e, err := rs.resolve(p)
+					if err != nil {
+						t.Errorf("%s %s in %s: %v", o.Type, op, region, err)
+						break
+					}
+					// Signed for the client's region, either way it is spelled.
+					scheme, _ := authScheme(e.Properties)
+					signing := scheme.region
+					if signing == "" {
+						signing = region
+					}
+					compiled := call.SigningRegion
+					if compiled == "" {
+						compiled = region
+					}
+					wantURL := "https://" + strings.ReplaceAll(call.Host, "{region}", region) + path
+					if e.URL != wantURL || signing != compiled || scheme.disableDoubleEncoding != call.DisableDoubleEncoding {
+						t.Errorf("%s %s in %s for %q: the rule set gives %s signed for %s; compiled %s signed for %s",
+							o.Type, op, region, value, e.URL, signing, wantURL, compiled)
+						break
+					}
+					checked++
 				}
-				e, err := rs.resolve(params)
-				if err != nil {
-					t.Errorf("%s %s in %s: %v", o.Type, op, region, err)
-					break
-				}
-				// Signed for the client's region, either way it is spelled.
-				signing, _, _ := authScheme(e.Properties)
-				if signing == "" {
-					signing = region
-				}
-				compiled := call.SigningRegion
-				if compiled == "" {
-					compiled = region
-				}
-				wantURL := "https://" + strings.ReplaceAll(call.Host, "{region}", region)
-				if e.URL != wantURL || signing != compiled {
-					t.Errorf("%s %s in %s: the rule set gives %s signed for %s; compiled %s signed for %s",
-						o.Type, op, region, e.URL, signing, wantURL, compiled)
-					break
-				}
-				checked++
 			}
 		}
 	}
 	t.Logf("%d operation and region pairs across %d overrides and %d regions", checked, len(all), len(regions))
+}
+
+// A parameter bound from an input member must come back as the whole path
+// of the URL, as S3's path-style URL carries the bucket.
+func TestEndpointOfBoundPath(t *testing.T) {
+	pathStyle := func(url string) map[string]any {
+		rules := rulesWith(map[string]any{
+			"type": "endpoint",
+			"conditions": []any{map[string]any{
+				"fn": "uriEncode", "argv": []any{map[string]any{"ref": "Bucket"}}, "assign": "uri_encoded_bucket",
+			}},
+			"endpoint": map[string]any{"url": url, "properties": map[string]any{"authSchemes": []any{
+				map[string]any{"name": "sigv4", "signingName": "widgets", "disableDoubleEncoding": true},
+			}}},
+		})
+		rules["parameters"].(map[string]any)["Bucket"] = map[string]any{"type": "string"}
+		raw, _ := json.Marshal(rules)
+		return map[string]any{"raw": raw}
+	}
+	cases := map[string]struct {
+		url, bound, refused string
+	}{
+		"the bound value as the path":   {url: "https://widgets.{Region}.{PartitionResult#dnsSuffix}/{uri_encoded_bucket}", bound: endpointBound},
+		"a path beside the bound value": {url: "https://widgets.{Region}.{PartitionResult#dnsSuffix}/v1/{uri_encoded_bucket}", bound: endpointBound, refused: "whose path is not the bound parameter alone"},
+		"the bound value in the host":   {url: "https://{uri_encoded_bucket}.widgets.{Region}.{PartitionResult#dnsSuffix}", bound: endpointBound, refused: "whose path is not the bound parameter alone"},
+		"a path with nothing bound":     {url: "https://widgets.{Region}.{PartitionResult#dnsSuffix}/{uri_encoded_bucket}", refused: "not an https host"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			raw := pathStyle(c.url)["raw"].([]byte)
+			params := map[string]any{"Bucket": endpointBound}
+			e, reason := endpointOf(raw, params, "widgets", c.bound)
+			if c.refused != "" {
+				if !strings.Contains(reason, c.refused) {
+					t.Fatalf("endpointOf = %+v, %q; want refused with %q", e, reason, c.refused)
+				}
+				return
+			}
+			if reason != "" || e.Host != "widgets.{region}.amazonaws.com" || !e.DisableDoubleEncoding {
+				t.Fatalf("endpointOf = %+v, %q; want widgets.{region}.amazonaws.com signed as sent", e, reason)
+			}
+		})
+	}
 }

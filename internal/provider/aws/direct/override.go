@@ -62,6 +62,13 @@ type Override struct {
 	// read or delete answers for absence must also be observed by the
 	// harness before the type is production or mutable.
 	UndeclaredErrors map[string]string `yaml:"undeclaredErrors,omitempty"`
+	// EndpointParams sets endpoint rule set parameters every call of the
+	// type is resolved with, beside each operation's static ones, such as
+	// S3's ForcePathStyle: true. "{Member}" binds a parameter to an input
+	// member the operation names as its context parameter, such as S3's
+	// Bucket: "{Bucket}"; the endpoint must then carry it as the URL path,
+	// where the operation's URI already leads with it.
+	EndpointParams map[string]any `yaml:"endpointParams,omitempty"`
 }
 
 // Call is one further call of a read: an operation of the same model,

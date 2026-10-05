@@ -22,6 +22,8 @@ type callCompiler struct {
 	svc, op            smithyShape
 	want               map[string]bool
 	resource, payload  string
+	// bound is the input member an endpoint parameter is bound to.
+	bound string
 }
 
 // fail records a problem; every one is reported, not only the first.
@@ -53,6 +55,7 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 	c.address()
 	c.operation()
 	c.identifier()
+	c.boundEndpoint()
 	c.response()
 	c.fields()
 	c.absent()
@@ -86,16 +89,64 @@ func (c *callCompiler) address() {
 	if c.r.SigningName == "" {
 		c.fail("the service declares no signing name")
 	}
-	var reason string
-	var static map[string]struct{ Value any }
-	_ = json.Unmarshal(c.model.Shapes[c.namespace+c.o.Read.Operation].Traits["smithy.rules#staticContextParams"], &static)
-	params := map[string]any{}
-	for name, p := range static {
-		params[name] = p.Value
+	params, member := endpointParams(c.o.EndpointParams, staticParams(c.model.Shapes[c.namespace+c.o.Read.Operation]))
+	c.bound = member
+	bound := ""
+	if member != "" {
+		bound = endpointBound
 	}
-	if c.r.Host, c.r.SigningRegion, reason = endpointOf(c.svc.Traits["smithy.rules#endpointRuleSet"], params, c.r.SigningName); reason != "" {
+	e, reason := endpointOf(c.svc.Traits["smithy.rules#endpointRuleSet"], params, c.r.SigningName, bound)
+	if reason != "" {
 		c.fail("no endpoint this client can form: %s", reason)
 	}
+	c.r.Host, c.r.SigningRegion, c.r.DisableDoubleEncoding = e.Host, e.SigningRegion, e.DisableDoubleEncoding
+}
+
+// staticParams is an operation's smithy.rules#staticContextParams values.
+func staticParams(op smithyShape) map[string]any {
+	var static map[string]struct{ Value any }
+	_ = json.Unmarshal(op.Traits["smithy.rules#staticContextParams"], &static)
+	out := make(map[string]any, len(static))
+	for name, p := range static {
+		out[name] = p.Value
+	}
+	return out
+}
+
+// boundEndpoint checks a parameter bound from an input member: the
+// operation must name the member as that parameter's context parameter,
+// or the bound value would never reach the rule set the SDKs evaluate,
+// and the URI must lead with the member as a label the identifier binds,
+// since the endpoint's path is dropped for the URI's.
+func (c *callCompiler) boundEndpoint() {
+	if c.bound == "" {
+		return
+	}
+	var param string
+	for name, v := range c.o.EndpointParams {
+		if v == "{"+c.bound+"}" {
+			param = name
+		}
+	}
+	m, ok := c.model.Shapes[ref(c.op.Input)].Members[c.bound]
+	var ctx struct{ Name string }
+	if ok {
+		_ = json.Unmarshal(m.Traits["smithy.rules#contextParam"], &ctx)
+	}
+	if ctx.Name != param {
+		c.fail("endpointParams binds %s to %s, which %s does not name as that context parameter", param, c.bound, c.o.Read.Operation)
+		return
+	}
+	first, _, _ := strings.Cut(strings.TrimPrefix(c.r.URI, "/"), "/")
+	first, _, _ = strings.Cut(first, "?")
+	if first == "{"+c.bound+"}" {
+		for _, b := range c.r.Identifier {
+			if b.Location == "label" && b.Member == c.bound {
+				return
+			}
+		}
+	}
+	c.fail("endpointParams binds %s to %s, but %s's URI %s does not lead with it as a label the identifier binds", param, c.bound, c.o.Read.Operation, c.r.URI)
 }
 
 // operation binds the read's operation to its protocol's address, and

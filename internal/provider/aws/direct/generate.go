@@ -77,6 +77,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	}
 	field(b, "Host", r.Host)
 	field(b, "SigningRegion", r.SigningRegion)
+	if r.DisableDoubleEncoding {
+		b.WriteString("DisableDoubleEncoding: true,\n")
+	}
 	field(b, "Target", r.Target)
 	field(b, "Method", r.Method)
 	field(b, "URI", r.URI)

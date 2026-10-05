@@ -113,9 +113,11 @@ func (s *cfnSchema) types(p cfnProperty) map[string]bool {
 	return out
 }
 
-// nestedAlternative is nested of p's one structured oneOf or anyOf
-// alternative, such as a key schema that is a list of elements or a legacy
-// bare object; nil unless exactly one alternative is structured.
+// nestedAlternative is nested of p's structured oneOf or anyOf
+// alternatives, such as a key schema that is a list of elements or a legacy
+// bare object: one alternative's properties, or the union of several whose
+// property names are disjoint; nil when none is structured or two share a
+// name.
 func (s *cfnSchema) nestedAlternative(p cfnProperty) map[string]cfnProperty {
 	p = s.resolve(p)
 	var structured []map[string]cfnProperty
@@ -124,10 +126,23 @@ func (s *cfnSchema) nestedAlternative(p cfnProperty) map[string]cfnProperty {
 			structured = append(structured, nested)
 		}
 	}
-	if len(structured) != 1 {
+	if len(structured) == 0 {
 		return nil
 	}
-	return structured[0]
+	// Object alternatives with no property name in common, such as S3's
+	// log key format, either SimplePrefix or PartitionedPrefix, are one
+	// object whose response carries one of them; a name two alternatives
+	// share could mean different things, so that is no structure.
+	out := map[string]cfnProperty{}
+	for _, nested := range structured {
+		for name, child := range nested {
+			if _, shared := out[name]; shared {
+				return nil
+			}
+			out[name] = child
+		}
+	}
+	return out
 }
 
 // nested is the properties of p when it is an object with declared
