@@ -186,6 +186,12 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				fail("%s counts failed entries by %s, which is not a number in %s's output", at, m.FailedCount, m.Operation)
 			}
 		}
+		for _, entry := range m.RetryErrors {
+			code, text, hasText := strings.Cut(entry, ":")
+			if code == "" || strings.ContainsAny(code, " \t") || hasText && strings.TrimSpace(text) == "" {
+				fail("%s retryErrors names %q, which is not an error code or a code and the text its message contains", at, entry)
+			}
+		}
 		if len(m.Clear) > 0 && at != "delete" {
 			fail("%s clears %v, but only a delete clears", at, m.Clear)
 		}

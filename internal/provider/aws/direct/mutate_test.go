@@ -3,6 +3,8 @@ package direct
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -234,6 +236,16 @@ func TestCompileRefusesABadMutation(t *testing.T) {
 			c.Identifier = map[string]string{"QueueUrl": "Url"}
 			o.Create = &c
 		}, "create does not map the identifier QueueUrl"},
+		"a retry entry with no text": {func(o *Override) {
+			c := *o.Create
+			c.RetryErrors = []string{"QueueDeletedRecently: "}
+			o.Create = &c
+		}, `retryErrors names "QueueDeletedRecently: "`},
+		"a retry entry that is not a code": {func(o *Override) {
+			c := *o.Create
+			c.RetryErrors = []string{"Queue Deleted Recently"}
+			o.Create = &c
+		}, `retryErrors names "Queue Deleted Recently"`},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -265,5 +277,27 @@ func TestCreateQueueRetriesARecentlyDeletedName(t *testing.T) {
 	}
 	if n := len(f.calls["CreateQueue"]); n != 3 {
 		t.Fatalf("CreateQueue called %d times, want 3", n)
+	}
+}
+
+// An entry naming text retries only an error whose message contains it;
+// one naming a code alone retries every error with that code.
+func TestRetryableMatchesCodeAndText(t *testing.T) {
+	entries := []string{"ResourceConflictException", "InvalidParameterValueException: cannot be assumed by Lambda"}
+	cases := map[string]struct {
+		err  error
+		want bool
+	}{
+		"the text":               {&APIError{Code: "InvalidParameterValueException", Message: "The role defined for the function cannot be assumed by Lambda."}, true},
+		"other text":             {&APIError{Code: "InvalidParameterValueException", Message: "The runtime parameter of python2.7 is no longer supported"}, false},
+		"a code alone":           {&APIError{Code: "ResourceConflictException", Message: "The operation cannot be performed at this time."}, true},
+		"another code":           {&APIError{Code: "ResourceNotFoundException", Message: "cannot be assumed by Lambda"}, false},
+		"wrapped":                {fmt.Errorf("sending: %w", &APIError{Code: "ResourceConflictException"}), true},
+		"not a service's answer": {errors.New("cannot be assumed by Lambda"), false},
+	}
+	for name, c := range cases {
+		if got := retryable(c.err, entries); got != c.want {
+			t.Errorf("%s: retryable = %v, want %v", name, got, c.want)
+		}
 	}
 }

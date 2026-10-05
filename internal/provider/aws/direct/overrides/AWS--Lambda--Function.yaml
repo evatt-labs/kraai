@@ -6,6 +6,12 @@ read:
     FunctionName: FunctionName
   response: Configuration
   absentErrors: [ResourceNotFoundException]
+  # Each change is refused while another is settling.
+  busy:
+    State: [Pending]
+    LastUpdateStatus: [InProgress]
+  capture:
+    Arn: FunctionArn
 properties:
   Architectures: Architectures
   Arn: FunctionArn
@@ -128,3 +134,161 @@ also:
           MinExecutionEnvironments: MinExecutionEnvironments
 absentIds:
   - kraai-nonexistent-function-zzz
+# A function in a VPC holds Pending for minutes while its network
+# interfaces are made.
+wait: 15m
+create:
+  operation: CreateFunction
+  # A role made moments before is refused until Lambda can assume it.
+  retryErrors:
+    - ResourceConflictException
+    - "InvalidParameterValueException: cannot be assumed by Lambda"
+  input:
+    FunctionName: "{FunctionName}"
+    Runtime: "{Runtime}"
+    Role: "{Role}"
+    Handler: "{Handler}"
+    Code: "{Code}"
+    Description: "{Description}"
+    Timeout: "{Timeout}"
+    MemorySize: "{MemorySize}"
+    VpcConfig: "{VpcConfig:wire}"
+    PackageType: "{PackageType}"
+    DeadLetterConfig: "{DeadLetterConfig:wire}"
+    Environment: "{Environment:wire}"
+    KMSKeyArn: "{KmsKeyArn}"
+    TracingConfig: "{TracingConfig:wire}"
+    Tags: "{Tags:entries}"
+    Layers: "{Layers}"
+    FileSystemConfigs: "{FileSystemConfigs:wire}"
+    CodeSigningConfigArn: "{CodeSigningConfigArn}"
+    ImageConfig: "{ImageConfig}"
+    Architectures: "{Architectures}"
+    EphemeralStorage: "{EphemeralStorage:wire}"
+    SnapStart: "{SnapStart}"
+    LoggingConfig: "{LoggingConfig:wire}"
+    TenancyConfig: "{TenancyConfig:wire}"
+  identifier:
+    FunctionName: FunctionName
+update:
+  - operation: UpdateFunctionConfiguration
+    retryErrors: [ResourceConflictException]
+    properties: [Role, Handler, Description, Timeout, MemorySize, VpcConfig, Environment, Runtime,
+      DeadLetterConfig, KmsKeyArn, TracingConfig, Layers, FileSystemConfigs, ImageConfig,
+      EphemeralStorage, SnapStart, LoggingConfig]
+    input:
+      FunctionName: "{FunctionName}"
+      Role: "{Role}"
+      Handler: "{Handler}"
+      Description: "{Description}"
+      Timeout: "{Timeout}"
+      MemorySize: "{MemorySize}"
+      VpcConfig: "{VpcConfig:wire}"
+      Environment: "{Environment:wire}"
+      Runtime: "{Runtime}"
+      DeadLetterConfig: "{DeadLetterConfig:wire}"
+      KMSKeyArn: "{KmsKeyArn}"
+      TracingConfig: "{TracingConfig:wire}"
+      Layers: "{Layers}"
+      FileSystemConfigs: "{FileSystemConfigs:wire}"
+      ImageConfig: "{ImageConfig}"
+      EphemeralStorage: "{EphemeralStorage:wire}"
+      SnapStart: "{SnapStart}"
+      LoggingConfig: "{LoggingConfig:wire}"
+  # Code is never read back, so every update sends it again; the
+  # architecture is set with it.
+  - operation: UpdateFunctionCode
+    retryErrors: [ResourceConflictException]
+    properties: [Code, Architectures]
+    input:
+      FunctionName: "{FunctionName}"
+      S3Bucket: "{Code.S3Bucket}"
+      S3Key: "{Code.S3Key}"
+      S3ObjectVersion: "{Code.S3ObjectVersion}"
+      S3ObjectStorageMode: "{Code.S3ObjectStorageMode}"
+      ImageUri: "{Code.ImageUri}"
+      SourceKMSKeyArn: "{Code.SourceKMSKeyArn}"
+      Architectures: "{Architectures}"
+  - operation: PutFunctionConcurrency
+    retryErrors: [ResourceConflictException]
+    properties: [ReservedConcurrentExecutions]
+    input:
+      FunctionName: "{FunctionName}"
+      ReservedConcurrentExecutions: "{ReservedConcurrentExecutions}"
+  - operation: PutFunctionRecursionConfig
+    retryErrors: [ResourceConflictException]
+    properties: [RecursiveLoop]
+    input:
+      FunctionName: "{FunctionName}"
+      RecursiveLoop: "{RecursiveLoop}"
+  - operation: PutRuntimeManagementConfig
+    retryErrors: [ResourceConflictException]
+    properties: [RuntimeManagementConfig]
+    input:
+      FunctionName: "{FunctionName}"
+      UpdateRuntimeOn: "{RuntimeManagementConfig.UpdateRuntimeOn}"
+      RuntimeVersionArn: "{RuntimeManagementConfig.RuntimeVersionArn}"
+  - operation: PutFunctionCodeSigningConfig
+    retryErrors: [ResourceConflictException]
+    properties: [CodeSigningConfigArn]
+    input:
+      FunctionName: "{FunctionName}"
+      CodeSigningConfigArn: "{CodeSigningConfigArn}"
+  - tags:
+      property: Tags
+      add:
+        operation: TagResource
+        retryErrors: [ResourceConflictException]
+        input:
+          Resource: "{Arn}"
+          Tags: "{added:entries}"
+      remove:
+        operation: UntagResource
+        retryErrors: [ResourceConflictException]
+        input:
+          Resource: "{Arn}"
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteFunction
+  retryErrors: [ResourceConflictException]
+  input:
+    FunctionName: "{FunctionName}"
+  absentErrors: [ResourceNotFoundException]
+unsupported:
+  Code.ZipFile: inline source is zipped by Cloud Control; the API takes the zip itself
+  CapacityProviderConfig: runs on Lambda managed instances, which no direct evidence covers
+  FunctionScalingConfig: set on the published version of a function on managed instances
+  PublishToLatestPublished: publishes a version for managed instances
+  DurableConfig: replaces the function when some of its members change, which no direct evidence covers
+lifecycle:
+  create:
+    FunctionName: "{name}"
+    Runtime: python3.13
+    Handler: index.handler
+    Role: "{functionRoleArn}"
+    Code:
+      S3Bucket: "{artifactBucket}"
+      S3Key: lifecycle/handler-1.zip
+    MemorySize: 128
+    Timeout: 3
+    Environment:
+      Variables:
+        STAGE: one
+    Tags:
+      - Key: kraai-lifecycle-stage
+        Value: one
+  update:
+    Code:
+      S3Bucket: "{artifactBucket}"
+      S3Key: lifecycle/handler-2.zip
+    Description: updated by the lifecycle harness
+    Timeout: 5
+    Environment:
+      Variables:
+        STAGE: two
+        EXTRA: "yes"
+    ReservedConcurrentExecutions: 1
+    RecursiveLoop: Allow
+    Tags:
+      - Key: kraai-lifecycle-stage
+        Value: two

@@ -61,6 +61,13 @@ func compileUnsupported(o Override, schema *cfnSchema, routed map[string]bool, r
 			r.WriteOnly = append(r.WriteOnly, name)
 		}
 	}
+	// An object whose every member is write-only, such as a function's
+	// code, is never read back either.
+	for _, name := range sortedKeys(schema.Properties) {
+		if !slices.Contains(r.WriteOnly, name) && schema.onlyWriteOnlyMembers(name) {
+			r.WriteOnly = append(r.WriteOnly, name)
+		}
+	}
 	slices.Sort(r.WriteOnly)
 	return errs
 }

@@ -425,8 +425,15 @@ func (c *Client) poll() time.Duration {
 	return c.Poll
 }
 
-// retryable reports an error whose code is one of codes.
-func retryable(err error, codes []string) bool {
+// retryable reports an error one of entries names: by its code, or, for
+// an entry "Code: text", by its code and text its message contains.
+func retryable(err error, entries []string) bool {
 	var api *APIError
-	return errors.As(err, &api) && slices.Contains(codes, api.Code)
+	if !errors.As(err, &api) {
+		return false
+	}
+	return slices.ContainsFunc(entries, func(entry string) bool {
+		code, text, hasText := strings.Cut(entry, ":")
+		return code == api.Code && (!hasText || strings.Contains(api.Message, strings.TrimSpace(text)))
+	})
 }
