@@ -146,16 +146,8 @@ func verify(files fs.FS) error {
 
 // hasOperation reports whether the model subset in file defines operation.
 func hasOperation(files fs.FS, file, operation string) error {
-	raw, err := fs.ReadFile(files, file)
+	model, err := loadModel(files, file)
 	if err != nil {
-		return err
-	}
-	var model struct {
-		Shapes map[string]struct {
-			Type string `json:"type"`
-		} `json:"shapes"`
-	}
-	if err := json.Unmarshal(raw, &model); err != nil {
 		return err
 	}
 	for id, shape := range model.Shapes {

@@ -34,20 +34,12 @@ func (c *callCompiler) fail(format string, args ...any) {
 // call; otherwise the call accounts for every readable property but those
 // o's further calls map.
 func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]bool, each string) (Reader, []error) {
-	var model smithyModel
-	raw, err := fs.ReadFile(files, lock.Models[o.Read.Model].File)
-	if err == nil {
-		err = json.Unmarshal(raw, &model)
-	}
+	model, err := loadModel(files, lock.Models[o.Read.Model].File)
 	if err != nil {
 		return Reader{}, []error{err}
 	}
-	schemaRaw, err := fs.ReadFile(files, lock.Schemas[o.Type].File)
+	schema, err := loadSchema(files, lock.Schemas[o.Type].File)
 	if err != nil {
-		return Reader{}, []error{err}
-	}
-	var schema cfnSchema
-	if err := json.Unmarshal(schemaRaw, &schema); err != nil {
 		return Reader{}, []error{err}
 	}
 	schema.elsewhere = map[string]bool{}
