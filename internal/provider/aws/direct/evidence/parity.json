@@ -1593,10 +1593,10 @@
     {
       "type": "AWS::Lambda::Function",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-02",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 1,
+      "instances": 3,
       "compared": [
         "Architectures",
         "Arn",
@@ -1622,7 +1622,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "24c0f62fd9886b0eaf960560d39ebac39de6d5f95b9da9023c13a3ef52e5c4a4"
+      "override": "495ac870db075b62e31cfea0e27bde734cf1769a93b0cdbb80c1ac1bfc9cd6bc"
     },
     {
       "type": "AWS::Lambda::MicrovmImage",
