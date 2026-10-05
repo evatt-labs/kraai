@@ -8,6 +8,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"maps"
 	"net/http"
 	"os"
@@ -134,13 +135,9 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 	r := readers[o.Type]
 	tagIndex := slices.IndexFunc(append(slices.Clone(r.Fields), alsoFields(r)...), func(f Field) bool { return f.Property == "Tags" })
 	tagged := tagIndex >= 0
-	// A schema that types its tags as a map reads them keyed, or as the map
-	// the service returns; the others are Key/Value lists.
-	tagField := Field{}
-	if tagged {
-		tagField = append(slices.Clone(r.Fields), alsoFields(r)...)[tagIndex]
-	}
-	tagsAsMap := tagged && (tagField.Keyed != nil || tagField.Kind == "map")
+	// The schema says whether its tags are a map or Key/Value lists; how
+	// the read returns them does not.
+	tagsAsMap := tagged && schemaTypesObject(t, o.Type, "Tags")
 	withName := func(tags any) any {
 		if tagsAsMap {
 			out := map[string]any{"kraai:resource-name": name}
@@ -312,4 +309,23 @@ func namesUnset(v any, unset map[string]bool) string {
 		}
 	}
 	return ""
+}
+
+// schemaTypesObject reports whether typeName's locked schema types property
+// as an object.
+func schemaTypesObject(t *testing.T, typeName, property string) bool {
+	t.Helper()
+	lock, err := LoadLock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var schema cfnSchema
+	raw, err := fs.ReadFile(files, lock.Schemas[typeName].File)
+	if err == nil {
+		err = json.Unmarshal(raw, &schema)
+	}
+	if err != nil {
+		t.Fatalf("%s schema: %v", typeName, err)
+	}
+	return schema.types(schema.Properties[property])["object"]
 }
