@@ -516,6 +516,11 @@
       "sourceSha256": "5f58cbcaf19e9ca4916816c06241f7e3bc6edf38ec08d1a77ce1e02006a4e2e8",
       "subsetSha256": "a66b1916ed6ccbd878a50fd70e2e58c0012e592939850b98116339663ae46b86"
     },
+    "s3/service/2006-03-01/s3-2006-03-01.json": {
+      "file": "models/s3-2006-03-01.json",
+      "sourceSha256": "e632755547997bbfbde67d5630d6f09601c909ed9026713e5ff3f71887ab4892",
+      "subsetSha256": "b173941205395c0aa35aaea1024e9ce506b90b51a6c9aafcc78b9990c63378b5"
+    },
     "s3vectors/service/2025-07-15/s3vectors-2025-07-15.json": {
       "file": "models/s3vectors-2025-07-15.json",
       "sourceSha256": "627c33dc6e867bd3a96821bad2c5cca4ecc0e17a98b6835fc3a8d274061a6e46",
@@ -1697,6 +1702,11 @@
       "file": "schemas/AWS--Route53Resolver--ResolverQueryLoggingConfigAssociation.json",
       "sourceSha256": "8765441f73c8f19b7328200674542b907f5fd05623c0f004c9cb43830e52cfd3",
       "subsetSha256": "9a1ba1fcae8db2d34703e7e646e3fa11c97f99962b4928b6d72c6e27700c3ea7"
+    },
+    "AWS::S3::Bucket": {
+      "file": "schemas/AWS--S3--Bucket.json",
+      "sourceSha256": "637eda1f9c85137db51a664a1827f7a1068016c2652a54954108582a446d1d83",
+      "subsetSha256": "61c25e54920ea9fb808a9347a8103f0a0daf3036227e4c81e9ef15a8ff00e6ac"
     },
     "AWS::S3Vectors::VectorBucket": {
       "file": "schemas/AWS--S3Vectors--VectorBucket.json",

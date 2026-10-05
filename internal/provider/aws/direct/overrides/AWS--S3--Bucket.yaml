@@ -1,0 +1,290 @@
+type: AWS::S3::Bucket
+read:
+  model: s3/service/2006-03-01/s3-2006-03-01.json
+  operation: GetBucketVersioning
+  identifier:
+    BucketName: Bucket
+  absentErrors: [NoSuchBucket]
+# Every call goes to the regional host with the bucket in the path, which
+# each operation's URI already leads with.
+endpointParams:
+  ForcePathStyle: true
+  Bucket: "{Bucket}"
+# Bucket names are global; one carrying the account is not a stranger's.
+absentIds:
+  - kraai-absent-probe-{account}-{region}
+properties:
+  BucketName: '{BucketName}'
+  VersioningConfiguration:
+    member: .
+    properties:
+      Status: Status
+also:
+  - operation: GetBucketAbac
+    identifier:
+      BucketName: Bucket
+    response: AbacStatus
+    absentErrors: [NoSuchBucket]
+    properties:
+      AbacStatus: Status
+  - operation: GetBucketAccelerateConfiguration
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    properties:
+      AccelerateConfiguration:
+        member: .
+        properties:
+          AccelerationStatus: Status
+  - operation: GetBucketEncryption
+    identifier:
+      BucketName: Bucket
+    response: ServerSideEncryptionConfiguration
+    absentErrors: [NoSuchBucket]
+    properties:
+      BucketEncryption:
+        member: .
+        properties:
+          ServerSideEncryptionConfiguration:
+            member: Rules
+            properties:
+              BlockedEncryptionTypes:
+                member: BlockedEncryptionTypes
+                properties:
+                  EncryptionType: EncryptionType
+              BucketKeyEnabled: BucketKeyEnabled
+              ServerSideEncryptionByDefault:
+                member: ApplyServerSideEncryptionByDefault
+                properties:
+                  KMSMasterKeyID: KMSMasterKeyID
+                  SSEAlgorithm: SSEAlgorithm
+  - operation: GetBucketOwnershipControls
+    identifier:
+      BucketName: Bucket
+    response: OwnershipControls
+    absentErrors: [NoSuchBucket, OwnershipControlsNotFoundError]
+    properties:
+      OwnershipControls:
+        member: .
+        properties:
+          Rules:
+            member: Rules
+            properties:
+              ObjectOwnership: ObjectOwnership
+  - operation: GetPublicAccessBlock
+    identifier:
+      BucketName: Bucket
+    response: PublicAccessBlockConfiguration
+    absentErrors: [NoSuchBucket, NoSuchPublicAccessBlockConfiguration]
+    properties:
+      PublicAccessBlockConfiguration:
+        member: .
+        properties:
+          BlockPublicAcls: BlockPublicAcls
+          BlockPublicPolicy: BlockPublicPolicy
+          IgnorePublicAcls: IgnorePublicAcls
+          RestrictPublicBuckets: RestrictPublicBuckets
+  - operation: GetBucketTagging
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket, NoSuchTagSet]
+    properties:
+      Tags:
+        member: TagSet
+        properties:
+          Key: Key
+          Value: Value
+  - operation: GetBucketCors
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket, NoSuchCORSConfiguration]
+    properties:
+      CorsConfiguration:
+        member: .
+        properties:
+          CorsRules:
+            member: CORSRules
+            properties:
+              AllowedHeaders: AllowedHeaders
+              AllowedMethods: AllowedMethods
+              AllowedOrigins: AllowedOrigins
+              ExposedHeaders: ExposeHeaders
+              Id: ID
+              MaxAge: MaxAgeSeconds
+  - operation: GetObjectLockConfiguration
+    identifier:
+      BucketName: Bucket
+    response: ObjectLockConfiguration
+    absentErrors: [NoSuchBucket, ObjectLockConfigurationNotFoundError]
+    properties:
+      ObjectLockEnabled:
+        member: ObjectLockEnabled
+        trueWhen: [Enabled]
+      ObjectLockConfiguration:
+        member: .
+        properties:
+          ObjectLockEnabled: ObjectLockEnabled
+          Rule:
+            member: Rule
+            properties:
+              DefaultRetention:
+                member: DefaultRetention
+                properties:
+                  Days: Days
+                  DefaultEventHold:
+                    member: DefaultEventHold
+                    properties:
+                      Days: Days
+                      Years: Years
+                  Mode: Mode
+                  Years: Years
+  - operation: GetBucketWebsite
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket, NoSuchWebsiteConfiguration]
+    properties:
+      WebsiteConfiguration:
+        member: .
+        properties:
+          ErrorDocument: ErrorDocument.Key
+          IndexDocument: IndexDocument.Suffix
+          RedirectAllRequestsTo:
+            member: RedirectAllRequestsTo
+            properties:
+              HostName: HostName
+              Protocol: Protocol
+          RoutingRules:
+            member: RoutingRules
+            properties:
+              RedirectRule:
+                member: Redirect
+                properties:
+                  HostName: HostName
+                  HttpRedirectCode: HttpRedirectCode
+                  Protocol: Protocol
+                  ReplaceKeyPrefixWith: ReplaceKeyPrefixWith
+                  ReplaceKeyWith: ReplaceKeyWith
+              RoutingRuleCondition:
+                member: Condition
+                properties:
+                  HttpErrorCodeReturnedEquals: HttpErrorCodeReturnedEquals
+                  KeyPrefixEquals: KeyPrefixEquals
+  - operation: GetBucketLogging
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    properties:
+      LoggingConfiguration:
+        member: LoggingEnabled
+        properties:
+          DestinationBucketName: TargetBucket
+          LogFilePrefix: TargetPrefix
+          TargetObjectKeyFormat:
+            member: TargetObjectKeyFormat
+            properties:
+              SimplePrefix: SimplePrefix
+              PartitionedPrefix:
+                member: PartitionedPrefix
+                properties:
+                  PartitionDateSource: PartitionDateSource
+  - operation: GetBucketReplication
+    identifier:
+      BucketName: Bucket
+    response: ReplicationConfiguration
+    absentErrors: [NoSuchBucket, ReplicationConfigurationNotFoundError]
+    properties:
+      ReplicationConfiguration:
+        member: .
+        properties:
+          Role: Role
+          Rules:
+            member: Rules
+            properties:
+              DeleteMarkerReplication:
+                member: DeleteMarkerReplication
+                properties:
+                  Status: Status
+              Destination:
+                member: Destination
+                properties:
+                  AccessControlTranslation:
+                    member: AccessControlTranslation
+                    properties:
+                      Owner: Owner
+                  Account: Account
+                  Bucket: Bucket
+                  EncryptionConfiguration:
+                    member: EncryptionConfiguration
+                    properties:
+                      ReplicaKmsKeyID: ReplicaKmsKeyID
+                  Metrics:
+                    member: Metrics
+                    properties:
+                      EventThreshold:
+                        member: EventThreshold
+                        properties:
+                          Minutes: Minutes
+                      Status: Status
+                  ReplicationTime:
+                    member: ReplicationTime
+                    properties:
+                      Status: Status
+                      Time:
+                        member: Time
+                        properties:
+                          Minutes: Minutes
+                  StorageClass: StorageClass
+              Filter:
+                member: Filter
+                properties:
+                  And:
+                    member: And
+                    properties:
+                      Prefix: Prefix
+                      TagFilters:
+                        member: Tags
+                        properties:
+                          Key: Key
+                          Value: Value
+                  Prefix: Prefix
+                  TagFilter:
+                    member: Tag
+                    properties:
+                      Key: Key
+                      Value: Value
+              Id: ID
+              Priority: Priority
+              SourceSelectionCriteria:
+                member: SourceSelectionCriteria
+                properties:
+                  ReplicaModifications:
+                    member: ReplicaModifications
+                    properties:
+                      Status: Status
+                  SseKmsEncryptedObjects:
+                    member: SseKmsEncryptedObjects
+                    properties:
+                      Status: Status
+              Status: Status
+skip:
+  Arn: no S3 call returns it; Cloud Control builds it from the bucket name
+  DomainName: no S3 call returns it; Cloud Control builds it from the bucket name
+  DualStackDomainName: no S3 call returns it; Cloud Control builds it from the bucket name and region
+  RegionalDomainName: no S3 call returns it; Cloud Control builds it from the bucket name and region
+  WebsiteURL: no S3 call returns it; Cloud Control builds it from the bucket name and region
+  AnalyticsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
+  IntelligentTieringConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
+  InventoryConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
+  MetricsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
+  LifecycleConfiguration: the API nests each rule's prefix, tags and size bounds in a Filter and its expiration in Expiration, which the schema flattens; not mapped
+  MetadataConfiguration: GetBucketMetadataConfiguration returns its tables in a result shape not mapped here, and its V1 counterpart is refused for accounts on the V2 API
+  MetadataTableConfiguration: GetBucketMetadataTableConfiguration answers V1APIsNotAllowed for an account on the V2 metadata API
+  NotificationConfiguration: the API gives each configuration a list of Events where the schema has one Event per configuration, which no mapping here splits
+undeclaredErrors:
+  NoSuchCORSConfiguration: S3's model declares no errors on GetBucketCors; it answers this for a bucket with no CORS configuration.
+  NoSuchPublicAccessBlockConfiguration: S3's model declares no errors on GetPublicAccessBlock; it answers this for a bucket with no public access block.
+  NoSuchTagSet: S3's model declares no errors on GetBucketTagging; it answers this for a bucket with no tags.
+  NoSuchWebsiteConfiguration: S3's model declares no errors on GetBucketWebsite; it answers this for a bucket with no website configuration.
+  ObjectLockConfigurationNotFoundError: S3's model declares no errors on GetObjectLockConfiguration; it answers this for a bucket without object lock.
+  OwnershipControlsNotFoundError: S3's model declares no errors on GetBucketOwnershipControls; it answers this for a bucket with no ownership controls.
+  ReplicationConfigurationNotFoundError: S3's model declares no errors on GetBucketReplication; it answers this for a bucket with no replication configuration.
