@@ -37,12 +37,14 @@ func init() {
 			Update: []MutationCall{
 				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "CreateTags", Target: "AmazonEC2.CreateTags", TagProperty: "Tags", Input: map[string]any{"Resources": []any{"{InternetGatewayId}"}, "Tags": "{added:wire}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "DeleteTags", Target: "AmazonEC2.DeleteTags", Input: map[string]any{"Resources": []any{"{InternetGatewayId}"}, "Tags": "{removed:keys}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}},
 			},
+			Mutable: true,
 		},
 		"AWS::EC2::Route": {
 			Type:        "AWS::EC2::Route",
 			Protocol:    "ec2Query",
 			SigningName: "ec2",
 			Complete:    true,
+			Production:  true,
 			Host:        "ec2.{region}.amazonaws.com",
 			Action:      "DescribeRouteTables",
 			Version:     "2016-11-15",
@@ -86,6 +88,7 @@ func init() {
 			Update: []MutationCall{
 				MutationCall{Operation: "ReplaceRoute", Target: "AmazonEC2.ReplaceRoute", Input: map[string]any{"CarrierGatewayId": "{CarrierGatewayId}", "CoreNetworkArn": "{CoreNetworkArn}", "DestinationCidrBlock": "{DestinationCidrBlock}", "DestinationIpv6CidrBlock": "{DestinationIpv6CidrBlock}", "DestinationPrefixListId": "{DestinationPrefixListId}", "EgressOnlyInternetGatewayId": "{EgressOnlyInternetGatewayId}", "GatewayId": "{GatewayId}", "InstanceId": "{InstanceId}", "LocalGatewayId": "{LocalGatewayId}", "NatGatewayId": "{NatGatewayId}", "NetworkInterfaceId": "{NetworkInterfaceId}", "OdbNetworkArn": "{OdbNetworkArn}", "RouteTableId": "{RouteTableId}", "TransitGatewayId": "{TransitGatewayId}", "VpcEndpointId": "{VpcEndpointId}", "VpcPeeringConnectionId": "{VpcPeeringConnectionId}"}, Properties: []string{"CarrierGatewayId", "CoreNetworkArn", "EgressOnlyInternetGatewayId", "GatewayId", "InstanceId", "LocalGatewayId", "NatGatewayId", "NetworkInterfaceId", "OdbNetworkArn", "TransitGatewayId", "VpcEndpointId", "VpcPeeringConnectionId"}, Form: map[string]FormStep{"CarrierGatewayId": {Key: "CarrierGatewayId", Kind: "scalar"}, "CoreNetworkArn": {Key: "CoreNetworkArn", Kind: "scalar"}, "DestinationCidrBlock": {Key: "DestinationCidrBlock", Kind: "scalar"}, "DestinationIpv6CidrBlock": {Key: "DestinationIpv6CidrBlock", Kind: "scalar"}, "DestinationPrefixListId": {Key: "DestinationPrefixListId", Kind: "scalar"}, "EgressOnlyInternetGatewayId": {Key: "EgressOnlyInternetGatewayId", Kind: "scalar"}, "GatewayId": {Key: "GatewayId", Kind: "scalar"}, "InstanceId": {Key: "InstanceId", Kind: "scalar"}, "LocalGatewayId": {Key: "LocalGatewayId", Kind: "scalar"}, "NatGatewayId": {Key: "NatGatewayId", Kind: "scalar"}, "NetworkInterfaceId": {Key: "NetworkInterfaceId", Kind: "scalar"}, "OdbNetworkArn": {Key: "OdbNetworkArn", Kind: "scalar"}, "RouteTableId": {Key: "RouteTableId", Kind: "scalar"}, "TransitGatewayId": {Key: "TransitGatewayId", Kind: "scalar"}, "VpcEndpointId": {Key: "VpcEndpointId", Kind: "scalar"}, "VpcPeeringConnectionId": {Key: "VpcPeeringConnectionId", Kind: "scalar"}}},
 			},
+			Mutable: true,
 		},
 		"AWS::EC2::RouteTable": {
 			Type:        "AWS::EC2::RouteTable",
@@ -121,6 +124,7 @@ func init() {
 			Update: []MutationCall{
 				MutationCall{TagProperty: "Tags", Add: &MutationCall{Operation: "CreateTags", Target: "AmazonEC2.CreateTags", TagProperty: "Tags", Input: map[string]any{"Resources": []any{"{RouteTableId}"}, "Tags": "{added:wire}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}, Remove: &MutationCall{Operation: "DeleteTags", Target: "AmazonEC2.DeleteTags", Input: map[string]any{"Resources": []any{"{RouteTableId}"}, "Tags": "{removed:keys}"}, Form: map[string]FormStep{"Resources": {Key: "ResourceId", Kind: "list"}, "Resources[]": {Key: "", Kind: "scalar"}, "Tags": {Key: "Tag", Kind: "list"}, "Tags[]": {Key: "", Kind: "structure"}, "Tags[].Key": {Key: "Key", Kind: "scalar"}, "Tags[].Value": {Key: "Value", Kind: "scalar"}}}},
 			},
+			Mutable: true,
 		},
 		"AWS::EC2::SecurityGroup": {
 			Type:        "AWS::EC2::SecurityGroup",
@@ -206,6 +210,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 		"AWS::EC2::Subnet": {
 			Type:        "AWS::EC2::Subnet",
@@ -294,12 +299,14 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 		"AWS::EC2::SubnetRouteTableAssociation": {
 			Type:        "AWS::EC2::SubnetRouteTableAssociation",
 			Protocol:    "ec2Query",
 			SigningName: "ec2",
 			Complete:    true,
+			Production:  true,
 			Host:        "ec2.{region}.amazonaws.com",
 			Action:      "DescribeRouteTables",
 			Version:     "2016-11-15",
@@ -328,6 +335,7 @@ func init() {
 			LifecycleComplete:      true,
 			Create:                 &MutationCall{Operation: "AssociateRouteTable", Target: "AmazonEC2.AssociateRouteTable", Input: map[string]any{"RouteTableId": "{RouteTableId}", "SubnetId": "{SubnetId}"}, Properties: []string{"RouteTableId", "SubnetId"}, Identifier: map[string]string{"Id": "associationId"}, Form: map[string]FormStep{"RouteTableId": {Key: "RouteTableId", Kind: "scalar"}, "SubnetId": {Key: "SubnetId", Kind: "scalar"}}},
 			Delete:                 &MutationCall{Operation: "DisassociateRouteTable", Target: "AmazonEC2.DisassociateRouteTable", Input: map[string]any{"AssociationId": "{Id}"}, AbsentErrors: []string{"InvalidAssociationID.NotFound"}, Form: map[string]FormStep{"AssociationId": {Key: "AssociationId", Kind: "scalar"}}},
+			Mutable:                true,
 		},
 		"AWS::EC2::VPC": {
 			Type:        "AWS::EC2::VPC",
@@ -514,6 +522,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 		"AWS::EC2::VPCGatewayAttachment": {
 			Type:        "AWS::EC2::VPCGatewayAttachment",
@@ -545,15 +554,16 @@ func init() {
 			Capture: []Field{
 				{Property: "CurrentInternetGatewayId", Member: "InternetGatewayId", Kind: "scalar", XMLName: "internetGatewayId", Scalar: "string"},
 			},
-			UndeclaredDeleteErrors: []string{"Gateway.NotAttached", "InvalidInternetGatewayID.NotFound"},
+			UndeclaredDeleteErrors: []string{"Gateway.NotAttached"},
 			Unsupported:            map[string]string{"VpnGatewayId": "the attachment of a VPN gateway, which is free only while unattached, is made through Cloud Control"},
 			LifecycleComplete:      true,
 			MutationCaptures:       true,
 			Create:                 &MutationCall{Operation: "AttachInternetGateway", Target: "AmazonEC2.AttachInternetGateway", Input: map[string]any{"InternetGatewayId": "{InternetGatewayId}", "VpcId": "{VpcId}"}, Properties: []string{"InternetGatewayId", "VpcId"}, Identifier: map[string]string{"AttachmentType": "=IGW", "VpcId": "{VpcId}"}, Form: map[string]FormStep{"InternetGatewayId": {Key: "InternetGatewayId", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
-			Delete:                 &MutationCall{Operation: "DetachInternetGateway", Target: "AmazonEC2.DetachInternetGateway", Input: map[string]any{"InternetGatewayId": "{CurrentInternetGatewayId}", "VpcId": "{VpcId}"}, AbsentErrors: []string{"Gateway.NotAttached", "InvalidInternetGatewayID.NotFound"}, Form: map[string]FormStep{"InternetGatewayId": {Key: "InternetGatewayId", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
+			Delete:                 &MutationCall{Operation: "DetachInternetGateway", Target: "AmazonEC2.DetachInternetGateway", Input: map[string]any{"InternetGatewayId": "{CurrentInternetGatewayId}", "VpcId": "{VpcId}"}, AbsentErrors: []string{"Gateway.NotAttached"}, Form: map[string]FormStep{"InternetGatewayId": {Key: "InternetGatewayId", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}},
 			Update: []MutationCall{
 				MutationCall{Operation: "AttachInternetGateway", Target: "AmazonEC2.AttachInternetGateway", Input: map[string]any{"InternetGatewayId": "{InternetGatewayId}", "VpcId": "{VpcId}"}, Properties: []string{"InternetGatewayId"}, Form: map[string]FormStep{"InternetGatewayId": {Key: "InternetGatewayId", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}, Before: &MutationCall{Operation: "DetachInternetGateway", Target: "AmazonEC2.DetachInternetGateway", Input: map[string]any{"InternetGatewayId": "{CurrentInternetGatewayId}", "VpcId": "{VpcId}"}, AbsentErrors: []string{"Gateway.NotAttached"}, Form: map[string]FormStep{"InternetGatewayId": {Key: "InternetGatewayId", Kind: "scalar"}, "VpcId": {Key: "VpcId", Kind: "scalar"}}}},
 			},
+			Mutable: true,
 		},
 	})
 }

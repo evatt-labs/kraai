@@ -726,14 +726,17 @@
       "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 2,
+      "instances": 9,
       "compared": [
         "CidrBlock",
         "DestinationCidrBlock",
+        "DestinationIpv6CidrBlock",
         "GatewayId",
         "RouteTableId",
         "VpcEndpointId"
       ],
+      "absence": "parity",
+      "probed": 1,
       "override": "8c1e41c7cf662d4e108852f455a264ea36fe83f85e6c126183a4137f92d024d7"
     },
     {
@@ -812,10 +815,14 @@
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-10-05",
       "region": "us-east-1",
-      "outcome": "oracle-unavailable",
-      "instances": 0,
-      "compared": [],
-      "note": "Cloud Control could not read any listed instance",
+      "outcome": "parity",
+      "instances": 1,
+      "compared": [
+        "Id",
+        "RouteTableId",
+        "SubnetId"
+      ],
+      "note": "Cloud Control could not read some listed instances",
       "absence": "parity",
       "probed": 1,
       "override": "824143f618c15dc9526059ae4841db18c2ff623634ff06aa30cc85ce01d2b441"
@@ -852,7 +859,7 @@
       "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 1,
+      "instances": 2,
       "compared": [
         "AttachmentType",
         "InternetGatewayId",
@@ -860,7 +867,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "a0953bd28af9fd6ed1a743f37a07933811d5792a3f9875b9a2bc7c2cf670f1b9"
+      "override": "9a006fb6db1a9b6c353b2d2bbe908c55126d0e3cfbf5516a177342dd9685dd10"
     },
     {
       "type": "AWS::ECS::Cluster",
