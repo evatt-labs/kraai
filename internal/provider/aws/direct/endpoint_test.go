@@ -129,6 +129,7 @@ func TestEndpointsHoldInEveryRegion(t *testing.T) {
 	for _, o := range all {
 		r, ok := byType[o.Type]
 		if !ok {
+			t.Errorf("%s compiled to no reader", o.Type)
 			continue
 		}
 		m, err := loadModel(files, lock.Models[o.Read.Model].File)
@@ -146,6 +147,9 @@ func TestEndpointsHoldInEveryRegion(t *testing.T) {
 			t.Fatal(err)
 		}
 		calls := map[string]Reader{o.Read.Operation: r}
+		if len(r.Also) != len(o.Also) {
+			t.Fatalf("%s compiled %d of its %d further calls", o.Type, len(r.Also), len(o.Also))
+		}
 		for i, a := range o.Also {
 			calls[a.Operation] = r.Also[i]
 		}
