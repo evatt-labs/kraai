@@ -34,8 +34,38 @@
       },
       "type": "string"
     },
+    "com.amazonaws.signer#BadRequestException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.signer#CertificateArn": {
       "type": "string"
+    },
+    "com.amazonaws.signer#ConflictException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.signer#DisplayName": {
       "type": "string"
@@ -237,6 +267,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.signer#NotFoundException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.signer#PlatformId": {
       "type": "string"
     },
@@ -272,6 +317,21 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#ServiceLimitExceededException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },
@@ -424,6 +484,24 @@
       },
       "type": "string"
     },
+    "com.amazonaws.signer#ThrottlingException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#deprecated": {
+          "message": "Instead of this error, TooManyRequestsException should be used."
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
     "com.amazonaws.signer#Timestamp": {
       "type": "timestamp"
     },
@@ -439,6 +517,21 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.signer#ValidationException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.signer#ErrorCode"
+        },
+        "message": {
+          "target": "com.amazonaws.signer#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },

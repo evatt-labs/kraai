@@ -928,6 +928,25 @@
       "type": "service",
       "version": "2021-07-15"
     },
+    "com.amazonaws.chimesdkmediapipelines#ConflictException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chimesdkmediapipelines#ContentRedactionOutput": {
       "members": {
         "REDACTED": {
@@ -1542,6 +1561,25 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.chimesdkmediapipelines#ResourceLimitExceededException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkmediapipelines#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String"
+        },
+        "RequestId": {
+          "target": "com.amazonaws.chimesdkmediapipelines#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.chimesdkmediapipelines#RuleName": {
       "traits": {

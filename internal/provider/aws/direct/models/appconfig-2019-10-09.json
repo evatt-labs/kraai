@@ -1133,6 +1133,29 @@
       },
       "type": "boolean"
     },
+    "com.amazonaws.appconfig#BytesMeasure": {
+      "members": {
+        "KILOBYTES": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KILOBYTES"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.appconfig#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.appconfig#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appconfig#DeploymentStrategy": {
       "members": {
         "DeploymentDurationInMinutes": {
@@ -1260,6 +1283,12 @@
         "smithy.api#pattern": "^[^\\/#:\\n]{1,64}$"
       },
       "type": "string"
+    },
+    "com.amazonaws.appconfig#Float": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "float"
     },
     "com.amazonaws.appconfig#GetDeploymentStrategy": {
       "errors": [
@@ -1547,6 +1576,33 @@
         "target": "com.amazonaws.appconfig#StringWithLengthBetween1And2048"
       }
     },
+    "com.amazonaws.appconfig#PayloadTooLargeException": {
+      "members": {
+        "Limit": {
+          "target": "com.amazonaws.appconfig#Float",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "Measure": {
+          "target": "com.amazonaws.appconfig#BytesMeasure"
+        },
+        "Message": {
+          "target": "com.amazonaws.appconfig#String"
+        },
+        "Size": {
+          "target": "com.amazonaws.appconfig#Float",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 413
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appconfig#Percentage": {
       "traits": {
         "smithy.api#range": {
@@ -1585,6 +1641,18 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appconfig#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.appconfig#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

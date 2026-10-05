@@ -1,5 +1,21 @@
 {
   "shapes": {
+    "com.amazonaws.elasticache#APICallRateForCustomerExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "APICallRateForCustomerExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#AddTagsToResource": {
       "errors": [
         {
@@ -1099,6 +1115,38 @@
       "type": "service",
       "version": "2015-02-02"
     },
+    "com.amazonaws.elasticache#AuthorizationAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AuthorizationAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#AuthorizationNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AuthorizationNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#AvailabilityZone": {
       "members": {
         "Name": {
@@ -1107,6 +1155,25 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#AwsQueryErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.elasticache#CacheClusterAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheClusterAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.elasticache#CacheClusterNotFoundFault": {
@@ -1122,6 +1189,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CacheParameterGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheParameterGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1141,6 +1224,38 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#CacheParameterGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheParameterGroupQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CacheSecurityGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CacheSecurityGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#CacheSecurityGroupNotFoundFault": {
       "members": {
         "message": {
@@ -1154,6 +1269,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#CacheSecurityGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "QuotaExceeded.CacheSecurityGroup",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1292,6 +1423,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#ClusterQuotaForCustomerExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ClusterQuotaForCustomerExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#CreateCacheSubnetGroup": {
       "errors": [
         {
@@ -1363,6 +1510,38 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#DefaultUserAssociatedToUserGroupFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DefaultUserAssociatedToUserGroup",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#DefaultUserRequired": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DefaultUserRequired",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1441,8 +1620,72 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#DuplicateUserNameFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateUserName",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#ExceptionMessage": {
       "type": "string"
+    },
+    "com.amazonaws.elasticache#GlobalReplicationGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "GlobalReplicationGroupAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#GlobalReplicationGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "GlobalReplicationGroupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InsufficientCacheClusterCapacityFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InsufficientCacheClusterCapacity",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticache#IntegerOptional": {
       "type": "integer"
@@ -1456,6 +1699,136 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidARN",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidCacheClusterStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCacheClusterState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidCacheParameterGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCacheParameterGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidCacheSecurityGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCacheSecurityGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidCredentialsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCredentialsException",
+          "httpResponseCode": 408
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 408
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidGlobalReplicationGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidGlobalReplicationGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidKMSKeyFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidKMSKeyFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidParameterCombinationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#AwsQueryErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidParameterCombination",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidParameterValueException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#AwsQueryErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidParameterValue",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -1511,6 +1884,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#InvalidSnapshotStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSnapshotState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#InvalidSubnet": {
       "members": {
         "message": {
@@ -1520,6 +1909,54 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidSubnet",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidUserGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidUserGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidUserStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidUserState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#InvalidVPCNetworkStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidVPCNetworkStateFault",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -1695,6 +2132,86 @@
       },
       "type": "list"
     },
+    "com.amazonaws.elasticache#NoOperationFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NoOperationFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#NodeGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NodeGroupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#NodeGroupsPerReplicationGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NodeGroupsPerReplicationGroupQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#NodeQuotaForClusterExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NodeQuotaForClusterExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#NodeQuotaForCustomerExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NodeQuotaForCustomerExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#RemoveTagsFromResource": {
       "errors": [
         {
@@ -1777,6 +2294,38 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#ReplicationGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReplicationGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ReplicationGroupAlreadyUnderMigrationFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReplicationGroupAlreadyUnderMigrationFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#ReplicationGroupNotFoundFault": {
       "members": {
         "message": {
@@ -1786,6 +2335,38 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "ReplicationGroupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ReplicationGroupNotUnderMigrationFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReplicationGroupNotUnderMigrationFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ReservedCacheNodeAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedCacheNodeAlreadyExists",
           "httpResponseCode": 404
         },
         "smithy.api#error": "client",
@@ -1809,6 +2390,54 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#ReservedCacheNodeQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedCacheNodeQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ReservedCacheNodesOfferingNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedCacheNodesOfferingNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ServerlessCacheAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServerlessCacheAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#ServerlessCacheNotFoundFault": {
       "members": {
         "message": {
@@ -1822,6 +2451,38 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ServerlessCacheQuotaForCustomerExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServerlessCacheQuotaForCustomerExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ServerlessCacheSnapshotAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServerlessCacheSnapshotAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1841,6 +2502,86 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#ServerlessCacheSnapshotQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServerlessCacheSnapshotQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ServiceLinkedRoleNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServiceLinkedRoleNotFoundFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#ServiceUpdateNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServiceUpdateNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#SnapshotAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SnapshotAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#SnapshotFeatureNotSupportedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SnapshotFeatureNotSupportedFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#SnapshotNotFoundFault": {
       "members": {
         "message": {
@@ -1854,6 +2595,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#SnapshotQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SnapshotQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -2007,6 +2764,54 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#TestFailoverNotAvailableFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TestFailoverNotAvailableFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#UserAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UserAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#UserGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UserGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#UserGroupNotFoundFault": {
       "members": {
         "message": {
@@ -2023,6 +2828,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticache#UserGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UserGroupQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticache#UserNotFoundFault": {
       "members": {
         "message": {
@@ -2036,6 +2857,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticache#UserQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.elasticache#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UserQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     }

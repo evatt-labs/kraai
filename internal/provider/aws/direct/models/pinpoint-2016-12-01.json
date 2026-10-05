@@ -63,6 +63,23 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.pinpoint#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        },
+        "RequestID": {
+          "target": "com.amazonaws.pinpoint#__string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.pinpoint#DefaultButtonConfiguration": {
       "members": {
         "BackgroundColor": {

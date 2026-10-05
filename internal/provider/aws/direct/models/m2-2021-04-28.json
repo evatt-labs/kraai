@@ -834,6 +834,29 @@
     "com.amazonaws.m2#CapacityValue": {
       "type": "integer"
     },
+    "com.amazonaws.m2#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.m2#DeployedVersionSummary": {
       "members": {
         "applicationVersion": {
@@ -965,6 +988,22 @@
         ]
       },
       "type": "string"
+    },
+    "com.amazonaws.m2#ExecutionTimeoutException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 504,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.m2#FsxStorageConfiguration": {
       "members": {
@@ -1454,6 +1493,53 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.m2#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.m2#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503,
+        "smithy.api#retryable": {}
       },
       "type": "structure"
     },

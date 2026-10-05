@@ -1,5 +1,17 @@
 {
   "shapes": {
+    "com.amazonaws.codestarconnections#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codestarconnections#AccountId": {
       "traits": {
         "smithy.api#length": {
@@ -812,6 +824,42 @@
       "type": "service",
       "version": "2019-12-01"
     },
+    "com.amazonaws.codestarconnections#ConcurrentModificationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#ConditionalCheckFailedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codestarconnections#Connection": {
       "members": {
         "ConnectionArn": {
@@ -948,6 +996,42 @@
       },
       "type": "string"
     },
+    "com.amazonaws.codestarconnections#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#InvalidInputException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codestarconnections#ProviderType": {
       "members": {
         "BITBUCKET": {
@@ -983,6 +1067,18 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.codestarconnections#ResourceAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codestarconnections#ResourceNotFoundException": {
       "members": {
         "Message": {
@@ -1004,6 +1100,90 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#RetryLatestCommitFailedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#SyncBlockerDoesNotExistException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#SyncConfigurationStillExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#UnsupportedOperationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#UnsupportedProviderTypeException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codestarconnections#UpdateOutOfSyncException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codestarconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
       },
       "type": "structure"
     }

@@ -1378,6 +1378,21 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.mediaconvert#UnprocessableEntityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediaconvert#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 422
+      },
+      "type": "structure"
+    },
     "com.amazonaws.mediaconvert#__integer": {
       "type": "integer"
     },

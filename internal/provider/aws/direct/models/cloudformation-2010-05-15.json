@@ -17,6 +17,22 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.cloudformation#AlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AlreadyExistsException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#Arn": {
       "type": "string"
     },
@@ -1347,6 +1363,22 @@
       "type": "service",
       "version": "2010-05-15"
     },
+    "com.amazonaws.cloudformation#ConcurrentResourcesLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConcurrentResourcesLimitExceeded",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#ConfigurationSchema": {
       "traits": {
         "smithy.api#length": {
@@ -1356,6 +1388,22 @@
         "smithy.api#pattern": "^[\\s\\S]+$"
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudformation#CreatedButModifiedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CreatedButModifiedException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudformation#CreationTime": {
       "type": "timestamp"
@@ -2119,6 +2167,22 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.cloudformation#HookResultNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "HookResultNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#ImportExistingResources": {
       "type": "boolean"
     },
@@ -2128,6 +2192,70 @@
     "com.amazonaws.cloudformation#IncludePropertyValues": {
       "type": "boolean"
     },
+    "com.amazonaws.cloudformation#InsufficientCapabilitiesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InsufficientCapabilitiesException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#InvalidChangeSetStatusException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidChangeSetStatus",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#InvalidOperationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidOperationException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#InvalidStateTransitionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidStateTransition",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#IsActivated": {
       "type": "boolean"
     },
@@ -2136,6 +2264,22 @@
     },
     "com.amazonaws.cloudformation#LastUpdatedTime": {
       "type": "timestamp"
+    },
+    "com.amazonaws.cloudformation#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "LimitExceededException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudformation#LiveResourceDrift": {
       "members": {
@@ -2214,6 +2358,22 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.cloudformation#NameAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NameAlreadyExistsException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#NextToken": {
       "traits": {
         "smithy.api#length": {
@@ -2260,6 +2420,70 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.cloudformation#OperationIdAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OperationIdAlreadyExistsException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#OperationInProgressException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OperationInProgressException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#OperationNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OperationNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#OperationStatusCheckFailedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConditionalCheckFailed",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudformation#OptionalSecureUrl": {
       "traits": {
@@ -2747,6 +2971,54 @@
     "com.amazonaws.cloudformation#ResourcePropertyPath": {
       "type": "string"
     },
+    "com.amazonaws.cloudformation#ResourceScanInProgressException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceScanInProgress",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ResourceScanLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceScanLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#ResourceScanNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceScanNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#ResourceStatusReason": {
       "type": "string"
     },
@@ -2931,6 +3203,22 @@
     "com.amazonaws.cloudformation#StackId": {
       "type": "string"
     },
+    "com.amazonaws.cloudformation#StackInstanceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StackInstanceNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#StackName": {
       "type": "string"
     },
@@ -2942,6 +3230,38 @@
         "smithy.api#pattern": "^([a-zA-Z][-a-zA-Z0-9]*)|(arn:\\b(aws|aws-us-gov|aws-cn)\\b:[-a-zA-Z0-9:/._+]*)$"
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudformation#StackNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StackNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#StackRefactorNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StackRefactorNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudformation#StackResourceDriftStatus": {
       "members": {
@@ -2983,6 +3303,54 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.cloudformation#StackSetNotEmptyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StackSetNotEmptyException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#StackSetNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StackSetNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudformation#StaleRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StaleRequestException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudformation#SupportedMajorVersion": {
       "traits": {
@@ -3097,6 +3465,22 @@
     "com.amazonaws.cloudformation#Timestamp": {
       "type": "timestamp"
     },
+    "com.amazonaws.cloudformation#TokenAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TokenAlreadyExistsException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudformation#TotalWarnings": {
       "traits": {
         "smithy.api#range": {
@@ -3117,6 +3501,23 @@
         "smithy.api#pattern": "^arn:aws[A-Za-z0-9-]{0,64}:cloudformation:[A-Za-z0-9-]{1,64}:([0-9]{12})?:type/.+$"
       },
       "type": "string"
+    },
+    "com.amazonaws.cloudformation#TypeConfigurationNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudformation#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TypeConfigurationNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudformation#TypeHierarchy": {
       "type": "string"

@@ -51,6 +51,27 @@
       "traits": {},
       "type": "enum"
     },
+    "com.amazonaws.serverlessapplicationrepository#ConflictException": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.serverlessapplicationrepository#__string",
+          "traits": {
+            "smithy.api#jsonName": "errorCode"
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.serverlessapplicationrepository#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.serverlessapplicationrepository#ForbiddenException": {
       "members": {
         "ErrorCode": {

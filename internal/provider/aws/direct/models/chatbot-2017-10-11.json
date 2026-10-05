@@ -1,5 +1,53 @@
 {
   "shapes": {
+    "com.amazonaws.chatbot#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#CreateChimeWebhookConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#CreateSlackChannelConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#CreateTeamsChannelConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chatbot#CustomAction": {
       "members": {
         "ActionName": {
@@ -222,8 +270,152 @@
       },
       "type": "string"
     },
+    "com.amazonaws.chatbot#DeleteChimeWebhookConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DeleteMicrosoftTeamsUserIdentityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DeleteSlackChannelConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DeleteSlackUserIdentityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DeleteSlackWorkspaceAuthorizationFault": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DeleteTeamsChannelConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DeleteTeamsConfiguredTeamException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DescribeChimeWebhookConfigurationsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DescribeSlackChannelConfigurationsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DescribeSlackUserIdentitiesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#DescribeSlackWorkspacesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chatbot#ErrorMessage": {
       "type": "string"
+    },
+    "com.amazonaws.chatbot#GetAccountPreferencesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
     },
     "com.amazonaws.chatbot#GetCustomAction": {
       "errors": [
@@ -288,6 +480,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.chatbot#GetTeamsChannelConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chatbot#InternalServiceError": {
       "members": {
         "Message": {
@@ -297,6 +501,18 @@
       "traits": {
         "smithy.api#error": "server",
         "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#InvalidParameterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -312,6 +528,54 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.chatbot#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#ListMicrosoftTeamsConfiguredTeamsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#ListMicrosoftTeamsUserIdentitiesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#ListTeamsChannelConfigurationsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chatbot#ResourceNotFoundException": {
       "members": {
         "Message": {
@@ -324,6 +588,30 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.chatbot#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chatbot#UnauthorizedException": {
       "members": {
         "message": {
@@ -333,6 +621,54 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#UpdateAccountPreferencesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#UpdateChimeWebhookConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#UpdateSlackChannelConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chatbot#UpdateTeamsChannelConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.chatbot#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
       },
       "type": "structure"
     },

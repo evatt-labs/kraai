@@ -9,6 +9,19 @@
       },
       "type": "string"
     },
+    "com.amazonaws.iotdeviceadvisor#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotdeviceadvisor#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iotdeviceadvisor#DeviceUnderTest": {
       "members": {
         "certificateArn": {

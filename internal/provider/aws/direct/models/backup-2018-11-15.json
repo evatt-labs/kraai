@@ -1,5 +1,62 @@
 {
   "shapes": {
+    "com.amazonaws.backup#AlreadyExistsException": {
+      "members": {
+        "Arn": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "CreatorRequestId": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#ConflictException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConflictException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.backup#CryoControllerUserManager": {
       "operations": [
         {
@@ -906,6 +963,28 @@
       "type": "service",
       "version": "2018-11-15"
     },
+    "com.amazonaws.backup#DependencyFailureException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.backup#GetRestoreTestingPlan": {
       "errors": [
         {
@@ -956,6 +1035,116 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#InvalidParameterValueException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#InvalidRequestException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#InvalidResourceStateException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#LimitExceededException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.backup#MissingParameterValueException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Context": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backup#string"
+        },
+        "Type": {
+          "target": "com.amazonaws.backup#string",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },

@@ -38,6 +38,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.paymentcryptography#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.paymentcryptography#GetAlias": {
       "errors": [
         {
@@ -768,6 +780,18 @@
       "type": "service",
       "version": "2021-09-14"
     },
+    "com.amazonaws.paymentcryptography#PublicPolicyException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.paymentcryptography#ResourceNotFoundException": {
       "members": {
         "ResourceId": {
@@ -778,6 +802,18 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.paymentcryptography#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

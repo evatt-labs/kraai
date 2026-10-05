@@ -9,6 +9,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.opensearchserverless#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.opensearchserverless#GetSecurityConfig": {
       "errors": [
         {
@@ -164,6 +176,21 @@
       "traits": {
         "smithy.api#error": "server",
         "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.opensearchserverless#OcuLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },
@@ -935,6 +962,39 @@
         ]
       },
       "type": "string"
+    },
+    "com.amazonaws.opensearchserverless#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.opensearchserverless#ValidationException": {
       "members": {

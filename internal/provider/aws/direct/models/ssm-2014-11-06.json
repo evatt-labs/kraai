@@ -1,5 +1,19 @@
 {
   "shapes": {
+    "com.amazonaws.ssm#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#Account": {
       "type": "string"
     },
@@ -165,6 +179,21 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.ssm#AlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AlreadyExistsException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#AmazonSSM": {
       "operations": [
@@ -1195,6 +1224,28 @@
       },
       "type": "boolean"
     },
+    "com.amazonaws.ssm#AssociatedInstances": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AssociatedInstances",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AssociationAlreadyExists": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AssociationAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#AssociationComplianceSeverity": {
       "members": {
         "Critical": {
@@ -1382,11 +1433,37 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#AssociationExecutionDoesNotExist": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AssociationExecutionDoesNotExist",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#AssociationId": {
       "traits": {
         "smithy.api#pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
       },
       "type": "string"
+    },
+    "com.amazonaws.ssm#AssociationLimitExceeded": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AssociationLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#AssociationName": {
       "traits": {
@@ -1495,6 +1572,111 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ssm#AssociationVersionLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AssociationVersionLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AutomationDefinitionNotApprovedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AutomationDefinitionNotApproved",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AutomationDefinitionNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AutomationDefinitionNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AutomationDefinitionVersionNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AutomationDefinitionVersionNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AutomationExecutionLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AutomationExecutionLimitExceeded",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AutomationExecutionNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AutomationExecutionNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#AutomationStepNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AutomationStepNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#AutomationTargetParameterName": {
       "traits": {
         "smithy.api#length": {
@@ -1530,6 +1712,51 @@
         "target": "com.amazonaws.ssm#CalendarNameOrARN"
       },
       "type": "list"
+    },
+    "com.amazonaws.ssm#ComplianceTypeCountLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ComplianceTypeCountLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConflictException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#CustomSchemaCountLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CustomSchemaCountLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#DateTime": {
       "type": "timestamp"
@@ -1642,11 +1869,71 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ssm#DocumentAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DocumentAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DocumentLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DocumentLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DocumentPermissionLimit": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DocumentPermissionLimit",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#DocumentVersion": {
       "traits": {
         "smithy.api#pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$"
       },
       "type": "string"
+    },
+    "com.amazonaws.ssm#DocumentVersionLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DocumentVersionLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#DoesNotExistException": {
       "members": {
@@ -1657,6 +1944,47 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "DoesNotExistException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DuplicateDocumentContent": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateDocumentContent",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DuplicateDocumentVersionName": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateDocumentVersionName",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#DuplicateInstanceId": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateInstanceId",
           "httpResponseCode": 404
         },
         "smithy.api#error": "client"
@@ -1720,6 +2048,21 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.ssm#FeatureNotAvailableException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "FeatureNotAvailableException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#GetMaintenanceWindow": {
       "errors": [
@@ -1959,6 +2302,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#IdempotentParameterMismatch": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IdempotentParameterMismatch",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#IncompatiblePolicyException": {
       "members": {
         "message": {
@@ -1996,6 +2354,12 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ssm#Integer": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
+    },
     "com.amazonaws.ssm#InternalServerError": {
       "members": {
         "Message": {
@@ -2008,6 +2372,51 @@
           "httpResponseCode": 500
         },
         "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidActivation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidActivation",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidActivationId": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidActivationId",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidAggregatorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAggregator",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
@@ -2027,6 +2436,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#InvalidAssociation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAssociation",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#InvalidAssociationVersion": {
       "members": {
         "Message": {
@@ -2036,6 +2460,92 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidAssociationVersion",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidAutomationExecutionParametersException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAutomationExecutionParameters",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidAutomationSignalException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAutomationSignalException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidAutomationStatusUpdateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAutomationStatusUpdateException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidCommandId": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCommandId",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidDeleteInventoryParametersException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDeleteInventoryParameters",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidDeletionIdException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDeletionId",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client"
@@ -2058,6 +2568,139 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#InvalidDocumentContent": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDocumentContent",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidDocumentOperation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDocumentOperation",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidDocumentSchemaVersion": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDocumentSchemaVersion",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidDocumentType": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDocumentType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidDocumentVersion": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDocumentVersion",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidFilter": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidFilter",
+          "httpResponseCode": 441
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidFilterKey": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidFilterKey",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidFilterOption": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidFilterOption",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidFilterValue": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidFilterValue",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#InvalidInstanceId": {
       "members": {
         "Message": {
@@ -2073,6 +2716,99 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#InvalidInstanceInformationFilterValue": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidInstanceInformationFilterValue",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidInstancePropertyFilterValue": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidInstancePropertyFilterValue",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidInventoryGroupException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidInventoryGroup",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidInventoryItemContextException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidInventoryItemContext",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidInventoryRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidInventoryRequest",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidItemContentException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "TypeName": {
+          "target": "com.amazonaws.ssm#InventoryItemTypeName"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidItemContent",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#InvalidKeyId": {
       "members": {
         "message": {
@@ -2083,6 +2819,114 @@
         "aws.protocols#awsQueryError": {
           "code": "InvalidKeyId",
           "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidNextToken": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidNextToken",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidNotificationConfig": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidNotificationConfig",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidOptionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidOption",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidOutputFolder": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidOutputFolder",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidOutputLocation": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidOutputLocation",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidParameters": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidParameters",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidPermissionType": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidPermissionType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidPluginName": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidPluginName",
+          "httpResponseCode": 404
         },
         "smithy.api#error": "client"
       },
@@ -2134,6 +2978,183 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidResourceType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidResultAttributeException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidResultAttribute",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidRole": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidRole",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidSchedule": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSchedule",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidTag": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidTag",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidTarget": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidTarget",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidTargetMaps": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidTargetMaps",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidTypeNameException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidTypeName",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InvalidUpdate": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidUpdate",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#InventoryItemTypeName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^(AWS|Custom):.*$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#InvocationDoesNotExist": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvocationDoesNotExist",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ItemContentMismatchException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "TypeName": {
+          "target": "com.amazonaws.ssm#InventoryItemTypeName"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ItemContentMismatch",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ItemSizeLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "TypeName": {
+          "target": "com.amazonaws.ssm#InventoryItemTypeName"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ItemSizeLimitExceeded",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client"
@@ -2284,6 +3305,21 @@
     "com.amazonaws.ssm#MaintenanceWindowTimezone": {
       "type": "string"
     },
+    "com.amazonaws.ssm#MalformedResourcePolicyDocumentException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MalformedResourcePolicyDocumentException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#MaxConcurrency": {
       "traits": {
         "smithy.api#length": {
@@ -2294,6 +3330,21 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ssm#MaxDocumentSizeExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MaxDocumentSizeExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#MaxErrors": {
       "traits": {
         "smithy.api#length": {
@@ -2303,6 +3354,270 @@
         "smithy.api#pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$"
       },
       "type": "string"
+    },
+    "com.amazonaws.ssm#NoLongerSupportedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NoLongerSupported",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemAccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemAccessDeniedException",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "OpsItemId": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemAlreadyExistsException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemConflictException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemId": {
+      "traits": {
+        "smithy.api#pattern": "^(oi)-[0-9a-f]{12}$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#OpsItemInvalidParameterException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "ParameterNames": {
+          "target": "com.amazonaws.ssm#OpsItemParameterNamesList"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemInvalidParameterException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemLimitExceededException": {
+      "members": {
+        "Limit": {
+          "target": "com.amazonaws.ssm#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "LimitType": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "ResourceTypes": {
+          "target": "com.amazonaws.ssm#OpsItemParameterNamesList"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemLimitExceededException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemNotFoundException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemParameterNamesList": {
+      "member": {
+        "target": "com.amazonaws.ssm#String"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.ssm#OpsItemRelatedItemAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "OpsItemId": {
+          "target": "com.amazonaws.ssm#OpsItemId"
+        },
+        "ResourceUri": {
+          "target": "com.amazonaws.ssm#OpsItemRelatedItemAssociationResourceUri"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemRelatedItemAlreadyExistsException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemRelatedItemAssociationNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsItemRelatedItemAssociationNotFoundException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsItemRelatedItemAssociationResourceUri": {
+      "type": "string"
+    },
+    "com.amazonaws.ssm#OpsMetadataAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsMetadataAlreadyExistsException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsMetadataInvalidArgumentException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsMetadataInvalidArgumentException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsMetadataKeyLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsMetadataKeyLimitExceededException",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsMetadataLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsMetadataLimitExceededException",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsMetadataNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsMetadataNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#OpsMetadataTooManyUpdatesException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpsMetadataTooManyUpdatesException",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#PSParameterName": {
       "traits": {
@@ -2548,6 +3863,21 @@
         "target": "com.amazonaws.ssm#ParameterValue"
       },
       "type": "list"
+    },
+    "com.amazonaws.ssm#ParameterVersionLabelLimitExceeded": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ParameterVersionLabelLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#ParameterVersionNotFound": {
       "members": {
@@ -2796,8 +4126,230 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#ResourceDataSyncAlreadyExistsException": {
+      "members": {
+        "SyncName": {
+          "target": "com.amazonaws.ssm#ResourceDataSyncName"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceDataSyncAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceDataSyncConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceDataSyncConflictException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceDataSyncCountExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceDataSyncCountExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceDataSyncInvalidConfigurationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceDataSyncInvalidConfiguration",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceDataSyncName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.ssm#ResourceDataSyncNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "SyncName": {
+          "target": "com.amazonaws.ssm#ResourceDataSyncName"
+        },
+        "SyncType": {
+          "target": "com.amazonaws.ssm#ResourceDataSyncType"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceDataSyncNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceDataSyncType": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 64,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.ssm#ResourceId": {
       "type": "string"
+    },
+    "com.amazonaws.ssm#ResourceInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceInUseException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceLimitExceededException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourcePolicyConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourcePolicyConflictException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourcePolicyInvalidParameterException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "ParameterNames": {
+          "target": "com.amazonaws.ssm#ResourcePolicyParameterNamesList"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourcePolicyInvalidParameterException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourcePolicyLimitExceededException": {
+      "members": {
+        "Limit": {
+          "target": "com.amazonaws.ssm#Integer",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "LimitType": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourcePolicyLimitExceededException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourcePolicyNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourcePolicyNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ResourcePolicyParameterNamesList": {
+      "member": {
+        "target": "com.amazonaws.ssm#String"
+      },
+      "type": "list"
     },
     "com.amazonaws.ssm#ResourceTypeForTagging": {
       "members": {
@@ -2927,6 +4479,40 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.ssm#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "QuotaCode": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        },
+        "ServiceCode": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#ServiceSetting": {
       "members": {
         "ARN": {
@@ -3011,8 +4597,34 @@
     "com.amazonaws.ssm#StatusName": {
       "type": "string"
     },
+    "com.amazonaws.ssm#StatusUnchanged": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StatusUnchanged",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#String": {
       "type": "string"
+    },
+    "com.amazonaws.ssm#SubTypeCountLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubTypeCountLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.ssm#Tag": {
       "members": {
@@ -3076,6 +4688,21 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#TargetInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TargetInUseException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
       "type": "structure"
     },
     "com.amazonaws.ssm#TargetKey": {
@@ -3208,6 +4835,21 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ssm#TargetNotConnected": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TargetNotConnected",
+          "httpResponseCode": 430
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#TargetValue": {
       "type": "string"
     },
@@ -3235,6 +4877,28 @@
       },
       "type": "list"
     },
+    "com.amazonaws.ssm#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "QuotaCode": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        },
+        "ServiceCode": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#TooManyTagsError": {
       "members": {},
       "traits": {
@@ -3261,6 +4925,114 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ssm#TotalSizeLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TotalSizeLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedCalendarException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedCalendarException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedFeatureRequiredException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedFeatureRequiredException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedInventoryItemContextException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "TypeName": {
+          "target": "com.amazonaws.ssm#InventoryItemTypeName"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedInventoryItemContext",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedInventorySchemaVersionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedInventorySchemaVersion",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedOperatingSystem": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedOperatingSystem",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedOperationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedOperation",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ssm#UnsupportedParameterType": {
       "members": {
         "message": {
@@ -3270,6 +5042,40 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "UnsupportedParameterType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#UnsupportedPlatformType": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedPlatformType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssm#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssm#String"
+        },
+        "ReasonCode": {
+          "target": "com.amazonaws.ssm#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ValidationException",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client"

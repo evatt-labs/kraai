@@ -921,6 +921,26 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.workspacesweb#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage"
+        },
+        "resourceId": {
+          "target": "com.amazonaws.workspacesweb#ResourceId",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.workspacesweb#ResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.workspacesweb#CustomPattern": {
       "members": {
         "keywordRegex": {
@@ -1857,6 +1877,34 @@
     "com.amazonaws.workspacesweb#ServiceCode": {
       "type": "string"
     },
+    "com.amazonaws.workspacesweb#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#ExceptionMessage"
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.workspacesweb#QuotaCode",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "com.amazonaws.workspacesweb#ResourceId",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.workspacesweb#ResourceType",
+          "traits": {}
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.workspacesweb#ServiceCode",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
     "com.amazonaws.workspacesweb#StringType": {
       "traits": {
         "smithy.api#length": {
@@ -1899,6 +1947,9 @@
       },
       "type": "string"
     },
+    "com.amazonaws.workspacesweb#TagExceptionMessage": {
+      "type": "string"
+    },
     "com.amazonaws.workspacesweb#ThrottlingException": {
       "members": {
         "message": {
@@ -1928,6 +1979,22 @@
     },
     "com.amazonaws.workspacesweb#Timestamp": {
       "type": "timestamp"
+    },
+    "com.amazonaws.workspacesweb#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.workspacesweb#TagExceptionMessage"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.workspacesweb#ARN",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.workspacesweb#UrlPattern": {
       "traits": {

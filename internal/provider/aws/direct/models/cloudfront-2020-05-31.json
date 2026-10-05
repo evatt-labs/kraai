@@ -12,6 +12,30 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudfront#BatchTooLarge": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 413
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#CNAMEAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudfront#CachePolicy": {
       "members": {
         "CachePolicyConfig": {
@@ -34,6 +58,18 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#CachePolicyAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
       "type": "structure"
     },
     "com.amazonaws.cloudfront#CachePolicyConfig": {
@@ -146,6 +182,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.cloudfront#CachePolicyInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudfront#CachePolicyQueryStringBehavior": {
       "members": {
         "all": {
@@ -189,6 +237,66 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#CannotChangeImmutablePublicKeyFields": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#CannotDeleteEntityWhileInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#CannotUpdateEntityWhileInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#CloudFrontOriginAccessIdentityAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#CloudFrontOriginAccessIdentityInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
       "type": "structure"
     },
     "com.amazonaws.cloudfront#Cloudfront2020_05_31": {
@@ -1324,6 +1432,30 @@
       "type": "service",
       "version": "2020-05-31"
     },
+    "com.amazonaws.cloudfront#ContinuousDeploymentPolicyAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#ContinuousDeploymentPolicyInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudfront#CookieNameList": {
       "member": {
         "target": "com.amazonaws.cloudfront#string",
@@ -1347,6 +1479,174 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#DistributionAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#DistributionNotDisabled": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#EntityAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#EntityLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#EntityNotFound": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#EntitySizeLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 413
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FieldLevelEncryptionConfigAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FieldLevelEncryptionConfigInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FieldLevelEncryptionProfileAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FieldLevelEncryptionProfileInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FieldLevelEncryptionProfileSizeExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FunctionAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FunctionInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#FunctionSizeLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 413
+      },
       "type": "structure"
     },
     "com.amazonaws.cloudfront#GetCachePolicy": {
@@ -1433,6 +1733,426 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.cloudfront#IllegalDelete": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#IllegalFieldLevelEncryptionConfigAssociationWithCacheBehavior": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#IllegalOriginAccessConfiguration": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#IllegalUpdate": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InconsistentQuantities": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidArgument": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidAssociation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidDefaultRootObject": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidDomainNameForOriginAccessControl": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidErrorCode": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidForwardCookies": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidFunctionAssociation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidGeoRestrictionParameter": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidHeadersForS3Origin": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidIfMatchVersion": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidLambdaFunctionAssociation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidLocationCode": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidMinimumProtocolVersion": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidOrigin": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidOriginAccessControl": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidOriginAccessIdentity": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidOriginKeepaliveTimeout": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidOriginReadTimeout": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidProtocolSettings": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidQueryStringParameters": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidRelativePath": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidRequiredProtocol": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidResponseCode": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidTTLOrder": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidTagging": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidViewerCertificate": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#InvalidWebACLId": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#KeyGroupAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#MissingBody": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#MonitoringSubscriptionAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudfront#NoSuchCachePolicy": {
       "members": {
         "Message": {
@@ -1442,6 +2162,246 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchCloudFrontOriginAccessIdentity": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchContinuousDeploymentPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchDistribution": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchFieldLevelEncryptionConfig": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchFieldLevelEncryptionProfile": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchFunctionExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchInvalidation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchMonitoringSubscription": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchOrigin": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchOriginAccessControl": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchOriginRequestPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchPublicKey": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchRealtimeLogConfig": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchResource": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchResponseHeadersPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#NoSuchStreamingDistribution": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#OriginAccessControlAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#OriginAccessControlInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#OriginRequestPolicyAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#OriginRequestPolicyInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
       },
       "type": "structure"
     },
@@ -1479,6 +2439,54 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.cloudfront#PreconditionFailed": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 412
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#PublicKeyAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#PublicKeyInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#QueryArgProfileEmpty": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudfront#QueryStringNames": {
       "members": {
         "Items": {
@@ -1503,6 +2511,798 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.cloudfront#RealtimeLogConfigAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#RealtimeLogConfigInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#RealtimeLogConfigOwnerMismatch": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#ResourceInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#ResourceNotDisabled": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#ResponseHeadersPolicyAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#ResponseHeadersPolicyInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#StagingDistributionInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#StreamingDistributionAlreadyExists": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#StreamingDistributionNotDisabled": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TestFunctionFailed": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooLongCSPInResponseHeadersPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCacheBehaviors": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCachePolicies": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCertificates": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCloudFrontOriginAccessIdentities": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyContinuousDeploymentPolicies": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCookieNamesInWhiteList": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCookiesInCachePolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCookiesInOriginRequestPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyCustomHeadersInResponseHeadersPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionCNAMEs": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributions": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsAssociatedToCachePolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsAssociatedToFieldLevelEncryptionConfig": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsAssociatedToKeyGroup": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsAssociatedToOriginAccessControl": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsAssociatedToOriginRequestPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsAssociatedToResponseHeadersPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsWithFunctionAssociations": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsWithLambdaAssociations": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyDistributionsWithSingleFunctionARN": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFieldLevelEncryptionConfigs": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFieldLevelEncryptionContentTypeProfiles": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFieldLevelEncryptionEncryptionEntities": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFieldLevelEncryptionFieldPatterns": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFieldLevelEncryptionProfiles": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFieldLevelEncryptionQueryArgProfiles": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFunctionAssociations": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyFunctions": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyHeadersInCachePolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyHeadersInForwardedValues": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyHeadersInOriginRequestPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyInvalidationsInProgress": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyKeyGroups": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyKeyGroupsAssociatedToDistribution": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyLambdaFunctionAssociations": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyOriginAccessControls": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyOriginCustomHeaders": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyOriginGroupsPerDistribution": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyOriginRequestPolicies": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyOrigins": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyPublicKeys": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyPublicKeysInKeyGroup": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyQueryStringParameters": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyQueryStringsInCachePolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyQueryStringsInOriginRequestPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyRealtimeLogConfigs": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyRemoveHeadersInResponseHeadersPolicy": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyResponseHeadersPolicies": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyStreamingDistributionCNAMEs": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyStreamingDistributions": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TooManyTrustedSigners": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TrustedKeyGroupDoesNotExist": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#TrustedSignerDoesNotExist": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudfront#UnsupportedOperation": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudfront#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.cloudfront#boolean": {
       "type": "boolean"

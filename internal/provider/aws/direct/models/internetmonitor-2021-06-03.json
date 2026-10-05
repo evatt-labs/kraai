@@ -31,6 +31,30 @@
       },
       "type": "string"
     },
+    "com.amazonaws.internetmonitor#BadRequestException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.internetmonitor#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.internetmonitor#GetMonitor": {
       "errors": [
         {
@@ -180,6 +204,19 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.internetmonitor#InternalServerErrorException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
       "type": "structure"
     },
     "com.amazonaws.internetmonitor#InternalServerException": {
@@ -823,6 +860,18 @@
       "type": "service",
       "version": "2021-06-03"
     },
+    "com.amazonaws.internetmonitor#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.internetmonitor#LocalHealthEventsConfig": {
       "members": {
         "HealthScoreThreshold": {
@@ -948,6 +997,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.internetmonitor#NotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.internetmonitor#Percentage": {
       "traits": {
         "smithy.api#default": 0,
@@ -967,6 +1028,18 @@
         "smithy.api#pattern": "^[a-zA-Z0-9_.-]+$"
       },
       "type": "string"
+    },
+    "com.amazonaws.internetmonitor#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.internetmonitor#S3Config": {
       "members": {
@@ -1030,6 +1103,21 @@
       "type": "string"
     },
     "com.amazonaws.internetmonitor#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.internetmonitor#TooManyRequestsException": {
       "members": {
         "message": {
           "target": "smithy.api#String"

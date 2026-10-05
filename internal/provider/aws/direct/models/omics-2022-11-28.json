@@ -840,6 +840,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.omics#NotSupportedOperationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 405
+      },
+      "type": "structure"
+    },
     "com.amazonaws.omics#Omics": {
       "operations": [
         {
@@ -1495,6 +1510,22 @@
       },
       "type": "service",
       "version": "2022-11-28"
+    },
+    "com.amazonaws.omics#RangeNotSatisfiableException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 416,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.omics#ReadmePath": {
       "traits": {

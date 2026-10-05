@@ -948,6 +948,15 @@
       "type": "service",
       "version": "2017-05-18"
     },
+    "com.amazonaws.athena#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.athena#CatalogNameString": {
       "traits": {
         "smithy.api#length": {
@@ -1366,6 +1375,17 @@
       },
       "type": "string"
     },
+    "com.amazonaws.athena#MetadataException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.athena#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.athena#NameString": {
       "traits": {
         "smithy.api#length": {
@@ -1447,6 +1467,58 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.athena#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.athena#ErrorMessage"
+        },
+        "ResourceName": {
+          "target": "com.amazonaws.athena#AmazonResourceName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#SessionAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.athena#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.athena#ThrottleReason": {
+      "members": {
+        "CONCURRENT_QUERY_LIMIT_EXCEEDED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONCURRENT_QUERY_LIMIT_EXCEEDED"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.athena#TooManyRequestsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.athena#ErrorMessage"
+        },
+        "Reason": {
+          "target": "com.amazonaws.athena#ThrottleReason"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.athena#WorkGroupName": {
       "traits": {

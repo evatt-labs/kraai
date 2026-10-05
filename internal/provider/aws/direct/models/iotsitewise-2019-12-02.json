@@ -821,6 +821,18 @@
       "type": "service",
       "version": "2019-12-02"
     },
+    "com.amazonaws.iotsitewise#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iotsitewise#ActionDefinition": {
       "members": {
         "actionDefinitionId": {
@@ -866,6 +878,15 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        }
+      },
+      "type": "string"
     },
     "com.amazonaws.iotsitewise#AssetModelPropertyBindingValue": {
       "members": {
@@ -1046,6 +1067,33 @@
         "smithy.api#pattern": "^(LATEST|ACTIVE|[1-9]{1}\\d{0,9})$"
       },
       "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ConflictingOperationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceArn": {
+          "target": "com.amazonaws.iotsitewise#ResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.iotsitewise#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.iotsitewise#DashboardDefinition": {
       "traits": {
@@ -1660,6 +1708,9 @@
     "com.amazonaws.iotsitewise#ErrorMessage": {
       "type": "string"
     },
+    "com.amazonaws.iotsitewise#ExceptionMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iotsitewise#GroupIdentity": {
       "members": {
         "id": {
@@ -1803,6 +1854,21 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 410
       },
       "type": "structure"
     },
@@ -2003,6 +2069,33 @@
       },
       "type": "string"
     },
+    "com.amazonaws.iotsitewise#PreconditionFailedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceArn": {
+          "target": "com.amazonaws.iotsitewise#ResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.iotsitewise#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 412
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iotsitewise#ProjectResource": {
       "members": {
         "id": {
@@ -2013,6 +2106,18 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#QueryTimeoutException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.iotsitewise#Resource": {
@@ -2028,6 +2133,39 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ResourceAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceArn": {
+          "target": "com.amazonaws.iotsitewise#ResourceArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.iotsitewise#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ResourceArn": {
+      "type": "string"
+    },
+    "com.amazonaws.iotsitewise#ResourceId": {
+      "type": "string"
     },
     "com.amazonaws.iotsitewise#ResourceNotFoundException": {
       "members": {
@@ -2074,6 +2212,21 @@
       },
       "type": "string"
     },
+    "com.amazonaws.iotsitewise#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iotsitewise#ThrottlingException": {
       "members": {
         "message": {
@@ -2091,6 +2244,37 @@
     },
     "com.amazonaws.iotsitewise#Timestamp": {
       "type": "timestamp"
+    },
+    "com.amazonaws.iotsitewise#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ExceptionMessage"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.iotsitewise#AmazonResourceName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#UnauthorizedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
     },
     "com.amazonaws.iotsitewise#Url": {
       "traits": {
@@ -2112,6 +2296,18 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iotsitewise#ValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iotsitewise#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.iotsitewise#Version": {

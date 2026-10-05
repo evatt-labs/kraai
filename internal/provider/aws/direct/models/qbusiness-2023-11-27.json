@@ -166,6 +166,33 @@
       },
       "type": "string"
     },
+    "com.amazonaws.qbusiness#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.qbusiness#Description": {
       "traits": {
         "smithy.api#length": {
@@ -635,6 +662,21 @@
       "type": "service",
       "version": "2023-11-27"
     },
+    "com.amazonaws.qbusiness#ExternalResourceException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 424
+      },
+      "type": "structure"
+    },
     "com.amazonaws.qbusiness#GetApplication": {
       "errors": [
         {
@@ -856,6 +898,36 @@
       },
       "type": "string"
     },
+    "com.amazonaws.qbusiness#LicenseNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.qbusiness#MediaTooLargeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.qbusiness#PersonalizationConfiguration": {
       "members": {
         "personalizationControlMode": {
@@ -962,6 +1034,33 @@
         "smithy.api#pattern": "^arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}$"
       },
       "type": "string"
+    },
+    "com.amazonaws.qbusiness#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.qbusiness#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.qbusiness#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.qbusiness#String": {
       "traits": {

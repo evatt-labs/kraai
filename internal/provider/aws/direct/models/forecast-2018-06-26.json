@@ -898,6 +898,30 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.forecast#InvalidNextTokenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.forecast#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.forecast#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.forecast#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.forecast#Name": {
       "traits": {
         "smithy.api#length": {
@@ -907,6 +931,30 @@
         "smithy.api#pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
       },
       "type": "string"
+    },
+    "com.amazonaws.forecast#ResourceAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.forecast#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.forecast#ResourceInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.forecast#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.forecast#ResourceNotFoundException": {
       "members": {

@@ -1,5 +1,21 @@
 {
   "shapes": {
+    "com.amazonaws.elasticloadbalancingv2#ALPNPolicyNotSupportedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ALPNPolicyNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#AddTags": {
       "errors": [
         {
@@ -80,6 +96,22 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.elasticloadbalancingv2#AllocationIdNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AllocationIdNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#AnomalyDetection": {
       "members": {
         "MitigationInEffect": {
@@ -110,6 +142,102 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.elasticloadbalancingv2#AvailabilityZoneNotSupportedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AvailabilityZoneNotSupported",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CaCertificatesBundleNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CaCertificatesBundleNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CapacityDecreaseRequestsLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CapacityDecreaseRequestLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CapacityReservationPendingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CapacityReservationPending",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CapacityUnitsLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CapacityUnitsLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#CertificateNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CertificateNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#CreateTargetGroup": {
       "errors": [
@@ -227,6 +355,22 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DeleteAssociationSameAccountException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DeleteAssociationSameAccount",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -602,6 +746,38 @@
     "com.amazonaws.elasticloadbalancingv2#Description": {
       "type": "string"
     },
+    "com.amazonaws.elasticloadbalancingv2#DuplicateListenerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateListener",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DuplicateLoadBalancerNameException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateLoadBalancerName",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#DuplicateTagKeysException": {
       "members": {
         "Message": {
@@ -627,6 +803,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "DuplicateTargetGroupName",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#DuplicateTrustStoreNameException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateTrustStoreName",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -1725,6 +1917,54 @@
     "com.amazonaws.elasticloadbalancingv2#HttpCode": {
       "type": "string"
     },
+    "com.amazonaws.elasticloadbalancingv2#IncompatibleProtocolsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IncompatibleProtocols",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InsufficientCapacityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InsufficientCapacity",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InvalidCaCertificatesBundleException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCaCertificatesBundle",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#InvalidConfigurationRequestException": {
       "members": {
         "Message": {
@@ -1734,6 +1974,86 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidConfigurationRequest",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InvalidLoadBalancerActionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidLoadBalancerAction",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InvalidRevocationContentException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidRevocationContent",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InvalidSchemeException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidScheme",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InvalidSecurityGroupException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSecurityGroup",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#InvalidSubnetException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSubnet",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -1971,6 +2291,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticloadbalancingv2#OperationNotPermittedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OperationNotPermitted",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#PageSize": {
       "traits": {
         "smithy.api#range": {
@@ -1997,6 +2333,38 @@
         }
       },
       "type": "integer"
+    },
+    "com.amazonaws.elasticloadbalancingv2#PriorRequestNotCompleteException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "PriorRequestNotComplete",
+          "httpResponseCode": 429
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#PriorityInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "PriorityInUse",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#ProtocolEnum": {
       "members": {
@@ -2206,6 +2574,54 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticloadbalancingv2#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RevocationContentNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RevocationContentNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#RevocationIdNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RevocationIdNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#RuleNotFoundException": {
       "members": {
         "Message": {
@@ -2215,6 +2631,38 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "RuleNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#SSLPolicyNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SSLPolicyNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#SubnetNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubnetNotFound",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -2484,6 +2932,22 @@
         "target": "com.amazonaws.elasticloadbalancingv2#TargetGroupArn"
       },
       "type": "list"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TargetGroupAssociationLimitException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TargetGroupAssociationLimit",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.elasticloadbalancingv2#TargetGroupAttribute": {
       "members": {
@@ -2772,6 +3236,70 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.elasticloadbalancingv2#TooManyActionsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyActions",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyCertificatesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyCertificates",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyListenersException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyListeners",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyLoadBalancersException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyLoadBalancers",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#TooManyRegistrationsForTargetIdException": {
       "members": {
         "Message": {
@@ -2781,6 +3309,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "TooManyRegistrationsForTargetId",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyRulesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyRules",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -2836,6 +3380,86 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elasticloadbalancingv2#TooManyTrustStoreRevocationEntriesException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyTrustStoreRevocationEntries",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyTrustStoresException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyTrustStores",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TooManyUniqueTargetGroupsPerLoadBalancerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TooManyUniqueTargetGroupsPerLoadBalancer",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TrustStoreAssociationNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AssociationNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TrustStoreInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TrustStoreInUse",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elasticloadbalancingv2#TrustStoreNotFoundException": {
       "members": {
         "Message": {
@@ -2845,6 +3469,38 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "TrustStoreNotFound",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#TrustStoreNotReadyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TrustStoreNotReady",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elasticloadbalancingv2#UnsupportedProtocolException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.elasticloadbalancingv2#ErrorDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedProtocol",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",

@@ -666,6 +666,33 @@
       "type": "service",
       "version": "2020-07-14"
     },
+    "com.amazonaws.ivschat#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ivschat#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.ivschat#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.ivschat#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ivschat#ErrorMessage": {
       "type": "string"
     },
@@ -770,6 +797,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.ivschat#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ivschat#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ivschat#LambdaArn": {
       "traits": {
         "smithy.api#length": {
@@ -779,6 +821,12 @@
         "smithy.api#pattern": "^$|^arn:aws:lambda:[a-z0-9-]+:[0-9]{12}:function:.+"
       },
       "type": "string"
+    },
+    "com.amazonaws.ivschat#Limit": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "integer"
     },
     "com.amazonaws.ivschat#LoggingConfigurationIdentifier": {
       "traits": {
@@ -814,6 +862,21 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.ivschat#PendingVerification": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ivschat#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
       "type": "structure"
     },
     "com.amazonaws.ivschat#ResourceId": {
@@ -917,6 +980,40 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ivschat#ServiceQuotaExceededException": {
+      "members": {
+        "limit": {
+          "target": "com.amazonaws.ivschat#Limit",
+          "traits": {
+            "smithy.api#default": 0,
+            "smithy.api#required": {}
+          }
+        },
+        "message": {
+          "target": "com.amazonaws.ivschat#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.ivschat#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.ivschat#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ivschat#TagKey": {
       "traits": {
         "smithy.api#length": {
@@ -949,6 +1046,40 @@
       "value": {
         "target": "com.amazonaws.ivschat#TagValue"
       }
+    },
+    "com.amazonaws.ivschat#ThrottlingException": {
+      "members": {
+        "limit": {
+          "target": "com.amazonaws.ivschat#Limit",
+          "traits": {
+            "smithy.api#default": 0,
+            "smithy.api#required": {}
+          }
+        },
+        "message": {
+          "target": "com.amazonaws.ivschat#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.ivschat#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.ivschat#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
     },
     "com.amazonaws.ivschat#Time": {
       "traits": {

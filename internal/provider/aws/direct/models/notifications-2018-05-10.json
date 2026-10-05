@@ -37,6 +37,27 @@
       },
       "type": "string"
     },
+    "com.amazonaws.notifications#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.notifications#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.notifications#ResourceId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.notifications#CreationTime": {
       "traits": {
         "smithy.api#timestampFormat": "date-time"
@@ -784,8 +805,44 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.notifications#ResourceType": {
+      "type": "string"
+    },
     "com.amazonaws.notifications#ServiceCode": {
       "type": "string"
+    },
+    "com.amazonaws.notifications#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.notifications#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.notifications#QuotaCode",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "com.amazonaws.notifications#ResourceId",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.notifications#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.notifications#ServiceCode",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.notifications#Source": {
       "traits": {

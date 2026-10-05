@@ -261,6 +261,66 @@
       },
       "type": "string"
     },
+    "com.amazonaws.securityhub#OrganizationNotFoundException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#OrganizationalUnitNotFoundException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#ResourceConflictException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.securityhub#ResourceInUseException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.securityhub#ResourceNotFoundException": {
       "members": {
         "Code": {
@@ -1236,6 +1296,21 @@
       },
       "type": "service",
       "version": "2018-10-26"
+    },
+    "com.amazonaws.securityhub#ServiceQuotaExceededException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        },
+        "Message": {
+          "target": "com.amazonaws.securityhub#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.securityhub#StringList": {
       "member": {

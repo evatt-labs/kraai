@@ -1,5 +1,29 @@
 {
   "shapes": {
+    "com.amazonaws.codedeploy#AlarmsLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#ApplicationAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#ApplicationDoesNotExistException": {
       "members": {
         "message": {
@@ -47,6 +71,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.codedeploy#ApplicationLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#ApplicationName": {
       "traits": {
         "smithy.api#length": {
@@ -69,11 +105,47 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.codedeploy#ArnNotSupportedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#BatchLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#Boolean": {
       "traits": {
         "smithy.api#default": false
       },
       "type": "boolean"
+    },
+    "com.amazonaws.codedeploy#BucketNameFilterRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.codedeploy#CodeDeploy_20141006": {
       "operations": [
@@ -1075,6 +1147,30 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.codedeploy#DeploymentAlreadyCompletedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentConfigAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#DeploymentConfigDoesNotExistException": {
       "members": {
         "message": {
@@ -1089,6 +1185,18 @@
     },
     "com.amazonaws.codedeploy#DeploymentConfigId": {
       "type": "string"
+    },
+    "com.amazonaws.codedeploy#DeploymentConfigInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.codedeploy#DeploymentConfigInfo": {
       "members": {
@@ -1124,6 +1232,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.codedeploy#DeploymentConfigLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#DeploymentConfigName": {
       "traits": {
         "smithy.api#length": {
@@ -1135,6 +1255,174 @@
       "type": "string"
     },
     "com.amazonaws.codedeploy#DeploymentConfigNameRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentDoesNotExistException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentGroupAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentGroupDoesNotExistException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentGroupLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentGroupNameRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentIdRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentIsNotInReadyStateException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentNotStartedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentTargetDoesNotExistException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentTargetIdRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DeploymentTargetListSizeExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#DescriptionTooLongException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#ECSServiceMappingLimitExceededException": {
       "members": {
         "message": {
           "target": "com.amazonaws.codedeploy#Message",
@@ -1243,10 +1531,232 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.codedeploy#GitHubAccountTokenDoesNotExistException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#GitHubAccountTokenName": {
       "type": "string"
     },
+    "com.amazonaws.codedeploy#GitHubAccountTokenNameRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#IamArnRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#IamSessionArnAlreadyRegisteredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#IamUserArnAlreadyRegisteredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#IamUserArnRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InstanceDoesNotExistException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#deprecated": {
+          "message": "This exception is deprecated, use DeploymentTargetDoesNotExistException instead."
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InstanceIdRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#deprecated": {
+          "message": "This exception is deprecated, use DeploymentTargetIdRequiredException instead."
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InstanceLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InstanceNameAlreadyRegisteredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InstanceNameRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InstanceNotRegisteredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidAlarmConfigException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#InvalidApplicationNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidArnException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidAutoRollbackConfigException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidAutoScalingGroupException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidBlueGreenDeploymentConfigurationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidBucketNameFilterException": {
       "members": {
         "message": {
           "target": "com.amazonaws.codedeploy#Message",
@@ -1270,7 +1780,583 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.codedeploy#InvalidDeployedStateFilterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#InvalidDeploymentConfigNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidDeploymentGroupNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidDeploymentIdException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidDeploymentInstanceTypeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidDeploymentStatusException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidDeploymentStyleException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidDeploymentTargetIdException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidDeploymentWaitTypeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidEC2TagCombinationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidEC2TagException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidECSServiceException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidExternalIdException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidFileExistsBehaviorException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidGitHubAccountTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidGitHubAccountTokenNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidIamSessionArnException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidIamUserArnException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidIgnoreApplicationStopFailuresValueException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidInputException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidInstanceNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidInstanceStatusException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidInstanceTypeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidKeyPrefixFilterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidLifecycleEventHookExecutionIdException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidLifecycleEventHookExecutionStatusException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidLoadBalancerInfoException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidMinimumHealthyHostValueException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidNextTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidOnPremisesTagCombinationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidOperationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidRegistrationStatusException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidRevisionException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidRoleException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidSortByException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidSortOrderException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTagException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTagFilterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTagsToAddException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTargetFilterNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTargetGroupPairException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTargetInstancesException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTimeRangeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTrafficRoutingConfigurationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidTriggerConfigException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidUpdateOutdatedInstancesOnlyValueException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#InvalidZonalDeploymentConfigurationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#LifecycleEventAlreadyCompletedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#LifecycleHookLimitExceededException": {
       "members": {
         "message": {
           "target": "com.amazonaws.codedeploy#Message",
@@ -1363,11 +2449,143 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.codedeploy#MultipleIamArnsProvidedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#OperationNotSupportedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codedeploy#Percentage": {
       "traits": {
         "smithy.api#default": 0
       },
       "type": "integer"
+    },
+    "com.amazonaws.codedeploy#ResourceArnRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#ResourceValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#RevisionDoesNotExistException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#RevisionRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#RoleRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#TagLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#TagRequiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#TagSetListLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.codedeploy#TimeBasedCanary": {
       "members": {
@@ -1448,6 +2666,30 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.codedeploy#TriggerTargetsLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codedeploy#UnsupportedActionForDeploymentTypeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.codedeploy#Message",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.codedeploy#WaitTimeInMins": {
       "traits": {

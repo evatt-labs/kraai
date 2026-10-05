@@ -663,11 +663,55 @@
       "type": "service",
       "version": "2023-07-26"
     },
+    "com.amazonaws.bedrockagentruntime#BadGatewayException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentruntime#NonBlankString"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.bedrockagentruntime#NonBlankString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 502
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentruntime#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentruntime#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrockagentruntime#DateTimestamp": {
       "traits": {
         "smithy.api#timestampFormat": "date-time"
       },
       "type": "timestamp"
+    },
+    "com.amazonaws.bedrockagentruntime#DependencyFailedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentruntime#NonBlankString"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.bedrockagentruntime#NonBlankString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 424
+      },
+      "type": "structure"
     },
     "com.amazonaws.bedrockagentruntime#GetSession": {
       "errors": [
@@ -790,6 +834,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.bedrockagentruntime#ModelNotReadyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentruntime#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 424
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrockagentruntime#NonBlankString": {
       "traits": {
         "smithy.api#pattern": "^[\\s\\S]*$"
@@ -805,6 +861,18 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentruntime#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentruntime#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },

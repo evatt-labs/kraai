@@ -189,6 +189,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.mailmanager#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mailmanager#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.mailmanager#DeliverToMailboxAction": {
       "members": {
         "ActionFailurePolicy": {
@@ -2826,6 +2838,18 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mailmanager#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mailmanager#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
       "type": "structure"
     },
     "com.amazonaws.mailmanager#SmtpReplyCode": {

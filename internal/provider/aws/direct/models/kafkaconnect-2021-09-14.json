@@ -94,6 +94,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.kafkaconnect#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kafkaconnect#__string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.kafkaconnect#ConnectorConfiguration": {
       "key": {
         "target": "com.amazonaws.kafkaconnect#__string"

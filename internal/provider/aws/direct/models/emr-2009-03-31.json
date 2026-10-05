@@ -1081,6 +1081,18 @@
     "com.amazonaws.emr#ErrorMessage": {
       "type": "string"
     },
+    "com.amazonaws.emr#InternalServerError": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InternalFailure",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.emr#InternalServerException": {
       "members": {
         "Message": {

@@ -414,6 +414,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.kendraranking#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.kendraranking#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.kendraranking#DescribeRescoreExecutionPlan": {
       "errors": [
         {
@@ -620,6 +632,30 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kendraranking#ResourceUnavailableException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.kendraranking#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kendraranking#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.kendraranking#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

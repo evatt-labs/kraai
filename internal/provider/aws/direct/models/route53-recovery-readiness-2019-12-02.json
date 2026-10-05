@@ -15,6 +15,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.route53recoveryreadiness#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53recoveryreadiness#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53recoveryreadiness#DNSTargetResource": {
       "members": {
         "DomainName": {

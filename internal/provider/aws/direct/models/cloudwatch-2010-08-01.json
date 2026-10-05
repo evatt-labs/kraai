@@ -350,6 +350,67 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatch#DashboardErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.cloudwatch#DashboardInvalidInputError": {
+      "members": {
+        "dashboardValidationMessages": {
+          "target": "com.amazonaws.cloudwatch#DashboardValidationMessages"
+        },
+        "message": {
+          "target": "com.amazonaws.cloudwatch#DashboardErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidParameterInput",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#DashboardNotFoundError": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#DashboardErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#DashboardValidationMessage": {
+      "members": {
+        "DataPath": {
+          "target": "com.amazonaws.cloudwatch#DataPath",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#Message",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#DashboardValidationMessages": {
+      "member": {
+        "target": "com.amazonaws.cloudwatch#DashboardValidationMessage"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.cloudwatch#DataPath": {
+      "type": "string"
+    },
     "com.amazonaws.cloudwatch#DatapointsToAlarm": {
       "traits": {
         "smithy.api#range": {
@@ -1496,6 +1557,23 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatch#InvalidFormatFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidFormat",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatch#InvalidNextToken": {
       "members": {
         "message": {
@@ -1513,6 +1591,23 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatch#InvalidParameterCombinationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#AwsQueryErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidParameterCombination",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatch#InvalidParameterValueException": {
       "members": {
         "message": {
@@ -1523,6 +1618,67 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidParameterValue",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#KmsAccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#KmsKeyDisabledException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#KmsKeyNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.cloudwatch#FaultDescription"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "LimitExceededException",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -1719,6 +1875,9 @@
         }
       },
       "type": "integer"
+    },
+    "com.amazonaws.cloudwatch#Message": {
+      "type": "string"
     },
     "com.amazonaws.cloudwatch#Metric": {
       "members": {
@@ -1984,6 +2143,23 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatch#MissingRequiredParameterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatch#AwsQueryErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MissingParameter",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.cloudwatch#Namespace": {
@@ -2615,6 +2791,9 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.cloudwatch#String": {
+      "type": "string"
     },
     "com.amazonaws.cloudwatch#SuppressorPeriod": {
       "type": "integer"

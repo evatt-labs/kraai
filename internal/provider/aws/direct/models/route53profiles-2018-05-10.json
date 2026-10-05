@@ -29,6 +29,17 @@
       },
       "type": "string"
     },
+    "com.amazonaws.route53profiles#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53profiles#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53profiles#CreatorRequestId": {
       "traits": {
         "smithy.api#length": {
@@ -218,6 +229,28 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.route53profiles#InternalServiceErrorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53profiles#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53profiles#InvalidNextTokenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53profiles#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53profiles#InvalidParameterException": {
       "members": {
         "FieldName": {
@@ -229,6 +262,21 @@
           "traits": {
             "smithy.api#required": {}
           }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53profiles#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53profiles#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.route53profiles#String",
+          "traits": {}
         }
       },
       "traits": {
@@ -424,6 +472,21 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.route53profiles#ResourceExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53profiles#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.route53profiles#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.route53profiles#ResourceId": {
       "traits": {

@@ -128,6 +128,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.mediatailor#BadRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.mediatailor#__string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.mediatailor#ChannelState": {
       "members": {
         "RUNNING": {

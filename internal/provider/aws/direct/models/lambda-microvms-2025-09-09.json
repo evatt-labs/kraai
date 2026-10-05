@@ -12,6 +12,26 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.lambdamicrovms#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lambdamicrovms#GetMicrovmImage": {
       "errors": [
         {
@@ -123,6 +143,21 @@
       },
       "type": "string"
     },
+    "com.amazonaws.lambdamicrovms#InsufficientCapacityException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lambdamicrovms#InternalServerException": {
       "members": {
         "message": {
@@ -139,6 +174,22 @@
         "smithy.api#error": "server",
         "smithy.api#httpError": 500,
         "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#InvalidParameterValueException": {
+      "members": {
+        "Type": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -874,6 +925,22 @@
       },
       "type": "string"
     },
+    "com.amazonaws.lambdamicrovms#ResourceConflictException": {
+      "members": {
+        "Type": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lambdamicrovms#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -894,6 +961,50 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#ServiceException": {
+      "members": {
+        "Type": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },
@@ -952,6 +1063,22 @@
         "smithy.api#retryable": {
           "throttling": true
         }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambdamicrovms#TooManyRequestsException": {
+      "members": {
+        "Type": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
       },
       "type": "structure"
     },

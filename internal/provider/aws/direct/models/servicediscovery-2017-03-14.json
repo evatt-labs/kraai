@@ -9,6 +9,15 @@
       },
       "type": "string"
     },
+    "com.amazonaws.servicediscovery#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.servicediscovery#Arn": {
       "traits": {
         "smithy.api#length": {
@@ -17,6 +26,18 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.servicediscovery#CustomHealthNotFound": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.servicediscovery#DnsProperties": {
       "members": {
@@ -30,6 +51,22 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.servicediscovery#DuplicateRequest": {
+      "members": {
+        "DuplicateOperationId": {
+          "target": "com.amazonaws.servicediscovery#OperationId",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
       "type": "structure"
     },
     "com.amazonaws.servicediscovery#ErrorMessage": {
@@ -89,6 +126,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.servicediscovery#InstanceNotFound": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.servicediscovery#InvalidInput": {
       "members": {
         "Message": {
@@ -145,6 +194,26 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.servicediscovery#NamespaceAlreadyExists": {
+      "members": {
+        "CreatorRequestId": {
+          "target": "com.amazonaws.servicediscovery#ResourceId",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        },
+        "NamespaceId": {
+          "target": "com.amazonaws.servicediscovery#ResourceId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.servicediscovery#NamespaceName": {
@@ -206,6 +275,27 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.servicediscovery#OperationId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 255,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.servicediscovery#OperationNotFound": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.servicediscovery#RecordTTL": {
       "traits": {
         "smithy.api#range": {
@@ -214,6 +304,18 @@
         }
       },
       "type": "long"
+    },
+    "com.amazonaws.servicediscovery#RequestLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
     },
     "com.amazonaws.servicediscovery#ResourceCount": {
       "type": "integer"
@@ -235,6 +337,42 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.servicediscovery#ResourceInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.servicediscovery#ResourceLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.servicediscovery#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.servicediscovery#Route53AutoNaming_v20170314": {
       "operations": [
@@ -945,8 +1083,72 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.servicediscovery#ServiceAlreadyExists": {
+      "members": {
+        "CreatorRequestId": {
+          "target": "com.amazonaws.servicediscovery#ResourceId",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        },
+        "ServiceArn": {
+          "target": "com.amazonaws.servicediscovery#Arn",
+          "traits": {}
+        },
+        "ServiceId": {
+          "target": "com.amazonaws.servicediscovery#ResourceId",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.servicediscovery#ServiceAttributesLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.servicediscovery#ServiceNotFound": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.servicediscovery#Timestamp": {
       "type": "timestamp"
+    },
+    "com.amazonaws.servicediscovery#TooManyTagsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicediscovery#ErrorMessage"
+        },
+        "ResourceName": {
+          "target": "com.amazonaws.servicediscovery#AmazonResourceName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

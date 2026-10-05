@@ -120,6 +120,33 @@
       },
       "type": "string"
     },
+    "com.amazonaws.greengrassv2#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.greengrassv2#DescribeComponent": {
       "errors": [
         {
@@ -1169,6 +1196,21 @@
     "com.amazonaws.greengrassv2#PublisherString": {
       "type": "string"
     },
+    "com.amazonaws.greengrassv2#RequestAlreadyInProgressException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.greengrassv2#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -1201,6 +1243,41 @@
         "smithy.api#default": 0
       },
       "type": "integer"
+    },
+    "com.amazonaws.greengrassv2#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {}
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.greengrassv2#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.greengrassv2#String": {
       "type": "string"

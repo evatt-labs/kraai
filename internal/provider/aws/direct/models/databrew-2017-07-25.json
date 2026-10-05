@@ -905,6 +905,18 @@
       "type": "service",
       "version": "2017-07-25"
     },
+    "com.amazonaws.databrew#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.databrew#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.databrew#Arn": {
       "traits": {
         "smithy.api#length": {
@@ -960,6 +972,18 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.databrew#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.databrew#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.databrew#CreatedBy": {
       "type": "string"
@@ -1281,6 +1305,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.databrew#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.databrew#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.databrew#JobName": {
       "traits": {
         "smithy.api#length": {
@@ -1494,6 +1530,18 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.databrew#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.databrew#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.databrew#SessionStatus": {
       "members": {

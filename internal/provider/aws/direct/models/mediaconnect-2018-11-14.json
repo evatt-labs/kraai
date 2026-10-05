@@ -1,5 +1,22 @@
 {
   "shapes": {
+    "com.amazonaws.mediaconnect#AddFlowOutputs420Exception": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
+    },
     "com.amazonaws.mediaconnect#BadRequestException": {
       "members": {
         "Message": {
@@ -402,6 +419,57 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.mediaconnect#CreateBridge420Exception": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#CreateFlow420Exception": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#CreateGateway420Exception": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
+    },
     "com.amazonaws.mediaconnect#DescribeBridge": {
       "errors": [
         {
@@ -754,6 +822,23 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.mediaconnect#GrantFlowEntitlements420Exception": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
     },
     "com.amazonaws.mediaconnect#IngressGatewayBridge": {
       "members": {
@@ -1786,6 +1871,54 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.mediaconnect#RouterInputServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#RouterNetworkInterfaceServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediaconnect#RouterOutputServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
     },
     "com.amazonaws.mediaconnect#ServiceUnavailableException": {
       "members": {

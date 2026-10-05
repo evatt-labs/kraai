@@ -1,5 +1,20 @@
 {
   "shapes": {
+    "com.amazonaws.verifiedpermissions#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.verifiedpermissions#Alias": {
       "traits": {
         "smithy.api#length": {
@@ -26,6 +41,36 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.verifiedpermissions#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.verifiedpermissions#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resources": {
+          "target": "com.amazonaws.verifiedpermissions#ResourceConflictList",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.verifiedpermissions#GetPolicyStoreAlias": {
       "errors": [
@@ -102,6 +147,37 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.verifiedpermissions#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.verifiedpermissions#InvalidStateException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 406
+      },
+      "type": "structure"
+    },
     "com.amazonaws.verifiedpermissions#PolicyStoreId": {
       "traits": {
         "smithy.api#length": {
@@ -121,6 +197,30 @@
         "smithy.api#pattern": "^arn:[^:]*:[^:]*:[^:]*:[^:]*:.*$"
       },
       "type": "string"
+    },
+    "com.amazonaws.verifiedpermissions#ResourceConflict": {
+      "members": {
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.verifiedpermissions#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.verifiedpermissions#ResourceConflictList": {
+      "member": {
+        "target": "com.amazonaws.verifiedpermissions#ResourceConflict"
+      },
+      "type": "list"
     },
     "com.amazonaws.verifiedpermissions#ResourceNotFoundException": {
       "members": {
@@ -193,11 +293,127 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.verifiedpermissions#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.verifiedpermissions#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.verifiedpermissions#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
     "com.amazonaws.verifiedpermissions#TimestampFormat": {
       "traits": {
         "smithy.api#timestampFormat": "date-time"
       },
       "type": "timestamp"
+    },
+    "com.amazonaws.verifiedpermissions#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.verifiedpermissions#AmazonResourceName"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.verifiedpermissions#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.verifiedpermissions#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.verifiedpermissions#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "path": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.verifiedpermissions#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.verifiedpermissions#ValidationExceptionField"
+      },
+      "type": "list"
     },
     "com.amazonaws.verifiedpermissions#VerifiedPermissions": {
       "errors": [

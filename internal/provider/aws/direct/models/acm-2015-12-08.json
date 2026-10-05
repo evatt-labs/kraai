@@ -1040,6 +1040,17 @@
       "type": "service",
       "version": "2015-12-08"
     },
+    "com.amazonaws.acm#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.acm#CoralAvailabilityThrottledResource": {
       "type": "string"
     },
@@ -1119,6 +1130,105 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.acm#InvalidArgsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#InvalidArnException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#InvalidDomainValidationOptionsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#InvalidParameterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#InvalidStateException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#InvalidTagException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#RequestInProgressException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.acm#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.acm#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -1143,8 +1253,30 @@
     "com.amazonaws.acm#ServiceErrorMessage": {
       "type": "string"
     },
+    "com.amazonaws.acm#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.acm#String": {
       "type": "string"
+    },
+    "com.amazonaws.acm#TagPolicyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.acm#ThrottlingException": {
       "members": {
@@ -1185,6 +1317,17 @@
         "target": "com.amazonaws.acm#ThrottlingReason"
       },
       "type": "list"
+    },
+    "com.amazonaws.acm#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.acm#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.acm#ValidationException": {
       "members": {

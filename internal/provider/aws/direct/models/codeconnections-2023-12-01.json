@@ -1,5 +1,17 @@
 {
   "shapes": {
+    "com.amazonaws.codeconnections#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codeconnections#AccountId": {
       "traits": {
         "smithy.api#length": {
@@ -653,6 +665,42 @@
       "type": "service",
       "version": "2023-12-01"
     },
+    "com.amazonaws.codeconnections#ConcurrentModificationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#ConditionalCheckFailedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codeconnections#Connection": {
       "members": {
         "ConnectionArn": {
@@ -789,6 +837,42 @@
       },
       "type": "string"
     },
+    "com.amazonaws.codeconnections#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#InvalidInputException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codeconnections#ProviderType": {
       "members": {
         "AZURE_DEV_OPS": {
@@ -830,6 +914,18 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.codeconnections#ResourceAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.codeconnections#ResourceNotFoundException": {
       "members": {
         "Message": {
@@ -851,6 +947,90 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#RetryLatestCommitFailedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#SyncBlockerDoesNotExistException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#SyncConfigurationStillExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#UnsupportedOperationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#UnsupportedProviderTypeException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.codeconnections#UpdateOutOfSyncException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.codeconnections#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
       },
       "type": "structure"
     }

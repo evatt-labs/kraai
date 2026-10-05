@@ -958,6 +958,15 @@
       "type": "service",
       "version": "2016-04-12"
     },
+    "com.amazonaws.xray#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.xray#ErrorMessage": {
       "type": "string"
     },
@@ -1067,6 +1076,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.xray#InvalidPolicyRevisionIdException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.xray#InvalidRequestException": {
       "members": {
         "Message": {
@@ -1078,8 +1099,82 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.xray#LockoutPreventionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#MalformedPolicyDocumentException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.xray#NullableBoolean": {
       "type": "boolean"
+    },
+    "com.amazonaws.xray#PolicyCountLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#PolicySizeLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        },
+        "ResourceName": {
+          "target": "com.amazonaws.xray#AmazonResourceName"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#RuleLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.xray#String": {
       "type": "string"
@@ -1093,6 +1188,21 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.xray#TooManyTagsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.xray#ErrorMessage"
+        },
+        "ResourceName": {
+          "target": "com.amazonaws.xray#AmazonResourceName"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     }

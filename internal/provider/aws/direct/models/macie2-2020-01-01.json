@@ -1582,6 +1582,23 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.macie2#UnprocessableEntityException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.macie2#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "message",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 422
+      },
+      "type": "structure"
+    },
     "com.amazonaws.macie2#ValidationException": {
       "members": {
         "message": {

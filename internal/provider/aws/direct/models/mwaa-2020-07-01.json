@@ -1,5 +1,17 @@
 {
   "shapes": {
+    "com.amazonaws.mwaa#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.mwaa#AirflowConfigurationOptions": {
       "key": {
         "target": "com.amazonaws.mwaa#ConfigKey"
@@ -1358,6 +1370,46 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.mwaa#RestApiClientException": {
+      "members": {
+        "RestApiResponse": {
+          "target": "com.amazonaws.mwaa#RestApiResponse",
+          "traits": {}
+        },
+        "RestApiStatusCode": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mwaa#RestApiResponse": {
+      "traits": {
+        "smithy.api#sensitive": {}
+      },
+      "type": "document"
+    },
+    "com.amazonaws.mwaa#RestApiServerException": {
+      "members": {
+        "RestApiResponse": {
+          "target": "com.amazonaws.mwaa#RestApiResponse",
+          "traits": {}
+        },
+        "RestApiStatusCode": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.mwaa#S3BucketArn": {
       "traits": {
         "smithy.api#length": {
@@ -1406,6 +1458,18 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.mwaa#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
     },
     "com.amazonaws.mwaa#SubnetId": {
       "traits": {

@@ -910,6 +910,18 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.bedrockdataautomation#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockdataautomation#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrockdataautomation#CustomOutputConfiguration": {
       "members": {
         "blueprints": {
@@ -2081,6 +2093,18 @@
       },
       "traits": {},
       "type": "enum"
+    },
+    "com.amazonaws.bedrockdataautomation#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockdataautomation#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.bedrockdataautomation#SpeakerLabelingConfiguration": {
       "members": {

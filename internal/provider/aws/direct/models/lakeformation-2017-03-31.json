@@ -958,6 +958,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.lakeformation#AlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lakeformation#CatalogIdString": {
       "traits": {
         "smithy.api#length": {
@@ -968,6 +980,30 @@
       },
       "type": "string"
     },
+    "com.amazonaws.lakeformation#ConcurrentModificationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lakeformation#EntityNotFoundException": {
       "members": {
         "Message": {
@@ -977,6 +1013,19 @@
       },
       "traits": {
         "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#ExpiredException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 410
       },
       "type": "structure"
     },
@@ -1051,6 +1100,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.lakeformation#GlueEncryptionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lakeformation#InternalServiceException": {
       "members": {
         "Message": {
@@ -1112,6 +1173,56 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.lakeformation#PermissionTypeMismatchException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#ResourceNotReadyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#ResourceNumberLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#StatisticsNotReadyYetException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lakeformation#TagValueList": {
       "member": {
         "target": "com.amazonaws.lakeformation#LFTagValue"
@@ -1123,6 +1234,74 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.lakeformation#ThrottledException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#TransactionCanceledException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#TransactionCommitInProgressException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#TransactionCommittedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lakeformation#WorkUnitsNotReadyYetException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lakeformation#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 420
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

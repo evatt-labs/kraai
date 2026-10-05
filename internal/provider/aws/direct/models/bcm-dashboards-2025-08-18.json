@@ -344,6 +344,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.bcmdashboards#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bcmdashboards#DashboardArn": {
       "traits": {
         "smithy.api#length": {
@@ -688,6 +703,21 @@
         "smithy.api#pattern": "^(?!.* {2})[a-zA-Z][a-zA-Z0-9 _-]{0,48}[a-zA-Z0-9_-]$"
       },
       "type": "string"
+    },
+    "com.amazonaws.bcmdashboards#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bcmdashboards#GenericString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.bcmdashboards#ServiceRoleArn": {
       "traits": {

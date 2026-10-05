@@ -1,5 +1,17 @@
 {
   "shapes": {
+    "com.amazonaws.imagebuilder#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.imagebuilder#AccountId": {
       "traits": {
         "smithy.api#pattern": "^[0-9]{12}$"
@@ -50,6 +62,18 @@
     },
     "com.amazonaws.imagebuilder#DateTimeTimestamp": {
       "type": "timestamp"
+    },
+    "com.amazonaws.imagebuilder#DryRunOperationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 412
+      },
+      "type": "structure"
     },
     "com.amazonaws.imagebuilder#ErrorMessage": {
       "type": "string"
@@ -129,7 +153,79 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.imagebuilder#IdempotentParameterMismatchException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#InvalidPaginationTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#InvalidParameterCombinationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#InvalidParameterException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#InvalidParameterValueException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.imagebuilder#InvalidRequestException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#InvalidVersionNumberException": {
       "members": {
         "message": {
           "target": "com.amazonaws.imagebuilder#ErrorMessage"
@@ -548,11 +644,59 @@
       },
       "type": "string"
     },
+    "com.amazonaws.imagebuilder#ResourceAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#ResourceDependencyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.imagebuilder#ResourceName": {
       "traits": {
         "smithy.api#pattern": "^[-_A-Za-z-0-9][-_A-Za-z0-9 ]{1,126}[-_A-Za-z-0-9]$"
       },
       "type": "string"
+    },
+    "com.amazonaws.imagebuilder#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.imagebuilder#RoleNameOrArn": {
       "traits": {
@@ -573,6 +717,18 @@
       "traits": {
         "smithy.api#error": "server",
         "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.imagebuilder#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },
@@ -627,6 +783,18 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.imagebuilder#TooManyRequestsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.imagebuilder#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
     },
     "com.amazonaws.imagebuilder#WildcardVersionNumber": {
       "traits": {

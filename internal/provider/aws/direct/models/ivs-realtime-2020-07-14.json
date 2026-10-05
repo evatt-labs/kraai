@@ -1304,6 +1304,67 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ivsrealtime#PendingVerification": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivsrealtime#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivsrealtime#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ivsrealtime#PublicKey": {
       "members": {
         "arn": {

@@ -39,6 +39,21 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.resiliencehubv2#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.resiliencehubv2#DataRecoveryTargets": {
       "members": {
         "timeBetweenBackupsInMinutes": {
@@ -1146,6 +1161,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.resiliencehubv2#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
     "com.amazonaws.resiliencehubv2#System": {
       "members": {
         "createdAt": {
@@ -1250,6 +1280,25 @@
         "smithy.api#pattern": "^[^\\x00-\\x1f\\x22]*$"
       },
       "type": "string"
+    },
+    "com.amazonaws.resiliencehubv2#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
     },
     "com.amazonaws.resiliencehubv2#ValidationException": {
       "members": {

@@ -693,6 +693,21 @@
       "type": "service",
       "version": "2020-07-20"
     },
+    "com.amazonaws.proton#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.proton#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.proton#Description": {
       "traits": {
         "smithy.api#length": {
@@ -1128,6 +1143,21 @@
         "smithy.api#pattern": "^arn:(aws|aws-cn|aws-us-gov):iam::\\d{12}:role/([\\w+=,.@-]{1,512}[/:])*([\\w+=,.@-]{1,64})$"
       },
       "type": "string"
+    },
+    "com.amazonaws.proton#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.proton#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.proton#ServiceTemplate": {
       "members": {
