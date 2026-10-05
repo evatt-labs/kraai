@@ -79,11 +79,14 @@ func TestLifecycleParity(t *testing.T) {
 		}
 		e := TypeLifecycle{Type: o.Type, Date: time.Now().UTC().Format("2006-01-02"), Override: hash, Outcome: "parity"}
 		ran, skipped := false, false
+		r := readers[o.Type]
+		observed := observing(client, append(slices.Clone(r.UndeclaredReadErrors), r.UndeclaredDeleteErrors...))
 		passed := t.Run(o.Type, func(t *testing.T) {
 			ran = true
 			defer func() { skipped = t.Skipped() }()
 			e = lifecycle(ctx, t, cc, client, o, e)
 		})
+		e.Observed = observed()
 		// A type -run leaves out, or that could not run, is not evidence
 		// either way.
 		if !ran || skipped {
@@ -208,6 +211,18 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 		}
 		e.Updated = append(e.Updated, property)
 	}
+	// An undeclared code the delete takes for an instance already gone is
+	// proved by deleting it again, with the address read while it existed:
+	// Delete itself reads first and would make no call.
+	var again map[string]any
+	if len(r.UndeclaredDeleteErrors) > 0 {
+		values, err := client.addressOf(ctx, r, id)
+		if err != nil {
+			fail("address the delete", err)
+			return e
+		}
+		again = values
+	}
 	if err := client.Delete(ctx, o.Type, id); err != nil {
 		fail("delete", err)
 		return e
@@ -215,6 +230,11 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 	deleted = true
 	if err := ccAbsent(ctx, cc, o.Type, id); err != nil {
 		fail("delete read through Cloud Control", err)
+	}
+	if again != nil {
+		if _, err := client.mutate(ctx, r, *r.Delete, again); err != nil && !client.absent(r.Delete.AbsentErrors, err) {
+			fail("delete of the instance already gone", err)
+		}
 	}
 	sort.Strings(e.Updated)
 	return e

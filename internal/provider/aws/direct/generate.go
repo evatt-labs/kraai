@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/format"
 	"io/fs"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -39,9 +40,9 @@ func Generate() (map[string][]byte, error) {
 		b.WriteString("func init() {\nregister(map[string]Reader{\n")
 		for _, r := range rs {
 			fmt.Fprintf(&b, "%s: {\n", strconv.Quote(r.Type))
-			production := r.Complete && proven[r.Type] && (len(r.Identifier) == 1 || len(r.IdentifierOrder) == len(r.Identifier))
+			production := r.Complete && r.addressable() && evidenced(proven, r.Type, r.UndeclaredReadErrors)
 			readerBody(&b, r, production)
-			if production && r.LifecycleComplete && lived[r.Type] {
+			if production && r.LifecycleComplete && evidenced(lived, r.Type, r.UndeclaredDeleteErrors) {
 				b.WriteString("Mutable: true,\n")
 			}
 			b.WriteString("},\n")
@@ -407,9 +408,26 @@ func Readers() []Reader {
 	return out
 }
 
+// evidenced reports whether evidence for typeName is recorded and observed
+// every code in undeclared: an override's own claim that the service
+// answers a code its model does not declare holds only once a run saw it.
+func evidenced(evidence map[string][]string, typeName string, undeclared []string) bool {
+	observed, ok := evidence[typeName]
+	if !ok {
+		return false
+	}
+	for _, code := range undeclared {
+		if !slices.Contains(observed, code) {
+			return false
+		}
+	}
+	return true
+}
+
 // provenTypes is every type whose recorded evidence shows parity on the
-// instances read and on the identifiers probed as absent.
-func provenTypes(files fs.FS) (map[string]bool, error) {
+// instances read and on the identifiers probed as absent, each with the
+// codes the run observed.
+func provenTypes(files fs.FS) (map[string][]string, error) {
 	raw, err := fs.ReadFile(files, "evidence/parity.json")
 	if err != nil {
 		return nil, err
@@ -418,14 +436,14 @@ func provenTypes(files fs.FS) (map[string]bool, error) {
 	if err := json.Unmarshal(raw, &evidence); err != nil {
 		return nil, err
 	}
-	out := map[string]bool{}
+	out := map[string][]string{}
 	for _, e := range evidence.Types {
 		if e.Outcome != "parity" || e.Absence != "parity" {
 			continue
 		}
 		// A missing override is no reader to prove.
 		if current, err := overrideHash(files, e.Type); err == nil && current == e.Override {
-			out[e.Type] = true
+			out[e.Type] = e.Observed
 		}
 	}
 	return out, nil

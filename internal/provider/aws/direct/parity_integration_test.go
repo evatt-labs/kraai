@@ -72,9 +72,11 @@ func TestReadParity(t *testing.T) {
 			t.Fatal(err)
 		}
 		e := TypeEvidence{Type: r.Type, SmithyCommit: lock.SmithyCommit, Date: time.Now().UTC().Format("2006-01-02"), Region: region, Override: hash}
+		observed := observing(client, r.UndeclaredReadErrors)
 		t.Run(r.Type, func(t *testing.T) {
 			e = readParity(ctx, t, cc, client, r, e, perType)
 		})
+		e.Observed = observed()
 		t.Logf("%s: %s over %d instances", r.Type, e.Outcome, e.Instances)
 		run.Types = append(run.Types, e)
 	}
