@@ -705,61 +705,63 @@
     {
       "type": "AWS::EC2::InternetGateway",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-27",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 2,
+      "instances": 1,
       "compared": [
         "InternetGatewayId",
         "Tags"
       ],
+      "observed": [
+        "InvalidInternetGatewayID.NotFound"
+      ],
       "absence": "parity",
       "probed": 1,
-      "override": "b8fd938fc8608160eb9fba2a669dd397056ffad22db1b5aa088e00f6fd30563f"
+      "override": "f44a420795755bd26cc68904c1582b39d762e79b1cd8963606647659d97cc53d"
     },
     {
       "type": "AWS::EC2::Route",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-02",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 10,
+      "instances": 2,
       "compared": [
         "CidrBlock",
         "DestinationCidrBlock",
-        "DestinationIpv6CidrBlock",
-        "DestinationPrefixListId",
         "GatewayId",
         "RouteTableId",
         "VpcEndpointId"
       ],
-      "absence": "parity",
-      "probed": 1,
-      "override": "e28bfdb1cd2ed0f4c10f764ffca33b3e2c8b0386404073a75882ba6caf7ab9fb"
+      "override": "8c1e41c7cf662d4e108852f455a264ea36fe83f85e6c126183a4137f92d024d7"
     },
     {
       "type": "AWS::EC2::RouteTable",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-27",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 3,
+      "instances": 1,
       "compared": [
         "RouteTableId",
         "Tags",
         "VpcId"
       ],
+      "observed": [
+        "InvalidRouteTableID.NotFound"
+      ],
       "absence": "parity",
       "probed": 1,
-      "override": "403ee44a1c3df9c5c85e74af0d94626ee577adb4de54cc4752fd8776c2a30614"
+      "override": "c842b84d87da4643a7063b93c19539029834467bc4c10b97476ce7b419ac17f3"
     },
     {
       "type": "AWS::EC2::SecurityGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-28",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 4,
+      "instances": 1,
       "compared": [
         "GroupDescription",
         "GroupId",
@@ -767,20 +769,22 @@
         "Id",
         "SecurityGroupEgress",
         "SecurityGroupIngress",
-        "Tags",
         "VpcId"
+      ],
+      "observed": [
+        "InvalidGroup.NotFound"
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "c3311f3f567fdc24b344a260e63ab8bc5c7f2a90377a07fa3bbcc3f063e3d682"
+      "override": "c9eae3a5ea2571786eb5ac8647ffef58aee668ca1cc17a58fd343b6e18d06291"
     },
     {
       "type": "AWS::EC2::Subnet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-02",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 7,
+      "instances": 6,
       "compared": [
         "AssignIpv6AddressOnCreation",
         "AvailabilityZone",
@@ -788,8 +792,6 @@
         "BlockPublicAccessStates",
         "CidrBlock",
         "EnableDns64",
-        "Ipv6CidrBlock",
-        "Ipv6CidrBlocks",
         "Ipv6Native",
         "MapPublicIpOnLaunch",
         "NetworkAclAssociationId",
@@ -798,34 +800,33 @@
         "Tags",
         "VpcId"
       ],
+      "observed": [
+        "InvalidSubnetID.NotFound"
+      ],
       "absence": "parity",
       "probed": 1,
-      "override": "b389a677c53c89c76816adecfdf15efeb92fb3536f9172f116bf579ac77de585"
+      "override": "ad933ddc9dc4b82ba8f42e99f69e5ee4f57525604efa452fb68aa8efc3cad680"
     },
     {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-29",
+      "date": "2026-10-05",
       "region": "us-east-1",
-      "outcome": "parity",
-      "instances": 2,
-      "compared": [
-        "Id",
-        "RouteTableId",
-        "SubnetId"
-      ],
-      "note": "Cloud Control could not read some listed instances",
+      "outcome": "oracle-unavailable",
+      "instances": 0,
+      "compared": [],
+      "note": "Cloud Control could not read any listed instance",
       "absence": "parity",
       "probed": 1,
-      "override": "17ed2a37cd47818f1afeac91609a9944eb862cc7c2ffc8761b9c0168373d59b7"
+      "override": "824143f618c15dc9526059ae4841db18c2ff623634ff06aa30cc85ce01d2b441"
     },
     {
       "type": "AWS::EC2::VPC",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-29",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 2,
+      "instances": 1,
       "compared": [
         "CidrBlock",
         "CidrBlockAssociations",
@@ -836,20 +837,22 @@
         "InstanceTenancy",
         "Ipv6CidrBlocks",
         "Tags",
-        "VpcEncryptionControl",
         "VpcId"
+      ],
+      "observed": [
+        "InvalidVpcID.NotFound"
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "a96171f0c7ce9d52b4142e2a948fa565df0efb6c09c55bc0b2ef5e0eb42ee71c"
+      "override": "2c34e031125a78da69aa0d9e90b853dcfbb4e3dd532bfe34cd16b469e48743dc"
     },
     {
       "type": "AWS::EC2::VPCGatewayAttachment",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-02",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 3,
+      "instances": 1,
       "compared": [
         "AttachmentType",
         "InternetGatewayId",
@@ -857,7 +860,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "151fbb92a2abda37584d73f7eb95e47fffb609346d533194a036c2f5f84517b3"
+      "override": "a0953bd28af9fd6ed1a743f37a07933811d5792a3f9875b9a2bc7c2cf670f1b9"
     },
     {
       "type": "AWS::ECS::Cluster",
