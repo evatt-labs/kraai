@@ -214,6 +214,21 @@
       "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
     },
     {
+      "type": "AWS::Lambda::Function",
+      "date": "2026-10-05",
+      "outcome": "parity",
+      "updated": [
+        "Code",
+        "Description",
+        "Environment",
+        "RecursiveLoop",
+        "ReservedConcurrentExecutions",
+        "Tags",
+        "Timeout"
+      ],
+      "override": "495ac870db075b62e31cfea0e27bde734cf1769a93b0cdbb80c1ac1bfc9cd6bc"
+    },
+    {
       "type": "AWS::Lambda::Permission",
       "date": "2026-10-05",
       "outcome": "parity",

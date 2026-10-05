@@ -39,7 +39,9 @@ var updateLifecycle = flag.Bool("update-lifecycle", false, "merge this run into 
 // bills while it exists or a subnet a type needs: {kmsKeyArn} is read from
 // KRAAI_LIFECYCLE_KMS_KEY_ARN, {subnetIdA} from KRAAI_LIFECYCLE_SUBNET_ID_A,
 // {functionName}, a function a URL or permission is made on, from
-// KRAAI_LIFECYCLE_FUNCTION_NAME.
+// KRAAI_LIFECYCLE_FUNCTION_NAME, and a function's {artifactBucket} and
+// {functionRoleArn} from KRAAI_LIFECYCLE_ARTIFACT_BUCKET and
+// KRAAI_LIFECYCLE_FUNCTION_ROLE_ARN.
 // An update naming one that is unset is skipped, and a type whose create
 // names one is skipped and records nothing.
 //

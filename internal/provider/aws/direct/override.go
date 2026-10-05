@@ -256,7 +256,10 @@ type Mutation struct {
 	AbsentErrors []string `yaml:"absentErrors,omitempty"`
 	// RetryErrors names the error codes that mean the call can succeed if
 	// made again shortly, such as a name still held after a delete; the
-	// call is retried within the mutation's wait.
+	// call is retried within the mutation's wait. An entry "Code: text"
+	// retries only an error with that code whose message contains text,
+	// for a code the service also answers for errors no retry mends, such
+	// as a role Lambda cannot assume yet among invalid parameters.
 	RetryErrors []string `yaml:"retryErrors,omitempty"`
 	// FailedCount is the output member counting entries the call could not
 	// apply, for a call that answers success with some failed; above zero
