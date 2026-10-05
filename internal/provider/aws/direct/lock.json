@@ -4,657 +4,657 @@
     "acm/service/2015-12-08/acm-2015-12-08.json": {
       "file": "models/acm-2015-12-08.json",
       "sourceSha256": "4f2e27af9601556e61e14d7250cf57fcc303acd82b36e066a793381582966e81",
-      "subsetSha256": "ee43dafe7f049121bf2e92cc6feb01edd9575347f7aad70f255ea1fa67f66ec2"
+      "subsetSha256": "6a604569818d1c870950af057b08f8a4aa4a97d07995f317aa13bca62ead51d4"
     },
     "apigatewayv2/service/2018-11-29/apigatewayv2-2018-11-29.json": {
       "file": "models/apigatewayv2-2018-11-29.json",
       "sourceSha256": "423a8e8562ca06a12ee6c90f8d0b39ae05e184354de4d83c74d8118d9179fcc4",
-      "subsetSha256": "9443289dccd6ec5ebf29ded8851c074db2ed73ce4a34526b480dd2b00e35f198"
+      "subsetSha256": "2db610de5b1ba0bda44c720c80b7289336d57384db6f16fe91daa843f274526d"
     },
     "appconfig/service/2019-10-09/appconfig-2019-10-09.json": {
       "file": "models/appconfig-2019-10-09.json",
       "sourceSha256": "ae80951fcaa00840d0b273ee198998789aafb452cd34107599fb48590c9428e3",
-      "subsetSha256": "69bf5fcd077226748eb99e1eaaaf402dc59d85f225bd032d16ec0b9415668eb5"
+      "subsetSha256": "e5dfb792f7cd6bfb06b8020fc4f6ebd03602453097ab6dc1c67b443423b2c973"
     },
     "appintegrations/service/2020-07-29/appintegrations-2020-07-29.json": {
       "file": "models/appintegrations-2020-07-29.json",
       "sourceSha256": "085662661107e651741cea85ed5b10bac1d9e4487bcae9b4a84b00ae4476e4a8",
-      "subsetSha256": "7a79b1ca5e6595ea36134fc156379b100f24661b8cc672b389e62142778d8e1b"
+      "subsetSha256": "7b169cb5c47ae712eea7bc6616ede25355ecad023d4ee4aa9dedee512c76f41b"
     },
     "apprunner/service/2020-05-15/apprunner-2020-05-15.json": {
       "file": "models/apprunner-2020-05-15.json",
       "sourceSha256": "322b9b69806ead20132e77fa5080ec9f0564183a3a42daf9246777a2421488f2",
-      "subsetSha256": "1fbaf1beb9eb8826d858b3d20c148b3ea0b1b426c68df756582089877a5bd6db"
+      "subsetSha256": "1be6f8bca654e4eacd9ac36ef5487230c7f34f5a6e43994358d9508c0f763b3a"
     },
     "appsync/service/2017-07-25/appsync-2017-07-25.json": {
       "file": "models/appsync-2017-07-25.json",
       "sourceSha256": "5db1d883689ffe44163ff9a72c4a5df42683a2a5b52d1eebded1e96557324642",
-      "subsetSha256": "0bf7b8e808204b91895aa0ffab4ff7d435150b5046667b64847a4ebbc40effac"
+      "subsetSha256": "e9182233b885c031582ce96a2901ee44120f22ee6588d69804cf9afaa6987d28"
     },
     "athena/service/2017-05-18/athena-2017-05-18.json": {
       "file": "models/athena-2017-05-18.json",
       "sourceSha256": "bd1b3de55549f9de8c1ff8856c0623af35b4c9ed272c6f2dfbdf930beb2ccbdd",
-      "subsetSha256": "345ee60d6ea7a24d987a2093025d07c88d937ce680abd9c3a4d85874df0b0c6c"
+      "subsetSha256": "d27961a34bbb836aa8f02b834cd1c398e21ecdd1174c123364e20175455e06ab"
     },
     "b2bi/service/2022-06-23/b2bi-2022-06-23.json": {
       "file": "models/b2bi-2022-06-23.json",
       "sourceSha256": "57ddb6317ceb7c2d1255ac2ab7d7d1807949ecd1a2324cf7e378ad9113d54c40",
-      "subsetSha256": "385f3b9b44eb75efd17fb94902243b66d6afbc2f52d9748f0da16c343c4d10cc"
+      "subsetSha256": "920a8f6af36e1dffad187eecefc50c4a6a635205615989ea8fe28b37a6888277"
     },
     "backup-gateway/service/2021-01-01/backup-gateway-2021-01-01.json": {
       "file": "models/backup-gateway-2021-01-01.json",
       "sourceSha256": "008b43cb3d3a82fa9c7030dccea9c75ec128d90f24fd7c806dc2f5fbb7df2417",
-      "subsetSha256": "5df3326af41feef73795a7e6548c574201460ca0c80fda74e2eb738a73f0788d"
+      "subsetSha256": "95e6efb16be0a514c52917a68a81cf7460e17c007721acb9da276de8e7ad2e9f"
     },
     "backup/service/2018-11-15/backup-2018-11-15.json": {
       "file": "models/backup-2018-11-15.json",
       "sourceSha256": "42fd0f16fd8896247137607430b54f69079678c8fb461afe3fe54a4fdf00f65d",
-      "subsetSha256": "f240259feeb883d0580d1afc814cd9a60faa676aa16cac060de3f91648121ac6"
+      "subsetSha256": "e07686598a181f67725756c46be8771efeb7673f4a0da6468c219340458ee212"
     },
     "bcm-dashboards/service/2025-08-18/bcm-dashboards-2025-08-18.json": {
       "file": "models/bcm-dashboards-2025-08-18.json",
       "sourceSha256": "ce2e2ccbe11baf560316d4eb70fa105ec6cc6dfc6fec419b43aaaa56f4d5465b",
-      "subsetSha256": "22d58aa07dc32dc2f64d1afca34e9bf24920ba0782684032c0beb7d5cb4ca90b"
+      "subsetSha256": "a8d486d1126426174ec6d654f6eb9d792719526e2500f458fe21ea5785599d3d"
     },
     "bedrock-agent-runtime/service/2023-07-26/bedrock-agent-runtime-2023-07-26.json": {
       "file": "models/bedrock-agent-runtime-2023-07-26.json",
       "sourceSha256": "bc5a151f224452a51106cf964365299832737cb63b3be0d5ba4fa77602e274f5",
-      "subsetSha256": "ca44ee3e21495dc10dc8eeb92f3b5b1bff73a1a9c555f549c06ff763835369e9"
+      "subsetSha256": "a5937a782c6b858a29c711ab8659b9c9a49f7bf27cb03d7ad19ebdfb7c2a10cb"
     },
     "bedrock-agentcore-control/service/2023-06-05/bedrock-agentcore-control-2023-06-05.json": {
       "file": "models/bedrock-agentcore-control-2023-06-05.json",
       "sourceSha256": "d5cfa2b23d02d7e32fe6269d4edc9f94435bfe0710c5a29df4c177fb569e2079",
-      "subsetSha256": "e802f9c68b578fda1dc7e6e4c505f496466535dca0b196d30a3ec0f411f7c3e8"
+      "subsetSha256": "3dab8130bc194463f9183bc9c102a9c48cd0c793e4f2c9f379c978e8c8d41f31"
     },
     "bedrock-data-automation/service/2023-07-26/bedrock-data-automation-2023-07-26.json": {
       "file": "models/bedrock-data-automation-2023-07-26.json",
       "sourceSha256": "57a9478257e596708233bf3e7b1113a6df8e1dcd0016380aff8a615c867be128",
-      "subsetSha256": "40a0b9ce67a808ee985e91e5863a14e77849fd633607456dcca913d0c6f4574d"
+      "subsetSha256": "f5f46d0ee17b6e4e0fb42b3764c38f2ef9af7d5bb26dd0f071ac11af0291893f"
     },
     "bedrock/service/2023-04-20/bedrock-2023-04-20.json": {
       "file": "models/bedrock-2023-04-20.json",
       "sourceSha256": "31e8c7eb23e9e87e564c4e1ad8f7f07a65fd0e3f15ce60f799872e4236744c8d",
-      "subsetSha256": "1d7364b89ae0438882261f11a871154f66d610df14a65f6b0420041ebfd18378"
+      "subsetSha256": "e374762710675b6d5dd09053b9f649e1d0695d28ffe20aec76a0064a03a9c7cb"
     },
     "chatbot/service/2017-10-11/chatbot-2017-10-11.json": {
       "file": "models/chatbot-2017-10-11.json",
       "sourceSha256": "961871e816fc4cb786963aaad6f6341f50dc60a8e91b67b80b17c3d859631e85",
-      "subsetSha256": "125b5715e98d61c074b053a4ddde3e5bf0f6bbc11cb548343a44798cb8a6502f"
+      "subsetSha256": "3fcfa6432714495b1e9d10ae1dd7d255648d4ecc162dfccf90205ba461df37c1"
     },
     "chime-sdk-identity/service/2021-04-20/chime-sdk-identity-2021-04-20.json": {
       "file": "models/chime-sdk-identity-2021-04-20.json",
       "sourceSha256": "0c77cd74ac7c47306bb99893260361eb043856424b12b481d0d62ebe1159a0a4",
-      "subsetSha256": "efd39ad5915389358bcbb5e97d0d125bc4a5148ba2be3801119b1148f1d5d894"
+      "subsetSha256": "ac6e9c1191129f7043a2f4da766b3ebdee4f4c2ba5d91d5d240590ca56a5064c"
     },
     "chime-sdk-media-pipelines/service/2021-07-15/chime-sdk-media-pipelines-2021-07-15.json": {
       "file": "models/chime-sdk-media-pipelines-2021-07-15.json",
       "sourceSha256": "251918ed38214f2ce08f24acab3d185b8f974494d89b79807f882bc5ad2b9dae",
-      "subsetSha256": "12b8e716a7a8c07a1913d7d39fa89ef982abf7383a39a5a5c637e0232c92c1e7"
+      "subsetSha256": "4f79777dcfddf35d698c06cd6203bf5a03d20c079a292c5d673b76122d946c8b"
     },
     "chime-sdk-voice/service/2022-08-03/chime-sdk-voice-2022-08-03.json": {
       "file": "models/chime-sdk-voice-2022-08-03.json",
       "sourceSha256": "360e0333677be40befb511f78ba5d1558b6fa6d5f3fcd9705fe701793063d12d",
-      "subsetSha256": "e9608796e0d4707aa52267ed4d18e3c63dca76c9cfe61c1d89bfe1df711e5f26"
+      "subsetSha256": "2eb8387b8c5373037a6c46974382a939a1d838cd38866b52671b0bfde5591829"
     },
     "cleanroomsml/service/2023-09-06/cleanroomsml-2023-09-06.json": {
       "file": "models/cleanroomsml-2023-09-06.json",
       "sourceSha256": "b5864764e76291c93dc4157a489771d073a8c6cbffecdd4e453a5149237b2937",
-      "subsetSha256": "b24002382cb105cb671702b8aed742898d908e0b1bf9860cde75ee990eeaa72e"
+      "subsetSha256": "4b50703e7a007b7923f2cc4a04962ea50319edb8530e6e8a7a583f58d574ac40"
     },
     "cloudformation/service/2010-05-15/cloudformation-2010-05-15.json": {
       "file": "models/cloudformation-2010-05-15.json",
       "sourceSha256": "9992e8206bda7e3c3bb34886f99ca4e07acc12fa24542b788bf03759ad9e6a9c",
-      "subsetSha256": "62c80d1de4690c0bbf907c8e167028dc983cd5703304b3b900871ac601caa46d"
+      "subsetSha256": "ffd309e3afad6274cbfcd0a0a2dc923a8a1f7a5f57c7dc381980602f58589ec7"
     },
     "cloudfront/service/2020-05-31/cloudfront-2020-05-31.json": {
       "file": "models/cloudfront-2020-05-31.json",
       "sourceSha256": "a2a8fff6faa4d1d97e958ae04ca8180d5e16e3073e2dd99bb88a3cc60e7f4928",
-      "subsetSha256": "b5c0d246fa05f4805c80003630d96ce66ddbae4818cfd6d79f3c8f10ee85a7b6"
+      "subsetSha256": "1f17da5c5fc8d510f43927055ee5362cacdcf341dc0152eb185d0eacdbea525d"
     },
     "cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json": {
       "file": "models/cloudwatch-logs-2014-03-28.json",
       "sourceSha256": "cdc16e4bb2c68677f226a021f6f03a87268560e02dfdd7522e26792d8b25f0ce",
-      "subsetSha256": "b30430e9d47c33d93f7ff4dd62c375ec1bc3427e966f86921f9b99f81d42ecd4"
+      "subsetSha256": "2ff42bb358792d16fd69007d32c563f807977321bd353ab4d0e55e1ba3fda80e"
     },
     "cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json": {
       "file": "models/cloudwatch-2010-08-01.json",
       "sourceSha256": "bdf9bc624e25b5dc82f0e6965ebd5f5a18c0c28aa906eb5c159f39c11ee5bbc8",
-      "subsetSha256": "dc7a9e60c975178d1a7dbf5e9b1e1b0807807083ec125fe3ec7bce832991cfd4"
+      "subsetSha256": "19bb2eac5efcaebd32aceb409c2c1cadc8983616977b5043e2264f44da690fb0"
     },
     "codeconnections/service/2023-12-01/codeconnections-2023-12-01.json": {
       "file": "models/codeconnections-2023-12-01.json",
       "sourceSha256": "df2b3888b5330379673d58477c15feadb296bcf47d6e6e120bf1be15ec5845b0",
-      "subsetSha256": "dec2eb3d977d44705c5a804c5928012cb14ed5fa7fac0c049dedcdafa46f9d35"
+      "subsetSha256": "8210117dd7cf3dcd1349e209304244f912b44fe69add332c928c06558508a617"
     },
     "codedeploy/service/2014-10-06/codedeploy-2014-10-06.json": {
       "file": "models/codedeploy-2014-10-06.json",
       "sourceSha256": "e270383d2bb6dd822f4f617cbf2dc32112beb5c766b5b345cbfd253ff1af6e4a",
-      "subsetSha256": "ea83cc09e38dc96b43e3fd47b402be8dd4e6fcebc6d13685a251249900bc79af"
+      "subsetSha256": "95b60441b1758fb21ed23bc8bebebbba893ba622af556e1fe6859ae6a4570437"
     },
     "codestar-connections/service/2019-12-01/codestar-connections-2019-12-01.json": {
       "file": "models/codestar-connections-2019-12-01.json",
       "sourceSha256": "7a88b767bb489aba8892e784e5658bc37be9cfa8558e15e9727de6922af889a8",
-      "subsetSha256": "ab2c04d574eec77abbd7f055892147a64266eccab71c9379c6861f58cbeba365"
+      "subsetSha256": "5a7a02fac6021b699a447cef5d9216e6e2786e06aaf45adea8b50ae2c35f5588"
     },
     "config-service/service/2014-11-12/config-service-2014-11-12.json": {
       "file": "models/config-service-2014-11-12.json",
       "sourceSha256": "140b2f862c302d6d747c170e61f22a3108d517b42af3623c3e329027d373862b",
-      "subsetSha256": "7d00403b4ee0d78ed577a5d4fa1727852bdf2926de163b35317193d4c8a97602"
+      "subsetSha256": "1acc489a4ddb3f715fb4bf6465fb89d83124d154484a72c2ae7192a5c6f3c05d"
     },
     "connectcases/service/2022-10-03/connectcases-2022-10-03.json": {
       "file": "models/connectcases-2022-10-03.json",
       "sourceSha256": "254ab28f34918b41695ee9662bc6d4294b2670dd71a0c074a12b3f0d23f54070",
-      "subsetSha256": "bd48d038ea2e74d16b924c03d2b4296a0ac566d4fefe9f0c5ec992c9386998d5"
+      "subsetSha256": "08f6fa462131b2b656601bec67bb2bc3b7ac9186682c3eeb589da0b0c921ceab"
     },
     "connecthealth/service/2025-01-29/connecthealth-2025-01-29.json": {
       "file": "models/connecthealth-2025-01-29.json",
       "sourceSha256": "b8a39db72d49f6cdb52e67bd3378b1de69df38b43ca69643a1275f3c2e5add19",
-      "subsetSha256": "666f222339a0d428b30f47c477dc7311810b9ee44844bbbb73361d34f92b877b"
+      "subsetSha256": "22e04d3876218965717ae7b923bbec5abdc60118bf17695c290f0ab92784c950"
     },
     "customer-profiles/service/2020-08-15/customer-profiles-2020-08-15.json": {
       "file": "models/customer-profiles-2020-08-15.json",
       "sourceSha256": "fe531aa3b9897d9acf8380a8a1147ba12a03c4f6ade6e4eedb97e6a3e1738840",
-      "subsetSha256": "d79a356fb5d6f25c780dd8b3e892fcda617dac6fa17a3d5831be2ca6d7bc3656"
+      "subsetSha256": "c4e3335960a92223e03a52c8e67f567966c2d96721f82a53bc3fd6fb07a86ac1"
     },
     "databrew/service/2017-07-25/databrew-2017-07-25.json": {
       "file": "models/databrew-2017-07-25.json",
       "sourceSha256": "b214b8341c14abc6cc88896f4b3864ac9532edda80e78e6503dc4eeb4229a7fd",
-      "subsetSha256": "1797d079f205d66cbf5d1ab891ed8a56d175f587a9b1d9306f5845128ddbfb2b"
+      "subsetSha256": "6b52b4b322f55712b7dd8d4130636e3d7b0317489a8ea0b86cf31add6f3ee639"
     },
     "dataexchange/service/2017-07-25/dataexchange-2017-07-25.json": {
       "file": "models/dataexchange-2017-07-25.json",
       "sourceSha256": "0891c22c6bd7a43cccbaf0055ae1511a9ccdc62054059f8cbacddd5e5a6ec834",
-      "subsetSha256": "2bbaf40f2cf67444803204fdd690886c326d9632205d14431e55cb7470790e5a"
+      "subsetSha256": "0f77af676c24d0ab118df8c2f555d8a9133ef29e7dbee8f907ea98b1d437dde0"
     },
     "datasync/service/2018-11-09/datasync-2018-11-09.json": {
       "file": "models/datasync-2018-11-09.json",
       "sourceSha256": "70ec45e7317c498df52ba9a0978d85be9ea82ee3da31a9c8858b2559d07adcd1",
-      "subsetSha256": "d836eb2d4a9911a85365a94884394c44a2e6ce73dffdbedfc133871328d425f9"
+      "subsetSha256": "5be15d7b377d29a2d8ddd42f24ba068dedf29c0a73343aafbb4fb8c1fc2edfc1"
     },
     "docdb-elastic/service/2022-11-28/docdb-elastic-2022-11-28.json": {
       "file": "models/docdb-elastic-2022-11-28.json",
       "sourceSha256": "a096d665ac8fdd8fe7d2bbe636cc9b5e12e41f2df97f2bf30bf7018ec8fd94f5",
-      "subsetSha256": "464a214f97d23d25a5f08313661e9621fb652a4cc93f34e21f95fc4a602b262c"
+      "subsetSha256": "e26aaebc72d71c1b58eb2c5b0965e6faf52798f54487b5e52e899b94f71e7158"
     },
     "dynamodb/service/2012-08-10/dynamodb-2012-08-10.json": {
       "file": "models/dynamodb-2012-08-10.json",
       "sourceSha256": "551882dda390dbce7e3d2001e85017a58b76fdcfaf1bc152b6ecf063efc70705",
-      "subsetSha256": "feca4bd61c63eec44bf1a04130f5d6287053207ae5c5ac83c70b3f02f23be72f"
+      "subsetSha256": "faba24ef8eeba0aaa95c372a9b7f408ac7af0a36c46072fedcd7a9d854ad02b8"
     },
     "ec2/service/2016-11-15/ec2-2016-11-15.json": {
       "file": "models/ec2-2016-11-15.json",
       "sourceSha256": "6a342a7b0b4101eb8dca882cda19ceca543cf0dce3c6293418f0acf74e0b1b65",
-      "subsetSha256": "e449bde810b443c813ec7ceffad327839693dfad77b3932c9ac782c2ee017b3f"
+      "subsetSha256": "184eaa6535578d3d5bbcc0a736e515bdd08e15eedcf8f11ad842eaebf51ff31e"
     },
     "ecs/service/2014-11-13/ecs-2014-11-13.json": {
       "file": "models/ecs-2014-11-13.json",
       "sourceSha256": "039c1877a9b6b6997819988c4f8f7e9f063bcfe6afa6c431d2da45fc8422eace",
-      "subsetSha256": "1ccdab29fbad8ac1a4c8808e2132c9b945bc417da33877f52a73c319dbd7b2e2"
+      "subsetSha256": "78d8fb26a4d37db4b9b047a28d96cad4c6afb603793a26cb7266dc1da4a674ba"
     },
     "elastic-load-balancing-v2/service/2015-12-01/elastic-load-balancing-v2-2015-12-01.json": {
       "file": "models/elastic-load-balancing-v2-2015-12-01.json",
       "sourceSha256": "b8e2667dc02196215c863ecab13f2aecd8d9520262c85de1edbe80fd95e74d2f",
-      "subsetSha256": "3d03d447911e3ff762e667eecd82feab46a6198c57bf1c52618a167ed4942829"
+      "subsetSha256": "a175bcf6fe890cc1a9c67eeac134728bba23b427f839cfebef5f0c0122815619"
     },
     "elasticache/service/2015-02-02/elasticache-2015-02-02.json": {
       "file": "models/elasticache-2015-02-02.json",
       "sourceSha256": "531f322d4461115b8cebe68b55a2dae3bbbcff5908b5ed711f19fd6bfb073940",
-      "subsetSha256": "04b75f59079cbe1e903ba08f3df9e54573817901726dc2488b98c68aa422b79d"
+      "subsetSha256": "53ce66ac41fd68669dd0154b86a6b4ca59b466e4ee73f87c75e13924cd04ece7"
     },
     "elementalinference/service/2018-11-14/elementalinference-2018-11-14.json": {
       "file": "models/elementalinference-2018-11-14.json",
       "sourceSha256": "ce05de4443c6bfc811a649225eb3435e092405ee2234b835d0dc6c8a8518b1d2",
-      "subsetSha256": "08d55878f0751f6d0bcdae6f6330bf60eeaba23dd2244604c79442a45ab1ae25"
+      "subsetSha256": "0b4e66d99644fe8ad1e990ff63d65ba93c0a8dd12af7365ee48fcd2c7c27382f"
     },
     "emr/service/2009-03-31/emr-2009-03-31.json": {
       "file": "models/emr-2009-03-31.json",
       "sourceSha256": "cff4f77057767f2010954968e34881199e6d306510ca2d8c4175a6deb2c02add",
-      "subsetSha256": "ca51b167a7605d23a4a40ecdc8d17656133e26e94714e336c220b36725f24921"
+      "subsetSha256": "d080b3cdb9976eeec1c978e42d0135b0e5721d2f4b57264a766280679dd20246"
     },
     "entityresolution/service/2018-05-10/entityresolution-2018-05-10.json": {
       "file": "models/entityresolution-2018-05-10.json",
       "sourceSha256": "dd59315e6bb76673dc5be3935c55aa2b785821b056b3bc5637eee5baaed1c7fd",
-      "subsetSha256": "b21f125dcd01dea958d6a4fde205349a243ba5b4a65756ce3ac323cadc9dfc6a"
+      "subsetSha256": "c0ca967908989cc23f1453996bd01b436140a1edf6fbafe98f073c09ed001aa5"
     },
     "eventbridge/service/2015-10-07/eventbridge-2015-10-07.json": {
       "file": "models/eventbridge-2015-10-07.json",
       "sourceSha256": "47054e3cf1572673a5dc9931c0a6cddc1fc29b9338d9b124bc4ad8a0ec3bb2e7",
-      "subsetSha256": "14e02475d821634b71dce38571adfb531bb10425706ad9719e5c5575f96e8284"
+      "subsetSha256": "397705f6d2db3f467ae293b1fb26da0e48c9cb3ca22504eb7d9cec2368f3b137"
     },
     "forecast/service/2018-06-26/forecast-2018-06-26.json": {
       "file": "models/forecast-2018-06-26.json",
       "sourceSha256": "0e4f7f80f98dac93ccce5dbde32282ec47f8b8c20f9a8436268b1607badee025",
-      "subsetSha256": "7255e469d64601461747691b553f5f0266da71fe59732cfe67e68a7105131734"
+      "subsetSha256": "3c95ff971ab48109e0cd34af0ce9ec8e40e307cdbc7b80d3b0e81f7853d062a3"
     },
     "gamelift/service/2015-10-01/gamelift-2015-10-01.json": {
       "file": "models/gamelift-2015-10-01.json",
       "sourceSha256": "39cf197ca0c0e9eb769cc41223c8d0533340d43e33aff06b73d7b947bf3a3a28",
-      "subsetSha256": "3efcd14ba2524666873a9ee0042c3d0edcb0edf91429558793ad1d38d46f4b7b"
+      "subsetSha256": "4c8e62f3cede48bd52089e1d1dbdda1234dc67912b8f168e132b2ad9ca838220"
     },
     "global-accelerator/service/2018-08-08/global-accelerator-2018-08-08.json": {
       "file": "models/global-accelerator-2018-08-08.json",
       "sourceSha256": "ee5f1987dd083d041633bf1bd4d91f289840e86e8e2102b4dcf172697e258cda",
-      "subsetSha256": "4e99bb5d72988cc94277ab08d5ba4d43f852e070222232a974c1bdb75d677c33"
+      "subsetSha256": "8c4fc7f9c200dae255f1987a64d2a4906b863fec43d1e80b9515cf1d911f05af"
     },
     "glue/service/2017-03-31/glue-2017-03-31.json": {
       "file": "models/glue-2017-03-31.json",
       "sourceSha256": "e3cce2bd91eee6615cfe07ccc281d73b01513156e461e8c10d52b2a733a31c02",
-      "subsetSha256": "c05fb9525acc113d4384872fd92a145c1f53112707f727f8b6c4b051025a245b"
+      "subsetSha256": "1218c801016f684fd39550391211eb7df4074fb647c38fa3ca0501e0968843d8"
     },
     "greengrassv2/service/2020-11-30/greengrassv2-2020-11-30.json": {
       "file": "models/greengrassv2-2020-11-30.json",
       "sourceSha256": "e0c324d26e877ff05a37ef087a68def9d29b0736941f9a263e2182fd0d4ad608",
-      "subsetSha256": "0f0758774bcd1e5a059e533887e7f4d2bd95513b8b014812b588c8e59c7563c8"
+      "subsetSha256": "5a34103679725c002dc4a8abf7bd8491c82421d46fc4119514997f781f8b155b"
     },
     "iam/service/2010-05-08/iam-2010-05-08.json": {
       "file": "models/iam-2010-05-08.json",
       "sourceSha256": "c1f74d3eda269e4fa2f00b57d57ed19c0e0a6d7fc7c70d4e351e319d178430f9",
-      "subsetSha256": "0f8a4cde5b1bab579b112abe341a2430417b002a42ce89dfec0330ee1b84d6b7"
+      "subsetSha256": "9610d7272add840a8245f83cbb3a67c2940de92b68cffee0f728e8a124975094"
     },
     "imagebuilder/service/2019-12-02/imagebuilder-2019-12-02.json": {
       "file": "models/imagebuilder-2019-12-02.json",
       "sourceSha256": "61991b5b1aea5f8530e847ebfdcd42d863f42d824cf0e0f366692a41145cfc80",
-      "subsetSha256": "09ba5b7fd609e81d424243267899de72d595ed3375badb9742becbf5b4e7bdb8"
+      "subsetSha256": "3d32291e461abe3a90b61303c943bcffa721fcf97500c71dde48b3875d493e58"
     },
     "internetmonitor/service/2021-06-03/internetmonitor-2021-06-03.json": {
       "file": "models/internetmonitor-2021-06-03.json",
       "sourceSha256": "7290eac49fbb1bbff6c958df3b369590edc97c50b7f85112a2196a23e29d53e4",
-      "subsetSha256": "4f7e3db09ac6afcefe59660fb4093e96581964c29ea91bb93892f6e618334af8"
+      "subsetSha256": "f231e94e2b9741ce50f498b1c88464ce2759795f28c6fd54f0a63cac9d328a27"
     },
     "invoicing/service/2024-12-01/invoicing-2024-12-01.json": {
       "file": "models/invoicing-2024-12-01.json",
       "sourceSha256": "d5fce15437dc55ec764aa343f1028790b6c23565ae06cb1113d9dee836c978b9",
-      "subsetSha256": "58f635552105c6210b642d3e73ee33682c740dd6f65c5abc2e40ddf41a8f71a2"
+      "subsetSha256": "70a6afb7f3cc808aadd68d815654fb05f5f58a60dea4856bec386456dfb1da59"
     },
     "iot-wireless/service/2020-11-22/iot-wireless-2020-11-22.json": {
       "file": "models/iot-wireless-2020-11-22.json",
       "sourceSha256": "c6ac65397dd493eece348a9ebf61079e5b7ce6749ee0f6ee4a7c6bf04a97832d",
-      "subsetSha256": "1a6e7fef421fbccd0aabff3a5996aa1d493763a8f837fc063c192e82613794e2"
+      "subsetSha256": "d221ead719f0096fc74d66e109c455dfd849368a3df9560284fdcf7ebb62add9"
     },
     "iot/service/2015-05-28/iot-2015-05-28.json": {
       "file": "models/iot-2015-05-28.json",
       "sourceSha256": "88664a70aaae99eae112a1bfad74052ff2764916aa536b5d19a33723f2ae1a1f",
-      "subsetSha256": "febb107b977dfe708232bafb1e090bc3716f48d30d12d5e878411b19f0fc323a"
+      "subsetSha256": "e844e111f44f49ba364095c308084d566c52a2075b6749bb4950d2f7375099b6"
     },
     "iotdeviceadvisor/service/2020-09-18/iotdeviceadvisor-2020-09-18.json": {
       "file": "models/iotdeviceadvisor-2020-09-18.json",
       "sourceSha256": "00aee2b78a76f36a5ae37dd968a8e22fd5e2854f9aa3a3d19152a2a429f2fd39",
-      "subsetSha256": "b7aba81b9dbab209aeb49efee86c004b5112afc1c42281bf1f86fa1e4d930fda"
+      "subsetSha256": "e45e0a028adefcd0379dea40dddb4cf975c0219670eefe323f9746e9f2a98d0a"
     },
     "iotfleetwise/service/2021-06-17/iotfleetwise-2021-06-17.json": {
       "file": "models/iotfleetwise-2021-06-17.json",
       "sourceSha256": "9f2e33b6a840fd3721cc5bc03a3e4ff30ddb289e78c607e51622686a1e86934f",
-      "subsetSha256": "afc595f5e12eb0a2275bf44f75509d6d9815326a2f757c9ac0f6f51729f0a7f5"
+      "subsetSha256": "0d09a7f4fb59f646cf8995276b3b11dd3dc6e93ac1e2855a0de0b68103be2aa3"
     },
     "iotsitewise/service/2019-12-02/iotsitewise-2019-12-02.json": {
       "file": "models/iotsitewise-2019-12-02.json",
       "sourceSha256": "29268ed6f84f8a517d0087cc6f3ad3a6845f649885f5069f3a1f75134c28d36e",
-      "subsetSha256": "28c35498db7b7673ccc4da9b4a7dd9ce652ac80ccfd76191b74d613529a750c4"
+      "subsetSha256": "cad27fa0881677d41fa40dbd688d8004676b64f712bb17edae8d9f9f0562e703"
     },
     "iottwinmaker/service/2021-11-29/iottwinmaker-2021-11-29.json": {
       "file": "models/iottwinmaker-2021-11-29.json",
       "sourceSha256": "4ed54955625de2c0e751c58f1c2a6e4ab51c771a71c4788274ac13ec8da0cd1b",
-      "subsetSha256": "f98da46a937ac1e66bb06b762def2f500c0d6d27b29d2278f97938dd5f246387"
+      "subsetSha256": "7b4351106dd34b564ac1cde119ca1343ec2b5978800492199bf56711cd877380"
     },
     "ivs-realtime/service/2020-07-14/ivs-realtime-2020-07-14.json": {
       "file": "models/ivs-realtime-2020-07-14.json",
       "sourceSha256": "eb15a9fe06a16106f7b0a2ee3d869d8214f371c2745352c78f96a7632d61907b",
-      "subsetSha256": "5f3002858c37f3bc667bb3a1491fbe53507741a7c22e1e87dd4298caf77e9f53"
+      "subsetSha256": "fe81ddf1255b9f0948f4ecfe3bceba79671454bcf6f855bcba3315357c5aa184"
     },
     "ivs/service/2020-07-14/ivs-2020-07-14.json": {
       "file": "models/ivs-2020-07-14.json",
       "sourceSha256": "c7228fa78bdd0191ac3e14d187c28ea8bdaee508c3acf3b321e7482d867e688d",
-      "subsetSha256": "59ce82da08d01cf542789ffc9716f194be46ab16d503a49d81c1ebb9efde2377"
+      "subsetSha256": "87641de56215f309a059b77d073926427502dc4bb605c6f6426a4a959974ae80"
     },
     "ivschat/service/2020-07-14/ivschat-2020-07-14.json": {
       "file": "models/ivschat-2020-07-14.json",
       "sourceSha256": "5629ed4ef708a281fbf1b7d95fb0ccf4a054bd46443cc55ff1ba47f2762b4c3b",
-      "subsetSha256": "6db795d6300ecf553398e518c84c5e2037a0e7538995121ee2c08077bfea0848"
+      "subsetSha256": "01e06ce620302f1d3644da2a6c2b69b5ac90b9f842c78d092b2dc741c642ef50"
     },
     "kafkaconnect/service/2021-09-14/kafkaconnect-2021-09-14.json": {
       "file": "models/kafkaconnect-2021-09-14.json",
       "sourceSha256": "d4d4ce36cea68e054d646d6dd4f968cea460ad1b9bdcc5fc6f5dbe84d0e93804",
-      "subsetSha256": "11bdd85f95be52eb17b93c9b976afeafc2d0f8ecab4699846f007a3f4336f90f"
+      "subsetSha256": "d5d463351ae6d1c067b03a1c241533df3619d37299fa455ab2a754f4b229a233"
     },
     "kendra-ranking/service/2022-10-19/kendra-ranking-2022-10-19.json": {
       "file": "models/kendra-ranking-2022-10-19.json",
       "sourceSha256": "86122553038a316b022eef1fc0d826544bea593351dade1b9bfa2abd82d69c04",
-      "subsetSha256": "2df3166af5008eb861417cff01d427bddf03b2de2d23d8c22b5071f0ccf5d1f2"
+      "subsetSha256": "5e4c94a0df8a63ec30d2dd56d02e3f1ea627d9bd949a41993ea9d610f1716e00"
     },
     "kinesis/service/2013-12-02/kinesis-2013-12-02.json": {
       "file": "models/kinesis-2013-12-02.json",
       "sourceSha256": "156f6bde03b979d270b23bb55b0d0b8307b4e4c780febd3a0749f50c4c2b766b",
-      "subsetSha256": "e0c32910ec0edeb18a7f8d133454f6073b0c07136104a691d3367db8d3d4c694"
+      "subsetSha256": "97d147a2a91c64ade0afc68dac89a126a440a0a7768fe744bf88f6abd4d4da7e"
     },
     "lakeformation/service/2017-03-31/lakeformation-2017-03-31.json": {
       "file": "models/lakeformation-2017-03-31.json",
       "sourceSha256": "69a11756fd55fde42ad3c5f672013eead9b8b24e37658ccc8af520965e566dae",
-      "subsetSha256": "18e3ecf62a6b84c67f4fb1dba91d2e639ce60780759975e7c0476b5733e84358"
+      "subsetSha256": "92c07d849ac4ba03cc3a072a1ffedfb7823734866f8d19a36789163b79f19896"
     },
     "lambda-microvms/service/2025-09-09/lambda-microvms-2025-09-09.json": {
       "file": "models/lambda-microvms-2025-09-09.json",
       "sourceSha256": "1553849887e0154eae91b3960b5770e08798c404e2909bca65f06be5a9458dad",
-      "subsetSha256": "b09bd76b07fd0283586e7fc9ce5b4ffcee91405585e67faeeb399aa4704586af"
+      "subsetSha256": "643197b2f32bccef40441249ce3ffb497e45528ef19e22416c420b500622002f"
     },
     "lambda/service/2015-03-31/lambda-2015-03-31.json": {
       "file": "models/lambda-2015-03-31.json",
       "sourceSha256": "595dcd2bd52005ed888323578f9239a4e5b5ccccebf49ee3ab1e0057ce387c54",
-      "subsetSha256": "7f2a8fab0a05c525010c92474468efb684a4e34803f480a9bd1341c4c89a0ed8"
+      "subsetSha256": "96f73ea9aa60e9560fc07b4a68c7b0f274cfc1789282f9ae58d8609ec4880c1c"
     },
     "license-manager/service/2018-08-01/license-manager-2018-08-01.json": {
       "file": "models/license-manager-2018-08-01.json",
       "sourceSha256": "4df617a87f7aed3ad37f1e1c295e95926da09617dfb64cdfc2f74c0c51be5a0d",
-      "subsetSha256": "49659a2f07971ab4a4a5fc13fbdb51b64954b181803bc4d910d3e437814a05e0"
+      "subsetSha256": "c14fa56b920a2ed26a6440fb3116e702fad6aa32717d944b60b83a01b4cfdbbc"
     },
     "lookoutequipment/service/2020-12-15/lookoutequipment-2020-12-15.json": {
       "file": "models/lookoutequipment-2020-12-15.json",
       "sourceSha256": "9da9fb51b2e9c7cd53ae221ed535ccb69b1374c3f22e20424259f34380df3314",
-      "subsetSha256": "a9fc5ed0c3f213c93a358c44597fdc1ca800756a810d319ad283c0707cc3dea5"
+      "subsetSha256": "6cbbeaf960b7b0b9a2d766bfc63995d2b8029c85c90b82b7d91d747fbc4083e8"
     },
     "m2/service/2021-04-28/m2-2021-04-28.json": {
       "file": "models/m2-2021-04-28.json",
       "sourceSha256": "0828b076e8b231ec4ad5c9e6dd06cc95181c2dbe47a5502c62445998b6b1acfb",
-      "subsetSha256": "d5db563cac11e861a515c886443ebe7320545deeb5df0366e7d4239e4954e36e"
+      "subsetSha256": "1d0e50d351f09da06c3d3cf53b54b63004d927bed06c3881cc0424d78486bcb9"
     },
     "macie2/service/2020-01-01/macie2-2020-01-01.json": {
       "file": "models/macie2-2020-01-01.json",
       "sourceSha256": "955d6cb7818b30536daa0a7f928044b0349f7e84cec9400022b024b10c70a6cf",
-      "subsetSha256": "db14cc7e9f50a2de8aa54ec19861e27d2e32096f4e9392be37c841605f3829d1"
+      "subsetSha256": "823fdbd62e4bb02d98eb93648761920f8a7a8cba05e52983c04e2d11b7f95cd9"
     },
     "mailmanager/service/2023-10-17/mailmanager-2023-10-17.json": {
       "file": "models/mailmanager-2023-10-17.json",
       "sourceSha256": "7e6d05d13cac582d3799813fee7936b00013762bfe5314aa4552fb5c8d9800a8",
-      "subsetSha256": "d76960442f375367db612b302b4eb8ebf8b5d484a1ca99e5456bd73119743f6b"
+      "subsetSha256": "2ca00bb07cf8aab84626cf0f3698c1af0480f18cf3ef903662da29043dc06f1d"
     },
     "mediaconnect/service/2018-11-14/mediaconnect-2018-11-14.json": {
       "file": "models/mediaconnect-2018-11-14.json",
       "sourceSha256": "97103176f08eb4be5a3ba326b31964ee4170ebb8824e22f7a9e8dc7417312cc9",
-      "subsetSha256": "30da720841903857bc64ee9cc94005fbb0feb73b47d3d1ac06a7ef201c59c500"
+      "subsetSha256": "3798584a5e536f134a8bd5dc4fe9a196ee68adb256bb458f67f9a93e3f54050f"
     },
     "mediaconvert/service/2017-08-29/mediaconvert-2017-08-29.json": {
       "file": "models/mediaconvert-2017-08-29.json",
       "sourceSha256": "6fad649fc43970a67e959ba68d972c4ba83c1c5ffa305db1559a5bd47619ee40",
-      "subsetSha256": "a9df2fe9a3410cfed18587e4c890d0d3e6e3637ffea71874ffff283d78a19d24"
+      "subsetSha256": "7d4b46aeb82c2fbff9c5da119606af03019316175a145ad94df00ddf50847ce0"
     },
     "medialive/service/2017-10-14/medialive-2017-10-14.json": {
       "file": "models/medialive-2017-10-14.json",
       "sourceSha256": "c46630bd8d1b0739f35a71732ec9cf544cf14a0e080b2fb70edf74f7b93aba9b",
-      "subsetSha256": "92c258055b87f32beeef403385299e3210e3b819a3c963e7d61a0355228e20a5"
+      "subsetSha256": "8c22cd172f6b6e759bdacfc33841b8a2f3ccb9f03912c15736d297b7534ff2a1"
     },
     "mediapackage-vod/service/2018-11-07/mediapackage-vod-2018-11-07.json": {
       "file": "models/mediapackage-vod-2018-11-07.json",
       "sourceSha256": "4ee5951cc62b0d975cf5a99069766f94202c4e84e92b9566ba6fa5bd433681b9",
-      "subsetSha256": "320cd009f379838791d4b1020258a880065fdf3ce74f4561a43597ed4166b272"
+      "subsetSha256": "78ee08ecc9f293430e8095b0aa59421fa9e7df4a9162048a8a092335dfcfc84a"
     },
     "mediapackage/service/2017-10-12/mediapackage-2017-10-12.json": {
       "file": "models/mediapackage-2017-10-12.json",
       "sourceSha256": "4d43c7b611ea16967351b4627ff0d028751174cac77d09b2c9813ca3b4aad09e",
-      "subsetSha256": "e0f82f30c99bde9ee49d08a2be58a45c5dc9875526d60409326a6dfd675cde79"
+      "subsetSha256": "8305b582fa702d1d22bc8ba0d87ab2319f854a5ad6ac59269fbcab5a3540952f"
     },
     "mediapackagev2/service/2022-12-25/mediapackagev2-2022-12-25.json": {
       "file": "models/mediapackagev2-2022-12-25.json",
       "sourceSha256": "c33a32d5b2a911646310fc3612b7d73d9edd0140449c200ad9a32ff57e0177ee",
-      "subsetSha256": "866d9b5a5a70e4bfb06ffe935e30d129b46cfee9800e9ebad320154a9376c4c0"
+      "subsetSha256": "76a85bb6501088541e18cc810d35829032f41ecda266225affb23abce8913784"
     },
     "mediatailor/service/2018-04-23/mediatailor-2018-04-23.json": {
       "file": "models/mediatailor-2018-04-23.json",
       "sourceSha256": "9749e439ae084109157aec94c9fe66cdfcd5c0f3c7c10ebd363329fb3451102f",
-      "subsetSha256": "5141457eea5f152a9a8330bab755996f87d675bbd156c42177c6bd3d08025e5c"
+      "subsetSha256": "7b078e304ca111775ad1a769663c1a3f511eda328ce9727365439abfab2cc74a"
     },
     "medical-imaging/service/2023-07-19/medical-imaging-2023-07-19.json": {
       "file": "models/medical-imaging-2023-07-19.json",
       "sourceSha256": "3d9dc6daa81b49f6c4aaef88631a9c3d823e15e0f8652bd3af5c4b213dcbdf19",
-      "subsetSha256": "1a7a214874434e919f2020f7c147831fde8a3786be0a218b7ca9b7c216f07f6c"
+      "subsetSha256": "6000fbcdfb1fc35b0fc7eaf568353b3356fd897fa96db9257caa8e1c46a09ac8"
     },
     "mgn/service/2020-02-26/mgn-2020-02-26.json": {
       "file": "models/mgn-2020-02-26.json",
       "sourceSha256": "8e742eeb56b96ff78d8332fc2bd89af2891e5ed21f99a7fb43d8b2a95d22db98",
-      "subsetSha256": "42be0cad61414b8d245cdc99baec01be065791e3f3f320a7c988840589179caf"
+      "subsetSha256": "e36a2db32cc44b6452d0c122b244927b106b9acf895662d5f9e519412570fd4c"
     },
     "mwaa/service/2020-07-01/mwaa-2020-07-01.json": {
       "file": "models/mwaa-2020-07-01.json",
       "sourceSha256": "4b66b349f8f02d9bdbe7b84897364da4b9e7b95e8f7d2f2ef40e9bdc8745a8fb",
-      "subsetSha256": "07be1a2d8e003e90eeb9160414b7ed1ec47fe0a82827754dd99e19a1dda444a7"
+      "subsetSha256": "be1d97406ee24978b2dea5d828637a8a886d2df668ae74772d627f89a8cda1ad"
     },
     "network-firewall/service/2020-11-12/network-firewall-2020-11-12.json": {
       "file": "models/network-firewall-2020-11-12.json",
       "sourceSha256": "28e889751b5cf1374412f70b4b31770ccfbb3fd868ae864538afabf65384b06a",
-      "subsetSha256": "ecb02177919e0553bfefdd16c49065f11314ac62cfcd7c98b642b0a6432b7e7b"
+      "subsetSha256": "f522dfb48a937cf92bc0ea5613fe818ca297a3e88f12a4dac4bf8f51fd820ec1"
     },
     "notifications/service/2018-05-10/notifications-2018-05-10.json": {
       "file": "models/notifications-2018-05-10.json",
       "sourceSha256": "d872475b481d272ae1b26198a730907ba85d03a1f7fa7b60e6023baf3e5dd551",
-      "subsetSha256": "c8701fa329ddb283fcd85980c571e9e8110fb9b85b669d7cec0f80d4674023d0"
+      "subsetSha256": "f2f4d64ac5d910ff13704de55a5db1b24f052dad39c99aff16d35b75c544a48a"
     },
     "nova-act/service/2025-08-22/nova-act-2025-08-22.json": {
       "file": "models/nova-act-2025-08-22.json",
       "sourceSha256": "135733771a656e4a6b12663e065ff05d6679398e84e60216b73732277c08ab20",
-      "subsetSha256": "434061783ab5f885bbbf8135fefd63424d5f5df6f4fb10f037a26225c3348665"
+      "subsetSha256": "f2eb99cd96e7f72e8401ef30ebabcd576d7ff00e1a33a2bb64b7c348fd706cfa"
     },
     "odb/service/2024-08-20/odb-2024-08-20.json": {
       "file": "models/odb-2024-08-20.json",
       "sourceSha256": "33ebfe46d63d991946c4b337428b7cbf2a3be10b87ff53b0cb4fe69730392e27",
-      "subsetSha256": "fa3299aa6552dc72b617e2699516b24f69ba9e364dca1ca9acbf722fa003c111"
+      "subsetSha256": "f821528abbf8215003cbd473472c3ebee00a24a1a9db4f5b74234f94d0b8023d"
     },
     "omics/service/2022-11-28/omics-2022-11-28.json": {
       "file": "models/omics-2022-11-28.json",
       "sourceSha256": "ad318cdf2a2d5026def389f5afc8123cf42b5d7339fe85922f80b282ac750c35",
-      "subsetSha256": "e4e7491a2602f328c6f4857e110f16b6085a350661b2658847ed070f1461e5db"
+      "subsetSha256": "131398079359915b1526e7d8044aeae00f4c2bff51669cfba076023f3c7f9c26"
     },
     "opensearchserverless/service/2021-11-01/opensearchserverless-2021-11-01.json": {
       "file": "models/opensearchserverless-2021-11-01.json",
       "sourceSha256": "a0507d78c8bdec6faf31df2e94277d2a5722674788a96eabe23890e1f760f060",
-      "subsetSha256": "4780acb51c2038a2ba55214d3ff942dffd49344bea5b918f89c574e0274f32f8"
+      "subsetSha256": "c74755b6be5deaebc386b470a280acd46f5a243fd76092223c47dabcf15d283f"
     },
     "outposts/service/2019-12-03/outposts-2019-12-03.json": {
       "file": "models/outposts-2019-12-03.json",
       "sourceSha256": "0c52837db231b007cd228ccb8de005b4498b6ec1abc37c905aa7053929cf79dc",
-      "subsetSha256": "33a9921f122c044a78ce83a4a53419384a980f4a219768554b527313cd15695e"
+      "subsetSha256": "cf1cd07dbc5b9c6bef7d83fa63c486c00bb507f893914f19076b5b5ddc69f856"
     },
     "payment-cryptography/service/2021-09-14/payment-cryptography-2021-09-14.json": {
       "file": "models/payment-cryptography-2021-09-14.json",
       "sourceSha256": "4aa023efb919d68df4c06aeed23a26c0fe05ec864b3e08a16e9be2908db8575d",
-      "subsetSha256": "a70f2415da56590b5cf5ee8648b071bf63939fd2a76c6f5f85852775ad43f931"
+      "subsetSha256": "7b55a61a54a23f63118f582104ba0a44b329ab3b4b5d73bda1a070f1ab624297"
     },
     "pcs/service/2023-02-10/pcs-2023-02-10.json": {
       "file": "models/pcs-2023-02-10.json",
       "sourceSha256": "7b4e9f41f09ff396758a40920bba55cda7067e30a1499dc96f337ef2187c0fca",
-      "subsetSha256": "3e1ccc68ce5f7df4699dd107b1f899fe76a5d4881223918b3900b2fb2061c09b"
+      "subsetSha256": "40503e85eee1eb8926089f75cb708993ec2ad586ae83ac5b5b377b588fc79f8d"
     },
     "personalize/service/2018-05-22/personalize-2018-05-22.json": {
       "file": "models/personalize-2018-05-22.json",
       "sourceSha256": "1cd24395bc9e495437ab25660de92bc293bedaaf4ef513b33087866217457912",
-      "subsetSha256": "e1edcb872956d41efce4e3b8efc9a94c24c69cc49672bb7980ae7348123276a5"
+      "subsetSha256": "096dc42ea80ede10e7519e2e7b568d4bd76b93c273f1c13b4a48df117458a852"
     },
     "pinpoint/service/2016-12-01/pinpoint-2016-12-01.json": {
       "file": "models/pinpoint-2016-12-01.json",
       "sourceSha256": "79595a61c51bb24e1704f481c6faa3526f7f80a90fdeb94964c8384e46a3d39f",
-      "subsetSha256": "27839a175995cc85d9c47f152839c7b1c347b3deb17325a3d87b7feb70a1bb81"
+      "subsetSha256": "0143b871162ab421309b68625170853c81b94ac9654dc88e085fe4d3844d637b"
     },
     "pipes/service/2015-10-07/pipes-2015-10-07.json": {
       "file": "models/pipes-2015-10-07.json",
       "sourceSha256": "9ab8abf2fa45ef8dd89a0ec37aca1b374a889ba472d2f52e88057f66b79e4f05",
-      "subsetSha256": "c36fe095c981166c4fbf1be122fc17e27699131ff712b014b4dcc8f16e7cae9d"
+      "subsetSha256": "1b2d42873d5d964d10b1459f1716e71d016bc770f09ef57317b2f20c0b6cf3b4"
     },
     "proton/service/2020-07-20/proton-2020-07-20.json": {
       "file": "models/proton-2020-07-20.json",
       "sourceSha256": "97e381a75da5de3e9f33d6229900a3a1be42c4b6ab901758855d768d78bb17e0",
-      "subsetSha256": "2f8e3cc5095d615b44265722fd37780659043527f8324a6451405f473d67615b"
+      "subsetSha256": "52c68f67a8b7736debd269b53b1e05c81d34e2e022f388f04aed8e62f99adbb2"
     },
     "qbusiness/service/2023-11-27/qbusiness-2023-11-27.json": {
       "file": "models/qbusiness-2023-11-27.json",
       "sourceSha256": "0144dc238009cbba58506f2a84055722c4d37ae3ed907116323ddabeef46d57d",
-      "subsetSha256": "2884659d900826991d42bad3ecdd6030c31ac1067b57384ff02ec515319a39ba"
+      "subsetSha256": "5e0ac2c44ddcce1148959183506431d56cef10961d9884909ac4b35ebc767af7"
     },
     "rds/service/2014-10-31/rds-2014-10-31.json": {
       "file": "models/rds-2014-10-31.json",
       "sourceSha256": "ece1de6b0278c9327d5e79ac62032ca8c6c1f76e4d24fef95e7d3641f0459020",
-      "subsetSha256": "2305bbedf817ce78358d3cfce0350c3b7dc34a0ac01d5ad0503c1c1d9d0df7cc"
+      "subsetSha256": "64db23e2e16eea1781c22d8276cc1da55b8deb3e7d2bb94b0eeb82fd73c9ae72"
     },
     "resiliencehubv2/service/2026-02-17/resiliencehubv2-2026-02-17.json": {
       "file": "models/resiliencehubv2-2026-02-17.json",
       "sourceSha256": "63bfcfdaa37c68c13c600b108439435a15360a27fdb96221377a366c0c427593",
-      "subsetSha256": "0230b11cabe10992154d1f6f60b938940b8fe74471628073bda24fa517832dfc"
+      "subsetSha256": "f3b10f515908a8bc1512ed365b0f6fcff372dca899ca04203a48f9d11a2cbcee"
     },
     "rolesanywhere/service/2018-05-10/rolesanywhere-2018-05-10.json": {
       "file": "models/rolesanywhere-2018-05-10.json",
       "sourceSha256": "ec05a45aa6b4e4008780aa019e1f0df11df55c63b34d8ef59c20844498dadaef",
-      "subsetSha256": "38dd67778d29e908c8cc804d8731ec92fc9719646758a295f4da0864af269f28"
+      "subsetSha256": "93bdcd91a706990b7e0478a083cbc19b20872802e666e77f072aed91e209e04b"
     },
     "route53-recovery-readiness/service/2019-12-02/route53-recovery-readiness-2019-12-02.json": {
       "file": "models/route53-recovery-readiness-2019-12-02.json",
       "sourceSha256": "22dd4f313cf7f5c42204f571247d7169bc0042d7eb7588b036d271db4a5cef5b",
-      "subsetSha256": "d76a86fb513aefa10fca0531d2a0830c6f9bca4828395d0eedf48dbb4d7e62a7"
+      "subsetSha256": "35acc6dddd6163e122aecfb9a8154c2989bdadf58685451f21a95f739a4c3161"
     },
     "route53profiles/service/2018-05-10/route53profiles-2018-05-10.json": {
       "file": "models/route53profiles-2018-05-10.json",
       "sourceSha256": "170cf11ffd8fb2683d76023dce5367b48b07639290d613ae002b05ae90dfaba9",
-      "subsetSha256": "5626f25755cf3f5062db4fd26076e1a0f916361e45565e6139756677abc31a5f"
+      "subsetSha256": "d83e988ce047d52f01607cf6693b355edcbba5efb2eadb9af3d11f98a91d21a7"
     },
     "route53resolver/service/2018-04-01/route53resolver-2018-04-01.json": {
       "file": "models/route53resolver-2018-04-01.json",
       "sourceSha256": "5f58cbcaf19e9ca4916816c06241f7e3bc6edf38ec08d1a77ce1e02006a4e2e8",
-      "subsetSha256": "96a71113ec3d97d7f3c3badfd7b7bb22713c650613b750d6bc9f7b28d64497f0"
+      "subsetSha256": "cb874f727cebf757cd2173a46489a06ce7d3950add0ace1217f6c06005970851"
     },
     "s3vectors/service/2025-07-15/s3vectors-2025-07-15.json": {
       "file": "models/s3vectors-2025-07-15.json",
       "sourceSha256": "627c33dc6e867bd3a96821bad2c5cca4ecc0e17a98b6835fc3a8d274061a6e46",
-      "subsetSha256": "4a237e71192db04ab1e3ea05ee4460e5d2534f2713eefb1f19b906be2a00eb05"
+      "subsetSha256": "c7709c40eab8076bd8a51b83ae33598d48cb36e64e4dbfd320dc1cadc286b7c7"
     },
     "sagemaker/service/2017-07-24/sagemaker-2017-07-24.json": {
       "file": "models/sagemaker-2017-07-24.json",
       "sourceSha256": "d13d6714b2160891023ff9eb46b1e956c63cb4c1165aab7e27162b50da88557c",
-      "subsetSha256": "74704a8c3dd0b2605f978f5bb75132ee0decc2ecda83c89031f21876c8eb79ec"
+      "subsetSha256": "8bd5134dddb857871a3f7b4a3432ac11210b5faeed38869682007ce28cf9d96d"
     },
     "scheduler/service/2021-06-30/scheduler-2021-06-30.json": {
       "file": "models/scheduler-2021-06-30.json",
       "sourceSha256": "7917c15f45862b8579b6d798cd9d884a0c9251d267b50f4892bca4d5e8d42ad9",
-      "subsetSha256": "0c3e2819d91bef92e976aee4598eeb1ca050f861938de5cb63aa87361b14e0d5"
+      "subsetSha256": "3515786c1283276407fe3b45f9b45f67699ca9d21b12def07c8ff26320213e47"
     },
     "schemas/service/2019-12-02/schemas-2019-12-02.json": {
       "file": "models/schemas-2019-12-02.json",
       "sourceSha256": "801f795ec5f7973bcd2c6bae14dc03859c3e54e718f3e4b85b8445f47d798a68",
-      "subsetSha256": "6a1eba34610d1ea5350ac54ea03e5b314b5b7c85d04b65f7a005565293b07997"
+      "subsetSha256": "3aa7dd176a16b658359ac6cc244e7ab3cbf7690fec9f71929b52d84705fcaaf6"
     },
     "secrets-manager/service/2017-10-17/secrets-manager-2017-10-17.json": {
       "file": "models/secrets-manager-2017-10-17.json",
       "sourceSha256": "2738bd8ded2b25834c71089cf71232738972d78befa80fa168ea476978ac8604",
-      "subsetSha256": "cacc6d116fc05e8bf4edfb9773f7c5d0c967fb00a0b1f6434c6106c0757fa940"
+      "subsetSha256": "2c7156da069cf5561604df667f2a8b28d35896ea7b00033710d7d9e43c9e8fdc"
     },
     "securityagent/service/2025-09-06/securityagent-2025-09-06.json": {
       "file": "models/securityagent-2025-09-06.json",
       "sourceSha256": "26c14d384f79c859a5528aa7f6e361c801f68ff171a309380ace454f8a5fcdb1",
-      "subsetSha256": "1158cadf3ad30bf77a6d752e1dccd38171009d66984c6a5d5a7bfac9e81c1ccf"
+      "subsetSha256": "8c6bf453b63ba014d700109bc491b56cfeffccba3feb3b65f2c5a89e247a2577"
     },
     "securityhub/service/2018-10-26/securityhub-2018-10-26.json": {
       "file": "models/securityhub-2018-10-26.json",
       "sourceSha256": "166cd45a727aaf252f96587ecd1f234fc6a6f27f12f055c4d6396d4601759782",
-      "subsetSha256": "348129ec0e79eeaae1a0c37b7c92c984f0b9f6f7ffdba8b01d37bf84e43af085"
+      "subsetSha256": "377610d867ea99e33785ea7bd4a00c928d153505dfe3abce2542146045bc4802"
     },
     "serverlessapplicationrepository/service/2017-09-08/serverlessapplicationrepository-2017-09-08.json": {
       "file": "models/serverlessapplicationrepository-2017-09-08.json",
       "sourceSha256": "25d74570261704fb96d31565e51899fa7e758c3cf608592489854e2a6372527d",
-      "subsetSha256": "c39febc19c6c35f12a92cc9cb83a9f9ab74b442354ad4232a67f7dc7d187a9e0"
+      "subsetSha256": "332f38b513b70d5f33d0575ec73de6cab1a44d9baa02976f9fd82517563eb064"
     },
     "service-catalog/service/2015-12-10/service-catalog-2015-12-10.json": {
       "file": "models/service-catalog-2015-12-10.json",
       "sourceSha256": "6abf3b40b5a9ff390b36a247a3c1e5d38c8e5ad04e377dd04290e9a1bb85f12e",
-      "subsetSha256": "7a81d2b9742c2ac5c709d5a5653f889f53b71b5cc4dc3c4be097c5cad67a1ce8"
+      "subsetSha256": "2a2b80164f8967360b2106e6eaa2ea77715972f2fb1be2119c6f5deece2c26d7"
     },
     "servicediscovery/service/2017-03-14/servicediscovery-2017-03-14.json": {
       "file": "models/servicediscovery-2017-03-14.json",
       "sourceSha256": "8156815ba7a3e4cb6b369234bb7e75698c3ba9962eac3b76f407cd55274fc7d7",
-      "subsetSha256": "acbb54bc05b0c2c924948b225f5e9bd3f175c41e0c2cd7acb93a306711967e75"
+      "subsetSha256": "37c9bb96e97e448bfc253467d889b885883c6bb2c2e7f3e41ea024c03d07a759"
     },
     "ses/service/2010-12-01/ses-2010-12-01.json": {
       "file": "models/ses-2010-12-01.json",
       "sourceSha256": "eb061a201fd24d227bc701e9a188146c1ccf39faae04fef37df2110bfbd152d3",
-      "subsetSha256": "ec09882f03ae727c95371737d9f3ef4bef5d913fe0ab09b7c41817f59aa7127a"
+      "subsetSha256": "46a0ebe10d2c92dd9cce10a5344b493e84e1b615d50825bf75afdb8037433bf9"
     },
     "sesv2/service/2019-09-27/sesv2-2019-09-27.json": {
       "file": "models/sesv2-2019-09-27.json",
       "sourceSha256": "b6ee9e6b19642fedddae1fd4b5c6235d88c5b4ce6b244f21c0b57f721d12a233",
-      "subsetSha256": "714e20a6ccc0fbe8615e68dc22a498eba8cf2c2aa3db303c3e320f415d3480fe"
+      "subsetSha256": "a123c936273956eb4f578f3c84cc5ad70126241285afd7bed7a9badfbf4e3284"
     },
     "shield/service/2016-06-02/shield-2016-06-02.json": {
       "file": "models/shield-2016-06-02.json",
       "sourceSha256": "639fe74bff059d2e4884fc5883e70fbd55ea62c318d0cd746358be355d04342e",
-      "subsetSha256": "eb27e3a5d008eaa277a1b93e1e08d451e76e1c059296718fff7cb1833bfdea43"
+      "subsetSha256": "39ff53d7487d60433e6e475098807b7d6ed9e41ddac0f95e34f66ad62f93baff"
     },
     "signer/service/2017-08-25/signer-2017-08-25.json": {
       "file": "models/signer-2017-08-25.json",
       "sourceSha256": "1145d7c9e3867eeb629d1aa934b8da3a2031102c9f5382dcb898fd8ae7cd19d3",
-      "subsetSha256": "ce4181cababaefe2774486af545d9c3a4dbb4787dcb4a436d0189be753c49021"
+      "subsetSha256": "8a06952a373f5fa011a312c51a9e582b4f93f35c530646340b0907c29c875930"
     },
     "sqs/service/2012-11-05/sqs-2012-11-05.json": {
       "file": "models/sqs-2012-11-05.json",
       "sourceSha256": "f34a7d2560fb9776206fb35958b8d0fc5f17d33f377bb7512d55a34a8c0c78f0",
-      "subsetSha256": "cb9ddaf9530f61cbaa3a7442fd35729753744a0dc2543e00ec6eb3730b51dd7a"
+      "subsetSha256": "f0acd44b4eb57962c31175286406585c8bb4a5d0245a1402279b5a61db977728"
     },
     "ssm-quicksetup/service/2018-05-10/ssm-quicksetup-2018-05-10.json": {
       "file": "models/ssm-quicksetup-2018-05-10.json",
       "sourceSha256": "faa363535a435d522becae7ab4d0d8b1fba1f2a68433f8e20b6c26d6da3613b6",
-      "subsetSha256": "d01e7c32eae128b679d83149bf41d64945ea2e472d87847abc3c28dd311759ce"
+      "subsetSha256": "570aa2d0ad5cdc6a7ac8121a9dce0b177f96ac8a3515974759523fcab4835d66"
     },
     "ssm/service/2014-11-06/ssm-2014-11-06.json": {
       "file": "models/ssm-2014-11-06.json",
       "sourceSha256": "23a5af746171632c4e9eabd6e5c7ea32cfc3c772307fb81e8cc920b17992a61c",
-      "subsetSha256": "789f71ce16e9a88b4cc3bc1564a4397514322c46294f36801539cedd9dcefebf"
+      "subsetSha256": "30cea6013dbad10f7e75641aa0e53d1ad7291a2a479aafe91ee59b7d2ea7170e"
     },
     "sso-admin/service/2020-07-20/sso-admin-2020-07-20.json": {
       "file": "models/sso-admin-2020-07-20.json",
       "sourceSha256": "55abac354aee5b5b9583291e8798141c2e56f430fff8a1a2e4686293b7e31c2e",
-      "subsetSha256": "7ae5da82bfafdd089faa2752dffed9646799b672fa3dc347d8a34f6ffe9249af"
+      "subsetSha256": "47a97a3b9f45b7715789b02ad974a1a512610d471fa031675f04761bd8dd5edd"
     },
     "timestream-influxdb/service/2023-01-27/timestream-influxdb-2023-01-27.json": {
       "file": "models/timestream-influxdb-2023-01-27.json",
       "sourceSha256": "dc3fe9a84bd31db133c83b5f913679453201cda163be1a4c784805a5002a465f",
-      "subsetSha256": "cd81bcbcad5a2cd9a2263cebc4c90398e0f98d1cb3c0ef8df06ef9f3fbb58f89"
+      "subsetSha256": "380a6aa0b2ec8a563031863fbed2e1af0c42a916fa28fc4b47bf626b456f63e2"
     },
     "transfer/service/2018-11-05/transfer-2018-11-05.json": {
       "file": "models/transfer-2018-11-05.json",
       "sourceSha256": "a3f19665a141dea8777bede9628bc57a9248fe093f19fc15327f568272e19607",
-      "subsetSha256": "24572f8af944ecf68f9faa68f7ab5aa40a4135355f1055cd3c90f1aa007f7b8c"
+      "subsetSha256": "3ceb10173a41915e7539490a6eeb8c5f53144c80ac73cd8aaf8a59819d2e8ccc"
     },
     "verifiedpermissions/service/2021-12-01/verifiedpermissions-2021-12-01.json": {
       "file": "models/verifiedpermissions-2021-12-01.json",
       "sourceSha256": "26caa56d6911fda01b4c77477bef353d385a827428cf4a6d8944238f5a1a45a4",
-      "subsetSha256": "d728b7e3a16c5f7275d2e6502fcb7872f444d824111ccf7a7578f09bab656fff"
+      "subsetSha256": "c592e44b5996536d9ffec4e3e844df9e623b838535582d20b59f075385971507"
     },
     "voice-id/service/2021-09-27/voice-id-2021-09-27.json": {
       "file": "models/voice-id-2021-09-27.json",
       "sourceSha256": "6773374810e7e0048b2123857b9a8e95b589c36fa530908625ac92333b9a7d86",
-      "subsetSha256": "7407b4b52a367bb1aac1ae668743965ac33074deb72782eafbe8ed4a55a2631c"
+      "subsetSha256": "0caaee92c6ee8fdd24df82d1437278e86e10521646161b11cedf4c3fcddb2fc9"
     },
     "vpc-lattice/service/2022-11-30/vpc-lattice-2022-11-30.json": {
       "file": "models/vpc-lattice-2022-11-30.json",
       "sourceSha256": "1d4a53307e88624cc84190e4f96948adae6b8d657e4dcf603828fb9a19f40afd",
-      "subsetSha256": "d4a67d283676eae3c0da5ca14c57507c97f9c5f8d56b95e754f07fac5fdf0b4b"
+      "subsetSha256": "3507099a3fec4a3c1182e9bf5572e1ea85152597ddfd3d07161964f4a89d2f70"
     },
     "wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json": {
       "file": "models/wellarchitected-2020-03-31.json",
       "sourceSha256": "060d12694f778b0081e34932728f19badbd99c7d5ccba9f5dbd9ff384cefc4e3",
-      "subsetSha256": "5ffd4a8beb58b8749ce56c2866f7603ac887b64d6a6c0cd75af31502ab1e16fe"
+      "subsetSha256": "624cb5cd2dcbae749f82aea88e717ff15dd3ab13ccf72d9991cb5f25f55bdf66"
     },
     "wickr/service/2024-02-01/wickr-2024-02-01.json": {
       "file": "models/wickr-2024-02-01.json",
       "sourceSha256": "84742f14a1f34f6a66a5efb93ef5a91f537fad019cb0fddabd6763293a3d22e6",
-      "subsetSha256": "8ae59d4879b0c33d57b4072f5f6e55e3f960654583986def1099ee06994318be"
+      "subsetSha256": "db84028744a43fb432bce83085a55b465fefe0e68029a33dd2fb192955e04eba"
     },
     "workspaces-instances/service/2022-07-26/workspaces-instances-2022-07-26.json": {
       "file": "models/workspaces-instances-2022-07-26.json",
       "sourceSha256": "288391e01f1c9260c7060d57d95b6fd98cc45813b3e4a3a5ead4c63b4b71fa95",
-      "subsetSha256": "1e035c54b78bbc67a299ee5fe5aab77623d96daa0df31854a6110d582055b39a"
+      "subsetSha256": "f2a628b1e9aa5d7332da7946a2ba248716ca51127ccf63d118e90c9d21074555"
     },
     "workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json": {
       "file": "models/workspaces-web-2020-07-08.json",
       "sourceSha256": "77098e3a28a21f6ec6cdef6c4772da2d1a84b1d542ff721a21c01549cfa3b6cc",
-      "subsetSha256": "70fd84b0f0a4d2ddea531faa0067a7e63bfdc800ad68fd5961cf46e835cc44e8"
+      "subsetSha256": "c4734513a7c26836c0089c36b2d972ea0ad9f6fa1b7c97cb6eb75a52c154fadd"
     },
     "xray/service/2016-04-12/xray-2016-04-12.json": {
       "file": "models/xray-2016-04-12.json",
       "sourceSha256": "ab1a0cfc7a244eb934542d67949631b6b353d1165e263e8cd2dcaff84c9f554c",
-      "subsetSha256": "89d30d1c06b6f9ac12a54888ecadff31eb133199722388b7485fe96f91d76293"
+      "subsetSha256": "092c853fbd61a36f7df55cd44a7c36672fdae70c1ca8c53d9c184ce4e4823c5c"
     }
   },
   "schemas": {

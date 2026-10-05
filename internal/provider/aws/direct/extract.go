@@ -390,11 +390,11 @@ func subsetModel(raw []byte, operations []string) ([]byte, error) {
 			svc[k] = v
 		}
 	}
-	// Endpoint tests, the decision-diagram form of the rules and IAM
-	// condition keys are large and read by nothing generated from the
-	// subset; the rule set stays, for a model with no endpoint prefix.
+	// The decision-diagram form of the rules and IAM condition keys are
+	// large and read by nothing generated from the subset. The rule set
+	// stays, and so do its endpoint tests, which check the evaluator.
 	if traits, ok := svc["traits"].(map[string]any); ok {
-		for _, t := range []string{"smithy.rules#endpointTests", "smithy.rules#endpointBdd", "aws.iam#defineConditionKeys"} {
+		for _, t := range []string{"smithy.rules#endpointBdd", "aws.iam#defineConditionKeys"} {
 			delete(traits, t)
 		}
 	}
