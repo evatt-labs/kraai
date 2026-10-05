@@ -33,6 +33,9 @@ type Client struct {
 	// RetryDelay, when set, replaces the backoff between attempts of a
 	// request that failed transiently.
 	RetryDelay time.Duration
+	// Account returns the account id, for a property built from it that
+	// no read returns; nil leaves such a property unread.
+	Account func(context.Context) (string, error)
 }
 
 // APIError is a service's refusal of a read.
@@ -201,12 +204,16 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		}
 		values = append(values, b)
 	}
+	vars, err := c.templateVars(ctx, r, identifier)
+	if err != nil {
+		return nil, nil, false, err
+	}
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
 			return nil, nil, false, r.absence(err)
 		}
-		return r.readXML(body, &walk{vars: identifier})
+		return r.readXML(body, &walk{vars: vars})
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
@@ -216,7 +223,7 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		return nil, nil, false, errIncomplete(typeName)
 	}
 	root, _ := out.(map[string]any)
-	w := &walk{vars: identifier}
+	w := &walk{vars: vars}
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
 		out = obj[step.Name]

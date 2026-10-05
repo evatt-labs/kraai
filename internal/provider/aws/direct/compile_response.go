@@ -202,6 +202,13 @@ func (c *callCompiler) fields() {
 			if f.Kind == "identifier" && !c.want[f.Member] {
 				c.fail("%s reads {%s}, which is not the primary identifier", f.Property, f.Member)
 			}
+			if f.Kind == "template" {
+				for _, p := range placeholders(f.Member) {
+					if !c.want[p] && p != regionPlaceholder && p != accountPlaceholder {
+						c.fail("%s is built from {%s}, which is neither the primary identifier, {region} nor {account}", f.Property, p)
+					}
+				}
+			}
 			for _, cond := range f.Unless {
 				i := slices.IndexFunc(c.r.Fields, func(top Field) bool { return top.Property == cond.Field.Property })
 				if i < 0 || c.r.Fields[i].Kind != "scalar" || len(cond.Values) == 0 {

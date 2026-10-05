@@ -86,7 +86,7 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 				path = strings.Replace(path, "{"+b.Member+"}", escapeLabel(b.Value, false), 1)
 			}
 		case "query":
-			query.Set(b.Name, b.Value)
+			query.Add(b.Name, b.Value)
 		case "header":
 			headers.Set(b.Name, b.Value)
 		case "form":

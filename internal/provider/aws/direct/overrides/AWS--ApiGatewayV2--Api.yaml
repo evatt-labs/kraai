@@ -32,7 +32,80 @@ properties:
   # The schema types Tags as a flat map, which is what the API returns.
   Tags: Tags
   Version: Version
-skip:
-  ExecuteApiArn: Cloud Control builds it from the account and region, which GetApi's output carries neither of.
+  # GetApi's output carries neither the account nor the region.
+  ExecuteApiArn: "arn:aws:execute-api:{region}:{account}:{ApiId}"
+create:
+  operation: CreateApi
+  name:
+    property: Name
+    tag: kraai:resource-name
+    maxLength: 128
+  input:
+    Name: "{Name}"
+    ProtocolType: "{ProtocolType}"
+    ApiKeySelectionExpression: "{ApiKeySelectionExpression}"
+    CorsConfiguration: "{CorsConfiguration:wire}"
+    Description: "{Description}"
+    DisableExecuteApiEndpoint: "{DisableExecuteApiEndpoint}"
+    IpAddressType: "{IpAddressType}"
+    RouteSelectionExpression: "{RouteSelectionExpression}"
+    Tags: "{Tags}"
+    Version: "{Version}"
+  identifier:
+    ApiId: ApiId
+update:
+  - operation: UpdateApi
+    properties: [ApiKeySelectionExpression, CorsConfiguration, Description, DisableExecuteApiEndpoint, IpAddressType, Name, RouteSelectionExpression, Version]
+    input:
+      ApiId: "{ApiId}"
+      ApiKeySelectionExpression: "{ApiKeySelectionExpression}"
+      CorsConfiguration: "{CorsConfiguration:wire}"
+      Description: "{Description}"
+      DisableExecuteApiEndpoint: "{DisableExecuteApiEndpoint}"
+      IpAddressType: "{IpAddressType}"
+      Name: "{Name}"
+      RouteSelectionExpression: "{RouteSelectionExpression}"
+      Version: "{Version}"
+  # No read returns the API's ARN, which the tag calls are addressed by; it
+  # carries no account.
+  - tags:
+      property: Tags
+      add:
+        operation: TagResource
+        input:
+          ResourceArn: "arn:aws:apigateway:{region}::/apis/{ApiId}"
+          Tags: "{added:entries}"
+      remove:
+        operation: UntagResource
+        input:
+          ResourceArn: "arn:aws:apigateway:{region}::/apis/{ApiId}"
+          TagKeys: "{removed}"
+delete:
+  operation: DeleteApi
+  input:
+    ApiId: "{ApiId}"
+  absentErrors: [NotFoundException]
+unsupported:
+  Body: an OpenAPI definition is imported by ImportApi, which no direct call makes
+  BodyS3Location: an OpenAPI definition is imported by ImportApi, which no direct call makes
+  BasePath: applies only to an imported OpenAPI definition
+  FailOnWarnings: applies only to an imported OpenAPI definition
+  DisableSchemaValidation: applies only to an imported OpenAPI definition
+  CredentialsArn: quick create also makes a route, an integration and a stage, which a direct delete would not remove
+  RouteKey: quick create also makes a route, an integration and a stage, which a direct delete would not remove
+  Target: quick create also makes a route, an integration and a stage, which a direct delete would not remove
+# An HTTP API with no route, integration or stage bills nothing.
+lifecycle:
+  create:
+    ProtocolType: HTTP
+    Description: kraai lifecycle probe
+    CorsConfiguration: {AllowOrigins: [https://example.com], MaxAge: 60}
+  update:
+    Description: kraai lifecycle probe, updated
+    CorsConfiguration: {AllowOrigins: [https://example.org], AllowMethods: [GET], AllowCredentials: true}
+    DisableExecuteApiEndpoint: true
+    IpAddressType: dualstack
+    Version: "2"
+    Tags: {team: kraai}
 absentIds:
   - abcde12345

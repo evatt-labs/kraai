@@ -30,6 +30,13 @@ func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[strin
 			}
 			continue
 		}
+		if f.Kind == "template" {
+			// Built only when every part is known.
+			if v := substitute(f.Member, w.vars).(string); !placeholderName.MatchString(v) {
+				out[f.Property] = v
+			}
+			continue
+		}
 		// Walk Via to every structure holding the member; a list step
 		// fans out, making the property a list of the member's values.
 		holders, projected := []map[string]any{obj}, false

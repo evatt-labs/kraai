@@ -236,6 +236,9 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 	for _, opt := range opts {
 		opt(c)
 	}
+	if c.direct != nil {
+		c.direct.Account = c.AccountID
+	}
 	return c, nil
 }
 
