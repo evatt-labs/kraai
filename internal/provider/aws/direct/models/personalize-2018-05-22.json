@@ -1648,6 +1648,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.personalize#InvalidNextTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.personalize#ItemAttribute": {
       "traits": {
         "smithy.api#length": {
@@ -1666,6 +1678,18 @@
         "smithy.api#pattern": "^arn:aws.*:kms:.*:[0-9]{12}:key/"
       },
       "type": "string"
+    },
+    "com.amazonaws.personalize#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.personalize#MetricName": {
       "traits": {
@@ -1773,6 +1797,30 @@
     },
     "com.amazonaws.personalize#PerformIncrementalUpdate": {
       "type": "boolean"
+    },
+    "com.amazonaws.personalize#ResourceAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.personalize#ResourceNotFoundException": {
       "members": {
@@ -2011,6 +2059,30 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.personalize#TooManyTagKeysException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.personalize#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.personalize#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.personalize#TrackingId": {
       "traits": {

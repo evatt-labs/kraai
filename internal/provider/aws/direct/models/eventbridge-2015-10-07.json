@@ -1524,6 +1524,17 @@
       "type": "service",
       "version": "2015-10-07"
     },
+    "com.amazonaws.eventbridge#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.eventbridge#Action": {
       "traits": {
         "smithy.api#length": {
@@ -2586,6 +2597,17 @@
         "smithy.api#pattern": "^arn:aws[a-z-]*:iam::\\d{12}:role\\/[\\w+=,.@/-]+$"
       },
       "type": "string"
+    },
+    "com.amazonaws.eventbridge#IllegalStatusException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.eventbridge#IncludeDetail": {
       "members": {
@@ -4184,6 +4206,17 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.eventbridge#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.eventbridge#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.eventbridge#Timestamp": {
       "type": "timestamp"

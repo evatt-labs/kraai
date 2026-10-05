@@ -45,6 +45,30 @@
       },
       "type": "string"
     },
+    "com.amazonaws.configservice#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#ConformancePackTemplateValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.configservice#Connector": {
       "members": {
         "arn": {
@@ -143,6 +167,617 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#IdempotentParameterMismatch": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InsufficientDeliveryPolicyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InsufficientPermissionsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidConfigurationRecorderNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidDeliveryChannelNameException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidExpressionException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidLimitException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidNextTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidParameterValueException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidRecordingGroupException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidResultTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidRoleException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidS3KeyPrefixException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidS3KmsKeyArnException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidSNSTopicARNException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#InvalidTimeRangeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#LastDeliveryChannelDeleteFailedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxActiveResourcesExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfConfigRulesExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfConfigurationRecordersExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfConformancePacksExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfConnectorsExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfDeliveryChannelsExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfOrganizationConfigRulesExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfOrganizationConformancePacksExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#MaxNumberOfRetentionConfigurationsExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoAvailableConfigurationRecorderException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoAvailableDeliveryChannelException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoAvailableOrganizationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoRunningConfigurationRecorderException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchBucketException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchConfigRuleException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchConfigRuleInConformancePackException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchConfigurationAggregatorException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchConfigurationRecorderException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchConformancePackException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchDeliveryChannelException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchOrganizationConfigRuleException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchOrganizationConformancePackException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchRemediationConfigurationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchRemediationExceptionException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#NoSuchRetentionConfigurationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#OrganizationAccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#OrganizationAllFeaturesNotEnabledException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#OrganizationConformancePackTemplateValidationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#OversizedConfigurationItemException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#RemediationInProgressException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#ResourceConcurrentModificationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#ResourceNotDiscoveredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
@@ -1157,6 +1792,33 @@
       },
       "type": "service",
       "version": "2014-11-12"
+    },
+    "com.amazonaws.configservice#String": {
+      "type": "string"
+    },
+    "com.amazonaws.configservice#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.configservice#UnmodifiableEntityException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.configservice#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.configservice#ValidationException": {
       "members": {

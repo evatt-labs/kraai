@@ -1008,6 +1008,38 @@
       },
       "type": "list"
     },
+    "com.amazonaws.sqs#BatchEntryIdsNotDistinct": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.BatchEntryIdsNotDistinct",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#BatchRequestTooLong": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.BatchRequestTooLong",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#CreateQueue": {
       "errors": [
         {
@@ -1125,6 +1157,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.sqs#EmptyBatchRequest": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.EmptyBatchRequest",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#ExceptionMessage": {
       "type": "string"
     },
@@ -1232,6 +1280,43 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.sqs#InvalidBatchEntryId": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.InvalidBatchEntryId",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#InvalidIdFormat": {
+      "members": {},
+      "traits": {
+        "smithy.api#deprecated": {
+          "message": "exception has been included in ReceiptHandleIsInvalid"
+        },
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#InvalidMessageContents": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#InvalidSecurity": {
       "members": {
         "message": {
@@ -1245,6 +1330,118 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#KmsAccessDenied": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMS.AccessDeniedException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#KmsDisabled": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMS.DisabledException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#KmsInvalidKeyUsage": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMS.InvalidKeyUsageException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#KmsInvalidState": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMS.InvalidStateException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#KmsNotFound": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMS.NotFoundException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#KmsOptInRequired": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMS.OptInRequired",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#KmsThrottled": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMS.ThrottlingException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1304,6 +1501,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.sqs#MessageNotInflight": {
+      "members": {},
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.MessageNotInflight",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#OverLimit": {
       "members": {
         "message": {
@@ -1313,6 +1522,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "OverLimit",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#PurgeQueueInProgress": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.PurgeQueueInProgress",
           "httpResponseCode": 403
         },
         "smithy.api#error": "client",
@@ -1520,6 +1745,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.sqs#ReceiptHandleIsInvalid": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReceiptHandleIsInvalid",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sqs#RequestThrottled": {
       "members": {
         "message": {
@@ -1533,6 +1774,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#ResourceNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceNotFoundException",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
       },
       "type": "structure"
     },
@@ -1672,6 +1929,22 @@
     },
     "com.amazonaws.sqs#TagValue": {
       "type": "string"
+    },
+    "com.amazonaws.sqs#TooManyEntriesInBatchRequest": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sqs#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AWS.SimpleQueueService.TooManyEntriesInBatchRequest",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.sqs#UnsupportedOperation": {
       "members": {

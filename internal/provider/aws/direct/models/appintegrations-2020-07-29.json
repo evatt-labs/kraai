@@ -746,6 +746,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.appintegrations#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.appintegrations#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appintegrations#Description": {
       "traits": {
         "smithy.api#length": {
@@ -755,6 +767,18 @@
         "smithy.api#pattern": ".*"
       },
       "type": "string"
+    },
+    "com.amazonaws.appintegrations#DuplicateResourceException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.appintegrations#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.appintegrations#EventBridgeBus": {
       "traits": {
@@ -907,6 +931,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.appintegrations#ResourceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.appintegrations#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appintegrations#Source": {
       "traits": {
         "smithy.api#length": {
@@ -960,6 +996,18 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appintegrations#UnsupportedOperationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.appintegrations#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     }

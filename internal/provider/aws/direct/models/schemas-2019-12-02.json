@@ -23,6 +23,29 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.schemas#ConflictException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.schemas#DescribeDiscoverer": {
       "errors": [
         {
@@ -229,6 +252,29 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.schemas#GoneException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 410
+      },
+      "type": "structure"
+    },
     "com.amazonaws.schemas#InternalServerErrorException": {
       "members": {
         "Code": {
@@ -275,6 +321,29 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.schemas#PreconditionFailedException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 412
+      },
+      "type": "structure"
+    },
     "com.amazonaws.schemas#ServiceUnavailableException": {
       "members": {
         "Code": {
@@ -307,6 +376,29 @@
       "value": {
         "target": "com.amazonaws.schemas#__string"
       }
+    },
+    "com.amazonaws.schemas#TooManyRequestsException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.schemas#__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
     },
     "com.amazonaws.schemas#UnauthorizedException": {
       "members": {

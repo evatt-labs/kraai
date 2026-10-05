@@ -587,6 +587,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.kinesis#DryRunOperationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.kinesis#ErrorMessage": {
       "type": "string"
     },
@@ -600,6 +611,29 @@
       },
       "type": "string"
     },
+    "com.amazonaws.kinesis#ExpiredIteratorException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kinesis#ExpiredNextTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.kinesis#GSRSchemaARN": {
       "traits": {
         "smithy.api#length": {
@@ -610,7 +644,90 @@
       },
       "type": "string"
     },
+    "com.amazonaws.kinesis#InternalFailureException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.kinesis#InvalidArgumentException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kinesis#KMSAccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kinesis#KMSDisabledException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kinesis#KMSInvalidStateException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kinesis#KMSNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kinesis#KMSOptInRequired": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.kinesis#KMSThrottlingException": {
       "members": {
         "message": {
           "target": "com.amazonaws.kinesis#ErrorMessage",
@@ -9403,6 +9520,18 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.kinesis#ProvisionedThroughputExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.kinesis#RecordConfiguration": {
       "members": {
         "GSRSchemaARN": {
@@ -9447,6 +9576,18 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.kinesis#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.kinesis#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.kinesis#ResourceNotFoundException": {
       "members": {

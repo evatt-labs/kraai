@@ -17,6 +17,9 @@ type Reader struct {
 	// region in a regional one; SigningRegion, when set, is the region a
 	// global endpoint is signed for.
 	Host, SigningRegion string
+	// DisableDoubleEncoding signs the path as sent, not escaped a second
+	// time, as an auth scheme with disableDoubleEncoding asks, such as S3's.
+	DisableDoubleEncoding bool
 	// Target is the X-Amz-Target header of an awsJson protocol.
 	Target string
 	// Method and URI are the HTTP binding of a restJson1 operation.

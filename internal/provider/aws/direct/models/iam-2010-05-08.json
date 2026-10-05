@@ -2546,6 +2546,18 @@
       "type": "service",
       "version": "2010-05-08"
     },
+    "com.amazonaws.iam#AccountNotManagementOrDelegatedAdministratorException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iam#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iam#AttachRolePolicy": {
       "errors": [
         {
@@ -2621,6 +2633,18 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.iam#CallerIsNotManagementAccountException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iam#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.iam#ConcurrentModificationException": {
@@ -2723,6 +2747,54 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#CredentialReportExpiredException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#credentialReportExpiredExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReportExpired",
+          "httpResponseCode": 410
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 410
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#CredentialReportNotPresentException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#credentialReportNotPresentExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReportNotPresent",
+          "httpResponseCode": 410
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 410
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#CredentialReportNotReadyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#credentialReportNotReadyExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReportInProgress",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
       },
       "type": "structure"
     },
@@ -2877,6 +2949,38 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.iam#DuplicateCertificateException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#duplicateCertificateMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateCertificate",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#DuplicateSSHPublicKeyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#duplicateSSHPublicKeyMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DuplicateSSHPublicKey",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iam#EntityAlreadyExistsException": {
       "members": {
         "message": {
@@ -2892,6 +2996,63 @@
         "smithy.api#httpError": 409
       },
       "type": "structure"
+    },
+    "com.amazonaws.iam#EntityTemporarilyUnmodifiableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#entityTemporarilyUnmodifiableMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "EntityTemporarilyUnmodifiable",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#ExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#FeatureDisabledException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#FeatureDisabledMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "FeatureDisabled",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#FeatureDisabledMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#FeatureEnabledException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#FeatureEnabledMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "FeatureEnabled",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#FeatureEnabledMessage": {
+      "type": "string"
     },
     "com.amazonaws.iam#GetRole": {
       "errors": [
@@ -3026,6 +3187,38 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.iam#InvalidAuthenticationCodeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#invalidAuthenticationCodeMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidAuthenticationCode",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#InvalidCertificateException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#invalidCertificateMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCertificate",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iam#InvalidInputException": {
       "members": {
         "message": {
@@ -3035,6 +3228,54 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidInput",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#InvalidPublicKeyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#invalidPublicKeyMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidPublicKey",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#InvalidUserTypeException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#invalidUserTypeMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidUserType",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#KeyPairMismatchException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#keyPairMismatchMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KeyPairMismatch",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -3205,6 +3446,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.iam#MalformedCertificateException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#malformedCertificateMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MalformedCertificate",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iam#MalformedPolicyDocumentException": {
       "members": {
         "message": {
@@ -3218,6 +3475,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#NameConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#nameConflictMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NameConflict",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
       },
       "type": "structure"
     },
@@ -3237,6 +3510,62 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.iam#OpenIdIdpCommunicationErrorException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#openIdIdpCommunicationErrorExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OpenIdIdpCommunicationError",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#OrganizationNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iam#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#OrganizationNotInAllFeaturesModeException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iam#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#PasswordPolicyViolationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#passwordPolicyViolationMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "PasswordPolicyViolation",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iam#PermissionsBoundaryAttachmentType": {
       "members": {
         "Policy": {
@@ -3247,6 +3576,22 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.iam#PolicyEvaluationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#policyEvaluationErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "PolicyEvaluation",
+          "httpResponseCode": 500
+        },
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
     },
     "com.amazonaws.iam#PolicyNotAttachableException": {
       "members": {
@@ -3364,6 +3709,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.iam#ReportGenerationLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#reportGenerationLimitExceededMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReportGenerationLimitExceeded",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iam#Role": {
       "members": {
         "Arn": {
@@ -3442,6 +3803,50 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.iam#RoleModifiedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#roleModifiedMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RoleModified",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#RoleTemplateDisabledException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#roleTemplateDisabledMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RoleTemplateDisabled",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#ServiceAccessNotEnabledException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iam#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iam#ServiceFailureException": {
       "members": {
         "message": {
@@ -3455,6 +3860,22 @@
         },
         "smithy.api#error": "server",
         "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#ServiceNotSupportedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#serviceNotSupportedMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NotSupportedService",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
       },
       "type": "structure"
     },
@@ -3550,6 +3971,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "UnmodifiableEntity",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iam#UnrecognizedPublicKeyEncodingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iam#unrecognizedPublicKeyEncodingMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnrecognizedPublicKeyEncoding",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -3716,13 +4153,31 @@
       },
       "type": "boolean"
     },
+    "com.amazonaws.iam#credentialReportExpiredExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#credentialReportNotPresentExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#credentialReportNotReadyExceptionMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#dateType": {
       "type": "timestamp"
     },
     "com.amazonaws.iam#deleteConflictMessage": {
       "type": "string"
     },
+    "com.amazonaws.iam#duplicateCertificateMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#duplicateSSHPublicKeyMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#entityAlreadyExistsMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#entityTemporarilyUnmodifiableMessage": {
       "type": "string"
     },
     "com.amazonaws.iam#idType": {
@@ -3738,10 +4193,28 @@
     "com.amazonaws.iam#integerType": {
       "type": "integer"
     },
+    "com.amazonaws.iam#invalidAuthenticationCodeMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#invalidCertificateMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#invalidInputMessage": {
       "type": "string"
     },
+    "com.amazonaws.iam#invalidPublicKeyMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#invalidUserTypeMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#keyPairMismatchMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#limitExceededMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#malformedCertificateMessage": {
       "type": "string"
     },
     "com.amazonaws.iam#malformedPolicyDocumentMessage": {
@@ -3766,7 +4239,16 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.iam#nameConflictMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#noSuchEntityMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#openIdIdpCommunicationErrorExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#passwordPolicyViolationMessage": {
       "type": "string"
     },
     "com.amazonaws.iam#pathType": {
@@ -3787,6 +4269,9 @@
         },
         "smithy.api#pattern": "^[\\u0009\\u000A\\u000D\\u0020-\\u00FF]+$"
       },
+      "type": "string"
+    },
+    "com.amazonaws.iam#policyEvaluationErrorMessage": {
       "type": "string"
     },
     "com.amazonaws.iam#policyNameListType": {
@@ -3819,6 +4304,9 @@
       },
       "type": "string"
     },
+    "com.amazonaws.iam#reportGenerationLimitExceededMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#responseMarkerType": {
       "type": "string"
     },
@@ -3841,6 +4329,9 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.iam#roleModifiedMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#roleNameType": {
       "traits": {
         "smithy.api#length": {
@@ -3851,7 +4342,13 @@
       },
       "type": "string"
     },
+    "com.amazonaws.iam#roleTemplateDisabledMessage": {
+      "type": "string"
+    },
     "com.amazonaws.iam#serviceFailureExceptionMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#serviceNotSupportedMessage": {
       "type": "string"
     },
     "com.amazonaws.iam#stringType": {
@@ -3902,6 +4399,9 @@
       "type": "string"
     },
     "com.amazonaws.iam#unmodifiableEntityMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.iam#unrecognizedPublicKeyEncodingMessage": {
       "type": "string"
     }
   },

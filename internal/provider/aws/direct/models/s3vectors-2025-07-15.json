@@ -1,5 +1,35 @@
 {
   "shapes": {
+    "com.amazonaws.s3vectors#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3vectors#EncryptionConfiguration": {
       "members": {
         "kmsKeyArn": {
@@ -73,6 +103,67 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3vectors#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#KmsDisabledException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#KmsInvalidKeyUsageException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#KmsInvalidStateException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3vectors#KmsKeyArn": {
       "traits": {
         "smithy.api#length": {
@@ -82,6 +173,21 @@
         "smithy.api#pattern": "^(arn:aws[-a-z0-9]*:kms:[-a-z0-9]*:[0-9]{12}:key/.+)$"
       },
       "type": "string"
+    },
+    "com.amazonaws.s3vectors#KmsNotFoundException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.s3vectors#NotFoundException": {
       "members": {
@@ -95,6 +201,22 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#RequestTimeoutException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 408,
+        "smithy.api#retryable": {}
       },
       "type": "structure"
     },
@@ -380,6 +502,21 @@
       "type": "service",
       "version": "2025-07-15"
     },
+    "com.amazonaws.s3vectors#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3vectors#ServiceUnavailableException": {
       "members": {
         "message": {
@@ -412,6 +549,66 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.s3vectors#TooManyRequestsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.s3vectors#ExceptionMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {
+          "throttling": true
+        }
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#ValidationException": {
+      "members": {
+        "fieldList": {
+          "target": "com.amazonaws.s3vectors#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "path": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3vectors#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.s3vectors#ValidationExceptionField"
+      },
+      "type": "list"
     },
     "com.amazonaws.s3vectors#VectorBucket": {
       "members": {

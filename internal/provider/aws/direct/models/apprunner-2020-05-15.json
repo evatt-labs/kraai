@@ -1077,6 +1077,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.apprunner#InvalidStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.apprunner#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.apprunner#IsDefault": {
       "type": "boolean"
     },
@@ -1174,6 +1190,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apprunner#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.apprunner#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ServiceQuotaExceeded",
+          "httpResponseCode": 402
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

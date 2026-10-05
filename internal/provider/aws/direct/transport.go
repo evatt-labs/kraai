@@ -160,11 +160,17 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 		now = c.Now
 	}
 	sum := sha256.Sum256(payload)
+	if r.SigningName == "s3" {
+		// S3 refuses a request that does not carry the payload hash it
+		// was signed with as a header.
+		req.Header.Set("X-Amz-Content-Sha256", hex.EncodeToString(sum[:]))
+	}
 	region := c.Region
 	if r.SigningRegion != "" {
 		region = r.SigningRegion
 	}
-	if err := v4.NewSigner().SignHTTP(ctx, creds, req, hex.EncodeToString(sum[:]), r.SigningName, region, now()); err != nil {
+	signer := v4.NewSigner(func(o *v4.SignerOptions) { o.DisableURIPathEscaping = r.DisableDoubleEncoding })
+	if err := signer.SignHTTP(ctx, creds, req, hex.EncodeToString(sum[:]), r.SigningName, region, now()); err != nil {
 		return nil, err
 	}
 	return req, nil

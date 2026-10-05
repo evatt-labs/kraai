@@ -662,6 +662,36 @@
       },
       "type": "string"
     },
+    "com.amazonaws.medicalimaging#BadRequestException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.medicalimaging#DatastoreId": {
       "traits": {
         "smithy.api#pattern": "^[0-9a-z]{32}$"
@@ -875,6 +905,21 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.medicalimaging#NotAcceptableException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 406
+      },
+      "type": "structure"
+    },
     "com.amazonaws.medicalimaging#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -887,6 +932,21 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medicalimaging#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

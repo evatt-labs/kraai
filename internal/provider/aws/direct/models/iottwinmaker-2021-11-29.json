@@ -669,6 +669,54 @@
       "type": "service",
       "version": "2021-11-29"
     },
+    "com.amazonaws.iottwinmaker#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iottwinmaker#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iottwinmaker#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iottwinmaker#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iottwinmaker#ConnectorFailureException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iottwinmaker#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 424
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iottwinmaker#ConnectorTimeoutException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iottwinmaker#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 424
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iottwinmaker#Description": {
       "traits": {
         "smithy.api#length": {
@@ -686,6 +734,9 @@
           "min": 0
         }
       },
+      "type": "string"
+    },
+    "com.amazonaws.iottwinmaker#ExceptionMessage": {
       "type": "string"
     },
     "com.amazonaws.iottwinmaker#GetWorkspace": {
@@ -828,6 +879,19 @@
       },
       "type": "list"
     },
+    "com.amazonaws.iottwinmaker#QueryTimeoutException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iottwinmaker#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.iottwinmaker#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -887,6 +951,18 @@
     "com.amazonaws.iottwinmaker#Timestamp": {
       "traits": {},
       "type": "timestamp"
+    },
+    "com.amazonaws.iottwinmaker#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.iottwinmaker#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.iottwinmaker#TwinMakerArn": {
       "traits": {

@@ -2482,6 +2482,35 @@
       "override": "84ca00c418c58d59c6f4237b91412b4a7ae167f586c12fd0f62e47a377fa8645"
     },
     {
+      "type": "AWS::S3::Bucket",
+      "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
+      "date": "2026-10-05",
+      "region": "us-east-1",
+      "outcome": "parity",
+      "instances": 3,
+      "compared": [
+        "AbacStatus",
+        "AccelerateConfiguration",
+        "BucketEncryption",
+        "BucketName",
+        "OwnershipControls",
+        "PublicAccessBlockConfiguration",
+        "VersioningConfiguration"
+      ],
+      "observed": [
+        "NoSuchCORSConfiguration",
+        "NoSuchPublicAccessBlockConfiguration",
+        "NoSuchTagSet",
+        "NoSuchWebsiteConfiguration",
+        "ObjectLockConfigurationNotFoundError",
+        "OwnershipControlsNotFoundError",
+        "ReplicationConfigurationNotFoundError"
+      ],
+      "absence": "parity",
+      "probed": 1,
+      "override": "19063474d03fd9ff3b6f4efcf16372d8812545244fa5a6821659f947b7933ac9"
+    },
+    {
       "type": "AWS::S3Vectors::VectorBucket",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-09-25",

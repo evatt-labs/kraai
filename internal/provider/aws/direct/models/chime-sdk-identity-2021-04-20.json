@@ -671,6 +671,21 @@
       "type": "service",
       "version": "2021-04-20"
     },
+    "com.amazonaws.chimesdkidentity#ConflictException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chimesdkidentity#DescribeAppInstance": {
       "errors": [
         {
@@ -865,6 +880,36 @@
         "smithy.api#sensitive": {}
       },
       "type": "string"
+    },
+    "com.amazonaws.chimesdkidentity#NotFoundException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkidentity#ResourceLimitExceededException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkidentity#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkidentity#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.chimesdkidentity#ServiceFailureException": {
       "members": {

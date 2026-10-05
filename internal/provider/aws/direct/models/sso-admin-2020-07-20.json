@@ -117,6 +117,21 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.ssoadmin#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssoadmin#ConflictExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#ConflictExceptionMessage": {
+      "type": "string"
+    },
     "com.amazonaws.ssoadmin#Date": {
       "type": "timestamp"
     },
@@ -1490,6 +1505,21 @@
       },
       "type": "service",
       "version": "2020-07-20"
+    },
+    "com.amazonaws.ssoadmin#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.ssoadmin#ServiceQuotaExceededMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ssoadmin#ServiceQuotaExceededMessage": {
+      "type": "string"
     },
     "com.amazonaws.ssoadmin#SignInOptions": {
       "members": {

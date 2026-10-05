@@ -723,6 +723,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.bedrock#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrock#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrock#GetAutomatedReasoningPolicy": {
       "errors": [
         {
@@ -1220,6 +1232,18 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.bedrock#ResourceInUseException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrock#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrock#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -1248,6 +1272,40 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.bedrock#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrock#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrock#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrock#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrock#TaggableResourcesArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 20
+        },
+        "smithy.api#pattern": "(^[a-zA-Z0-9][a-zA-Z0-9\\-]*$)|(^arn:aws(-[^:]+)?:bedrock:[a-z0-9-]{1,20}:[0-9]{12}:custom-model/(imported)/[a-z0-9]{12}$)|(^arn:aws(-[^:]+)?:bedrock:[a-z0-9-]{1,20}:([0-9]{12}|)((:(fine-tuning-job|model-customization-job|custom-model)/[a-z0-9-]{1,63}[.]{1}[a-z0-9-]{1,63}([a-z0-9-]{1,63}[.]){0,2}[a-z0-9-]{1,63}([:][a-z0-9-]{1,63}){0,2}(/[a-z0-9]{12})$)|(:guardrail/[a-z0-9]+$)|(:automated-reasoning-policy/[a-zA-Z0-9]+(:[a-zA-Z0-9]+)?$)|(:(inference-profile|application-inference-profile)/[a-zA-Z0-9-:.]+$)|(:(provisioned-model|model-invocation-job|model-evaluation-job|evaluation-job|model-import-job|imported-model|async-invoke|provisioned-model-v2|provisioned-model-reservation|prompt-router|custom-model-deployment)/[a-z0-9]{12}$)))"
+      },
+      "type": "string"
+    },
     "com.amazonaws.bedrock#ThrottlingException": {
       "members": {
         "message": {
@@ -1265,6 +1323,22 @@
         "smithy.api#timestampFormat": "date-time"
       },
       "type": "timestamp"
+    },
+    "com.amazonaws.bedrock#TooManyTagsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrock#NonBlankString"
+        },
+        "resourceName": {
+          "target": "com.amazonaws.bedrock#TaggableResourcesArn",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.bedrock#ValidationException": {
       "members": {

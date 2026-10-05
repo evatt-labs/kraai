@@ -957,6 +957,102 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.glue#AlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ColumnStatisticsTaskNotRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ColumnStatisticsTaskRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ColumnStatisticsTaskStoppingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ConcurrentModificationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ConcurrentRunsExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ConditionCheckFailureException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.glue#ContextWords": {
       "member": {
         "target": "com.amazonaws.glue#NameString"
@@ -969,12 +1065,157 @@
       },
       "type": "list"
     },
+    "com.amazonaws.glue#CrawlerNotRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#CrawlerRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#CrawlerStoppingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.glue#EntityNotFoundException": {
       "members": {
         "FromFederationSource": {
           "target": "com.amazonaws.glue#NullableBoolean",
           "traits": {}
         },
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#FederatedResourceAlreadyExistsException": {
+      "members": {
+        "AssociatedGlueResource": {
+          "target": "com.amazonaws.glue#GlueResourceArn",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#FederationSourceErrorCode": {
+      "members": {
+        "AccessDeniedException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AccessDeniedException"
+          }
+        },
+        "EntityNotFoundException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EntityNotFoundException"
+          }
+        },
+        "InternalServiceException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InternalServiceException"
+          }
+        },
+        "InvalidCredentialsException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InvalidCredentialsException"
+          }
+        },
+        "InvalidInputException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InvalidInputException"
+          }
+        },
+        "InvalidResponseException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "InvalidResponseException"
+          }
+        },
+        "OperationNotSupportedException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OperationNotSupportedException"
+          }
+        },
+        "OperationTimeoutException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OperationTimeoutException"
+          }
+        },
+        "PartialFailureException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "PartialFailureException"
+          }
+        },
+        "ThrottlingException": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ThrottlingException"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.glue#FederationSourceException": {
+      "members": {
+        "FederationSourceErrorCode": {
+          "target": "com.amazonaws.glue#FederationSourceErrorCode",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#FederationSourceRetryableException": {
+      "members": {
         "Message": {
           "target": "com.amazonaws.glue#MessageString",
           "traits": {}
@@ -1046,6 +1287,131 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.glue#GlueEncryptionException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#GlueResourceArn": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10240,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:aws(-(cn|us-gov|iso(-[bef])?))?:glue:"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.glue#IdempotentParameterMismatchException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#IllegalBlueprintStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#IllegalSessionStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#IllegalWorkflowStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#IntegrationConflictOperationFault": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#IntegrationErrorMessage": {
+      "type": "string"
+    },
+    "com.amazonaws.glue#IntegrationNotFoundFault": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#IntegrationQuotaExceededFault": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#InternalServerException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.glue#InternalServiceException": {
       "members": {
         "Message": {
@@ -1074,6 +1440,92 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.glue#InvalidIntegrationStateFault": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#InvalidStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#KMSKeyNotAccessibleFault": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#MLTransformNotReadyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#MaterializedViewRefreshTaskNotRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#MaterializedViewRefreshTaskRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#MaterializedViewRefreshTaskStoppingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.glue#MessageString": {
       "type": "string"
     },
@@ -1087,10 +1539,189 @@
       },
       "type": "string"
     },
+    "com.amazonaws.glue#NoScheduleException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.glue#NullableBoolean": {
       "type": "boolean"
     },
+    "com.amazonaws.glue#OperationNotSupportedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.glue#OperationTimeoutException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#OrchestrationMessageString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 400000,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
+    "com.amazonaws.glue#PermissionTypeMismatchException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ResourceNotReadyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ResourceNumberLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#SchedulerNotRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#SchedulerRunningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#SchedulerTransitioningException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#SessionBusyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#OrchestrationMessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#TargetResourceNotFound": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#IntegrationErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#ValidationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.glue#MessageString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.glue#VersionMismatchException": {
       "members": {
         "Message": {
           "target": "com.amazonaws.glue#MessageString",

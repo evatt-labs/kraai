@@ -381,6 +381,16 @@ func subsetModel(raw []byte, operations []string) ([]byte, error) {
 		visit(id)
 		opIDs = append(opIDs, map[string]any{"target": id})
 	}
+	// Every error shape the model declares stays, wherever it is declared:
+	// an override may name a code its operation does not declare but the
+	// service answers, and the compiler checks codes against these.
+	for _, id := range sortedShapeIDs(shapes) {
+		if s, _ := shapes[id].(map[string]any); s != nil {
+			if traits, _ := s["traits"].(map[string]any); traits != nil && traits["smithy.api#error"] != nil {
+				visit(id)
+			}
+		}
+	}
 	sort.Slice(opIDs, func(i, j int) bool {
 		return opIDs[i].(map[string]any)["target"].(string) < opIDs[j].(map[string]any)["target"].(string)
 	})
@@ -513,4 +523,15 @@ func replaceDir(next, dir, tmpRoot string) error {
 		return err
 	}
 	return nil
+}
+
+// sortedShapeIDs is the shape ids of shapes in order, so a walk over them
+// is the same every run.
+func sortedShapeIDs(shapes map[string]any) []string {
+	ids := make([]string, 0, len(shapes))
+	for id := range shapes {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	return ids
 }

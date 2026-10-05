@@ -1,5 +1,23 @@
 {
   "shapes": {
+    "com.amazonaws.backupgateway#AccessDeniedException": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.backupgateway#string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.backupgateway#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.backupgateway#BackupOnPremises_v20210101": {
       "errors": [
         {
@@ -897,6 +915,24 @@
       "type": "service",
       "version": "2021-01-01"
     },
+    "com.amazonaws.backupgateway#ConflictException": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.backupgateway#string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.backupgateway#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.backupgateway#GetHypervisor": {
       "errors": [
         {
@@ -1009,6 +1045,22 @@
       },
       "type": "string"
     },
+    "com.amazonaws.backupgateway#InternalServerException": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.backupgateway#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backupgateway#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.backupgateway#KmsKeyArn": {
       "traits": {
         "smithy.api#length": {
@@ -1092,8 +1144,42 @@
       },
       "type": "string"
     },
+    "com.amazonaws.backupgateway#ThrottlingException": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.backupgateway#string",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.backupgateway#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
     "com.amazonaws.backupgateway#Time": {
       "type": "timestamp"
+    },
+    "com.amazonaws.backupgateway#ValidationException": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.backupgateway#string",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.backupgateway#string"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.backupgateway#string": {
       "type": "string"

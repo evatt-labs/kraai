@@ -44,6 +44,33 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.workspacesinstances#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.workspacesinstances#EC2InstanceError": {
       "members": {
         "EC2ErrorCode": {
@@ -516,6 +543,45 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.workspacesinstances#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "QuotaCode": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ServiceCode": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

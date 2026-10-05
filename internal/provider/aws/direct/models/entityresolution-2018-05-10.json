@@ -698,6 +698,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.entityresolution#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.entityresolution#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.entityresolution#Description": {
       "traits": {
         "smithy.api#length": {
@@ -730,6 +742,26 @@
         }
       },
       "type": "string"
+    },
+    "com.amazonaws.entityresolution#ExceedsLimitException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.entityresolution#ErrorMessage"
+        },
+        "quotaName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "quotaValue": {
+          "target": "smithy.api#Integer",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.entityresolution#GetIdNamespace": {
       "errors": [

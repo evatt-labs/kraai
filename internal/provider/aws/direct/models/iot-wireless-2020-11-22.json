@@ -18,6 +18,15 @@
       },
       "type": "boolean"
     },
+    "com.amazonaws.iotwireless#AmazonResourceName": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1011,
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.iotwireless#ApId": {
       "traits": {
         "smithy.api#length": {
@@ -64,6 +73,26 @@
         }
       },
       "type": "integer"
+    },
+    "com.amazonaws.iotwireless#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iotwireless#Message"
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.iotwireless#ResourceId",
+          "traits": {}
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.iotwireless#ResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.iotwireless#DakCertificateId": {
       "traits": {
@@ -1175,6 +1204,22 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.iotwireless#TooManyTagsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.iotwireless#Message"
+        },
+        "ResourceName": {
+          "target": "com.amazonaws.iotwireless#AmazonResourceName",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },

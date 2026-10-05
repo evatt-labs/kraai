@@ -784,6 +784,21 @@
       },
       "type": "string"
     },
+    "com.amazonaws.cleanroomsml#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cleanroomsml#ContainerArgument": {
       "traits": {
         "smithy.api#length": {
@@ -1206,6 +1221,21 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.cleanroomsml#InternalServiceException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cleanroomsml#KmsKeyArn": {
       "traits": {
         "aws.api#arnReference": {
@@ -1300,6 +1330,34 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cleanroomsml#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "quotaValue": {
+          "target": "smithy.api#Double",
+          "traits": {
+            "smithy.api#range": {
+              "max": 100000,
+              "min": 0
+            }
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

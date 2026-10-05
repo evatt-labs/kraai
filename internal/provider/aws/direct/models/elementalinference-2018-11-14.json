@@ -15,6 +15,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.elementalinference#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elementalinference#DictionaryArn": {
       "traits": {
         "aws.api#arnReference": {
@@ -779,6 +795,22 @@
       },
       "type": "list"
     },
+    "com.amazonaws.elementalinference#GatewayTimedOutException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 504,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.elementalinference#GetDictionary": {
       "errors": [
         {
@@ -920,6 +952,37 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elementalinference#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.elementalinference#ServiceUnavailableException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503,
+        "smithy.api#retryable": {}
       },
       "type": "structure"
     },

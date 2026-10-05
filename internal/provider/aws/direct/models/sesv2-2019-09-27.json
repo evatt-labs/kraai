@@ -1,5 +1,29 @@
 {
   "shapes": {
+    "com.amazonaws.sesv2#AccountSuspendedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#AlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sesv2#BadRequestException": {
       "members": {
         "message": {
@@ -9,6 +33,30 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#ConcurrentModificationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
       },
       "type": "structure"
     },
@@ -98,6 +146,66 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.sesv2#InternalServiceErrorException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#InvalidNextTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#MailFromDomainNotVerifiedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#MessageRejected": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sesv2#NotFoundException": {
       "members": {
         "message": {
@@ -107,6 +215,18 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sesv2#SendingPausedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.sesv2#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },

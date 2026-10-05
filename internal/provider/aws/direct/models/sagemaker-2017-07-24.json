@@ -1016,6 +1016,17 @@
       },
       "type": "list"
     },
+    "com.amazonaws.sagemaker#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.sagemaker#FailureReason"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.sagemaker#ContainerArgument": {
       "traits": {
         "smithy.api#length": {
@@ -9211,6 +9222,28 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.sagemaker#ResourceInUse": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.sagemaker#FailureReason"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sagemaker#ResourceLimitExceeded": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.sagemaker#FailureReason"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
       "type": "structure"
     },
     "com.amazonaws.sagemaker#ResourceNotFound": {

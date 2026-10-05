@@ -711,6 +711,33 @@
       "type": "service",
       "version": "2025-08-22"
     },
+    "com.amazonaws.novaact#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.novaact#DateTimestamp": {
       "traits": {
         "smithy.api#timestampFormat": "date-time"
@@ -901,6 +928,45 @@
         "smithy.api#pattern": "^[a-zA-Z0-9!\\-_.*'()]+(?:/[a-zA-Z0-9!\\-_.*'()]+)*$"
       },
       "type": "string"
+    },
+    "com.amazonaws.novaact#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.novaact#NonBlankString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.novaact#ThrottlingException": {
       "members": {

@@ -199,6 +199,17 @@
       },
       "type": "list"
     },
+    "com.amazonaws.cloudwatchlogs#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#CopyValue": {
       "members": {
         "entries": {
@@ -301,6 +312,20 @@
       },
       "traits": {
         "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#DataAlreadyAcceptedException": {
+      "members": {
+        "expectedSequenceToken": {
+          "target": "com.amazonaws.cloudwatchlogs#SequenceToken"
+        },
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
@@ -1517,6 +1542,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatchlogs#InternalStreamingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#InvalidOperationException": {
       "members": {
         "message": {
@@ -1530,6 +1566,20 @@
     },
     "com.amazonaws.cloudwatchlogs#InvalidParameterException": {
       "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#InvalidSequenceTokenException": {
+      "members": {
+        "expectedSequenceToken": {
+          "target": "com.amazonaws.cloudwatchlogs#SequenceToken"
+        },
         "message": {
           "target": "com.amazonaws.cloudwatchlogs#Message"
         }
@@ -2949,6 +2999,20 @@
       },
       "type": "list"
     },
+    "com.amazonaws.cloudwatchlogs#MalformedQueryException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        },
+        "queryCompileError": {
+          "target": "com.amazonaws.cloudwatchlogs#QueryCompileError"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#MappingVersion": {
       "traits": {
         "smithy.api#length": {
@@ -3951,6 +4015,37 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.cloudwatchlogs#QueryCharOffset": {
+      "type": "integer"
+    },
+    "com.amazonaws.cloudwatchlogs#QueryCompileError": {
+      "members": {
+        "location": {
+          "target": "com.amazonaws.cloudwatchlogs#QueryCompileErrorLocation",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#QueryCompileErrorLocation": {
+      "members": {
+        "endCharOffset": {
+          "target": "com.amazonaws.cloudwatchlogs#QueryCharOffset",
+          "traits": {}
+        },
+        "startCharOffset": {
+          "target": "com.amazonaws.cloudwatchlogs#QueryCharOffset",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.cloudwatchlogs#QueryLanguage": {
       "members": {
         "CWLI": {
@@ -4257,6 +4352,14 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.cloudwatchlogs#SequenceToken": {
+      "traits": {
+        "smithy.api#length": {
+          "min": 1
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.cloudwatchlogs#Service": {
       "traits": {
         "smithy.api#length": {
@@ -4286,6 +4389,28 @@
       },
       "traits": {
         "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#SessionStreamingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#SessionTimeoutException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
@@ -4670,6 +4795,17 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.cloudwatchlogs#UnrecognizedClientException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.cloudwatchlogs#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
       "type": "structure"
     },
     "com.amazonaws.cloudwatchlogs#UntagResource": {

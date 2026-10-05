@@ -1,5 +1,163 @@
 {
   "shapes": {
+    "com.amazonaws.ses#AccountSendingPausedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AccountSendingPausedException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#AlreadyExistsException": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ses#RuleOrRuleSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#AmazonResourceName": {
+      "type": "string"
+    },
+    "com.amazonaws.ses#CannotDeleteException": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ses#RuleOrRuleSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CannotDelete",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#ConfigurationSetAlreadyExistsException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConfigurationSetAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#ConfigurationSetDoesNotExistException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConfigurationSetDoesNotExist",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#ConfigurationSetName": {
+      "type": "string"
+    },
+    "com.amazonaws.ses#ConfigurationSetSendingPausedException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConfigurationSetSendingPausedException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#CustomVerificationEmailInvalidContentException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CustomVerificationEmailInvalidContent",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#CustomVerificationEmailTemplateAlreadyExistsException": {
+      "members": {
+        "CustomVerificationEmailTemplateName": {
+          "target": "com.amazonaws.ses#TemplateName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CustomVerificationEmailTemplateAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ses#CustomVerificationEmailTemplateDoesNotExistException": {
       "members": {
         "CustomVerificationEmailTemplateName": {
@@ -23,11 +181,82 @@
     "com.amazonaws.ses#ErrorMessage": {
       "type": "string"
     },
+    "com.amazonaws.ses#EventDestinationAlreadyExistsException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "EventDestinationName": {
+          "target": "com.amazonaws.ses#EventDestinationName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "EventDestinationAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#EventDestinationDoesNotExistException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "EventDestinationName": {
+          "target": "com.amazonaws.ses#EventDestinationName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "EventDestinationDoesNotExist",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#EventDestinationName": {
+      "type": "string"
+    },
     "com.amazonaws.ses#FailureRedirectionURL": {
       "type": "string"
     },
     "com.amazonaws.ses#FromAddress": {
       "type": "string"
+    },
+    "com.amazonaws.ses#FromEmailAddressNotVerifiedException": {
+      "members": {
+        "FromEmailAddress": {
+          "target": "com.amazonaws.ses#FromAddress",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "FromEmailAddressNotVerified",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.ses#GetCustomVerificationEmailTemplate": {
       "errors": [
@@ -89,6 +318,369 @@
         "smithy.api#output": {}
       },
       "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidCloudWatchDestinationException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "EventDestinationName": {
+          "target": "com.amazonaws.ses#EventDestinationName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCloudWatchDestination",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidConfigurationSetException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidConfigurationSet",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidDeliveryOptionsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDeliveryOptions",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidFirehoseDestinationException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "EventDestinationName": {
+          "target": "com.amazonaws.ses#EventDestinationName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidFirehoseDestination",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidLambdaFunctionException": {
+      "members": {
+        "FunctionArn": {
+          "target": "com.amazonaws.ses#AmazonResourceName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidLambdaFunction",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidPolicyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidPolicy",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidRenderingParameterException": {
+      "members": {
+        "TemplateName": {
+          "target": "com.amazonaws.ses#TemplateName"
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidRenderingParameter",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidS3ConfigurationException": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.ses#S3BucketName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidS3Configuration",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidSNSDestinationException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "EventDestinationName": {
+          "target": "com.amazonaws.ses#EventDestinationName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSNSDestination",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidSnsTopicException": {
+      "members": {
+        "Topic": {
+          "target": "com.amazonaws.ses#AmazonResourceName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidSnsTopic",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidTemplateException": {
+      "members": {
+        "TemplateName": {
+          "target": "com.amazonaws.ses#TemplateName"
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidTemplate",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#InvalidTrackingOptionsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidTrackingOptions",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "LimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#MailFromDomainNotVerifiedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MailFromDomainNotVerifiedException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#MessageRejected": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MessageRejected",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#MissingRenderingAttributeException": {
+      "members": {
+        "TemplateName": {
+          "target": "com.amazonaws.ses#TemplateName"
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MissingRenderingAttribute",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#ProductionAccessNotGrantedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ProductionAccessNotGranted",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#RuleDoesNotExistException": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ses#RuleOrRuleSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RuleDoesNotExist",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#RuleOrRuleSetName": {
+      "type": "string"
+    },
+    "com.amazonaws.ses#RuleSetDoesNotExistException": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.ses#RuleOrRuleSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "RuleSetDoesNotExist",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#S3BucketName": {
+      "type": "string"
     },
     "com.amazonaws.ses#SimpleEmailService": {
       "operations": [
@@ -996,8 +1588,67 @@
     "com.amazonaws.ses#TemplateContent": {
       "type": "string"
     },
+    "com.amazonaws.ses#TemplateDoesNotExistException": {
+      "members": {
+        "TemplateName": {
+          "target": "com.amazonaws.ses#TemplateName"
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TemplateDoesNotExist",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ses#TemplateName": {
       "type": "string"
+    },
+    "com.amazonaws.ses#TrackingOptionsAlreadyExistsException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TrackingOptionsAlreadyExistsException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ses#TrackingOptionsDoesNotExistException": {
+      "members": {
+        "ConfigurationSetName": {
+          "target": "com.amazonaws.ses#ConfigurationSetName",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.ses#ErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TrackingOptionsDoesNotExistException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

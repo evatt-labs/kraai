@@ -667,6 +667,21 @@
       },
       "type": "string"
     },
+    "com.amazonaws.b2bi#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.b2bi#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.b2bi#CreatedDate": {
       "traits": {
         "smithy.api#timestampFormat": "date-time"
@@ -910,6 +925,45 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.b2bi#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.b2bi#ErrorMessage",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "serviceCode": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },

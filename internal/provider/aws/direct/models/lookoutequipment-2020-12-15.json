@@ -668,6 +668,21 @@
       },
       "type": "string"
     },
+    "com.amazonaws.lookoutequipment#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lookoutequipment#BoundedLengthString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lookoutequipment#DataDelayOffsetInMinutes": {
       "traits": {
         "smithy.api#range": {
@@ -1078,6 +1093,21 @@
         "smithy.api#pattern": "^(^$)|([\\u0009\\u000A\\u000D\\u0020-\\u00FF]{1,1023}/$)$"
       },
       "type": "string"
+    },
+    "com.amazonaws.lookoutequipment#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lookoutequipment#BoundedLengthString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.lookoutequipment#ThrottlingException": {
       "members": {

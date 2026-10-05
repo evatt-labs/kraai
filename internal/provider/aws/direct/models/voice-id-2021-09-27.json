@@ -18,6 +18,69 @@
       },
       "type": "string"
     },
+    "com.amazonaws.voiceid#ConflictException": {
+      "members": {
+        "ConflictType": {
+          "target": "com.amazonaws.voiceid#ConflictType",
+          "traits": {}
+        },
+        "Message": {
+          "target": "com.amazonaws.voiceid#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.voiceid#ConflictType": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "ANOTHER_ACTIVE_STREAM",
+            "value": "ANOTHER_ACTIVE_STREAM"
+          },
+          {
+            "name": "DOMAIN_NOT_ACTIVE",
+            "value": "DOMAIN_NOT_ACTIVE"
+          },
+          {
+            "name": "CANNOT_CHANGE_SPEAKER_AFTER_ENROLLMENT",
+            "value": "CANNOT_CHANGE_SPEAKER_AFTER_ENROLLMENT"
+          },
+          {
+            "name": "ENROLLMENT_ALREADY_EXISTS",
+            "value": "ENROLLMENT_ALREADY_EXISTS"
+          },
+          {
+            "name": "SPEAKER_NOT_SET",
+            "value": "SPEAKER_NOT_SET"
+          },
+          {
+            "name": "SPEAKER_OPTED_OUT",
+            "value": "SPEAKER_OPTED_OUT"
+          },
+          {
+            "name": "CONCURRENT_CHANGES",
+            "value": "CONCURRENT_CHANGES"
+          },
+          {
+            "name": "DOMAIN_LOCKED_FROM_ENCRYPTION_UPDATES",
+            "value": "DOMAIN_LOCKED_FROM_ENCRYPTION_UPDATES"
+          },
+          {
+            "name": "CANNOT_DELETE_NON_EMPTY_WATCHLIST",
+            "value": "CANNOT_DELETE_NON_EMPTY_WATCHLIST"
+          },
+          {
+            "name": "FRAUDSTER_MUST_BELONG_TO_AT_LEAST_ONE_WATCHLIST",
+            "value": "FRAUDSTER_MUST_BELONG_TO_AT_LEAST_ONE_WATCHLIST"
+          }
+        ]
+      },
+      "type": "string"
+    },
     "com.amazonaws.voiceid#DescribeDomain": {
       "errors": [
         {
@@ -289,6 +352,18 @@
         ]
       },
       "type": "string"
+    },
+    "com.amazonaws.voiceid#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.voiceid#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.voiceid#String": {
       "traits": {

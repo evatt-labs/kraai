@@ -861,6 +861,33 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.timestreaminfluxdb#ConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceId": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "resourceType": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.timestreaminfluxdb#DbBackupConfigurationOutput": {
       "members": {
         "customSchedule": {
@@ -1656,6 +1683,21 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.timestreaminfluxdb#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
       "type": "structure"
     },
     "com.amazonaws.timestreaminfluxdb#Status": {

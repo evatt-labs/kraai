@@ -122,6 +122,36 @@
       },
       "type": "string"
     },
+    "com.amazonaws.wellarchitected#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.wellarchitected#ExceptionMessage",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.wellarchitected#ExceptionResourceId",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.wellarchitected#ExceptionResourceType",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.wellarchitected#Count": {
       "traits": {
         "smithy.api#range": {
@@ -1102,6 +1132,42 @@
     "com.amazonaws.wellarchitected#ServiceCode": {
       "traits": {},
       "type": "string"
+    },
+    "com.amazonaws.wellarchitected#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.wellarchitected#ExceptionMessage",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "QuotaCode": {
+          "target": "com.amazonaws.wellarchitected#QuotaCode",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.wellarchitected#ExceptionResourceId"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.wellarchitected#ExceptionResourceType"
+        },
+        "ServiceCode": {
+          "target": "com.amazonaws.wellarchitected#ServiceCode",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.wellarchitected#ShareInvitationId": {
       "traits": {

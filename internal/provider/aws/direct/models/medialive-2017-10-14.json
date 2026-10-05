@@ -102,6 +102,21 @@
       "traits": {},
       "type": "enum"
     },
+    "com.amazonaws.medialive#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.medialive#DescribeCluster": {
       "errors": [
         {
@@ -1562,6 +1577,45 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.medialive#UnprocessableEntityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        },
+        "ValidationErrors": {
+          "target": "com.amazonaws.medialive#__listOfValidationError",
+          "traits": {
+            "smithy.api#jsonName": "validationErrors"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 422
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.medialive#ValidationError": {
+      "members": {
+        "ElementPath": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "elementPath"
+          }
+        },
+        "ErrorMessage": {
+          "target": "com.amazonaws.medialive#__string",
+          "traits": {
+            "smithy.api#jsonName": "errorMessage"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.medialive#__listOfInterfaceMapping": {
       "member": {
         "target": "com.amazonaws.medialive#InterfaceMapping"
@@ -1579,6 +1633,13 @@
     "com.amazonaws.medialive#__listOfRoute": {
       "member": {
         "target": "com.amazonaws.medialive#Route"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.medialive#__listOfValidationError": {
+      "member": {
+        "target": "com.amazonaws.medialive#ValidationError"
       },
       "traits": {},
       "type": "list"

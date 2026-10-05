@@ -748,6 +748,33 @@
       },
       "type": "string"
     },
+    "com.amazonaws.bedrockagentcorecontrol#ConcurrentModificationException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrockagentcorecontrol#CredentialProviderName": {
       "traits": {
         "smithy.api#length": {
@@ -788,6 +815,21 @@
         "smithy.api#sensitive": {}
       },
       "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#EncryptionFailure": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.bedrockagentcorecontrol#GetApiKeyCredentialProvider": {
       "errors": [
@@ -1306,6 +1348,18 @@
       },
       "type": "string"
     },
+    "com.amazonaws.bedrockagentcorecontrol#ResourceLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrockagentcorecontrol#ResourceNotFoundException": {
       "members": {
         "message": {
@@ -1315,6 +1369,22 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#RetryableConflictException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409,
+        "smithy.api#retryable": {}
       },
       "type": "structure"
     },
@@ -1362,8 +1432,69 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.bedrockagentcorecontrol#ServiceException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.bedrockagentcorecontrol#NonBlankString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
     "com.amazonaws.bedrockagentcorecontrol#String": {
       "type": "string"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#SubscriptionRequiredException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "productName": {
+          "target": "smithy.api#String",
+          "traits": {}
+        },
+        "subscriptionUrl": {
+          "target": "smithy.api#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.bedrockagentcorecontrol#ThrottledException": {
+      "members": {
+        "message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429,
+        "smithy.api#retryable": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.bedrockagentcorecontrol#ThrottlingException": {
       "members": {

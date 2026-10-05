@@ -225,6 +225,17 @@
     "com.amazonaws.networkfirewall#ErrorMessage": {
       "type": "string"
     },
+    "com.amazonaws.networkfirewall#InsufficientCapacityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.networkfirewall#InternalServerError": {
       "members": {
         "Message": {
@@ -236,7 +247,62 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.networkfirewall#InvalidOperationException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.networkfirewall#InvalidRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.networkfirewall#InvalidResourcePolicyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.networkfirewall#InvalidTokenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.networkfirewall#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.networkfirewall#LogDestinationPermissionException": {
       "members": {
         "Message": {
           "target": "com.amazonaws.networkfirewall#ErrorMessage"
@@ -1223,6 +1289,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.networkfirewall#ResourceOwnerCheckException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.networkfirewall#Tag": {
       "members": {
         "Key": {
@@ -1274,6 +1351,17 @@
       "type": "string"
     },
     "com.amazonaws.networkfirewall#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.networkfirewall#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.networkfirewall#UnsupportedOperationException": {
       "members": {
         "Message": {
           "target": "com.amazonaws.networkfirewall#ErrorMessage"

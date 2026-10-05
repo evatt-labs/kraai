@@ -1,5 +1,20 @@
 {
   "shapes": {
+    "com.amazonaws.chimesdkvoice#AccessDeniedException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkvoice#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkvoice#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chimesdkvoice#BadRequestException": {
       "members": {
         "Code": {
@@ -664,6 +679,21 @@
       "type": "service",
       "version": "2022-08-03"
     },
+    "com.amazonaws.chimesdkvoice#ConflictException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkvoice#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkvoice#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chimesdkvoice#ErrorCode": {
       "members": {
         "AccessDenied": {
@@ -929,6 +959,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.chimesdkvoice#GoneException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkvoice#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkvoice#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 410
+      },
+      "type": "structure"
+    },
     "com.amazonaws.chimesdkvoice#Iso8601Timestamp": {
       "traits": {
         "smithy.api#timestampFormat": "date-time"
@@ -970,6 +1015,21 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkvoice#ResourceLimitExceededException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkvoice#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkvoice#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1099,6 +1159,21 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 401
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.chimesdkvoice#UnprocessableEntityException": {
+      "members": {
+        "Code": {
+          "target": "com.amazonaws.chimesdkvoice#ErrorCode"
+        },
+        "Message": {
+          "target": "com.amazonaws.chimesdkvoice#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 422
       },
       "type": "structure"
     },

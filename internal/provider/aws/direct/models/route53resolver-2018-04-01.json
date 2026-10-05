@@ -38,6 +38,17 @@
       },
       "type": "string"
     },
+    "com.amazonaws.route53resolver#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53resolver#Count": {
       "traits": {
         "smithy.api#default": 0
@@ -531,6 +542,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.route53resolver#InvalidNextTokenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53resolver#InvalidParameterException": {
       "members": {
         "FieldName": {
@@ -549,10 +571,47 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.route53resolver#InvalidPolicyDocument": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53resolver#InvalidRequestException": {
       "members": {
         "Message": {
           "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#InvalidTagException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.route53resolver#String",
+          "traits": {}
         }
       },
       "traits": {
@@ -912,6 +971,21 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.route53resolver#ResourceExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.route53resolver#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53resolver#ResourceId": {
       "traits": {
         "smithy.api#length": {
@@ -921,7 +995,37 @@
       },
       "type": "string"
     },
+    "com.amazonaws.route53resolver#ResourceInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.route53resolver#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53resolver#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#String"
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.route53resolver#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#ResourceUnavailableException": {
       "members": {
         "Message": {
           "target": "com.amazonaws.route53resolver#String"
@@ -1923,6 +2027,17 @@
       },
       "type": "string"
     },
+    "com.amazonaws.route53resolver#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.route53resolver#ShareStatus": {
       "members": {
         "NotShared": {
@@ -1959,6 +2074,17 @@
       "type": "string"
     },
     "com.amazonaws.route53resolver#ThrottlingException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.route53resolver#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.route53resolver#UnknownResourceException": {
       "members": {
         "Message": {
           "target": "com.amazonaws.route53resolver#ExceptionMessage"

@@ -915,6 +915,15 @@
       "type": "service",
       "version": "2020-02-26"
     },
+    "com.amazonaws.mgn#BoundedString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        }
+      },
+      "type": "string"
+    },
     "com.amazonaws.mgn#Cidr": {
       "traits": {
         "smithy.api#length": {
@@ -955,6 +964,61 @@
       },
       "type": "list"
     },
+    "com.amazonaws.mgn#ConflictException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "errors": {
+          "target": "com.amazonaws.mgn#ConflictExceptionErrors",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "resourceId": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#ConflictExceptionErrors": {
+      "member": {
+        "target": "com.amazonaws.mgn#ErrorDetails"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mgn#ErrorDetails": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.mgn#BoundedString",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.mgn#GetNetworkMigrationDefinition": {
       "errors": [
         {
@@ -991,6 +1055,28 @@
       },
       "traits": {
         "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#InternalServerException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "retryAfterSeconds": {
+          "target": "com.amazonaws.mgn#PositiveInteger",
+          "traits": {
+            "smithy.api#default": 0,
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 500
       },
       "type": "structure"
     },
@@ -1101,6 +1187,15 @@
       },
       "type": "string"
     },
+    "com.amazonaws.mgn#PositiveInteger": {
+      "traits": {
+        "smithy.api#default": 0,
+        "smithy.api#range": {
+          "min": 0
+        }
+      },
+      "type": "long"
+    },
     "com.amazonaws.mgn#ResourceNotFoundException": {
       "members": {
         "code": {
@@ -1171,6 +1266,41 @@
       "value": {
         "target": "com.amazonaws.mgn#ScopeTagValue"
       }
+    },
+    "com.amazonaws.mgn#ServiceQuotaExceededException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "quotaValue": {
+          "target": "com.amazonaws.mgn#StrictlyPositiveInteger",
+          "traits": {}
+        },
+        "resourceId": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "resourceType": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.mgn#SourceConfiguration": {
       "members": {
@@ -1264,6 +1394,14 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.mgn#StrictlyPositiveInteger": {
+      "traits": {
+        "smithy.api#range": {
+          "min": 1
+        }
+      },
+      "type": "integer"
     },
     "com.amazonaws.mgn#TagKey": {
       "traits": {
@@ -1370,6 +1508,116 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.mgn#ThrottlingException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "quotaCode": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "retryAfterSeconds": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        },
+        "serviceCode": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#UninitializedAccountException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#ValidationException": {
+      "members": {
+        "code": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "fieldList": {
+          "target": "com.amazonaws.mgn#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString"
+        },
+        "reason": {
+          "target": "com.amazonaws.mgn#ValidationExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        },
+        "name": {
+          "target": "com.amazonaws.mgn#LargeBoundedString",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.mgn#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.mgn#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.mgn#ValidationExceptionReason": {
+      "traits": {
+        "smithy.api#enum": [
+          {
+            "name": "UNKNOWN_OPERATION",
+            "value": "unknownOperation"
+          },
+          {
+            "name": "CANNOT_PARSE",
+            "value": "cannotParse"
+          },
+          {
+            "name": "FIELD_VALIDATION_FAILED",
+            "value": "fieldValidationFailed"
+          },
+          {
+            "name": "OTHER",
+            "value": "other"
+          }
+        ]
+      },
+      "type": "string"
     },
     "com.amazonaws.mgn#VpcProvisioningStrategy": {
       "traits": {

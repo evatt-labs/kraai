@@ -12,6 +12,51 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.mediapackagev2#ConflictException": {
+      "members": {
+        "ConflictExceptionType": {
+          "target": "com.amazonaws.mediapackagev2#ConflictExceptionType",
+          "traits": {}
+        },
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.mediapackagev2#ConflictExceptionType": {
+      "members": {
+        "CONFLICTING_OPERATION": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CONFLICTING_OPERATION"
+          }
+        },
+        "IDEMPOTENT_PARAMETER_MISMATCH": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IDEMPOTENT_PARAMETER_MISMATCH"
+          }
+        },
+        "RESOURCE_ALREADY_EXISTS": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESOURCE_ALREADY_EXISTS"
+          }
+        },
+        "RESOURCE_IN_USE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RESOURCE_IN_USE"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.mediapackagev2#EntityTag": {
       "traits": {
         "smithy.api#length": {
@@ -201,6 +246,18 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.mediapackagev2#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.mediapackagev2#TagKey": {
       "type": "string"

@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"maps"
 	"slices"
+	"strings"
 )
 
 // Compile checks every override against its locked model and schema and
@@ -45,6 +46,18 @@ func compileAll(plain fs.FS) ([]Reader, error) {
 
 func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	r, errs := compileCall(files, lock, o, nil, nil, "")
+	bound := 0
+	for _, v := range o.EndpointParams {
+		if s, ok := v.(string); ok && strings.HasPrefix(s, "{") {
+			bound++
+		}
+	}
+	if bound > 1 {
+		errs = append(errs, fmt.Errorf("endpointParams binds %d parameters to input members; one is the most an endpoint's path carries", bound))
+	}
+	if _, member := endpointParams(o.EndpointParams, nil); member != "" && (o.Create != nil || len(o.Update) > 0 || o.Delete != nil) {
+		errs = append(errs, fmt.Errorf("endpointParams binds a parameter to %s, which a mutation does not yet send", member))
+	}
 	if model, err := loadModel(files, lock.Models[o.Read.Model].File); err == nil && r.Protocol != "" {
 		var codeErrs []error
 		r.UndeclaredReadErrors, r.UndeclaredDeleteErrors, codeErrs = checkErrorCodes(&model, r.Protocol, o)
@@ -82,7 +95,8 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 			Type: o.Type,
 			Read: Read{Model: o.Read.Model, Operation: call.Operation, Identifier: call.Identifier,
 				Response: call.Response, Input: call.Input, AbsentErrors: call.AbsentErrors},
-			Properties: call.Properties,
+			Properties:     call.Properties,
+			EndpointParams: o.EndpointParams,
 		}
 		callCaptured := captured
 		if call.Each != "" {

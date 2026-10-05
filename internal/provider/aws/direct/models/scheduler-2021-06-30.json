@@ -758,6 +758,21 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.scheduler#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.scheduler#CreationDate": {
       "type": "timestamp"
     },
@@ -1562,6 +1577,21 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.scheduler#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "smithy.api#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
     },
     "com.amazonaws.scheduler#Source": {
       "traits": {

@@ -1004,6 +1004,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.servicecatalog#DuplicateResourceException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicecatalog#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.servicecatalog#ErrorMessage": {
       "traits": {
         "smithy.api#length": {
@@ -1013,8 +1024,63 @@
       },
       "type": "string"
     },
+    "com.amazonaws.servicecatalog#InvalidParametersException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicecatalog#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.servicecatalog#InvalidStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicecatalog#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.servicecatalog#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicecatalog#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.servicecatalog#OperationNotSupportedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicecatalog#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.servicecatalog#Owner": {
       "type": "string"
+    },
+    "com.amazonaws.servicecatalog#ResourceInUseException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.servicecatalog#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.servicecatalog#ResourceNotFoundException": {
       "members": {

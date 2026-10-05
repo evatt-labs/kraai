@@ -32,6 +32,26 @@
       },
       "type": "string"
     },
+    "com.amazonaws.outposts#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.outposts#ErrorMessage"
+        },
+        "ResourceId": {
+          "target": "com.amazonaws.outposts#String",
+          "traits": {}
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.outposts#ResourceType",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.outposts#ErrorMessage": {
       "traits": {
         "smithy.api#length": {
@@ -1239,6 +1259,35 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.outposts#ResourceType": {
+      "members": {
+        "ORDER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ORDER"
+          }
+        },
+        "OUTPOST": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OUTPOST"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.outposts#ServiceQuotaExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.outposts#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
     "com.amazonaws.outposts#SiteArn": {
       "traits": {
         "smithy.api#length": {
@@ -1256,6 +1305,16 @@
           "min": 1
         },
         "smithy.api#pattern": "^(arn:aws([a-z-]+)?:outposts:[a-z\\d-]+:\\d{12}:site/)?(os-[a-f0-9]{17})$"
+      },
+      "type": "string"
+    },
+    "com.amazonaws.outposts#String": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 1000,
+          "min": 1
+        },
+        "smithy.api#pattern": "^[\\S \\n]+$"
       },
       "type": "string"
     },

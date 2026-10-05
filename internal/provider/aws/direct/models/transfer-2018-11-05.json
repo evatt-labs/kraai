@@ -1,5 +1,21 @@
 {
   "shapes": {
+    "com.amazonaws.transfer#AccessDeniedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#ServiceErrorMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AccessDenied",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.transfer#AddressAllocationId": {
       "type": "string"
     },
@@ -174,6 +190,21 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.transfer#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#Message",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.transfer#CopyStepDetails": {
       "members": {
@@ -1081,6 +1112,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.transfer#InvalidNextTokenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#Message",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.transfer#InvalidRequestException": {
       "members": {
         "Message": {
@@ -1320,6 +1366,33 @@
     "com.amazonaws.transfer#Resource": {
       "type": "string"
     },
+    "com.amazonaws.transfer#ResourceExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.transfer#Message",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Resource": {
+          "target": "com.amazonaws.transfer#Resource",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ResourceType": {
+          "target": "com.amazonaws.transfer#ResourceType",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.transfer#ResourceNotFoundException": {
       "members": {
         "Message": {
@@ -1348,6 +1421,9 @@
       "type": "structure"
     },
     "com.amazonaws.transfer#ResourceType": {
+      "type": "string"
+    },
+    "com.amazonaws.transfer#RetryAfterSeconds": {
       "type": "string"
     },
     "com.amazonaws.transfer#Role": {
@@ -1706,6 +1782,21 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.transfer#ThrottlingException": {
+      "members": {
+        "RetryAfterSeconds": {
+          "target": "com.amazonaws.transfer#RetryAfterSeconds",
+          "traits": {
+            "smithy.api#httpHeader": "Retry-After"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
     },
     "com.amazonaws.transfer#TlsSessionResumptionMode": {
       "members": {

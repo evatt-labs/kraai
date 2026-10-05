@@ -895,6 +895,67 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ivs#ChannelNotBroadcasting": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ivs#ChannelPlaybackRestrictionPolicyArn": {
       "traits": {
         "smithy.api#length": {
@@ -943,6 +1004,67 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.ivs#ConflictException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     },
     "com.amazonaws.ivs#ContainerFormat": {
       "traits": {
@@ -1817,6 +1939,128 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.ivs#ServiceQuotaExceededException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.ivs#ServiceUnavailable": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ivs#Srt": {
       "members": {
         "endpoint": {
@@ -1878,6 +2122,67 @@
       },
       "type": "string"
     },
+    "com.amazonaws.ivs#StreamUnavailable": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "server",
+        "smithy.api#httpError": 503
+      },
+      "type": "structure"
+    },
     "com.amazonaws.ivs#String": {
       "type": "string"
     },
@@ -1924,6 +2229,67 @@
         }
       },
       "type": "long"
+    },
+    "com.amazonaws.ivs#ThrottlingException": {
+      "members": {
+        "accessControlAllowOrigin": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Allow-Origin"
+          }
+        },
+        "accessControlExposeHeaders": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Access-Control-Expose-Headers"
+          }
+        },
+        "cacheControl": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Cache-Control"
+          }
+        },
+        "contentSecurityPolicy": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Content-Security-Policy"
+          }
+        },
+        "exceptionMessage": {
+          "target": "com.amazonaws.ivs#errorMessage",
+          "traits": {}
+        },
+        "strictTransportSecurity": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "Strict-Transport-Security"
+          }
+        },
+        "xAmznErrorType": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "x-amzn-ErrorType"
+          }
+        },
+        "xContentTypeOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Content-Type-Options"
+          }
+        },
+        "xFrameOptions": {
+          "target": "com.amazonaws.ivs#String",
+          "traits": {
+            "smithy.api#httpHeader": "X-Frame-Options"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
     },
     "com.amazonaws.ivs#ThumbnailConfiguration": {
       "members": {

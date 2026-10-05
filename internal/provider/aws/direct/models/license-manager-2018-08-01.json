@@ -1126,6 +1126,22 @@
     "com.amazonaws.licensemanager#BoxInteger": {
       "type": "integer"
     },
+    "com.amazonaws.licensemanager#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ConflictException",
+          "httpResponseCode": 409
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.licensemanager#ConsumptionConfiguration": {
       "members": {
         "BorrowConfiguration": {
@@ -1202,6 +1218,18 @@
         "target": "com.amazonaws.licensemanager#Entitlement"
       },
       "type": "list"
+    },
+    "com.amazonaws.licensemanager#EntitlementNotAllowedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.licensemanager#EntitlementUnit": {
       "members": {
@@ -1369,6 +1397,41 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.licensemanager#FailedDependencyException": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.licensemanager#String"
+        },
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "FailedDependency",
+          "httpResponseCode": 424
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 424
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#FilterLimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "FilterLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.licensemanager#GetGrant": {
       "errors": [
@@ -1784,6 +1847,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.licensemanager#InvalidResourceStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidResourceState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.licensemanager#IssuerDetails": {
       "members": {
         "KeyFingerprint": {
@@ -2117,6 +2196,25 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.licensemanager#LicenseUsageException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "LicenseUsageFailure",
+          "httpResponseCode": 412
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 412
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#Location": {
+      "type": "string"
+    },
     "com.amazonaws.licensemanager#Long": {
       "type": "long"
     },
@@ -2173,6 +2271,18 @@
       },
       "type": "list"
     },
+    "com.amazonaws.licensemanager#NoEntitlementsAllowedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.licensemanager#Options": {
       "members": {
         "ActivationOverrideBehavior": {
@@ -2225,6 +2335,24 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.licensemanager#RedirectException": {
+      "members": {
+        "Location": {
+          "target": "com.amazonaws.licensemanager#Location",
+          "traits": {
+            "smithy.api#httpHeader": "Location"
+          }
+        },
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 308
+      },
+      "type": "structure"
+    },
     "com.amazonaws.licensemanager#RenewType": {
       "members": {
         "MONTHLY": {
@@ -2257,6 +2385,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "ResourceLimitExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.licensemanager#ResourceNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidResource.NotFound",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -2340,6 +2484,18 @@
         "target": "com.amazonaws.licensemanager#String"
       },
       "type": "list"
+    },
+    "com.amazonaws.licensemanager#UnsupportedDigitalSignatureMethodException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.licensemanager#Message"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.licensemanager#ValidationException": {
       "members": {

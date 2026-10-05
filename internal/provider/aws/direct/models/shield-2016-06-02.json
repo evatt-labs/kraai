@@ -774,6 +774,28 @@
       "type": "service",
       "version": "2016-06-02"
     },
+    "com.amazonaws.shield#AccessDeniedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#AccessDeniedForDependencyException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.shield#DescribeProtectionGroup": {
       "errors": [
         {
@@ -828,6 +850,121 @@
       },
       "traits": {
         "smithy.api#error": "server"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#InvalidOperationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#InvalidPaginationTokenException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#InvalidParameterException": {
+      "members": {
+        "fields": {
+          "target": "com.amazonaws.shield#ValidationExceptionFieldList",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        },
+        "reason": {
+          "target": "com.amazonaws.shield#ValidationExceptionReason",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#InvalidResourceException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#LimitNumber": {
+      "traits": {
+        "smithy.api#default": 0
+      },
+      "type": "long"
+    },
+    "com.amazonaws.shield#LimitType": {
+      "type": "string"
+    },
+    "com.amazonaws.shield#LimitsExceededException": {
+      "members": {
+        "Limit": {
+          "target": "com.amazonaws.shield#LimitNumber",
+          "traits": {
+            "smithy.api#default": 0
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.shield#LimitType",
+          "traits": {}
+        },
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#LockedSubscriptionException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#NoAssociatedRoleException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.shield#OptimisticLockException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
@@ -978,6 +1115,21 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.shield#ResourceAlreadyExistsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#errorMessage"
+        },
+        "resourceType": {
+          "target": "com.amazonaws.shield#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.shield#ResourceArn": {
       "traits": {
         "smithy.api#length": {
@@ -1005,6 +1157,47 @@
     },
     "com.amazonaws.shield#String": {
       "type": "string"
+    },
+    "com.amazonaws.shield#ValidationExceptionField": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.shield#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "name": {
+          "target": "com.amazonaws.shield#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.shield#ValidationExceptionFieldList": {
+      "member": {
+        "target": "com.amazonaws.shield#ValidationExceptionField"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.shield#ValidationExceptionReason": {
+      "members": {
+        "FIELD_VALIDATION_FAILED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FIELD_VALIDATION_FAILED"
+          }
+        },
+        "OTHER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "OTHER"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.shield#errorMessage": {
       "type": "string"

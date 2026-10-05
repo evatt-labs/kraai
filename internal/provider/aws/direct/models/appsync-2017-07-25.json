@@ -882,6 +882,42 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.appsync#ApiKeyLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#ApiKeyValidityOutOfBoundsException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#ApiLimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appsync#BadRequestDetail": {
       "members": {
         "codeErrors": {
@@ -998,6 +1034,30 @@
       },
       "type": "list"
     },
+    "com.amazonaws.appsync#ConcurrentModificationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#ConflictException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appsync#Description": {
       "traits": {
         "smithy.api#length": {
@@ -1111,6 +1171,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.appsync#GraphQLSchemaException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appsync#InternalFailureException": {
       "members": {
         "message": {
@@ -1123,6 +1195,18 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.appsync#LimitExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 429
+      },
+      "type": "structure"
+    },
     "com.amazonaws.appsync#NotFoundException": {
       "members": {
         "message": {
@@ -1132,6 +1216,18 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.appsync#ServiceQuotaExceededException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 402
       },
       "type": "structure"
     },
@@ -1172,6 +1268,18 @@
         "smithy.api#pattern": "^[\\s\\w+-=\\.:/@]*$"
       },
       "type": "string"
+    },
+    "com.amazonaws.appsync#UnauthorizedException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.appsync#String"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 401
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

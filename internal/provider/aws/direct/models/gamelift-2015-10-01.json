@@ -179,6 +179,17 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.gamelift#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.gamelift#ContainerCommandStringList": {
       "member": {
         "target": "com.amazonaws.gamelift#NonZeroAnd255MaxString"
@@ -847,6 +858,17 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#FleetCapacityExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
       },
       "type": "structure"
     },
@@ -2502,6 +2524,17 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.gamelift#GameSessionFullException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.gamelift#IamRoleArn": {
       "traits": {
         "smithy.api#length": {
@@ -2511,6 +2544,17 @@
         "smithy.api#pattern": "^arn:.*:role\\/[\\w+=,.@-]+$"
       },
       "type": "string"
+    },
+    "com.amazonaws.gamelift#IdempotentParameterMismatchException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.gamelift#ImageUriString": {
       "traits": {
@@ -2572,6 +2616,28 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.gamelift#InvalidFleetStatusException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#InvalidGameSessionStatusException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.gamelift#InvalidRequestException": {
       "members": {
         "Message": {
@@ -2599,6 +2665,17 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.gamelift#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.gamelift#LinuxCapabilities": {
       "members": {
@@ -2906,6 +2983,17 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.gamelift#NotReadyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.gamelift#OperatingSystem": {
       "members": {
         "AMAZON_LINUX": {
@@ -2946,6 +3034,17 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.gamelift#OutOfCapacityException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.gamelift#PortNumber": {
       "traits": {
@@ -3081,6 +3180,28 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.gamelift#TaggingFailedException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.gamelift#TerminalRoutingStrategyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.gamelift#NonEmptyString"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client"
+      },
+      "type": "structure"
     },
     "com.amazonaws.gamelift#Timestamp": {
       "type": "timestamp"

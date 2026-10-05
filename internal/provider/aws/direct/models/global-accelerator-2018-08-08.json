@@ -1,5 +1,29 @@
 {
   "shapes": {
+    "com.amazonaws.globalaccelerator#AcceleratorNotDisabledException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#AcceleratorNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.globalaccelerator#AccessDeniedException": {
       "members": {
         "Message": {
@@ -9,6 +33,30 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#AssociatedEndpointGroupFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#AssociatedListenerFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -64,6 +112,30 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.globalaccelerator#ByoipCidrNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.globalaccelerator#DescribeCrossAccountAttachment": {
       "errors": [
         {
@@ -111,6 +183,54 @@
       },
       "traits": {
         "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#EndpointAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#EndpointGroupAlreadyExistsException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#EndpointGroupNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#EndpointNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
       },
       "type": "structure"
     },
@@ -734,6 +854,18 @@
       "type": "service",
       "version": "2018-08-08"
     },
+    "com.amazonaws.globalaccelerator#IncorrectCidrStateException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.globalaccelerator#InternalServiceErrorException": {
       "members": {
         "Message": {
@@ -755,6 +887,54 @@
       "traits": {
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#InvalidNextTokenException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#InvalidPortRangeException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#LimitExceededException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.globalaccelerator#ListenerNotFoundException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
       },
       "type": "structure"
     },
@@ -803,6 +983,18 @@
     },
     "com.amazonaws.globalaccelerator#Timestamp": {
       "type": "timestamp"
+    },
+    "com.amazonaws.globalaccelerator#TransactionInProgressException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.globalaccelerator#ErrorMessage"
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
     }
   },
   "smithy": "2.0"

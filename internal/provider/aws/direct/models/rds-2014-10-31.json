@@ -1141,6 +1141,54 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.rds#AuthorizationAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AuthorizationAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#AuthorizationNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AuthorizationNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#AuthorizationQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "AuthorizationQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#AvailabilityZone": {
       "members": {
         "Name": {
@@ -1149,6 +1197,41 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.rds#BackupPolicyNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "BackupPolicyNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#deprecated": {
+          "message": "Please avoid using this fault"
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#BlueGreenDeploymentAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "BlueGreenDeploymentAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
       "type": "structure"
     },
     "com.amazonaws.rds#BlueGreenDeploymentNotFoundFault": {
@@ -1169,6 +1252,38 @@
     },
     "com.amazonaws.rds#Boolean": {
       "type": "boolean"
+    },
+    "com.amazonaws.rds#CertificateNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CertificateNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#CreateCustomDBEngineVersionFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CreateCustomDBEngineVersionFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.rds#CreateDBClusterParameterGroup": {
       "errors": [
@@ -1303,6 +1418,182 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#CustomAvailabilityZoneNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CustomAvailabilityZoneNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#CustomDBEngineVersionAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CustomDBEngineVersionAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#CustomDBEngineVersionNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CustomDBEngineVersionNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#CustomDBEngineVersionQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "CustomDBEngineVersionQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterAutomatedBackupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterAutomatedBackupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterAutomatedBackupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterAutomatedBackupQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterBacktrackNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterBacktrackNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterEndpointAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterEndpointAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterEndpointNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterEndpointNotFoundFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterEndpointQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterEndpointQuotaExceededFault",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBClusterNotFoundFault": {
       "members": {
         "message": {
@@ -1374,6 +1665,22 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.rds#DBClusterParameterGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterParameterGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBClusterParameterGroupsMessage": {
       "members": {
         "DBClusterParameterGroups": {
@@ -1390,6 +1697,150 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBClusterQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterQuotaExceededFault",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterRoleAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterRoleAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterRoleNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterRoleNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterRoleQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterRoleQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterSnapshotAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterSnapshotAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBClusterSnapshotNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBClusterSnapshotNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBInstanceAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBInstanceAutomatedBackupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceAutomatedBackupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBInstanceAutomatedBackupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceAutomatedBackupQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBInstanceNotFoundFault": {
       "members": {
         "message": {
@@ -1399,6 +1850,86 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "DBInstanceNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBInstanceNotReadyFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceNotReady",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBInstanceRoleAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceRoleAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBInstanceRoleNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceRoleNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBInstanceRoleQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBInstanceRoleQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBLogFileNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBLogFileNotFoundFault",
           "httpResponseCode": 404
         },
         "smithy.api#error": "client",
@@ -1454,6 +1985,38 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBProxyAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBProxyEndpointAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyEndpointAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBProxyEndpointNotFoundFault": {
       "members": {
         "message": {
@@ -1467,6 +2030,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBProxyEndpointQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyEndpointQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1486,6 +2065,38 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBProxyQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBProxyTargetAlreadyRegisteredFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyTargetAlreadyRegisteredFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBProxyTargetGroupNotFoundFault": {
       "members": {
         "message": {
@@ -1502,6 +2113,102 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBProxyTargetNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBProxyTargetNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSecurityGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSecurityGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSecurityGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSecurityGroupNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSecurityGroupNotSupportedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSecurityGroupNotSupported",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSecurityGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "QuotaExceeded.DBSecurityGroup",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBShardGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBShardGroupAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBShardGroupNotFoundFault": {
       "members": {
         "message": {
@@ -1515,6 +2222,22 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBSnapshotAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSnapshotAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1632,6 +2355,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DBSubnetGroupNotAllowedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBSubnetGroupNotAllowedFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#DBSubnetGroupNotFoundFault": {
       "members": {
         "message": {
@@ -1682,6 +2421,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "DBSubnetQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#DBUpgradeDependencyFailureFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DBUpgradeDependencyFailure",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -1903,14 +2658,94 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#DomainNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "DomainNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#Ec2ImagePropertiesNotSupportedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "Ec2ImagePropertiesNotSupportedFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#EngineModeList": {
       "member": {
         "target": "com.amazonaws.rds#String"
       },
       "type": "list"
     },
+    "com.amazonaws.rds#EventSubscriptionQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "EventSubscriptionQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#ExceptionMessage": {
       "type": "string"
+    },
+    "com.amazonaws.rds#ExportTaskAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ExportTaskAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ExportTaskNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ExportTaskNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
     },
     "com.amazonaws.rds#Filter": {
       "members": {
@@ -1950,8 +2785,200 @@
       },
       "type": "list"
     },
+    "com.amazonaws.rds#GlobalClusterAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "GlobalClusterAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#GlobalClusterNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "GlobalClusterNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#GlobalClusterQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "GlobalClusterQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#IamRoleMissingPermissionsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IamRoleMissingPermissions",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#IamRoleNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IamRoleNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InstanceQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InstanceQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InsufficientAvailableIPsInSubnetFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InsufficientAvailableIPsInSubnetFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InsufficientDBClusterCapacityFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InsufficientDBClusterCapacityFault",
+          "httpResponseCode": 403
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 403
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InsufficientDBInstanceCapacityFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InsufficientDBInstanceCapacity",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InsufficientStorageClusterCapacityFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InsufficientStorageClusterCapacity",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#IntegerOptional": {
       "type": "integer"
+    },
+    "com.amazonaws.rds#IntegrationAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IntegrationAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#IntegrationConflictOperationFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IntegrationConflictOperationFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.rds#IntegrationNotFoundFault": {
       "members": {
@@ -1966,6 +2993,86 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#IntegrationQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "IntegrationQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidBlueGreenDeploymentStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidBlueGreenDeploymentStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidCustomDBEngineVersionStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidCustomDBEngineVersionStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBClusterAutomatedBackupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBClusterAutomatedBackupStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBClusterCapacityFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBClusterCapacityFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -1985,6 +3092,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#InvalidDBClusterSnapshotStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBClusterSnapshotStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#InvalidDBClusterStateFault": {
       "members": {
         "message": {
@@ -1994,6 +3117,22 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidDBClusterStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBInstanceAutomatedBackupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBInstanceAutomatedBackupState",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -2033,6 +3172,102 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#InvalidDBProxyEndpointStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBProxyEndpointStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBProxyStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBProxyStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBSecurityGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBSecurityGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBShardGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBShardGroupState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBSnapshotStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBSnapshotState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidDBSubnetGroupFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidDBSubnetGroupFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#InvalidDBSubnetGroupStateFault": {
       "members": {
         "message": {
@@ -2065,6 +3300,166 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#InvalidEventSubscriptionStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidEventSubscriptionState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidExportOnlyFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidExportOnly",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidExportSourceStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidExportSourceState",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidExportTaskStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidExportTaskStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidGlobalClusterStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidGlobalClusterStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidIntegrationStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidIntegrationStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidOptionGroupStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidOptionGroupStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidResourceStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidResourceStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidRestoreFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidRestoreFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidS3BucketFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidS3BucketFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#InvalidSubnet": {
       "members": {
         "message": {
@@ -2074,6 +3469,38 @@
       "traits": {
         "aws.protocols#awsQueryError": {
           "code": "InvalidSubnet",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#InvalidVPCNetworkStateFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "InvalidVPCNetworkStateFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#KMSKeyNotAccessibleFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "KMSKeyNotAccessibleFault",
           "httpResponseCode": 400
         },
         "smithy.api#error": "client",
@@ -2148,6 +3575,22 @@
       },
       "traits": {
         "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#MaxDBShardGroupLimitReached": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "MaxDBShardGroupLimitReached",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -2258,6 +3701,70 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#NetworkTypeNotSupported": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "NetworkTypeNotSupported",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#OptionGroupAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OptionGroupAlreadyExistsFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#OptionGroupNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OptionGroupNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#OptionGroupQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "OptionGroupQuotaExceededFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#Outpost": {
       "members": {
         "Arn": {
@@ -2327,8 +3834,40 @@
       },
       "type": "list"
     },
+    "com.amazonaws.rds#PointInTimeRestoreNotEnabledFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "PointInTimeRestoreNotEnabled",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#PotentiallySensitiveParameterValue": {
       "type": "string"
+    },
+    "com.amazonaws.rds#ProvisionedIopsNotAvailableInAZFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ProvisionedIopsNotAvailableInAZFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
     },
     "com.amazonaws.rds#RemoveTagsFromResource": {
       "errors": [
@@ -2406,6 +3945,70 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#ReservedDBInstanceAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedDBInstanceAlreadyExists",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ReservedDBInstanceNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedDBInstanceNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ReservedDBInstanceQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedDBInstanceQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ReservedDBInstancesOfferingNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ReservedDBInstancesOfferingNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#ResetDBClusterParameterGroup": {
       "errors": [
         {
@@ -2444,6 +4047,198 @@
       },
       "traits": {
         "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#ResourceNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "ResourceNotFoundFault",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SNSInvalidTopicFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SNSInvalidTopic",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SNSNoAuthorizationFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SNSNoAuthorization",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SNSTopicArnNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SNSTopicArnNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SharedSnapshotQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SharedSnapshotQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SnapshotQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SnapshotQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SourceClusterNotSupportedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SourceClusterNotSupportedFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SourceDatabaseNotSupportedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SourceDatabaseNotSupportedFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SourceNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SourceNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#StorageQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StorageQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#StorageTypeNotAvailableFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StorageTypeNotAvailableFault",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#StorageTypeNotSupportedFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "StorageTypeNotSupported",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     },
@@ -2511,6 +4306,54 @@
       },
       "type": "list"
     },
+    "com.amazonaws.rds#SubscriptionAlreadyExistFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubscriptionAlreadyExist",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SubscriptionCategoryNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubscriptionCategoryNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#SubscriptionNotFoundFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "SubscriptionNotFound",
+          "httpResponseCode": 404
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#Tag": {
       "members": {
         "Key": {
@@ -2547,6 +4390,22 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.rds#TenantDatabaseAlreadyExistsFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TenantDatabaseAlreadyExists",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
     "com.amazonaws.rds#TenantDatabaseNotFoundFault": {
       "members": {
         "message": {
@@ -2560,6 +4419,54 @@
         },
         "smithy.api#error": "client",
         "smithy.api#httpError": 404
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#TenantDatabaseQuotaExceededFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "TenantDatabaseQuotaExceeded",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#UnsupportedDBEngineVersionFault": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "UnsupportedDBEngineVersion",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.rds#VpcEncryptionControlViolationException": {
+      "members": {
+        "message": {
+          "target": "com.amazonaws.rds#ExceptionMessage"
+        }
+      },
+      "traits": {
+        "aws.protocols#awsQueryError": {
+          "code": "VpcEncryptionControlViolationException",
+          "httpResponseCode": 400
+        },
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
       },
       "type": "structure"
     }
