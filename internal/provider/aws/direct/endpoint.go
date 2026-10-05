@@ -3,203 +3,87 @@ package direct
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
+	"net/url"
 	"strings"
 )
 
-// partitionValues are the aws partition's values for the rule set
-// variables a standard endpoint URL uses.
-var partitionValues = strings.NewReplacer(
-	"{PartitionResult#dnsSuffix}", "amazonaws.com",
-	"{PartitionResult#dualStackDnsSuffix}", "api.aws",
-	"{PartitionResult#implicitGlobalRegion}", "us-east-1",
-	"{Region}", "{region}",
-)
+// endpointRegion is the region an operation's endpoint is resolved for at
+// compile time. It matches the aws partition's region pattern and names no
+// real region, so wherever it appears in the result is where the client's
+// region goes. TestEndpointsHoldInEveryRegion checks that what this gives
+// is what every real region of the partition gives.
+const endpointRegion = "us-kraai-1"
 
-// otherPartitionRegions prefix the regions of partitions other than aws,
-// which a literal host under amazonaws.com can still name.
-var otherPartitionRegions = []string{"us-gov", "cn-", "us-iso", "eu-iso", "eusc-"}
-
-// endpointOf reads the one standard endpoint a service's rule set gives
-// for the aws partition from its URLs as written, rather than evaluating
-// its conditions. It returns the host, {region} standing for the client's
-// region when regional, and the region a global endpoint is signed for; or
-// why no single endpoint is there to form.
-//
-// A URL is set aside when it is FIPS, in another partition, or depends on
-// a parameter this client never sets. An amazonaws.com host is preferred
-// to an api.aws one, which some services give only in dual-stack form; a
-// literal host for one region that the regional form produces anyway is
-// not a second endpoint.
-func endpointOf(ruleSet json.RawMessage, static map[string]any) (host, signingRegion, reason string) {
-	var tree any
-	if json.Unmarshal(ruleSet, &tree) != nil || tree == nil {
+// endpointOf resolves the endpoint a service's rule set gives an operation
+// in the aws partition: the operation's static context parameters set,
+// every client setting such as FIPS or dual-stack at its default, and every
+// parameter the operation binds from its input left unset. It returns the
+// host, {region} standing for the client's region, and the region a global
+// endpoint is signed for; or why no endpoint this client can call is there.
+func endpointOf(ruleSet json.RawMessage, static map[string]any, signingName string) (host, signingRegion, reason string) {
+	if len(ruleSet) == 0 {
 		return "", "", "the model has no endpoint rule set"
 	}
-	// An operation parameter, one no client setting fills, has only the
-	// value the operation's staticContextParams give it, or its default.
-	var parameters struct {
-		Parameters map[string]struct {
-			BuiltIn string `json:"builtIn"`
-			Default any    `json:"default"`
-		} `json:"parameters"`
+	rs, err := parseRuleSet(ruleSet)
+	if err != nil {
+		return "", "", err.Error()
 	}
-	_ = json.Unmarshal(ruleSet, &parameters)
-	operationParam := func(argv any) (value any, known, isOperation bool) {
-		ref, _ := argv.(map[string]any)["ref"].(string)
-		p, ok := parameters.Parameters[ref]
-		if !ok || p.BuiltIn != "" {
-			return nil, false, false
-		}
-		if v, ok := static[ref]; ok {
-			return v, true, true
-		}
-		return p.Default, p.Default != nil, true
-	}
-	// unreachable reports a rule gated on an operation parameter this
-	// operation cannot give the value the rule requires.
-	unreachable := func(rule map[string]any) bool {
-		conditions, _ := rule["conditions"].([]any)
-		for _, c := range conditions {
-			cond, _ := c.(map[string]any)
-			argv, _ := cond["argv"].([]any)
-			if len(argv) == 0 {
-				continue
-			}
-			if _, isRef := argv[0].(map[string]any); !isRef {
-				continue
-			}
-			value, known, isOperation := operationParam(argv[0])
-			if !isOperation {
-				continue
-			}
-			switch cond["fn"] {
-			case "isSet":
-				if !known {
-					return true
-				}
-			case "booleanEquals":
-				if len(argv) == 2 && (!known || value != argv[1]) {
-					return true
-				}
-			}
-		}
-		return false
-	}
-	type candidate struct {
-		host, signingRegion string
-		implicit            bool
-	}
-	tiers := map[string]map[candidate]bool{"amazonaws.com": {}, "api.aws": {}}
-	var walk func(any)
-	walk = func(v any) {
-		switch t := v.(type) {
-		case map[string]any:
-			if unreachable(t) {
-				return
-			}
-			if t["type"] == "endpoint" {
-				endpoint, _ := t["endpoint"].(map[string]any)
-				url, _ := endpoint["url"].(string)
-				var signing string
-				if props, ok := endpoint["properties"].(map[string]any); ok {
-					if schemes, ok := props["authSchemes"].([]any); ok && len(schemes) > 0 {
-						scheme, _ := schemes[0].(map[string]any)
-						signing, _ = scheme["signingRegion"].(string)
-					}
-				}
-				h, ok := strings.CutPrefix(partitionValues.Replace(url), "https://")
-				if ok && !strings.ContainsAny(strings.ReplaceAll(h, "{region}", ""), "{}/") &&
-					!fips(h) && !otherPartition(h) {
-					c := candidate{host: h, implicit: strings.Contains(url, "{PartitionResult#implicitGlobalRegion}")}
-					if !strings.Contains(h, "{region}") {
-						c.signingRegion = partitionValues.Replace(signing)
-					}
-					for suffix, tier := range tiers {
-						if strings.HasSuffix(h, "."+suffix) {
-							tier[c] = true
-						}
-					}
-				}
-			}
-			for _, child := range t {
-				walk(child)
-			}
-		case []any:
-			for _, child := range t {
-				walk(child)
-			}
+	params := map[string]any{}
+	for name, p := range rs.Parameters {
+		if p.BuiltIn == "AWS::Region" {
+			params[name] = endpointRegion
 		}
 	}
-	walk(tree)
-	found := tiers["amazonaws.com"]
-	if len(found) == 0 {
-		found = tiers["api.aws"]
+	for name, v := range static {
+		params[name] = v
 	}
-	// A regional form accounts for any literal it produces for one region.
-	for c := range found {
-		prefix, suffix, regional := strings.Cut(c.host, ".{region}.")
-		if !regional {
-			continue
-		}
-		for other := range found {
-			rest, ok := strings.CutPrefix(other.host, prefix+".")
-			if ok && strings.HasSuffix(rest, "."+suffix) && !strings.Contains(strings.TrimSuffix(rest, "."+suffix), ".") && other != c {
-				delete(found, other)
-			}
-		}
+	e, err := rs.resolve(params)
+	if err != nil {
+		return "", "", err.Error()
 	}
-	// A host built from the partition's implicit global region is the rule
-	// for partitions the set names no endpoint of; the aws partition's own
-	// global host, signed for the same region, is the one that applies, as
-	// IAM's iam.amazonaws.com beside iam.us-east-1.amazonaws.com.
-	for c := range found {
-		if !c.implicit {
-			continue
-		}
-		for other := range found {
-			if !other.implicit && !strings.Contains(other.host, "{region}") && other.signingRegion == c.signingRegion {
-				delete(found, c)
-				break
-			}
-		}
+	u, err := url.Parse(e.URL)
+	switch {
+	case err != nil:
+		return "", "", fmt.Sprintf("the rule set gives %s, which is not a URL", e.URL)
+	case u.Scheme != "https" || u.Port() != "" || u.User != nil || u.RawQuery != "" || strings.Trim(u.Path, "/") != "":
+		return "", "", fmt.Sprintf("the rule set gives %s, not an https host", e.URL)
+	case len(e.Headers) > 0:
+		return "", "", fmt.Sprintf("the rule set gives %s with headers this client does not send", e.URL)
 	}
-	if len(found) != 1 {
-		hosts := make([]string, 0, len(found))
-		for c := range found {
-			hosts = append(hosts, c.host)
-		}
-		sort.Strings(hosts)
-		return "", "", fmt.Sprintf("the rule set gives %d standard endpoints %v", len(found), hosts)
+	host = strings.ReplaceAll(u.Host, endpointRegion, "{region}")
+	signing, name, reason := authScheme(e.Properties)
+	if reason != "" {
+		return "", "", reason
 	}
-	for c := range found {
-		host, signingRegion = c.host, c.signingRegion
+	if name != "" && name != signingName {
+		return "", "", fmt.Sprintf("the rule set signs %s for %s, not %s", e.URL, name, signingName)
 	}
-	if !strings.Contains(host, "{region}") && signingRegion != "us-east-1" {
-		return "", "", fmt.Sprintf("the global endpoint %s is signed for %q, not us-east-1", host, signingRegion)
+	switch signing {
+	case "", endpointRegion:
+	case "us-east-1":
+		signingRegion = signing
+	default:
+		return "", "", fmt.Sprintf("the endpoint %s is signed for %q, not the client's region or us-east-1", host, signing)
+	}
+	if signingRegion == "" && !strings.Contains(host, "{region}") {
+		return "", "", fmt.Sprintf("the endpoint %s names no region and is signed for the client's", host)
 	}
 	return host, signingRegion, ""
 }
 
-// fips reports whether any label of host names a FIPS endpoint.
-func fips(host string) bool {
-	for label := range strings.SplitSeq(host, ".") {
-		if label == "fips" || strings.HasSuffix(label, "-fips") {
-			return true
-		}
+// authScheme reads the region and name an endpoint's first auth scheme
+// signs for; either is empty when the scheme leaves it to the client. A
+// first scheme other than sigv4, such as sigv4a, is refused.
+func authScheme(properties map[string]any) (region, name, reason string) {
+	schemes, _ := properties["authSchemes"].([]any)
+	if len(schemes) == 0 {
+		return "", "", ""
 	}
-	return false
-}
-
-// otherPartition reports whether any label of host is another
-// partition's region.
-func otherPartition(host string) bool {
-	for label := range strings.SplitSeq(host, ".") {
-		for _, prefix := range otherPartitionRegions {
-			if strings.HasPrefix(label, prefix) {
-				return true
-			}
-		}
+	scheme, _ := schemes[0].(map[string]any)
+	if scheme["name"] != "sigv4" {
+		return "", "", fmt.Sprintf("the endpoint's first auth scheme is %v, not sigv4", scheme["name"])
 	}
-	return false
+	region, _ = scheme["signingRegion"].(string)
+	name, _ = scheme["signingName"].(string)
+	return region, name, ""
 }

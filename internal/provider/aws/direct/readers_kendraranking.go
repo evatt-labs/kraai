@@ -8,7 +8,7 @@ func init() {
 			Type:        "AWS::KendraRanking::ExecutionPlan",
 			Protocol:    "awsJson1_0",
 			SigningName: "kendra-ranking",
-			Host:        "kendra-ranking.{region}.amazonaws.com",
+			Host:        "kendra-ranking.{region}.api.aws",
 			Target:      "AWSKendraRerankingFrontendService.DescribeRescoreExecutionPlan",
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "body"},

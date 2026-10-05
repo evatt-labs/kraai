@@ -8,7 +8,7 @@ func init() {
 			Type:        "AWS::CertificateManager::AcmeExternalAccountBinding",
 			Protocol:    "awsJson1_1",
 			SigningName: "acm",
-			Host:        "acm.{region}.amazonaws.com",
+			Host:        "acm-acme.{region}.api.aws",
 			Target:      "CertificateManager.DescribeAcmeExternalAccountBinding",
 			Identifier: []Binding{
 				{Property: "AcmeExternalAccountBindingArn", Member: "AcmeExternalAccountBindingArn", Location: "body"},
