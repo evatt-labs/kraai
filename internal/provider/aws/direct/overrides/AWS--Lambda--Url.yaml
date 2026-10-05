@@ -31,5 +31,42 @@ properties:
       AllowOrigins: AllowOrigins
       ExposeHeaders: ExposeHeaders
       MaxAge: MaxAge
+create:
+  operation: CreateFunctionUrlConfig
+  # A function given by ARN is read back by its name.
+  unechoed: [TargetFunctionArn]
+  input:
+    FunctionName: "{TargetFunctionArn}"
+    Qualifier: "{Qualifier}"
+    AuthType: "{AuthType}"
+    InvokeMode: "{InvokeMode}"
+    Cors: "{Cors:wire}"
+  identifier:
+    FunctionArn: FunctionArn
+update:
+  - operation: UpdateFunctionUrlConfig
+    properties: [AuthType, Cors, InvokeMode]
+    input:
+      FunctionName: "{FunctionArn}"
+      AuthType: "{AuthType}"
+      InvokeMode: "{InvokeMode}"
+      Cors: "{Cors:wire}"
+delete:
+  operation: DeleteFunctionUrlConfig
+  input:
+    FunctionName: "{FunctionArn}"
+  absentErrors: [ResourceNotFoundException]
+# The vector's URL is AWS_IAM throughout, so nothing is invocable without
+# credentials: NONE would make the harness's function public.
+lifecycle:
+  create:
+    TargetFunctionArn: "{functionName}"
+    AuthType: AWS_IAM
+  update:
+    InvokeMode: RESPONSE_STREAM
+    Cors:
+      AllowMethods: ["GET"]
+      AllowOrigins: ["https://example.com"]
+      MaxAge: 600
 absentIds:
   - arn:aws:lambda:{region}:{account}:function:kraai-absent-probe

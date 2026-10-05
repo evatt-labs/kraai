@@ -36,7 +36,8 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 		name  string
 		value []string
 	}{{"AbsentErrors", m.AbsentErrors}, {"RetryErrors", m.RetryErrors}, {"Properties", m.Properties},
-		{"Key", m.Key}, {"Match", m.Match}, {"Clear", m.Clear}, {"Immutable", m.Immutable}, {"With", m.With}} {
+		{"Key", m.Key}, {"Match", m.Match}, {"Clear", m.Clear}, {"Immutable", m.Immutable}, {"With", m.With},
+		{"Generate", m.Generate}, {"Unechoed", m.Unechoed}} {
 		if f.value != nil {
 			fmt.Fprintf(b, "%s: %#v, ", f.name, f.value)
 		}

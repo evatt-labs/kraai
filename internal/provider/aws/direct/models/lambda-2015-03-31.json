@@ -3,6 +3,15 @@
     "com.amazonaws.lambda#AWSGirApiService": {
       "operations": [
         {
+          "target": "com.amazonaws.lambda#AddPermission"
+        },
+        {
+          "target": "com.amazonaws.lambda#CreateFunctionUrlConfig"
+        },
+        {
+          "target": "com.amazonaws.lambda#DeleteFunctionUrlConfig"
+        },
+        {
           "target": "com.amazonaws.lambda#GetCodeSigningConfig"
         },
         {
@@ -25,6 +34,12 @@
         },
         {
           "target": "com.amazonaws.lambda#GetRuntimeManagementConfig"
+        },
+        {
+          "target": "com.amazonaws.lambda#RemovePermission"
+        },
+        {
+          "target": "com.amazonaws.lambda#UpdateFunctionUrlConfig"
         }
       ],
       "traits": {
@@ -378,6 +393,210 @@
       },
       "type": "service",
       "version": "2015-03-31"
+    },
+    "com.amazonaws.lambda#Action": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 10000,
+          "min": 0
+        },
+        "smithy.api#pattern": "^(lambda:[*]|lambda:[a-zA-Z]+|[*])$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#AddPermission": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambda#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.lambda#PolicyLengthExceededException"
+        },
+        {
+          "target": "com.amazonaws.lambda#PreconditionFailedException"
+        },
+        {
+          "target": "com.amazonaws.lambda#PublicPolicyException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceConflictException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ServiceException"
+        },
+        {
+          "target": "com.amazonaws.lambda#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lambda#AddPermissionRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.lambda#AddPermissionResponse"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "lambda:FunctionUrlAuthType",
+          "lambda:Principal"
+        ],
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to give an AWS service or another account permission to use an AWS Lambda function",
+          "relativeDocumentation": "API_AddPermission.html",
+          "resources": {
+            "required": {
+              "function": {}
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 201,
+          "method": "POST",
+          "uri": "/2015-03-31/functions/{FunctionName}/policy"
+        },
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.lambda#AddPermissionRequest": {
+      "members": {
+        "Action": {
+          "target": "com.amazonaws.lambda#Action",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "EventSourceToken": {
+          "target": "com.amazonaws.lambda#EventSourceToken",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionName": {
+          "target": "com.amazonaws.lambda#NamespacedFunctionName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionUrlAuthType": {
+          "target": "com.amazonaws.lambda#FunctionUrlAuthType",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "InvokedViaFunctionUrl": {
+          "target": "com.amazonaws.lambda#InvokedViaFunctionUrl",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Principal": {
+          "target": "com.amazonaws.lambda#Principal",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "PrincipalOrgID": {
+          "target": "com.amazonaws.lambda#PrincipalOrgID",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Qualifier": {
+          "target": "com.amazonaws.lambda#NumericLatestPublishedOrAliasQualifier",
+          "traits": {
+            "smithy.api#httpQuery": "Qualifier",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "RevisionId": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "SourceAccount": {
+          "target": "com.amazonaws.lambda#SourceOwner",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "SourceArn": {
+          "target": "com.amazonaws.lambda#Arn",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "StatementId": {
+          "target": "com.amazonaws.lambda#StatementId",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "aws.api#data": "permissions",
+        "smithy.api#input": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#AddPermissionResponse": {
+      "members": {
+        "Statement": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
     },
     "com.amazonaws.lambda#AllowCredentials": {
       "traits": {
@@ -838,6 +1057,173 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.lambda#CreateFunctionUrlConfig": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambda#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceConflictException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ServiceException"
+        },
+        {
+          "target": "com.amazonaws.lambda#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lambda#CreateFunctionUrlConfigRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.lambda#CreateFunctionUrlConfigResponse"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "lambda:FunctionArn",
+          "lambda:FunctionUrlAuthType"
+        ],
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to create a function url configuration for a Lambda function",
+          "relativeDocumentation": "API_CreateFunctionUrlConfig.html",
+          "resources": {
+            "required": {
+              "function": {}
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 201,
+          "method": "POST",
+          "uri": "/2021-10-31/functions/{FunctionName}/url"
+        },
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.lambda#CreateFunctionUrlConfigRequest": {
+      "members": {
+        "AuthType": {
+          "target": "com.amazonaws.lambda#FunctionUrlAuthType",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Cors": {
+          "target": "com.amazonaws.lambda#Cors",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionName": {
+          "target": "com.amazonaws.lambda#FunctionUrlFunctionName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "InvokeMode": {
+          "target": "com.amazonaws.lambda#InvokeMode",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Qualifier": {
+          "target": "com.amazonaws.lambda#FunctionUrlQualifier",
+          "traits": {
+            "smithy.api#httpQuery": "Qualifier",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#CreateFunctionUrlConfigResponse": {
+      "members": {
+        "AuthType": {
+          "target": "com.amazonaws.lambda#FunctionUrlAuthType",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Cors": {
+          "target": "com.amazonaws.lambda#Cors",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.lambda#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionArn": {
+          "target": "com.amazonaws.lambda#FunctionArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionUrl": {
+          "target": "com.amazonaws.lambda#FunctionUrl",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "InvokeMode": {
+          "target": "com.amazonaws.lambda#InvokeMode",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lambda#DeadLetterConfig": {
       "members": {
         "TargetArn": {
@@ -850,6 +1236,85 @@
         }
       },
       "traits": {
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#DeleteFunctionUrlConfig": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambda#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceConflictException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ServiceException"
+        },
+        {
+          "target": "com.amazonaws.lambda#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lambda#DeleteFunctionUrlConfigRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "lambda:FunctionArn",
+          "lambda:FunctionUrlAuthType"
+        ],
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to delete function url configuration for a Lambda function",
+          "relativeDocumentation": "API_DeleteFunctionUrlConfig.html",
+          "resources": {
+            "required": {
+              "function": {}
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/2021-10-31/functions/{FunctionName}/url"
+        },
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.lambda#DeleteFunctionUrlConfigRequest": {
+      "members": {
+        "FunctionName": {
+          "target": "com.amazonaws.lambda#FunctionUrlFunctionName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Qualifier": {
+          "target": "com.amazonaws.lambda#FunctionUrlQualifier",
+          "traits": {
+            "smithy.api#httpQuery": "Qualifier",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
         "smithy.api#tags": [
           "feature:public"
         ]
@@ -1065,6 +1530,19 @@
         ]
       },
       "type": "integer"
+    },
+    "com.amazonaws.lambda#EventSourceToken": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 256,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[a-zA-Z0-9._\\-]+$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
     },
     "com.amazonaws.lambda#ExecutionEnvironmentMemoryGiBPerVCpu": {
       "traits": {
@@ -2844,6 +3322,14 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.lambda#InvokedViaFunctionUrl": {
+      "traits": {
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "boolean"
+    },
     "com.amazonaws.lambda#KMSKeyArn": {
       "traits": {
         "smithy.api#length": {
@@ -3511,6 +3997,19 @@
       },
       "type": "string"
     },
+    "com.amazonaws.lambda#NamespacedStatementId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-zA-Z0-9-_.]+)$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
     "com.amazonaws.lambda#NullableBoolean": {
       "traits": {
         "smithy.api#tags": [
@@ -3585,6 +4084,116 @@
       },
       "type": "integer"
     },
+    "com.amazonaws.lambda#PolicyLengthExceededException": {
+      "members": {
+        "Type": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "message": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400,
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#PreconditionFailedException": {
+      "members": {
+        "Type": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "message": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 412,
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#Principal": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 2048,
+          "min": 0
+        },
+        "smithy.api#pattern": "^[^\\s]+$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#PrincipalOrgID": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 34,
+          "min": 12
+        },
+        "smithy.api#pattern": "^o-[a-z0-9]{10,32}$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
+    "com.amazonaws.lambda#PublicPolicyException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Type": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400,
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
     "com.amazonaws.lambda#PublishedFunctionQualifier": {
       "traits": {
         "smithy.api#length": {
@@ -3625,6 +4234,108 @@
         ]
       },
       "type": "enum"
+    },
+    "com.amazonaws.lambda#RemovePermission": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambda#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.lambda#PreconditionFailedException"
+        },
+        {
+          "target": "com.amazonaws.lambda#PublicPolicyException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ServiceException"
+        },
+        {
+          "target": "com.amazonaws.lambda#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lambda#RemovePermissionRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "lambda:FunctionUrlAuthType",
+          "lambda:Principal"
+        ],
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to revoke function-use permission from an AWS service or another account",
+          "relativeDocumentation": "API_RemovePermission.html",
+          "resources": {
+            "required": {
+              "function": {}
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/2015-03-31/functions/{FunctionName}/policy/{StatementId}"
+        },
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.lambda#RemovePermissionRequest": {
+      "members": {
+        "FunctionName": {
+          "target": "com.amazonaws.lambda#NamespacedFunctionName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Qualifier": {
+          "target": "com.amazonaws.lambda#NumericLatestPublishedOrAliasQualifier",
+          "traits": {
+            "smithy.api#httpQuery": "Qualifier",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "RevisionId": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#httpQuery": "RevisionId",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "StatementId": {
+          "target": "com.amazonaws.lambda#NamespacedStatementId",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "aws.api#data": "permissions",
+        "smithy.api#input": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
     },
     "com.amazonaws.lambda#ReservedConcurrentExecutions": {
       "traits": {
@@ -3683,6 +4394,34 @@
         ]
       },
       "type": "string"
+    },
+    "com.amazonaws.lambda#ResourceConflictException": {
+      "members": {
+        "Type": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "message": {
+          "target": "com.amazonaws.lambda#String",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409,
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
     },
     "com.amazonaws.lambda#ResourceNotFoundException": {
       "members": {
@@ -4512,6 +5251,19 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.lambda#SourceOwner": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 12,
+          "min": 0
+        },
+        "smithy.api#pattern": "^\\d{12}$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
     "com.amazonaws.lambda#State": {
       "members": {
         "Active": {
@@ -4972,6 +5724,19 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.lambda#StatementId": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 100,
+          "min": 1
+        },
+        "smithy.api#pattern": "^([a-zA-Z0-9-_]+)$",
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "string"
+    },
     "com.amazonaws.lambda#String": {
       "traits": {
         "smithy.api#tags": [
@@ -5404,6 +6169,181 @@
         ]
       },
       "type": "string"
+    },
+    "com.amazonaws.lambda#UpdateFunctionUrlConfig": {
+      "errors": [
+        {
+          "target": "com.amazonaws.lambda#InvalidParameterValueException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceConflictException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ResourceNotFoundException"
+        },
+        {
+          "target": "com.amazonaws.lambda#ServiceException"
+        },
+        {
+          "target": "com.amazonaws.lambda#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.lambda#UpdateFunctionUrlConfigRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.lambda#UpdateFunctionUrlConfigResponse"
+      },
+      "traits": {
+        "aws.iam#conditionKeys": [
+          "lambda:FunctionArn",
+          "lambda:FunctionUrlAuthType"
+        ],
+        "aws.iam#iamAction": {
+          "documentation": "Grants permission to update a function url configuration for a Lambda function",
+          "relativeDocumentation": "API_UpdateFunctionUrlConfig.html",
+          "resources": {
+            "required": {
+              "function": {}
+            }
+          }
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/2021-10-31/functions/{FunctionName}/url"
+        },
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.lambda#UpdateFunctionUrlConfigRequest": {
+      "members": {
+        "AuthType": {
+          "target": "com.amazonaws.lambda#FunctionUrlAuthType",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Cors": {
+          "target": "com.amazonaws.lambda#Cors",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionName": {
+          "target": "com.amazonaws.lambda#FunctionUrlFunctionName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "InvokeMode": {
+          "target": "com.amazonaws.lambda#InvokeMode",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Qualifier": {
+          "target": "com.amazonaws.lambda#FunctionUrlQualifier",
+          "traits": {
+            "smithy.api#httpQuery": "Qualifier",
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.lambda#UpdateFunctionUrlConfigResponse": {
+      "members": {
+        "AuthType": {
+          "target": "com.amazonaws.lambda#FunctionUrlAuthType",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "Cors": {
+          "target": "com.amazonaws.lambda#Cors",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "CreationTime": {
+          "target": "com.amazonaws.lambda#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionArn": {
+          "target": "com.amazonaws.lambda#FunctionArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "FunctionUrl": {
+          "target": "com.amazonaws.lambda#FunctionUrl",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "InvokeMode": {
+          "target": "com.amazonaws.lambda#InvokeMode",
+          "traits": {
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        },
+        "LastModifiedTime": {
+          "target": "com.amazonaws.lambda#Timestamp",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#tags": [
+              "feature:public"
+            ]
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#tags": [
+          "feature:public"
+        ]
+      },
+      "type": "structure"
     },
     "com.amazonaws.lambda#UpdateRuntimeOn": {
       "members": {

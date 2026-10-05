@@ -339,7 +339,7 @@
     "lambda/service/2015-03-31/lambda-2015-03-31.json": {
       "file": "models/lambda-2015-03-31.json",
       "sourceSha256": "595dcd2bd52005ed888323578f9239a4e5b5ccccebf49ee3ab1e0057ce387c54",
-      "subsetSha256": "2a056a9cb7eb0256f82295462319de72b9828a7f496cbcfdeab95a49547bf58f"
+      "subsetSha256": "960e9d5c3c71c7161a3a1c2da13ed195a0b05cb60c735d892653f2e1eae12cc9"
     },
     "license-manager/service/2018-08-01/license-manager-2018-08-01.json": {
       "file": "models/license-manager-2018-08-01.json",

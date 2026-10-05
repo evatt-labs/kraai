@@ -47,6 +47,8 @@ type MutationCall struct {
 	// Create.Idempotent.
 	TokenMember string
 	Idempotent  bool
+	// Generate and Unechoed are Create.Generate and Create.Unechoed.
+	Generate, Unechoed []string
 	// Method, URI and Bindings are, under restJson1, the operation's HTTP
 	// binding and where each input member goes in the request.
 	Method, URI string
@@ -267,6 +269,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				}
 				c.NameProperty, c.NameTag, c.NameMaxLength = n.Property, n.Tag, n.MaxLength
 			}
+			compileCreateValues(*o.Create, &schema, identifier, c, fail)
 			if o.Create.Idempotent {
 				if o.Create.Name == nil && !sent {
 					fail("create is idempotent, but neither names %s from a tag nor sends its identifier", o.Type)

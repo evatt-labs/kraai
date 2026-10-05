@@ -1637,10 +1637,10 @@
     {
       "type": "AWS::Lambda::Permission",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-02",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 7,
+      "instances": 6,
       "compared": [
         "Action",
         "EventSourceToken",
@@ -1655,27 +1655,26 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "662183f42bff66879f442a9b1f84caf7d9c2fd0e940bcb7c6f75c69328068886"
+      "override": "f3ca47ce4d72f1231d42dddfd705870a027dc5cce374c044ffd1afe3d5166cb2"
     },
     {
       "type": "AWS::Lambda::Url",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-02",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 2,
+      "instances": 1,
       "compared": [
         "AuthType",
         "Cors",
         "FunctionArn",
         "FunctionUrl",
         "InvokeMode",
-        "Qualifier",
         "TargetFunctionArn"
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "da10ced6273338a54b64cda61a7f1f3cb96bca383335305256f2386efeb7d830"
+      "override": "554682f60370f6320d93cc6f14740de5050b3d480c7ef12ec752745a53df13d5"
     },
     {
       "type": "AWS::LicenseManager::Grant",
