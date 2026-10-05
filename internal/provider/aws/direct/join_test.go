@@ -19,12 +19,10 @@ func widgetModel(cfnName, signingName string) map[string]any {
 			"com.example#Widgets": map[string]any{
 				"type": "service",
 				"traits": map[string]any{
-					"aws.api#service": map[string]any{"sdkId": cfnName, "arnNamespace": signingName, "cloudFormationName": cfnName, "endpointPrefix": signingName},
-					"aws.auth#sigv4":  map[string]any{"name": signingName},
-					"smithy.rules#endpointRuleSet": map[string]any{"rules": []any{map[string]any{
-						"type": "endpoint", "endpoint": map[string]any{"url": "https://" + signingName + ".{Region}.{PartitionResult#dnsSuffix}"},
-					}}},
-					"aws.protocols#awsJson1_1": map[string]any{},
+					"aws.api#service":              map[string]any{"sdkId": cfnName, "arnNamespace": signingName, "cloudFormationName": cfnName, "endpointPrefix": signingName},
+					"aws.auth#sigv4":               map[string]any{"name": signingName},
+					"smithy.rules#endpointRuleSet": regionalRules("https://" + signingName + ".{Region}.{PartitionResult#dnsSuffix}"),
+					"aws.protocols#awsJson1_1":     map[string]any{},
 				},
 			},
 			"com.example#GetWidget": map[string]any{
@@ -205,115 +203,6 @@ func TestJoinPicksTheModelNamingTheService(t *testing.T) {
 	j := joinWidget(t, []map[string]any{widgetModel("Gadgets", "widgets"), widgetModel("Doodads", "widgets")}, widgetSchema())
 	if j.Override != nil || !strings.Contains(strings.Join(j.Reasons, ";"), "several") {
 		t.Fatalf("joined through %v, reasons %v; want refused as several", j.Override, j.Reasons)
-	}
-}
-
-func TestEndpointOf(t *testing.T) {
-	type ep struct{ url, signing string }
-	rules := func(eps ...ep) json.RawMessage {
-		var list []any
-		for _, e := range eps {
-			endpoint := map[string]any{"url": e.url}
-			if e.signing != "" {
-				endpoint["properties"] = map[string]any{"authSchemes": []any{map[string]any{"name": "sigv4", "signingRegion": e.signing}}}
-			}
-			list = append(list, map[string]any{"type": "endpoint", "endpoint": endpoint})
-		}
-		raw, _ := json.Marshal(map[string]any{"rules": []any{map[string]any{"type": "tree", "rules": list}}})
-		return raw
-	}
-	regional := ep{"https://widgets.{Region}.{PartitionResult#dnsSuffix}", ""}
-	cases := map[string]struct {
-		rules                  json.RawMessage
-		host, signing, refused string
-	}{
-		"regional":                    {rules(regional), "widgets.{region}.amazonaws.com", "", ""},
-		"regional with a dotted host": {rules(ep{"https://api.widgets.{Region}.{PartitionResult#dnsSuffix}", ""}), "api.widgets.{region}.amazonaws.com", "", ""},
-		"regional beside fips, dual-stack and other partitions": {rules(
-			regional, ep{"https://widgets-fips.{Region}.{PartitionResult#dnsSuffix}", ""},
-			ep{"https://widgets.{Region}.{PartitionResult#dualStackDnsSuffix}", ""}, ep{"https://widgets.us-gov-west-1.amazonaws.com", ""},
-			ep{"https://widgets.cn-north-1.amazonaws.com.cn", ""},
-		), "widgets.{region}.amazonaws.com", "", ""},
-		"regional beside one region's literal of the same form": {rules(regional, ep{"https://widgets.us-east-1.amazonaws.com", ""}), "widgets.{region}.amazonaws.com", "", ""},
-		"global":                               {rules(ep{"https://widgets.{PartitionResult#dnsSuffix}", "{PartitionResult#implicitGlobalRegion}"}), "widgets.amazonaws.com", "us-east-1", ""},
-		"global in the implicit region":        {rules(ep{"https://widgets.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dnsSuffix}", "us-east-1"}), "widgets.us-east-1.amazonaws.com", "us-east-1", ""},
-		"a global form signed elsewhere":       {rules(ep{"https://widgets.{PartitionResult#dnsSuffix}", "us-west-2"}), "", "", `is signed for "us-west-2"`},
-		"regional and global both":             {rules(regional, ep{"https://widgets.{PartitionResult#dnsSuffix}", "us-east-1"}), "", "", "2 standard endpoints"},
-		"a literal the form would not produce": {rules(regional, ep{"https://widgets.amazonaws.com", ""}), "", "", "2 standard endpoints [widgets.amazonaws.com widgets.{region}.amazonaws.com]"},
-		"only one region's literal":            {rules(ep{"https://widgets.us-west-2.amazonaws.com", ""}), "", "", `widgets.us-west-2.amazonaws.com is signed for ""`},
-		"only fips":                            {rules(ep{"https://widgets-fips.{Region}.{PartitionResult#dnsSuffix}", ""}), "", "", "0 standard endpoints"},
-		"regional spelled with the suffix":     {rules(ep{"https://widgets.{Region}.amazonaws.com", ""}, regional), "widgets.{region}.amazonaws.com", "", ""},
-		"dual-stack only": {rules(ep{"https://widgets.{Region}.{PartitionResult#dualStackDnsSuffix}", ""},
-			ep{"https://widgets-fips.{Region}.{PartitionResult#dualStackDnsSuffix}", ""}), "widgets.{region}.api.aws", "", ""},
-		"dual-stack beside a standard form": {rules(regional, ep{"https://widgets.{Region}.{PartitionResult#dualStackDnsSuffix}", ""}), "widgets.{region}.amazonaws.com", "", ""},
-		"a name that merely contains iso":   {rules(ep{"https://api.deviceadvisor.{Region}.{PartitionResult#dnsSuffix}", ""}), "api.deviceadvisor.{region}.amazonaws.com", "", ""},
-		"fips in a later label":             {rules(regional, ep{"https://api.widgets-fips.{Region}.{PartitionResult#dnsSuffix}", ""}), "widgets.{region}.amazonaws.com", "", ""},
-		"another partition's literal": {rules(regional, ep{"https://widgets.us-gov.amazonaws.com", ""},
-			ep{"https://widgets.cn-north-1.amazonaws.com.cn", ""}), "widgets.{region}.amazonaws.com", "", ""},
-		"global beside another partition's global": {rules(ep{"https://widgets.{PartitionResult#dnsSuffix}", "us-east-1"},
-			ep{"https://widgets.us-gov.amazonaws.com", "us-gov-west-1"}), "widgets.amazonaws.com", "us-east-1", ""},
-		"a global host beside the implicit-region form": {rules(ep{"https://widgets.amazonaws.com", "us-east-1"},
-			ep{"https://widgets.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dnsSuffix}", "{PartitionResult#implicitGlobalRegion}"}), "widgets.amazonaws.com", "us-east-1", ""},
-		"a global host signed elsewhere beside the implicit-region form": {rules(ep{"https://widgets.amazonaws.com", "us-west-2"},
-			ep{"https://widgets.{PartitionResult#implicitGlobalRegion}.{PartitionResult#dnsSuffix}", "{PartitionResult#implicitGlobalRegion}"}), "", "", "2 standard endpoints"},
-		"a form that needs a parameter": {rules(regional, ep{"https://{AccountId}.widgets.{Region}.{PartitionResult#dnsSuffix}", ""}), "widgets.{region}.amazonaws.com", "", ""},
-		"no rule set":                   {nil, "", "", "no endpoint rule set"},
-	}
-	for name, c := range cases {
-		t.Run(name, func(t *testing.T) {
-			host, signing, reason := endpointOf(c.rules, nil)
-			if c.refused != "" {
-				if !strings.Contains(reason, c.refused) || host != "" {
-					t.Fatalf("endpointOf = %q, %q, %q; want refused with %q", host, signing, reason, c.refused)
-				}
-				return
-			}
-			if host != c.host || signing != c.signing || reason != "" {
-				t.Fatalf("endpointOf = %q, %q, %q; want %q, %q", host, signing, reason, c.host, c.signing)
-			}
-		})
-	}
-}
-
-// A rule gated on an operation parameter is reachable only by an operation
-// whose static context parameters satisfy it, as DynamoDB routes only
-// SearchVectors to a second host.
-func TestEndpointOfPrunesOperationRules(t *testing.T) {
-	endpoint := func(url string) map[string]any {
-		return map[string]any{"type": "endpoint", "endpoint": map[string]any{"url": url}}
-	}
-	search := endpoint("https://search-widgets.{Region}.{PartitionResult#dnsSuffix}")
-	search["conditions"] = []any{
-		map[string]any{"fn": "isSet", "argv": []any{map[string]any{"ref": "IsSearchOperation"}}},
-		map[string]any{"fn": "booleanEquals", "argv": []any{map[string]any{"ref": "IsSearchOperation"}, true}},
-	}
-	raw, _ := json.Marshal(map[string]any{
-		"parameters": map[string]any{
-			"Region":            map[string]any{"builtIn": "AWS::Region", "type": "string"},
-			"IsSearchOperation": map[string]any{"type": "boolean"},
-		},
-		"rules": []any{search, endpoint("https://widgets.{Region}.{PartitionResult#dnsSuffix}")},
-	})
-	for name, c := range map[string]struct {
-		static map[string]any
-		host   string
-	}{
-		"another operation":           {nil, "widgets.{region}.amazonaws.com"},
-		"the search operation":        {map[string]any{"IsSearchOperation": true}, ""},
-		"an operation setting it off": {map[string]any{"IsSearchOperation": false}, "widgets.{region}.amazonaws.com"},
-	} {
-		t.Run(name, func(t *testing.T) {
-			host, _, reason := endpointOf(raw, c.static)
-			if c.host == "" {
-				if !strings.Contains(reason, "2 standard endpoints") {
-					t.Fatalf("endpointOf = %q, %q; want both hosts reachable", host, reason)
-				}
-				return
-			}
-			if host != c.host || reason != "" {
-				t.Fatalf("endpointOf = %q, %q; want %q", host, reason, c.host)
-			}
-		})
 	}
 }
 

@@ -8,7 +8,7 @@ func init() {
 			Type:        "AWS::QBusiness::Application",
 			Protocol:    "restJson1",
 			SigningName: "qbusiness",
-			Host:        "qbusiness.{region}.amazonaws.com",
+			Host:        "qbusiness.{region}.api.aws",
 			Method:      "GET",
 			URI:         "/applications/{applicationId}",
 			Identifier: []Binding{

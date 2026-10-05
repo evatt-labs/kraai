@@ -93,7 +93,7 @@ func (c *callCompiler) address() {
 	for name, p := range static {
 		params[name] = p.Value
 	}
-	if c.r.Host, c.r.SigningRegion, reason = endpointOf(c.svc.Traits["smithy.rules#endpointRuleSet"], params); reason != "" {
+	if c.r.Host, c.r.SigningRegion, reason = endpointOf(c.svc.Traits["smithy.rules#endpointRuleSet"], params, c.r.SigningName); reason != "" {
 		c.fail("no endpoint this client can form: %s", reason)
 	}
 }

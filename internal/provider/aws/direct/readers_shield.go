@@ -5,11 +5,12 @@ package direct
 func init() {
 	register(map[string]Reader{
 		"AWS::Shield::ProtectionGroup": {
-			Type:        "AWS::Shield::ProtectionGroup",
-			Protocol:    "awsJson1_1",
-			SigningName: "shield",
-			Host:        "shield.{region}.amazonaws.com",
-			Target:      "AWSShield_20160616.DescribeProtectionGroup",
+			Type:          "AWS::Shield::ProtectionGroup",
+			Protocol:      "awsJson1_1",
+			SigningName:   "shield",
+			Host:          "shield.us-east-1.amazonaws.com",
+			SigningRegion: "us-east-1",
+			Target:        "AWSShield_20160616.DescribeProtectionGroup",
 			Identifier: []Binding{
 				{Property: "ProtectionGroupArn", Member: "", Location: "placeholder"},
 			},
