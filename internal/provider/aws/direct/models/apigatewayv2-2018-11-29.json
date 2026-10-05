@@ -3,7 +3,22 @@
     "com.amazonaws.apigatewayv2#ApiGatewayV2": {
       "operations": [
         {
+          "target": "com.amazonaws.apigatewayv2#CreateApi"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#DeleteApi"
+        },
+        {
           "target": "com.amazonaws.apigatewayv2#GetApi"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#TagResource"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#UntagResource"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#UpdateApi"
         }
       ],
       "traits": {
@@ -340,6 +355,40 @@
       "type": "service",
       "version": "2018-11-29"
     },
+    "com.amazonaws.apigatewayv2#Arn": {
+      "traits": {},
+      "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#BadRequestException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 400
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#ConflictException": {
+      "members": {
+        "Message": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#error": "client",
+        "smithy.api#httpError": 409
+      },
+      "type": "structure"
+    },
     "com.amazonaws.apigatewayv2#Cors": {
       "members": {
         "AllowCredentials": {
@@ -402,6 +451,281 @@
       },
       "traits": {},
       "type": "list"
+    },
+    "com.amazonaws.apigatewayv2#CreateApi": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apigatewayv2#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apigatewayv2#CreateApiRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.apigatewayv2#CreateApiResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 201,
+          "method": "POST",
+          "uri": "/v2/apis"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.apigatewayv2#CreateApiRequest": {
+      "members": {
+        "ApiKeySelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "apiKeySelectionExpression"
+          }
+        },
+        "CorsConfiguration": {
+          "target": "com.amazonaws.apigatewayv2#Cors",
+          "traits": {
+            "smithy.api#jsonName": "corsConfiguration"
+          }
+        },
+        "CredentialsArn": {
+          "target": "com.amazonaws.apigatewayv2#Arn",
+          "traits": {
+            "smithy.api#jsonName": "credentialsArn"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween0And1024",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "DisableExecuteApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableExecuteApiEndpoint"
+          }
+        },
+        "DisableSchemaValidation": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableSchemaValidation"
+          }
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.apigatewayv2#IpAddressType",
+          "traits": {
+            "smithy.api#jsonName": "ipAddressType"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And128",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "name",
+            "smithy.api#required": {}
+          }
+        },
+        "ProtocolType": {
+          "target": "com.amazonaws.apigatewayv2#ProtocolType",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#jsonName": "protocolType",
+            "smithy.api#required": {}
+          }
+        },
+        "RouteKey": {
+          "target": "com.amazonaws.apigatewayv2#SelectionKey",
+          "traits": {
+            "smithy.api#jsonName": "routeKey"
+          }
+        },
+        "RouteSelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "routeSelectionExpression"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.apigatewayv2#Tags",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "Target": {
+          "target": "com.amazonaws.apigatewayv2#UriWithLengthBetween1And2048",
+          "traits": {
+            "smithy.api#jsonName": "target"
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64",
+          "traits": {
+            "smithy.api#jsonName": "version"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#CreateApiResponse": {
+      "members": {
+        "ApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "apiEndpoint"
+          }
+        },
+        "ApiGatewayManaged": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "apiGatewayManaged"
+          }
+        },
+        "ApiId": {
+          "target": "com.amazonaws.apigatewayv2#Id",
+          "traits": {
+            "smithy.api#jsonName": "apiId"
+          }
+        },
+        "ApiKeySelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "apiKeySelectionExpression"
+          }
+        },
+        "CorsConfiguration": {
+          "target": "com.amazonaws.apigatewayv2#Cors",
+          "traits": {
+            "smithy.api#jsonName": "corsConfiguration"
+          }
+        },
+        "CreatedDate": {
+          "target": "com.amazonaws.apigatewayv2#__timestampIso8601",
+          "traits": {
+            "smithy.api#jsonName": "createdDate"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween0And1024",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "DisableExecuteApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableExecuteApiEndpoint"
+          }
+        },
+        "DisableSchemaValidation": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableSchemaValidation"
+          }
+        },
+        "ImportInfo": {
+          "target": "com.amazonaws.apigatewayv2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "importInfo"
+          }
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.apigatewayv2#IpAddressType",
+          "traits": {
+            "smithy.api#jsonName": "ipAddressType"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And128",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "ProtocolType": {
+          "target": "com.amazonaws.apigatewayv2#ProtocolType",
+          "traits": {
+            "smithy.api#jsonName": "protocolType"
+          }
+        },
+        "RouteSelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "routeSelectionExpression"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.apigatewayv2#Tags",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64",
+          "traits": {
+            "smithy.api#jsonName": "version"
+          }
+        },
+        "Warnings": {
+          "target": "com.amazonaws.apigatewayv2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "warnings"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#DeleteApi": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apigatewayv2#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apigatewayv2#DeleteApiRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/v2/apis/{ApiId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.apigatewayv2#DeleteApiRequest": {
+      "members": {
+        "ApiId": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.apigatewayv2#GetApi": {
       "errors": [
@@ -626,6 +950,10 @@
       "traits": {},
       "type": "string"
     },
+    "com.amazonaws.apigatewayv2#SelectionKey": {
+      "traits": {},
+      "type": "string"
+    },
     "com.amazonaws.apigatewayv2#StringWithLengthBetween0And1024": {
       "traits": {},
       "type": "string"
@@ -641,6 +969,64 @@
     "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64": {
       "traits": {},
       "type": "string"
+    },
+    "com.amazonaws.apigatewayv2#TagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apigatewayv2#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apigatewayv2#TagResourceRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.apigatewayv2#TagResourceResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 201,
+          "method": "POST",
+          "uri": "/v2/tags/{ResourceArn}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.apigatewayv2#TagResourceRequest": {
+      "members": {
+        "ResourceArn": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.apigatewayv2#Tags",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#TagResourceResponse": {
+      "members": {},
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.apigatewayv2#Tags": {
       "key": {
@@ -672,6 +1058,290 @@
         "smithy.api#httpError": 429
       },
       "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#UntagResource": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apigatewayv2#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apigatewayv2#UntagResourceRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/v2/tags/{ResourceArn}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.apigatewayv2#UntagResourceRequest": {
+      "members": {
+        "ResourceArn": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "TagKeys": {
+          "target": "com.amazonaws.apigatewayv2#__listOf__string",
+          "traits": {
+            "smithy.api#clientOptional": {},
+            "smithy.api#httpQuery": "tagKeys",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#UpdateApi": {
+      "errors": [
+        {
+          "target": "com.amazonaws.apigatewayv2#BadRequestException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#ConflictException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#NotFoundException"
+        },
+        {
+          "target": "com.amazonaws.apigatewayv2#TooManyRequestsException"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.apigatewayv2#UpdateApiRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.apigatewayv2#UpdateApiResponse"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PATCH",
+          "uri": "/v2/apis/{ApiId}"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.apigatewayv2#UpdateApiRequest": {
+      "members": {
+        "ApiId": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {}
+          }
+        },
+        "ApiKeySelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "apiKeySelectionExpression"
+          }
+        },
+        "CorsConfiguration": {
+          "target": "com.amazonaws.apigatewayv2#Cors",
+          "traits": {
+            "smithy.api#jsonName": "corsConfiguration"
+          }
+        },
+        "CredentialsArn": {
+          "target": "com.amazonaws.apigatewayv2#Arn",
+          "traits": {
+            "smithy.api#jsonName": "credentialsArn"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween0And1024",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "DisableExecuteApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableExecuteApiEndpoint"
+          }
+        },
+        "DisableSchemaValidation": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableSchemaValidation"
+          }
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.apigatewayv2#IpAddressType",
+          "traits": {
+            "smithy.api#jsonName": "ipAddressType"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And128",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "RouteKey": {
+          "target": "com.amazonaws.apigatewayv2#SelectionKey",
+          "traits": {
+            "smithy.api#jsonName": "routeKey"
+          }
+        },
+        "RouteSelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "routeSelectionExpression"
+          }
+        },
+        "Target": {
+          "target": "com.amazonaws.apigatewayv2#UriWithLengthBetween1And2048",
+          "traits": {
+            "smithy.api#jsonName": "target"
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64",
+          "traits": {
+            "smithy.api#jsonName": "version"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#UpdateApiResponse": {
+      "members": {
+        "ApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__string",
+          "traits": {
+            "smithy.api#jsonName": "apiEndpoint"
+          }
+        },
+        "ApiGatewayManaged": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "apiGatewayManaged"
+          }
+        },
+        "ApiId": {
+          "target": "com.amazonaws.apigatewayv2#Id",
+          "traits": {
+            "smithy.api#jsonName": "apiId"
+          }
+        },
+        "ApiKeySelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "apiKeySelectionExpression"
+          }
+        },
+        "CorsConfiguration": {
+          "target": "com.amazonaws.apigatewayv2#Cors",
+          "traits": {
+            "smithy.api#jsonName": "corsConfiguration"
+          }
+        },
+        "CreatedDate": {
+          "target": "com.amazonaws.apigatewayv2#__timestampIso8601",
+          "traits": {
+            "smithy.api#jsonName": "createdDate"
+          }
+        },
+        "Description": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween0And1024",
+          "traits": {
+            "smithy.api#jsonName": "description"
+          }
+        },
+        "DisableExecuteApiEndpoint": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableExecuteApiEndpoint"
+          }
+        },
+        "DisableSchemaValidation": {
+          "target": "com.amazonaws.apigatewayv2#__boolean",
+          "traits": {
+            "smithy.api#jsonName": "disableSchemaValidation"
+          }
+        },
+        "ImportInfo": {
+          "target": "com.amazonaws.apigatewayv2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "importInfo"
+          }
+        },
+        "IpAddressType": {
+          "target": "com.amazonaws.apigatewayv2#IpAddressType",
+          "traits": {
+            "smithy.api#jsonName": "ipAddressType"
+          }
+        },
+        "Name": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And128",
+          "traits": {
+            "smithy.api#jsonName": "name"
+          }
+        },
+        "ProtocolType": {
+          "target": "com.amazonaws.apigatewayv2#ProtocolType",
+          "traits": {
+            "smithy.api#jsonName": "protocolType"
+          }
+        },
+        "RouteSelectionExpression": {
+          "target": "com.amazonaws.apigatewayv2#SelectionExpression",
+          "traits": {
+            "smithy.api#jsonName": "routeSelectionExpression"
+          }
+        },
+        "Tags": {
+          "target": "com.amazonaws.apigatewayv2#Tags",
+          "traits": {
+            "smithy.api#jsonName": "tags"
+          }
+        },
+        "Version": {
+          "target": "com.amazonaws.apigatewayv2#StringWithLengthBetween1And64",
+          "traits": {
+            "smithy.api#jsonName": "version"
+          }
+        },
+        "Warnings": {
+          "target": "com.amazonaws.apigatewayv2#__listOf__string",
+          "traits": {
+            "smithy.api#jsonName": "warnings"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.apigatewayv2#UriWithLengthBetween1And2048": {
+      "traits": {},
+      "type": "string"
     },
     "com.amazonaws.apigatewayv2#__boolean": {
       "type": "boolean"

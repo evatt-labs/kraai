@@ -177,6 +177,8 @@ type Binding struct {
 	// Structured is a fixed input's value when it is a list or map, sent
 	// as the member's structure under an awsJson protocol.
 	Structured any
+	// JSONShape renames a restJson1 body member's nested keys.
+	JSONShape *jsonShape
 }
 
 // Field reads one property from the response.

@@ -318,6 +318,8 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 		}
 		return w, nil
 	}
+	values = maps.Clone(values)
+	values[regionPlaceholder] = c.Region
 	var bindings []Binding
 	for _, member := range sortedKeys(m.Input) {
 		v, ok, err := render(m.Input[member], values, wireAs)
@@ -325,6 +327,14 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 			return nil, err
 		}
 		if !ok {
+			continue
+		}
+		if r.Protocol == "restJson1" {
+			placed, err := restBindings(m, member, v)
+			if err != nil {
+				return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
+			}
+			bindings = append(bindings, placed...)
 			continue
 		}
 		if !isQuery(r.Protocol) {
@@ -344,15 +354,20 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 		}
 		bindings = append(bindings, token...)
 	}
+	if r.Protocol == "restJson1" {
+		if err := restLabelsFilled(m, bindings); err != nil {
+			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
+		}
+	}
 	// Many mutations answer with no body at all.
-	body, err := c.sendRetrying(ctx, policy, call, "", "", m.Target, bindings)
+	body, err := c.sendRetrying(ctx, policy, call, m.Method, m.URI, m.Target, bindings)
 	for deadline := time.Now().Add(c.wait(r)); retryable(err, m.RetryErrors) && time.Now().Before(deadline); {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case <-time.After(c.poll()):
 		}
-		body, err = c.sendRetrying(ctx, policy, call, "", "", m.Target, bindings)
+		body, err = c.sendRetrying(ctx, policy, call, m.Method, m.URI, m.Target, bindings)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)

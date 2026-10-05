@@ -47,6 +47,10 @@ type MutationCall struct {
 	// Create.Idempotent.
 	TokenMember string
 	Idempotent  bool
+	// Method, URI and Bindings are, under restJson1, the operation's HTTP
+	// binding and where each input member goes in the request.
+	Method, URI string
+	Bindings    []Binding
 	// Identifier maps, for a create, each primary identifier property to
 	// the output member carrying it, a dotted path into nested structures.
 	Identifier map[string]string
@@ -94,8 +98,8 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	if raw, err := fs.ReadFile(files, lock.Schemas[o.Type].File); err != nil || json.Unmarshal(raw, &schema) != nil {
 		return []error{fmt.Errorf("%s has no readable locked schema", o.Type)}
 	}
-	if !isAWSJSON(r.Protocol) && !isQuery(r.Protocol) {
-		return []error{fmt.Errorf("a mutation under %s is not supported yet; only the awsJson and query protocols", r.Protocol)}
+	if !isAWSJSON(r.Protocol) && !isQuery(r.Protocol) && r.Protocol != "restJson1" {
+		return []error{fmt.Errorf("a mutation under %s is not supported yet; only the awsJson, restJson1 and query protocols", r.Protocol)}
 	}
 	var service, namespace string
 	for id, s := range model.Shapes {
@@ -130,7 +134,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 			}
 			for _, match := range templateRefs(m.Input[member]) {
 				name, chain, path := match[0], filterChain(match[1]), match[2]
-				if _, known := schema.Properties[name]; !known && !extra[name] {
+				if _, known := schema.Properties[name]; !known && !extra[name] && name != regionPlaceholder {
 					fail("%s input %s names {%s}, which is not a property of %s", at, member, name, o.Type)
 				}
 				if path != name && name != "element" && !schemaPath(&schema, path) {
@@ -193,6 +197,9 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				fail("%s "+format, append([]any{at}, args...)...)
 			})
 		}
+		if r.Protocol == "restJson1" {
+			restCall(&model, op, input, m, c, at, fail)
+		}
 		requiredBy[c] = required
 		return c
 	}
@@ -235,6 +242,11 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 						fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 					}
 					ids[property] = xmlPath
+				case r.Protocol == "restJson1":
+					var found bool
+					if ids[property], found = jsonOutputPath(&model, output, path); !ok || !found {
+						fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
+					}
 				case !ok || outputMember(model, output, path) != "string":
 					fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 				}

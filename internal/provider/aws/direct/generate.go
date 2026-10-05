@@ -262,6 +262,10 @@ func binding(b *bytes.Buffer, in Binding) {
 		b.WriteString(", Structured: ")
 		literal(b, in.Structured)
 	}
+	if in.JSONShape != nil {
+		b.WriteString(", JSONShape: ")
+		jsonShapeLiteral(b, in.JSONShape)
+	}
 	b.WriteString("},\n")
 }
 
@@ -426,7 +430,8 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	b.WriteString("MutationCall{")
 	for _, f := range []struct{ name, value string }{{"Operation", m.Operation}, {"Target", m.Target},
 		{"NameProperty", m.NameProperty}, {"NameTag", m.NameTag}, {"TagProperty", m.TagProperty},
-		{"ListProperty", m.ListProperty}, {"FailedCount", m.FailedCount}, {"TokenMember", m.TokenMember}} {
+		{"ListProperty", m.ListProperty}, {"FailedCount", m.FailedCount}, {"TokenMember", m.TokenMember},
+		{"Method", m.Method}, {"URI", m.URI}} {
 		if f.value != "" {
 			fmt.Fprintf(b, "%s: %q, ", f.name, f.value)
 		}
@@ -458,6 +463,13 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	}
 	if m.Identifier != nil {
 		fmt.Fprintf(b, "Identifier: %#v, ", m.Identifier)
+	}
+	if len(m.Bindings) > 0 {
+		b.WriteString("Bindings: []Binding{")
+		for _, in := range m.Bindings {
+			binding(b, in)
+		}
+		b.WriteString("}, ")
 	}
 	if len(m.Form) > 0 {
 		b.WriteString("Form: map[string]FormStep{")
