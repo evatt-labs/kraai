@@ -19,10 +19,11 @@ properties:
   Action:
     member: Policy
     extract: ["Statement[Sid={Id}].Action"]
-  # A service principal is a Service, anything else an AWS principal.
+  # A service principal is a Service, an account an AWS principal, and the
+  # wildcard a bare string.
   Principal:
     member: Policy
-    extract: ["Statement[Sid={Id}].Principal.Service", "Statement[Sid={Id}].Principal.AWS"]
+    extract: ["Statement[Sid={Id}].Principal.Service", "Statement[Sid={Id}].Principal.AWS", "Statement[Sid={Id}].Principal"]
   SourceArn:
     member: Policy
     extract: ["Statement[Sid={Id}].Condition.ArnLike.AWS:SourceArn"]
@@ -42,5 +43,44 @@ properties:
     member: Policy
     extract: ["Statement[Sid={Id}].Condition.Bool.lambda:InvokedViaFunctionUrl"]
     transform: boolean
+create:
+  operation: AddPermission
+  # The statement ID is the caller's to name, and the schema reads it only.
+  generate: [Id]
+  # An account ID is read back as that account's root ARN.
+  unechoed: [Principal]
+  input:
+    FunctionName: "{FunctionName}"
+    StatementId: "{Id}"
+    Action: "{Action}"
+    Principal: "{Principal}"
+    SourceArn: "{SourceArn}"
+    SourceAccount: "{SourceAccount}"
+    PrincipalOrgID: "{PrincipalOrgID}"
+    EventSourceToken: "{EventSourceToken}"
+    FunctionUrlAuthType: "{FunctionUrlAuthType}"
+    InvokedViaFunctionUrl: "{InvokedViaFunctionUrl}"
+  # Changes to one function's policy are made one at a time.
+  retryErrors: [ResourceConflictException]
+  identifier:
+    FunctionName: "{FunctionName}"
+    Id: "{Id}"
+delete:
+  operation: RemovePermission
+  input:
+    FunctionName: "{FunctionName}"
+    StatementId: "{Id}"
+  absentErrors: [ResourceNotFoundException]
+  retryErrors: [ResourceConflictException]
+# Every property is create-only. The vector's principal is a service with a
+# source in this account, never a wildcard, on a function the harness made.
+lifecycle:
+  create:
+    FunctionName: "{functionName}"
+    Action: lambda:InvokeFunction
+    Principal: events.amazonaws.com
+    SourceArn: arn:aws:events:{region}:{account}:rule/{name}
+    SourceAccount: "{account}"
+  update: {}
 absentIds:
   - kraai-absent-probe|kraai-absent-statement

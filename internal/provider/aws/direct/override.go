@@ -291,6 +291,14 @@ type Create struct {
 	// making a new revision, is not idempotent. The create then takes the
 	// retries a read does.
 	Idempotent bool `yaml:"idempotent,omitempty"`
+	// Generate names read-only identifier properties the caller chooses
+	// and the create sends, such as a permission's statement ID, filled
+	// with a random UUID when the desired state leaves them unset.
+	Generate []string `yaml:"generate,omitempty"`
+	// Unechoed names properties the create sends that a read returns in
+	// another form, such as an account ID read back as its root ARN. The
+	// wait for a read to show the create does not hold it to them.
+	Unechoed []string `yaml:"unechoed,omitempty"`
 }
 
 // NameFrom is a name property filled from a tag's value. A value longer

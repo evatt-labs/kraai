@@ -35,6 +35,9 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 		}
 		values[p] = shortName(name, r.Create.NameMaxLength)
 	}
+	if err := generateValues(typeName, *r.Create, values); err != nil {
+		return "", err
+	}
 	if err := checkCreatable(r, values); err != nil {
 		return "", err
 	}
@@ -82,7 +85,7 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 	// wait cannot see it.
 	readable := map[string]any{}
 	for _, f := range append(slices.Clone(r.Fields), alsoFields(r)...) {
-		if v, ok := values[f.Property]; ok {
+		if v, ok := values[f.Property]; ok && !slices.Contains(r.Create.Unechoed, f.Property) {
 			readable[f.Property] = readableValue(f, v)
 		}
 	}

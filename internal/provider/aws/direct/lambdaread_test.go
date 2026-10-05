@@ -116,8 +116,11 @@ func TestReadPermission(t *testing.T) {
 	other := map[string]any{"Sid": "other", "Action": "lambda:InvokeFunction", "Principal": map[string]any{"Service": "s3.amazonaws.com"},
 		"Condition": map[string]any{"ArnLike": map[string]any{"AWS:SourceArn": "arn:aws:s3:::b"}, "Bool": map[string]any{"lambda:InvokedViaFunctionUrl": "true"}}}
 	mine := map[string]any{"Sid": "mine", "Action": "lambda:InvokeFunctionUrl", "Principal": map[string]any{"AWS": "arn:aws:iam::1:root"}}
+	// The wildcard principal is a bare string, not a Service or AWS key.
+	org := map[string]any{"Sid": "org", "Action": "lambda:GetFunction", "Principal": "*",
+		"Condition": map[string]any{"StringEquals": map[string]any{"aws:PrincipalOrgID": "o-abc1234567"}}}
 	var paths []string
-	statements := []map[string]any{other, mine}
+	statements := []map[string]any{other, mine, org}
 	client := serveLambda(t, func(r *http.Request) (int, string, any) {
 		paths = append(paths, r.Method+" "+r.URL.EscapedPath())
 		if len(statements) == 0 {
@@ -137,6 +140,9 @@ func TestReadPermission(t *testing.T) {
 	}
 	if got, err := client.ReadByID(ctx, "AWS::Lambda::Permission", "fn|mine"); err != nil || got["Principal"] != "arn:aws:iam::1:root" {
 		t.Fatalf("an AWS principal = %v, %v", got, err)
+	}
+	if got, err := client.ReadByID(ctx, "AWS::Lambda::Permission", "fn|org"); err != nil || got["Principal"] != "*" || got["PrincipalOrgID"] != "o-abc1234567" {
+		t.Fatalf("a wildcard principal = %v, %v", got, err)
 	}
 	if _, err := client.ReadByID(ctx, "AWS::Lambda::Permission", "fn|nope"); !errors.Is(err, ErrAbsent) {
 		t.Fatalf("a statement the policy lacks = %v, want absent", err)

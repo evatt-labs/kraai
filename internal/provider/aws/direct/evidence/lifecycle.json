@@ -214,6 +214,22 @@
       "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
     },
     {
+      "type": "AWS::Lambda::Permission",
+      "date": "2026-10-05",
+      "outcome": "parity",
+      "override": "f3ca47ce4d72f1231d42dddfd705870a027dc5cce374c044ffd1afe3d5166cb2"
+    },
+    {
+      "type": "AWS::Lambda::Url",
+      "date": "2026-10-05",
+      "outcome": "parity",
+      "updated": [
+        "Cors",
+        "InvokeMode"
+      ],
+      "override": "554682f60370f6320d93cc6f14740de5050b3d480c7ef12ec752745a53df13d5"
+    },
+    {
       "type": "AWS::Logs::LogGroup",
       "date": "2026-09-27",
       "outcome": "parity",

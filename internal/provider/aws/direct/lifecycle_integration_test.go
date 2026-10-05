@@ -37,7 +37,9 @@ var updateLifecycle = flag.Bool("update-lifecycle", false, "merge this run into 
 //
 // A vector may name a resource made for the harness, such as a key that
 // bills while it exists or a subnet a type needs: {kmsKeyArn} is read from
-// KRAAI_LIFECYCLE_KMS_KEY_ARN, {subnetIdA} from KRAAI_LIFECYCLE_SUBNET_ID_A.
+// KRAAI_LIFECYCLE_KMS_KEY_ARN, {subnetIdA} from KRAAI_LIFECYCLE_SUBNET_ID_A,
+// {functionName}, a function a URL or permission is made on, from
+// KRAAI_LIFECYCLE_FUNCTION_NAME.
 // An update naming one that is unset is skipped, and a type whose create
 // names one is skipped and records nothing.
 //
