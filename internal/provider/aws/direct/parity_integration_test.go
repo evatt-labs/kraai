@@ -47,7 +47,8 @@ func TestReadParity(t *testing.T) {
 		t.Fatal(err)
 	}
 	account = aws.ToString(who.Account)
-	client := &Client{HTTP: &http.Client{Timeout: 30 * time.Second}, Credentials: cfg.Credentials, Region: region}
+	client := &Client{HTTP: &http.Client{Timeout: 30 * time.Second}, Credentials: cfg.Credentials, Region: region,
+		Account: func(context.Context) (string, error) { return account, nil }}
 	lock, err := LoadLock()
 	if err != nil {
 		t.Fatal(err)

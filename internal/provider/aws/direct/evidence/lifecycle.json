@@ -1,6 +1,20 @@
 {
   "types": [
     {
+      "type": "AWS::ApiGatewayV2::Api",
+      "date": "2026-10-05",
+      "outcome": "parity",
+      "updated": [
+        "CorsConfiguration",
+        "Description",
+        "DisableExecuteApiEndpoint",
+        "IpAddressType",
+        "Tags",
+        "Version"
+      ],
+      "override": "20331a006a2d69471aa8f99fe6c218fbbd43c4036068cc28165293a17c4b91df"
+    },
+    {
       "type": "AWS::CloudWatch::Alarm",
       "date": "2026-09-29",
       "outcome": "parity",

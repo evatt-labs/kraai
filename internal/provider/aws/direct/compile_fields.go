@@ -45,6 +45,14 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s is neither mapped nor skipped", at, name)
 			continue
 		}
+		// A placeholder outside a selection makes the member a template.
+		if refs := placeholders(selections.ReplaceAllString(mapping.Member, "")); len(refs) > 0 && mapping.Member != "{"+refs[0]+"}" {
+			if !schema.types(props[name])["string"] {
+				fail("%s%s is built from %s, but the schema does not type it a string", at, name, mapping.Member)
+			}
+			fields = append(fields, Field{Property: name, Member: mapping.Member, Kind: "template"})
+			continue
+		}
 		if id, ok := strings.CutPrefix(mapping.Member, "{"); ok && strings.HasSuffix(id, "}") {
 			if !schema.types(props[name])["string"] {
 				fail("%s%s reads the identifier %s, but the schema does not type it a string", at, name, mapping.Member)

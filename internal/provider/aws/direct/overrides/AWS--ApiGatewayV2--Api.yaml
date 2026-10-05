@@ -32,8 +32,8 @@ properties:
   # The schema types Tags as a flat map, which is what the API returns.
   Tags: Tags
   Version: Version
-skip:
-  ExecuteApiArn: Cloud Control builds it from the account and region, which GetApi's output carries neither of.
+  # GetApi's output carries neither the account nor the region.
+  ExecuteApiArn: "arn:aws:execute-api:{region}:{account}:{ApiId}"
 create:
   operation: CreateApi
   name:

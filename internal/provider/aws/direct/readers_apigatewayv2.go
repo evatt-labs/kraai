@@ -8,6 +8,8 @@ func init() {
 			Type:        "AWS::ApiGatewayV2::Api",
 			Protocol:    "restJson1",
 			SigningName: "apigateway",
+			Complete:    true,
+			Production:  true,
 			Host:        "apigateway.{region}.amazonaws.com",
 			Method:      "GET",
 			URI:         "/v2/apis/{ApiId}",
@@ -31,6 +33,7 @@ func init() {
 				},
 				{Property: "Description", Member: "Description", Kind: "scalar", JSONName: "description"},
 				{Property: "DisableExecuteApiEndpoint", Member: "DisableExecuteApiEndpoint", Kind: "scalar", JSONName: "disableExecuteApiEndpoint"},
+				{Property: "ExecuteApiArn", Member: "arn:aws:execute-api:{region}:{account}:{ApiId}", Kind: "template"},
 				{Property: "IpAddressType", Member: "IpAddressType", Kind: "scalar", JSONName: "ipAddressType"},
 				{Property: "Name", Member: "Name", Kind: "scalar", JSONName: "name"},
 				{Property: "ProtocolType", Member: "ProtocolType", Kind: "scalar", JSONName: "protocolType"},
@@ -71,6 +74,7 @@ func init() {
 					Binding{Location: "query", Member: "TagKeys", Name: "tagKeys", List: true},
 				}}},
 			},
+			Mutable: true,
 		},
 	})
 }

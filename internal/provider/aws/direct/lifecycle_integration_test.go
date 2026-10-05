@@ -57,7 +57,8 @@ func TestLifecycleParity(t *testing.T) {
 		t.Fatal(err)
 	}
 	account = aws.ToString(who.Account)
-	client := &Client{HTTP: &http.Client{Timeout: 30 * time.Second}, Credentials: cfg.Credentials, Region: region}
+	client := &Client{HTTP: &http.Client{Timeout: 30 * time.Second}, Credentials: cfg.Credentials, Region: region,
+		Account: func(context.Context) (string, error) { return account, nil }}
 	all, err := Overrides()
 	if err != nil {
 		t.Fatal(err)
@@ -133,9 +134,13 @@ func lifecycle(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clien
 	r := readers[o.Type]
 	tagIndex := slices.IndexFunc(append(slices.Clone(r.Fields), alsoFields(r)...), func(f Field) bool { return f.Property == "Tags" })
 	tagged := tagIndex >= 0
-	// A schema that types its tags as a map reads them keyed; the others
-	// are Key/Value lists.
-	tagsAsMap := tagged && append(slices.Clone(r.Fields), alsoFields(r)...)[tagIndex].Keyed != nil
+	// A schema that types its tags as a map reads them keyed, or as the map
+	// the service returns; the others are Key/Value lists.
+	tagField := Field{}
+	if tagged {
+		tagField = append(slices.Clone(r.Fields), alsoFields(r)...)[tagIndex]
+	}
+	tagsAsMap := tagged && (tagField.Keyed != nil || tagField.Kind == "map")
 	withName := func(tags any) any {
 		if tagsAsMap {
 			out := map[string]any{"kraai:resource-name": name}

@@ -3,10 +3,10 @@
     {
       "type": "AWS::ApiGatewayV2::Api",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-02",
+      "date": "2026-10-05",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 3,
+      "instances": 2,
       "compared": [
         "ApiEndpoint",
         "ApiId",
@@ -14,6 +14,7 @@
         "CorsConfiguration",
         "Description",
         "DisableExecuteApiEndpoint",
+        "ExecuteApiArn",
         "IpAddressType",
         "Name",
         "ProtocolType",
@@ -23,7 +24,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "8c5fa12c731141fa8a6b694d5b39d0c89e03531c0208d4a8ef4d128e775d7cdf"
+      "override": "20331a006a2d69471aa8f99fe6c218fbbd43c4036068cc28165293a17c4b91df"
     },
     {
       "type": "AWS::AppConfig::DeploymentStrategy",

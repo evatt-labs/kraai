@@ -3,6 +3,7 @@ package direct
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -253,5 +254,45 @@ func TestRenameJSONAtEveryDepth(t *testing.T) {
 	}
 	if shape := bodyShape(model, "s#Plain", map[string]bool{}); shape != nil {
 		t.Errorf("a shape with nothing to rename = %+v, want nil", shape)
+	}
+}
+
+// ExecuteApiArn, which no read returns, is built from the region, the
+// account and the identifier, and left unread when the account is unknown.
+func TestReadBuildsTheExecuteAPIArn(t *testing.T) {
+	f := &fakeHTTPAPI{api: map[string]any{"apiId": "abc123", "name": "kraai-api", "protocolType": "HTTP"}}
+	client := f.serve(t)
+	ctx := context.Background()
+	props, err := client.ReadByID(ctx, httpAPIType, "abc123")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v, ok := props["ExecuteApiArn"]; ok {
+		t.Fatalf("ExecuteApiArn = %v with no account source, want it unread", v)
+	}
+	calls := 0
+	client.Account = func(context.Context) (string, error) { calls++; return "123456789012", nil }
+	if props, err = client.ReadByID(ctx, httpAPIType, "abc123"); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := props["ExecuteApiArn"], "arn:aws:execute-api:us-east-1:123456789012:abc123"; got != want {
+		t.Fatalf("ExecuteApiArn = %v, want %s", got, want)
+	}
+	client.Account = func(context.Context) (string, error) { return "", errors.New("no credentials") }
+	if _, err := client.ReadByID(ctx, httpAPIType, "abc123"); err == nil || !strings.Contains(err.Error(), "no credentials") {
+		t.Fatalf("err = %v, want the account failure", err)
+	}
+	// A reader building nothing from the account never asks for it.
+	vars, err := client.templateVars(ctx, Reader{Fields: []Field{{Property: "Name", Member: "Name", Kind: "scalar"}}}, nil)
+	if err != nil || calls != 1 || vars[accountPlaceholder] != "" {
+		t.Fatalf("vars %v, err %v, account asked %d times; want no account and one earlier ask", vars, err, calls)
+	}
+}
+
+func TestCompileRefusesATemplateFromAnUnknownValue(t *testing.T) {
+	files := edit(t, "AWS--ApiGatewayV2--Api.yaml", "{region}:{account}:{ApiId}", "{region}:{account}:{Name}")
+	_, err := compileAll(files)
+	if err == nil || !strings.Contains(err.Error(), "ExecuteApiArn is built from {Name}, which is neither the primary identifier") {
+		t.Fatalf("compile = %v", err)
 	}
 }
