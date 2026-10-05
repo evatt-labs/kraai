@@ -25,14 +25,18 @@ type TypeLifecycle struct {
 	Updated []string `json:"updated,omitempty"`
 	// Override is the SHA-256 of the override the run mutated through.
 	Override string `json:"override"`
+	// Observed is every error code listed in the override's
+	// undeclaredErrors that a direct call in this run answered for
+	// absence, the delete of an instance already gone among them.
+	Observed []string `json:"observed,omitempty"`
 }
 
 // lifecycleTypes is the types whose lifecycle evidence is parity for the
-// override they have now.
-func lifecycleTypes(files fs.FS) (map[string]bool, error) {
+// override they have now, each with the codes the run observed.
+func lifecycleTypes(files fs.FS) (map[string][]string, error) {
 	raw, err := fs.ReadFile(files, "evidence/lifecycle.json")
 	if errors.Is(err, fs.ErrNotExist) {
-		return map[string]bool{}, nil
+		return map[string][]string{}, nil
 	}
 	if err != nil {
 		return nil, err
@@ -41,10 +45,10 @@ func lifecycleTypes(files fs.FS) (map[string]bool, error) {
 	if err := json.Unmarshal(raw, &evidence); err != nil {
 		return nil, err
 	}
-	out := map[string]bool{}
+	out := map[string][]string{}
 	for _, e := range evidence.Types {
 		if current, err := overrideHash(files, e.Type); e.Outcome == "parity" && err == nil && current == e.Override {
-			out[e.Type] = true
+			out[e.Type] = e.Observed
 		}
 	}
 	return out, nil

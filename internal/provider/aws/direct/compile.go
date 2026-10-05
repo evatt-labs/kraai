@@ -45,6 +45,11 @@ func compileAll(plain fs.FS) ([]Reader, error) {
 
 func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	r, errs := compileCall(files, lock, o, nil, nil, "")
+	if model, err := loadModel(files, lock.Models[o.Read.Model].File); err == nil && r.Protocol != "" {
+		var codeErrs []error
+		r.UndeclaredReadErrors, r.UndeclaredDeleteErrors, codeErrs = checkErrorCodes(&model, r.Protocol, o)
+		errs = append(errs, codeErrs...)
+	}
 	wait, err := compileWait(o)
 	if err != nil {
 		errs = append(errs, err)

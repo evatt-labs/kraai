@@ -9,7 +9,9 @@ import (
 	"flag"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -72,9 +74,11 @@ func TestReadParity(t *testing.T) {
 			t.Fatal(err)
 		}
 		e := TypeEvidence{Type: r.Type, SmithyCommit: lock.SmithyCommit, Date: time.Now().UTC().Format("2006-01-02"), Region: region, Override: hash}
+		observed := observing(client, r.UndeclaredReadErrors)
 		t.Run(r.Type, func(t *testing.T) {
 			e = readParity(ctx, t, cc, client, r, e, perType)
 		})
+		e.Observed = observed()
 		t.Logf("%s: %s over %d instances", r.Type, e.Outcome, e.Instances)
 		run.Types = append(run.Types, e)
 	}
@@ -330,4 +334,28 @@ func skipTreeFor(t *testing.T, typeName string) map[string]any {
 	}
 	t.Fatalf("%s has no override", typeName)
 	return nil
+}
+
+// observing has c report each of want it observes, until the returned
+// function stops it and returns them, sorted. Further calls run
+// concurrently, so the codes are gathered under a lock.
+func observing(c *Client, want []string) func() []string {
+	var mu sync.Mutex
+	seen := map[string]bool{}
+	c.Observe = func(code string) {
+		if slices.Contains(want, code) {
+			mu.Lock()
+			seen[code] = true
+			mu.Unlock()
+		}
+	}
+	return func() []string {
+		c.Observe = nil
+		mu.Lock()
+		defer mu.Unlock()
+		if len(seen) == 0 {
+			return nil
+		}
+		return sortedKeys(seen)
+	}
 }

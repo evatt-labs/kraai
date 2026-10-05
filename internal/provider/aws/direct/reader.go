@@ -75,6 +75,11 @@ type Reader struct {
 	// Mutable is true when the type may be created, updated and deleted
 	// directly; see LifecycleComplete.
 	Mutable bool
+	// UndeclaredReadErrors and UndeclaredDeleteErrors are the read's and
+	// the delete's absentErrors codes listed in Override.UndeclaredErrors,
+	// which evidence must show observed before the type is production or
+	// mutable.
+	UndeclaredReadErrors, UndeclaredDeleteErrors []string
 	// When is the read properties, and their values, an Also call is made
 	// for; see Call.When.
 	When []Condition

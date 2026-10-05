@@ -189,3 +189,5 @@ lifecycle:
     Tags: [{Key: team, Value: kraai}]
 absentIds:
   - vpc-0a1b2c3d4e5f60718
+undeclaredErrors:
+  InvalidVpcID.NotFound: EC2's model declares no errors. DescribeVpcs and DeleteVpc answer it for a VPC that does not exist.
