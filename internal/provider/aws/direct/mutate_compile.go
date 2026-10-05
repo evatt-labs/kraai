@@ -1,7 +1,6 @@
 package direct
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"maps"
@@ -88,16 +87,12 @@ var mutationPlaceholder = regexp.MustCompile(`\{([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*
 func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	var errs []error
 	fail := func(format string, args ...any) { errs = append(errs, fmt.Errorf(format, args...)) }
-	var model smithyModel
-	raw, err := fs.ReadFile(files, lock.Models[o.Read.Model].File)
-	if err == nil {
-		err = json.Unmarshal(raw, &model)
-	}
+	model, err := loadModel(files, lock.Models[o.Read.Model].File)
 	if err != nil {
 		return []error{err}
 	}
-	var schema cfnSchema
-	if raw, err := fs.ReadFile(files, lock.Schemas[o.Type].File); err != nil || json.Unmarshal(raw, &schema) != nil {
+	schema, err := loadSchema(files, lock.Schemas[o.Type].File)
+	if err != nil {
 		return []error{fmt.Errorf("%s has no readable locked schema", o.Type)}
 	}
 	if !isAWSJSON(r.Protocol) && !isQuery(r.Protocol) && r.Protocol != "restJson1" {

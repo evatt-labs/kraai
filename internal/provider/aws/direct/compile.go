@@ -1,7 +1,6 @@
 package direct
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -14,7 +13,8 @@ import (
 // the first.
 func Compile() ([]Reader, error) { return compileAll(files) }
 
-func compileAll(files fs.FS) ([]Reader, error) {
+func compileAll(plain fs.FS) ([]Reader, error) {
+	files := withDecoded(plain)
 	if err := verify(files); err != nil {
 		return nil, err
 	}
@@ -167,8 +167,8 @@ func checkWrapped(files fs.FS, lock Lock, o Override, fields []Field) []error {
 		if f.Wrap == "" {
 			continue
 		}
-		var schema cfnSchema
-		if raw, err := fs.ReadFile(files, lock.Schemas[o.Type].File); err != nil || json.Unmarshal(raw, &schema) != nil {
+		schema, err := loadSchema(files, lock.Schemas[o.Type].File)
+		if err != nil {
 			return []error{fmt.Errorf("%s has no readable locked schema", o.Type)}
 		}
 		for _, name := range sortedKeys(schema.nested(schema.Properties[f.Property])) {
