@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "CellName", Member: "CellName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CellArn", Member: "CellArn", Kind: "scalar", JSONName: "cellArn"},
 				{Property: "CellName", Member: "CellName", Kind: "scalar", JSONName: "cellName"},
@@ -31,6 +32,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "RecoveryGroupName", Member: "RecoveryGroupName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Cells", Member: "Cells", Kind: "list", JSONName: "cells"},
 				{Property: "RecoveryGroupArn", Member: "RecoveryGroupArn", Kind: "scalar", JSONName: "recoveryGroupArn"},
@@ -47,6 +49,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ResourceSetName", Member: "ResourceSetName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "ResourceSetArn", Member: "ResourceSetArn", Kind: "scalar", JSONName: "resourceSetArn"},
 				{Property: "ResourceSetName", Member: "ResourceSetName", Kind: "scalar", JSONName: "resourceSetName"},

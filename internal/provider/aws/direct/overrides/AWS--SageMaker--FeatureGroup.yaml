@@ -3,6 +3,7 @@ type: AWS::SageMaker::FeatureGroup
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeFeatureGroup
+  absentErrors: [ResourceNotFound]
   identifier:
     FeatureGroupName: FeatureGroupName
 properties:

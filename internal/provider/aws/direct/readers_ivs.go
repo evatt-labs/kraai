@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "channel"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "channel"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Authorized", Member: "authorized", Kind: "scalar"},
@@ -46,7 +47,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "encoderConfiguration"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "encoderConfiguration"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Name", Member: "name", Kind: "scalar"},
@@ -70,7 +72,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "ingestConfiguration"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ingestConfiguration"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "IngestProtocol", Member: "ingestProtocol", Kind: "scalar"},
@@ -92,7 +95,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "keyPair"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "keyPair"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Fingerprint", Member: "fingerprint", Kind: "scalar"},
@@ -109,7 +113,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "playbackRestrictionPolicy"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "playbackRestrictionPolicy"}},
 			Fields: []Field{
 				{Property: "AllowedCountries", Member: "allowedCountries", Kind: "list"},
 				{Property: "AllowedOrigins", Member: "allowedOrigins", Kind: "list"},
@@ -128,7 +133,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "publicKey"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "publicKey"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Fingerprint", Member: "fingerprint", Kind: "scalar"},
@@ -146,7 +152,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "recordingConfiguration"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "recordingConfiguration"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "DestinationConfiguration", Member: "destinationConfiguration", Kind: "structure",
@@ -187,7 +194,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "storageConfiguration"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "storageConfiguration"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Name", Member: "name", Kind: "scalar"},
@@ -208,7 +216,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "streamKey"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "streamKey"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "ChannelArn", Member: "channelArn", Kind: "scalar"},

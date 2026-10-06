@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "label"},
 			},
-			Response: []Step{{Name: "queue"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "queue"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "ConcurrentJobs", Member: "ConcurrentJobs", Kind: "scalar", JSONName: "concurrentJobs"},

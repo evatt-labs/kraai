@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ClusterId", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "ChannelIds", Member: "ChannelIds", Kind: "list", JSONName: "channelIds"},
@@ -45,6 +46,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "NetworkId", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "AssociatedClusterIds", Member: "AssociatedClusterIds", Kind: "list", JSONName: "associatedClusterIds"},
@@ -74,7 +76,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "SdiSourceId", Location: "label"},
 			},
-			Response: []Step{{Name: "sdiSource"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "sdiSource"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "Id", Member: "Id", Kind: "scalar", JSONName: "id"},

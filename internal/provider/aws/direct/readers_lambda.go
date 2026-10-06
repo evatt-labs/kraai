@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "CodeSigningConfigArn", Member: "CodeSigningConfigArn", Location: "label"},
 			},
-			Response: []Step{{Name: "CodeSigningConfig"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "CodeSigningConfig"}},
 			Fields: []Field{
 				{Property: "AllowedPublishers", Member: "AllowedPublishers", Kind: "structure",
 					Fields: []Field{
@@ -314,6 +315,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ImageArn", Member: "imageIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "ImageArn", Member: "imageArn", Kind: "scalar"},

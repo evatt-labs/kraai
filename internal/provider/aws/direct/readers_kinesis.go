@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ChannelARN", Member: "ChannelARN", Location: "body"},
 			},
-			Response: []Step{{Name: "ChannelDescription"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ChannelDescription"}},
 			Fields: []Field{
 				{Property: "ChannelARN", Member: "ChannelARN", Kind: "scalar"},
 				{Property: "ChannelCreationTimestamp", Member: "ChannelCreationTimestamp", Kind: "timestamp"},
@@ -111,7 +112,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ConsumerARN", Member: "ConsumerARN", Location: "body"},
 			},
-			Response: []Step{{Name: "ConsumerDescription"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ConsumerDescription"}},
 			Fields: []Field{
 				{Property: "ConsumerARN", Member: "ConsumerARN", Kind: "scalar"},
 				{Property: "ConsumerCreationTimestamp", Member: "ConsumerCreationTimestamp", Kind: "timestamp"},

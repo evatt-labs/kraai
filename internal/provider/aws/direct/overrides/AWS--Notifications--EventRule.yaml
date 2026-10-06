@@ -3,6 +3,7 @@ type: AWS::Notifications::EventRule
 read:
   model: notifications/service/2018-05-10/notifications-2018-05-10.json
   operation: GetEventRule
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Arn: arn
 properties:

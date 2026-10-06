@@ -3,6 +3,7 @@ type: AWS::RolesAnywhere::Profile
 read:
   model: rolesanywhere/service/2018-05-10/rolesanywhere-2018-05-10.json
   operation: GetProfile
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ProfileId: profileId
   response: profile

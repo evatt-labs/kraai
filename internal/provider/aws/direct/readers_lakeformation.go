@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TagKey", Member: "TagKey", Location: "body"},
 			},
+			AbsentErrors: []string{"EntityNotFoundException"},
 			Fields: []Field{
 				{Property: "CatalogId", Member: "CatalogId", Kind: "scalar"},
 				{Property: "TagKey", Member: "TagKey", Kind: "scalar"},

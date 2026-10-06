@@ -13,6 +13,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "CapacityUnits", Member: "CapacityUnits", Kind: "structure",

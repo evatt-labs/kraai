@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "Arn", Location: "body"},
 			},
-			Response: []Step{{Name: "Connector"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Connector"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "ConnectorConfiguration", Member: "connectorConfiguration", Kind: "structure",

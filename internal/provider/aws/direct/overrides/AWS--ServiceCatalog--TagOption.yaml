@@ -3,6 +3,7 @@ type: AWS::ServiceCatalog::TagOption
 read:
   model: service-catalog/service/2015-12-10/service-catalog-2015-12-10.json
   operation: DescribeTagOption
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: Id
   response: TagOptionDetail

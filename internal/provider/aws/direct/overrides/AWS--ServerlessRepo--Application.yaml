@@ -3,6 +3,7 @@ type: AWS::ServerlessRepo::Application
 read:
   model: serverlessapplicationrepository/service/2017-09-08/serverlessapplicationrepository-2017-09-08.json
   operation: GetApplication
+  absentErrors: [NotFoundException]
   identifier:
     ApplicationId: ApplicationId
 properties:

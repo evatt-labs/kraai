@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DomainArn", Member: "domainId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedTime", Member: "createdTime", Kind: "timestamp"},
 				{Property: "DomainArn", Member: "domainArn", Kind: "scalar"},

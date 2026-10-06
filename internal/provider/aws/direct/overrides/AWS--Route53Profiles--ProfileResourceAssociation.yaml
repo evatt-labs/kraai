@@ -3,6 +3,7 @@ type: AWS::Route53Profiles::ProfileResourceAssociation
 read:
   model: route53profiles/service/2018-05-10/route53profiles-2018-05-10.json
   operation: GetProfileResourceAssociation
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: ProfileResourceAssociationId
   response: ProfileResourceAssociation

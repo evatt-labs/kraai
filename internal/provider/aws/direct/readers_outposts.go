@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "OutpostArn", Member: "OutpostId", Location: "label"},
 			},
-			Response: []Step{{Name: "Outpost"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "Outpost"}},
 			Fields: []Field{
 				{Property: "AvailabilityZone", Member: "AvailabilityZone", Kind: "scalar"},
 				{Property: "AvailabilityZoneId", Member: "AvailabilityZoneId", Kind: "scalar"},

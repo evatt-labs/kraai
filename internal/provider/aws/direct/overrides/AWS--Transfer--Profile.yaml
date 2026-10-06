@@ -3,6 +3,7 @@ type: AWS::Transfer::Profile
 read:
   model: transfer/service/2018-11-05/transfer-2018-11-05.json
   operation: DescribeProfile
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ProfileId: ProfileId
   response: Profile

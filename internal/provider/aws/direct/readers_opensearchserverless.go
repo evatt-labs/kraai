@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "id", Location: "body"},
 			},
-			Response: []Step{{Name: "securityConfigDetail"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "securityConfigDetail"}},
 			Fields: []Field{
 				{Property: "Description", Member: "description", Kind: "scalar"},
 				{Property: "IamFederationOptions", Member: "iamFederationOptions", Kind: "structure",

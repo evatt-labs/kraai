@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "body"},
 			},
-			Response: []Step{{Name: "Namespace"}},
+			AbsentErrors: []string{"NamespaceNotFound"},
+			Response:     []Step{{Name: "Namespace"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},

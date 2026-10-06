@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "HypervisorArn", Member: "HypervisorArn", Location: "body"},
 			},
-			Response: []Step{{Name: "Hypervisor"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Hypervisor"}},
 			Fields: []Field{
 				{Property: "Host", Member: "Host", Kind: "scalar"},
 				{Property: "HypervisorArn", Member: "HypervisorArn", Kind: "scalar"},

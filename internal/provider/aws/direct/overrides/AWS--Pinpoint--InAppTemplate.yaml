@@ -3,6 +3,7 @@ type: AWS::Pinpoint::InAppTemplate
 read:
   model: pinpoint/service/2016-12-01/pinpoint-2016-12-01.json
   operation: GetInAppTemplate
+  absentErrors: [NotFoundException]
   identifier:
     TemplateName: TemplateName
   response: InAppTemplateResponse

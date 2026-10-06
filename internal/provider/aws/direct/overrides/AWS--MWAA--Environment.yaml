@@ -3,6 +3,7 @@ type: AWS::MWAA::Environment
 read:
   model: mwaa/service/2020-07-01/mwaa-2020-07-01.json
   operation: GetEnvironment
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Name: Name
   response: Environment

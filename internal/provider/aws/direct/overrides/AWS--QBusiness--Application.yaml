@@ -3,6 +3,7 @@ type: AWS::QBusiness::Application
 read:
   model: qbusiness/service/2023-11-27/qbusiness-2023-11-27.json
   operation: GetApplication
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ApplicationId: applicationId
 properties:

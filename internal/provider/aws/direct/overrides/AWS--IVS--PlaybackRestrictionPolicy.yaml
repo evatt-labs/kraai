@@ -3,6 +3,7 @@ type: AWS::IVS::PlaybackRestrictionPolicy
 read:
   model: ivs/service/2020-07-14/ivs-2020-07-14.json
   operation: GetPlaybackRestrictionPolicy
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Arn: arn
   response: playbackRestrictionPolicy

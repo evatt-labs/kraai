@@ -13,6 +13,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "InferenceSchedulerName", Member: "InferenceSchedulerName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DataDelayOffsetInMinutes", Member: "DataDelayOffsetInMinutes", Kind: "scalar"},
 				{Property: "DataInputConfiguration", Member: "DataInputConfiguration", Kind: "structure",

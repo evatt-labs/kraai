@@ -3,6 +3,7 @@ type: AWS::MediaPackage::PackagingConfiguration
 read:
   model: mediapackage-vod/service/2018-11-07/mediapackage-vod-2018-11-07.json
   operation: DescribePackagingConfiguration
+  absentErrors: [NotFoundException]
   identifier:
     Id: Id
 properties:

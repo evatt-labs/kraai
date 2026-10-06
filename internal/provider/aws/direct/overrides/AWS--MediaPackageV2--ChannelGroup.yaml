@@ -3,6 +3,7 @@ type: AWS::MediaPackageV2::ChannelGroup
 read:
   model: mediapackagev2/service/2022-12-25/mediapackagev2-2022-12-25.json
   operation: GetChannelGroup
+  absentErrors: [ResourceNotFoundException]
   # The ChannelGroupName member refuses an ARN; arn:...:channelGroup/name.
   input:
     ChannelGroupName: "{Arn:arnName}"

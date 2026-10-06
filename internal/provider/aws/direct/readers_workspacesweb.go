@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "BrowserSettingsArn", Member: "browserSettingsArn", Location: "label"},
 			},
-			Response: []Step{{Name: "browserSettings"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "browserSettings"}},
 			Fields: []Field{
 				{Property: "AdditionalEncryptionContext", Member: "additionalEncryptionContext", Kind: "map"},
 				{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
@@ -40,7 +41,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DataProtectionSettingsArn", Member: "dataProtectionSettingsArn", Location: "label"},
 			},
-			Response: []Step{{Name: "dataProtectionSettings"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "dataProtectionSettings"}},
 			Fields: []Field{
 				{Property: "AdditionalEncryptionContext", Member: "additionalEncryptionContext", Kind: "map"},
 				{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
@@ -90,7 +92,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "IdentityProviderArn", Member: "identityProviderArn", Location: "label"},
 			},
-			Response: []Step{{Name: "identityProvider"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "identityProvider"}},
 			Fields: []Field{
 				{Property: "IdentityProviderArn", Member: "identityProviderArn", Kind: "scalar"},
 				{Property: "IdentityProviderDetails", Member: "identityProviderDetails", Kind: "map"},
@@ -108,7 +111,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "IpAccessSettingsArn", Member: "ipAccessSettingsArn", Location: "label"},
 			},
-			Response: []Step{{Name: "ipAccessSettings"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ipAccessSettings"}},
 			Fields: []Field{
 				{Property: "AdditionalEncryptionContext", Member: "additionalEncryptionContext", Kind: "map"},
 				{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
@@ -135,7 +139,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "NetworkSettingsArn", Member: "networkSettingsArn", Location: "label"},
 			},
-			Response: []Step{{Name: "networkSettings"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "networkSettings"}},
 			Fields: []Field{
 				{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
 				{Property: "NetworkSettingsArn", Member: "networkSettingsArn", Kind: "scalar"},
@@ -154,7 +159,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "UserAccessLoggingSettingsArn", Member: "userAccessLoggingSettingsArn", Location: "label"},
 			},
-			Response: []Step{{Name: "userAccessLoggingSettings"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "userAccessLoggingSettings"}},
 			Fields: []Field{
 				{Property: "AssociatedPortalArns", Member: "associatedPortalArns", Kind: "list"},
 				{Property: "KinesisStreamArn", Member: "kinesisStreamArn", Kind: "scalar"},

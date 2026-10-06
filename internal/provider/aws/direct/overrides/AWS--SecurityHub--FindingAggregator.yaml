@@ -3,6 +3,7 @@ type: AWS::SecurityHub::FindingAggregator
 read:
   model: securityhub/service/2018-10-26/securityhub-2018-10-26.json
   operation: GetFindingAggregator
+  absentErrors: [ResourceNotFoundException]
   identifier:
     FindingAggregatorArn: FindingAggregatorArn
 properties:

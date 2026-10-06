@@ -3,6 +3,7 @@ type: AWS::CleanRoomsML::ConfiguredModelAlgorithm
 read:
   model: cleanroomsml/service/2023-09-06/cleanroomsml-2023-09-06.json
   operation: GetConfiguredModelAlgorithm
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ConfiguredModelAlgorithmArn: configuredModelAlgorithmArn
 properties:

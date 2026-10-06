@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AcmeExternalAccountBindingArn", Member: "AcmeExternalAccountBindingArn", Location: "body"},
 			},
-			Response: []Step{{Name: "ExternalAccountBinding"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ExternalAccountBinding"}},
 			Fields: []Field{
 				{Property: "AcmeEndpointArn", Member: "AcmeEndpointArn", Kind: "scalar"},
 				{Property: "AcmeExternalAccountBindingArn", Member: "AcmeExternalAccountBindingArn", Kind: "scalar"},

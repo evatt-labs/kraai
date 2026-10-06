@@ -3,6 +3,7 @@ type: AWS::EntityResolution::SchemaMapping
 read:
   model: entityresolution/service/2018-05-10/entityresolution-2018-05-10.json
   operation: GetSchemaMapping
+  absentErrors: [ResourceNotFoundException]
   identifier:
     SchemaName: schemaName
 properties:

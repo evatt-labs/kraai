@@ -17,6 +17,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "name", Value: "{CredentialProviderArn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "ApiKeySecretArn", Member: "apiKeySecretArn", Kind: "structure",
 					Fields: []Field{
@@ -40,6 +41,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ProfileId", Member: "profileId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "Description", Member: "description", Kind: "scalar"},
@@ -66,6 +68,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "label", Member: "policyEngineId", Value: "{PolicyEngineArn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "Description", Member: "description", Kind: "scalar"},

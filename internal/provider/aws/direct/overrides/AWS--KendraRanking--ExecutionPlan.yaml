@@ -3,6 +3,7 @@ type: AWS::KendraRanking::ExecutionPlan
 read:
   model: kendra-ranking/service/2022-10-19/kendra-ranking-2022-10-19.json
   operation: DescribeRescoreExecutionPlan
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: Id
 properties:

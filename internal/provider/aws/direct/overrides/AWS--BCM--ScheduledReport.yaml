@@ -3,6 +3,7 @@ type: AWS::BCM::ScheduledReport
 read:
   model: bcm-dashboards/service/2025-08-18/bcm-dashboards-2025-08-18.json
   operation: GetScheduledReport
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Arn: arn
   response: scheduledReport

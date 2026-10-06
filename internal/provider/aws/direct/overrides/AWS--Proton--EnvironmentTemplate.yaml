@@ -3,6 +3,7 @@ type: AWS::Proton::EnvironmentTemplate
 read:
   model: proton/service/2020-07-20/proton-2020-07-20.json
   operation: GetEnvironmentTemplate
+  absentErrors: [ResourceNotFoundException]
   # The name member refuses an ARN; arn:...:environment-template/name.
   input:
     name: "{Arn:arnName}"

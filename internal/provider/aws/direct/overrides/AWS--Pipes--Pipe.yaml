@@ -3,6 +3,7 @@ type: AWS::Pipes::Pipe
 read:
   model: pipes/service/2015-10-07/pipes-2015-10-07.json
   operation: DescribePipe
+  absentErrors: [NotFoundException]
   identifier:
     Name: Name
 properties:

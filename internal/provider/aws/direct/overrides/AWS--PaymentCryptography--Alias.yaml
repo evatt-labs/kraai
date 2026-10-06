@@ -3,6 +3,7 @@ type: AWS::PaymentCryptography::Alias
 read:
   model: payment-cryptography/service/2021-09-14/payment-cryptography-2021-09-14.json
   operation: GetAlias
+  absentErrors: [ResourceNotFoundException]
   identifier:
     AliasName: AliasName
   response: Alias

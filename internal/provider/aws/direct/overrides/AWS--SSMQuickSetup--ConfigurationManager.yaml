@@ -3,6 +3,7 @@ type: AWS::SSMQuickSetup::ConfigurationManager
 read:
   model: ssm-quicksetup/service/2018-05-10/ssm-quicksetup-2018-05-10.json
   operation: GetConfigurationManager
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ManagerArn: ManagerArn
 properties:

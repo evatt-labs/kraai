@@ -3,6 +3,7 @@ type: AWS::MediaLive::Cluster
 read:
   model: medialive/service/2017-10-14/medialive-2017-10-14.json
   operation: DescribeCluster
+  absentErrors: [NotFoundException]
   identifier:
     Id: ClusterId
 properties:

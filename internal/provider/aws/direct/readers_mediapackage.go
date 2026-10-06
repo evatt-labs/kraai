@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "CreatedAt", Member: "CreatedAt", Kind: "scalar", JSONName: "createdAt"},
@@ -40,6 +41,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "Description", Member: "Description", Kind: "scalar", JSONName: "description"},
@@ -78,6 +80,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "Authorization", Member: "Authorization", Kind: "structure", JSONName: "authorization",
@@ -277,6 +280,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "CmafPackage", Member: "CmafPackage", Kind: "structure", JSONName: "cmafPackage",
@@ -450,6 +454,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", JSONName: "arn"},
 				{Property: "Authorization", Member: "Authorization", Kind: "structure", JSONName: "authorization",

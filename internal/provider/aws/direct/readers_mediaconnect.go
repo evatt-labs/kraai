@@ -15,7 +15,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "BridgeArn", Member: "BridgeArn", Location: "label"},
 			},
-			Response: []Step{{Name: "bridge"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "bridge"}},
 			Fields: []Field{
 				{Property: "BridgeArn", Member: "BridgeArn", Kind: "scalar", JSONName: "bridgeArn"},
 				{Property: "BridgeState", Member: "BridgeState", Kind: "scalar", JSONName: "bridgeState"},
@@ -99,7 +100,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "GatewayArn", Member: "GatewayArn", Location: "label"},
 			},
-			Response: []Step{{Name: "gateway"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "gateway"}},
 			Fields: []Field{
 				{Property: "EgressCidrBlocks", Member: "EgressCidrBlocks", Kind: "list", JSONName: "egressCidrBlocks"},
 				{Property: "GatewayArn", Member: "GatewayArn", Kind: "scalar", JSONName: "gatewayArn"},

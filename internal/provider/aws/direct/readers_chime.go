@@ -33,7 +33,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "MediaInsightsPipelineConfigurationArn", Member: "Identifier", Location: "label"},
 			},
-			Response: []Step{{Name: "MediaInsightsPipelineConfiguration"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "MediaInsightsPipelineConfiguration"}},
 			Fields: []Field{
 				{Property: "CreatedTimestamp", Member: "CreatedTimestamp", Kind: "timestamp"},
 				{Property: "Elements", Member: "Elements", Kind: "list",
@@ -144,7 +145,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "SipMediaApplicationArn", Member: "SipMediaApplicationId", Location: "label"},
 			},
-			Response: []Step{{Name: "SipMediaApplication"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "SipMediaApplication"}},
 			Fields: []Field{
 				{Property: "AwsRegion", Member: "AwsRegion", Kind: "scalar"},
 				{Property: "CreatedTimestamp", Member: "CreatedTimestamp", Kind: "timestamp"},
@@ -172,7 +174,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "label", Member: "VoiceConnectorId", Value: "{VoiceConnectorArn:arnName}"},
 			},
-			Response: []Step{{Name: "VoiceConnector"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "VoiceConnector"}},
 			Fields: []Field{
 				{Property: "AwsRegion", Member: "AwsRegion", Kind: "scalar"},
 				{Property: "CreatedTimestamp", Member: "CreatedTimestamp", Kind: "timestamp"},

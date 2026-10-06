@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "IdNamespaceName", Member: "idNamespaceName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "Description", Member: "description", Kind: "scalar"},
@@ -64,6 +65,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "SchemaName", Member: "schemaName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "Description", Member: "description", Kind: "scalar"},

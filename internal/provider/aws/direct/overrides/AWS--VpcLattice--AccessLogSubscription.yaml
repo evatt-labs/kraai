@@ -3,6 +3,7 @@ type: AWS::VpcLattice::AccessLogSubscription
 read:
   model: vpc-lattice/service/2022-11-30/vpc-lattice-2022-11-30.json
   operation: GetAccessLogSubscription
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Arn: accessLogSubscriptionIdentifier
 properties:

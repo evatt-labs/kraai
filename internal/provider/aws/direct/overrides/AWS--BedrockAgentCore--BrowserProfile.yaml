@@ -3,6 +3,7 @@ type: AWS::BedrockAgentCore::BrowserProfile
 read:
   model: bedrock-agentcore-control/service/2023-06-05/bedrock-agentcore-control-2023-06-05.json
   operation: GetBrowserProfile
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ProfileId: profileId
 properties:

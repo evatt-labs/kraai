@@ -3,6 +3,7 @@ type: AWS::SecurityHub::AggregatorV2
 read:
   model: securityhub/service/2018-10-26/securityhub-2018-10-26.json
   operation: GetAggregatorV2
+  absentErrors: [ResourceNotFoundException]
   identifier:
     AggregatorV2Arn: AggregatorV2Arn
 properties:

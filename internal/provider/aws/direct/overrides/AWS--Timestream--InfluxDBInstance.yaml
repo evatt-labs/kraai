@@ -3,6 +3,7 @@ type: AWS::Timestream::InfluxDBInstance
 read:
   model: timestream-influxdb/service/2023-01-27/timestream-influxdb-2023-01-27.json
   operation: GetDbInstance
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: identifier
 properties:

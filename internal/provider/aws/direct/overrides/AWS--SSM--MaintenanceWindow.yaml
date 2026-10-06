@@ -3,6 +3,7 @@ type: AWS::SSM::MaintenanceWindow
 read:
   model: ssm/service/2014-11-06/ssm-2014-11-06.json
   operation: GetMaintenanceWindow
+  absentErrors: [DoesNotExistException]
   identifier:
     WindowId: WindowId
 properties:

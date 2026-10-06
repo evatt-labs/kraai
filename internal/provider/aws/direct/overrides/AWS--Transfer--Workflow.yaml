@@ -3,6 +3,7 @@ type: AWS::Transfer::Workflow
 read:
   model: transfer/service/2018-11-05/transfer-2018-11-05.json
   operation: DescribeWorkflow
+  absentErrors: [ResourceNotFoundException]
   identifier:
     WorkflowId: WorkflowId
   response: Workflow

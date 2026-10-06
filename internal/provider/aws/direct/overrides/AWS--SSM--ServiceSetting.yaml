@@ -3,6 +3,7 @@ type: AWS::SSM::ServiceSetting
 read:
   model: ssm/service/2014-11-06/ssm-2014-11-06.json
   operation: GetServiceSetting
+  absentErrors: [ServiceSettingNotFound]
   identifier:
     Arn: SettingId
   response: ServiceSetting

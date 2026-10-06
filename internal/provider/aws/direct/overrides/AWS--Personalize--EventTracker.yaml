@@ -3,6 +3,7 @@ type: AWS::Personalize::EventTracker
 read:
   model: personalize/service/2018-05-22/personalize-2018-05-22.json
   operation: DescribeEventTracker
+  absentErrors: [ResourceNotFoundException]
   identifier:
     EventTrackerArn: eventTrackerArn
   response: eventTracker

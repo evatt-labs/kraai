@@ -3,6 +3,7 @@ type: AWS::IoTWireless::Destination
 read:
   model: iot-wireless/service/2020-11-22/iot-wireless-2020-11-22.json
   operation: GetDestination
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Name: Name
 properties:

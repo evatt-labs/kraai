@@ -3,6 +3,7 @@ type: AWS::EntityResolution::IdNamespace
 read:
   model: entityresolution/service/2018-05-10/entityresolution-2018-05-10.json
   operation: GetIdNamespace
+  absentErrors: [ResourceNotFoundException]
   identifier:
     IdNamespaceName: idNamespaceName
 properties:

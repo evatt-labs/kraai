@@ -3,6 +3,7 @@ type: AWS::CodeDeploy::Application
 read:
   model: codedeploy/service/2014-10-06/codedeploy-2014-10-06.json
   operation: GetApplication
+  absentErrors: [ApplicationDoesNotExistException]
   identifier:
     ApplicationName: applicationName
   response: application

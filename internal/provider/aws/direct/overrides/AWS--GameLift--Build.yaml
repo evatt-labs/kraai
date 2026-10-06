@@ -3,6 +3,7 @@ type: AWS::GameLift::Build
 read:
   model: gamelift/service/2015-10-01/gamelift-2015-10-01.json
   operation: DescribeBuild
+  absentErrors: [NotFoundException]
   identifier:
     BuildId: BuildId
   response: Build

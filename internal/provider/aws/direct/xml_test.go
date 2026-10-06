@@ -455,19 +455,25 @@ func TestReadRestXML(t *testing.T) {
 }
 
 func TestReadRestXMLError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(404)
-		_, _ = io.WriteString(w, `<ErrorResponse><Error><Type>Sender</Type><Code>NoSuchCachePolicy</Code><Message>gone</Message></Error></ErrorResponse>`)
-	}))
-	t.Cleanup(srv.Close)
-	client := &Client{
-		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, RetryDelay: time.Millisecond,
+	serve := func(status int, code string) *Client {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(status)
+			_, _ = io.WriteString(w, `<ErrorResponse><Error><Type>Sender</Type><Code>`+code+`</Code><Message>m</Message></Error></ErrorResponse>`)
+		}))
+		t.Cleanup(srv.Close)
+		return &Client{
+			HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+			Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, RetryDelay: time.Millisecond,
+		}
 	}
-	_, err := client.Read(context.Background(), cachePolicies, map[string]string{"Id": "x"})
+	_, err := serve(403, "AccessDenied").Read(context.Background(), cachePolicies, map[string]string{"Id": "x"})
 	var apiErr *APIError
-	if !errors.As(err, &apiErr) || apiErr.Code != "NoSuchCachePolicy" || apiErr.Status != 404 {
+	if !errors.As(err, &apiErr) || apiErr.Code != "AccessDenied" || apiErr.Status != 403 {
 		t.Fatalf("error = %#v", err)
+	}
+	// The code the read lists for a policy that does not exist is absence.
+	if _, err := serve(404, "NoSuchCachePolicy").Read(context.Background(), cachePolicies, map[string]string{"Id": "x"}); !errors.Is(err, ErrAbsent) {
+		t.Fatalf("a missing policy read %v, want absent", err)
 	}
 }
 

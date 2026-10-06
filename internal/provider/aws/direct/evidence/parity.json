@@ -29,7 +29,7 @@
     {
       "type": "AWS::AppConfig::DeploymentStrategy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 4,
@@ -43,12 +43,12 @@
         "Name",
         "ReplicateTo"
       ],
-      "override": "b6da18a5ad7bfec86a80ae15cc9633b455bbde9e7f57603cddc0d261daae02b7"
+      "override": "ab2e6ff66deff8231a69fa4c35259cd6d62685bd045b0daff9818dedf26c3bb9"
     },
     {
       "type": "AWS::AppConfig::Extension",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 6,
@@ -61,32 +61,32 @@
         "Parameters",
         "VersionNumber"
       ],
-      "override": "fcf11d05759075ded4ebf088af002fc265471f7f56073af5855a3e79706caa15"
+      "override": "ad7475e28d8db790c82517898164a9fa73bd7eec6780a150c01a249fa3445d1c"
     },
     {
       "type": "AWS::AppConfig::ExtensionAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "68ebe6159ca91160275796b466a93754cb9844284bf968aa7352d77c46c61440"
+      "override": "0a67fae7457ca2e14496f70eb10d1e9efac47d85d22d79e29076f93032e13cc0"
     },
     {
       "type": "AWS::AppIntegrations::EventIntegration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "de67e957077f57df07f72ea052a9350be4063ef3c323cfdd982a68bbd3149969"
+      "override": "edae7d3d2a896e2f67411c200d0876d4618216b1676c438fff6b60c280eb9ce3"
     },
     {
       "type": "AWS::AppRunner::AutoScalingConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
@@ -99,12 +99,12 @@
         "MaxSize",
         "MinSize"
       ],
-      "override": "9fe0ca2ce4aa8cf77b46e1a235d1d7c7f2d45338f3e5108254a0644b3e896604"
+      "override": "db40f75cfd376c0b33e83511a0e6d3fa2bc45cf8f9ba505c82fbcac556826c04"
     },
     {
       "type": "AWS::AppRunner::ObservabilityConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
@@ -115,37 +115,37 @@
         "ObservabilityConfigurationRevision",
         "TraceConfiguration"
       ],
-      "override": "97bdbc398ff1f514d4c6544d99fc6c8692a34f61056f9bf156c086116f39e920"
+      "override": "3833cade8df5b19cf94a02fe196fdb0f47a083630ef91c1336b43a93b6fcdd00"
     },
     {
       "type": "AWS::AppRunner::VpcConnector",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "805c56293096fc84ae46ad533737b71db8f2082a54b9b7af01020c9c9d1ee45c"
+      "override": "c294083ac4a63242c6a63b869bcab896eaa90d63eea7f6c8c56c1960c81fc94c"
     },
     {
       "type": "AWS::AppRunner::VpcIngressConnection",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "15f65a6abdb26a49ba6c4ad9ba3b62c1c4c7eb3ec4d57721271c1d36131eac0e"
+      "override": "75dbcaee48762876912d6b830e0e52f3ada03f56b1c3a357b4a5c0f98ba323a7"
     },
     {
       "type": "AWS::AppSync::DomainName",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b8247a135a94b6a6f2a95afa6f88ecd331639e7b62533ad52826a7dfac66835c"
+      "override": "ac5602934eaa23c091965a2d211d702332dbbd138ce5022ff13a54f161cf2d63"
     },
     {
       "type": "AWS::Athena::DataCatalog",
@@ -171,153 +171,143 @@
     {
       "type": "AWS::B2BI::Profile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c1c9bf6f1de8a4a8d3854167e84a7d5df5e2a39c182048b72472b38fee9e21c3"
+      "override": "4a51eb316cad7ba5795681d656c8e1ea523d3306100738fd3d86ac002e9cdd4e"
     },
     {
       "type": "AWS::BCM::ScheduledReport",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "baba23114bc5c3d215729fb6ef7d6f9ca554612617cfc2c835081f1facca16f6"
+      "override": "0345f0ba409ed2559a75f5d1f816bb8ae918065c7356a63e9245653717d10f65"
     },
     {
       "type": "AWS::Backup::RestoreTestingPlan",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "32d49822f497f0c924ea8a8adafe6d8507abb6cf88db985ac67dcba2be05ed0b"
+      "override": "fee4c5abf285f3ac353aae27f19ecded8ba707daef13ce32dd7e223a0d82ab6e"
     },
     {
       "type": "AWS::BackupGateway::Hypervisor",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e4bc49cfca53b6568b30e4bfa504105bf5707243516c37998892d9ac4555e51d"
+      "override": "4b346789233d7f62e32b5d0617d9bc20a89858dd95277baba8fcf0f9258b0d33"
     },
     {
       "type": "AWS::Bedrock::AutomatedReasoningPolicy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9f9c93461a682c1a29701337ed60144080ad9ee27fb1b36dbe68dd1b40dc770b"
+      "override": "1548ae500a2d72005ca94195916651611272df7243b42f5c76ba03f2e67f7452"
     },
     {
       "type": "AWS::Bedrock::DataAutomationProject",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "12efd09c3785669524ea005989e043342825641cf753311c3816f02cd0e1f7f6"
+      "override": "d96ffc32b3f8e757b758dcd5fe178e1f456b683a8c02465be722171312acdac0"
     },
     {
       "type": "AWS::Bedrock::IntelligentPromptRouter",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-24",
+      "date": "2026-10-06",
       "region": "us-east-1",
-      "outcome": "parity",
-      "instances": 1,
-      "compared": [
-        "CreatedAt",
-        "FallbackModel",
-        "Models",
-        "PromptRouterArn",
-        "PromptRouterName",
-        "RoutingCriteria",
-        "Status",
-        "Type",
-        "UpdatedAt"
-      ],
-      "override": "47907f629d7f8fed76367d504543e72b904319d4230e28480e0081bfb0e5450e"
+      "outcome": "no-instances",
+      "instances": 0,
+      "compared": [],
+      "override": "f21f7011d97853f1ceff08790d5ceeeab0662f0d46814a63a993d02aec58a2e5"
     },
     {
       "type": "AWS::Bedrock::Session",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1fbe491b3c0583e5310cb8bd8ab9377e0761657e8b741443b4c36e531090d5c6"
+      "override": "0d4f3ece5cadfd83b29da8f0fbe18ce088d5fa2725c9af8472cd3208173f7e49"
     },
     {
       "type": "AWS::BedrockAgentCore::ApiKeyCredentialProvider",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "87ba1f31d8619c8ed74a2889f279a4ea5272d8b8f4878ca6ae8cd5a5548e3545"
+      "override": "9146c4dd7a88a15b778d92eedc10aa010590c07f0659b067876e56096693f37e"
     },
     {
       "type": "AWS::BedrockAgentCore::BrowserProfile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "84305a1a0de30fc4a5226e046f67fc0c868ceb6f369fb52ad2f324bc56dae12a"
+      "override": "e06d86dc29e81b742dd74583d99389fec677a2d5893cc6d6285693f2f0281c29"
     },
     {
       "type": "AWS::BedrockAgentCore::PolicyEngine",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f370a2de038d0811fdf072f2bb7debf0f761b60f7515b050708e58d809e144c3"
+      "override": "47986ab58ebe8554f8f19b03818f2346324d36a6771d8dc504da5de1d7f66e1b"
     },
     {
       "type": "AWS::Cases::Domain",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "83e5cd585c52cb3c60cffd6c5b2c4dfbf415a3dd901004cc34c616dbc0bb81f7"
+      "override": "bb7b6aa0dd4886461ff9db6af132a595343d89d5bfc362667184c22f8234ce5e"
     },
     {
       "type": "AWS::CertificateManager::AcmeExternalAccountBinding",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "7bb0152ff83646635d88ab65cd0db5c69f233772ab4158af86f3c829d253b204"
+      "override": "7e9d55f1a5b95c5a9109d918a841223ca1e4fc4422e851057a80676c097149d3"
     },
     {
       "type": "AWS::Chatbot::CustomAction",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9b2f4d45c1468d7ad3b40ab216ae89959dcdd6f10dc888d9ecdbe9b46583b41e"
+      "override": "e23da31574ea8e7c1f9f4425efb6369058af2853becad3222092cea4308dac62"
     },
     {
       "type": "AWS::Chime::AppInstance",
@@ -332,88 +322,88 @@
     {
       "type": "AWS::Chime::MediaInsightsPipelineConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e4c017fee58d6beb5e422147973e9d26080e18eb20d192e470adf83abfa7c563"
+      "override": "7fc7161e73af6c4910125c0751e9cfeb9af8200b4715db32d778e207d07e8d8e"
     },
     {
       "type": "AWS::Chime::SipMediaApplication",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4e5c7bf0aaf29905717a2d97c8aff95628801013f0c8ce0cde3e6b4a93fe11fa"
+      "override": "659eae36989d5850d8f87881140cbae75e04fa90797063bccb9b1ad8fd27938f"
     },
     {
       "type": "AWS::Chime::VoiceConnector",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d091397d1563deb64e2ae1d0a87e18a7534b7b6961280a855777aa333c43f561"
+      "override": "7f5a52226b66ae9e5255a4f865b4a5eee85889bf2d3b8d179f822062aa5406f6"
     },
     {
       "type": "AWS::CleanRoomsML::ConfiguredModelAlgorithm",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9bc033ae09fbccc6f9edc6557c3eb6fdcad6a8642495d9944f257d372c4e1ca1"
+      "override": "8433ff2e93ff09afad355696e66caed2b33dfe5d7d5066fa9bbbb561b52cfb7c"
     },
     {
       "type": "AWS::CleanRoomsML::TrainingDataset",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "bc098025f857ab4170a6cdce9e36a2efea26a52660de6fe2ee7af7237299f895"
+      "override": "c3b8637fe826cd379f40c222e7f33836568183df7260bfca50c27e2357312cf2"
     },
     {
       "type": "AWS::CloudFormation::ChangeSet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "6cc9b918b8502cb3595a2a5d64dad6efb036600fe543cebbe79a22036f877184"
+      "override": "5e4a6ed8d9cb92d9b4332671fd588d6716dc26c120b12b3433eda8c1468b9a5c"
     },
     {
       "type": "AWS::CloudFormation::GeneratedTemplate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2c0107ca9983ef91b799265d448b47e6f53649653104b15515e156a124e0a0fa"
+      "override": "9823891be064107bc0d66679a841adae882e69c562d4d5e8b3ec5515bd91f336"
     },
     {
       "type": "AWS::CloudFormation::ModuleDefaultVersion",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8ea3b59972c96136e096fa47f96a0dcaddbffadba7377750d5784256e3c05dbb"
+      "override": "9154ae97f4afe6d8369db9e5a84ae6a4b0bacf5609bf7302fad3429587a3de67"
     },
     {
       "type": "AWS::CloudFront::CachePolicy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 15,
@@ -422,7 +412,7 @@
         "Id",
         "LastModifiedTime"
       ],
-      "override": "1b92a601b7ce50d684a46fd669d0f699c958d31897aaa515e15398229d49a187"
+      "override": "5a87cf97974e7d5db0603634c4c96ed8bcd653b15ec7304bd1589dee6b506734"
     },
     {
       "type": "AWS::CloudWatch::Alarm",
@@ -459,27 +449,27 @@
     {
       "type": "AWS::CodeConnections::Connection",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "464073cb0a1a7344af119249854db771040b4d55d4ede61ad18956fdf04e4acb"
+      "override": "f664bf2279b2c50f4c90376370e56549bf4ef36cc34a633e48b0f912795fc6e8"
     },
     {
       "type": "AWS::CodeDeploy::Application",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3033f4b227eea7e03a40970477074adffaa3e077b7b0292ed1eef341d673c3e1"
+      "override": "40cca380a8615a51d0dc857190d5487d7fbd79c6b98197638d6365d654a30af1"
     },
     {
       "type": "AWS::CodeDeploy::DeploymentConfig",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 17,
@@ -489,77 +479,77 @@
         "MinimumHealthyHosts",
         "TrafficRoutingConfig"
       ],
-      "override": "12e1bc837717e0dec4113db6a7263f978d43e840196c6dfc2f2015d62fe20ac9"
+      "override": "6a9925e18f8993e3acdc4b77939638f4d961539cfbd9e5ca245c8ead0d4fb0fd"
     },
     {
       "type": "AWS::CodeStarConnections::Connection",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d21eb58f3cf1f97fd49e93f55ba03581e09ae1fb1b30a3f9ba17ba245f2bf1f6"
+      "override": "1c0445443f61b60158422f5807331299a1332f76eef6bfe54b814214782dedaf"
     },
     {
       "type": "AWS::Config::Connector",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4f4dcc0e5507ff040f2002f9577d795964d27158cbe36d84ea03da9e942fc036"
+      "override": "696430fdce50b9500e9cd578cf7bc6fe92f9aebe2ea08e150864d120f778b9dd"
     },
     {
       "type": "AWS::CustomerProfiles::Domain",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7bd8e1c04bda341481f4a506859d314a0bfcd9cef612b7c13cb92514a1d07831"
+      "override": "3482e4f97037b7781384a0aac582be35f213d799269bc7b7d69d2e694bebe740"
     },
     {
       "type": "AWS::DataBrew::Project",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "01cb87c1881d6e3f5bf6cb7e8e246c41b20e69b8ef517549766efb34bfdaf9c1"
+      "override": "6a712d366b22e4441c97ced161467693d0fa55fe71727bb24e494020912fe1eb"
     },
     {
       "type": "AWS::DataBrew::Recipe",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9b7ebd1c7df3727fe86fd23d2247884b697c2caedc6f2baf0495a06c4c0fe701"
+      "override": "6b019b5ebae69dbbf04da11775a7d82546f5ba93cbd6bc1756f5747d485ed9f7"
     },
     {
       "type": "AWS::DataBrew::Schedule",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "781d942eb9f141330d036299a5ebefe493f75f8e66b7f772c60e65fd7fafc449"
+      "override": "5076da928ab6b827e59121446cbadf04768d4a9ab2cdcf797bb960d61690d817"
     },
     {
       "type": "AWS::DataExchange::DataSet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a1718338861bd6d9f5e5640d7edc1fb62b7189abaa8b6c054f7563c215bcdda6"
+      "override": "f1e269fdcdf0646d0ebd33f5f7c25d931eac57983280170409e09c1efa2cc384"
     },
     {
       "type": "AWS::DataSync::LocationEFS",
@@ -654,22 +644,22 @@
     {
       "type": "AWS::DocDBElastic::Cluster",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "495c1c37f0b95e7a62b2352a4d799f154a009a918fa31ab2c8b89b277766145c"
+      "override": "36ee5c29ce00bc8e87cd1261ea93c8faf8eee9839a0710e136706e364ccde6ce"
     },
     {
       "type": "AWS::DocDBElastic::ClusterSnapshot",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "733c488041adcd39de3523626a63774cae148b1ab5662e9f40cfb425084cb372"
+      "override": "03c586acc2a0f6b961b1bb5d2752b7b6157a7179bcd94f8028ddff5f38ad94b1"
     },
     {
       "type": "AWS::DynamoDB::Table",
@@ -992,62 +982,62 @@
     {
       "type": "AWS::ElementalInference::Dictionary",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5edcc3bd3112906825bf0dd23d4b93136f1da3b70275e297f7b70459a9dd90de"
+      "override": "391e2e33ab4b985ab7e79871f91785f10084c6fa9e72d5874ad290c24978070c"
     },
     {
       "type": "AWS::EntityResolution::IdNamespace",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "20f285452ff745dd9eaf925916e4d210c2fd8e357314638f13e0de508629ef6c"
+      "override": "3164c5acc7618e2661bd02c5f57f378db310e15b2323de1aa3ee02213c7877ed"
     },
     {
       "type": "AWS::EntityResolution::SchemaMapping",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b9f11cd0bc403513618a702d1a21d902e6d0b5aec51ecb2073e47922876a9b98"
+      "override": "b4228052c3697d15f2f8811ffd4f254d4b6744cd7d00aab85fa34e3a182d119a"
     },
     {
       "type": "AWS::EventSchemas::Discoverer",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a1941bc3005b66a6425f71ea7db6cfafd7863409e3ca013bd4da85f00906e516"
+      "override": "867e7b28fd63fe82be4dd0404cc6744eb5fcdc065597d65c392200b4bd3b150b"
     },
     {
       "type": "AWS::EventSchemas::Registry",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6797a0ccf15fb363cc59c2149f779a5e2d52bcebe0cb3cc07e37beb106eb15dd"
+      "override": "cd9865392c35099eff527da44f9247576dff59553c048aab13405d25cc47ec38"
     },
     {
       "type": "AWS::Events::Endpoint",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3d94745273e59a5e25e94703f31157fe77316fe920f54b627318e294d1b394dd"
+      "override": "964abd9484bc5055f63109ad63d53392b22e360eca380c5efb50365234b9e7cc"
     },
     {
       "type": "AWS::Events::EventBus",
@@ -1092,103 +1082,103 @@
     {
       "type": "AWS::Forecast::DatasetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "dd666673ca7fab6e4ab568d011bbb5037f20db8da11c8272e96fdd1765ef9330"
+      "override": "57f828d0f8ab7781c543a738b7da390c5b742b4574fc2d5463f082d064610485"
     },
     {
       "type": "AWS::GameLift::Alias",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "46772a40df643e5402ddbfc5bc24bcba7cd5171f87f33e445dfc03a434718107"
+      "override": "7f34976e01c0b7517a31f48c31ea797f342ae5d44afcf4d573e79f4eee32a101"
     },
     {
       "type": "AWS::GameLift::Build",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7d1b0c24a46aebd14f49598df611efe1428efa4f0e76a44d6f885a65e5aa6a57"
+      "override": "862e30c679e7232b87b0ca51e5739bf0b2bc646e384ea200eb2026819aa9113b"
     },
     {
       "type": "AWS::GameLift::ContainerGroupDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a7c9688ae07aa49f9931a48add4e3c8b65c1216ccbdeb42091f89720ed045b88"
+      "override": "e0be1e6cf922ce3609cb7cf37c1cdbf6992fc8b3a4fe54d5407dfebccf14dc84"
     },
     {
       "type": "AWS::GameLift::GameServerGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "45f18aa7cf1be1a571cffdfee47ce98bf8be6f03f36edc382ed37e75b6a61148"
+      "override": "791a52d97f89bd335856d2a04eaec5cb68962373b92e0095949a644b9e3c1e8b"
     },
     {
       "type": "AWS::GlobalAccelerator::CrossAccountAttachment",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e94575a60d1746a43f476628df19619ddb27901f0a149af049fdfb79935d863e"
+      "override": "3ca2a71b42a6f84a5b7166921a61379c1988cdda586bd305ac27cfa8903495c2"
     },
     {
       "type": "AWS::Glue::CustomEntityType",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cf2e32f54ceb7480ef28d21416b289e615f0650fb6605a67884e1f304fb6fddb"
+      "override": "3a0260602528e8b5d05c6496c5f9b9a71021bc67918f81d4bebcaf98185e8982"
     },
     {
       "type": "AWS::GreengrassV2::ComponentVersion",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "e3775f8c6c636992998954fece1b66d2d3cae011a7b5444c9526bc820c0940e8"
+      "override": "8dce599bb3919080f720308d32c92b5f35244d6d2b1110794845ccf9863b99ce"
     },
     {
       "type": "AWS::HealthAgent::Domain",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d1040a04a4e14ad1a8427db817120f611d6257cae14e0b6a51083e1bea07a342"
+      "override": "89614b03d3173a0f02a34d32485e1d511ca1cfb486b158865e45a9d27a01372f"
     },
     {
       "type": "AWS::HealthImaging::Datastore",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "81a1085934f53482e7686159bbdda6cf36e16e77ba8a5a9c11baf4f331bb9e0c"
+      "override": "d40fbacf3dc25133f9bf3fd5f8db7d9a3b899010eb095538708651ca9ce6e6dc"
     },
     {
       "type": "AWS::IAM::Role",
@@ -1215,103 +1205,103 @@
     {
       "type": "AWS::IVS::Channel",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6f98f3295d022aef2a9a300f5eccc0e55084d2380cb5b22e6c92244932f386d4"
+      "override": "3a19ff73b19a955aae0e79a74baf05f9672540f0e33ee08c15461b12b05805e7"
     },
     {
       "type": "AWS::IVS::EncoderConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1266ab8064d51a55f73d684aa58206f18424a4081180b783b036512b90f1e626"
+      "override": "25034f9d3212cefe1df772674814c5b691156ca6e130ea20b1c32cd6f7dc153c"
     },
     {
       "type": "AWS::IVS::IngestConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c10bef96283415927e33a767b0309164defb2066d08d0a467c681f13a9071ab1"
+      "override": "e8b63b0a0a2bee5c0b041675b23af0a7d1194f85fa75fb4304b42cfaab545ee1"
     },
     {
       "type": "AWS::IVS::PlaybackKeyPair",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "640512550c28b72e8b0c77d211ac328b2b5b48ba2f2a962e049753f70fcf4809"
+      "override": "87411c18547b8ec5e78fb9f10b676cd91e7ad943dcc7ddd2cdf8f4ad51f0d07a"
     },
     {
       "type": "AWS::IVS::PlaybackRestrictionPolicy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "def13819a4223baa7823beb7a7d07c2188fd1f23890390df761b7d07fe2160ff"
+      "override": "031e0c6a26f0f5e74f1a225e0259d02e87286ca39cd9e05c63eea0faf9b219d7"
     },
     {
       "type": "AWS::IVS::PublicKey",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0b8b5e2e48d4a3923032ead068651cb8698028086c3acfaf82d80f6ff77fbcf0"
+      "override": "34dbd384383f157efbf1f61e3f24a67c73ae2476036a7afe4d49f5eaae9b011b"
     },
     {
       "type": "AWS::IVS::RecordingConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2d7a447ffb1b7f15ab02f7f56b437db4d85f6c98199d4a996e7bbac561a524e5"
+      "override": "f5c4f6dc6ed47cc2a5c3762fbbc9c36b2196ffd14447328d9053aaac09a2f3e7"
     },
     {
       "type": "AWS::IVS::StorageConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c36780eacd40ae11f47d69265d80721ea79448c697992760e8dce93a0bc9d858"
+      "override": "212108a9ee3b94ba214a33444016e7b3a9540686b8946e0fce19d8405c0f94ed"
     },
     {
       "type": "AWS::IVS::StreamKey",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "03cc807db32b4461af7ac9b6c6e962feceae865cba3e74ff4a96f848dcc14589"
+      "override": "349dc4ac7e49d8f52ced932483ea5128e55cfa0d732fe497f80d17cd0441b7ef"
     },
     {
       "type": "AWS::IVSChat::Room",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c1b1b5fb192cc09646844cdbf5ac377ffc7f194f85cd529092ab38834481070f"
+      "override": "35651a0e84600c1277e214aeb0f383ecc1f9d6c88a5fa73fd723d5c1300651ee"
     },
     {
       "type": "AWS::ImageBuilder::LifecyclePolicy",
@@ -1336,74 +1326,74 @@
     {
       "type": "AWS::Invoicing::ProcurementPortalPreference",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6517ca958fc06f33a410fe69bf8aef52505a440bc6c31efe89ed464c150b4a5d"
+      "override": "607fb08f2759b1d0fcbc83aff302dc9469f9ff3f7c816bd69afa4e8471a125a3"
     },
     {
       "type": "AWS::IoT::CustomMetric",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "a95d6e609833dfc925c0eb3008447a1f79ba73e6d37181afd06ebdf539f64cc3"
+      "override": "2ff81341a3d50be0ce1c73e3c94aae6c52160e4ee6e39131dce54c9b23d9e5f2"
     },
     {
       "type": "AWS::IoT::Dimension",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "4932316e79f28104fc08d3b0fc43abe2c93cf5e4e64349c26aa4652e8235d077"
+      "override": "4ed827df593725d738d838fd5073e32b978b13a78ebc42e159ea5393c8468a9c"
     },
     {
       "type": "AWS::IoT::FleetMetric",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c94783b37fd0fa717349928b8631f49bfa0df7c3222709b1252eb970fb07ab6a"
+      "override": "9dff3cd854617d8f6108b7dec7997f44d32aa58d7d4e032de74d02dd5df70b73"
     },
     {
       "type": "AWS::IoT::RoleAlias",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4893b3e7ed6070cb8209ffbeae62a5f51c0ddd38454921b98b0681c12945b529"
+      "override": "7ea1b1d7db06a313074fbc5ed46d31933230eed56d97ce46ebb3557d53a6b15c"
     },
     {
       "type": "AWS::IoT::ScheduledAudit",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "898642d579f2fd0beaf9adaa5e88a63df0117793f3aea7ec98170af03ba99986"
+      "override": "5899b5d65f2fcb53f221b1ae6745c086d26ee868bcf1cc114c5fa4a01efd3e01"
     },
     {
       "type": "AWS::IoT::SoftwarePackage",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "119015196cdd25830b8b32a4d466c0bf008b6ee970843ba6f7e61dd4044aa1ee"
+      "override": "ce5fb30a7d5247b0a993e10592f3c260045ef01695c6bfc21e8dafe854fc965e"
     },
     {
       "type": "AWS::IoT::TopicRuleDestination",
@@ -1418,187 +1408,187 @@
     {
       "type": "AWS::IoTCoreDeviceAdvisor::SuiteDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4448d9eaeaece0b6117c2fb18712c01d8e0503a024509f52f6e7152511d73be5"
+      "override": "5bd566db4ee386324a5c84b2e607f20494439d2f1150b45e996fb59373024a91"
     },
     {
       "type": "AWS::IoTFleetWise::Fleet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "fa92754c33833877034484478e290e6d2ac1a79617fd3f5932038455f3321413"
+      "override": "54e1078fd56d45ccd3687beaacaf174fba28fceb9ee2b250de9afc6f6c796196"
     },
     {
       "type": "AWS::IoTFleetWise::StateTemplate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "ac14531ef2408ecae1daa9b1276dd408c12d4ad653e35f2af77ba34597e2d7e6"
+      "override": "4040c7fe32466d92712f18d1a92a9c26a91fd046f3308bd569021aa72794252f"
     },
     {
       "type": "AWS::IoTSiteWise::AccessPolicy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "9a109fd3295fd4bcc4f75dd390e9690067f645993bf8e494afe20b172f6029cf"
+      "override": "b7aba56fa095cf6dcf395343e14acb54c49e31b5607902e9bc0a1094c6cc6d19"
     },
     {
       "type": "AWS::IoTSiteWise::ComputationModel",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "febe93f39ba7ddffb55e9fa704898f09453466dea2718c3708f55eaa97712541"
+      "override": "5a07c4f8aba080f31743ee4887d29296f32d63e5c10e9c9abae9b859937ca56e"
     },
     {
       "type": "AWS::IoTSiteWise::Dashboard",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "3ba11d98c3c8d29500f654f8b9729cd2786665d43bfb1d52d65d407f6dc30547"
+      "override": "6efcb1830f34d9310b1f91ecf94b6c2d42e9f232b2c412ff378e6e37717b4c36"
     },
     {
       "type": "AWS::IoTSiteWise::Portal",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4bd029ebf92c62c22e4d8d1c031d3a44c6e1ae8cf9b745796ac5c10ba4dcbdee"
+      "override": "20efcfad2863107871c355c5b4ca358b67541161248ac76681ff2738f27d5574"
     },
     {
       "type": "AWS::IoTTwinMaker::Workspace",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a56b128ee4b396da066ed7f732809cb73a4689b69bfc408814d9dc9a91704a9b"
+      "override": "4b86c04022e4d93c021c31c5763b754b7b8e294dfa9b6cea0f4f4ab395331a05"
     },
     {
       "type": "AWS::IoTWireless::Destination",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "212d905620f5e72d877351ee4214f623d49bd2c236a773bbfbfb9a1f4b01a32a"
+      "override": "2e58e5db0c7deafd9764d53888884d9c533ac572b46ef786ccb15636ebb19f9e"
     },
     {
       "type": "AWS::IoTWireless::DeviceProfile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "78721fdb4583bb244b9269ce0e5adc914d14b6022d2889b438490ae33d9c4ee2"
+      "override": "46fc4e542dbb5ce99ec3d444991c4b6430c3bc332c2bc89c022cb0b481a50cd0"
     },
     {
       "type": "AWS::IoTWireless::NetworkAnalyzerConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "14a7935d4e1b43f151fdb9e815a33b97f5c83a86f89499b4151502d377e3a539"
+      "override": "94a470d460983f2b11bf60e162e4a1eec6756186cd7fd2846c97e3f1e32b7efc"
     },
     {
       "type": "AWS::IoTWireless::ServiceProfile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "96c85ee1a2da2d3d3ac8f0afb047cbe24e6977e5a40439a36258aedecc5a4b96"
+      "override": "14251829eab7fd62fbc1cb68f2df8b2f74e8475ef82923140695fbf80175ce2d"
     },
     {
       "type": "AWS::KafkaConnect::Connector",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6bae375290beae17643e25cd7a9805379544da88be6e0cee150bcc4a9a719264"
+      "override": "17d6b14f394dd371327ac7e7d284776fbd5192d08002fb56352f9d43edba478d"
     },
     {
       "type": "AWS::KendraRanking::ExecutionPlan",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "95fba2b12ae77ea86e0992496f0380a50d6676a114e809836a01a4b2175671dd"
+      "override": "8468a830ff20730e8595f4f63cdb904f7917c7048239705d7abe4021326fa519"
     },
     {
       "type": "AWS::Kinesis::Channel",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cce51671c4553da01c77d01e9e7dbc48b1d40863836a966d66505acea5835701"
+      "override": "660a4873c7d0500191ad4b507f797a26152f97a5866da175fe16fee60b37a5b1"
     },
     {
       "type": "AWS::Kinesis::StreamConsumer",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: GeneralServiceException",
-      "override": "2a389f6ffeafecb44b93972d5bceba21aab98409377b2e18d62490cad5f8ce1a"
+      "override": "d4f984c884fa1d8f2e7fce6e10ccec30263f622e99c7c26f08b96c1ab024129a"
     },
     {
       "type": "AWS::LakeFormation::Tag",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "37aeaf8c20e5f2cff00b2e8a238779fd7bb88d3c7b38ccaf33faf946141a85cc"
+      "override": "2344a6e16f7dcc147c72b10a7f379cebafb81ee01733cf3d06091e4813932287"
     },
     {
       "type": "AWS::Lambda::CodeSigningConfig",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "85f1014984bb6e76cbd229423c850618977c19048b99956060bb08f7488379e7"
+      "override": "718df860169772fe98e246dc282cbbcf07345b297c653148b4361cc94b5b7a8e"
     },
     {
       "type": "AWS::Lambda::Function",
@@ -1637,12 +1627,12 @@
     {
       "type": "AWS::Lambda::MicrovmImage",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b38227661eeec8f90e65f9e118082207a453ee111f2e6febfc43b15a7abac994"
+      "override": "5aa5b50598b10a13787d61a8abf05be70e0447688976ea2cdb6cee0c458044f2"
     },
     {
       "type": "AWS::Lambda::Permission",
@@ -1733,22 +1723,22 @@
     {
       "type": "AWS::Logs::DeliverySource",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "11761f7367d5524c59920f71f89b0c9022641a1494bbb9fe270c68c3656ca247"
+      "override": "872d14ba6f4051039187907c0e43756b373afdb6847c3970f2b12a9789574006"
     },
     {
       "type": "AWS::Logs::Integration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f87b822b26e371c7a97818d940fbda34ae7f32222969b9b9619ce0fe2515877d"
+      "override": "0c3f6fb48f364a308245593f05bcefeccb57b7fb9436b7cbd32858bc48eec751"
     },
     {
       "type": "AWS::Logs::LogGroup",
@@ -1790,130 +1780,130 @@
     {
       "type": "AWS::Logs::ScheduledQuery",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1d4de574e84f4a156ef88b4e410781ce9c7bdf55369210269b34b40212f92b39"
+      "override": "ecf00cccd8fd9dbb6c642360417618eb9005090c0e8c065e59195388a91f536b"
     },
     {
       "type": "AWS::Logs::Transformer",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c606f7eb30e2a2e1e34c9181c88a64a253500181d9ae16cadf262e886853b38a"
+      "override": "f734d446fb0eb218e6f9d7349dcc8a73e6e14e6b3130479852f70294608f4c0c"
     },
     {
       "type": "AWS::LookoutEquipment::InferenceScheduler",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a63bf7d408a6ce9cdef7dfe60f1147ed1a145122aca51ce6dcc75ae26e4df92e"
+      "override": "7050dca3be0d15736310706772da363b96024fad81ff2c312be6e4303b89c460"
     },
     {
       "type": "AWS::M2::Application",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c4f89b63e0ab50f9243a10936a78458f74f50b798256738c11faedf5e1965d39"
+      "override": "aaf5511a5b00787358f0a5d39987d2b86dca43240e47ac034936287d7280b873"
     },
     {
       "type": "AWS::M2::Environment",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "499014feb490c19c0fff323438e9fdf22eb09d7ce24e8ec63a6c50e7c8930dca"
+      "override": "bf9cacc03bebc385011bed0174abd4e4c2266380f6a8692ba0b17ff64f15075d"
     },
     {
       "type": "AWS::MGN::NetworkMigrationDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "486966cf2ed32606c4a897adc57975643452f23b84a5c291cac39293032f74e0"
+      "override": "6453d4014fe4d77370514e7c9bd6c6ec550b0779671a1e8d83367f6ed247c017"
     },
     {
       "type": "AWS::MWAA::Environment",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "29278d3f1b42f370e3afd07545058eca13fb43dd354c25b47d1700eda6ad5c4e"
+      "override": "937d299c03371aa5caf0f01bcb0fa3b89840bd40e80244306995e1a659337aa9"
     },
     {
       "type": "AWS::Macie::CustomDataIdentifier",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "3c5428b1e2766ee3e79ce42a9ae70bc27c0d2beee6e9e32ec6f60d5db4962769"
+      "override": "b19ab19db5a5c30cbd645ff5d482106e9bf8e45319969993f895832aded4c451"
     },
     {
       "type": "AWS::Macie::FindingsFilter",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "47e32a872d2636422ce57ab3d84f0a96f731cd9e771f81c7a00013cf84cd71ed"
+      "override": "20b62291b34a99109c5d1f3277203954d13cab11c63744a30c00b1c3f03e556a"
     },
     {
       "type": "AWS::Macie::Member",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "7bb74f517c9542e1564e6c92b22c1f0afe6e620af90904cf4366fbe40720cfb8"
+      "override": "27c732ecec56b4c08cfd8e00e90fbfe1bfae1815b088d6e63c654eb739f3b25a"
     },
     {
       "type": "AWS::MediaConnect::Bridge",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "681f016448d0e3545c706cc7e1f6d7530a068943d48e23fa11df99ebb1a4b435"
+      "override": "96d6d98b80424f3960f194f73db2fc1c3fc6914d311b35a02c22ebda780b518b"
     },
     {
       "type": "AWS::MediaConnect::Gateway",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ae9a182cce35846850aefb2cac1871305c5ef6ba7c6f397e4f9529bee82cb153"
+      "override": "fc60f9d9e8e286392efd9d41723a82c315407b29e77ecdb544d23142aa796eaf"
     },
     {
       "type": "AWS::MediaConvert::Queue",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "parity",
       "instances": 1,
@@ -1925,99 +1915,99 @@
         "PricingPlan",
         "Status"
       ],
-      "override": "225545369dea20f732df60ea8522ec18a3a358dd6870c7a2888c1461be485be6"
+      "override": "e73907eed54e41379d7b2e9161071f3dfc74de51df91c09c2f64f67e3d684003"
     },
     {
       "type": "AWS::MediaLive::Cluster",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a29df9085cddbe40f37a3e26037448ae3822a2f4882208a85de475e3d21aedba"
+      "override": "ad651bd30da6baa6d34f20ccc7ea134fba42936013082a5c44e23ec56a23752c"
     },
     {
       "type": "AWS::MediaLive::Network",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "03a7543f5fbf7a8dbcaf77e72f41a8e8afc7fe8e0dd5178d876a9e79d681ae28"
+      "override": "eb7696ad50587bdb7282e35a4c348cbd31a6c9e9d399a28a5f8f3ce37d746ed4"
     },
     {
       "type": "AWS::MediaLive::SdiSource",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c83f7df9f0f79246d16eb9223bf2d885fb32de5cefbf14840d7fcd8b1f2a03ab"
+      "override": "0b24eae4672afe11fb09dfe013cc050f91ff4f822fc07ba464463c35325ae21b"
     },
     {
       "type": "AWS::MediaPackage::Asset",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "72d27e11c10364d88127b21e13cf751a4a7a09ccbff6f93ec80a450b65f29832"
+      "override": "3c677904dd1f01084c7e34c722f5334172d3c32724844cc74217f9431954c302"
     },
     {
       "type": "AWS::MediaPackage::Channel",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e8eafa01803195d96439aa1a4d530d6e82e18b3c10e0392be754e145a9a27ada"
+      "override": "34285440ceb94c6d2fc5f292b0d9d196496775797608f72c3fbe1e10e21478c4"
     },
     {
       "type": "AWS::MediaPackage::OriginEndpoint",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "798682631ebf4cada74eba525a77c63aee0db26b6905bf75f4979e9bf95e900f"
+      "override": "edb1ab114b22f0a4f27a426e7b6ba525f6c0840c7344ce4b52408531402f2ec4"
     },
     {
       "type": "AWS::MediaPackage::PackagingConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "81a89b1493276f9459ac82bb9e7b5e402975144b4cbfc4ee0087149edf97a6aa"
+      "override": "8188d3b2ef2400a8b12ad67576b613a3ff840e661ff88e36fe05c5185445f599"
     },
     {
       "type": "AWS::MediaPackage::PackagingGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "18c936baccad85404952b2154a5642efaf84dc93237941e543b91a514be680c7"
+      "override": "c453b958960a297896dbb11bb417152ce54481c2e34ae19a07402bd601efe5ac"
     },
     {
       "type": "AWS::MediaPackageV2::ChannelGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "83e3483b31ece9ddfe66bce59b92248de7eb989ea15b9340e7b014d8bd6535b9"
+      "override": "14b7de8d7bf52272f1fd8e60cba6312471e1fba9070326239c1b8ffe7de35dc9"
     },
     {
       "type": "AWS::MediaTailor::Channel",
@@ -2052,256 +2042,256 @@
     {
       "type": "AWS::NetworkFirewall::ContainerAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2320c23f3133d238f9a4b89d8897ad18dfd426157f9382957ade349eed38fa94"
+      "override": "c839822a505cb172b4b6b892460776ddd4b0ead8ab603cf812b50f31c9547e8a"
     },
     {
       "type": "AWS::Notifications::EventRule",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "601dbb874f1e7e1a968aaaa7096eaf86363cd1d982b02e553190b4d9a50571c6"
+      "override": "e320799df4e44dae7d066cc7eacb8c42ee232dd3a2ce987be98e868dc052a7d7"
     },
     {
       "type": "AWS::Notifications::NotificationConfiguration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ca980bbde89908b5789cb7bce5ccf7dd534eba981710d4fefb11ab46f7bf105b"
+      "override": "44ff74ff7131ef654a9169de2f3f45dbc1ce4b00422f52f222231873f67758e7"
     },
     {
       "type": "AWS::NovaAct::WorkflowDefinition",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "af6dd3e811a8e995c57ed7eb3411e2bad0e07285e42b45f865e79545c493f849"
+      "override": "13de8a917bcfe7b70ba6e5505f873f357f2b4f28e15614033f220ded43fe0ea8"
     },
     {
       "type": "AWS::ODB::OdbNetwork",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "4372ad8c2ed4d373d6c3d472ebf98b18525ce005053531c22b532e85be847e67"
+      "override": "65599d5b196b19741698fafc0fb0bc5263d7d09ed79b067f5c3aafe420c0c748"
     },
     {
       "type": "AWS::ODB::OdbPeeringConnection",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "0a3b227c2385c50b97763c85a6cb79dc1702281b7827788828c7d0d957ffd125"
+      "override": "8daa44f16a880d73a97d3b657502abcfcba6ca9a18ec5a77643dca5a88188be4"
     },
     {
       "type": "AWS::Omics::Configuration",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "54f6ff3af6d30945c0c92a54b24388ae843651cfd5915a3324faed491bb2141f"
+      "override": "3d2f0e1547c142a68c941198c5c596e301556108413c3d5a7cf401320d0113ad"
     },
     {
       "type": "AWS::Omics::RunCache",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e30870b9b74548502a8e63017a07bbab040dc11976b23fc9127adcd3640b2872"
+      "override": "002c0dc741f8972f2dcde558fa805c0247be9a26b8b96b02d70f4b145686f512"
     },
     {
       "type": "AWS::Omics::RunGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "bd782e764d1580517d51c2d4b9c9614f7ca27aedaf7aada8e19838623069043f"
+      "override": "8bd15d666a290b3058b57a7368404cd50512942ae6659b289053ad15e7490064"
     },
     {
       "type": "AWS::Omics::Workflow",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "312a01b8e64a1d90064c56b26e9cf820f1df20eb32663fc2e899171eb455e861"
+      "override": "8195fbfa04f176c566b4766abeaa7be124dec86806f4d1c7aa824f077f61f2fd"
     },
     {
       "type": "AWS::OpenSearchServerless::SecurityConfig",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "66c1aa622f8daeb3c369453ecdf4948ceeacbb7e0d51702f8c1d6fe1611d1ca6"
+      "override": "ace314401dfd11aced02bfefb83328c58e856e3be4fea4c757532a7d771b4c72"
     },
     {
       "type": "AWS::Outposts::Outpost",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "612df13b81cbee43cf87e38c28cfa396a459979b339e9c80953fe6e08c6e4904"
+      "override": "d66f7f15b29fee0677215279a9146859062c6b62dda1c3effd0867c962708717"
     },
     {
       "type": "AWS::PCS::Cluster",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d4ca4f94296f6a1d6bd58c9fcd9a6db276f5dc248a76d8126d02ca70c4ff72e5"
+      "override": "464222997d3f1bc9ed1b613d161c90bdac5f45b9b7ccaee84f59cac9acdfcc40"
     },
     {
       "type": "AWS::PaymentCryptography::Alias",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a64752e17d733217b5c4c868b754d5a358c359b6958e08893b425a0f6a09b24b"
+      "override": "ec8bbfdac24df665c3f9d58947d2a318b7af0aef57efd4bb1bbe49258d154e13"
     },
     {
       "type": "AWS::Personalize::DatasetGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d24cb91ff24130df8e1db8d33c72ad278c7097e46ecab313331a5b6172ba4c89"
+      "override": "234c3a7c9ddcfb9e788738c339b850e766841e8d5a184bb49cec2f40e0564b63"
     },
     {
       "type": "AWS::Personalize::EventTracker",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8d1f4253a04f07e49fcc80ef1f271305cc8db1cf3462920b074f95c1e82570b7"
+      "override": "f3a58609f7e8dde70c13a9130122939a7c5a0fc45c7f5caeab6fe27726cbfb94"
     },
     {
       "type": "AWS::Personalize::Filter",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8553954627e74d85e71760ae2040e53549ba52670da5a737e4396a05f2d2a8ac"
+      "override": "b668161ef04b9f6731d885e4047efdae6e8522ceeba679882b26f5faab317e02"
     },
     {
       "type": "AWS::Personalize::Schema",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "630805c188dd0d3d9715397d86c6818422e7a3b4a1e8eb6d3fd3c0523228c9f7"
+      "override": "d6c019edf0631b4119dafec92c7ada95084a2b81763a9d4cad6f201d483a608a"
     },
     {
       "type": "AWS::Personalize::Solution",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c010bc5bc37b85d02e3cc7ba3525a85f5fdf87455f02ab293dc90ddb6997e90d"
+      "override": "6eaa5ab88e18bf5e21284fdc381478a0d4a78176b0da9294f59a13bbca9ab7a2"
     },
     {
       "type": "AWS::Pinpoint::InAppTemplate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b18017d1593f4bb723ac296e98e45001fc7e64a3b7a38ceecff853fa0b454450"
+      "override": "0c415c7b3a6327e83d3dd04ced00f410b57ac7256c596153323fba3353ede273"
     },
     {
       "type": "AWS::Pipes::Pipe",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "91c66149ed104caf2804a5d23850f52df0fc9941ad7620515635ddff98304220"
+      "override": "95e8753d50a1c7e1ddf5c1d99074f08fe1cc83b5cb0fbcd9e3471cd5374f528c"
     },
     {
       "type": "AWS::Proton::EnvironmentAccountConnection",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4e2f91f575f328bc9f7d52f61b7d878fe06c4f37ef8144d1fac77e481926c9af"
+      "override": "764040b2521df9d2caf14b1f6327daa1d888f71e996c95542fa5a0625db1bb37"
     },
     {
       "type": "AWS::Proton::EnvironmentTemplate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1b112850a6d57b2b9c89a6824f365ef791fc6ca7b55c26a1a3baee0ba876348b"
+      "override": "2043f2842acfab9f28b0175a9b1176b2132853ff125e4afbd112be0d8a638050"
     },
     {
       "type": "AWS::Proton::ServiceTemplate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3dc6735e2c2b626d613c7b92b32837d4d84b39f8b58532e52556b8d0b251c411"
+      "override": "c00f0b1b85301d2cc4c6a72c600e214e815e3de815f7f45c4d64d5d3627c7d49"
     },
     {
       "type": "AWS::QBusiness::Application",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6b2e3845ec49f0511d6494b1d2f56b157b68d4e274507b652807b4a02e145ba0"
+      "override": "58e9205bc47ea3dc127f6405e6731c097bebeef7453e89f528eae3be79748a22"
     },
     {
       "type": "AWS::RDS::DBClusterParameterGroup",
@@ -2342,144 +2332,144 @@
     {
       "type": "AWS::ResilienceHubV2::Policy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4ff2135132c140247081b57e034eb3971ce98aeae899b0b592c09b3a8625c88c"
+      "override": "191cfc2730db3b9fbd6ffbe63188c15f2e37b6072932f786768baafa6273f81b"
     },
     {
       "type": "AWS::ResilienceHubV2::System",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "85a81d8ef6d9dd8314df09e3abbfef9ba7109247653e1b732721cc960d3bed06"
+      "override": "c85154018822d2738ba72f1919c6c177aabcc6fd13df8deca947c82a88ddf439"
     },
     {
       "type": "AWS::RolesAnywhere::Profile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "377de0753d08963bcb0bd8827680b5916ac032554d1ad404b2deb0fd1ded644f"
+      "override": "a17638334c3814fbfdb3cf03b92e942538369fa2ef9c823d845fa4f4bbd3ca54"
     },
     {
       "type": "AWS::Route53Profiles::Profile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "70c4d796a847433128b0bf4cfa5c8b12009730441034d23e3312aaa4ebb7be9c"
+      "override": "b2a344e20e4835a948bee5b7c58b2d979fd214a5f5973097780602a57bf836e6"
     },
     {
       "type": "AWS::Route53Profiles::ProfileAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e04211049f1507f69788f0e7490ec634872dfdf359ad5e24f5bae1ddb1854c7a"
+      "override": "6a5752e8f6a9a2e4f3e363ebc2927029b02a7b970592716c6123290f18bfb0ef"
     },
     {
       "type": "AWS::Route53Profiles::ProfileResourceAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "fac2e2fb22bf51cf5932f114979028454cf561bb9e131303691d0e081d9c4107"
+      "override": "5ced5ab9be5796df1b18484403616b97bf67a107ec76231c4db4aaf50b62839f"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::Cell",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b827351cb903d1e5fcaa40e96995b2b26d1de4ef25a71ceed19dac901ffe627a"
+      "override": "965facedb69026cccc0f18b7e929da857a7ceb4791af7249971354ea0df3c00a"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::RecoveryGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a28254e5ea9574f32dc204c369d0ff5a2f35d31d71878acdf48537da34eeabc6"
+      "override": "f29d0bbf23680478846778ce634228c99adc3a509bcb8052556f5358f7dfe7cb"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::ResourceSet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "826284efed71be7a241e898efa2b022132fbce43536a34f4f757ede50f363d31"
+      "override": "92f362060bb344518474197840625bebc320d6aa195b0492b846433e766467da"
     },
     {
       "type": "AWS::Route53Resolver::FirewallDomainList",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "oracle-unavailable",
       "instances": 0,
       "compared": [],
       "note": "Cloud Control could not read any listed instance",
-      "override": "6a224ae35341c733972f4b860778b6be865279cdefb669161c2319731c35b6c2"
+      "override": "16eb4e937f66eeab6f45872b99c53a9110b4640491213c10b0ed77a8aa521297"
     },
     {
       "type": "AWS::Route53Resolver::FirewallRuleGroupAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5887c8513c80ac4653779b8fc63f179f4ea5f58d4f91e3fef1c2653af9f2ad50"
+      "override": "8797fd97b643eaa64b6af850b5e930e69f280fb812179cd11d83a987642a6468"
     },
     {
       "type": "AWS::Route53Resolver::OutpostResolver",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9b516e1ed48f89e1617b8298df81a20939017a7eecabb2c72565095526d84257"
+      "override": "d3608924ded9e84fad67a33846aa7e51155d6017d1ad1152060e7eb7b99d19e7"
     },
     {
       "type": "AWS::Route53Resolver::ResolverQueryLoggingConfig",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "068ee85cbe9885d1c26a5bf87f03cc7039e238d771e847855a30faeee727caf1"
+      "override": "3fddd0aea6ad636cd4c4051683a91af972a8dd1e2cc7dadd9ab3eff242344ba4"
     },
     {
       "type": "AWS::Route53Resolver::ResolverQueryLoggingConfigAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "84ca00c418c58d59c6f4237b91412b4a7ae167f586c12fd0f62e47a377fa8645"
+      "override": "0387aef8d4861cdeb49258e695ac42bef700251269fadea0c1862deb6405a5a4"
     },
     {
       "type": "AWS::S3::Bucket",
@@ -2534,62 +2524,62 @@
     {
       "type": "AWS::S3Vectors::VectorBucket",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "09fd5a6ba6ca8f03afaf3652ff8c87f46ecc2bce8c93e731fd80fe8823021241"
+      "override": "301b3e4ceee7bffeb04bde4644fe875f124133c7ec11c48147a407b2146649da"
     },
     {
       "type": "AWS::SES::ContactList",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "57cfb6dfebc974fdc5d1dd350253718ef1dfb71bb0addebfbdbb7e4db18bddcd"
+      "override": "16ad0f1b955fb6c92c3638843ae591b3c6d5bafc75ca89d4f37f173d8b8aeeb4"
     },
     {
       "type": "AWS::SES::CustomVerificationEmailTemplate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9e256f1dc31967bd77f4e1d05f37b1f82872bff4148591ad7c6677c5ae81770b"
+      "override": "cb3794f371b6440a028712ddee383864bca3991d399676310ff48dd12d254fef"
     },
     {
       "type": "AWS::SES::MailManagerAddressList",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "27e0f3a32112c2e9cbaccbdab8efff2ad396761c1c665adafa9f01e92174ba36"
+      "override": "a0c5018c160c76d742b2e87f422c86dd563c28d25ba8bd8ff2e5c6244ba96384"
     },
     {
       "type": "AWS::SES::MailManagerRuleSet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f5c01aa341505b50c411a53b43af8c0074efbd38729a42e5753dfc40066ad011"
+      "override": "c5b7a666e6024d6ebaec11b514d9b5634964e6bd84aa885690c76d0436c8b662"
     },
     {
       "type": "AWS::SES::MailManagerTrafficPolicy",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1282b07467be006d2f0428523a55fdb0f0cfe56a87ffad7319adabb32886d709"
+      "override": "c397588851b63d0a076bf7fb0095c960cbed2bceb5cc011a0f1ca100bda43183"
     },
     {
       "type": "AWS::SQS::Queue",
@@ -2622,22 +2612,22 @@
     {
       "type": "AWS::SSM::Association",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c22c3228791562407ae889aba66db69ab583483ed66388ee2b8e8eef11f3bb33"
+      "override": "a46279ac9c7fc06856463b1ba78b2269732a80d782626b8055e34306fa7f856d"
     },
     {
       "type": "AWS::SSM::MaintenanceWindow",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "98e11cc83a1dff3a8f44f0cd414c444249e27badf54396b44f7725b8968081b3"
+      "override": "ee648af6c22dd2373c98ddc430b06381cd323966981c78a68dded96fa8e673a5"
     },
     {
       "type": "AWS::SSM::Parameter",
@@ -2661,34 +2651,34 @@
     {
       "type": "AWS::SSM::ServiceSetting",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "26d92d2465776fbfc4daad996127ea167e59d68b3efb0a17ffe89518381dd063"
+      "override": "0484bc01a48d9af22314ce0afdd56977d1398f7017a3c5bc2142f01292f677d9"
     },
     {
       "type": "AWS::SSMQuickSetup::ConfigurationManager",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "fc301ceadc6bbdc67eac63d590a90c04a62bd8162016d54d1f3c0b9a3ac5c78d"
+      "override": "f2e346e48eb0a01a9cf92468a969785082abf89494621c0d97a420a80cf473b6"
     },
     {
       "type": "AWS::SSO::Application",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "be4846a474454b514628b22f539ae47afc4df5691b05f93535655da1ae01b2c2"
+      "override": "f3d67fa9eeebdebfde6c882ca86812dc792dd48db94c2d2e6cc7ce655ee54eb8"
     },
     {
       "type": "AWS::SSO::Instance",
@@ -2713,12 +2703,12 @@
     {
       "type": "AWS::SageMaker::ClusterSchedulerConfig",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5713168873e043eacb0de8ccb7fc206249caa2cb2632128a9d1545074390e134"
+      "override": "1f2abf04cab5c7844c9a25abc539f2e5205aae5bc1933d6ae8f7184d21acd3af"
     },
     {
       "type": "AWS::SageMaker::CodeRepository",
@@ -2733,53 +2723,53 @@
     {
       "type": "AWS::SageMaker::DeviceFleet",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: UnsupportedActionException",
-      "override": "b0e5038b7486080ab012e0254e326f8eec0384d8732343c0f4b9fe2edbcd93e7"
+      "override": "e7b3026917d896e509d63da90c70562ca7fed023de6c2c4bebf79455246e6a32"
     },
     {
       "type": "AWS::SageMaker::FeatureGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cfc3d72966698741cafdffe5c42cf7319eb69702925912b8da847754b1dc7717"
+      "override": "c7d858d1552ad2bfb88a3cca5163d5e2cc819b06b03f5a6c36ed5a383063244f"
     },
     {
       "type": "AWS::SageMaker::Hub",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "da9062aaa7e58823904d15aaf6c3f3ed09fd3d4306a2e75e1b13a3e09b372dbf"
+      "override": "53f885865e337a43ac697619a2957e564675b9db0fc3b7abbe9bfe27bc38abb1"
     },
     {
       "type": "AWS::SageMaker::HumanTaskUi",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2b02ce69a2517f8f849852582c8b273b2f3ec344c4ebb7691f4498b2809ebbf4"
+      "override": "5a6f32e867ed761ba2bf6051e28a63ab656bddad600d719c952012c05bd0a3fb"
     },
     {
       "type": "AWS::SageMaker::MlflowTrackingServer",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c6786d3a97813dd7f7edaf1d085906f6edfe3ff20f052194a0953b297d0b3453"
+      "override": "2a751fad5f0625a0f36d2beddbc43f4a24a5690caa2ba73dfff9c300b9924fc1"
     },
     {
       "type": "AWS::SageMaker::Model",
@@ -2814,12 +2804,12 @@
     {
       "type": "AWS::SageMaker::ProcessingJob",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5a8fe65d0725088fcd0b12dee7d319594f82688f5902a85f7eb57961c5895d65"
+      "override": "37f8bbf1db8501323d6e8ce68a467c601d2007d3b429dc68ae3c1990d48592f3"
     },
     {
       "type": "AWS::SageMaker::Project",
@@ -2834,37 +2824,37 @@
     {
       "type": "AWS::SageMaker::StudioLifecycleConfig",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ca2ffa66c701dcc1bb5e4ff604d19a151ac7854c9cb6afa976c6d341d81e5bf8"
+      "override": "a421cf697d3a2ba89a21d90e8427dda30b89b47f93358da018985f58cf6c1eb2"
     },
     {
       "type": "AWS::SageMaker::TrialComponent",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "12d2e2a9185d4653ce35b53cd9c37b61a3ba95fa4518dc9491abd538931576e0"
+      "override": "032cf4dbe787734b9800d4e542ef01f1bd591162ce50cb67d99b54bf267c8903"
     },
     {
       "type": "AWS::Scheduler::Schedule",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d2b3f40821773cfb70fb42972379c30f733eb762bb5307e2275caa1fd8c9ccdc"
+      "override": "8aee62f138bc17c015fbcbb08fbdb42b4edf190e0dcff89775b1795ac9ee9e36"
     },
     {
       "type": "AWS::Scheduler::ScheduleGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "differs",
       "instances": 1,
@@ -2876,7 +2866,7 @@
       "differing": [
         "Arn"
       ],
-      "override": "4ba5284ac22f533d7ee86f9ad10bf72d38abd59e3cc6f3222905ebfd1a9f1522"
+      "override": "1f38d8f1dcd1ad4bee9d3775e8d8a1f5b894523c6f4825a4db5d2cc0a133f397"
     },
     {
       "type": "AWS::SecretsManager::Secret",
@@ -2909,350 +2899,350 @@
     {
       "type": "AWS::SecurityHub::AggregatorV2",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AlreadyExistsException",
-      "override": "8a66e1209f1a2b1a70483b3e0e483eb8b144554405a48be21cd24159fa6c3053"
+      "override": "ed15dc2fc5d6a6f5bd5505120047bf30923fc37ad156c7329a37eb544aa87cdf"
     },
     {
       "type": "AWS::SecurityHub::FindingAggregator",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: ResourceNotFoundException",
-      "override": "3be936a07cc0c7b401b3b702d14934b43c673feb96b00f70e96bb291d123e185"
+      "override": "15d6c38d1f3bee3b205ee448d700401ae634a6b7801aa5eeead5448bee68fe8a"
     },
     {
       "type": "AWS::ServerlessRepo::Application",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d7c47dc77122be6fa19eb8698d70d2391297b185ddf7fed00e630f7283a08596"
+      "override": "e959ec0a9a987a7c7ce01948ae754df02f9ebce1714db2ae6fbee2979f543a09"
     },
     {
       "type": "AWS::ServiceCatalog::TagOption",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f819a4cc088ef3a79383cfd53dcfd6ea41d12a624acaede1e779ace83d1445d0"
+      "override": "2e54b09be527d8862bd80ef736373f75bbaf276aa0cae8964da31179176265d5"
     },
     {
       "type": "AWS::ServiceDiscovery::HttpNamespace",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1fac83dc5f81168621426e326a8ba511553cb5c9779a309b4f91472b43db0a0e"
+      "override": "bf212d0f08f79c4ca8c7c1fc1d50edcd587ed71faf2dffb2c956c33f4d0e44bc"
     },
     {
       "type": "AWS::Shield::ProtectionGroup",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: ResourceNotFoundException",
-      "override": "81c795aba7774a477a7562463444acec63ff1db225036e07fcaf3d34560f3a87"
+      "override": "5d4dd10fb145df0b49ded467a79b0f03418ea12a5187367ce6059307feedd7b1"
     },
     {
       "type": "AWS::Signer::SigningProfile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b26316d58746c2ff3644bccd1aae23b130750562f031359aa21beaeec7503047"
+      "override": "e8750f92c811dca9291d7adee0f89f372e25de50a736eb8cfdfd83317ffd4ca4"
     },
     {
       "type": "AWS::Timestream::InfluxDBCluster",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "de3405616fa52ab37518664190d3fc5f237c0597691df9df2b805f78b7cfdf1a"
+      "override": "2ec7ddbcdf022dd177169139f16552ca6d15a9b75d7476070adee8ec01b424b4"
     },
     {
       "type": "AWS::Timestream::InfluxDBInstance",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "01072c20c680449dec470396ea18cf44f4a6d0d7203a20ce6598afb36ee5b79d"
+      "override": "4786a73682a49bd62e528887929be7741551e32910f153b69abd9aab2641dad9"
     },
     {
       "type": "AWS::Transfer::Certificate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "01e0ac4ee7e5cccd072b5a896823233c23129eb7fa37625459b6cbc318234426"
+      "override": "445a08abaec68ad4478edbcb6c90c85a872a41f58b6ed3f147b3a4c52f5ffbb8"
     },
     {
       "type": "AWS::Transfer::Profile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e8bfb5467e8ec3a6a20c9b0a7d06b7cc1e1ecac051150a7d0c55e995f0bc3539"
+      "override": "6e6d7c87a1cb4edf240132b8e876948d7459a5370fa4c7a2cf87414ea763545c"
     },
     {
       "type": "AWS::Transfer::Server",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4e4d33a694a8f3c70005dfb4075508db9e89bc678d849459cf53d2a2df180f17"
+      "override": "e38a6f0676cad2294cdabea2c619068e569bf3ac04e0a0aa793645ecfb81f454"
     },
     {
       "type": "AWS::Transfer::Workflow",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "87a47744b20112bef2caf1ad16b9f4dae6ffbbfa5c7ef8ff3a6f3c1cc33ad757"
+      "override": "18472ab1e66dbbabf0a88767dc8a2591f8f9626192c4db488d991466f341f158"
     },
     {
       "type": "AWS::VerifiedPermissions::PolicyStoreAlias",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f74502b0d9ff642cda93ff4926ba0201f9562c7af5b119e5e201d7bdc7cb6398"
+      "override": "2aa8d94e9a79e08d6be12e0ff1ee441bd1658eb1e78d1e6bdd9a1c1400b17109"
     },
     {
       "type": "AWS::VoiceID::Domain",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "f11c50970ca93d0433366a6bcbcd06893bbd493a8442e81ffa3e660f41896869"
+      "override": "d4c802ed9473ca026c78e2f6a26372e7e69e39234cee00965cf1bdbb556bec56"
     },
     {
       "type": "AWS::VpcLattice::AccessLogSubscription",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "5c34eedb1936394e7eabd83dc3ba42bc79abd1e3829e0e0d4abadd8fca9c68f8"
+      "override": "0389cf7bef45e8a271bce1e358b5a785531f25753f30fc21b64af32fb205b389"
     },
     {
       "type": "AWS::VpcLattice::DomainVerification",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d1bf1c468827b3beed3c6a009f6771094f60f83a89dcff8c99de1638054e586e"
+      "override": "f544cf04ace4ea826fbbd027ee1844de3e22fd388a03e91567d7875a8d8031e5"
     },
     {
       "type": "AWS::VpcLattice::Service",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f981b14faa708e3ed35b73e8992a39cf75736a4d46b741c68feee3196ac6e2aa"
+      "override": "1b25d27be62c82a09843418da6d520c683d22b20869881c6e2d4cc33c0db2be9"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetwork",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4e943e2d979220b73bd5e1b7daec85e2737526a8dfc0ffffbb411f235fdf1c63"
+      "override": "55b9bd11252d70a8b6a31a4ca2d8b0cb2c5a96b181b730c8462cbfd6dc29614f"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkResourceAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "42b5002590e0f229839be2b0cd78d61da58f1e16e4a9b00e43d5e7566e9a5b3a"
+      "override": "f49a76b030dd5651e98d79e333b96218466ac1d8da380a1252e9c8631178132f"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkServiceAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "d2394c2c37efb10fcef56279a5b4355652bb6711975bd5efce9671d0954602b1"
+      "override": "75a689d41bdb56f7d3e390c2d41ffe62305d5421d8c81fa286cff00f01a77110"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkVpcAssociation",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "89415d4d1d387fca569550725cf0037579e5089d77cfa5f7388cf7f24b06e398"
+      "override": "56834ddd712d63f1af8e3811c5ecc9051052ea379c80cf38b903a662572de675"
     },
     {
       "type": "AWS::WellArchitected::AgentProfile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6ecaa0e402f7edcf3422c4cf702fe629dff77e6aedabe1142b4fd50c805581c1"
+      "override": "b4bd5b1cd46021bf2ea655fba2d77b02aacca3481d5d5f47f49b2c0ce0bedae5"
     },
     {
       "type": "AWS::WellArchitected::Profile",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4b269a89e322398b07ce0008518f73b74988dab0faa406ad4f3c47807120d20c"
+      "override": "7ac8489bb13e37e48246acf47913adf05c71f2dd88db8f7772753737499fba02"
     },
     {
       "type": "AWS::WellArchitected::ReviewTemplate",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a9ba4939cdac1ff56359045b36c5c0d68a47d1ea4b3b12b650ddfa02a39adfe6"
+      "override": "c1d82722772850ed2ce3701024710c7211cf11eb2002fde9f915cbb58178a58c"
     },
     {
       "type": "AWS::WellArchitected::Workload",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b2fe78835f0b93ae8caca4e82e428f6225ad7f4f57d86a27715d8d2facfba123"
+      "override": "613871d1d292d48cbc3f9acfcd2af27342fa1f7b3a59aa83df6cc22bd61a2682"
     },
     {
       "type": "AWS::Wickr::Network",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c1f9c73d45f3a4ce952929176f59186a4da87c0520d5be70f2994629ce758943"
+      "override": "083087089a42c9306b139a34db8a34de397c733acb2c2ee38c67129238e948ae"
     },
     {
       "type": "AWS::WorkSpacesWeb::BrowserSettings",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "57526ccfa82fac617069f79eaebf468574a023078c2845180b4e2fdb3e42b0e2"
+      "override": "f560b87ef7cb3c956dc7dc9e5b3bd9db170036dc1a3cd19957a9096eb4c9b2f4"
     },
     {
       "type": "AWS::WorkSpacesWeb::DataProtectionSettings",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2d4e8e2287b5538003a4d0e937cb8dd5acbc184af8c8f755a2d84785bd8d38d2"
+      "override": "ef9c7537efd18325175a4f8dc382fb42298cb95bcae06dbf22f3ecfec652e3d5"
     },
     {
       "type": "AWS::WorkSpacesWeb::IdentityProvider",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "unlisted",
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "597f467d133be782eb44778fa86f18c671b2b7139c2a424a6ce39e7484a1bef3"
+      "override": "471f8f0a07344ecd5815a1a3cf0248207d48b524e3fe5b59a054c85ef6c59e99"
     },
     {
       "type": "AWS::WorkSpacesWeb::IpAccessSettings",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1d701134d15f2a9d328f9f658b3f1958e3a815db58e375602a5aff51961763ad"
+      "override": "9129cf17f02fda6d0ef46975b541d2e4065355248c84318d333a180173418048"
     },
     {
       "type": "AWS::WorkSpacesWeb::NetworkSettings",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6f4ce10c07fa926d42bbb41649e7f486ffe37b9d475b326001febb3b88a7c9d7"
+      "override": "a3d24f3886c2f3f7faeec1f53208089d7741ceb24815876bd582d194bb513101"
     },
     {
       "type": "AWS::WorkSpacesWeb::UserAccessLoggingSettings",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cd016bd0dd730bbad03255dff580e0a8a4aaa31706e890afa415f25bd297a118"
+      "override": "7cf309b132bad8ada036fff83e00876cf1e5316c92e76f4ced1a30be772d17a0"
     },
     {
       "type": "AWS::WorkspacesInstances::WorkspaceInstance",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-09-25",
+      "date": "2026-10-06",
       "region": "us-east-1",
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cd5217f9115cd377ef60c0dc7bcbba6dee28ee9303e5bcf6907ec553c866396e"
+      "override": "04a227337c501f31e3a6313b327e8eade9153a54a563d5fe3144ce6dbcabd3aa"
     },
     {
       "type": "AWS::XRay::Group",

@@ -3,6 +3,7 @@ type: AWS::VoiceID::Domain
 read:
   model: voice-id/service/2021-09-27/voice-id-2021-09-27.json
   operation: DescribeDomain
+  absentErrors: [ResourceNotFoundException]
   identifier:
     DomainId: DomainId
   response: Domain

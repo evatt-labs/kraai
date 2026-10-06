@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "body"},
 			},
-			Response: []Step{{Name: "TagOptionDetail"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "TagOptionDetail"}},
 			Fields: []Field{
 				{Property: "Active", Member: "Active", Kind: "scalar"},
 				{Property: "Id", Member: "Id", Kind: "scalar"},

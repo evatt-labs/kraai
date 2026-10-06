@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ProfileId", Member: "profileId", Location: "label"},
 			},
-			Response: []Step{{Name: "profile"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "profile"}},
 			Fields: []Field{
 				{Property: "AcceptRoleSessionName", Member: "acceptRoleSessionName", Kind: "scalar"},
 				{Property: "AttributeMappings", Member: "attributeMappings", Kind: "list",

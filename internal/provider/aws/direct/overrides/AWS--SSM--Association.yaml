@@ -3,6 +3,7 @@ type: AWS::SSM::Association
 read:
   model: ssm/service/2014-11-06/ssm-2014-11-06.json
   operation: DescribeAssociation
+  absentErrors: [AssociationDoesNotExist]
   identifier:
     AssociationId: AssociationId
   response: AssociationDescription

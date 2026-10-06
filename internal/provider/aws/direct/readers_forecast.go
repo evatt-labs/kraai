@@ -13,6 +13,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DatasetGroupArn", Member: "DatasetGroupArn", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DatasetArns", Member: "DatasetArns", Kind: "list"},
 				{Property: "DatasetGroupArn", Member: "DatasetGroupArn", Kind: "scalar"},

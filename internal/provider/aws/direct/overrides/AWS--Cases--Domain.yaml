@@ -3,6 +3,7 @@ type: AWS::Cases::Domain
 read:
   model: connectcases/service/2022-10-03/connectcases-2022-10-03.json
   operation: GetDomain
+  absentErrors: [ResourceNotFoundException]
   identifier:
     DomainArn: domainId
 properties:

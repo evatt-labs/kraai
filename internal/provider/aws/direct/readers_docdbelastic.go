@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ClusterArn", Member: "clusterArn", Location: "label"},
 			},
-			Response: []Step{{Name: "cluster"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "cluster"}},
 			Fields: []Field{
 				{Property: "AdminUserName", Member: "adminUserName", Kind: "scalar"},
 				{Property: "AuthType", Member: "authType", Kind: "scalar"},
@@ -42,7 +43,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "SnapshotArn", Member: "snapshotArn", Location: "label"},
 			},
-			Response: []Step{{Name: "snapshot"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "snapshot"}},
 			Fields: []Field{
 				{Property: "AdminUserName", Member: "adminUserName", Kind: "scalar"},
 				{Property: "ClusterArn", Member: "clusterArn", Kind: "scalar"},

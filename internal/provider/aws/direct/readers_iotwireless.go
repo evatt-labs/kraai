@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -33,6 +34,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "Id", Member: "Id", Kind: "scalar"},
@@ -72,6 +74,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "ConfigurationName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -96,6 +99,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "Id", Member: "Id", Kind: "scalar"},

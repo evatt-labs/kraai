@@ -3,6 +3,7 @@ type: AWS::GlobalAccelerator::CrossAccountAttachment
 read:
   model: global-accelerator/service/2018-08-08/global-accelerator-2018-08-08.json
   operation: DescribeCrossAccountAttachment
+  absentErrors: [AttachmentNotFoundException]
   identifier:
     AttachmentArn: AttachmentArn
   response: CrossAccountAttachment

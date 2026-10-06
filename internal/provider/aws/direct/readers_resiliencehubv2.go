@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "PolicyArn", Member: "policyArn", Location: "query", Name: "policyArn"},
 			},
-			Response: []Step{{Name: "policy"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "policy"}},
 			Fields: []Field{
 				{Property: "AssociatedServiceCount", Member: "associatedServiceCount", Kind: "scalar"},
 				{Property: "AvailabilitySlo", Member: "availabilitySlo", Kind: "structure",
@@ -59,7 +60,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "SystemArn", Member: "systemArn", Location: "query", Name: "systemArn"},
 			},
-			Response: []Step{{Name: "system"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "system"}},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "Description", Member: "description", Kind: "scalar"},

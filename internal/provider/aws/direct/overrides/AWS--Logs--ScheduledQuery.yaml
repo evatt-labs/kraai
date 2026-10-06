@@ -3,6 +3,7 @@ type: AWS::Logs::ScheduledQuery
 read:
   model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
   operation: GetScheduledQuery
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ScheduledQueryArn: identifier
 properties:

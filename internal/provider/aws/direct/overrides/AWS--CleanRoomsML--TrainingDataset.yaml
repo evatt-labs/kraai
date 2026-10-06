@@ -3,6 +3,7 @@ type: AWS::CleanRoomsML::TrainingDataset
 read:
   model: cleanroomsml/service/2023-09-06/cleanroomsml-2023-09-06.json
   operation: GetTrainingDataset
+  absentErrors: [ResourceNotFoundException]
   identifier:
     TrainingDatasetArn: trainingDatasetArn
 properties:

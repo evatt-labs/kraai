@@ -3,6 +3,7 @@ type: AWS::SSO::Application
 read:
   model: sso-admin/service/2020-07-20/sso-admin-2020-07-20.json
   operation: DescribeApplication
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ApplicationArn: ApplicationArn
 properties:

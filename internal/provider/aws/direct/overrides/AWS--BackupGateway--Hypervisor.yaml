@@ -3,6 +3,7 @@ type: AWS::BackupGateway::Hypervisor
 read:
   model: backup-gateway/service/2021-01-01/backup-gateway-2021-01-01.json
   operation: GetHypervisor
+  absentErrors: [ResourceNotFoundException]
   identifier:
     HypervisorArn: HypervisorArn
   response: Hypervisor

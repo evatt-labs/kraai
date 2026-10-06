@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "PolicyArn", Member: "policyArn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "DefinitionHash", Member: "definitionHash", Kind: "scalar"},
@@ -36,7 +37,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ProjectArn", Member: "projectArn", Location: "label"},
 			},
-			Response: []Step{{Name: "project"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "project"}},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
 				{Property: "CustomOutputConfiguration", Member: "customOutputConfiguration", Kind: "structure",
@@ -308,6 +310,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "PromptRouterArn", Member: "promptRouterArn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "Description", Member: "description", Kind: "scalar"},
@@ -356,6 +359,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "SessionArn", Member: "sessionIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "EncryptionKeyArn", Member: "encryptionKeyArn", Kind: "scalar"},

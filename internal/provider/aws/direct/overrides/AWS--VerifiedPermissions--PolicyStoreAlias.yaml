@@ -3,6 +3,7 @@ type: AWS::VerifiedPermissions::PolicyStoreAlias
 read:
   model: verifiedpermissions/service/2021-12-01/verifiedpermissions-2021-12-01.json
   operation: GetPolicyStoreAlias
+  absentErrors: [ResourceNotFoundException]
   identifier:
     AliasName: aliasName
 properties:

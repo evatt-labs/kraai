@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ConfiguredModelAlgorithmArn", Member: "configuredModelAlgorithmArn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "ConfiguredModelAlgorithmArn", Member: "configuredModelAlgorithmArn", Kind: "scalar"},
 				{Property: "Description", Member: "description", Kind: "scalar"},
@@ -50,6 +51,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TrainingDatasetArn", Member: "trainingDatasetArn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Description", Member: "description", Kind: "scalar"},
 				{Property: "Name", Member: "name", Kind: "scalar"},

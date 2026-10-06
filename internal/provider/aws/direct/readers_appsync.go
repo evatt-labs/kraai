@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DomainName", Member: "domainName", Location: "label"},
 			},
-			Response: []Step{{Name: "domainNameConfig"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "domainNameConfig"}},
 			Fields: []Field{
 				{Property: "AppSyncDomainName", Member: "appsyncDomainName", Kind: "scalar"},
 				{Property: "CertificateArn", Member: "certificateArn", Kind: "scalar"},

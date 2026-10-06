@@ -3,6 +3,7 @@ type: AWS::CloudFormation::GeneratedTemplate
 read:
   model: cloudformation/service/2010-05-15/cloudformation-2010-05-15.json
   operation: DescribeGeneratedTemplate
+  absentErrors: [GeneratedTemplateNotFound]
   identifier:
     GeneratedTemplateId: GeneratedTemplateName
 properties:

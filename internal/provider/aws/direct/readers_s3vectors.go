@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "VectorBucketArn", Member: "vectorBucketArn", Location: "body"},
 			},
-			Response: []Step{{Name: "vectorBucket"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "vectorBucket"}},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
 				{Property: "EncryptionConfiguration", Member: "encryptionConfiguration", Kind: "structure",

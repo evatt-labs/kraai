@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "OdbNetworkArn", Member: "odbNetworkId", Location: "body"},
 			},
-			Response: []Step{{Name: "odbNetwork"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "odbNetwork"}},
 			Fields: []Field{
 				{Property: "AvailabilityZone", Member: "availabilityZone", Kind: "scalar"},
 				{Property: "AvailabilityZoneId", Member: "availabilityZoneId", Kind: "scalar"},
@@ -94,7 +95,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "OdbPeeringConnectionArn", Member: "odbPeeringConnectionId", Location: "body"},
 			},
-			Response: []Step{{Name: "odbPeeringConnection"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "odbPeeringConnection"}},
 			Fields: []Field{
 				{Property: "DisplayName", Member: "displayName", Kind: "scalar"},
 				{Property: "OdbNetworkArn", Member: "odbNetworkArn", Kind: "scalar"},

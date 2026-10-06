@@ -3,6 +3,7 @@ type: AWS::Lambda::CodeSigningConfig
 read:
   model: lambda/service/2015-03-31/lambda-2015-03-31.json
   operation: GetCodeSigningConfig
+  absentErrors: [ResourceNotFoundException]
   identifier:
     CodeSigningConfigArn: CodeSigningConfigArn
   response: CodeSigningConfig

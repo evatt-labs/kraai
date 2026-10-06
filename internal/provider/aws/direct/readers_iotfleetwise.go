@@ -13,6 +13,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "fleetId", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
@@ -31,6 +32,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "identifier", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},

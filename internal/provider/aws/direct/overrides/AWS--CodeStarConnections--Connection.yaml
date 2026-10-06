@@ -3,6 +3,7 @@ type: AWS::CodeStarConnections::Connection
 read:
   model: codestar-connections/service/2019-12-01/codestar-connections-2019-12-01.json
   operation: GetConnection
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ConnectionArn: ConnectionArn
   response: Connection

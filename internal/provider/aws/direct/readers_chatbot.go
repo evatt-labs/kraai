@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "CustomActionArn", Member: "CustomActionArn", Location: "body"},
 			},
-			Response: []Step{{Name: "CustomAction"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "CustomAction"}},
 			Fields: []Field{
 				{Property: "ActionName", Member: "ActionName", Kind: "scalar"},
 				{Property: "AliasName", Member: "AliasName", Kind: "scalar"},

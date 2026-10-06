@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "CertificateId", Member: "CertificateId", Location: "body"},
 			},
-			Response: []Step{{Name: "Certificate"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Certificate"}},
 			Fields: []Field{
 				{Property: "ActiveDate", Member: "ActiveDate", Kind: "timestamp"},
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
@@ -47,7 +48,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ProfileId", Member: "ProfileId", Location: "body"},
 			},
-			Response: []Step{{Name: "Profile"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Profile"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "As2Id", Member: "As2Id", Kind: "scalar"},
@@ -75,7 +77,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "ServerId", Value: "{Arn:arnName}"},
 			},
-			Response: []Step{{Name: "Server"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Server"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "As2ServiceManagedEgressIpAddresses", Member: "As2ServiceManagedEgressIpAddresses", Kind: "list"},
@@ -162,7 +165,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "WorkflowId", Member: "WorkflowId", Location: "body"},
 			},
-			Response: []Step{{Name: "Workflow"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Workflow"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},

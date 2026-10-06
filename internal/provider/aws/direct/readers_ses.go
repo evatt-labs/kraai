@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ContactListName", Member: "ContactListName", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "ContactListName", Member: "ContactListName", Kind: "scalar"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -45,6 +46,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TemplateName", Member: "TemplateName", Location: "form", Name: "TemplateName"},
 			},
+			AbsentErrors: []string{"CustomVerificationEmailTemplateDoesNotExist"},
 			Fields: []Field{
 				{Property: "FailureRedirectionURL", Member: "FailureRedirectionURL", Kind: "scalar", XMLName: "FailureRedirectionURL", Scalar: "string"},
 				{Property: "FromEmailAddress", Member: "FromEmailAddress", Kind: "scalar", XMLName: "FromEmailAddress", Scalar: "string"},
@@ -63,6 +65,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AddressListId", Member: "AddressListId", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AddressListArn", Member: "AddressListArn", Kind: "scalar"},
 				{Property: "AddressListId", Member: "AddressListId", Kind: "scalar"},
@@ -78,6 +81,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "RuleSetId", Member: "RuleSetId", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "RuleSetArn", Member: "RuleSetArn", Kind: "scalar"},
 				{Property: "RuleSetId", Member: "RuleSetId", Kind: "scalar"},
@@ -101,6 +105,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TrafficPolicyId", Member: "TrafficPolicyId", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DefaultAction", Member: "DefaultAction", Kind: "scalar"},
 				{Property: "MaxMessageSizeBytes", Member: "MaxMessageSizeBytes", Kind: "scalar"},

@@ -2,6 +2,7 @@ type: AWS::Bedrock::IntelligentPromptRouter
 read:
   model: bedrock/service/2023-04-20/bedrock-2023-04-20.json
   operation: GetPromptRouter
+  absentErrors: [ResourceNotFoundException]
   identifier:
     PromptRouterArn: promptRouterArn
 properties:

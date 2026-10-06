@@ -3,6 +3,7 @@ type: AWS::EventSchemas::Discoverer
 read:
   model: schemas/service/2019-12-02/schemas-2019-12-02.json
   operation: DescribeDiscoverer
+  absentErrors: [NotFoundException]
   identifier:
     DiscovererArn: DiscovererId
 properties:

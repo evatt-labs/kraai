@@ -3,6 +3,7 @@ type: AWS::Notifications::NotificationConfiguration
 read:
   model: notifications/service/2018-05-10/notifications-2018-05-10.json
   operation: GetNotificationConfiguration
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Arn: arn
 properties:

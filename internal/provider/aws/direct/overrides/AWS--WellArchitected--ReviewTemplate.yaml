@@ -3,6 +3,7 @@ type: AWS::WellArchitected::ReviewTemplate
 read:
   model: wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json
   operation: GetReviewTemplate
+  absentErrors: [ResourceNotFoundException]
   identifier:
     TemplateArn: TemplateArn
   response: ReviewTemplate

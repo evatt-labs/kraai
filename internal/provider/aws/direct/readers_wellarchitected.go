@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "profileArn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AggregationConfiguration", Member: "aggregationConfiguration", Kind: "list",
 					Fields: []Field{
@@ -53,7 +54,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ProfileArn", Member: "ProfileArn", Location: "label"},
 			},
-			Response: []Step{{Name: "Profile"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Profile"}},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "CreatedAt", Kind: "timestamp"},
 				{Property: "Owner", Member: "Owner", Kind: "scalar"},
@@ -80,7 +82,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TemplateArn", Member: "TemplateArn", Location: "label"},
 			},
-			Response: []Step{{Name: "ReviewTemplate"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ReviewTemplate"}},
 			Fields: []Field{
 				{Property: "Description", Member: "Description", Kind: "scalar"},
 				{Property: "Lenses", Member: "Lenses", Kind: "list"},
@@ -105,7 +108,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "label", Member: "WorkloadId", Value: "{WorkloadArn:arnName}"},
 			},
-			Response: []Step{{Name: "Workload"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Workload"}},
 			Fields: []Field{
 				{Property: "AccountIds", Member: "AccountIds", Kind: "list"},
 				{Property: "ArchitecturalDesign", Member: "ArchitecturalDesign", Kind: "scalar"},

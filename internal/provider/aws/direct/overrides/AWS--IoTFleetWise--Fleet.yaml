@@ -3,6 +3,7 @@ type: AWS::IoTFleetWise::Fleet
 read:
   model: iotfleetwise/service/2021-06-17/iotfleetwise-2021-06-17.json
   operation: GetFleet
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: fleetId
 properties:

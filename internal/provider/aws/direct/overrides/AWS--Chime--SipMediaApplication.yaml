@@ -3,6 +3,7 @@ type: AWS::Chime::SipMediaApplication
 read:
   model: chime-sdk-voice/service/2022-08-03/chime-sdk-voice-2022-08-03.json
   operation: GetSipMediaApplication
+  absentErrors: [NotFoundException]
   identifier:
     SipMediaApplicationArn: SipMediaApplicationId
   response: SipMediaApplication

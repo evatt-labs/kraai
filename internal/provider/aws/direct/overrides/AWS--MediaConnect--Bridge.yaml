@@ -3,6 +3,7 @@ type: AWS::MediaConnect::Bridge
 read:
   model: mediaconnect/service/2018-11-14/mediaconnect-2018-11-14.json
   operation: DescribeBridge
+  absentErrors: [NotFoundException]
   identifier:
     BridgeArn: BridgeArn
   response: Bridge

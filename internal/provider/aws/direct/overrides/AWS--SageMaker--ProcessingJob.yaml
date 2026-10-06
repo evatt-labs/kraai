@@ -3,6 +3,7 @@ type: AWS::SageMaker::ProcessingJob
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeProcessingJob
+  absentErrors: [ResourceNotFound]
   # The ProcessingJobName member refuses an ARN; arn:...:processing-job/name.
   input:
     ProcessingJobName: "{ProcessingJobArn:arnName}"

@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AliasName", Member: "AliasName", Location: "body"},
 			},
-			Response: []Step{{Name: "Alias"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Alias"}},
 			Fields: []Field{
 				{Property: "AliasName", Member: "AliasName", Kind: "scalar"},
 				{Property: "KeyArn", Member: "KeyArn", Kind: "scalar"},

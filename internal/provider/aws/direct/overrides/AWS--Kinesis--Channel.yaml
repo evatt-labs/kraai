@@ -3,6 +3,7 @@ type: AWS::Kinesis::Channel
 read:
   model: kinesis/service/2013-12-02/kinesis-2013-12-02.json
   operation: DescribeChannel
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ChannelARN: ChannelARN
   response: ChannelDescription
