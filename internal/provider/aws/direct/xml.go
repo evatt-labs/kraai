@@ -121,7 +121,10 @@ func (r Reader) readXML(body []byte, w *walk) (props, captured map[string]any, b
 			}
 		}
 		if token != nil && token.text != "" {
-			return nil, nil, false, errIncomplete(r.Type)
+			if !w.follow {
+				return nil, nil, false, errIncomplete(r.Type)
+			}
+			w.next = token.text
 		}
 	}
 	root := node

@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"slices"
 	"sort"
@@ -33,6 +34,7 @@ var s3Bodies = map[string]string{
 	"ownershipControls": `<OwnershipControls` + s3NS + `><Rule><ObjectOwnership>BucketOwnerPreferred</ObjectOwnership></Rule></OwnershipControls>`,
 	"publicAccessBlock": `<PublicAccessBlockConfiguration` + s3NS + `><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>false</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>false</RestrictPublicBuckets></PublicAccessBlockConfiguration>`,
 	"tagging":           `<Tagging` + s3NS + `><TagSet><Tag><Key>team</Key><Value>core</Value></Tag><Tag><Key>env</Key><Value>dev</Value></Tag></TagSet></Tagging>`,
+	"inventory":         `<ListInventoryConfigurationsResult` + s3NS + `><IsTruncated>false</IsTruncated></ListInventoryConfigurationsResult>`,
 	"logging":           `<BucketLoggingStatus` + s3NS + `><LoggingEnabled><TargetBucket>logs</TargetBucket><TargetPrefix>b/</TargetPrefix><TargetObjectKeyFormat><PartitionedPrefix><PartitionDateSource>EventTime</PartitionDateSource></PartitionedPrefix></TargetObjectKeyFormat></LoggingEnabled></BucketLoggingStatus>`,
 	"cors":              `<CORSConfiguration` + s3NS + `><CORSRule><ID>web</ID><AllowedHeader>*</AllowedHeader><AllowedHeader>x-amz-meta-a</AllowedHeader><AllowedMethod>GET</AllowedMethod><AllowedOrigin>https://example.com</AllowedOrigin><ExposeHeader>ETag</ExposeHeader><MaxAgeSeconds>3000</MaxAgeSeconds></CORSRule></CORSConfiguration>`,
 }
@@ -121,7 +123,7 @@ func TestReadS3Bucket(t *testing.T) {
 	}
 
 	empty := sha256.Sum256(nil)
-	wantQueries := []string{"abac=", "accelerate=", "cors=", "encryption=", "logging=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
+	wantQueries := []string{"abac=", "accelerate=", "cors=", "encryption=", "inventory=&x-id=ListBucketInventoryConfigurations", "logging=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
 	var queries []string
 	for _, r := range requests() {
 		queries = append(queries, r.query)
@@ -311,5 +313,107 @@ func TestTemplateRegions(t *testing.T) {
 		if got["WebsiteURL"] != want {
 			t.Errorf("%s: WebsiteURL = %v, want %s", region, got["WebsiteURL"], want)
 		}
+	}
+}
+
+// inventoryPage is one page of ListBucketInventoryConfigurations: one
+// configuration, and the next page's token when there is one.
+func inventoryPage(id, next string) string {
+	token := "<IsTruncated>false</IsTruncated>"
+	if next != "" {
+		token = "<IsTruncated>true</IsTruncated><NextContinuationToken>" + next + "</NextContinuationToken>"
+	}
+	return `<ListInventoryConfigurationsResult` + s3NS + `><InventoryConfiguration><Id>` + id + `</Id><IsEnabled>true</IsEnabled>` +
+		`<Destination><S3BucketDestination><AccountId>111122223333</AccountId><Bucket>arn:aws:s3:::dest</Bucket><Format>CSV</Format></S3BucketDestination></Destination>` +
+		`<Filter><Prefix>` + id + `/</Prefix></Filter><IncludedObjectVersions>All</IncludedObjectVersions><Schedule><Frequency>Daily</Frequency></Schedule></InventoryConfiguration>` +
+		token + `</ListInventoryConfigurationsResult>`
+}
+
+// pagedS3Client answers every bucket call as TestReadS3Bucket's does,
+// and the inventory list from pages by the continuation token asked for.
+func pagedS3Client(t *testing.T, pages map[string]string) (*Client, func() []s3Request) {
+	t.Helper()
+	var mu sync.Mutex
+	var seen []s3Request
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		seen = append(seen, s3Request{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, "", ""})
+		mu.Unlock()
+		q := r.URL.Query()
+		if q.Has("inventory") {
+			_, _ = io.WriteString(w, pages[q.Get("continuation-token")])
+			return
+		}
+		first := strings.TrimSuffix(strings.SplitN(r.URL.RawQuery, "&", 2)[0], "=")
+		if code, unset := s3Unset[first]; unset {
+			status, body := s3NotFound(code)
+			w.WriteHeader(status)
+			_, _ = io.WriteString(w, body)
+			return
+		}
+		_, _ = io.WriteString(w, s3Bodies[first])
+	}))
+	t.Cleanup(srv.Close)
+	client := &Client{
+		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region: "eu-west-1", RetryDelay: time.Millisecond,
+		Endpoint: func(string) string { return srv.URL },
+		Now:      func() time.Time { return time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC) },
+	}
+	return client, func() []s3Request {
+		mu.Lock()
+		defer mu.Unlock()
+		return append([]s3Request(nil), seen...)
+	}
+}
+
+// A declared page token is followed: each page's configurations join one
+// list, and the next call sends the token the last answer gave.
+func TestReadFollowsDeclaredPages(t *testing.T) {
+	client, requests := pagedS3Client(t, map[string]string{"": inventoryPage("first", "t1"), "t1": inventoryPage("second", "")})
+	got, err := client.Read(context.Background(), "AWS::S3::Bucket", map[string]string{"BucketName": "b"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	list, _ := got["InventoryConfigurations"].([]any)
+	var ids []any
+	for _, c := range list {
+		ids = append(ids, c.(map[string]any)["Id"])
+	}
+	if !reflect.DeepEqual(ids, []any{"first", "second"}) {
+		t.Fatalf("InventoryConfigurations ids = %v, want [first second]; read %v", ids, got["InventoryConfigurations"])
+	}
+	want := map[string]any{"Id": "first", "Enabled": true, "IncludedObjectVersions": "All", "Prefix": "first/", "ScheduleFrequency": "Daily",
+		"Destination": map[string]any{"BucketAccountId": "111122223333", "BucketArn": "arn:aws:s3:::dest", "Format": "CSV"}}
+	if !reflect.DeepEqual(list[0], want) {
+		t.Fatalf("first configuration = %v, want %v", list[0], want)
+	}
+	var tokens []string
+	for _, r := range requests() {
+		if v, _ := url.ParseQuery(r.query); v.Has("inventory") {
+			tokens = append(tokens, v.Get("continuation-token"))
+		}
+	}
+	if !reflect.DeepEqual(tokens, []string{"", "t1"}) {
+		t.Fatalf("inventory calls sent tokens %q, want none then t1", tokens)
+	}
+}
+
+// A page that answers a token already followed is refused, not read
+// forever.
+func TestReadRefusesARepeatedPageToken(t *testing.T) {
+	client, requests := pagedS3Client(t, map[string]string{"": inventoryPage("first", "t1"), "t1": inventoryPage("second", "t1")})
+	_, err := client.Read(context.Background(), "AWS::S3::Bucket", map[string]string{"BucketName": "b"})
+	if err == nil || !strings.Contains(err.Error(), `answered page token "t1" again`) {
+		t.Fatalf("Read = %v, want the repeated token refused", err)
+	}
+	calls := 0
+	for _, r := range requests() {
+		if v, _ := url.ParseQuery(r.query); v.Has("inventory") {
+			calls++
+		}
+	}
+	if calls != 2 {
+		t.Fatalf("%d inventory calls, want 2: the second answer repeats the token", calls)
 	}
 }

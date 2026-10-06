@@ -185,6 +185,7 @@ func (c *callCompiler) operation() {
 
 	// A paginated operation may answer a filtered read with an empty page
 	// and a token; that page is not proof of absence.
+	var outputToken string
 	if c.op.Traits["smithy.api#paginated"] != nil {
 		var page, own smithyPaginated
 		_ = json.Unmarshal(c.svc.Traits["smithy.api#paginated"], &page)
@@ -192,11 +193,31 @@ func (c *callCompiler) operation() {
 		if own.OutputToken != "" {
 			page.OutputToken = own.OutputToken
 		}
+		outputToken = page.OutputToken
+		if c.o.Read.Pages != nil {
+			c.fail("%s declares pages, but its model's pagination trait names its tokens", c.o.Read.Operation)
+		}
+	}
+	if p := c.o.Read.Pages; p != nil && outputToken == "" {
+		input := c.model.Shapes[ref(c.op.Input)]
+		m, ok := input.Members[p.Input]
+		switch {
+		case p.Input == "" || p.Output == "":
+			c.fail("pages names an input token %q and an output token %q; both are required", p.Input, p.Output)
+		case !ok:
+			c.fail("pages sends its token in %s, which %s's input does not have", p.Input, c.o.Read.Operation)
+		default:
+			b := bindInput(&c.model, c.r.Protocol, p.Input, m, "pages sends its token in", c.fail)
+			c.r.PageInput = &b
+			outputToken = p.Output
+		}
+	}
+	if outputToken != "" {
 		at := ref(c.op.Output)
-		for _, step := range strings.Split(page.OutputToken, ".") {
+		for _, step := range strings.Split(outputToken, ".") {
 			m, ok := c.model.Shapes[at].Members[step]
 			if !ok {
-				c.fail("%s's output token %s is not a member of its output", c.o.Read.Operation, page.OutputToken)
+				c.fail("%s's output token %s is not a member of its output", c.o.Read.Operation, outputToken)
 				c.r.PageToken = nil
 				break
 			}

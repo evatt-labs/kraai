@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"maps"
 	"net/http"
+	"reflect"
 	"slices"
 	"strings"
 	"sync"
@@ -180,12 +181,67 @@ type elementResult struct {
 // readCall makes one call of a read and translates its response, and
 // returns the values r captures from it and whether it is busy.
 func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]string) (props, captured map[string]any, busy bool, err error) {
+	if r.PageInput == nil {
+		props, captured, busy, _, err = c.readPage(ctx, r, identifier, "")
+		return props, captured, busy, err
+	}
+	// A declared page token is followed to the last page. Each page's
+	// lists are joined; anything else must read the same on every page.
+	seen := map[string]bool{}
+	var token string
+	for page := 0; ; page++ {
+		more, moreCaptured, moreBusy, next, err := c.readPage(ctx, r, identifier, token)
+		if err != nil {
+			return nil, nil, false, err
+		}
+		if page == 0 {
+			props, captured, busy = more, moreCaptured, moreBusy
+		} else if err := joinPage(props, more); err != nil {
+			return nil, nil, false, fmt.Errorf("the %s call %s: %w", r.Type, r.Action+r.Target+r.URI, err)
+		}
+		if next == "" {
+			return props, captured, busy, nil
+		}
+		if seen[next] || page >= maxPages {
+			return nil, nil, false, fmt.Errorf("the %s call %s answered page token %q again or past %d pages", r.Type, r.Action+r.Target+r.URI, next, maxPages)
+		}
+		seen[next], token = true, next
+	}
+}
+
+// maxPages bounds how many pages a read follows.
+const maxPages = 1000
+
+// joinPage adds a later page's properties to props: lists are joined, and
+// any other property must be absent from one page or equal on both.
+func joinPage(props, page map[string]any) error {
+	for name, v := range page {
+		prior, ok := props[name]
+		if !ok {
+			props[name] = v
+			continue
+		}
+		a, aList := prior.([]any)
+		b, bList := v.([]any)
+		switch {
+		case aList && bList:
+			props[name] = append(a, b...)
+		case !reflect.DeepEqual(prior, v):
+			return fmt.Errorf("pages answer %s differently", name)
+		}
+	}
+	return nil
+}
+
+// readPage makes one call of a read, with token as its page token when it
+// is not empty, and returns the next page's token, empty after the last.
+func (c *Client) readPage(ctx context.Context, r Reader, identifier map[string]string, token string) (props, captured map[string]any, busy bool, next string, err error) {
 	typeName := r.Type
 	values := make([]Binding, 0, len(r.Identifier)+len(r.Input))
 	for _, b := range r.Identifier {
 		value, ok := identifier[b.Property]
 		if !ok {
-			return nil, nil, false, fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
+			return nil, nil, false, "", fmt.Errorf("%s is read by %s, which the identifier does not give", r.Type, b.Property)
 		}
 		if b.Location == "placeholder" {
 			continue
@@ -197,7 +253,7 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		template := b.Value
 		b.Value = substitute(b.Value, identifier).(string)
 		if missing := placeholderName.FindStringSubmatch(b.Value); missing != nil {
-			return nil, nil, false, fmt.Errorf("the %s read did not return %s, which its call %s is addressed by", typeName, missing[1], r.Action+r.Target+r.URI)
+			return nil, nil, false, "", fmt.Errorf("the %s read did not return %s, which its call %s is addressed by", typeName, missing[1], r.Action+r.Target+r.URI)
 		}
 		if b.Structured != nil {
 			b.Structured = substitute(b.Structured, identifier)
@@ -208,26 +264,36 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		}
 		values = append(values, b)
 	}
+	if token != "" {
+		b := *r.PageInput
+		b.Value = token
+		values = append(values, b)
+	}
 	vars, err := c.templateVars(ctx, r, identifier)
 	if err != nil {
-		return nil, nil, false, err
+		return nil, nil, false, "", err
 	}
 	if isXML(r.Protocol) {
 		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
-			return nil, nil, false, c.absence(r.AbsentErrors, err)
+			return nil, nil, false, "", c.absence(r.AbsentErrors, err)
 		}
-		return r.readXML(body, &walk{vars: vars})
+		w := &walk{vars: vars, follow: r.PageInput != nil}
+		props, captured, busy, err := r.readXML(body, w)
+		return props, captured, busy, w.next, err
 	}
 	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
-		return nil, nil, false, c.absence(r.AbsentErrors, err)
+		return nil, nil, false, "", c.absence(r.AbsentErrors, err)
 	}
-	if token, _ := at(out, r.PageToken); len(r.PageToken) > 0 && token != nil && token != "" {
-		return nil, nil, false, errIncomplete(typeName)
+	w := &walk{vars: vars, follow: r.PageInput != nil}
+	if t, _ := at(out, r.PageToken); len(r.PageToken) > 0 && t != nil && t != "" {
+		if !w.follow {
+			return nil, nil, false, "", errIncomplete(typeName)
+		}
+		w.next = fmt.Sprint(t)
 	}
 	root, _ := out.(map[string]any)
-	w := &walk{vars: vars}
 	for _, step := range r.Response {
 		obj, _ := out.(map[string]any)
 		out = obj[step.Name]
@@ -240,17 +306,17 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 				})
 			}
 			if len(items) == 0 {
-				return nil, nil, false, ErrAbsent
+				return nil, nil, false, "", ErrAbsent
 			}
 			if len(items) != 1 {
-				return nil, nil, false, fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
+				return nil, nil, false, "", fmt.Errorf("the %s response lists %d instances at %s, want exactly the one read", typeName, len(items), step.Name)
 			}
 			out = items[0]
 		}
 	}
 	obj, ok := out.(map[string]any)
 	if !ok {
-		return nil, nil, false, fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
+		return nil, nil, false, "", fmt.Errorf("the %s response has no resource at %s", typeName, r.responsePath())
 	}
 	props, err = r.finish(func(fields []Field, fromRoot bool) map[string]any {
 		if fromRoot {
@@ -259,7 +325,7 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		return r.translate(w, obj, fields)
 	})
 	if err == nil && w.absent {
-		return nil, nil, false, ErrAbsent
+		return nil, nil, false, "", ErrAbsent
 	}
 	if err == nil {
 		captured = r.translate(w, obj, r.Capture)
@@ -272,9 +338,9 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 		err = errors.Join(w.errs...)
 	}
 	if err != nil {
-		return nil, nil, false, err
+		return nil, nil, false, "", err
 	}
-	return props, captured, busy, nil
+	return props, captured, busy, w.next, nil
 }
 
 // absence is err, or ErrAbsent when absent(codes, err).

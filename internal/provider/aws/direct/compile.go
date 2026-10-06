@@ -94,7 +94,7 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 		sub := Override{
 			Type: o.Type,
 			Read: Read{Model: o.Read.Model, Operation: call.Operation, Identifier: call.Identifier,
-				Response: call.Response, Input: call.Input, AbsentErrors: call.AbsentErrors},
+				Response: call.Response, Input: call.Input, AbsentErrors: call.AbsentErrors, Pages: call.Pages},
 			Properties:     call.Properties,
 			EndpointParams: o.EndpointParams,
 		}

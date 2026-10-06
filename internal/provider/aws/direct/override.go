@@ -79,6 +79,8 @@ type Call struct {
 	Identifier map[string]string  `yaml:"identifier,omitempty"`
 	Response   string             `yaml:"response,omitempty"`
 	Input      map[string]any     `yaml:"input,omitempty"`
+	// Pages is Read.Pages, for this call.
+	Pages *Pages `yaml:"pages,omitempty"`
 	Properties map[string]Mapping `yaml:"properties"`
 	// AbsentErrors names the error codes that mean the call has nothing to
 	// read, such as no resource policy set, and leaves its properties
@@ -102,6 +104,10 @@ type Read struct {
 	// Model is the model file's path under models/ in
 	// github.com/aws/api-models-aws.
 	Model string `yaml:"model"`
+	// Pages names the page token members of an operation that pages its
+	// answer but whose model declares no pagination, such as S3's
+	// ListBucketMetricsConfigurations; the read follows every page.
+	Pages *Pages `yaml:"pages,omitempty"`
 	// Operation is the operation's name within that model.
 	Operation string `yaml:"operation"`
 	// Identifier binds each primary identifier property to the input
@@ -432,4 +438,12 @@ type Tags struct {
 type Lifecycle struct {
 	Create map[string]any `yaml:"create"`
 	Update map[string]any `yaml:"update"`
+}
+
+// Pages is a paged operation's token members: Input, sent to ask for the
+// next page, and Output, the answer's token for it, a dotted path when
+// nested; no Output token means the last page.
+type Pages struct {
+	Input  string `yaml:"input"`
+	Output string `yaml:"output"`
 }

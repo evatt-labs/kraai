@@ -100,6 +100,10 @@ type Reader struct {
 	// those it must read as absent: the only readers a lookup may use in
 	// place of Cloud Control.
 	Production bool
+	// PageInput is the input a declared page token is sent in, to follow
+	// pages; with none, an answer carrying a token is refused as
+	// incomplete. See Read.Pages.
+	PageInput *Binding
 	// PageToken is the wire path to the output's page token when the
 	// operation is paginated: a response carrying one is incomplete.
 	PageToken []string

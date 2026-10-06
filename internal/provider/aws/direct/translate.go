@@ -286,6 +286,10 @@ type walk struct {
 	// absent is set when a document selection found no element: the
 	// instance is gone.
 	absent bool
+	// follow is set when the call's page token is followed, and next is
+	// the token an answer carried for the next page.
+	follow bool
+	next   string
 }
 
 // keeps reports whether a list element passes every match, reading each

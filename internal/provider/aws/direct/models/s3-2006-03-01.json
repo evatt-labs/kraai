@@ -97,6 +97,9 @@
         },
         {
           "target": "com.amazonaws.s3#GetPublicAccessBlock"
+        },
+        {
+          "target": "com.amazonaws.s3#ListBucketInventoryConfigurations"
         }
       ],
       "traits": {
@@ -25310,8 +25313,409 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#InventoryConfiguration": {
+      "members": {
+        "Destination": {
+          "target": "com.amazonaws.s3#InventoryDestination",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Filter": {
+          "target": "com.amazonaws.s3#InventoryFilter",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#InventoryId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "IncludedObjectVersions": {
+          "target": "com.amazonaws.s3#InventoryIncludedObjectVersions",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "IsEnabled": {
+          "target": "com.amazonaws.s3#IsEnabled",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OptionalFields": {
+          "target": "com.amazonaws.s3#InventoryOptionalFields",
+          "traits": {}
+        },
+        "Schedule": {
+          "target": "com.amazonaws.s3#InventorySchedule",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#InventoryConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.s3#InventoryConfiguration"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.s3#InventoryDestination": {
+      "members": {
+        "S3BucketDestination": {
+          "target": "com.amazonaws.s3#InventoryS3BucketDestination",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#InventoryEncryption": {
+      "members": {
+        "SSEKMS": {
+          "target": "com.amazonaws.s3#SSEKMS",
+          "traits": {
+            "smithy.api#xmlName": "SSE-KMS"
+          }
+        },
+        "SSES3": {
+          "target": "com.amazonaws.s3#SSES3",
+          "traits": {
+            "smithy.api#xmlName": "SSE-S3"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#InventoryFilter": {
+      "members": {
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#InventoryFormat": {
+      "members": {
+        "CSV": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CSV"
+          }
+        },
+        "ORC": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ORC"
+          }
+        },
+        "Parquet": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Parquet"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#InventoryFrequency": {
+      "members": {
+        "Daily": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Daily"
+          }
+        },
+        "Weekly": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Weekly"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#InventoryId": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#InventoryIncludedObjectVersions": {
+      "members": {
+        "All": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "All"
+          }
+        },
+        "Current": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Current"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#InventoryOptionalField": {
+      "members": {
+        "BucketKeyStatus": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "BucketKeyStatus"
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ChecksumAlgorithm"
+          }
+        },
+        "ETag": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ETag"
+          }
+        },
+        "EncryptionStatus": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EncryptionStatus"
+          }
+        },
+        "IntelligentTieringAccessTier": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IntelligentTieringAccessTier"
+          }
+        },
+        "IsMultipartUploaded": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "IsMultipartUploaded"
+          }
+        },
+        "LastModifiedDate": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LastModifiedDate"
+          }
+        },
+        "LifecycleExpirationDate": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LifecycleExpirationDate"
+          }
+        },
+        "ObjectAccessControlList": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ObjectAccessControlList"
+          }
+        },
+        "ObjectLockEventHoldDuration": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ObjectLockEventHoldDuration"
+          }
+        },
+        "ObjectLockEventHoldStatus": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ObjectLockEventHoldStatus"
+          }
+        },
+        "ObjectLockLegalHoldStatus": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ObjectLockLegalHoldStatus"
+          }
+        },
+        "ObjectLockMode": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ObjectLockMode"
+          }
+        },
+        "ObjectLockRetainUntilDate": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ObjectLockRetainUntilDate"
+          }
+        },
+        "ObjectOwner": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ObjectOwner"
+          }
+        },
+        "ReplicationStatus": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ReplicationStatus"
+          }
+        },
+        "Size": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Size"
+          }
+        },
+        "StorageClass": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "StorageClass"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#InventoryOptionalFields": {
+      "member": {
+        "target": "com.amazonaws.s3#InventoryOptionalField",
+        "traits": {
+          "smithy.api#xmlName": "Field"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.s3#InventoryS3BucketDestination": {
+      "members": {
+        "AccountId": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {}
+        },
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Encryption": {
+          "target": "com.amazonaws.s3#InventoryEncryption",
+          "traits": {}
+        },
+        "Format": {
+          "target": "com.amazonaws.s3#InventoryFormat",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#InventorySchedule": {
+      "members": {
+        "Frequency": {
+          "target": "com.amazonaws.s3#InventoryFrequency",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#IsEnabled": {
+      "type": "boolean"
+    },
+    "com.amazonaws.s3#IsTruncated": {
+      "type": "boolean"
+    },
     "com.amazonaws.s3#KeyPrefixEquals": {
       "type": "string"
+    },
+    "com.amazonaws.s3#ListBucketInventoryConfigurations": {
+      "input": {
+        "target": "com.amazonaws.s3#ListBucketInventoryConfigurationsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#ListBucketInventoryConfigurationsOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?inventory&x-id=ListBucketInventoryConfigurations"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#ListBucketInventoryConfigurationsOutput": {
+      "members": {
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {}
+        },
+        "InventoryConfigurationList": {
+          "target": "com.amazonaws.s3#InventoryConfigurationList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "InventoryConfiguration"
+          }
+        },
+        "IsTruncated": {
+          "target": "com.amazonaws.s3#IsTruncated",
+          "traits": {}
+        },
+        "NextContinuationToken": {
+          "target": "com.amazonaws.s3#NextToken",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#xmlName": "ListInventoryConfigurationsResult"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#ListBucketInventoryConfigurationsRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {
+            "smithy.api#httpQuery": "continuation-token"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
     },
     "com.amazonaws.s3#LoggingEnabled": {
       "members": {
@@ -25394,6 +25798,9 @@
     },
     "com.amazonaws.s3#Minutes": {
       "type": "integer"
+    },
+    "com.amazonaws.s3#NextToken": {
+      "type": "string"
     },
     "com.amazonaws.s3#NoSuchAnnotation": {
       "members": {},
@@ -25960,11 +26367,32 @@
       },
       "type": "list"
     },
+    "com.amazonaws.s3#SSEKMS": {
+      "members": {
+        "KeyId": {
+          "target": "com.amazonaws.s3#SSEKMSKeyId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#xmlName": "SSE-KMS"
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3#SSEKMSKeyId": {
       "traits": {
         "smithy.api#sensitive": {}
       },
       "type": "string"
+    },
+    "com.amazonaws.s3#SSES3": {
+      "members": {},
+      "traits": {
+        "smithy.api#xmlName": "SSE-S3"
+      },
+      "type": "structure"
     },
     "com.amazonaws.s3#ServerSideEncryption": {
       "members": {
@@ -26283,6 +26711,9 @@
       "type": "structure"
     },
     "com.amazonaws.s3#TargetPrefix": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#Token": {
       "type": "string"
     },
     "com.amazonaws.s3#TooManyParts": {

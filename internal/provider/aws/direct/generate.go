@@ -150,6 +150,10 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if r.PageInput != nil {
+		b.WriteString("PageInput: &")
+		binding(b, *r.PageInput)
+	}
 	if len(r.PageToken) > 0 {
 		fmt.Fprintf(b, "PageToken: %#v,\n", r.PageToken)
 	}

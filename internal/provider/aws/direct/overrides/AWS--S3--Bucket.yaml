@@ -287,10 +287,34 @@ also:
                     properties:
                       Status: Status
               Status: Status
+  - operation: ListBucketInventoryConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    # The model declares no pagination; S3 pages at 100 configurations.
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      InventoryConfigurations:
+        member: InventoryConfigurationList
+        properties:
+          Id: Id
+          Enabled: IsEnabled
+          IncludedObjectVersions: IncludedObjectVersions
+          OptionalFields: OptionalFields
+          Prefix: Filter.Prefix
+          ScheduleFrequency: Schedule.Frequency
+          Destination:
+            member: Destination.S3BucketDestination
+            properties:
+              BucketAccountId: AccountId
+              BucketArn: Bucket
+              Format: Format
+              Prefix: Prefix
 skip:
   AnalyticsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
   IntelligentTieringConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
-  InventoryConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
   MetricsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
   LifecycleConfiguration: the API nests each rule's prefix, tags and size bounds in a Filter and its expiration in Expiration, which the schema flattens; not mapped
   MetadataConfiguration: GetBucketMetadataConfiguration returns its tables in a result shape not mapped here, and its V1 counterpart is refused for accounts on the V2 API
