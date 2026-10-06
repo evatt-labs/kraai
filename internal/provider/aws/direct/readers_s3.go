@@ -9,6 +9,7 @@ func init() {
 			Protocol:              "restXml",
 			SigningName:           "s3",
 			Complete:              true,
+			Production:            true,
 			Host:                  "s3.{region}.amazonaws.com",
 			DisableDoubleEncoding: true,
 			Method:                "GET",
@@ -867,6 +868,7 @@ func init() {
 					},
 				},
 			},
+			Mutable: true,
 		},
 	})
 }

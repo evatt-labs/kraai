@@ -771,7 +771,7 @@ lifecycle:
     NotificationConfiguration:
       EventBridgeConfiguration: {EventBridgeEnabled: true}
       TopicConfigurations:
-        - {Event: "s3:ObjectCreated:*", Topic: "{topicArn}", Filter: {S3Key: {Rules: [{Name: prefix, Value: in/}]}}}
+        - {Event: "s3:ObjectCreated:*", Topic: "{topicArn}", Filter: {S3Key: {Rules: [{Name: Prefix, Value: in/}]}}}
         - {Event: "s3:ObjectRemoved:*", Topic: "{topicArn}"}
     ReplicationConfiguration:
       Role: "{replicationRoleArn}"

@@ -197,11 +197,11 @@ func withoutOffPresences(r Reader, want map[string]any) map[string]any {
 // dropOffPresences is v, a value of f, without the presences in it set
 // false: whether to keep v at all, and whether anything was dropped.
 func dropOffPresences(f Field, v any) (out any, keep, changed bool) {
-	switch {
-	case f.Kind == "presence":
+	switch f.Kind {
+	case "presence":
 		on, _ := v.(bool)
 		return v, on, !on
-	case f.Kind == "structure":
+	case "structure":
 		props, ok := v.(map[string]any)
 		if !ok {
 			return v, true, false
