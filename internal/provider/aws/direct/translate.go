@@ -31,8 +31,7 @@ func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[strin
 			continue
 		}
 		if f.Kind == "template" {
-			// Built only when every part is known.
-			if v := substitute(f.Member, w.vars).(string); !placeholderName.MatchString(v) {
+			if v, ok := renderTemplate(f, w.vars); ok {
 				out[f.Property] = v
 			}
 			continue
@@ -329,4 +328,15 @@ func memberAt(obj map[string]any, path string) any {
 		v = m[name]
 	}
 	return v
+}
+
+// renderTemplate builds a template field from vars, in the form for the
+// region vars names; only when every part is known.
+func renderTemplate(f Field, vars map[string]string) (string, bool) {
+	tmpl := f.Member
+	if regional, ok := f.Regions[vars[regionPlaceholder]]; ok {
+		tmpl = regional
+	}
+	v := substitute(tmpl, vars).(string)
+	return v, !placeholderName.MatchString(v)
 }

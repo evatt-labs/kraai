@@ -17,12 +17,17 @@ func init() {
 			},
 			AbsentErrors: []string{"NoSuchBucket"},
 			Fields: []Field{
+				{Property: "Arn", Member: "arn:aws:s3:::{BucketName}", Kind: "template"},
 				{Property: "BucketName", Member: "BucketName", Kind: "identifier"},
+				{Property: "DomainName", Member: "{BucketName}.s3.amazonaws.com", Kind: "template"},
+				{Property: "DualStackDomainName", Member: "{BucketName}.s3.dualstack.{region}.amazonaws.com", Kind: "template"},
+				{Property: "RegionalDomainName", Member: "{BucketName}.s3.{region}.amazonaws.com", Kind: "template"},
 				{Property: "VersioningConfiguration", Member: ".", Kind: "structure",
 					Fields: []Field{
 						{Property: "Status", Member: "Status", Kind: "scalar", XMLName: "Status", Scalar: "string"},
 					},
 				},
+				{Property: "WebsiteURL", Member: "http://{BucketName}.s3-website.{region}.amazonaws.com", Kind: "template", Regions: map[string]string{"ap-northeast-1": "http://{BucketName}.s3-website-{region}.amazonaws.com", "ap-southeast-1": "http://{BucketName}.s3-website-{region}.amazonaws.com", "ap-southeast-2": "http://{BucketName}.s3-website-{region}.amazonaws.com", "eu-west-1": "http://{BucketName}.s3-website-{region}.amazonaws.com", "sa-east-1": "http://{BucketName}.s3-website-{region}.amazonaws.com", "us-east-1": "http://{BucketName}.s3-website-{region}.amazonaws.com", "us-west-1": "http://{BucketName}.s3-website-{region}.amazonaws.com", "us-west-2": "http://{BucketName}.s3-website-{region}.amazonaws.com"}},
 			},
 			AbsentIDs:            []string{"kraai-absent-probe-{account}-{region}"},
 			UndeclaredReadErrors: []string{"NoSuchCORSConfiguration", "NoSuchPublicAccessBlockConfiguration", "NoSuchTagSet", "NoSuchWebsiteConfiguration", "ObjectLockConfigurationNotFoundError", "OwnershipControlsNotFoundError", "ReplicationConfigurationNotFoundError"},

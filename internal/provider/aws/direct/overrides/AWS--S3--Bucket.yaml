@@ -15,6 +15,27 @@ absentIds:
   - kraai-absent-probe-{account}-{region}
 properties:
   BucketName: '{BucketName}'
+  # No S3 call returns these; Cloud Control builds them from the name and
+  # the bucket's region, which a read at this endpoint is in.
+  Arn: 'arn:aws:s3:::{BucketName}'
+  DomainName: '{BucketName}.s3.amazonaws.com'
+  RegionalDomainName: '{BucketName}.s3.{region}.amazonaws.com'
+  DualStackDomainName: '{BucketName}.s3.dualstack.{region}.amazonaws.com'
+  # Website endpoints are s3-website.REGION, except in the regions below,
+  # which keep the older s3-website-REGION form: the "Amazon S3 website
+  # endpoints" table of https://docs.aws.amazon.com/general/latest/gr/s3.html,
+  # read 2026-10-05.
+  WebsiteURL:
+    member: 'http://{BucketName}.s3-website.{region}.amazonaws.com'
+    regions:
+      ap-northeast-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      ap-southeast-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      ap-southeast-2: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      eu-west-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      sa-east-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      us-east-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      us-west-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      us-west-2: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
   VersioningConfiguration:
     member: .
     properties:
@@ -267,11 +288,6 @@ also:
                       Status: Status
               Status: Status
 skip:
-  Arn: no S3 call returns it; Cloud Control builds it from the bucket name
-  DomainName: no S3 call returns it; Cloud Control builds it from the bucket name
-  DualStackDomainName: no S3 call returns it; Cloud Control builds it from the bucket name and region
-  RegionalDomainName: no S3 call returns it; Cloud Control builds it from the bucket name and region
-  WebsiteURL: no S3 call returns it; Cloud Control builds it from the bucket name and region
   AnalyticsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
   IntelligentTieringConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
   InventoryConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations

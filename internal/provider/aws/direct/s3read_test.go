@@ -89,6 +89,11 @@ func TestReadS3Bucket(t *testing.T) {
 	var want map[string]any
 	if err := json.Unmarshal([]byte(`{
 		"BucketName": "my.bucket/x",
+		"Arn": "arn:aws:s3:::my.bucket/x",
+		"DomainName": "my.bucket/x.s3.amazonaws.com",
+		"RegionalDomainName": "my.bucket/x.s3.eu-west-1.amazonaws.com",
+		"DualStackDomainName": "my.bucket/x.s3.dualstack.eu-west-1.amazonaws.com",
+		"WebsiteURL": "http://my.bucket/x.s3-website-eu-west-1.amazonaws.com",
 		"VersioningConfiguration": {"Status": "Enabled"},
 		"AccelerateConfiguration": {"AccelerationStatus": "Suspended"},
 		"AbacStatus": "Enabled",
@@ -285,5 +290,26 @@ func TestS3EndpointParamsAreChecked(t *testing.T) {
 				t.Fatalf("errors = %s, want %q", got, c.refused)
 			}
 		})
+	}
+}
+
+// A template's form follows the region: S3's website endpoint keeps a dash
+// in the oldest regions and takes a dot in the rest.
+func TestTemplateRegions(t *testing.T) {
+	r := readers["AWS::S3::Bucket"]
+	i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == "WebsiteURL" })
+	if i < 0 {
+		t.Fatal("no WebsiteURL field")
+	}
+	for region, want := range map[string]string{
+		"us-east-1": "http://b.s3-website-us-east-1.amazonaws.com",
+		"us-east-2": "http://b.s3-website.us-east-2.amazonaws.com",
+		"eu-west-1": "http://b.s3-website-eu-west-1.amazonaws.com",
+		"eu-west-2": "http://b.s3-website.eu-west-2.amazonaws.com",
+	} {
+		got := r.translate(&walk{vars: map[string]string{"region": region, "BucketName": "b"}}, map[string]any{}, r.Fields[i:i+1])
+		if got["WebsiteURL"] != want {
+			t.Errorf("%s: WebsiteURL = %v, want %s", region, got["WebsiteURL"], want)
+		}
 	}
 }

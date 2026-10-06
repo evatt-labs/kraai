@@ -50,8 +50,16 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			if !schema.types(props[name])["string"] {
 				fail("%s%s is built from %s, but the schema does not type it a string", at, name, mapping.Member)
 			}
-			fields = append(fields, Field{Property: name, Member: mapping.Member, Kind: "template"})
+			for region, tmpl := range mapping.Regions {
+				if !slices.Equal(placeholders(tmpl), placeholders(mapping.Member)) {
+					fail("%s%s is built in %s from %s, which names other values than %s", at, name, region, tmpl, mapping.Member)
+				}
+			}
+			fields = append(fields, Field{Property: name, Member: mapping.Member, Regions: mapping.Regions, Kind: "template"})
 			continue
+		}
+		if len(mapping.Regions) > 0 {
+			fail("%s%s names regions, but %s is not a template", at, name, mapping.Member)
 		}
 		if id, ok := strings.CutPrefix(mapping.Member, "{"); ok && strings.HasSuffix(id, "}") {
 			if !schema.types(props[name])["string"] {

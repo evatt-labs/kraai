@@ -177,6 +177,12 @@ func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 			}
 			continue
 		}
+		if f.Kind == "template" {
+			if v, ok := renderTemplate(f, w.vars); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
 		holders, projected := []*xmlNode{n}, false
 		for _, step := range f.Via {
 			var next []*xmlNode

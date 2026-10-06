@@ -194,6 +194,9 @@ type Binding struct {
 type Field struct {
 	Property string
 	Member   string
+	// Regions is a template's form for each region it differs in; see
+	// Mapping.Regions.
+	Regions map[string]string
 	// Via is the path on the wire from the enclosing structure to the one
 	// holding Member, for a property the API wraps, such as a list inside
 	// a Quantity and Items structure. A list step reads Member from every

@@ -168,7 +168,11 @@ type List struct {
 // member of the operation's whole output with a leading "$.", for a value
 // the output carries beside the resource, such as its tags.
 type Mapping struct {
-	Member     string             `yaml:"member"`
+	Member string `yaml:"member"`
+	// Regions is, for a template member, the template for each region
+	// whose form differs, such as S3 website URLs, s3-website-REGION in
+	// the oldest regions and s3-website.REGION in the rest.
+	Regions    map[string]string  `yaml:"regions,omitempty"`
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
 	Skip       map[string]string  `yaml:"skip,omitempty"`
 	// Transform names a function applied to the value read: arnResource,

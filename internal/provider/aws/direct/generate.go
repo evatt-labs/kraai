@@ -325,6 +325,10 @@ func fields(b *bytes.Buffer, fs []Field) {
 // where the context does not already give the type.
 func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	fmt.Fprintf(b, "%s{Property: %q, Member: %q, Kind: %q", typeName, f.Property, f.Member, f.Kind)
+	if len(f.Regions) > 0 {
+		// fmt writes a map's keys sorted, so the output is the same each run.
+		fmt.Fprintf(b, ", Regions: %#v", f.Regions)
+	}
 	if len(f.Via) > 0 {
 		b.WriteString(", Via: []Step{")
 		for _, st := range f.Via {
