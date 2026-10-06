@@ -187,6 +187,8 @@ func (c *Client) readCall(ctx context.Context, r Reader, identifier map[string]s
 	}
 	// A declared page token is followed to the last page. Each page's
 	// lists are joined; anything else must read the same on every page.
+	// Captures and busy conditions are the first page's: a paged call is a
+	// further call listing configurations, which captures nothing.
 	seen := map[string]bool{}
 	var token string
 	for page := 0; ; page++ {
