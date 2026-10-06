@@ -3,6 +3,7 @@ type: AWS::Events::Endpoint
 read:
   model: eventbridge/service/2015-10-07/eventbridge-2015-10-07.json
   operation: DescribeEndpoint
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Name: Name
 properties:

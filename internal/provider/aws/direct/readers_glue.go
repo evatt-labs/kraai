@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "body"},
 			},
+			AbsentErrors: []string{"EntityNotFoundException"},
 			Fields: []Field{
 				{Property: "ContextWords", Member: "ContextWords", Kind: "list"},
 				{Property: "Name", Member: "Name", Kind: "scalar"},

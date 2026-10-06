@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DiscovererArn", Member: "DiscovererId", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "CrossAccount", Member: "CrossAccount", Kind: "scalar"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -33,6 +34,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "RegistryArn", Member: "RegistryName", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Description", Member: "Description", Kind: "scalar"},
 				{Property: "RegistryArn", Member: "RegistryArn", Kind: "scalar"},

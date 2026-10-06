@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ProcurementPortalPreferenceArn", Member: "ProcurementPortalPreferenceArn", Location: "body"},
 			},
-			Response: []Step{{Name: "ProcurementPortalPreference"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ProcurementPortalPreference"}},
 			Fields: []Field{
 				{Property: "AwsAccountId", Member: "AwsAccountId", Kind: "scalar"},
 				{Property: "BuyerDomain", Member: "BuyerDomain", Kind: "scalar"},

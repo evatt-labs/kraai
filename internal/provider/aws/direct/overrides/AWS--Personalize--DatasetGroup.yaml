@@ -3,6 +3,7 @@ type: AWS::Personalize::DatasetGroup
 read:
   model: personalize/service/2018-05-22/personalize-2018-05-22.json
   operation: DescribeDatasetGroup
+  absentErrors: [ResourceNotFoundException]
   identifier:
     DatasetGroupArn: datasetGroupArn
   response: datasetGroup

@@ -3,6 +3,7 @@ type: AWS::AppRunner::VpcConnector
 read:
   model: apprunner/service/2020-05-15/apprunner-2020-05-15.json
   operation: DescribeVpcConnector
+  absentErrors: [ResourceNotFoundException]
   identifier:
     VpcConnectorArn: VpcConnectorArn
   response: VpcConnector

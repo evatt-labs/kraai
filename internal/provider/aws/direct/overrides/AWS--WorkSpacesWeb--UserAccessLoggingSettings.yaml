@@ -3,6 +3,7 @@ type: AWS::WorkSpacesWeb::UserAccessLoggingSettings
 read:
   model: workspaces-web/service/2020-07-08/workspaces-web-2020-07-08.json
   operation: GetUserAccessLoggingSettings
+  absentErrors: [ResourceNotFoundException]
   identifier:
     UserAccessLoggingSettingsArn: userAccessLoggingSettingsArn
   response: userAccessLoggingSettings

@@ -17,6 +17,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "networkMigrationDefinitionID", Value: "{Arn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},

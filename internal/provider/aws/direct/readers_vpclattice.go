@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "accessLogSubscriptionIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "DestinationArn", Member: "destinationArn", Kind: "scalar"},
@@ -33,6 +34,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "domainVerificationIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "DomainName", Member: "domainName", Kind: "scalar"},
@@ -56,6 +58,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "serviceIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "AuthType", Member: "authType", Kind: "scalar"},
@@ -85,6 +88,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "serviceNetworkIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "AuthType", Member: "authType", Kind: "scalar"},
@@ -109,6 +113,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "serviceNetworkResourceAssociationIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Id", Member: "id", Kind: "scalar"},
@@ -127,6 +132,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "serviceNetworkServiceAssociationIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
@@ -156,6 +162,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "serviceNetworkVpcAssociationIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},

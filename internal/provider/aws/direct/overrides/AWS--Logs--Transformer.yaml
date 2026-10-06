@@ -3,6 +3,7 @@ type: AWS::Logs::Transformer
 read:
   model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
   operation: GetTransformer
+  absentErrors: [ResourceNotFoundException]
   identifier:
     LogGroupIdentifier: logGroupIdentifier
 properties:

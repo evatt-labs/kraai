@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ConnectorArn", Member: "connectorArn", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Capacity", Member: "capacity", Kind: "structure",
 					Fields: []Field{

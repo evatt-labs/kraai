@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "body"},
 			},
-			Response: []Step{{Name: "scheduledReport"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "scheduledReport"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},

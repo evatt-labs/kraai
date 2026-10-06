@@ -3,6 +3,7 @@ type: AWS::Lambda::MicrovmImage
 read:
   model: lambda-microvms/service/2025-09-09/lambda-microvms-2025-09-09.json
   operation: GetMicrovmImage
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ImageArn: imageIdentifier
 properties:

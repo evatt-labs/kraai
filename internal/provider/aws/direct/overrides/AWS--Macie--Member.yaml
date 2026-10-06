@@ -3,6 +3,7 @@ type: AWS::Macie::Member
 read:
   model: macie2/service/2020-01-01/macie2-2020-01-01.json
   operation: GetMember
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Arn: id
 properties:

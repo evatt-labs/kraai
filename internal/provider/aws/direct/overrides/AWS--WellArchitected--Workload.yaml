@@ -3,6 +3,7 @@ type: AWS::WellArchitected::Workload
 read:
   model: wellarchitected/service/2020-03-31/wellarchitected-2020-03-31.json
   operation: GetWorkload
+  absentErrors: [ResourceNotFoundException]
   # The WorkloadId member refuses an ARN; arn:...:workload/id.
   input:
     WorkloadId: "{WorkloadArn:arnName}"

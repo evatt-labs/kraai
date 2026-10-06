@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ApplicationId", Member: "applicationId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "ApplicationArn", Member: "applicationArn", Kind: "scalar"},
 				{Property: "ApplicationId", Member: "applicationId", Kind: "scalar"},

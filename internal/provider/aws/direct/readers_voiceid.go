@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DomainId", Member: "DomainId", Location: "body"},
 			},
-			Response: []Step{{Name: "Domain"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Domain"}},
 			Fields: []Field{
 				{Property: "Description", Member: "Description", Kind: "scalar"},
 				{Property: "DomainId", Member: "DomainId", Kind: "scalar"},

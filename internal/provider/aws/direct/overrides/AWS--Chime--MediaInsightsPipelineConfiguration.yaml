@@ -3,6 +3,7 @@ type: AWS::Chime::MediaInsightsPipelineConfiguration
 read:
   model: chime-sdk-media-pipelines/service/2021-07-15/chime-sdk-media-pipelines-2021-07-15.json
   operation: GetMediaInsightsPipelineConfiguration
+  absentErrors: [NotFoundException]
   identifier:
     MediaInsightsPipelineConfigurationArn: Identifier
   response: MediaInsightsPipelineConfiguration

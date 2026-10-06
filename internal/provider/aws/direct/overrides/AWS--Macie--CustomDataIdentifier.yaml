@@ -3,6 +3,7 @@ type: AWS::Macie::CustomDataIdentifier
 read:
   model: macie2/service/2020-01-01/macie2-2020-01-01.json
   operation: GetCustomDataIdentifier
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: id
 properties:

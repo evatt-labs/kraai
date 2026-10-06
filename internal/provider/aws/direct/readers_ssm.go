@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AssociationId", Member: "AssociationId", Location: "body"},
 			},
-			Response: []Step{{Name: "AssociationDescription"}},
+			AbsentErrors: []string{"AssociationDoesNotExist"},
+			Response:     []Step{{Name: "AssociationDescription"}},
 			Fields: []Field{
 				{Property: "ApplyOnlyAtCronInterval", Member: "ApplyOnlyAtCronInterval", Kind: "scalar"},
 				{Property: "AssociationDispatchAssumeRole", Member: "AssociationDispatchAssumeRole", Kind: "scalar"},
@@ -59,6 +60,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "WindowId", Member: "WindowId", Location: "body"},
 			},
+			AbsentErrors: []string{"DoesNotExistException"},
 			Fields: []Field{
 				{Property: "AllowUnassociatedTargets", Member: "AllowUnassociatedTargets", Kind: "scalar"},
 				{Property: "Cutoff", Member: "Cutoff", Kind: "scalar"},
@@ -132,7 +134,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "SettingId", Location: "body"},
 			},
-			Response: []Step{{Name: "ServiceSetting"}},
+			AbsentErrors: []string{"ServiceSettingNotFound"},
+			Response:     []Step{{Name: "ServiceSetting"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "ARN", Kind: "scalar"},
 				{Property: "LastModifiedDate", Member: "LastModifiedDate", Kind: "timestamp"},

@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DatastoreId", Member: "datastoreId", Location: "label"},
 			},
-			Response: []Step{{Name: "datastoreProperties"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "datastoreProperties"}},
 			Fields: []Field{
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
 				{Property: "DatastoreArn", Member: "datastoreArn", Kind: "scalar"},

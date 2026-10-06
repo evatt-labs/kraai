@@ -3,6 +3,7 @@ type: AWS::VpcLattice::Service
 read:
   model: vpc-lattice/service/2022-11-30/vpc-lattice-2022-11-30.json
   operation: GetService
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Arn: serviceIdentifier
 properties:

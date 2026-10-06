@@ -13,6 +13,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "WorkspaceInstanceId", Member: "WorkspaceInstanceId", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "EC2ManagedInstance", Member: "EC2ManagedInstance", Kind: "structure",
 					Fields: []Field{

@@ -3,6 +3,7 @@ type: AWS::Route53Profiles::Profile
 read:
   model: route53profiles/service/2018-05-10/route53profiles-2018-05-10.json
   operation: GetProfile
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: ProfileId
   response: Profile

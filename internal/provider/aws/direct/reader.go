@@ -281,6 +281,8 @@ type smithyShape struct {
 	Value   *smithyMember              `json:"value"`
 	Input   *smithyMember              `json:"input"`
 	Output  *smithyMember              `json:"output"`
+	// Errors is an operation's declared errors.
+	Errors []smithyMember `json:"errors"`
 }
 
 type smithyMember struct {

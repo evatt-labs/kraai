@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "FirewallDomainListId", Location: "body"},
 			},
-			Response: []Step{{Name: "FirewallDomainList"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "FirewallDomainList"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
@@ -36,7 +37,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "FirewallRuleGroupAssociationId", Location: "body"},
 			},
-			Response: []Step{{Name: "FirewallRuleGroupAssociation"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "FirewallRuleGroupAssociation"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
@@ -62,7 +64,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "body"},
 			},
-			Response: []Step{{Name: "OutpostResolver"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "OutpostResolver"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
@@ -86,7 +89,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ResolverQueryLogConfigId", Location: "body"},
 			},
-			Response: []Step{{Name: "ResolverQueryLogConfig"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ResolverQueryLogConfig"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "AssociationCount", Member: "AssociationCount", Kind: "scalar"},
@@ -110,7 +114,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ResolverQueryLogConfigAssociationId", Location: "body"},
 			},
-			Response: []Step{{Name: "ResolverQueryLogConfigAssociation"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ResolverQueryLogConfigAssociation"}},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "CreationTime", Kind: "scalar"},
 				{Property: "Error", Member: "Error", Kind: "scalar"},

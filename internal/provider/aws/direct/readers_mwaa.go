@@ -15,7 +15,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "label"},
 			},
-			Response: []Step{{Name: "Environment"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Environment"}},
 			Fields: []Field{
 				{Property: "AirflowConfigurationOptions", Member: "AirflowConfigurationOptions", Kind: "map"},
 				{Property: "AirflowVersion", Member: "AirflowVersion", Kind: "scalar"},

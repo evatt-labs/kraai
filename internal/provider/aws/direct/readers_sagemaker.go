@@ -119,6 +119,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "ClusterSchedulerConfigId", Value: "{ClusterSchedulerConfigArn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "ClusterArn", Member: "ClusterArn", Kind: "scalar"},
 				{Property: "ClusterSchedulerConfigArn", Member: "ClusterSchedulerConfigArn", Kind: "scalar"},
@@ -175,6 +176,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DeviceFleetName", Member: "DeviceFleetName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "Description", Member: "Description", Kind: "scalar"},
 				{Property: "DeviceFleetName", Member: "DeviceFleetName", Kind: "scalar"},
@@ -196,6 +198,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "FeatureGroupName", Member: "FeatureGroupName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -264,6 +267,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "HubArn", Member: "HubName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp"},
 				{Property: "HubArn", Member: "HubArn", Kind: "scalar"},
@@ -292,6 +296,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "HumanTaskUiName", Value: "{HumanTaskUiArn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp"},
 				{Property: "HumanTaskUiArn", Member: "HumanTaskUiArn", Kind: "scalar"},
@@ -307,6 +312,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TrackingServerName", Member: "TrackingServerName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "ArtifactStoreUri", Member: "ArtifactStoreUri", Kind: "scalar"},
 				{Property: "AutomaticModelRegistration", Member: "AutomaticModelRegistration", Kind: "scalar"},
@@ -843,6 +849,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "ProcessingJobName", Value: "{ProcessingJobArn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "AppSpecification", Member: "AppSpecification", Kind: "structure",
 					Fields: []Field{
@@ -1041,6 +1048,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "StudioLifecycleConfigName", Member: "StudioLifecycleConfigName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "StudioLifecycleConfigAppType", Member: "StudioLifecycleConfigAppType", Kind: "scalar"},
 				{Property: "StudioLifecycleConfigArn", Member: "StudioLifecycleConfigArn", Kind: "scalar"},
@@ -1057,6 +1065,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TrialComponentArn", Member: "TrialComponentName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFound"},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp"},
 				{Property: "DisplayName", Member: "DisplayName", Kind: "scalar"},

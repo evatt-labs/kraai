@@ -16,7 +16,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ChangeSetId", Member: "ChangeSetName", Location: "form", Name: "ChangeSetName"},
 			},
-			PageToken: []string{"NextToken"},
+			AbsentErrors: []string{"ChangeSetNotFound"},
+			PageToken:    []string{"NextToken"},
 			Fields: []Field{
 				{Property: "Capabilities", Member: "Capabilities", Kind: "list", XMLName: "Capabilities", Item: "member", Scalar: "string"},
 				{Property: "ChangeSetId", Member: "ChangeSetId", Kind: "scalar", XMLName: "ChangeSetId", Scalar: "string"},
@@ -50,6 +51,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "GeneratedTemplateId", Member: "GeneratedTemplateName", Location: "form", Name: "GeneratedTemplateName"},
 			},
+			AbsentErrors: []string{"GeneratedTemplateNotFound"},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp", XMLName: "CreationTime", Scalar: "timestamp"},
 				{Property: "GeneratedTemplateId", Member: "GeneratedTemplateId", Kind: "scalar", XMLName: "GeneratedTemplateId", Scalar: "string"},
@@ -85,6 +87,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "Arn", Location: "form", Name: "Arn"},
 			},
+			AbsentErrors: []string{"TypeNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar", XMLName: "Arn", Scalar: "string"},
 			},

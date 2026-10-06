@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "RestoreTestingPlanName", Member: "RestoreTestingPlanName", Location: "label"},
 			},
-			Response: []Step{{Name: "RestoreTestingPlan"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "RestoreTestingPlan"}},
 			Fields: []Field{
 				{Property: "RecoveryPointSelection", Member: "RecoveryPointSelection", Kind: "structure",
 					Fields: []Field{

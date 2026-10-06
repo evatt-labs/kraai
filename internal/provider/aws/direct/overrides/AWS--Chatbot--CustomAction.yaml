@@ -3,6 +3,7 @@ type: AWS::Chatbot::CustomAction
 read:
   model: chatbot/service/2017-10-11/chatbot-2017-10-11.json
   operation: GetCustomAction
+  absentErrors: [ResourceNotFoundException]
   identifier:
     CustomActionArn: CustomActionArn
   response: CustomAction

@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "name", Location: "body"},
 			},
-			Response: []Step{{Name: "deliverySource"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "deliverySource"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "DeliverySourceConfiguration", Member: "deliverySourceConfiguration", Kind: "map"},
@@ -35,6 +36,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "IntegrationName", Member: "integrationName", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "IntegrationName", Member: "integrationName", Kind: "scalar"},
 				{Property: "IntegrationStatus", Member: "integrationStatus", Kind: "scalar"},
@@ -179,6 +181,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ScheduledQueryArn", Member: "identifier", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CreationTime", Member: "creationTime", Kind: "scalar"},
 				{Property: "Description", Member: "description", Kind: "scalar"},
@@ -219,6 +222,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "LogGroupIdentifier", Member: "logGroupIdentifier", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "LogGroupIdentifier", Member: "logGroupIdentifier", Kind: "scalar"},
 				{Property: "TransformerConfig", Member: "transformerConfig", Kind: "list",

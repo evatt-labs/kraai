@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ManagerArn", Member: "ManagerArn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "ConfigurationDefinitions", Member: "ConfigurationDefinitions", Kind: "list",
 					Fields: []Field{

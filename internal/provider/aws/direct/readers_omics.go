@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "name", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
@@ -48,6 +49,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "label", Member: "id", Value: "{Arn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CacheBehavior", Member: "cacheBehavior", Kind: "scalar"},
@@ -70,6 +72,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "id", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
@@ -93,6 +96,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "id", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Accelerators", Member: "accelerators", Kind: "scalar"},
 				{Property: "Arn", Member: "arn", Kind: "scalar"},

@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AliasId", Member: "AliasId", Location: "body"},
 			},
-			Response: []Step{{Name: "Alias"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "Alias"}},
 			Fields: []Field{
 				{Property: "AliasArn", Member: "AliasArn", Kind: "scalar"},
 				{Property: "AliasId", Member: "AliasId", Kind: "scalar"},
@@ -37,7 +38,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "BuildId", Member: "BuildId", Location: "body"},
 			},
-			Response: []Step{{Name: "Build"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "Build"}},
 			Fields: []Field{
 				{Property: "BuildArn", Member: "BuildArn", Kind: "scalar"},
 				{Property: "BuildId", Member: "BuildId", Kind: "scalar"},
@@ -56,7 +58,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "body"},
 			},
-			Response: []Step{{Name: "ContainerGroupDefinition"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "ContainerGroupDefinition"}},
 			Fields: []Field{
 				{Property: "ContainerGroupDefinitionArn", Member: "ContainerGroupDefinitionArn", Kind: "scalar"},
 				{Property: "ContainerGroupType", Member: "ContainerGroupType", Kind: "scalar"},
@@ -177,7 +180,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "GameServerGroupArn", Member: "GameServerGroupName", Location: "body"},
 			},
-			Response: []Step{{Name: "GameServerGroup"}},
+			AbsentErrors: []string{"NotFoundException"},
+			Response:     []Step{{Name: "GameServerGroup"}},
 			Fields: []Field{
 				{Property: "AutoScalingGroupArn", Member: "AutoScalingGroupArn", Kind: "scalar"},
 				{Property: "BalancingStrategy", Member: "BalancingStrategy", Kind: "scalar"},

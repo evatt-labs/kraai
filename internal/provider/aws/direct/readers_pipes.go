@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "CreationTime", Kind: "timestamp"},

@@ -3,6 +3,7 @@ type: AWS::M2::Environment
 read:
   model: m2/service/2021-04-28/m2-2021-04-28.json
   operation: GetEnvironment
+  absentErrors: [ResourceNotFoundException]
   identifier:
     EnvironmentArn: environmentId
 properties:

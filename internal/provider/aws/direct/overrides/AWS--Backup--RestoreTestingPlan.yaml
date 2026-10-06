@@ -3,6 +3,7 @@ type: AWS::Backup::RestoreTestingPlan
 read:
   model: backup/service/2018-11-15/backup-2018-11-15.json
   operation: GetRestoreTestingPlan
+  absentErrors: [ResourceNotFoundException]
   identifier:
     RestoreTestingPlanName: RestoreTestingPlanName
   response: RestoreTestingPlan

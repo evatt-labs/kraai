@@ -3,6 +3,7 @@ type: AWS::Kinesis::StreamConsumer
 read:
   model: kinesis/service/2013-12-02/kinesis-2013-12-02.json
   operation: DescribeStreamConsumer
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ConsumerARN: ConsumerARN
   response: ConsumerDescription

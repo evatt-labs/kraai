@@ -16,6 +16,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "Id", Location: "label"},
 			},
+			AbsentErrors: []string{"NoSuchCachePolicy"},
 			Fields: []Field{
 				{Property: "CachePolicyConfig", Member: "CachePolicyConfig", Kind: "structure", XMLName: "CachePolicyConfig",
 					Fields: []Field{

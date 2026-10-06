@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AttachmentArn", Member: "AttachmentArn", Location: "body"},
 			},
-			Response: []Step{{Name: "CrossAccountAttachment"}},
+			AbsentErrors: []string{"AttachmentNotFoundException"},
+			Response:     []Step{{Name: "CrossAccountAttachment"}},
 			Fields: []Field{
 				{Property: "AttachmentArn", Member: "AttachmentArn", Kind: "scalar"},
 				{Property: "Name", Member: "Name", Kind: "scalar"},

@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ContainerAssociationArn", Member: "ContainerAssociationArn", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "ContainerAssociationArn", Member: "ContainerAssociationArn", Kind: "scalar"},
 				{Property: "ContainerAssociationName", Member: "ContainerAssociationName", Kind: "scalar"},

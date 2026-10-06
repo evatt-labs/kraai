@@ -3,6 +3,7 @@ type: AWS::Shield::ProtectionGroup
 read:
   model: shield/service/2016-06-02/shield-2016-06-02.json
   operation: DescribeProtectionGroup
+  absentErrors: [ResourceNotFoundException]
   # The ProtectionGroupId member refuses an ARN; arn:...:protection-group/id.
   input:
     ProtectionGroupId: "{ProtectionGroupArn:arnName}"

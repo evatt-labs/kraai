@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DatasetName", Member: "DatasetName", Kind: "scalar"},
 				{Property: "Name", Member: "Name", Kind: "scalar"},
@@ -37,6 +38,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Description", Member: "Description", Kind: "scalar"},
 				{Property: "Name", Member: "Name", Kind: "scalar"},
@@ -69,6 +71,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "Name", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "CronExpression", Member: "CronExpression", Kind: "scalar"},
 				{Property: "JobNames", Member: "JobNames", Kind: "list"},

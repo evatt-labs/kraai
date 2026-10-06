@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreationTime", Member: "creationTime", Kind: "timestamp"},
@@ -37,6 +38,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Arn", Member: "arn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AggregationDuration", Member: "aggregationDuration", Kind: "scalar"},
 				{Property: "Arn", Member: "arn", Kind: "scalar"},

@@ -13,6 +13,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "dbClusterId", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AllocatedStorage", Member: "allocatedStorage", Kind: "scalar"},
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
@@ -61,6 +62,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "identifier", Location: "body"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AllocatedStorage", Member: "allocatedStorage", Kind: "scalar"},
 				{Property: "Arn", Member: "arn", Kind: "scalar"},

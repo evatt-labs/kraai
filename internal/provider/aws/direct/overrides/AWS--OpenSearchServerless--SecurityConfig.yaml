@@ -3,6 +3,7 @@ type: AWS::OpenSearchServerless::SecurityConfig
 read:
   model: opensearchserverless/service/2021-11-01/opensearchserverless-2021-11-01.json
   operation: GetSecurityConfig
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Id: id
   response: securityConfigDetail

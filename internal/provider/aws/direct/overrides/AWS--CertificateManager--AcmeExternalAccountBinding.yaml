@@ -3,6 +3,7 @@ type: AWS::CertificateManager::AcmeExternalAccountBinding
 read:
   model: acm/service/2015-12-08/acm-2015-12-08.json
   operation: DescribeAcmeExternalAccountBinding
+  absentErrors: [ResourceNotFoundException]
   identifier:
     AcmeExternalAccountBindingArn: AcmeExternalAccountBindingArn
   response: ExternalAccountBinding

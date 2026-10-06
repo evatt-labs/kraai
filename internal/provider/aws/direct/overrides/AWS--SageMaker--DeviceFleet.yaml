@@ -3,6 +3,7 @@ type: AWS::SageMaker::DeviceFleet
 read:
   model: sagemaker/service/2017-07-24/sagemaker-2017-07-24.json
   operation: DescribeDeviceFleet
+  absentErrors: [ResourceNotFound]
   identifier:
     DeviceFleetName: DeviceFleetName
 properties:

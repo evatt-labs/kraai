@@ -3,6 +3,7 @@ type: AWS::Glue::CustomEntityType
 read:
   model: glue/service/2017-03-31/glue-2017-03-31.json
   operation: GetCustomEntityType
+  absentErrors: [EntityNotFoundException]
   identifier:
     Name: Name
 properties:

@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "MetricName", Member: "metricName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DisplayName", Member: "displayName", Kind: "scalar"},
 				{Property: "MetricArn", Member: "metricArn", Kind: "scalar"},
@@ -31,6 +32,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Name", Member: "name", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Name", Member: "name", Kind: "scalar"},
@@ -48,6 +50,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "MetricName", Member: "metricName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AggregationField", Member: "aggregationField", Kind: "scalar"},
 				{Property: "AggregationType", Member: "aggregationType", Kind: "structure",
@@ -79,7 +82,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "RoleAlias", Member: "roleAlias", Location: "label"},
 			},
-			Response: []Step{{Name: "roleAliasDescription"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "roleAliasDescription"}},
 			Fields: []Field{
 				{Property: "CredentialDurationSeconds", Member: "credentialDurationSeconds", Kind: "scalar"},
 				{Property: "RoleAlias", Member: "roleAlias", Kind: "scalar"},
@@ -97,6 +101,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ScheduledAuditName", Member: "scheduledAuditName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DayOfMonth", Member: "dayOfMonth", Kind: "scalar"},
 				{Property: "DayOfWeek", Member: "dayOfWeek", Kind: "scalar"},
@@ -116,6 +121,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "PackageName", Member: "packageName", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Description", Member: "description", Kind: "scalar"},
 				{Property: "PackageArn", Member: "packageArn", Kind: "scalar"},

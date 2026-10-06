@@ -3,6 +3,7 @@ type: AWS::DocDBElastic::ClusterSnapshot
 read:
   model: docdb-elastic/service/2022-11-28/docdb-elastic-2022-11-28.json
   operation: GetClusterSnapshot
+  absentErrors: [ResourceNotFoundException]
   identifier:
     SnapshotArn: snapshotArn
   response: snapshot

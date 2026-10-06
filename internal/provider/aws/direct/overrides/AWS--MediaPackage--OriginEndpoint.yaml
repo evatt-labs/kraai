@@ -3,6 +3,7 @@ type: AWS::MediaPackage::OriginEndpoint
 read:
   model: mediapackage/service/2017-10-12/mediapackage-2017-10-12.json
   operation: DescribeOriginEndpoint
+  absentErrors: [NotFoundException]
   identifier:
     Id: Id
 properties:

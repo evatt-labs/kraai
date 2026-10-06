@@ -14,7 +14,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ProfileId", Location: "label"},
 			},
-			Response: []Step{{Name: "Profile"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "Profile"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "ClientToken", Member: "ClientToken", Kind: "scalar"},
@@ -33,7 +34,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ProfileAssociationId", Location: "label"},
 			},
-			Response: []Step{{Name: "ProfileAssociation"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ProfileAssociation"}},
 			Fields: []Field{
 				{Property: "Id", Member: "Id", Kind: "scalar"},
 				{Property: "Name", Member: "Name", Kind: "scalar"},
@@ -52,7 +54,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ProfileResourceAssociationId", Location: "label"},
 			},
-			Response: []Step{{Name: "ProfileResourceAssociation"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ProfileResourceAssociation"}},
 			Fields: []Field{
 				{Property: "Id", Member: "Id", Kind: "scalar"},
 				{Property: "Name", Member: "Name", Kind: "scalar"},

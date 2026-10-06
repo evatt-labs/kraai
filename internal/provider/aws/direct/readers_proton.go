@@ -16,7 +16,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "id", Value: "{Arn:arnName}"},
 			},
-			Response: []Step{{Name: "environmentAccountConnection"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "environmentAccountConnection"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CodebuildRoleArn", Member: "codebuildRoleArn", Kind: "scalar"},
@@ -41,7 +42,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "name", Value: "{Arn:arnName}"},
 			},
-			Response: []Step{{Name: "environmentTemplate"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "environmentTemplate"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Description", Member: "description", Kind: "scalar"},
@@ -63,7 +65,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "name", Value: "{Arn:arnName}"},
 			},
-			Response: []Step{{Name: "serviceTemplate"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "serviceTemplate"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Description", Member: "description", Kind: "scalar"},

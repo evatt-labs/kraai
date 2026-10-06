@@ -3,6 +3,7 @@ type: AWS::AppIntegrations::EventIntegration
 read:
   model: appintegrations/service/2020-07-29/appintegrations-2020-07-29.json
   operation: GetEventIntegration
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Name: Name
 properties:

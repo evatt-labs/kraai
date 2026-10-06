@@ -3,6 +3,7 @@ type: AWS::S3Vectors::VectorBucket
 read:
   model: s3vectors/service/2025-07-15/s3vectors-2025-07-15.json
   operation: GetVectorBucket
+  absentErrors: [NotFoundException]
   identifier:
     VectorBucketArn: vectorBucketArn
   response: vectorBucket

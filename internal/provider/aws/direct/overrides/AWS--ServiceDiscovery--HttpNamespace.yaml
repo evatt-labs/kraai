@@ -3,6 +3,7 @@ type: AWS::ServiceDiscovery::HttpNamespace
 read:
   model: servicediscovery/service/2017-03-14/servicediscovery-2017-03-14.json
   operation: GetNamespace
+  absentErrors: [NamespaceNotFound]
   identifier:
     Id: Id
   response: Namespace

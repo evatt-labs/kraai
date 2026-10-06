@@ -3,6 +3,7 @@ type: AWS::M2::Application
 read:
   model: m2/service/2021-04-28/m2-2021-04-28.json
   operation: GetApplication
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ApplicationArn: applicationId
 properties:

@@ -3,6 +3,7 @@ type: AWS::AppRunner::VpcIngressConnection
 read:
   model: apprunner/service/2020-05-15/apprunner-2020-05-15.json
   operation: DescribeVpcIngressConnection
+  absentErrors: [ResourceNotFoundException]
   identifier:
     VpcIngressConnectionArn: VpcIngressConnectionArn
   response: VpcIngressConnection

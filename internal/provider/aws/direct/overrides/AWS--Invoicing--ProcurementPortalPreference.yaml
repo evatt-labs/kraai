@@ -3,6 +3,7 @@ type: AWS::Invoicing::ProcurementPortalPreference
 read:
   model: invoicing/service/2024-12-01/invoicing-2024-12-01.json
   operation: GetProcurementPortalPreference
+  absentErrors: [ResourceNotFoundException]
   identifier:
     ProcurementPortalPreferenceArn: ProcurementPortalPreferenceArn
   response: ProcurementPortalPreference

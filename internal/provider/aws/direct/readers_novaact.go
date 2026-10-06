@@ -18,6 +18,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "label", Member: "workflowDefinitionName", Value: "{Arn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},

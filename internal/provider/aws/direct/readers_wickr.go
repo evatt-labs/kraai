@@ -18,6 +18,7 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "label", Member: "networkId", Value: "{NetworkArn:arnName}"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundError"},
 			Fields: []Field{
 				{Property: "AccessLevel", Member: "accessLevel", Kind: "scalar"},
 				{Property: "AwsAccountId", Member: "awsAccountId", Kind: "scalar"},

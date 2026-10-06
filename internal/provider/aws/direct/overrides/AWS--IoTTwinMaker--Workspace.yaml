@@ -3,6 +3,7 @@ type: AWS::IoTTwinMaker::Workspace
 read:
   model: iottwinmaker/service/2021-11-29/iottwinmaker-2021-11-29.json
   operation: GetWorkspace
+  absentErrors: [ResourceNotFoundException]
   identifier:
     WorkspaceId: workspaceId
 properties:

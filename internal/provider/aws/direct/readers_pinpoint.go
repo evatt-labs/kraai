@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "TemplateName", Member: "TemplateName", Location: "label"},
 			},
+			AbsentErrors: []string{"NotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "Content", Member: "Content", Kind: "list",

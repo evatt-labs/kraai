@@ -3,6 +3,7 @@ type: AWS::LookoutEquipment::InferenceScheduler
 read:
   model: lookoutequipment/service/2020-12-15/lookoutequipment-2020-12-15.json
   operation: DescribeInferenceScheduler
+  absentErrors: [ResourceNotFoundException]
   identifier:
     InferenceSchedulerName: InferenceSchedulerName
 properties:

@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AutoScalingConfigurationArn", Member: "AutoScalingConfigurationArn", Location: "body"},
 			},
-			Response: []Step{{Name: "AutoScalingConfiguration"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "AutoScalingConfiguration"}},
 			Fields: []Field{
 				{Property: "AutoScalingConfigurationArn", Member: "AutoScalingConfigurationArn", Kind: "scalar"},
 				{Property: "AutoScalingConfigurationName", Member: "AutoScalingConfigurationName", Kind: "scalar"},
@@ -34,7 +35,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ObservabilityConfigurationArn", Member: "ObservabilityConfigurationArn", Location: "body"},
 			},
-			Response: []Step{{Name: "ObservabilityConfiguration"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ObservabilityConfiguration"}},
 			Fields: []Field{
 				{Property: "Latest", Member: "Latest", Kind: "scalar"},
 				{Property: "ObservabilityConfigurationArn", Member: "ObservabilityConfigurationArn", Kind: "scalar"},
@@ -57,7 +59,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "VpcConnectorArn", Member: "VpcConnectorArn", Location: "body"},
 			},
-			Response: []Step{{Name: "VpcConnector"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "VpcConnector"}},
 			Fields: []Field{
 				{Property: "SecurityGroups", Member: "SecurityGroups", Kind: "list"},
 				{Property: "Subnets", Member: "Subnets", Kind: "list"},
@@ -76,7 +79,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "VpcIngressConnectionArn", Member: "VpcIngressConnectionArn", Location: "body"},
 			},
-			Response: []Step{{Name: "VpcIngressConnection"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "VpcIngressConnection"}},
 			Fields: []Field{
 				{Property: "DomainName", Member: "DomainName", Kind: "scalar"},
 				{Property: "IngressVpcConfiguration", Member: "IngressVpcConfiguration", Kind: "structure",

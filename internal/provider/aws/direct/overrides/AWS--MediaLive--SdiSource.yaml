@@ -3,6 +3,7 @@ type: AWS::MediaLive::SdiSource
 read:
   model: medialive/service/2017-10-14/medialive-2017-10-14.json
   operation: DescribeSdiSource
+  absentErrors: [NotFoundException]
   identifier:
     Id: SdiSourceId
   response: SdiSource

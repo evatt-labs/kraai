@@ -3,6 +3,7 @@ type: AWS::DataBrew::Schedule
 read:
   model: databrew/service/2017-07-25/databrew-2017-07-25.json
   operation: DescribeSchedule
+  absentErrors: [ResourceNotFoundException]
   identifier:
     Name: Name
 properties:

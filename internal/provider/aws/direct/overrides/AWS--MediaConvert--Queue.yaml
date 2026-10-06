@@ -3,6 +3,7 @@ type: AWS::MediaConvert::Queue
 read:
   model: mediaconvert/service/2017-08-29/mediaconvert-2017-08-29.json
   operation: GetQueue
+  absentErrors: [NotFoundException]
   identifier:
     Name: Name
   response: Queue

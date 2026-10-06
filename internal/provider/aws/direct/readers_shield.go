@@ -17,7 +17,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "ProtectionGroupId", Value: "{ProtectionGroupArn:arnName}"},
 			},
-			Response: []Step{{Name: "ProtectionGroup"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "ProtectionGroup"}},
 			Fields: []Field{
 				{Property: "Aggregation", Member: "Aggregation", Kind: "scalar"},
 				{Property: "Members", Member: "Members", Kind: "list"},

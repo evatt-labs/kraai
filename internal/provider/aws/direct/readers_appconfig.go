@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "DeploymentStrategyId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DeploymentDurationInMinutes", Member: "DeploymentDurationInMinutes", Kind: "scalar"},
 				{Property: "Description", Member: "Description", Kind: "scalar"},
@@ -35,6 +36,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ExtensionIdentifier", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Actions", Member: "Actions", Kind: "map"},
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
@@ -55,6 +57,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "Id", Member: "ExtensionAssociationId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Arn", Member: "Arn", Kind: "scalar"},
 				{Property: "ExtensionArn", Member: "ExtensionArn", Kind: "scalar"},

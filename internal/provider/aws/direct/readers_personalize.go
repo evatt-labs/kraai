@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DatasetGroupArn", Member: "datasetGroupArn", Location: "body"},
 			},
-			Response: []Step{{Name: "datasetGroup"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "datasetGroup"}},
 			Fields: []Field{
 				{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
 				{Property: "Domain", Member: "domain", Kind: "scalar"},
@@ -31,7 +32,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "EventTrackerArn", Member: "eventTrackerArn", Location: "body"},
 			},
-			Response: []Step{{Name: "eventTracker"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "eventTracker"}},
 			Fields: []Field{
 				{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
 				{Property: "EventTrackerArn", Member: "eventTrackerArn", Kind: "scalar"},
@@ -48,7 +50,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "FilterArn", Member: "filterArn", Location: "body"},
 			},
-			Response: []Step{{Name: "filter"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "filter"}},
 			Fields: []Field{
 				{Property: "CreationDateTime", Member: "creationDateTime", Kind: "timestamp"},
 				{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
@@ -68,7 +71,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "SchemaArn", Member: "schemaArn", Location: "body"},
 			},
-			Response: []Step{{Name: "schema"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "schema"}},
 			Fields: []Field{
 				{Property: "Domain", Member: "domain", Kind: "scalar"},
 				{Property: "Name", Member: "name", Kind: "scalar"},
@@ -85,7 +89,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "SolutionArn", Member: "solutionArn", Location: "body"},
 			},
-			Response: []Step{{Name: "solution"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "solution"}},
 			Fields: []Field{
 				{Property: "DatasetGroupArn", Member: "datasetGroupArn", Kind: "scalar"},
 				{Property: "EventType", Member: "eventType", Kind: "scalar"},

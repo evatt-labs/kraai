@@ -13,7 +13,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ApplicationName", Member: "applicationName", Location: "body"},
 			},
-			Response: []Step{{Name: "application"}},
+			AbsentErrors: []string{"ApplicationDoesNotExistException"},
+			Response:     []Step{{Name: "application"}},
 			Fields: []Field{
 				{Property: "ApplicationName", Member: "applicationName", Kind: "scalar"},
 				{Property: "ComputePlatform", Member: "computePlatform", Kind: "scalar"},
@@ -29,7 +30,8 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DeploymentConfigName", Member: "deploymentConfigName", Location: "body"},
 			},
-			Response: []Step{{Name: "deploymentConfigInfo"}},
+			AbsentErrors: []string{"DeploymentConfigDoesNotExistException"},
+			Response:     []Step{{Name: "deploymentConfigInfo"}},
 			Fields: []Field{
 				{Property: "ComputePlatform", Member: "computePlatform", Kind: "scalar"},
 				{Property: "DeploymentConfigName", Member: "deploymentConfigName", Kind: "scalar"},

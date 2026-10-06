@@ -2,6 +2,7 @@ type: AWS::CloudFront::CachePolicy
 read:
   model: cloudfront/service/2020-05-31/cloudfront-2020-05-31.json
   operation: GetCachePolicy
+  absentErrors: [NoSuchCachePolicy]
   identifier:
     Id: Id
   response: CachePolicy

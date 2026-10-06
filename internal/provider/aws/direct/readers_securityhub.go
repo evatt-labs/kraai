@@ -14,6 +14,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AggregatorV2Arn", Member: "AggregatorV2Arn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AggregationRegion", Member: "AggregationRegion", Kind: "scalar"},
 				{Property: "AggregatorV2Arn", Member: "AggregatorV2Arn", Kind: "scalar"},
@@ -32,6 +33,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "FindingAggregatorArn", Member: "FindingAggregatorArn", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "FindingAggregationRegion", Member: "FindingAggregationRegion", Kind: "scalar"},
 				{Property: "FindingAggregatorArn", Member: "FindingAggregatorArn", Kind: "scalar"},

@@ -3,6 +3,7 @@ type: AWS::Signer::SigningProfile
 read:
   model: signer/service/2017-08-25/signer-2017-08-25.json
   operation: GetSigningProfile
+  absentErrors: [ResourceNotFoundException]
   # The profileName member refuses an ARN; arn:...:/signing-profiles/name.
   input:
     profileName: "{Arn:arnName}"

@@ -3,6 +3,7 @@ type: AWS::Logs::Integration
 read:
   model: cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json
   operation: GetIntegration
+  absentErrors: [ResourceNotFoundException]
   identifier:
     IntegrationName: integrationName
 properties:

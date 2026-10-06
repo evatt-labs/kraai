@@ -3,6 +3,7 @@ type: AWS::Transfer::Certificate
 read:
   model: transfer/service/2018-11-05/transfer-2018-11-05.json
   operation: DescribeCertificate
+  absentErrors: [ResourceNotFoundException]
   identifier:
     CertificateId: CertificateId
   response: Certificate

@@ -16,7 +16,8 @@ func init() {
 			Input: []Binding{
 				Binding{Location: "body", Member: "clusterIdentifier", Value: "{Arn:arnName}"},
 			},
-			Response: []Step{{Name: "cluster"}},
+			AbsentErrors: []string{"ResourceNotFoundException"},
+			Response:     []Step{{Name: "cluster"}},
 			Fields: []Field{
 				{Property: "Arn", Member: "arn", Kind: "scalar"},
 				{Property: "Endpoints", Member: "endpoints", Kind: "list",

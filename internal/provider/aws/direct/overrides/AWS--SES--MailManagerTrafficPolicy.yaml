@@ -3,6 +3,7 @@ type: AWS::SES::MailManagerTrafficPolicy
 read:
   model: mailmanager/service/2023-10-17/mailmanager-2023-10-17.json
   operation: GetTrafficPolicy
+  absentErrors: [ResourceNotFoundException]
   identifier:
     TrafficPolicyId: TrafficPolicyId
 properties:

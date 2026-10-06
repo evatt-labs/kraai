@@ -3,6 +3,7 @@ type: AWS::HealthAgent::Domain
 read:
   model: connecthealth/service/2025-01-29/connecthealth-2025-01-29.json
   operation: GetDomain
+  absentErrors: [ResourceNotFoundException]
   # The domainId member refuses an ARN; arn:...:domain/id.
   input:
     domainId: "{Arn:arnName}"

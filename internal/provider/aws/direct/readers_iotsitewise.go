@@ -15,6 +15,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "AccessPolicyId", Member: "accessPolicyId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "AccessPolicyArn", Member: "accessPolicyArn", Kind: "scalar"},
 				{Property: "AccessPolicyId", Member: "accessPolicyId", Kind: "scalar"},
@@ -64,6 +65,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "ComputationModelId", Member: "computationModelId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "ComputationModelArn", Member: "computationModelArn", Kind: "scalar"},
 				{Property: "ComputationModelConfiguration", Member: "computationModelConfiguration", Kind: "structure",
@@ -92,6 +94,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "DashboardId", Member: "dashboardId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "DashboardArn", Member: "dashboardArn", Kind: "scalar"},
 				{Property: "DashboardDefinition", Member: "dashboardDefinition", Kind: "scalar"},
@@ -111,6 +114,7 @@ func init() {
 			Identifier: []Binding{
 				{Property: "PortalId", Member: "portalId", Location: "label"},
 			},
+			AbsentErrors: []string{"ResourceNotFoundException"},
 			Fields: []Field{
 				{Property: "Alarms", Member: "alarms", Kind: "structure",
 					Fields: []Field{

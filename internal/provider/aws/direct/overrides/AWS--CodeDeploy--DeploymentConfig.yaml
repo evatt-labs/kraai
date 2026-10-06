@@ -2,6 +2,7 @@ type: AWS::CodeDeploy::DeploymentConfig
 read:
   model: codedeploy/service/2014-10-06/codedeploy-2014-10-06.json
   operation: GetDeploymentConfig
+  absentErrors: [DeploymentConfigDoesNotExistException]
   identifier:
     DeploymentConfigName: deploymentConfigName
   response: deploymentConfigInfo

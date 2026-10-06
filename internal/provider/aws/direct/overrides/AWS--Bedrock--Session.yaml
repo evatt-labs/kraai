@@ -3,6 +3,7 @@ type: AWS::Bedrock::Session
 read:
   model: bedrock-agent-runtime/service/2023-07-26/bedrock-agent-runtime-2023-07-26.json
   operation: GetSession
+  absentErrors: [ResourceNotFoundException]
   identifier:
     SessionArn: sessionIdentifier
 properties:

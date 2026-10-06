@@ -3,6 +3,7 @@ type: AWS::MGN::NetworkMigrationDefinition
 read:
   model: mgn/service/2020-02-26/mgn-2020-02-26.json
   operation: GetNetworkMigrationDefinition
+  absentErrors: [ResourceNotFoundException]
   # arn:...:network-migration-definition/nmd-...; the input takes the id.
   input:
     networkMigrationDefinitionID: "{Arn:arnName}"
