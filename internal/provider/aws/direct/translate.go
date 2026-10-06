@@ -36,6 +36,12 @@ func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[strin
 			}
 			continue
 		}
+		if f.Kind == "alternatives" {
+			if v, ok := firstAlternative(f, func(alt Field) map[string]any { return r.translate(w, obj, []Field{alt}) }); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
 		// Walk Via to every structure holding the member; a list step
 		// fans out, making the property a list of the member's values.
 		holders, projected := []map[string]any{obj}, false
@@ -343,4 +349,20 @@ func renderTemplate(f Field, vars map[string]string) (string, bool) {
 	}
 	v := substitute(tmpl, vars).(string)
 	return v, !placeholderName.MatchString(v)
+}
+
+// firstAlternative is the value of f's first alternative the response
+// carries, translated by read; one read as a list is wrapped as one.
+func firstAlternative(f Field, read func(Field) map[string]any) (any, bool) {
+	for _, alt := range f.Alternatives {
+		v, ok := read(alt)[f.Property]
+		if !ok {
+			continue
+		}
+		if alt.AsList {
+			v = []any{v}
+		}
+		return v, true
+	}
+	return nil, false
 }

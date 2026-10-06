@@ -30,6 +30,9 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#AccessPointArn": {
+      "type": "string"
+    },
     "com.amazonaws.s3#AccountId": {
       "type": "string"
     },
@@ -99,7 +102,16 @@
           "target": "com.amazonaws.s3#GetPublicAccessBlock"
         },
         {
+          "target": "com.amazonaws.s3#ListBucketAnalyticsConfigurations"
+        },
+        {
+          "target": "com.amazonaws.s3#ListBucketIntelligentTieringConfigurations"
+        },
+        {
           "target": "com.amazonaws.s3#ListBucketInventoryConfigurations"
+        },
+        {
+          "target": "com.amazonaws.s3#ListBucketMetricsConfigurations"
         }
       ],
       "traits": {
@@ -24071,6 +24083,121 @@
       "type": "service",
       "version": "2006-03-01"
     },
+    "com.amazonaws.s3#AnalyticsAndOperator": {
+      "members": {
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.s3#TagSet",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#AnalyticsConfiguration": {
+      "members": {
+        "Filter": {
+          "target": "com.amazonaws.s3#AnalyticsFilter",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#AnalyticsId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StorageClassAnalysis": {
+          "target": "com.amazonaws.s3#StorageClassAnalysis",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#AnalyticsConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.s3#AnalyticsConfiguration"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.s3#AnalyticsExportDestination": {
+      "members": {
+        "S3BucketDestination": {
+          "target": "com.amazonaws.s3#AnalyticsS3BucketDestination",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#AnalyticsFilter": {
+      "members": {
+        "And": {
+          "target": "com.amazonaws.s3#AnalyticsAndOperator",
+          "traits": {}
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tag": {
+          "target": "com.amazonaws.s3#Tag",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.s3#AnalyticsId": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#AnalyticsS3BucketDestination": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "BucketAccountId": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {}
+        },
+        "Format": {
+          "target": "com.amazonaws.s3#AnalyticsS3ExportFileFormat",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#AnalyticsS3ExportFileFormat": {
+      "members": {
+        "CSV": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CSV"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#AnnotationLimitExceeded": {
       "members": {},
       "traits": {
@@ -25266,6 +25393,99 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.s3#IntelligentTieringAndOperator": {
+      "members": {
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.s3#TagSet",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#IntelligentTieringConfiguration": {
+      "members": {
+        "Filter": {
+          "target": "com.amazonaws.s3#IntelligentTieringFilter",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#IntelligentTieringId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.s3#IntelligentTieringStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Tierings": {
+          "target": "com.amazonaws.s3#TieringList",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tiering"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#IntelligentTieringConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.s3#IntelligentTieringConfiguration"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.s3#IntelligentTieringDays": {
+      "type": "integer"
+    },
+    "com.amazonaws.s3#IntelligentTieringFilter": {
+      "members": {
+        "And": {
+          "target": "com.amazonaws.s3#IntelligentTieringAndOperator",
+          "traits": {}
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tag": {
+          "target": "com.amazonaws.s3#Tag"
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#IntelligentTieringId": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#IntelligentTieringStatus": {
+      "members": {
+        "Disabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Disabled"
+          }
+        },
+        "Enabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Enabled"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#InvalidAnnotationName": {
       "members": {},
       "traits": {
@@ -25638,6 +25858,163 @@
     "com.amazonaws.s3#KeyPrefixEquals": {
       "type": "string"
     },
+    "com.amazonaws.s3#ListBucketAnalyticsConfigurations": {
+      "input": {
+        "target": "com.amazonaws.s3#ListBucketAnalyticsConfigurationsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#ListBucketAnalyticsConfigurationsOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?analytics&x-id=ListBucketAnalyticsConfigurations"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#ListBucketAnalyticsConfigurationsOutput": {
+      "members": {
+        "AnalyticsConfigurationList": {
+          "target": "com.amazonaws.s3#AnalyticsConfigurationList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "AnalyticsConfiguration"
+          }
+        },
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {}
+        },
+        "IsTruncated": {
+          "target": "com.amazonaws.s3#IsTruncated",
+          "traits": {}
+        },
+        "NextContinuationToken": {
+          "target": "com.amazonaws.s3#NextToken",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#xmlName": "ListBucketAnalyticsConfigurationResult"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#ListBucketAnalyticsConfigurationsRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {
+            "smithy.api#httpQuery": "continuation-token"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#ListBucketIntelligentTieringConfigurations": {
+      "input": {
+        "target": "com.amazonaws.s3#ListBucketIntelligentTieringConfigurationsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#ListBucketIntelligentTieringConfigurationsOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?intelligent-tiering&x-id=ListBucketIntelligentTieringConfigurations"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#ListBucketIntelligentTieringConfigurationsOutput": {
+      "members": {
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {}
+        },
+        "IntelligentTieringConfigurationList": {
+          "target": "com.amazonaws.s3#IntelligentTieringConfigurationList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "IntelligentTieringConfiguration"
+          }
+        },
+        "IsTruncated": {
+          "target": "com.amazonaws.s3#IsTruncated",
+          "traits": {}
+        },
+        "NextContinuationToken": {
+          "target": "com.amazonaws.s3#NextToken",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#ListBucketIntelligentTieringConfigurationsRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {
+            "smithy.api#httpQuery": "continuation-token"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3#ListBucketInventoryConfigurations": {
       "input": {
         "target": "com.amazonaws.s3#ListBucketInventoryConfigurationsRequest"
@@ -25688,6 +26065,85 @@
       "type": "structure"
     },
     "com.amazonaws.s3#ListBucketInventoryConfigurationsRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {
+            "smithy.api#httpQuery": "continuation-token"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#ListBucketMetricsConfigurations": {
+      "input": {
+        "target": "com.amazonaws.s3#ListBucketMetricsConfigurationsRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#ListBucketMetricsConfigurationsOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?metrics&x-id=ListBucketMetricsConfigurations"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#ListBucketMetricsConfigurationsOutput": {
+      "members": {
+        "ContinuationToken": {
+          "target": "com.amazonaws.s3#Token",
+          "traits": {}
+        },
+        "IsTruncated": {
+          "target": "com.amazonaws.s3#IsTruncated",
+          "traits": {}
+        },
+        "MetricsConfigurationList": {
+          "target": "com.amazonaws.s3#MetricsConfigurationList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "MetricsConfiguration"
+          }
+        },
+        "NextContinuationToken": {
+          "target": "com.amazonaws.s3#NextToken",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#xmlName": "ListMetricsConfigurationsResult"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#ListBucketMetricsConfigurationsRequest": {
       "members": {
         "Bucket": {
           "target": "com.amazonaws.s3#BucketName",
@@ -25778,6 +26234,74 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#MetricsAndOperator": {
+      "members": {
+        "AccessPointArn": {
+          "target": "com.amazonaws.s3#AccessPointArn",
+          "traits": {}
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.s3#TagSet",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#MetricsConfiguration": {
+      "members": {
+        "Filter": {
+          "target": "com.amazonaws.s3#MetricsFilter",
+          "traits": {}
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#MetricsId",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#MetricsConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.s3#MetricsConfiguration"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.s3#MetricsFilter": {
+      "members": {
+        "AccessPointArn": {
+          "target": "com.amazonaws.s3#AccessPointArn",
+          "traits": {}
+        },
+        "And": {
+          "target": "com.amazonaws.s3#MetricsAndOperator",
+          "traits": {}
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tag": {
+          "target": "com.amazonaws.s3#Tag",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "union"
+    },
+    "com.amazonaws.s3#MetricsId": {
+      "type": "string"
     },
     "com.amazonaws.s3#MetricsStatus": {
       "members": {
@@ -26631,6 +27155,45 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.s3#StorageClassAnalysis": {
+      "members": {
+        "DataExport": {
+          "target": "com.amazonaws.s3#StorageClassAnalysisDataExport",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#StorageClassAnalysisDataExport": {
+      "members": {
+        "Destination": {
+          "target": "com.amazonaws.s3#AnalyticsExportDestination",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "OutputSchemaVersion": {
+          "target": "com.amazonaws.s3#StorageClassAnalysisSchemaVersion",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#StorageClassAnalysisSchemaVersion": {
+      "members": {
+        "V_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "V_1"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#Suffix": {
       "type": "string"
     },
@@ -26712,6 +27275,30 @@
     },
     "com.amazonaws.s3#TargetPrefix": {
       "type": "string"
+    },
+    "com.amazonaws.s3#Tiering": {
+      "members": {
+        "AccessTier": {
+          "target": "com.amazonaws.s3#IntelligentTieringAccessTier",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Days": {
+          "target": "com.amazonaws.s3#IntelligentTieringDays",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#TieringList": {
+      "member": {
+        "target": "com.amazonaws.s3#Tiering"
+      },
+      "type": "list"
     },
     "com.amazonaws.s3#Token": {
       "type": "string"

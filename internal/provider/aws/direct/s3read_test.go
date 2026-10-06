@@ -34,9 +34,20 @@ var s3Bodies = map[string]string{
 	"ownershipControls": `<OwnershipControls` + s3NS + `><Rule><ObjectOwnership>BucketOwnerPreferred</ObjectOwnership></Rule></OwnershipControls>`,
 	"publicAccessBlock": `<PublicAccessBlockConfiguration` + s3NS + `><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>false</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>false</RestrictPublicBuckets></PublicAccessBlockConfiguration>`,
 	"tagging":           `<Tagging` + s3NS + `><TagSet><Tag><Key>team</Key><Value>core</Value></Tag><Tag><Key>env</Key><Value>dev</Value></Tag></TagSet></Tagging>`,
-	"inventory":         `<ListInventoryConfigurationsResult` + s3NS + `><IsTruncated>false</IsTruncated></ListInventoryConfigurationsResult>`,
-	"logging":           `<BucketLoggingStatus` + s3NS + `><LoggingEnabled><TargetBucket>logs</TargetBucket><TargetPrefix>b/</TargetPrefix><TargetObjectKeyFormat><PartitionedPrefix><PartitionDateSource>EventTime</PartitionDateSource></PartitionedPrefix></TargetObjectKeyFormat></LoggingEnabled></BucketLoggingStatus>`,
-	"cors":              `<CORSConfiguration` + s3NS + `><CORSRule><ID>web</ID><AllowedHeader>*</AllowedHeader><AllowedHeader>x-amz-meta-a</AllowedHeader><AllowedMethod>GET</AllowedMethod><AllowedOrigin>https://example.com</AllowedOrigin><ExposeHeader>ETag</ExposeHeader><MaxAgeSeconds>3000</MaxAgeSeconds></CORSRule></CORSConfiguration>`,
+	"metrics": `<ListMetricsConfigurationsResult` + s3NS + `><IsTruncated>false</IsTruncated>` +
+		`<MetricsConfiguration><Id>m1</Id><Filter><And><Prefix>data/</Prefix><Tag><Key>c</Key><Value>3</Value></Tag></And></Filter></MetricsConfiguration>` +
+		`<MetricsConfiguration><Id>m2</Id><Filter><Tag><Key>a</Key><Value>1</Value></Tag></Filter></MetricsConfiguration>` +
+		`<MetricsConfiguration><Id>m3</Id><Filter><AccessPointArn>arn:aws:s3:eu-west-1:111122223333:accesspoint/ap</AccessPointArn></Filter></MetricsConfiguration>` +
+		`</ListMetricsConfigurationsResult>`,
+	"analytics": `<ListBucketAnalyticsConfigurationResult` + s3NS + `><IsTruncated>false</IsTruncated>` +
+		`<AnalyticsConfiguration><Id>an1</Id><Filter><And><Prefix>logs/</Prefix><Tag><Key>a</Key><Value>1</Value></Tag><Tag><Key>b</Key><Value>2</Value></Tag></And></Filter><StorageClassAnalysis/></AnalyticsConfiguration>` +
+		`</ListBucketAnalyticsConfigurationResult>`,
+	"intelligent-tiering": `<ListBucketIntelligentTieringConfigurationsOutput` + s3NS + `><IsTruncated>false</IsTruncated>` +
+		`<IntelligentTieringConfiguration><Id>it1</Id><Filter><Prefix>cold/</Prefix></Filter><Status>Enabled</Status><Tiering><Days>90</Days><AccessTier>ARCHIVE_ACCESS</AccessTier></Tiering></IntelligentTieringConfiguration>` +
+		`</ListBucketIntelligentTieringConfigurationsOutput>`,
+	"inventory": `<ListInventoryConfigurationsResult` + s3NS + `><IsTruncated>false</IsTruncated></ListInventoryConfigurationsResult>`,
+	"logging":   `<BucketLoggingStatus` + s3NS + `><LoggingEnabled><TargetBucket>logs</TargetBucket><TargetPrefix>b/</TargetPrefix><TargetObjectKeyFormat><PartitionedPrefix><PartitionDateSource>EventTime</PartitionDateSource></PartitionedPrefix></TargetObjectKeyFormat></LoggingEnabled></BucketLoggingStatus>`,
+	"cors":      `<CORSConfiguration` + s3NS + `><CORSRule><ID>web</ID><AllowedHeader>*</AllowedHeader><AllowedHeader>x-amz-meta-a</AllowedHeader><AllowedMethod>GET</AllowedMethod><AllowedOrigin>https://example.com</AllowedOrigin><ExposeHeader>ETag</ExposeHeader><MaxAgeSeconds>3000</MaxAgeSeconds></CORSRule></CORSConfiguration>`,
 }
 
 type s3Request struct{ method, path, query, sha, auth string }
@@ -106,6 +117,12 @@ func TestReadS3Bucket(t *testing.T) {
 		"OwnershipControls": {"Rules": [{"ObjectOwnership": "BucketOwnerPreferred"}]},
 		"PublicAccessBlockConfiguration": {"BlockPublicAcls": true, "IgnorePublicAcls": false, "BlockPublicPolicy": true, "RestrictPublicBuckets": false},
 		"Tags": [{"Key": "team", "Value": "core"}, {"Key": "env", "Value": "dev"}],
+		"MetricsConfigurations": [
+			{"Id": "m1", "Prefix": "data/", "TagFilters": [{"Key": "c", "Value": "3"}]},
+			{"Id": "m2", "TagFilters": [{"Key": "a", "Value": "1"}]},
+			{"Id": "m3", "AccessPointArn": "arn:aws:s3:eu-west-1:111122223333:accesspoint/ap"}],
+		"AnalyticsConfigurations": [{"Id": "an1", "Prefix": "logs/", "TagFilters": [{"Key": "a", "Value": "1"}, {"Key": "b", "Value": "2"}], "StorageClassAnalysis": {}}],
+		"IntelligentTieringConfigurations": [{"Id": "it1", "Prefix": "cold/", "Status": "Enabled", "Tierings": [{"AccessTier": "ARCHIVE_ACCESS", "Days": 90}]}],
 		"LoggingConfiguration": {"DestinationBucketName": "logs", "LogFilePrefix": "b/",
 			"TargetObjectKeyFormat": {"PartitionedPrefix": {"PartitionDateSource": "EventTime"}}},
 		"CorsConfiguration": {"CorsRules": [{"Id": "web", "AllowedHeaders": ["*", "x-amz-meta-a"], "AllowedMethods": ["GET"],
@@ -123,7 +140,7 @@ func TestReadS3Bucket(t *testing.T) {
 	}
 
 	empty := sha256.Sum256(nil)
-	wantQueries := []string{"abac=", "accelerate=", "cors=", "encryption=", "inventory=&x-id=ListBucketInventoryConfigurations", "logging=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
+	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "logging=", "metrics=&x-id=ListBucketMetricsConfigurations", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
 	var queries []string
 	for _, r := range requests() {
 		queries = append(queries, r.query)

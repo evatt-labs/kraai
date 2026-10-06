@@ -54,6 +54,10 @@ func xmlFields(model *smithyModel, structure string, fields []Field, at string, 
 		if f.Kind == "identifier" || f.Kind == "template" {
 			continue
 		}
+		if f.Kind == "alternatives" {
+			xmlFields(model, structure, f.Alternatives, at, fail)
+			continue
+		}
 		holder := structure
 		for j, step := range f.Via {
 			pm := model.Shapes[holder].Members[step.Name]

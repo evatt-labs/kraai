@@ -189,6 +189,15 @@ type Mapping struct {
 	// property the schema types otherwise; or urlJson, parsing JSON a
 	// service returns percent-encoded, as IAM does its policy documents.
 	Transform string `yaml:"transform,omitempty"`
+	// Alternatives reads the property from the first of several mappings
+	// the response carries, for a union the schema flattens, such as S3's
+	// filters: a prefix at Filter.Prefix or Filter.And.Prefix. Each takes
+	// this mapping's properties when it names none of its own; asList
+	// makes a single structure a one-element list, as Filter.Tag beside
+	// Filter.And.Tags.
+	Alternatives []Mapping `yaml:"alternatives,omitempty"`
+	// AsList is set on an alternative; see Alternatives.
+	AsList bool `yaml:"asList,omitempty"`
 	// Wrap reads a list of strings as a list of structures, each holding
 	// the string as the property named, for names a further call made for
 	// each element fills out, such as the inline policies IAM lists by name.
@@ -247,7 +256,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
+	if len(m.Properties) == 0 && len(m.Alternatives) == 0 && !m.AsList && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
 		return m.Member, nil
 	}
 	type plain Mapping

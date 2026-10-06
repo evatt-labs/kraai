@@ -221,6 +221,11 @@ type Field struct {
 	Unless []Condition
 	// Wrap is Mapping.Wrap.
 	Wrap string
+	// Alternatives is, for Kind alternatives, each mapping compiled as a
+	// field of the same property, tried in order; AsList is set on one
+	// whose single structure becomes a one-element list.
+	Alternatives []Field
+	AsList       bool
 	// Default is Mapping.Default.
 	Default any
 	// Extract is Mapping.Extract.

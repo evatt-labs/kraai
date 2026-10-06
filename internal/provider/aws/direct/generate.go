@@ -333,6 +333,17 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 		// fmt writes a map's keys sorted, so the output is the same each run.
 		fmt.Fprintf(b, ", Regions: %#v", f.Regions)
 	}
+	if f.AsList {
+		b.WriteString(", AsList: true")
+	}
+	if len(f.Alternatives) > 0 {
+		b.WriteString(", Alternatives: []Field{")
+		for _, alt := range f.Alternatives {
+			fieldLiteral(b, alt, "")
+			b.WriteString(", ")
+		}
+		b.WriteString("}")
+	}
 	if len(f.Via) > 0 {
 		b.WriteString(", Via: []Step{")
 		for _, st := range f.Via {

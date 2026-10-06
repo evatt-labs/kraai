@@ -45,6 +45,49 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s is neither mapped nor skipped", at, name)
 			continue
 		}
+		if len(mapping.Alternatives) > 0 {
+			if mapping.Member != "" || len(mapping.Skip) > 0 || mapping.Transform != "" {
+				fail("%s%s reads alternatives, so it names no member, skip or transform of its own", at, name)
+				continue
+			}
+			f := Field{Property: name, Kind: "alternatives"}
+			for i, alt := range mapping.Alternatives {
+				if len(alt.Alternatives) > 0 {
+					fail("%s%s alternative %d reads alternatives of its own", at, name, i)
+					continue
+				}
+				if len(alt.Properties) == 0 && len(alt.Skip) == 0 {
+					alt.Properties, alt.Skip = mapping.Properties, mapping.Skip
+				}
+				prop := props[name]
+				if alt.AsList {
+					// The single structure is one element of the list.
+					items := schema.resolve(prop).Items
+					if items == nil {
+						fail("%s%s alternative %s is read as a list, but the schema does not type the property an array", at, name, alt.Member)
+						continue
+					}
+					prop = *items
+				}
+				asList := alt.AsList
+				alt.AsList = false
+				compiled := compileFields(model, schema, map[string]cfnProperty{name: prop}, structure, map[string]Mapping{name: alt}, nil, at, fail)
+				if len(compiled) != 1 {
+					continue
+				}
+				compiled[0].AsList = asList
+				f.Alternatives = append(f.Alternatives, compiled[0])
+			}
+			if len(f.Alternatives) < 2 {
+				fail("%s%s reads alternatives, but fewer than two compile", at, name)
+				continue
+			}
+			fields = append(fields, f)
+			continue
+		}
+		if mapping.AsList {
+			fail("%s%s is read as a list, which only an alternative is", at, name)
+		}
 		// A placeholder outside a selection makes the member a template.
 		if refs := placeholders(selections.ReplaceAllString(mapping.Member, "")); len(refs) > 0 && mapping.Member != "{"+refs[0]+"}" {
 			if !schema.types(props[name])["string"] {

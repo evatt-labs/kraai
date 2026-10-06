@@ -186,6 +186,12 @@ func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 			}
 			continue
 		}
+		if f.Kind == "alternatives" {
+			if v, ok := firstAlternative(f, func(alt Field) map[string]any { return translateXML(w, n, []Field{alt}) }); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
 		holders, projected := []*xmlNode{n}, false
 		for _, step := range f.Via {
 			var next []*xmlNode

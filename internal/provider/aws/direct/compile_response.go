@@ -368,6 +368,7 @@ func (c *callCompiler) jsonNames() {
 					c.fail("%s maps to %s, which has a jsonName %s is not known to honour", f.Property, f.Member, c.r.Protocol)
 				}
 				walk(f.Fields)
+				walk(f.Alternatives)
 			}
 		}
 		walk(c.r.Fields)

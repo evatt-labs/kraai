@@ -312,10 +312,103 @@ also:
               BucketArn: Bucket
               Format: Format
               Prefix: Prefix
+  - operation: ListBucketMetricsConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      MetricsConfigurations:
+        member: MetricsConfigurationList
+        properties:
+          Id: Id
+          Prefix:
+            alternatives:
+              - member: Filter.Prefix
+              - member: Filter.And.Prefix
+          TagFilters:
+            alternatives:
+              - member: Filter.And.Tags
+              - member: Filter.Tag
+                asList: true
+            properties:
+              Key: Key
+              Value: Value
+          AccessPointArn:
+            alternatives:
+              - member: Filter.AccessPointArn
+              - member: Filter.And.AccessPointArn
+  - operation: ListBucketAnalyticsConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      AnalyticsConfigurations:
+        member: AnalyticsConfigurationList
+        properties:
+          Id: Id
+          Prefix:
+            alternatives:
+              - member: Filter.Prefix
+              - member: Filter.And.Prefix
+          TagFilters:
+            alternatives:
+              - member: Filter.And.Tags
+              - member: Filter.Tag
+                asList: true
+            properties:
+              Key: Key
+              Value: Value
+          StorageClassAnalysis:
+            member: StorageClassAnalysis
+            properties:
+              DataExport:
+                member: DataExport
+                properties:
+                  OutputSchemaVersion: OutputSchemaVersion
+                  Destination:
+                    member: Destination.S3BucketDestination
+                    properties:
+                      BucketAccountId: BucketAccountId
+                      BucketArn: Bucket
+                      Format: Format
+                      Prefix: Prefix
+  - operation: ListBucketIntelligentTieringConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      IntelligentTieringConfigurations:
+        member: IntelligentTieringConfigurationList
+        properties:
+          Id: Id
+          Status: Status
+          Tierings:
+            member: Tierings
+            properties:
+              AccessTier: AccessTier
+              Days: Days
+          Prefix:
+            alternatives:
+              - member: Filter.Prefix
+              - member: Filter.And.Prefix
+          TagFilters:
+            alternatives:
+              - member: Filter.And.Tags
+              - member: Filter.Tag
+                asList: true
+            properties:
+              Key: Key
+              Value: Value
 skip:
-  AnalyticsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
-  IntelligentTieringConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
-  MetricsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
   LifecycleConfiguration: the API nests each rule's prefix, tags and size bounds in a Filter and its expiration in Expiration, which the schema flattens; not mapped
   MetadataConfiguration: GetBucketMetadataConfiguration returns its tables in a result shape not mapped here, and its V1 counterpart is refused for accounts on the V2 API
   MetadataTableConfiguration: GetBucketMetadataTableConfiguration answers V1APIsNotAllowed for an account on the V2 metadata API
