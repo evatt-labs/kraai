@@ -274,19 +274,19 @@ func (c *Client) readPage(ctx context.Context, r Reader, identifier map[string]s
 		return nil, nil, false, "", err
 	}
 	if isXML(r.Protocol) {
-		body, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
+		body, header, err := c.send(ctx, r, r.Method, r.URI, r.Target, values)
 		if err != nil {
 			return nil, nil, false, "", c.absence(r.AbsentErrors, err)
 		}
-		w := &walk{vars: vars, follow: r.PageInput != nil}
+		w := &walk{vars: vars, follow: r.PageInput != nil, header: header}
 		props, captured, busy, err := r.readXML(body, w)
 		return props, captured, busy, w.next, err
 	}
-	out, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
+	out, header, err := c.call(ctx, r, r.Method, r.URI, r.Target, values)
 	if err != nil {
 		return nil, nil, false, "", c.absence(r.AbsentErrors, err)
 	}
-	w := &walk{vars: vars, follow: r.PageInput != nil}
+	w := &walk{vars: vars, follow: r.PageInput != nil, header: header}
 	if t, _ := at(out, r.PageToken); len(r.PageToken) > 0 && t != nil && t != "" {
 		if !w.follow {
 			return nil, nil, false, "", errIncomplete(typeName)

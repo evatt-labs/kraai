@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"net/http"
 	"net/url"
 	"slices"
 	"strconv"
@@ -39,6 +40,12 @@ func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[strin
 		}
 		if f.Kind == "alternatives" {
 			if v, ok := firstAlternative(f, func(alt Field) map[string]any { return r.translate(w, obj, []Field{alt}) }); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
+		if f.Header != "" {
+			if v := w.header.Get(f.Header); v != "" {
 				out[f.Property] = v
 			}
 			continue
@@ -312,6 +319,9 @@ type walk struct {
 	// the token an answer carried for the next page.
 	follow bool
 	next   string
+	// header is the response's headers, which a header-bound member is
+	// read from.
+	header http.Header
 }
 
 // keeps reports whether a list element passes every match, reading each

@@ -213,6 +213,24 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		if len(via) > 0 {
 			f.Via = via
 		}
+		// Only an output's own members bind to the HTTP response outside
+		// the body; a header is read as the text it carries.
+		if trait := httpBinding(m); trait != "" {
+			var header string
+			_ = json.Unmarshal(m.Traits["smithy.api#httpHeader"], &header)
+			switch t := targetType(model.Shapes[m.Target].Type, m.Target); {
+			case trait != "smithy.api#httpHeader":
+				fail("%s%s maps to %s, which is bound to %s, not the body", at, name, mapping.Member, trait)
+			case len(via) > 0 || key != "" || mapping.Transform != "" || len(mapping.Properties) > 0 || len(mapping.TrueWhen) > 0:
+				fail("%s%s maps to the header %s, which is read as it is", at, name, header)
+			case t != "string" && t != "enum" || !schema.types(props[name])["string"]:
+				fail("%s%s maps to the header %s, which is read as a string, but one side is not", at, name, header)
+			default:
+				f.Kind, f.Header = "scalar", header
+				fields = append(fields, f)
+			}
+			continue
+		}
 		// valueTarget is the shape read: the map's value for a key.
 		valueTarget := m.Target
 		if key != "" {
@@ -585,4 +603,14 @@ func compileSpread(model *smithyModel, schema *cfnSchema, list Field, nested map
 		return nil
 	}
 	return &Field{Property: sp.Property, Member: sp.Member, Kind: "list", Spread: true}
+}
+
+// httpBinding is the trait that binds member outside the body, if one does.
+func httpBinding(m smithyMember) string {
+	for _, trait := range []string{"smithy.api#httpHeader", "smithy.api#httpPrefixHeaders", "smithy.api#httpResponseCode"} {
+		if m.Traits[trait] != nil {
+			return trait
+		}
+	}
+	return ""
 }

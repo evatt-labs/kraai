@@ -229,6 +229,9 @@ type Field struct {
 	// Spread marks the list field whose values each make one element of
 	// the enclosing list; see Mapping.Spread.
 	Spread bool
+	// Header is the response header a member bound to one is read from,
+	// such as S3's x-amz-transition-default-minimum-object-size.
+	Header string
 	// Default is Mapping.Default.
 	Default any
 	// Extract is Mapping.Extract.

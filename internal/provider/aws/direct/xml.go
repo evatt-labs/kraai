@@ -192,6 +192,12 @@ func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 			}
 			continue
 		}
+		if f.Header != "" {
+			if v := w.header.Get(f.Header); v != "" {
+				out[f.Property] = v
+			}
+			continue
+		}
 		holders, projected := []*xmlNode{n}, false
 		for _, step := range f.Via {
 			var next []*xmlNode

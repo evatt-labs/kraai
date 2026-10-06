@@ -51,7 +51,7 @@ func itemName(m smithyMember, list smithyShape) string {
 func xmlFields(model *smithyModel, structure string, fields []Field, at string, fail func(string, ...any)) {
 	for i := range fields {
 		f := &fields[i]
-		if f.Kind == "identifier" || f.Kind == "template" {
+		if f.Kind == "identifier" || f.Kind == "template" || f.Header != "" {
 			continue
 		}
 		if f.Kind == "alternatives" {

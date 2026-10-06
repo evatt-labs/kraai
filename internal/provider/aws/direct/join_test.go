@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -274,15 +275,42 @@ func TestCompileRefusesWhatTheBodyDoesNotCarry(t *testing.T) {
 			t.Fatalf("errors = %v", errs)
 		}
 	})
-	t.Run("a header-bound member", func(t *testing.T) {
+	headerWidget := func() (map[string]any, map[string]any) {
 		m := restJSONWidget()
 		members := m["shapes"].(map[string]any)["com.example#GetWidgetResponse"].(map[string]any)["members"].(map[string]any)
 		delete(members["Widget"].(map[string]any), "traits")
 		members["WidgetId"], members["Name"], members["Size"] = map[string]any{"target": "smithy.api#String"}, map[string]any{"target": "smithy.api#String"}, map[string]any{"target": "smithy.api#Integer"}
+		return m, members
+	}
+	t.Run("a header-bound member is read from its header", func(t *testing.T) {
+		m, _ := headerWidget()
 		o := widgetOverride("")
 		o.Properties["Name"] = Mapping{Member: "ETag"}
+		r, errs := compileWidget(t, m, o)
+		if len(errs) > 0 {
+			t.Fatalf("errors = %v", errs)
+		}
+		i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == "Name" })
+		if i < 0 || r.Fields[i].Header == "" {
+			t.Fatalf("fields = %+v, want Name read from a header", r.Fields)
+		}
+	})
+	t.Run("a header-bound member transformed", func(t *testing.T) {
+		m, _ := headerWidget()
+		o := widgetOverride("")
+		o.Properties["Name"] = Mapping{Member: "ETag", Transform: "arnResource"}
 		_, errs := compileWidget(t, m, o)
-		if !containsErr(errs, "Name maps to ETag, which is bound to smithy.api#httpHeader") {
+		if !containsErr(errs, "Name maps to the header") {
+			t.Fatalf("errors = %v", errs)
+		}
+	})
+	t.Run("a member bound to the status code", func(t *testing.T) {
+		m, members := headerWidget()
+		members["Code"] = map[string]any{"target": "smithy.api#Integer", "traits": map[string]any{"smithy.api#httpResponseCode": map[string]any{}}}
+		o := widgetOverride("")
+		o.Properties["Size"] = Mapping{Member: "Code"}
+		_, errs := compileWidget(t, m, o)
+		if !containsErr(errs, "Size maps to Code, which is bound to smithy.api#httpResponseCode, not the body") {
 			t.Fatalf("errors = %v", errs)
 		}
 	})

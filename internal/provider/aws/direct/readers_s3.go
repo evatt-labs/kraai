@@ -645,7 +645,7 @@ func init() {
 										},
 									},
 								},
-								{Property: "TransitionDefaultMinimumObjectSize", Member: "TransitionDefaultMinimumObjectSize", Kind: "scalar", XMLName: "TransitionDefaultMinimumObjectSize", Scalar: "string"},
+								{Property: "TransitionDefaultMinimumObjectSize", Member: "TransitionDefaultMinimumObjectSize", Kind: "scalar", Header: "x-amz-transition-default-minimum-object-size"},
 							},
 						},
 					},

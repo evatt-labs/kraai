@@ -339,6 +339,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	if f.Spread {
 		b.WriteString(", Spread: true")
 	}
+	if f.Header != "" {
+		fmt.Fprintf(b, ", Header: %q", f.Header)
+	}
 	if len(f.Alternatives) > 0 {
 		b.WriteString(", Alternatives: []Field{")
 		for _, alt := range f.Alternatives {

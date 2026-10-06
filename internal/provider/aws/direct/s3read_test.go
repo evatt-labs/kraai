@@ -40,7 +40,7 @@ var s3Bodies = map[string]string{
 	"lifecycle": `<LifecycleConfiguration` + s3NS + `>` +
 		`<Rule><ID>r1</ID><Filter><And><Prefix>tmp/</Prefix><Tag><Key>d</Key><Value>4</Value></Tag><ObjectSizeGreaterThan>1024</ObjectSizeGreaterThan></And></Filter><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule>` +
 		`<Rule><ID>r2</ID><Filter><Prefix>old/</Prefix></Filter><Status>Enabled</Status><Transition><Days>40</Days><StorageClass>STANDARD_IA</StorageClass></Transition><NoncurrentVersionExpiration><NoncurrentDays>7</NoncurrentDays></NoncurrentVersionExpiration></Rule>` +
-		`<TransitionDefaultMinimumObjectSize>all_storage_classes_128K</TransitionDefaultMinimumObjectSize></LifecycleConfiguration>`,
+		`</LifecycleConfiguration>`,
 	"versioning":        `<VersioningConfiguration` + s3NS + `><Status>Enabled</Status></VersioningConfiguration>`,
 	"accelerate":        `<AccelerateConfiguration` + s3NS + `><Status>Suspended</Status></AccelerateConfiguration>`,
 	"abac":              `<AbacStatus` + s3NS + `><Status>Enabled</Status></AbacStatus>`,
@@ -75,7 +75,13 @@ func s3Client(t *testing.T, answer func(query string) (int, string)) (*Client, f
 		mu.Lock()
 		seen = append(seen, s3Request{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, r.Header.Get("X-Amz-Content-Sha256"), r.Header.Get("Authorization")})
 		mu.Unlock()
-		status, body := answer(strings.TrimSuffix(strings.SplitN(r.URL.RawQuery, "&", 2)[0], "="))
+		query := strings.TrimSuffix(strings.SplitN(r.URL.RawQuery, "&", 2)[0], "=")
+		status, body := answer(query)
+		if status == http.StatusOK {
+			for k, v := range s3Headers[query] {
+				w.Header().Set(k, v)
+			}
+		}
 		w.WriteHeader(status)
 		_, _ = io.WriteString(w, body)
 	}))
@@ -224,6 +230,12 @@ func s3NotFound(code string) (int, string) {
 
 // s3Unset is the configurations TestReadS3Bucket's bucket does not have,
 // by subresource, and the code S3 answers for each.
+// s3Headers is the response headers S3 answers a subresource with,
+// beside its body.
+var s3Headers = map[string]map[string]string{
+	"lifecycle": {"x-amz-transition-default-minimum-object-size": "all_storage_classes_128K"},
+}
+
 var s3Unset = map[string]string{
 	"metadataTable": "V1APIsNotAllowed",
 	"object-lock":   "ObjectLockConfigurationNotFoundError",

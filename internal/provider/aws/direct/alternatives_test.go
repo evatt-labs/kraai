@@ -2,6 +2,7 @@ package direct
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -110,5 +111,19 @@ func TestSpreadAndPresenceAreChecked(t *testing.T) {
 				t.Fatalf("errors = %q, want %q", got, c.refused)
 			}
 		})
+	}
+}
+
+// A header-bound field reads its header, under JSON as under XML; a
+// header the response does not carry leaves the property unread.
+func TestHeaderFieldsReadTheirHeader(t *testing.T) {
+	f := Field{Property: "Name", Member: "ETag", Kind: "scalar", Header: "ETag"}
+	h := http.Header{}
+	h.Set("ETag", `"abc"`)
+	if got := (Reader{}).translate(&walk{header: h}, map[string]any{"ETag": "body"}, []Field{f}); got["Name"] != `"abc"` {
+		t.Fatalf("translate = %v, want the header's value", got)
+	}
+	if got := (Reader{}).translate(&walk{header: http.Header{}}, map[string]any{"ETag": "body"}, []Field{f}); len(got) != 0 {
+		t.Fatalf("translate = %v, want nothing read without the header", got)
 	}
 }

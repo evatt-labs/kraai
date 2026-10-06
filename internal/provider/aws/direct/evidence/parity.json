@@ -2484,31 +2484,55 @@
     {
       "type": "AWS::S3::Bucket",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-05",
+      "date": "2026-10-06",
       "region": "us-east-1",
-      "outcome": "parity",
-      "instances": 3,
+      "outcome": "differs",
+      "instances": 6,
       "compared": [
         "AbacStatus",
         "AccelerateConfiguration",
+        "AnalyticsConfigurations",
+        "Arn",
         "BucketEncryption",
         "BucketName",
+        "CorsConfiguration",
+        "DomainName",
+        "DualStackDomainName",
+        "IntelligentTieringConfigurations",
+        "InventoryConfigurations",
+        "LifecycleConfiguration",
+        "LoggingConfiguration",
+        "MetricsConfigurations",
+        "NotificationConfiguration",
+        "ObjectLockConfiguration",
+        "ObjectLockEnabled",
         "OwnershipControls",
         "PublicAccessBlockConfiguration",
-        "VersioningConfiguration"
+        "RegionalDomainName",
+        "ReplicationConfiguration",
+        "Tags",
+        "VersioningConfiguration",
+        "WebsiteConfiguration",
+        "WebsiteURL"
+      ],
+      "differing": [
+        "LifecycleConfiguration.TransitionDefaultMinimumObjectSize"
       ],
       "observed": [
+        "MetadataConfigurationNotFound",
         "NoSuchCORSConfiguration",
+        "NoSuchLifecycleConfiguration",
         "NoSuchPublicAccessBlockConfiguration",
         "NoSuchTagSet",
         "NoSuchWebsiteConfiguration",
         "ObjectLockConfigurationNotFoundError",
         "OwnershipControlsNotFoundError",
-        "ReplicationConfigurationNotFoundError"
+        "ReplicationConfigurationNotFoundError",
+        "V1APIsNotAllowed"
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "19063474d03fd9ff3b6f4efcf16372d8812545244fa5a6821659f947b7933ac9"
+      "override": "6d6bdccbab07fc9b535235e5ff30ca822fe46cf6ff35012f3195dbd1675190ab"
     },
     {
       "type": "AWS::S3Vectors::VectorBucket",
