@@ -315,6 +315,33 @@
       "override": "5705128f86e8d158bc2f0d8b3f05a5fafb99f0a7a49d86fcd609e0fc713238ec"
     },
     {
+      "type": "AWS::S3::Bucket",
+      "date": "2026-10-06",
+      "outcome": "parity",
+      "updated": [
+        "AccelerateConfiguration",
+        "BucketEncryption",
+        "CorsConfiguration",
+        "LoggingConfiguration",
+        "ObjectLockConfiguration",
+        "OwnershipControls",
+        "PublicAccessBlockConfiguration",
+        "Tags",
+        "VersioningConfiguration",
+        "WebsiteConfiguration"
+      ],
+      "override": "cc8cb9cefaa1d5bcfa41c748baf3e7c751d2d5501e993142ccb63367951d8535",
+      "observed": [
+        "MetadataConfigurationNotFound",
+        "NoSuchCORSConfiguration",
+        "NoSuchLifecycleConfiguration",
+        "NoSuchTagSet",
+        "NoSuchWebsiteConfiguration",
+        "ReplicationConfigurationNotFoundError",
+        "V1APIsNotAllowed"
+      ]
+    },
+    {
       "type": "AWS::SQS::Queue",
       "date": "2026-09-29",
       "outcome": "parity",

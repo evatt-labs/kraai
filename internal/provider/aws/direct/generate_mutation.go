@@ -75,6 +75,9 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	if m.Idempotent {
 		b.WriteString("Idempotent: true, ")
 	}
+	if m.Checksum {
+		b.WriteString("Checksum: true, ")
+	}
 	if m.Required != nil {
 		fmt.Fprintf(b, "Required: %#v, ", m.Required)
 	}

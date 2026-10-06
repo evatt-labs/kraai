@@ -20,6 +20,9 @@ type Reader struct {
 	// DisableDoubleEncoding signs the path as sent, not escaped a second
 	// time, as an auth scheme with disableDoubleEncoding asks, such as S3's.
 	DisableDoubleEncoding bool
+	// RequestChecksum sends the request body's CRC32, which a call whose
+	// operation requires a request checksum must carry, as S3's puts do.
+	RequestChecksum bool
 	// Target is the X-Amz-Target header of an awsJson protocol.
 	Target string
 	// Method and URI are the HTTP binding of a restJson1 operation.
@@ -63,6 +66,8 @@ type Reader struct {
 	// Unsupported is the override's unsupported paths and reasons: see
 	// Override.Unsupported.
 	Unsupported map[string]string
+	// UnsupportedWhen is the override's conditional routes, by property.
+	UnsupportedWhen map[string]UnsupportedWhen
 	// WriteOnly is the schema's top-level write-only properties and objects
 	// whose every member is write-only. None is ever read back, so an update
 	// always finds them changed: apply leaves out those no update call sets,
@@ -192,6 +197,8 @@ type Binding struct {
 	Structured any
 	// JSONShape renames a restJson1 body member's nested keys.
 	JSONShape *jsonShape
+	// XMLPlan writes a restXml payload member as its XML document.
+	XMLPlan *xmlPlan
 }
 
 // Field reads one property from the response.

@@ -301,7 +301,7 @@ func (c *Client) mutate(ctx context.Context, r Reader, m MutationCall, values ma
 // mutateWith is mutate retrying only what policy allows.
 func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m MutationCall, values map[string]any) (map[string]any, error) {
 	call := Reader{Type: r.Type, Protocol: r.Protocol, SigningName: r.SigningName, Host: r.Host, SigningRegion: r.SigningRegion,
-		Action: m.Operation, Version: r.Version}
+		DisableDoubleEncoding: r.DisableDoubleEncoding, RequestChecksum: m.Checksum, Action: m.Operation, Version: r.Version}
 	wireAs := func(name string, v any) (any, error) {
 		// A tag or list call's elements are shaped as its property is.
 		if (name == "added" || name == "removed") && m.TagProperty != "" {
@@ -328,7 +328,7 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 		if !ok {
 			continue
 		}
-		if r.Protocol == "restJson1" {
+		if isREST(r.Protocol) {
 			placed, err := restBindings(m, member, v)
 			if err != nil {
 				return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
@@ -353,7 +353,7 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 		}
 		bindings = append(bindings, token...)
 	}
-	if r.Protocol == "restJson1" {
+	if isREST(r.Protocol) {
 		if err := restLabelsFilled(m, bindings); err != nil {
 			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
 		}

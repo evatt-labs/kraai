@@ -55,9 +55,6 @@ func compileOne(files fs.FS, lock Lock, o Override) (Reader, []error) {
 	if bound > 1 {
 		errs = append(errs, fmt.Errorf("endpointParams binds %d parameters to input members; one is the most an endpoint's path carries", bound))
 	}
-	if _, member := endpointParams(o.EndpointParams, nil); member != "" && (o.Create != nil || len(o.Update) > 0 || o.Delete != nil) {
-		errs = append(errs, fmt.Errorf("endpointParams binds a parameter to %s, which a mutation does not yet send", member))
-	}
 	if model, err := loadModel(files, lock.Models[o.Read.Model].File); err == nil && r.Protocol != "" {
 		var codeErrs []error
 		r.UndeclaredReadErrors, r.UndeclaredDeleteErrors, codeErrs = checkErrorCodes(&model, r.Protocol, o)

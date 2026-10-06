@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"hash/crc32"
 	"io"
 	"net/http"
 	"net/url"
@@ -70,6 +73,7 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 		base = c.Endpoint(host)
 	}
 	body := map[string]any{}
+	var xmlPayload []byte
 	path, query, headers, form := "/", url.Values{}, http.Header{}, url.Values{}
 	if isREST(r.Protocol) {
 		path = uri
@@ -91,6 +95,12 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 			headers.Set(b.Name, b.Value)
 		case "form":
 			form.Set(b.Name, b.Value)
+		case "payload":
+			doc, err := encodeXML(b.XMLPlan, b.Structured)
+			if err != nil {
+				return nil, fmt.Errorf("writing %s as XML: %w", b.Member, err)
+			}
+			xmlPayload = doc
 		default:
 			var v any = b.Value
 			switch {
@@ -115,15 +125,18 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 	}
 
 	var payload []byte
-	if isQuery(r.Protocol) {
+	switch {
+	case isQuery(r.Protocol):
 		form.Set("Action", r.Action)
 		form.Set("Version", r.Version)
 		payload = []byte(form.Encode())
-	} else if isAWSJSON(r.Protocol) || r.Protocol == "restJson1" && len(body) > 0 {
+	case isAWSJSON(r.Protocol) || r.Protocol == "restJson1" && len(body) > 0:
 		var err error
 		if payload, err = json.Marshal(body); err != nil {
 			return nil, err
 		}
+	case xmlPayload != nil:
+		payload = xmlPayload
 	}
 	u := base + path
 	if len(query) > 0 {
@@ -145,10 +158,22 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 		req.Header.Set("X-Amz-Target", target)
 	case "awsQuery", "ec2Query":
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+	case "restXml":
+		if payload != nil {
+			req.Header.Set("Content-Type", "application/xml")
+		}
 	default:
 		if payload != nil {
 			req.Header.Set("Content-Type", "application/json")
 		}
+	}
+	if r.RequestChecksum {
+		// S3 refuses a put that carries no checksum of its body; CRC32 is
+		// the one the SDKs send by default.
+		sum := make([]byte, 4)
+		binary.BigEndian.PutUint32(sum, crc32.ChecksumIEEE(payload))
+		req.Header.Set("X-Amz-Checksum-Crc32", base64.StdEncoding.EncodeToString(sum))
+		req.Header.Set("X-Amz-Sdk-Checksum-Algorithm", "CRC32")
 	}
 
 	creds, err := c.Credentials.Retrieve(ctx)
