@@ -92,6 +92,18 @@
           "target": "com.amazonaws.s3#DeleteBucket"
         },
         {
+          "target": "com.amazonaws.s3#DeleteBucketAnalyticsConfiguration"
+        },
+        {
+          "target": "com.amazonaws.s3#DeleteBucketIntelligentTieringConfiguration"
+        },
+        {
+          "target": "com.amazonaws.s3#DeleteBucketInventoryConfiguration"
+        },
+        {
+          "target": "com.amazonaws.s3#DeleteBucketMetricsConfiguration"
+        },
+        {
           "target": "com.amazonaws.s3#GetBucketAbac"
         },
         {
@@ -155,16 +167,28 @@
           "target": "com.amazonaws.s3#PutBucketAccelerateConfiguration"
         },
         {
+          "target": "com.amazonaws.s3#PutBucketAnalyticsConfiguration"
+        },
+        {
           "target": "com.amazonaws.s3#PutBucketCors"
         },
         {
           "target": "com.amazonaws.s3#PutBucketEncryption"
         },
         {
+          "target": "com.amazonaws.s3#PutBucketIntelligentTieringConfiguration"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketInventoryConfiguration"
+        },
+        {
           "target": "com.amazonaws.s3#PutBucketLifecycleConfiguration"
         },
         {
           "target": "com.amazonaws.s3#PutBucketLogging"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketMetricsConfiguration"
         },
         {
           "target": "com.amazonaws.s3#PutBucketNotificationConfiguration"
@@ -25145,6 +25169,214 @@
       },
       "type": "operation"
     },
+    "com.amazonaws.s3#DeleteBucketAnalyticsConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#DeleteBucketAnalyticsConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/{Bucket}?analytics"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#DeleteBucketAnalyticsConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#AnalyticsId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#DeleteBucketIntelligentTieringConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#DeleteBucketIntelligentTieringConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/{Bucket}?intelligent-tiering"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#DeleteBucketIntelligentTieringConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#IntelligentTieringId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#DeleteBucketInventoryConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#DeleteBucketInventoryConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/{Bucket}?inventory"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#DeleteBucketInventoryConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#InventoryId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#DeleteBucketMetricsConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#DeleteBucketMetricsConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/{Bucket}?metrics"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#DeleteBucketMetricsConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#MetricsId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3#DeleteBucketRequest": {
       "members": {
         "Bucket": {
@@ -28436,6 +28668,66 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#PutBucketAnalyticsConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketAnalyticsConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?analytics"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketAnalyticsConfigurationRequest": {
+      "members": {
+        "AnalyticsConfiguration": {
+          "target": "com.amazonaws.s3#AnalyticsConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "AnalyticsConfiguration"
+          }
+        },
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#AnalyticsId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3#PutBucketCors": {
       "input": {
         "target": "com.amazonaws.s3#PutBucketCorsRequest"
@@ -28566,6 +28858,126 @@
             "smithy.api#httpPayload": {},
             "smithy.api#required": {},
             "smithy.api#xmlName": "ServerSideEncryptionConfiguration"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketIntelligentTieringConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketIntelligentTieringConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?intelligent-tiering"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketIntelligentTieringConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#IntelligentTieringId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        },
+        "IntelligentTieringConfiguration": {
+          "target": "com.amazonaws.s3#IntelligentTieringConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "IntelligentTieringConfiguration"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketInventoryConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketInventoryConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?inventory"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketInventoryConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#InventoryId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        },
+        "InventoryConfiguration": {
+          "target": "com.amazonaws.s3#InventoryConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "InventoryConfiguration"
           }
         }
       },
@@ -28717,6 +29129,66 @@
           "target": "com.amazonaws.s3#AccountId",
           "traits": {
             "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketMetricsConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketMetricsConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?metrics"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketMetricsConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#MetricsId",
+          "traits": {
+            "smithy.api#httpQuery": "id",
+            "smithy.api#required": {}
+          }
+        },
+        "MetricsConfiguration": {
+          "target": "com.amazonaws.s3#MetricsConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "MetricsConfiguration"
           }
         }
       },

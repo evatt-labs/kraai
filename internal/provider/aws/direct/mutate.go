@@ -311,15 +311,23 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 	call := Reader{Type: r.Type, Protocol: r.Protocol, SigningName: r.SigningName, Host: r.Host, SigningRegion: r.SigningRegion,
 		DisableDoubleEncoding: r.DisableDoubleEncoding, RequestChecksum: m.Checksum, Action: m.Operation, Version: r.Version}
 	wireAs := func(name string, v any) (any, error) {
-		// A tag or list call's elements are shaped as its property is.
-		if (name == "added" || name == "removed") && m.TagProperty != "" {
+		// A tag or list call's elements are shaped as its property is,
+		// and the one element a call is made for as one of them.
+		element := name == "element" && m.TagProperty != ""
+		if (name == "added" || name == "removed" || element) && m.TagProperty != "" {
 			name = m.TagProperty
 		}
 		f, ok := readField(r, name)
 		if !ok {
 			return nil, fmt.Errorf("the %s call %s: %s has no read mapping to send it by", r.Type, m.Operation, name)
 		}
-		w, err := wire(f, v)
+		var w any
+		var err error
+		if element {
+			w, err = wireStructure(f, v)
+		} else {
+			w, err = wire(f, v)
+		}
 		if err != nil {
 			return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)
 		}
