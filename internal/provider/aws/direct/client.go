@@ -62,7 +62,7 @@ func (c *Client) Read(ctx context.Context, typeName string, identifier map[strin
 	if !ok {
 		return nil, fmt.Errorf("%s has no direct reader", typeName)
 	}
-	props, captured, _, err := c.readCall(ctx, r, identifier)
+	c, props, captured, err := c.readFollowing(ctx, r, identifier)
 	if err != nil {
 		return nil, err
 	}
