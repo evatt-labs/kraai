@@ -175,6 +175,17 @@ func empty(v any) bool {
 	return false
 }
 
+// setsNothing reports whether every one of u's properties changes sets is
+// empty.
+func setsNothing(u MutationCall, changes map[string]any) bool {
+	for _, p := range u.Properties {
+		if v, changed := changes[p]; changed && !empty(v) {
+			return false
+		}
+	}
+	return true
+}
+
 // readableValue is v with only what f's read maps, at every depth: the
 // members of a structure, or of each structure in a list, it reads.
 func readableValue(f Field, v any) any {

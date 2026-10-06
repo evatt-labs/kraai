@@ -66,8 +66,9 @@ type MutationCall struct {
 	// TagProperty as the property their elements are shaped as.
 	TagProperty string
 	Add, Remove *MutationCall
-	// Before is an update call's UpdateCall.Before.
-	Before *MutationCall
+	// Before and WhenEmpty are an update call's UpdateCall.Before and
+	// UpdateCall.WhenEmpty.
+	Before, WhenEmpty *MutationCall
 }
 
 // ChangeRoute is a compiled ChangeCall.
@@ -354,6 +355,9 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 		if u.Before != nil {
 			c.Before = call(*u.Before, at+" before", keys, "")
 		}
+		if u.WhenEmpty != nil {
+			c.WhenEmpty = call(*u.WhenEmpty, at+" whenEmpty", keys, "")
+		}
 		if u.Together {
 			for _, p := range requiredBy[c] {
 				if slices.Contains(u.Properties, p) {
@@ -446,6 +450,9 @@ func mutations(o Override) []Mutation {
 		out = append(out, u.Mutation)
 		if u.Before != nil {
 			out = append(out, *u.Before)
+		}
+		if u.WhenEmpty != nil {
+			out = append(out, *u.WhenEmpty)
 		}
 		if u.Tags != nil {
 			out = append(out, u.Tags.Add, u.Tags.Remove)

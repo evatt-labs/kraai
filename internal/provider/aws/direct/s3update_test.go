@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -25,6 +26,8 @@ type s3Echo struct {
 	// stored, when set, is what S3 keeps of a document put, such as its
 	// filter rule names respelled.
 	stored func(string) string
+	// deleted is each subresource deleted, which reads as its absence.
+	deleted []string
 }
 
 func (s *s3Echo) client(t *testing.T) *Client {
@@ -37,6 +40,17 @@ func (s *s3Echo) client(t *testing.T) *Client {
 		defer s.mu.Unlock()
 		if r.Method == http.MethodPut {
 			s.puts[query], s.header[query] = string(body), r.Header.Clone()
+			return
+		}
+		if r.Method == http.MethodDelete {
+			delete(s.puts, query)
+			s.deleted = append(s.deleted, query)
+			return
+		}
+		if query == "tagging" && slices.Contains(s.deleted, query) {
+			status, out := s3NotFound("NoSuchTagSet")
+			w.WriteHeader(status)
+			_, _ = io.WriteString(w, out)
 			return
 		}
 		if put, ok := s.puts[query]; ok {
@@ -166,5 +180,29 @@ func TestUpdateS3NotificationRuleNameInAnyCase(t *testing.T) {
 	}
 	if body := s.puts["notification"]; !strings.Contains(body, "<Name>prefix</Name>") {
 		t.Errorf("put body\n%s\nwant the name as the manifest spells it", body)
+	}
+}
+
+// No tags is the bucket's tagging deleted, since S3 refuses an empty tag
+// set; a read then finds none.
+func TestUpdateS3BucketToNoTags(t *testing.T) {
+	s := &s3Echo{}
+	client := s.client(t)
+	tags := []any{map[string]any{"Key": "team", "Value": "core"}}
+	if err := client.Update(context.Background(), "AWS::S3::Bucket", "b", map[string]any{}, map[string]any{"Tags": tags}); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Update(context.Background(), "AWS::S3::Bucket", "b", map[string]any{"Tags": tags}, map[string]any{"Tags": []any{}}); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(s.deleted, []string{"tagging"}) {
+		t.Errorf("deleted = %v, want the tagging alone", s.deleted)
+	}
+	got, err := client.Read(context.Background(), "AWS::S3::Bucket", map[string]string{"BucketName": "b"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v, read := got["Tags"]; read {
+		t.Errorf("Tags read back as %v, want none", v)
 	}
 }

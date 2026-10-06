@@ -386,6 +386,12 @@ type UpdateCall struct {
 	// absentErrors are the codes that mean there was nothing to undo, such
 	// as no gateway attached, and the update goes on.
 	Before *Mutation `yaml:"before,omitempty"`
+	// WhenEmpty is made instead of the call when every one of Properties
+	// the change sets is empty, for a service that refuses an empty
+	// document and takes its removal as a call of its own, such as S3's
+	// DeleteBucketTagging for no tags. Its absentErrors are the codes that
+	// mean there was nothing to remove.
+	WhenEmpty *Mutation `yaml:"whenEmpty,omitempty"`
 }
 
 // ListRoute updates a list property by the elements added or changed, {added},

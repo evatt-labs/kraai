@@ -104,6 +104,9 @@
           "target": "com.amazonaws.s3#DeleteBucketMetricsConfiguration"
         },
         {
+          "target": "com.amazonaws.s3#DeleteBucketTagging"
+        },
+        {
           "target": "com.amazonaws.s3#GetBucketAbac"
         },
         {
@@ -25378,6 +25381,51 @@
       "type": "structure"
     },
     "com.amazonaws.s3#DeleteBucketRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#DeleteBucketTagging": {
+      "input": {
+        "target": "com.amazonaws.s3#DeleteBucketTaggingRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/{Bucket}?tagging"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#DeleteBucketTaggingRequest": {
       "members": {
         "Bucket": {
           "target": "com.amazonaws.s3#BucketName",
