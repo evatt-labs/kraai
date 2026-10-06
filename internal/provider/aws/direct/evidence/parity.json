@@ -2486,7 +2486,7 @@
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
       "date": "2026-10-06",
       "region": "us-east-1",
-      "outcome": "differs",
+      "outcome": "parity",
       "instances": 6,
       "compared": [
         "AbacStatus",
@@ -2514,9 +2514,6 @@
         "VersioningConfiguration",
         "WebsiteConfiguration",
         "WebsiteURL"
-      ],
-      "differing": [
-        "LifecycleConfiguration.TransitionDefaultMinimumObjectSize"
       ],
       "observed": [
         "MetadataConfigurationNotFound",
