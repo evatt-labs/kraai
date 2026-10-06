@@ -106,13 +106,15 @@ up() {
 }
 
 empty() {
-  local b="$1" batch
+  local b="$1" batch bypass=()
+  # S3 refuses the governance bypass on a bucket without object lock.
+  [ "$b" = "$locked" ] && bypass=(--bypass-governance-retention)
   aws s3api head-bucket --bucket "$b" 2>/dev/null || return 0
   while :; do
     batch=$(aws s3api list-object-versions --bucket "$b" --max-items 500 --output json |
       jq -c '{Objects: ([.Versions[]?, .DeleteMarkers[]?] | map({Key, VersionId})), Quiet: true}')
     [ "$(jq '.Objects | length' <<<"$batch")" -gt 0 ] || break
-    run aws s3api delete-objects --bucket "$b" --bypass-governance-retention --delete "$batch" >/dev/null
+    run aws s3api delete-objects --bucket "$b" "${bypass[@]}" --delete "$batch" >/dev/null
     $apply || break
   done
 }
