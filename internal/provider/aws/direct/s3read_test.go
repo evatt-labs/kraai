@@ -341,7 +341,7 @@ func TestS3EndpointParamsAreChecked(t *testing.T) {
 		refused string
 	}{
 		"the bucket unbound":        {map[string]any{"ForcePathStyle": true}, "signs https://s3express-control.us-kraai-1.amazonaws.com for s3express, not s3"},
-		"a member it does not name": {map[string]any{"ForcePathStyle": true, "Bucket": "{Nope}"}, "binds Bucket to Nope, which GetBucketVersioning does not name as that context parameter"},
+		"a member it does not name": {map[string]any{"ForcePathStyle": true, "Bucket": "{Nope}"}, "GetBucketVersioning does not name Nope as the context parameter Bucket, which endpointParams binds it to"},
 		"virtual-hosted addressing": {map[string]any{"Bucket": "{Bucket}"}, "whose path is not the bound parameter alone"},
 		"two members bound":         {map[string]any{"ForcePathStyle": true, "Bucket": "{Bucket}", "Key": "{Key}"}, "binds 2 parameters"},
 	} {

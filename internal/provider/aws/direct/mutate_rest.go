@@ -21,8 +21,12 @@ func restBindings(m MutationCall, member string, v any) ([]Binding, error) {
 		return nil, fmt.Errorf("the %s call has no binding for %s", m.Operation, member)
 	}
 	b := m.Bindings[i]
-	if b.Location == "body" {
+	switch b.Location {
+	case "body":
 		b.Structured = renameJSON(v, b.JSONShape)
+		return []Binding{b}, nil
+	case "payload":
+		b.Structured = v
 		return []Binding{b}, nil
 	}
 	items := []any{v}

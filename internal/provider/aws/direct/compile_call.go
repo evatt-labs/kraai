@@ -136,31 +136,42 @@ func (c *callCompiler) boundEndpoint() {
 	if c.bound == "" {
 		return
 	}
+	if reason := boundCall(c.model.Shapes[ref(c.op.Input)], c.r.URI, c.bound, c.o.EndpointParams); reason != "" {
+		c.fail("%s %s", c.o.Read.Operation, reason)
+		return
+	}
+	for _, b := range c.r.Identifier {
+		if b.Location == "label" && b.Member == c.bound {
+			return
+		}
+	}
+	c.fail("endpointParams binds %s, which %s's identifier does not bind", c.bound, c.o.Read.Operation)
+}
+
+// boundCall is why a call cannot carry the endpoint parameter bound to
+// member: input must name member as that context parameter, or the value
+// would never reach the rule set, and the URI must lead with member as a
+// label, since the endpoint's path is dropped for the URI's; or "".
+func boundCall(input smithyShape, uri, member string, declared map[string]any) string {
 	var param string
-	for name, v := range c.o.EndpointParams {
-		if v == "{"+c.bound+"}" {
+	for name, v := range declared {
+		if v == "{"+member+"}" {
 			param = name
 		}
 	}
-	m, ok := c.model.Shapes[ref(c.op.Input)].Members[c.bound]
 	var ctx struct{ Name string }
-	if ok {
+	if m, ok := input.Members[member]; ok {
 		_ = json.Unmarshal(m.Traits["smithy.rules#contextParam"], &ctx)
 	}
 	if ctx.Name != param {
-		c.fail("endpointParams binds %s to %s, which %s does not name as that context parameter", param, c.bound, c.o.Read.Operation)
-		return
+		return fmt.Sprintf("does not name %s as the context parameter %s, which endpointParams binds it to", member, param)
 	}
-	first, _, _ := strings.Cut(strings.TrimPrefix(c.r.URI, "/"), "/")
+	first, _, _ := strings.Cut(strings.TrimPrefix(uri, "/"), "/")
 	first, _, _ = strings.Cut(first, "?")
-	if first == "{"+c.bound+"}" {
-		for _, b := range c.r.Identifier {
-			if b.Location == "label" && b.Member == c.bound {
-				return
-			}
-		}
+	if first != "{"+member+"}" {
+		return fmt.Sprintf("has the URI %s, which does not lead with {%s}, the parameter endpointParams binds", uri, member)
 	}
-	c.fail("endpointParams binds %s to %s, but %s's URI %s does not lead with it as a label the identifier binds", param, c.bound, c.o.Read.Operation, c.r.URI)
+	return ""
 }
 
 // operation binds the read's operation to its protocol's address, and

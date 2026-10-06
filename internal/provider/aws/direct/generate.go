@@ -280,6 +280,10 @@ func binding(b *bytes.Buffer, in Binding) {
 		b.WriteString(", JSONShape: ")
 		jsonShapeLiteral(b, in.JSONShape)
 	}
+	if in.XMLPlan != nil {
+		b.WriteString(", XMLPlan: ")
+		xmlPlanLiteral(b, in.XMLPlan)
+	}
 	b.WriteString("},\n")
 }
 

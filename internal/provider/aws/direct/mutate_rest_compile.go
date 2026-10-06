@@ -23,15 +23,20 @@ type jsonName struct {
 // uriLabel matches a label in an HTTP binding's URI, greedy or not.
 var uriLabel = regexp.MustCompile(`\{([A-Za-z0-9_]+)\+?\}`)
 
-// restCall fills c with a restJson1 operation's HTTP method and URI and,
-// for each input member m sends, where its binding puts it in the request.
-func restCall(model *smithyModel, op, input smithyShape, m Mutation, c *MutationCall, at string, fail func(string, ...any)) {
+// restCall fills c with a REST operation's HTTP method and URI and, for
+// each input member m sends, where its binding puts it in the request:
+// under restXml, the body is the one payload member, written as XML in the
+// service's namespace.
+func restCall(model *smithyModel, protocol, namespace string, op, input smithyShape, m Mutation, c *MutationCall, at string, fail func(string, ...any)) {
 	var http struct{ Method, URI string }
 	if err := json.Unmarshal(op.Traits["smithy.api#http"], &http); err != nil || http.Method == "" || http.URI == "" {
 		fail("%s operation %s has no HTTP binding", at, m.Operation)
 		return
 	}
 	c.Method, c.URI = http.Method, http.URI
+	var checksum struct{ RequestChecksumRequired bool }
+	_ = json.Unmarshal(op.Traits["aws.protocols#httpChecksum"], &checksum)
+	c.Checksum = checksum.RequestChecksumRequired || op.Traits["smithy.api#httpChecksumRequired"] != nil
 	for _, label := range uriLabel.FindAllStringSubmatch(http.URI, -1) {
 		if _, bound := m.Input[label[1]]; !bound {
 			fail("%s operation %s puts %s in its URI, which the input does not set", at, m.Operation, label[1])
@@ -47,6 +52,16 @@ func restCall(model *smithyModel, op, input smithyShape, m Mutation, c *Mutation
 		kind := targetType(model.Shapes[shape.Target].Type, shape.Target)
 		list := kind == "list" || kind == "set"
 		switch {
+		case protocol == "restXml" && shape.Traits["smithy.api#httpPayload"] != nil:
+			b.Location = "payload"
+			name := member
+			_ = json.Unmarshal(shape.Traits["smithy.api#xmlName"], &name)
+			b.XMLPlan = compileXMLPlan(model, shape.Target, name, false, map[string]bool{}, func(format string, args ...any) {
+				fail("%s input %s: "+format, append([]any{at, member}, args...)...)
+			})
+			if b.XMLPlan != nil {
+				b.XMLPlan.Namespace = namespace
+			}
 		case shape.Traits["smithy.api#httpPayload"] != nil, shape.Traits["smithy.api#httpPrefixHeaders"] != nil, shape.Traits["smithy.api#httpQueryParams"] != nil:
 			fail("%s input %s is bound by a trait this client does not send: only labels, query parameters, headers and body members", at, member)
 		case shape.Traits["smithy.api#httpLabel"] != nil:
@@ -59,6 +74,8 @@ func restCall(model *smithyModel, op, input smithyShape, m Mutation, c *Mutation
 			_ = json.Unmarshal(shape.Traits["smithy.api#httpHeader"], &b.Name)
 		case kind == "blob":
 			fail("%s input %s is a blob, which this client does not send", at, member)
+		case protocol == "restXml":
+			fail("%s input %s is a body member beside no payload, which this client does not send as XML", at, member)
 		default:
 			b.JSONShape = bodyShape(model, shape.Target, map[string]bool{})
 		}
@@ -121,4 +138,11 @@ func jsonOutputPath(model *smithyModel, output smithyShape, path string) (string
 		shape = model.Shapes[m.Target]
 	}
 	return strings.Join(keys, "."), true
+}
+
+// xmlNamespace is the namespace a service's XML documents are written in.
+func xmlNamespace(model *smithyModel, service string) string {
+	var ns struct{ URI string }
+	_ = json.Unmarshal(model.Shapes[service].Traits["smithy.api#xmlNamespace"], &ns)
+	return ns.URI
 }

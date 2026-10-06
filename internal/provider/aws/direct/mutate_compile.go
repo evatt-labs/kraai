@@ -13,6 +13,8 @@ import (
 // templates, and what the kind of call needs besides.
 type MutationCall struct {
 	Operation, Target string
+	// Checksum is set when the operation requires a request checksum.
+	Checksum bool
 	Input             map[string]any
 	AbsentErrors      []string
 	RetryErrors       []string
@@ -48,7 +50,7 @@ type MutationCall struct {
 	Idempotent  bool
 	// Generate and Unechoed are Create.Generate and Create.Unechoed.
 	Generate, Unechoed []string
-	// Method, URI and Bindings are, under restJson1, the operation's HTTP
+	// Method, URI and Bindings are, under a REST protocol, the operation's HTTP
 	// binding and where each input member goes in the request.
 	Method, URI string
 	Bindings    []Binding
@@ -95,8 +97,8 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 	if err != nil {
 		return []error{fmt.Errorf("%s has no readable locked schema", o.Type)}
 	}
-	if !isAWSJSON(r.Protocol) && !isQuery(r.Protocol) && r.Protocol != "restJson1" {
-		return []error{fmt.Errorf("a mutation under %s is not supported yet; only the awsJson, restJson1 and query protocols", r.Protocol)}
+	if !isAWSJSON(r.Protocol) && !isQuery(r.Protocol) && !isREST(r.Protocol) {
+		return []error{fmt.Errorf("a mutation under %s is not supported yet; only the awsJson, REST and query protocols", r.Protocol)}
 	}
 	var service, namespace string
 	for id, s := range model.Shapes {
@@ -200,8 +202,16 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				fail("%s "+format, append([]any{at}, args...)...)
 			})
 		}
-		if r.Protocol == "restJson1" {
-			restCall(&model, op, input, m, c, at, fail)
+		if isREST(r.Protocol) {
+			restCall(&model, r.Protocol, xmlNamespace(&model, service), op, input, m, c, at, fail)
+			if _, member := endpointParams(o.EndpointParams, nil); member != "" {
+				if reason := boundCall(input, c.URI, member, o.EndpointParams); reason != "" {
+					fail("%s operation %s %s", at, m.Operation, reason)
+				}
+				if _, sent := m.Input[member]; !sent {
+					fail("%s operation %s does not send %s, which endpointParams binds", at, m.Operation, member)
+				}
+			}
 		}
 		requiredBy[c] = required
 		return c
@@ -245,7 +255,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 						fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)
 					}
 					ids[property] = xmlPath
-				case r.Protocol == "restJson1":
+				case isREST(r.Protocol):
 					var found bool
 					if ids[property], found = jsonOutputPath(&model, output, path); !ok || !found {
 						fail("create does not map the identifier %s to a string member of %s's output", property, o.Create.Operation)

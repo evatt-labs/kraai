@@ -228,7 +228,7 @@ func TestRESTCallRefusesWhatItCannotSend(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			input := smithyShape{Members: map[string]smithyMember{"Thing": c.member}}
 			var errs []string
-			restCall(model, op, input, Mutation{Operation: "PutThing", Input: map[string]any{"Thing": "{X}"}}, &MutationCall{}, "update[0]",
+			restCall(model, "restJson1", "", op, input, Mutation{Operation: "PutThing", Input: map[string]any{"Thing": "{X}"}}, &MutationCall{}, "update[0]",
 				func(format string, args ...any) { errs = append(errs, fmt.Sprintf(format, args...)) })
 			if !slices.ContainsFunc(errs, func(e string) bool { return strings.Contains(e, c.want) }) {
 				t.Fatalf("errors %q, want one containing %q", errs, c.want)
