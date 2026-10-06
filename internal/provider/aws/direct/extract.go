@@ -60,7 +60,13 @@ type override struct {
 	} `yaml:"create"`
 	Update []struct {
 		Operation string `yaml:"operation"`
-		Tags      *struct {
+		Before    *struct {
+			Operation string `yaml:"operation"`
+		} `yaml:"before"`
+		WhenEmpty *struct {
+			Operation string `yaml:"operation"`
+		} `yaml:"whenEmpty"`
+		Tags *struct {
 			Add struct {
 				Operation string `yaml:"operation"`
 			} `yaml:"add"`
@@ -165,6 +171,12 @@ func run() error {
 				}
 			default:
 				ops[o.Read.Model] = append(ops[o.Read.Model], u.Operation)
+			}
+			if u.Before != nil {
+				ops[o.Read.Model] = append(ops[o.Read.Model], u.Before.Operation)
+			}
+			if u.WhenEmpty != nil {
+				ops[o.Read.Model] = append(ops[o.Read.Model], u.WhenEmpty.Operation)
 			}
 		}
 		for _, also := range o.Also {

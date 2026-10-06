@@ -84,7 +84,7 @@ func mutationLiteral(b *bytes.Buffer, m MutationCall) {
 	for _, f := range []struct {
 		name string
 		call *MutationCall
-	}{{"Add", m.Add}, {"Remove", m.Remove}, {"Change", m.Change}, {"Before", m.Before}} {
+	}{{"Add", m.Add}, {"Remove", m.Remove}, {"Change", m.Change}, {"Before", m.Before}, {"WhenEmpty", m.WhenEmpty}} {
 		if f.call != nil {
 			fmt.Fprintf(b, "%s: &", f.name)
 			mutationLiteral(b, *f.call)

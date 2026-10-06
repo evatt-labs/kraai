@@ -200,6 +200,12 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 				}
 			}
 		}
+		if u.WhenEmpty != nil && setsNothing(u, changes) {
+			if err := send(*u.WhenEmpty, values); err != nil && !c.absent(u.WhenEmpty.AbsentErrors, err) {
+				return err
+			}
+			continue
+		}
 		if !sendsChange(u, address, values) {
 			continue
 		}

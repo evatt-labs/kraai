@@ -686,12 +686,17 @@ update:
     input:
       Bucket: "{BucketName}"
       ObjectLockConfiguration: "{ObjectLockConfiguration:wire}"
+  # S3 refuses an empty tag set; no tags is the tagging deleted.
   - operation: PutBucketTagging
     properties: [Tags]
     input:
       Bucket: "{BucketName}"
       Tagging:
         TagSet: "{Tags:wire}"
+    whenEmpty:
+      operation: DeleteBucketTagging
+      input:
+        Bucket: "{BucketName}"
   - operation: PutBucketLifecycleConfiguration
     properties: [LifecycleConfiguration]
     input:
