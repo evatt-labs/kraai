@@ -14,10 +14,10 @@ import (
 type MutationCall struct {
 	Operation, Target string
 	// Checksum is set when the operation requires a request checksum.
-	Checksum bool
-	Input             map[string]any
-	AbsentErrors      []string
-	RetryErrors       []string
+	Checksum     bool
+	Input        map[string]any
+	AbsentErrors []string
+	RetryErrors  []string
 	// Properties is what an update call sets, or what a create sends.
 	Properties   []string
 	ListProperty string

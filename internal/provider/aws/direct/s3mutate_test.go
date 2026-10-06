@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/binary"
+	"fmt"
 	"hash/crc32"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -131,5 +133,69 @@ func TestUpdateS3BucketPutsEachConfiguration(t *testing.T) {
 	}
 	if len(got) != len(want) {
 		t.Fatalf("puts %v, want %v", got, want)
+	}
+}
+
+// Tags are made directly for a bucket without ABAC, and left to Cloud
+// Control once ABAC is on, whether the bucket reads so or the same change
+// turns it on; a change that leaves tags alone is not held back.
+func TestS3TagsRouteOnABAC(t *testing.T) {
+	const bucket = "AWS::S3::Bucket"
+	if !RoutesOnState(bucket) {
+		t.Fatal("the S3 bucket routes nothing on its state")
+	}
+	tags := []any{map[string]any{"Key": "team", "Value": "kraai"}}
+	cases := []struct {
+		name           string
+		changes, state map[string]any
+		want           bool
+	}{
+		{"tags, ABAC off", map[string]any{"Tags": tags}, map[string]any{"AbacStatus": "Disabled"}, true},
+		{"tags, ABAC never read", map[string]any{"Tags": tags}, map[string]any{}, true},
+		{"tags, ABAC on", map[string]any{"Tags": tags}, map[string]any{"AbacStatus": "Enabled"}, false},
+		{"versioning, ABAC on", map[string]any{"VersioningConfiguration": map[string]any{"Status": "Enabled"}}, map[string]any{"AbacStatus": "Enabled"}, true},
+	}
+	for _, c := range cases {
+		if got := CanMutateGiven(bucket, c.changes, c.state); got != c.want {
+			t.Errorf("%s: CanMutateGiven = %v, want %v", c.name, got, c.want)
+		}
+	}
+	// A create asking for ABAC and tags is Cloud Control's: ABAC itself is
+	// unsupported, and the tags would follow it.
+	if CanMutateWith(bucket, map[string]any{"BucketName": "b", "AbacStatus": "Enabled", "Tags": tags}) {
+		t.Error("a create with ABAC and tags is made directly")
+	}
+}
+
+// An unsupportedWhen that names no property, routes nothing or gives no
+// reason is refused.
+func TestUnsupportedWhenIsChecked(t *testing.T) {
+	all, err := Overrides()
+	if err != nil {
+		t.Fatal(err)
+	}
+	lock, err := loadLock(files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	i := slices.IndexFunc(all, func(o Override) bool { return o.Type == "AWS::S3::Bucket" })
+	for name, c := range map[string]struct {
+		routes  map[string]UnsupportedWhen
+		refused string
+	}{
+		"an unknown property":  {map[string]UnsupportedWhen{"Tags": {Property: "Nope", Values: []string{"x"}, Why: "y"}}, "unsupportedWhen Tags on Nope names a property"},
+		"an unrouted property": {map[string]UnsupportedWhen{"Arn": {Property: "AbacStatus", Values: []string{"Enabled"}, Why: "y"}}, "unsupportedWhen Arn names a property no update call routes"},
+		"no reason":            {map[string]UnsupportedWhen{"Tags": {Property: "AbacStatus", Values: []string{"Enabled"}}}, "unsupportedWhen Tags names no values or gives no reason"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			o := all[i]
+			o.UnsupportedWhen = c.routes
+			_, errs := compileOne(withDecoded(files), lock, o)
+			r := Reader{}
+			errs = append(errs, compileMutations(withDecoded(files), lock, o, &r)...)
+			if got := fmt.Sprint(errs); !strings.Contains(got, c.refused) {
+				t.Fatalf("errors = %s, want %q", got, c.refused)
+			}
+		})
 	}
 }

@@ -16,7 +16,30 @@ func CanMutateWith(typeName string, properties map[string]any) bool {
 		return false
 	}
 	path, _ := unsupportedIn(readers[typeName], properties)
-	return path == ""
+	return path == "" && CanMutateGiven(typeName, properties, properties)
+}
+
+// RoutesOnState reports whether typeName's changes may route on
+// the instance's current state, which the caller must then read first.
+func RoutesOnState(typeName string) bool { return len(readers[typeName].UnsupportedWhen) > 0 }
+
+// CanMutateGiven is false when changes name a property the override routes
+// to Cloud Control for an instance whose state, as read or as changes set
+// it, holds one of the condition's values.
+func CanMutateGiven(typeName string, changes, state map[string]any) bool {
+	for p, w := range readers[typeName].UnsupportedWhen {
+		if _, changed := changes[p]; !changed {
+			continue
+		}
+		v, set := changes[w.Property]
+		if !set {
+			v = state[w.Property]
+		}
+		if v != nil && slices.Contains(w.Values, fmt.Sprint(v)) {
+			return false
+		}
+	}
+	return true
 }
 
 // unsupportedIn returns the first, by path, unsupported property that

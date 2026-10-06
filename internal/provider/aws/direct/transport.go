@@ -125,16 +125,17 @@ func (c *Client) request(ctx context.Context, r Reader, method, uri, target stri
 	}
 
 	var payload []byte
-	if isQuery(r.Protocol) {
+	switch {
+	case isQuery(r.Protocol):
 		form.Set("Action", r.Action)
 		form.Set("Version", r.Version)
 		payload = []byte(form.Encode())
-	} else if isAWSJSON(r.Protocol) || r.Protocol == "restJson1" && len(body) > 0 {
+	case isAWSJSON(r.Protocol) || r.Protocol == "restJson1" && len(body) > 0:
 		var err error
 		if payload, err = json.Marshal(body); err != nil {
 			return nil, err
 		}
-	} else if xmlPayload != nil {
+	case xmlPayload != nil:
 		payload = xmlPayload
 	}
 	u := base + path

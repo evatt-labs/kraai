@@ -39,7 +39,7 @@ func TestEncodeXML(t *testing.T) {
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			var errs []string
-			plan := compileXMLPlan(model, c.target, c.root, false, map[string]bool{}, func(f string, a ...any) { errs = append(errs, f) })
+			plan := compileXMLPlan(model, c.target, c.root, false, map[string]bool{}, func(f string, _ ...any) { errs = append(errs, f) })
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			}

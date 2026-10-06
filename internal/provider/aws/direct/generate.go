@@ -200,6 +200,14 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	if len(r.Unsupported) > 0 {
 		fmt.Fprintf(b, "Unsupported: %#v,\n", r.Unsupported)
 	}
+	if len(r.UnsupportedWhen) > 0 {
+		b.WriteString("UnsupportedWhen: map[string]UnsupportedWhen{")
+		for _, p := range sortedKeys(r.UnsupportedWhen) {
+			w := r.UnsupportedWhen[p]
+			fmt.Fprintf(b, "%q: {Property: %q, Values: %#v, Why: %q}, ", p, w.Property, w.Values, w.Why)
+		}
+		b.WriteString("},\n")
+	}
 	if len(r.WriteOnly) > 0 {
 		fmt.Fprintf(b, "WriteOnly: %#v,\n", r.WriteOnly)
 	}

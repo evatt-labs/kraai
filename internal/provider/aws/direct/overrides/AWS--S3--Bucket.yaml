@@ -675,12 +675,6 @@ update:
     input:
       Bucket: "{BucketName}"
       ObjectLockConfiguration: "{ObjectLockConfiguration:wire}"
-  - operation: PutBucketAbac
-    properties: [AbacStatus]
-    input:
-      Bucket: "{BucketName}"
-      AbacStatus:
-        Status: "{AbacStatus}"
   - operation: PutBucketTagging
     properties: [Tags]
     input:
@@ -694,7 +688,15 @@ delete:
   absentErrors: [NoSuchBucket]
 # Object lock is turned on by the create alone.
 createOnly: [ObjectLockEnabled]
+# Under ABAC, S3 refuses a bucket's tagging and takes tags only through S3
+# Control's TagResource, a service no call here reaches yet (#467).
+unsupportedWhen:
+  Tags:
+    property: AbacStatus
+    values: [Enabled]
+    why: an ABAC bucket is tagged only through S3 Control, which no direct call reaches yet
 unsupported:
+  AbacStatus: enabling ABAC moves tagging to S3 Control, which no direct call reaches yet (#467)
   AccessControl: a legacy canned ACL, whose CloudFormation names (PublicRead) differ from the x-amz-acl values (public-read) no call maps
   BucketNamePrefix: a name generated from a prefix is Cloud Control's to make
   BucketNamespace: the create's namespace header is not sent by this client yet
@@ -707,6 +709,30 @@ unsupported:
   ReplicationConfiguration: replication needs a role and a versioned destination, which no call checks yet (#467)
   MetadataConfiguration: a metadata configuration creates S3 Tables, which no call makes yet (#467)
   MetadataTableConfiguration: the V1 metadata API is refused for accounts on V2 (#467)
+# Object lock is asked for at create, so its configuration can be set; a
+# bucket with no objects in it is deleted whatever its retention. The log
+# target is the fixture bucket dev/s3-fixtures.sh makes.
+lifecycle:
+  create:
+    ObjectLockEnabled: true
+    Tags: [{Key: team, Value: kraai}]
+  update:
+    VersioningConfiguration: {Status: Enabled}
+    AccelerateConfiguration: {AccelerationStatus: Enabled}
+    BucketEncryption:
+      ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+          BucketKeyEnabled: true
+    OwnershipControls: {Rules: [{ObjectOwnership: BucketOwnerPreferred}]}
+    PublicAccessBlockConfiguration: {BlockPublicAcls: true, IgnorePublicAcls: true, BlockPublicPolicy: true, RestrictPublicBuckets: true}
+    CorsConfiguration:
+      CorsRules: [{Id: web, AllowedMethods: [GET], AllowedOrigins: ["https://example.com"], MaxAge: 300}]
+    WebsiteConfiguration: {IndexDocument: index.html, ErrorDocument: error.html}
+    LoggingConfiguration: {DestinationBucketName: "{logBucket}", LogFilePrefix: lifecycle/}
+    ObjectLockConfiguration:
+      ObjectLockEnabled: Enabled
+      Rule: {DefaultRetention: {Mode: GOVERNANCE, Days: 1}}
+    Tags: [{Key: team, Value: kraai}, {Key: purpose, Value: lifecycle}]
 undeclaredErrors:
   MetadataConfigurationNotFound: S3's model declares no errors on GetBucketMetadataConfiguration; it answers this for a bucket with no metadata configuration.
   V1APIsNotAllowed: S3's model declares no errors on GetBucketMetadataTableConfiguration; it answers this for an account on the V2 metadata API, which can hold no V1 configuration.

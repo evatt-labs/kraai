@@ -46,6 +46,10 @@ type Override struct {
 	// update naming one makes no direct call: Cloud Control makes it. A
 	// top-level entry counts as routed for lifecycle completeness.
 	Unsupported map[string]string `yaml:"unsupported,omitempty"`
+	// UnsupportedWhen routes a property's change to Cloud Control only for
+	// an instance in a given state, such as an S3 bucket's tags once ABAC
+	// is enabled, which S3 then takes only through S3 Control.
+	UnsupportedWhen map[string]UnsupportedWhen `yaml:"unsupportedWhen,omitempty"`
 	// Lifecycle is the values the lifecycle harness creates an instance
 	// with, then sets one property at a time.
 	Lifecycle *Lifecycle `yaml:"lifecycle,omitempty"`
@@ -470,4 +474,13 @@ type Pages struct {
 type Spread struct {
 	Property string `yaml:"property"`
 	Member   string `yaml:"member"`
+}
+
+// UnsupportedWhen is a condition on a top-level property of the instance,
+// as it reads or as the change sets it, holding one of Values, and why the
+// direct calls cannot make the change then.
+type UnsupportedWhen struct {
+	Property string   `yaml:"property"`
+	Values   []string `yaml:"values"`
+	Why      string   `yaml:"why"`
 }

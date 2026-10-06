@@ -91,7 +91,7 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 		}
 		// A change the direct calls cannot make is Cloud Control's, decided
 		// before any call: half of a direct update cannot be retried there.
-		if c.mutatesDirectly(typeName, changes) {
+		if c.mutatesDirectly(typeName, changes) && c.directGiven(ctx, typeName, identifier, changes) {
 			directMutation(ctx, typeName, "update")
 			return c.updateDirect(ctx, typeName, identifier, changes)
 		}
@@ -214,4 +214,16 @@ func directMutation(ctx context.Context, typeName, kind string) {
 // goes through the type's own API rather than Cloud Control.
 func (c *Client) mutatesDirectly(typeName string, properties map[string]any) bool {
 	return c.direct != nil && c.canMutate != nil && c.canMutate(typeName, properties)
+}
+
+// directGiven reports whether changes may be made directly given how the
+// instance reads, for a type that routes some changes by the instance's
+// state, such as an S3 bucket's tags once ABAC is enabled. A read that
+// fails leaves the change to Cloud Control.
+func (c *Client) directGiven(ctx context.Context, typeName, identifier string, changes map[string]any) bool {
+	if !direct.RoutesOnState(typeName) {
+		return true
+	}
+	current, err := c.direct.ReadByID(ctx, typeName, identifier)
+	return err == nil && direct.CanMutateGiven(typeName, changes, current)
 }

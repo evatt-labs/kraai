@@ -51,6 +51,22 @@ func compileUnsupported(o Override, schema *cfnSchema, routed map[string]bool, r
 	if len(o.Unsupported) > 0 {
 		r.Unsupported = o.Unsupported
 	}
+	for _, p := range sortedKeys(o.UnsupportedWhen) {
+		w := o.UnsupportedWhen[p]
+		_, known := schema.Properties[p]
+		_, whenKnown := schema.Properties[w.Property]
+		switch {
+		case !known || !whenKnown:
+			errs = append(errs, fmt.Errorf("unsupportedWhen %s on %s names a property %s does not have", p, w.Property, o.Type))
+		case !routed[p]:
+			errs = append(errs, fmt.Errorf("unsupportedWhen %s names a property no update call routes, which needs no condition", p))
+		case len(w.Values) == 0 || strings.TrimSpace(w.Why) == "":
+			errs = append(errs, fmt.Errorf("unsupportedWhen %s names no values or gives no reason", p))
+		}
+	}
+	if len(o.UnsupportedWhen) > 0 {
+		r.UnsupportedWhen = o.UnsupportedWhen
+	}
 	for path := range o.Unsupported {
 		if !strings.Contains(path, ".") {
 			routed[path] = true

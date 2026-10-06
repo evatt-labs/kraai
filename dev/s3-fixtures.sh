@@ -9,6 +9,10 @@ set -euo pipefail
 #   dev/s3-fixtures.sh up   [--apply]
 #   dev/s3-fixtures.sh down [--apply]
 #
+# up also writes the KRAAI_LIFECYCLE_* export the S3 lifecycle vector
+# reads to $ENV_OUT: the destination bucket, which accepts access logs from
+# kraai-lifecycle-* buckets.
+#
 # Dry run unless --apply. The "bare" bucket has its public access block and
 # ownership controls deleted, the only way to observe the codes S3 answers
 # for their absence; it stays private, empty and without a policy.
@@ -25,6 +29,7 @@ main="${prefix}-main"
 dest="${prefix}-dest"
 locked="${prefix}-locked"
 bare="${prefix}-bare"
+env_out="${ENV_OUT:-${TMPDIR:-/tmp}/kraai-s3-fixtures.env}"
 topic_name="${prefix}-events"
 role_name="kraai-s3fx-replication"
 
@@ -52,7 +57,7 @@ up() {
 
   # The destination accepts access logs and inventory reports from main.
   dest_policy=$(jq -cn --arg d "$dest" --arg m "$main" --arg a "$acct" '{Version:"2012-10-17",Statement:[
-    {Sid:"logs",Effect:"Allow",Principal:{Service:"logging.s3.amazonaws.com"},Action:"s3:PutObject",Resource:("arn:aws:s3:::"+$d+"/*"),Condition:{ArnLike:{"aws:SourceArn":("arn:aws:s3:::"+$m)},StringEquals:{"aws:SourceAccount":$a}}},
+    {Sid:"logs",Effect:"Allow",Principal:{Service:"logging.s3.amazonaws.com"},Action:"s3:PutObject",Resource:("arn:aws:s3:::"+$d+"/*"),Condition:{ArnLike:{"aws:SourceArn":[("arn:aws:s3:::"+$m),"arn:aws:s3:::kraai-lifecycle-*"]},StringEquals:{"aws:SourceAccount":$a}}},
     {Sid:"inventory",Effect:"Allow",Principal:{Service:"s3.amazonaws.com"},Action:"s3:PutObject",Resource:("arn:aws:s3:::"+$d+"/*"),Condition:{ArnLike:{"aws:SourceArn":("arn:aws:s3:::"+$m)},StringEquals:{"aws:SourceAccount":$a,"s3:x-amz-acl":"bucket-owner-full-control"}}},
     {Sid:"tls",Effect:"Deny",Principal:"*",Action:"s3:*",Resource:[("arn:aws:s3:::"+$d),("arn:aws:s3:::"+$d+"/*")],Condition:{Bool:{"aws:SecureTransport":"false"}}}]}')
   run aws s3api put-bucket-policy --bucket "$dest" --policy "$dest_policy"
@@ -88,6 +93,10 @@ up() {
   run aws s3api put-bucket-notification-configuration --bucket "$main" --notification-configuration "$(jq -cn --arg t "$topic_arn" '{TopicConfigurations:[
     {Id:"t1",TopicArn:$t,Events:["s3:ObjectCreated:*"],Filter:{Key:{FilterRules:[{Name:"prefix",Value:"in/"},{Name:"suffix",Value:".csv"}]}}},
     {Id:"t2",TopicArn:$t,Events:["s3:ObjectRemoved:*"]}],EventBridgeConfiguration:{}}')"
+  if $apply; then
+    echo "export KRAAI_LIFECYCLE_LOG_BUCKET=$dest" >"$env_out"
+    echo "wrote $env_out" >&2
+  fi
   run aws s3api put-bucket-replication --bucket "$main" --replication-configuration "$(jq -cn --arg r "$role_arn" --arg d "$dest" '{Role:$r,Rules:[{ID:"rep1",Priority:1,Status:"Enabled",Filter:{Prefix:"rep/"},DeleteMarkerReplication:{Status:"Disabled"},Destination:{Bucket:("arn:aws:s3:::"+$d),StorageClass:"STANDARD_IA"}}]}')"
 }
 
