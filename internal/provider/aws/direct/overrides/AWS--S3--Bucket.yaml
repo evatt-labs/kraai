@@ -322,6 +322,8 @@ also:
     properties:
       MetricsConfigurations:
         member: MetricsConfigurationList
+        union:
+          and: Filter.And
         properties:
           Id: Id
           Prefix:
@@ -350,6 +352,8 @@ also:
     properties:
       AnalyticsConfigurations:
         member: AnalyticsConfigurationList
+        union:
+          and: Filter.And
         properties:
           Id: Id
           Prefix:
@@ -388,6 +392,8 @@ also:
     properties:
       IntelligentTieringConfigurations:
         member: IntelligentTieringConfigurationList
+        union:
+          and: Filter.And
         properties:
           Id: Id
           Status: Status
@@ -705,6 +711,68 @@ update:
     input:
       Bucket: "{BucketName}"
       ReplicationConfiguration: "{ReplicationConfiguration:wire}"
+  # Each analytics, intelligent-tiering, inventory and metrics configuration
+  # is put and deleted by its id.
+  - list:
+      property: AnalyticsConfigurations
+      key: [Id]
+      oneAtATime: true
+      add:
+        operation: PutBucketAnalyticsConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
+          AnalyticsConfiguration: "{element:wire}"
+      remove:
+        operation: DeleteBucketAnalyticsConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
+  - list:
+      property: IntelligentTieringConfigurations
+      key: [Id]
+      oneAtATime: true
+      add:
+        operation: PutBucketIntelligentTieringConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
+          IntelligentTieringConfiguration: "{element:wire}"
+      remove:
+        operation: DeleteBucketIntelligentTieringConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
+  - list:
+      property: InventoryConfigurations
+      key: [Id]
+      oneAtATime: true
+      add:
+        operation: PutBucketInventoryConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
+          InventoryConfiguration: "{element:wire}"
+      remove:
+        operation: DeleteBucketInventoryConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
+  - list:
+      property: MetricsConfigurations
+      key: [Id]
+      oneAtATime: true
+      add:
+        operation: PutBucketMetricsConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
+          MetricsConfiguration: "{element:wire}"
+      remove:
+        operation: DeleteBucketMetricsConfiguration
+        input:
+          Bucket: "{BucketName}"
+          Id: "{element.Id}"
 delete:
   operation: DeleteBucket
   input:
@@ -734,10 +802,6 @@ unsupported:
   # a wait for one would never see it.
   LifecycleConfiguration.Rules[].ExpirationDate: a rule's expiration date is read as epoch seconds, which a wait cannot match to the date written
   LifecycleConfiguration.Rules[].Transitions[].TransitionDate: a transition's date is read as epoch seconds, which a wait cannot match to the date written
-  AnalyticsConfigurations: its filters are read through alternatives, which no call writes back yet (#467)
-  MetricsConfigurations: its filters are read through alternatives, which no call writes back yet (#467)
-  IntelligentTieringConfigurations: its filters are read through alternatives, which no call writes back yet (#467)
-  InventoryConfigurations: each configuration is its own put by id, which no call makes yet (#467)
   MetadataConfiguration: a metadata configuration creates S3 Tables, which no call makes yet (#467)
   MetadataTableConfiguration: the V1 metadata API is refused for accounts on V2 (#467)
 # Object lock is asked for at create, so its configuration can be set; a
@@ -779,6 +843,21 @@ lifecycle:
       TopicConfigurations:
         - {Event: "s3:ObjectCreated:*", Topic: "{topicArn}", Filter: {S3Key: {Rules: [{Name: Prefix, Value: in/}]}}}
         - {Event: "s3:ObjectRemoved:*", Topic: "{topicArn}"}
+    AnalyticsConfigurations:
+      - {Id: an1, Prefix: logs/, TagFilters: [{Key: a, Value: "1"}], StorageClassAnalysis: {}}
+    IntelligentTieringConfigurations:
+      - {Id: it1, Status: Enabled, Prefix: cold/, Tierings: [{AccessTier: ARCHIVE_ACCESS, Days: 90}]}
+    InventoryConfigurations:
+      - Id: inv1
+        Enabled: true
+        IncludedObjectVersions: Current
+        ScheduleFrequency: Weekly
+        Prefix: data/
+        OptionalFields: [Size]
+        Destination: {BucketArn: "arn:aws:s3:::{logBucket}", Format: CSV, Prefix: inventory}
+    MetricsConfigurations:
+      - {Id: m1, Prefix: data/}
+      - {Id: m2, TagFilters: [{Key: a, Value: "1"}, {Key: b, Value: "2"}]}
     ReplicationConfiguration:
       Role: "{replicationRoleArn}"
       Rules:

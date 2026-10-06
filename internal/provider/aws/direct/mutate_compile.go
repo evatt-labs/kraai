@@ -149,7 +149,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				}
 				if slices.Contains(chain, "wire") {
 					property := path
-					if (name == "added" || name == "removed") && tags != "" {
+					if (name == "added" || name == "removed" || name == "element") && tags != "" {
 						property = tags
 					}
 					f, found := readField(*r, property)

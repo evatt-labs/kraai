@@ -2519,7 +2519,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "67646611418eba1b10c28c7f0038c14cd257f43e1db7d4226f7f4c70d76723b6"
+      "override": "12de93b217f6fe4c438c52050dfb2a75f344250c20bbfdab40305ca1a7a8979a"
     },
     {
       "type": "AWS::S3Vectors::VectorBucket",
