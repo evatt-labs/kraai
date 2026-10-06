@@ -35,7 +35,7 @@ func redirected(resp *http.Response, err error) error {
 // anything else into the host a request is sent to.
 var regionShape = regexp.MustCompile(`^[a-z]{2}(-[a-z]+)+-[0-9]+$`)
 
-// movedTo returns a copy of c in the region err redirected a read to, or
+// movedTo returns a copy of c in the region err redirected a call to, or
 // false when err is no redirect this client can follow: one to its own
 // region, or to a region outside its partition or not shaped as one.
 func (c *Client) movedTo(err error) (*Client, bool) {
@@ -64,4 +64,16 @@ func (c *Client) readFollowing(ctx context.Context, r Reader, identifier map[str
 		props, captured, _, err = c.readCall(ctx, r, identifier)
 	}
 	return c, props, captured, err
+}
+
+// following runs do through c, and again through the bucket's region when
+// a call was redirected there. Every call of one instance goes to the same
+// bucket, so the first is the one redirected, and a redirect is answered
+// without anything being done.
+func (c *Client) following(do func(*Client) error) error {
+	err := do(c)
+	if there, ok := c.movedTo(err); ok {
+		err = do(there)
+	}
+	return err
 }

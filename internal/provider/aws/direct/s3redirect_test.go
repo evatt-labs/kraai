@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -26,6 +27,9 @@ type s3Elsewhere struct {
 	mu                sync.Mutex
 	hosts             map[string]int
 	redirects, signed int
+	// writes is each PUT and DELETE answered in region, as METHOD query.
+	writes  []string
+	deleted bool
 }
 
 func (s *s3Elsewhere) client(t *testing.T) *Client {
@@ -54,6 +58,23 @@ func (s *s3Elsewhere) client(t *testing.T) *Client {
 			return
 		}
 		query := strings.TrimSuffix(strings.SplitN(r.URL.RawQuery, "&", 2)[0], "=")
+		s.mu.Lock()
+		if r.Method != http.MethodGet {
+			s.writes = append(s.writes, r.Method+" "+query)
+			s.deleted = s.deleted || r.Method == http.MethodDelete && query == ""
+		}
+		deleted := s.deleted
+		s.mu.Unlock()
+		switch {
+		case r.Method != http.MethodGet:
+			w.WriteHeader(http.StatusNoContent)
+			return
+		case deleted:
+			status, body := s3NotFound("NoSuchBucket")
+			w.WriteHeader(status)
+			_, _ = io.WriteString(w, body)
+			return
+		}
 		if code, unset := s3Unset[query]; unset {
 			status, body := s3NotFound(code)
 			w.WriteHeader(status)
@@ -140,6 +161,44 @@ func TestS3RedirectNotFollowed(t *testing.T) {
 			}
 			if s.signed != tc.requests {
 				t.Errorf("%d requests to %v, want %d", s.signed, s.hosts, tc.requests)
+			}
+		})
+	}
+}
+
+// An update or delete of a bucket in another region is made there: its
+// first call's redirect is followed once, and every write and the wait
+// after it go to the bucket's region.
+func TestMutateS3BucketInAnotherRegion(t *testing.T) {
+	for name, tc := range map[string]struct {
+		mutate func(*Client) error
+		writes []string
+	}{
+		"update": {
+			mutate: func(c *Client) error {
+				return c.Update(context.Background(), "AWS::S3::Bucket", "b",
+					map[string]any{"VersioningConfiguration": map[string]any{"Status": "Suspended"}},
+					map[string]any{"VersioningConfiguration": map[string]any{"Status": "Enabled"}})
+			},
+			writes: []string{"PUT versioning"},
+		},
+		"delete": {
+			mutate: func(c *Client) error { return c.Delete(context.Background(), "AWS::S3::Bucket", "b") },
+			writes: []string{"DELETE "},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			s := &s3Elsewhere{region: "us-east-2", header: true}
+			client := s.client(t)
+			client.Wait, client.Poll = time.Second, time.Millisecond
+			if err := tc.mutate(client); err != nil {
+				t.Fatal(err)
+			}
+			if !slices.Equal(s.writes, tc.writes) {
+				t.Errorf("writes in us-east-2 = %v, want %v", s.writes, tc.writes)
+			}
+			if s.redirects != 1 {
+				t.Errorf("%d requests were redirected, want only the first", s.redirects)
 			}
 		})
 	}

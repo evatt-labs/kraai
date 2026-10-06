@@ -97,6 +97,10 @@ func (c *Client) Create(ctx context.Context, typeName string, desired map[string
 // Update sets the changed properties of the instance identifier names,
 // current being how it was read, and returns once a read shows them.
 func (c *Client) Update(ctx context.Context, typeName, identifier string, current, changes map[string]any) error {
+	return c.following(func(c *Client) error { return c.update(ctx, typeName, identifier, current, changes) })
+}
+
+func (c *Client) update(ctx context.Context, typeName, identifier string, current, changes map[string]any) error {
 	r, ok := readers[typeName]
 	if !ok || !r.addressable() {
 		return fmt.Errorf("%s has no direct update", typeName)
@@ -214,6 +218,10 @@ func (c *Client) apply(ctx context.Context, r Reader, address, current, changes 
 // Delete deletes the instance identifier names and returns once a read
 // finds it absent.
 func (c *Client) Delete(ctx context.Context, typeName, identifier string) error {
+	return c.following(func(c *Client) error { return c.deleteInstance(ctx, typeName, identifier) })
+}
+
+func (c *Client) deleteInstance(ctx context.Context, typeName, identifier string) error {
 	r, ok := readers[typeName]
 	if !ok || r.Delete == nil || !r.addressable() {
 		return fmt.Errorf("%s has no direct delete", typeName)
