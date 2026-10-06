@@ -351,6 +351,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	if f.Spread {
 		b.WriteString(", Spread: true")
 	}
+	if f.Union != nil {
+		fmt.Fprintf(b, ", Union: &fieldUnion{And: %#v, Empty: %#v}", f.Union.And, f.Union.Empty)
+	}
 	if f.Header != "" {
 		fmt.Fprintf(b, ", Header: %q", f.Header)
 	}

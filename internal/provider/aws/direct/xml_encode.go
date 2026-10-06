@@ -43,6 +43,9 @@ func compileXMLPlan(model *smithyModel, target, name string, flattened bool, see
 	plan := &xmlPlan{Name: name, Flattened: flattened}
 	switch t := targetType(shape.Type, target); {
 	case isStructure(shape):
+		// A structure with no members, such as S3's EventBridgeConfiguration,
+		// is still written as an element, never as text.
+		plan.Members = []xmlMember{}
 		for _, member := range sortedKeys(shape.Members) {
 			m := shape.Members[member]
 			if m.Traits["smithy.api#xmlAttribute"] != nil {

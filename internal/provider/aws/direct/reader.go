@@ -237,6 +237,8 @@ type Field struct {
 	// Spread marks the list field whose values each make one element of
 	// the enclosing list; see Mapping.Spread.
 	Spread bool
+	// Union is Mapping.Union, its paths split into member names.
+	Union *fieldUnion
 	// Header is the response header a member bound to one is read from,
 	// such as S3's x-amz-transition-default-minimum-object-size.
 	Header string

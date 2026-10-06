@@ -419,6 +419,11 @@ also:
           TransitionDefaultMinimumObjectSize: TransitionDefaultMinimumObjectSize
           Rules:
             member: Rules
+            # A rule with no condition filters on nothing, which S3 takes
+            # as an empty filter.
+            union:
+              and: Filter.And
+              empty: Filter
             properties:
               Id: ID
               Status: Status
@@ -681,6 +686,25 @@ update:
       Bucket: "{BucketName}"
       Tagging:
         TagSet: "{Tags:wire}"
+  - operation: PutBucketLifecycleConfiguration
+    properties: [LifecycleConfiguration]
+    input:
+      Bucket: "{BucketName}"
+      # The minimum object size is a header beside the rules.
+      LifecycleConfiguration:
+        Rules: "{LifecycleConfiguration.Rules:wire}"
+      TransitionDefaultMinimumObjectSize: "{LifecycleConfiguration.TransitionDefaultMinimumObjectSize}"
+  # Each schema entry is one configuration of its single event.
+  - operation: PutBucketNotificationConfiguration
+    properties: [NotificationConfiguration]
+    input:
+      Bucket: "{BucketName}"
+      NotificationConfiguration: "{NotificationConfiguration:wire}"
+  - operation: PutBucketReplication
+    properties: [ReplicationConfiguration]
+    input:
+      Bucket: "{BucketName}"
+      ReplicationConfiguration: "{ReplicationConfiguration:wire}"
 delete:
   operation: DeleteBucket
   input:
@@ -700,21 +724,25 @@ unsupported:
   AccessControl: a legacy canned ACL, whose CloudFormation names (PublicRead) differ from the x-amz-acl values (public-read) no call maps
   BucketNamePrefix: a name generated from a prefix is Cloud Control's to make
   BucketNamespace: the create's namespace header is not sent by this client yet
-  LifecycleConfiguration: its filters and actions are read through alternatives, which no call writes back yet (#467)
-  NotificationConfiguration: its events are read spread across entries, which no call writes back yet (#467)
+  # The read gives a date as epoch seconds and CloudFormation as text, so
+  # a wait for one would never see it.
+  LifecycleConfiguration.Rules[].ExpirationDate: a rule's expiration date is read as epoch seconds, which a wait cannot match to the date written
+  LifecycleConfiguration.Rules[].Transitions[].TransitionDate: a transition's date is read as epoch seconds, which a wait cannot match to the date written
   AnalyticsConfigurations: its filters are read through alternatives, which no call writes back yet (#467)
   MetricsConfigurations: its filters are read through alternatives, which no call writes back yet (#467)
   IntelligentTieringConfigurations: its filters are read through alternatives, which no call writes back yet (#467)
   InventoryConfigurations: each configuration is its own put by id, which no call makes yet (#467)
-  ReplicationConfiguration: replication needs a role and a versioned destination, which no call checks yet (#467)
   MetadataConfiguration: a metadata configuration creates S3 Tables, which no call makes yet (#467)
   MetadataTableConfiguration: the V1 metadata API is refused for accounts on V2 (#467)
 # Object lock is asked for at create, so its configuration can be set; a
 # bucket with no objects in it is deleted whatever its retention. The log
-# target is the fixture bucket dev/s3-fixtures.sh makes.
+# target, replication destination, topic and role are the fixtures
+# dev/s3-fixtures.sh makes. Versioning is on from the create, since
+# replication needs it before its own update.
 lifecycle:
   create:
     ObjectLockEnabled: true
+    VersioningConfiguration: {Status: Enabled}
     Tags: [{Key: team, Value: kraai}]
   update:
     VersioningConfiguration: {Status: Enabled}
@@ -733,6 +761,27 @@ lifecycle:
       ObjectLockEnabled: Enabled
       Rule: {DefaultRetention: {Mode: GOVERNANCE, Days: 1}}
     Tags: [{Key: team, Value: kraai}, {Key: purpose, Value: lifecycle}]
+    # One rule for each way a filter is written: one condition, several
+    # under And, and none.
+    LifecycleConfiguration:
+      Rules:
+        - {Id: one, Status: Enabled, Prefix: tmp/, ExpirationInDays: 30}
+        - {Id: and, Status: Enabled, Prefix: logs/, TagFilters: [{Key: a, Value: "1"}], ObjectSizeGreaterThan: "1024", ExpirationInDays: 60}
+        - {Id: none, Status: Disabled, AbortIncompleteMultipartUpload: {DaysAfterInitiation: 3}}
+    NotificationConfiguration:
+      EventBridgeConfiguration: {EventBridgeEnabled: true}
+      TopicConfigurations:
+        - {Event: "s3:ObjectCreated:*", Topic: "{topicArn}", Filter: {S3Key: {Rules: [{Name: prefix, Value: in/}]}}}
+        - {Event: "s3:ObjectRemoved:*", Topic: "{topicArn}"}
+    ReplicationConfiguration:
+      Role: "{replicationRoleArn}"
+      Rules:
+        - Id: rep
+          Priority: 1
+          Status: Enabled
+          Filter: {Prefix: rep/}
+          DeleteMarkerReplication: {Status: Disabled}
+          Destination: {Bucket: "arn:aws:s3:::{logBucket}"}
 undeclaredErrors:
   MetadataConfigurationNotFound: S3's model declares no errors on GetBucketMetadataConfiguration; it answers this for a bucket with no metadata configuration.
   V1APIsNotAllowed: S3's model declares no errors on GetBucketMetadataTableConfiguration; it answers this for an account on the V2 metadata API, which can hold no V1 configuration.
