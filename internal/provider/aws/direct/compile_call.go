@@ -24,6 +24,10 @@ type callCompiler struct {
 	resource, payload  string
 	// bound is the input member an endpoint parameter is bound to.
 	bound string
+	// files and modelFile are where the model came from, for the rule set
+	// cache.
+	files     fs.FS
+	modelFile string
 }
 
 // fail records a problem; every one is reported, not only the first.
@@ -51,7 +55,8 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 		}
 	}
 
-	c := &callCompiler{o: o, only: only, captured: captured, each: each, model: model, schema: schema, r: Reader{Type: o.Type}}
+	c := &callCompiler{o: o, only: only, captured: captured, each: each, model: model, schema: schema, r: Reader{Type: o.Type},
+		files: files, modelFile: lock.Models[o.Read.Model].File}
 	c.address()
 	c.operation()
 	c.identifier()
@@ -95,7 +100,16 @@ func (c *callCompiler) address() {
 	if member != "" {
 		bound = endpointBound
 	}
-	e, reason := endpointOf(c.svc.Traits["smithy.rules#endpointRuleSet"], params, c.r.SigningName, bound)
+	var e endpoint
+	raw := c.svc.Traits["smithy.rules#endpointRuleSet"]
+	reason := "the model has no endpoint rule set"
+	if len(raw) > 0 {
+		if rs, err := loadRuleSet(c.files, c.modelFile, raw); err != nil {
+			reason = err.Error()
+		} else {
+			e, reason = endpointFor(rs, params, c.r.SigningName, bound)
+		}
+	}
 	if reason != "" {
 		c.fail("no endpoint this client can form: %s", reason)
 	}

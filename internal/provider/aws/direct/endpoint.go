@@ -67,6 +67,11 @@ func endpointOf(ruleSet json.RawMessage, params map[string]any, signingName, bou
 	if err != nil {
 		return endpoint{}, err.Error()
 	}
+	return endpointFor(rs, params, signingName, bound)
+}
+
+// endpointFor is endpointOf for a rule set already parsed.
+func endpointFor(rs *ruleSet, params map[string]any, signingName, bound string) (endpoint, string) {
 	all := map[string]any{}
 	for name, p := range rs.Parameters {
 		if p.BuiltIn == "AWS::Region" {
