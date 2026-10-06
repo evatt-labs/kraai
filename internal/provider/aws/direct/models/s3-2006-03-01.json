@@ -94,6 +94,12 @@
           "target": "com.amazonaws.s3#GetBucketLogging"
         },
         {
+          "target": "com.amazonaws.s3#GetBucketMetadataConfiguration"
+        },
+        {
+          "target": "com.amazonaws.s3#GetBucketMetadataTableConfiguration"
+        },
+        {
           "target": "com.amazonaws.s3#GetBucketNotificationConfiguration"
         },
         {
@@ -24214,6 +24220,23 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.s3#AnnotationConfigurationState": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#AnnotationLimitExceeded": {
       "members": {},
       "traits": {
@@ -24228,6 +24251,37 @@
         "smithy.api#error": "client",
         "smithy.api#httpError": 400
       },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#AnnotationTableConfigurationResult": {
+      "members": {
+        "ConfigurationState": {
+          "target": "com.amazonaws.s3#AnnotationConfigurationState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Error": {
+          "target": "com.amazonaws.s3#ErrorDetails"
+        },
+        "Role": {
+          "target": "com.amazonaws.s3#Role",
+          "traits": {}
+        },
+        "TableArn": {
+          "target": "com.amazonaws.s3#S3TablesArn",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.s3#S3TablesName",
+          "traits": {}
+        },
+        "TableStatus": {
+          "target": "com.amazonaws.s3#MetadataTableStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
       "type": "structure"
     },
     "com.amazonaws.s3#BlockedEncryptionTypes": {
@@ -24499,6 +24553,24 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.s3#DestinationResult": {
+      "members": {
+        "TableBucketArn": {
+          "target": "com.amazonaws.s3#S3TablesBucketArn",
+          "traits": {}
+        },
+        "TableBucketType": {
+          "target": "com.amazonaws.s3#S3TablesBucketType",
+          "traits": {}
+        },
+        "TableNamespace": {
+          "target": "com.amazonaws.s3#S3TablesNamespace",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#DisplayName": {
       "type": "string"
     },
@@ -24549,6 +24621,23 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#ErrorCode": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#ErrorDetails": {
+      "members": {
+        "ErrorCode": {
+          "target": "com.amazonaws.s3#ErrorCode",
+          "traits": {}
+        },
+        "ErrorMessage": {
+          "target": "com.amazonaws.s3#ErrorMessage",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#ErrorDocument": {
       "members": {
         "Key": {
@@ -24560,6 +24649,9 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#ErrorMessage": {
+      "type": "string"
     },
     "com.amazonaws.s3#Event": {
       "members": {
@@ -24802,6 +24894,23 @@
           "target": "smithy.api#Unit",
           "traits": {
             "smithy.api#enumValue": "Enabled"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#ExpirationState": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
           }
         }
       },
@@ -25243,6 +25352,158 @@
       "traits": {
         "smithy.api#input": {}
       },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketMetadataConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#GetBucketMetadataConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#GetBucketMetadataConfigurationOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?metadataConfiguration"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#GetBucketMetadataConfigurationOutput": {
+      "members": {
+        "GetBucketMetadataConfigurationResult": {
+          "target": "com.amazonaws.s3#GetBucketMetadataConfigurationResult",
+          "traits": {
+            "smithy.api#httpPayload": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketMetadataConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketMetadataConfigurationResult": {
+      "members": {
+        "MetadataConfigurationResult": {
+          "target": "com.amazonaws.s3#MetadataConfigurationResult",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketMetadataTableConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#GetBucketMetadataTableConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#GetBucketMetadataTableConfigurationOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?metadataTable"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#GetBucketMetadataTableConfigurationOutput": {
+      "members": {
+        "GetBucketMetadataTableConfigurationResult": {
+          "target": "com.amazonaws.s3#GetBucketMetadataTableConfigurationResult",
+          "traits": {
+            "smithy.api#httpPayload": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketMetadataTableConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketMetadataTableConfigurationResult": {
+      "members": {
+        "Error": {
+          "target": "com.amazonaws.s3#ErrorDetails",
+          "traits": {}
+        },
+        "MetadataTableConfigurationResult": {
+          "target": "com.amazonaws.s3#MetadataTableConfigurationResult",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.s3#MetadataTableStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
       "type": "structure"
     },
     "com.amazonaws.s3#GetBucketNotificationConfiguration": {
@@ -25984,6 +26245,23 @@
       },
       "type": "list"
     },
+    "com.amazonaws.s3#InventoryConfigurationState": {
+      "members": {
+        "DISABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DISABLED"
+          }
+        },
+        "ENABLED": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ENABLED"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#InventoryDestination": {
       "members": {
         "S3BucketDestination": {
@@ -26250,11 +26528,69 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.s3#InventoryTableConfigurationResult": {
+      "members": {
+        "ConfigurationState": {
+          "target": "com.amazonaws.s3#InventoryConfigurationState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Error": {
+          "target": "com.amazonaws.s3#ErrorDetails"
+        },
+        "TableArn": {
+          "target": "com.amazonaws.s3#S3TablesArn",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.s3#S3TablesName",
+          "traits": {}
+        },
+        "TableStatus": {
+          "target": "com.amazonaws.s3#MetadataTableStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#IsEnabled": {
       "type": "boolean"
     },
     "com.amazonaws.s3#IsTruncated": {
       "type": "boolean"
+    },
+    "com.amazonaws.s3#JournalTableConfigurationResult": {
+      "members": {
+        "Error": {
+          "target": "com.amazonaws.s3#ErrorDetails"
+        },
+        "RecordExpiration": {
+          "target": "com.amazonaws.s3#RecordExpiration",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableArn": {
+          "target": "com.amazonaws.s3#S3TablesArn",
+          "traits": {}
+        },
+        "TableName": {
+          "target": "com.amazonaws.s3#S3TablesName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableStatus": {
+          "target": "com.amazonaws.s3#MetadataTableStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.s3#KeyPrefixEquals": {
       "type": "string"
@@ -26780,6 +27116,45 @@
     "com.amazonaws.s3#MaxAgeSeconds": {
       "type": "integer"
     },
+    "com.amazonaws.s3#MetadataConfigurationResult": {
+      "members": {
+        "AnnotationTableConfigurationResult": {
+          "target": "com.amazonaws.s3#AnnotationTableConfigurationResult",
+          "traits": {}
+        },
+        "DestinationResult": {
+          "target": "com.amazonaws.s3#DestinationResult",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "InventoryTableConfigurationResult": {
+          "target": "com.amazonaws.s3#InventoryTableConfigurationResult",
+          "traits": {}
+        },
+        "JournalTableConfigurationResult": {
+          "target": "com.amazonaws.s3#JournalTableConfigurationResult",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#MetadataTableConfigurationResult": {
+      "members": {
+        "S3TablesDestinationResult": {
+          "target": "com.amazonaws.s3#S3TablesDestinationResult",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#MetadataTableStatus": {
+      "type": "string"
+    },
     "com.amazonaws.s3#Metrics": {
       "members": {
         "EventThreshold": {
@@ -27278,6 +27653,25 @@
       },
       "type": "list"
     },
+    "com.amazonaws.s3#RecordExpiration": {
+      "members": {
+        "Days": {
+          "target": "com.amazonaws.s3#RecordExpirationDays",
+          "traits": {}
+        },
+        "Expiration": {
+          "target": "com.amazonaws.s3#ExpirationState",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#RecordExpirationDays": {
+      "type": "integer"
+    },
     "com.amazonaws.s3#Redirect": {
       "members": {
         "HostName": {
@@ -27591,6 +27985,65 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#S3TablesArn": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#S3TablesBucketArn": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#S3TablesBucketType": {
+      "members": {
+        "aws": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "aws"
+          }
+        },
+        "customer": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "customer"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#S3TablesDestinationResult": {
+      "members": {
+        "TableArn": {
+          "target": "com.amazonaws.s3#S3TablesArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableBucketArn": {
+          "target": "com.amazonaws.s3#S3TablesBucketArn",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableName": {
+          "target": "com.amazonaws.s3#S3TablesName",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "TableNamespace": {
+          "target": "com.amazonaws.s3#S3TablesNamespace",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#S3TablesName": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#S3TablesNamespace": {
+      "type": "string"
     },
     "com.amazonaws.s3#SSEKMS": {
       "members": {

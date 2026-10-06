@@ -519,7 +519,7 @@
     "s3/service/2006-03-01/s3-2006-03-01.json": {
       "file": "models/s3-2006-03-01.json",
       "sourceSha256": "e632755547997bbfbde67d5630d6f09601c909ed9026713e5ff3f71887ab4892",
-      "subsetSha256": "722aade5430361b715ca6b56f1599567ceaa4919223388a55ec68bed732958ff"
+      "subsetSha256": "db5f1b743fdec1c9b4944bb80c4100ac4f445da42f2e490ac762cf656245787c"
     },
     "s3vectors/service/2025-07-15/s3vectors-2025-07-15.json": {
       "file": "models/s3vectors-2025-07-15.json",

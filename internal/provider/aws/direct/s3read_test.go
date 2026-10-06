@@ -27,6 +27,11 @@ const s3NS = ` xmlns="http://s3.amazonaws.com/doc/2006-03-01/"`
 // s3Bodies answers each bucket operation by the query literal its URI
 // carries, with what S3 sends for a bucket that sets every mapped feature.
 var s3Bodies = map[string]string{
+	"metadataConfiguration": `<GetBucketMetadataConfigurationResult` + s3NS + `><MetadataConfigurationResult>` +
+		`<DestinationResult><TableBucketType>aws</TableBucketType><TableBucketArn>arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3</TableBucketArn><TableNamespace>b_ns</TableNamespace></DestinationResult>` +
+		`<JournalTableConfigurationResult><TableStatus>ACTIVE</TableStatus><TableName>journal</TableName><TableArn>arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3/table/j</TableArn><RecordExpiration><Expiration>ENABLED</Expiration><Days>7</Days></RecordExpiration></JournalTableConfigurationResult>` +
+		`<InventoryTableConfigurationResult><ConfigurationState>DISABLED</ConfigurationState></InventoryTableConfigurationResult>` +
+		`</MetadataConfigurationResult></GetBucketMetadataConfigurationResult>`,
 	"notification": `<NotificationConfiguration` + s3NS + `>` +
 		`<TopicConfiguration><Id>t1</Id><Topic>arn:aws:sns:eu-west-1:111122223333:t</Topic><Event>s3:ObjectCreated:*</Event><Event>s3:ObjectRemoved:*</Event>` +
 		`<Filter><S3Key><FilterRule><Name>Prefix</Name><Value>in/</Value></FilterRule><FilterRule><Name>Suffix</Name><Value>.csv</Value></FilterRule></S3Key></Filter></TopicConfiguration>` +
@@ -135,6 +140,10 @@ func TestReadS3Bucket(t *testing.T) {
 				{"Event": "s3:ObjectCreated:*", "Topic": "arn:aws:sns:eu-west-1:111122223333:t", "Filter": {"S3Key": {"Rules": [{"Name": "Prefix", "Value": "in/"}, {"Name": "Suffix", "Value": ".csv"}]}}},
 				{"Event": "s3:ObjectRemoved:*", "Topic": "arn:aws:sns:eu-west-1:111122223333:t", "Filter": {"S3Key": {"Rules": [{"Name": "Prefix", "Value": "in/"}, {"Name": "Suffix", "Value": ".csv"}]}}}],
 			"QueueConfigurations": [{"Event": "s3:ObjectRestore:Completed", "Queue": "arn:aws:sqs:eu-west-1:111122223333:q"}]},
+		"MetadataConfiguration": {
+			"Destination":               {"TableBucketType": "aws", "TableBucketArn": "arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3", "TableNamespace": "b_ns"},
+			"JournalTableConfiguration":   {"TableName": "journal", "TableArn": "arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3/table/j", "RecordExpiration": {"Expiration": "ENABLED", "Days": 7}},
+			"InventoryTableConfiguration": {"ConfigurationState": "DISABLED"}},
 		"MetricsConfigurations": [
 			{"Id": "m1", "Prefix": "data/", "TagFilters": [{"Key": "c", "Value": "3"}]},
 			{"Id": "m2", "TagFilters": [{"Key": "a", "Value": "1"}]},
@@ -158,7 +167,7 @@ func TestReadS3Bucket(t *testing.T) {
 	}
 
 	empty := sha256.Sum256(nil)
-	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "lifecycle=", "logging=", "metrics=&x-id=ListBucketMetricsConfigurations", "notification=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
+	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "lifecycle=", "logging=", "metadataConfiguration=", "metadataTable=", "metrics=&x-id=ListBucketMetricsConfigurations", "notification=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
 	var queries []string
 	for _, r := range requests() {
 		queries = append(queries, r.query)
@@ -216,9 +225,10 @@ func s3NotFound(code string) (int, string) {
 // s3Unset is the configurations TestReadS3Bucket's bucket does not have,
 // by subresource, and the code S3 answers for each.
 var s3Unset = map[string]string{
-	"object-lock": "ObjectLockConfigurationNotFoundError",
-	"replication": "ReplicationConfigurationNotFoundError",
-	"website":     "NoSuchWebsiteConfiguration",
+	"metadataTable": "V1APIsNotAllowed",
+	"object-lock":   "ObjectLockConfigurationNotFoundError",
+	"replication":   "ReplicationConfigurationNotFoundError",
+	"website":       "NoSuchWebsiteConfiguration",
 }
 
 func TestReadS3BucketAbsence(t *testing.T) {
@@ -235,6 +245,8 @@ func TestReadS3BucketAbsence(t *testing.T) {
 			return notFound("NoSuchPublicAccessBlockConfiguration")
 		case "lifecycle":
 			return notFound("NoSuchLifecycleConfiguration")
+		case "metadataConfiguration":
+			return notFound("MetadataConfigurationNotFound")
 		}
 		if code, unset := s3Unset[query]; unset {
 			return notFound(code)
@@ -245,7 +257,7 @@ func TestReadS3BucketAbsence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, property := range []string{"CorsConfiguration", "Tags", "OwnershipControls", "PublicAccessBlockConfiguration", "ObjectLockConfiguration", "ReplicationConfiguration", "WebsiteConfiguration", "LifecycleConfiguration"} {
+	for _, property := range []string{"CorsConfiguration", "Tags", "OwnershipControls", "PublicAccessBlockConfiguration", "ObjectLockConfiguration", "ReplicationConfiguration", "WebsiteConfiguration", "LifecycleConfiguration", "MetadataConfiguration", "MetadataTableConfiguration"} {
 		if v, present := got[property]; present {
 			t.Errorf("%s = %v, want it left out", property, v)
 		}

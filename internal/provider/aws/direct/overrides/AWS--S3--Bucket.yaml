@@ -547,10 +547,65 @@ also:
                         properties:
                           Name: Name
                           Value: Value
-skip:
-  MetadataConfiguration: GetBucketMetadataConfiguration returns its tables in a result shape not mapped here, and its V1 counterpart is refused for accounts on the V2 API
-  MetadataTableConfiguration: GetBucketMetadataTableConfiguration answers V1APIsNotAllowed for an account on the V2 metadata API
+  - operation: GetBucketMetadataConfiguration
+    identifier:
+      BucketName: Bucket
+    response: GetBucketMetadataConfigurationResult
+    absentErrors: [NoSuchBucket, MetadataConfigurationNotFound]
+    properties:
+      MetadataConfiguration:
+        member: MetadataConfigurationResult
+        properties:
+          Destination:
+            member: DestinationResult
+            properties:
+              TableBucketArn: TableBucketArn
+              TableBucketType: TableBucketType
+              TableNamespace: TableNamespace
+          JournalTableConfiguration:
+            member: JournalTableConfigurationResult
+            properties:
+              TableArn: TableArn
+              TableName: TableName
+              RecordExpiration:
+                member: RecordExpiration
+                properties:
+                  Days: Days
+                  Expiration: Expiration
+          InventoryTableConfiguration:
+            member: InventoryTableConfigurationResult
+            properties:
+              ConfigurationState: ConfigurationState
+              TableArn: TableArn
+              TableName: TableName
+          AnnotationTableConfiguration:
+            member: AnnotationTableConfigurationResult
+            properties:
+              ConfigurationState: ConfigurationState
+              Role: Role
+              TableArn: TableArn
+              TableName: TableName
+  # The V1 metadata API is refused for an account on V2, which can hold no
+  # V1 configuration: that refusal reads as none.
+  - operation: GetBucketMetadataTableConfiguration
+    identifier:
+      BucketName: Bucket
+    response: GetBucketMetadataTableConfigurationResult
+    absentErrors: [NoSuchBucket, V1APIsNotAllowed]
+    properties:
+      MetadataTableConfiguration:
+        member: MetadataTableConfigurationResult
+        properties:
+          S3TablesDestination:
+            member: S3TablesDestinationResult
+            properties:
+              TableArn: TableArn
+              TableBucketArn: TableBucketArn
+              TableName: TableName
+              TableNamespace: TableNamespace
 undeclaredErrors:
+  MetadataConfigurationNotFound: S3's model declares no errors on GetBucketMetadataConfiguration; it answers this for a bucket with no metadata configuration.
+  V1APIsNotAllowed: S3's model declares no errors on GetBucketMetadataTableConfiguration; it answers this for an account on the V2 metadata API, which can hold no V1 configuration.
   NoSuchLifecycleConfiguration: S3's model declares no errors on GetBucketLifecycleConfiguration; it answers this for a bucket with no lifecycle configuration.
   NoSuchCORSConfiguration: S3's model declares no errors on GetBucketCors; it answers this for a bucket with no CORS configuration.
   NoSuchPublicAccessBlockConfiguration: S3's model declares no errors on GetPublicAccessBlock; it answers this for a bucket with no public access block.
