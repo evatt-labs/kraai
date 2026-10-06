@@ -333,7 +333,7 @@
         "VersioningConfiguration",
         "WebsiteConfiguration"
       ],
-      "override": "cb58d89dccd019eef60b7233abb88bad43ff4348d71c82f955a12b6874768ae2",
+      "override": "67646611418eba1b10c28c7f0038c14cd257f43e1db7d4226f7f4c70d76723b6",
       "observed": [
         "MetadataConfigurationNotFound",
         "NoSuchCORSConfiguration",

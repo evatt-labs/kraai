@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
+	"strings"
 )
 
 // wireCheck is what decides whether a read mapping runs backwards: the
@@ -201,6 +203,27 @@ func dropOffPresences(f Field, v any) (out any, keep, changed bool) {
 	case "presence":
 		on, _ := v.(bool)
 		return v, on, !on
+	case "list":
+		items, ok := v.([]any)
+		if !ok || len(f.Fields) == 0 {
+			return v, true, false
+		}
+		var kept []any
+		for i, item := range items {
+			w, _, dropped := dropOffPresences(Field{Kind: "structure", Fields: f.Fields}, item)
+			if dropped && kept == nil {
+				kept = slices.Clone(items)
+			}
+			if dropped {
+				// An element is kept, emptied or not: its place in the list
+				// is what a wait matches.
+				kept[i] = w
+			}
+		}
+		if kept == nil {
+			return v, true, false
+		}
+		return kept, true, true
 	case "structure":
 		props, ok := v.(map[string]any)
 		if !ok {
@@ -232,4 +255,62 @@ func dropOffPresences(f Field, v any) (out any, keep, changed bool) {
 		return kept, len(kept) > 0, true
 	}
 	return v, true, false
+}
+
+// canonicalCase is want with each value at one of r's CanonicalCase paths
+// equal to a spelling but for case written as that spelling.
+func canonicalCase(r Reader, want map[string]any) map[string]any {
+	out := want
+	for _, path := range sortedKeys(r.CanonicalCase) {
+		if v, changed := spelled(out, strings.Split(path, "."), r.CanonicalCase[path]); changed {
+			out = v.(map[string]any)
+		}
+	}
+	return out
+}
+
+// spelled is v with the string at path respelled, copied wherever it
+// changes so v itself is never written to.
+func spelled(v any, path []string, spellings []string) (any, bool) {
+	if len(path) == 0 {
+		s, ok := v.(string)
+		if !ok {
+			return v, false
+		}
+		for _, sp := range spellings {
+			if s != sp && strings.EqualFold(s, sp) {
+				return sp, true
+			}
+		}
+		return v, false
+	}
+	obj, ok := v.(map[string]any)
+	if !ok {
+		return v, false
+	}
+	name, list := strings.CutSuffix(path[0], "[]")
+	child, changed := obj[name], false
+	if list {
+		items, _ := child.([]any)
+		var out []any
+		for i, item := range items {
+			if w, c := spelled(item, path[1:], spellings); c {
+				if out == nil {
+					out = slices.Clone(items)
+				}
+				out[i] = w
+			}
+		}
+		if out != nil {
+			child, changed = out, true
+		}
+	} else {
+		child, changed = spelled(child, path[1:], spellings)
+	}
+	if !changed {
+		return v, false
+	}
+	copied := maps.Clone(obj)
+	copied[name] = child
+	return copied, true
 }

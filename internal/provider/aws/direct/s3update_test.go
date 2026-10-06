@@ -22,6 +22,9 @@ type s3Echo struct {
 	mu     sync.Mutex
 	puts   map[string]string
 	header map[string]http.Header
+	// stored, when set, is what S3 keeps of a document put, such as its
+	// filter rule names respelled.
+	stored func(string) string
 }
 
 func (s *s3Echo) client(t *testing.T) *Client {
@@ -37,6 +40,9 @@ func (s *s3Echo) client(t *testing.T) *Client {
 			return
 		}
 		if put, ok := s.puts[query]; ok {
+			if s.stored != nil {
+				put = s.stored(put)
+			}
 			if size := s.header[query].Get("X-Amz-Transition-Default-Minimum-Object-Size"); size != "" {
 				w.Header().Set("X-Amz-Transition-Default-Minimum-Object-Size", size)
 			}
@@ -140,5 +146,25 @@ func TestUpdateS3BucketRebuildsFlattenedConfigurations(t *testing.T) {
 				t.Errorf("read back %s\nwant      %s", mustJSON(t, got[tc.property]), mustJSON(t, want))
 			}
 		})
+	}
+}
+
+// A notification filter rule named in lower case is seen by the wait once
+// S3 has written it back as Prefix: the update succeeds rather than waiting
+// out its time for a spelling S3 never returns.
+func TestUpdateS3NotificationRuleNameInAnyCase(t *testing.T) {
+	s := &s3Echo{stored: func(doc string) string {
+		return strings.NewReplacer("<Name>prefix</Name>", "<Name>Prefix</Name>", "<Name>SUFFIX</Name>", "<Name>Suffix</Name>").Replace(doc)
+	}}
+	client := s.client(t)
+	value := map[string]any{"QueueConfigurations": []any{map[string]any{
+		"Event": "s3:ObjectCreated:*", "Queue": "arn:aws:sqs:eu-west-1:111122223333:q",
+		"Filter": map[string]any{"S3Key": map[string]any{"Rules": []any{
+			map[string]any{"Name": "prefix", "Value": "in/"}, map[string]any{"Name": "SUFFIX", "Value": ".csv"}}}}}}}
+	if err := client.Update(context.Background(), "AWS::S3::Bucket", "b", map[string]any{}, map[string]any{"NotificationConfiguration": value}); err != nil {
+		t.Fatal(err)
+	}
+	if body := s.puts["notification"]; !strings.Contains(body, "<Name>prefix</Name>") {
+		t.Errorf("put body\n%s\nwant the name as the manifest spells it", body)
 	}
 }

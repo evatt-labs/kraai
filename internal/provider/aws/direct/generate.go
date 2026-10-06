@@ -200,6 +200,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	if len(r.Unsupported) > 0 {
 		fmt.Fprintf(b, "Unsupported: %#v,\n", r.Unsupported)
 	}
+	if len(r.CanonicalCase) > 0 {
+		fmt.Fprintf(b, "CanonicalCase: %#v,\n", r.CanonicalCase)
+	}
 	if len(r.UnsupportedWhen) > 0 {
 		b.WriteString("UnsupportedWhen: map[string]UnsupportedWhen{")
 		for _, p := range sortedKeys(r.UnsupportedWhen) {

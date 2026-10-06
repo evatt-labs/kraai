@@ -1,6 +1,7 @@
 package direct
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -143,6 +144,86 @@ func TestWithoutOffPresences(t *testing.T) {
 			}
 			if mustJSON(t, want) != before {
 				t.Fatalf("the desired state was changed in place: %s", mustJSON(t, want))
+			}
+		})
+	}
+}
+
+// A presence inside a list's elements is dropped from each element it is
+// off in, the element kept in its place.
+func TestWithoutOffPresencesInAList(t *testing.T) {
+	r := Reader{Fields: []Field{{Property: "L", Member: "L", Kind: "list", Fields: []Field{
+		{Property: "On", Member: "On", Kind: "presence", Transform: "present"},
+		{Property: "X", Member: "X", Kind: "scalar"},
+	}}}}
+	want := map[string]any{"L": []any{
+		map[string]any{"On": false, "X": "a"},
+		map[string]any{"On": true, "X": "b"},
+	}}
+	got := withoutOffPresences(r, want)
+	if s, w := mustJSON(t, got), `{"L":[{"X":"a"},{"On":true,"X":"b"}]}`; s != w {
+		t.Fatalf("withoutOffPresences = %s, want %s", s, w)
+	}
+	if s := mustJSON(t, want); s != `{"L":[{"On":false,"X":"a"},{"On":true,"X":"b"}]}` {
+		t.Fatalf("the desired state was changed in place: %s", s)
+	}
+}
+
+// An empty list of tags under a replication rule's And is written as no
+// tags at all, never as an empty element S3 would refuse.
+func TestEmptyTagFiltersWriteNothing(t *testing.T) {
+	s := &s3Echo{}
+	client := s.client(t)
+	rule := map[string]any{"Id": "r", "Priority": 1, "Status": "Enabled",
+		"Filter":                  map[string]any{"And": map[string]any{"Prefix": "a/", "TagFilters": []any{}}},
+		"DeleteMarkerReplication": map[string]any{"Status": "Disabled"},
+		"Destination":             map[string]any{"Bucket": "arn:aws:s3:::dest"}}
+	value := map[string]any{"Role": "arn:aws:iam::111122223333:role/r", "Rules": []any{rule}}
+	if err := client.Update(context.Background(), "AWS::S3::Bucket", "b", map[string]any{}, map[string]any{"ReplicationConfiguration": value}); err != nil {
+		t.Fatal(err)
+	}
+	body := s.puts["replication"]
+	if !strings.Contains(body, "<Filter><And><Prefix>a/</Prefix></And></Filter>") || strings.Contains(body, "Tag") {
+		t.Fatalf("put body\n%s\nwant an And of the prefix alone", body)
+	}
+}
+
+// A value at a canonical-case path equal to a spelling but for case is
+// respelled for the wait; any other value, and the desired state itself,
+// is left as it was.
+func TestCanonicalCase(t *testing.T) {
+	r := Reader{CanonicalCase: map[string][]string{"N.Q[].R[].Name": {"Prefix", "Suffix"}}}
+	var want map[string]any
+	if err := json.Unmarshal([]byte(`{"N": {"Q": [{"R": [{"Name": "prefix"}, {"Name": "Other"}, {"Name": "Suffix"}]}, {"X": 1}]}, "M": "prefix"}`), &want); err != nil {
+		t.Fatal(err)
+	}
+	before := mustJSON(t, want)
+	got := canonicalCase(r, want)
+	if s, w := mustJSON(t, got), `{"M":"prefix","N":{"Q":[{"R":[{"Name":"Prefix"},{"Name":"Other"},{"Name":"Suffix"}]},{"X":1}]}}`; s != w {
+		t.Fatalf("canonicalCase = %s, want %s", s, w)
+	}
+	if mustJSON(t, want) != before {
+		t.Fatalf("the desired state was changed in place: %s", mustJSON(t, want))
+	}
+}
+
+// A canonical-case path must lead through the schema and name spellings.
+func TestCanonicalCaseIsChecked(t *testing.T) {
+	lock, err := loadLock(files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, paths := range map[string]map[string][]string{
+		"a path the schema lacks": {"NotificationConfiguration.Nope[].Name": {"Prefix"}},
+		"no spellings":            {"NotificationConfiguration.QueueConfigurations[].Filter.S3Key.Rules[].Name": nil},
+	} {
+		t.Run(name, func(t *testing.T) {
+			o := withRulesUnion(t, &Union{And: "Filter.And", Empty: "Filter"})
+			o.CanonicalCase = paths
+			r, _ := compileOne(withDecoded(files), lock, o)
+			errs := compileMutations(withDecoded(files), lock, o, &r)
+			if got := fmt.Sprint(errs); !strings.Contains(got, "canonicalCase") {
+				t.Fatalf("errors = %s, want the canonicalCase path refused", got)
 			}
 		})
 	}

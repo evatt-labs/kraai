@@ -719,6 +719,12 @@ unsupportedWhen:
     property: AbacStatus
     values: [Enabled]
     why: an ABAC bucket is tagged only through S3 Control, which no direct call reaches yet
+# S3 writes a notification filter rule's name back as Prefix or Suffix,
+# whatever case it was sent in.
+canonicalCase:
+  NotificationConfiguration.TopicConfigurations[].Filter.S3Key.Rules[].Name: [Prefix, Suffix]
+  NotificationConfiguration.QueueConfigurations[].Filter.S3Key.Rules[].Name: [Prefix, Suffix]
+  NotificationConfiguration.LambdaConfigurations[].Filter.S3Key.Rules[].Name: [Prefix, Suffix]
 unsupported:
   AbacStatus: enabling ABAC moves tagging to S3 Control, which no direct call reaches yet (#467)
   AccessControl: a legacy canned ACL, whose CloudFormation names (PublicRead) differ from the x-amz-acl values (public-read) no call maps

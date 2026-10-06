@@ -67,6 +67,14 @@ func compileUnsupported(o Override, schema *cfnSchema, routed map[string]bool, r
 	if len(o.UnsupportedWhen) > 0 {
 		r.UnsupportedWhen = o.UnsupportedWhen
 	}
+	for _, path := range sortedKeys(o.CanonicalCase) {
+		if !unsupportedPath(schema, path) || len(o.CanonicalCase[path]) == 0 {
+			errs = append(errs, fmt.Errorf("canonicalCase %s is not a path through %s's object properties and lists of objects, or names no spelling", path, o.Type))
+		}
+	}
+	if len(o.CanonicalCase) > 0 {
+		r.CanonicalCase = o.CanonicalCase
+	}
 	for path := range o.Unsupported {
 		if !strings.Contains(path, ".") {
 			routed[path] = true

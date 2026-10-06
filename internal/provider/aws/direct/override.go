@@ -50,6 +50,11 @@ type Override struct {
 	// an instance in a given state, such as an S3 bucket's tags once ABAC
 	// is enabled, which S3 then takes only through S3 Control.
 	UnsupportedWhen map[string]UnsupportedWhen `yaml:"unsupportedWhen,omitempty"`
+	// CanonicalCase names, by dotted path with [] after a list, a string
+	// the service writes back in its own case, and its spellings: a wait
+	// takes a desired value equal to one but for case as that spelling,
+	// so a write the service took is seen, such as S3's filter rule names.
+	CanonicalCase map[string][]string `yaml:"canonicalCase,omitempty"`
 	// Lifecycle is the values the lifecycle harness creates an instance
 	// with, then sets one property at a time.
 	Lifecycle *Lifecycle `yaml:"lifecycle,omitempty"`
