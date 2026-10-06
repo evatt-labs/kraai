@@ -100,6 +100,10 @@ type Reader struct {
 	// those it must read as absent: the only readers a lookup may use in
 	// place of Cloud Control.
 	Production bool
+	// PageInput is the input a declared page token is sent in, to follow
+	// pages; with none, an answer carrying a token is refused as
+	// incomplete. See Read.Pages.
+	PageInput *Binding
 	// PageToken is the wire path to the output's page token when the
 	// operation is paginated: a response carrying one is incomplete.
 	PageToken []string
@@ -194,6 +198,9 @@ type Binding struct {
 type Field struct {
 	Property string
 	Member   string
+	// Regions is a template's form for each region it differs in; see
+	// Mapping.Regions.
+	Regions map[string]string
 	// Via is the path on the wire from the enclosing structure to the one
 	// holding Member, for a property the API wraps, such as a list inside
 	// a Quantity and Items structure. A list step reads Member from every
@@ -214,6 +221,17 @@ type Field struct {
 	Unless []Condition
 	// Wrap is Mapping.Wrap.
 	Wrap string
+	// Alternatives is, for Kind alternatives, each mapping compiled as a
+	// field of the same property, tried in order; AsList is set on one
+	// whose single structure becomes a one-element list.
+	Alternatives []Field
+	AsList       bool
+	// Spread marks the list field whose values each make one element of
+	// the enclosing list; see Mapping.Spread.
+	Spread bool
+	// Header is the response header a member bound to one is read from,
+	// such as S3's x-amz-transition-default-minimum-object-size.
+	Header string
 	// Default is Mapping.Default.
 	Default any
 	// Extract is Mapping.Extract.

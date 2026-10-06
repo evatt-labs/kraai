@@ -86,16 +86,6 @@ func (c *callCompiler) response() {
 	} else if c.payload != "" {
 		c.fail("the body is the payload %s, so the response path must start at it", c.payload)
 	}
-	if isREST(c.r.Protocol) && c.o.Read.Response == "" {
-		for _, name := range sortedKeys(c.o.Properties) {
-			m := c.model.Shapes[c.resource].Members[c.o.Properties[name].Member]
-			for _, trait := range []string{"smithy.api#httpHeader", "smithy.api#httpPrefixHeaders", "smithy.api#httpResponseCode"} {
-				if m.Traits[trait] != nil {
-					c.fail("%s maps to %s, which is bound to %s, not the body", name, c.o.Properties[name].Member, trait)
-				}
-			}
-		}
-	}
 	if c.model.Shapes[c.resource].Type != "structure" {
 		c.fail("response path %q does not end at a structure", c.o.Read.Response)
 	}
@@ -368,6 +358,7 @@ func (c *callCompiler) jsonNames() {
 					c.fail("%s maps to %s, which has a jsonName %s is not known to honour", f.Property, f.Member, c.r.Protocol)
 				}
 				walk(f.Fields)
+				walk(f.Alternatives)
 			}
 		}
 		walk(c.r.Fields)

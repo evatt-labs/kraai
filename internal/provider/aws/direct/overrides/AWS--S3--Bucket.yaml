@@ -15,6 +15,27 @@ absentIds:
   - kraai-absent-probe-{account}-{region}
 properties:
   BucketName: '{BucketName}'
+  # No S3 call returns these; Cloud Control builds them from the name and
+  # the bucket's region, which a read at this endpoint is in.
+  Arn: 'arn:aws:s3:::{BucketName}'
+  DomainName: '{BucketName}.s3.amazonaws.com'
+  RegionalDomainName: '{BucketName}.s3.{region}.amazonaws.com'
+  DualStackDomainName: '{BucketName}.s3.dualstack.{region}.amazonaws.com'
+  # Website endpoints are s3-website.REGION, except in the regions below,
+  # which keep the older s3-website-REGION form: the "Amazon S3 website
+  # endpoints" table of https://docs.aws.amazon.com/general/latest/gr/s3.html,
+  # read 2026-10-05.
+  WebsiteURL:
+    member: 'http://{BucketName}.s3-website.{region}.amazonaws.com'
+    regions:
+      ap-northeast-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      ap-southeast-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      ap-southeast-2: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      eu-west-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      sa-east-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      us-east-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      us-west-1: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
+      us-west-2: 'http://{BucketName}.s3-website-{region}.amazonaws.com'
   VersioningConfiguration:
     member: .
     properties:
@@ -266,21 +287,326 @@ also:
                     properties:
                       Status: Status
               Status: Status
-skip:
-  Arn: no S3 call returns it; Cloud Control builds it from the bucket name
-  DomainName: no S3 call returns it; Cloud Control builds it from the bucket name
-  DualStackDomainName: no S3 call returns it; Cloud Control builds it from the bucket name and region
-  RegionalDomainName: no S3 call returns it; Cloud Control builds it from the bucket name and region
-  WebsiteURL: no S3 call returns it; Cloud Control builds it from the bucket name and region
-  AnalyticsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
-  IntelligentTieringConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
-  InventoryConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
-  MetricsConfigurations: listed one page at a time without a pagination trait in the model, so a read could silently omit configurations
-  LifecycleConfiguration: the API nests each rule's prefix, tags and size bounds in a Filter and its expiration in Expiration, which the schema flattens; not mapped
-  MetadataConfiguration: GetBucketMetadataConfiguration returns its tables in a result shape not mapped here, and its V1 counterpart is refused for accounts on the V2 API
-  MetadataTableConfiguration: GetBucketMetadataTableConfiguration answers V1APIsNotAllowed for an account on the V2 metadata API
-  NotificationConfiguration: the API gives each configuration a list of Events where the schema has one Event per configuration, which no mapping here splits
+  - operation: ListBucketInventoryConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    # The model declares no pagination; S3 pages at 100 configurations.
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      InventoryConfigurations:
+        member: InventoryConfigurationList
+        properties:
+          Id: Id
+          Enabled: IsEnabled
+          IncludedObjectVersions: IncludedObjectVersions
+          OptionalFields: OptionalFields
+          Prefix: Filter.Prefix
+          ScheduleFrequency: Schedule.Frequency
+          Destination:
+            member: Destination.S3BucketDestination
+            properties:
+              BucketAccountId: AccountId
+              BucketArn: Bucket
+              Format: Format
+              Prefix: Prefix
+  - operation: ListBucketMetricsConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      MetricsConfigurations:
+        member: MetricsConfigurationList
+        properties:
+          Id: Id
+          Prefix:
+            alternatives:
+              - member: Filter.Prefix
+              - member: Filter.And.Prefix
+          TagFilters:
+            alternatives:
+              - member: Filter.And.Tags
+              - member: Filter.Tag
+                asList: true
+            properties:
+              Key: Key
+              Value: Value
+          AccessPointArn:
+            alternatives:
+              - member: Filter.AccessPointArn
+              - member: Filter.And.AccessPointArn
+  - operation: ListBucketAnalyticsConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      AnalyticsConfigurations:
+        member: AnalyticsConfigurationList
+        properties:
+          Id: Id
+          Prefix:
+            alternatives:
+              - member: Filter.Prefix
+              - member: Filter.And.Prefix
+          TagFilters:
+            alternatives:
+              - member: Filter.And.Tags
+              - member: Filter.Tag
+                asList: true
+            properties:
+              Key: Key
+              Value: Value
+          StorageClassAnalysis:
+            member: StorageClassAnalysis
+            properties:
+              DataExport:
+                member: DataExport
+                properties:
+                  OutputSchemaVersion: OutputSchemaVersion
+                  Destination:
+                    member: Destination.S3BucketDestination
+                    properties:
+                      BucketAccountId: BucketAccountId
+                      BucketArn: Bucket
+                      Format: Format
+                      Prefix: Prefix
+  - operation: ListBucketIntelligentTieringConfigurations
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    pages:
+      input: ContinuationToken
+      output: NextContinuationToken
+    properties:
+      IntelligentTieringConfigurations:
+        member: IntelligentTieringConfigurationList
+        properties:
+          Id: Id
+          Status: Status
+          Tierings:
+            member: Tierings
+            properties:
+              AccessTier: AccessTier
+              Days: Days
+          Prefix:
+            alternatives:
+              - member: Filter.Prefix
+              - member: Filter.And.Prefix
+          TagFilters:
+            alternatives:
+              - member: Filter.And.Tags
+              - member: Filter.Tag
+                asList: true
+            properties:
+              Key: Key
+              Value: Value
+  - operation: GetBucketLifecycleConfiguration
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket, NoSuchLifecycleConfiguration]
+    properties:
+      LifecycleConfiguration:
+        member: .
+        properties:
+          TransitionDefaultMinimumObjectSize: TransitionDefaultMinimumObjectSize
+          Rules:
+            member: Rules
+            properties:
+              Id: ID
+              Status: Status
+              # The rule's filter is one of a prefix, a tag, size bounds or
+              # an And of them, beside a deprecated top-level prefix; the
+              # schema flattens them all.
+              Prefix:
+                alternatives:
+                  - member: Filter.Prefix
+                  - member: Filter.And.Prefix
+                  - member: Prefix
+              TagFilters:
+                alternatives:
+                  - member: Filter.And.Tags
+                  - member: Filter.Tag
+                    asList: true
+                properties:
+                  Key: Key
+                  Value: Value
+              ObjectSizeGreaterThan:
+                alternatives:
+                  - member: Filter.ObjectSizeGreaterThan
+                    transform: text
+                  - member: Filter.And.ObjectSizeGreaterThan
+                    transform: text
+              ObjectSizeLessThan:
+                alternatives:
+                  - member: Filter.ObjectSizeLessThan
+                    transform: text
+                  - member: Filter.And.ObjectSizeLessThan
+                    transform: text
+              ExpirationInDays: Expiration.Days
+              ExpirationDate: Expiration.Date
+              Transitions:
+                member: Transitions
+                properties:
+                  StorageClass: StorageClass
+                  TransitionInDays: Days
+                  TransitionDate: Date
+              NoncurrentVersionExpiration:
+                member: NoncurrentVersionExpiration
+                properties:
+                  NoncurrentDays: NoncurrentDays
+                  NewerNoncurrentVersions: NewerNoncurrentVersions
+              NoncurrentVersionTransitions:
+                member: NoncurrentVersionTransitions
+                properties:
+                  StorageClass: StorageClass
+                  TransitionInDays: NoncurrentDays
+                  NewerNoncurrentVersions: NewerNoncurrentVersions
+              AbortIncompleteMultipartUpload:
+                member: AbortIncompleteMultipartUpload
+                properties:
+                  DaysAfterInitiation: DaysAfterInitiation
+  - operation: GetBucketNotificationConfiguration
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    properties:
+      NotificationConfiguration:
+        member: .
+        properties:
+          EventBridgeConfiguration:
+            member: .
+            properties:
+              EventBridgeEnabled:
+                member: EventBridgeConfiguration
+                transform: present
+          TopicConfigurations:
+            member: TopicConfigurations
+            # One schema entry per event: Cloud Control keeps only the
+            # first of a configuration's events, dropping the rest.
+            spread:
+              property: Event
+              member: Events
+            properties:
+              Topic: TopicArn
+              Filter:
+                member: Filter
+                properties:
+                  S3Key:
+                    member: Key
+                    properties:
+                      Rules:
+                        member: FilterRules
+                        properties:
+                          Name: Name
+                          Value: Value
+          QueueConfigurations:
+            member: QueueConfigurations
+            # One schema entry per event: Cloud Control keeps only the
+            # first of a configuration's events, dropping the rest.
+            spread:
+              property: Event
+              member: Events
+            properties:
+              Queue: QueueArn
+              Filter:
+                member: Filter
+                properties:
+                  S3Key:
+                    member: Key
+                    properties:
+                      Rules:
+                        member: FilterRules
+                        properties:
+                          Name: Name
+                          Value: Value
+          LambdaConfigurations:
+            member: LambdaFunctionConfigurations
+            # One schema entry per event: Cloud Control keeps only the
+            # first of a configuration's events, dropping the rest.
+            spread:
+              property: Event
+              member: Events
+            properties:
+              Function: LambdaFunctionArn
+              Filter:
+                member: Filter
+                properties:
+                  S3Key:
+                    member: Key
+                    properties:
+                      Rules:
+                        member: FilterRules
+                        properties:
+                          Name: Name
+                          Value: Value
+  - operation: GetBucketMetadataConfiguration
+    identifier:
+      BucketName: Bucket
+    response: GetBucketMetadataConfigurationResult
+    absentErrors: [NoSuchBucket, MetadataConfigurationNotFound]
+    properties:
+      MetadataConfiguration:
+        member: MetadataConfigurationResult
+        properties:
+          Destination:
+            member: DestinationResult
+            properties:
+              TableBucketArn: TableBucketArn
+              TableBucketType: TableBucketType
+              TableNamespace: TableNamespace
+          JournalTableConfiguration:
+            member: JournalTableConfigurationResult
+            properties:
+              TableArn: TableArn
+              TableName: TableName
+              RecordExpiration:
+                member: RecordExpiration
+                properties:
+                  Days: Days
+                  Expiration: Expiration
+          InventoryTableConfiguration:
+            member: InventoryTableConfigurationResult
+            properties:
+              ConfigurationState: ConfigurationState
+              TableArn: TableArn
+              TableName: TableName
+          AnnotationTableConfiguration:
+            member: AnnotationTableConfigurationResult
+            properties:
+              ConfigurationState: ConfigurationState
+              Role: Role
+              TableArn: TableArn
+              TableName: TableName
+  # The V1 metadata API is refused for an account on V2, which can hold no
+  # V1 configuration: that refusal reads as none.
+  - operation: GetBucketMetadataTableConfiguration
+    identifier:
+      BucketName: Bucket
+    response: GetBucketMetadataTableConfigurationResult
+    absentErrors: [NoSuchBucket, V1APIsNotAllowed]
+    properties:
+      MetadataTableConfiguration:
+        member: MetadataTableConfigurationResult
+        properties:
+          S3TablesDestination:
+            member: S3TablesDestinationResult
+            properties:
+              TableArn: TableArn
+              TableBucketArn: TableBucketArn
+              TableName: TableName
+              TableNamespace: TableNamespace
 undeclaredErrors:
+  MetadataConfigurationNotFound: S3's model declares no errors on GetBucketMetadataConfiguration; it answers this for a bucket with no metadata configuration.
+  V1APIsNotAllowed: S3's model declares no errors on GetBucketMetadataTableConfiguration; it answers this for an account on the V2 metadata API, which can hold no V1 configuration.
+  NoSuchLifecycleConfiguration: S3's model declares no errors on GetBucketLifecycleConfiguration; it answers this for a bucket with no lifecycle configuration.
   NoSuchCORSConfiguration: S3's model declares no errors on GetBucketCors; it answers this for a bucket with no CORS configuration.
   NoSuchPublicAccessBlockConfiguration: S3's model declares no errors on GetPublicAccessBlock; it answers this for a bucket with no public access block.
   NoSuchTagSet: S3's model declares no errors on GetBucketTagging; it answers this for a bucket with no tags.

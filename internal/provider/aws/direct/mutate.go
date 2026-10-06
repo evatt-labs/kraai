@@ -359,14 +359,14 @@ func (c *Client) mutateWith(ctx context.Context, policy retryPolicy, r Reader, m
 		}
 	}
 	// Many mutations answer with no body at all.
-	body, err := c.sendRetrying(ctx, policy, call, m.Method, m.URI, m.Target, bindings)
+	body, _, err := c.sendRetrying(ctx, policy, call, m.Method, m.URI, m.Target, bindings)
 	for deadline := time.Now().Add(c.wait(r)); retryable(err, m.RetryErrors) && time.Now().Before(deadline); {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case <-time.After(c.poll()):
 		}
-		body, err = c.sendRetrying(ctx, policy, call, m.Method, m.URI, m.Target, bindings)
+		body, _, err = c.sendRetrying(ctx, policy, call, m.Method, m.URI, m.Target, bindings)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("the %s call %s: %w", r.Type, m.Operation, err)

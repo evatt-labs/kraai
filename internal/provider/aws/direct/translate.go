@@ -3,6 +3,8 @@ package direct
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
+	"net/http"
 	"net/url"
 	"slices"
 	"strconv"
@@ -31,8 +33,19 @@ func (r Reader) translate(w *walk, obj map[string]any, fields []Field) map[strin
 			continue
 		}
 		if f.Kind == "template" {
-			// Built only when every part is known.
-			if v := substitute(f.Member, w.vars).(string); !placeholderName.MatchString(v) {
+			if v, ok := renderTemplate(f, w.vars); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
+		if f.Kind == "alternatives" {
+			if v, ok := firstAlternative(f, func(alt Field) map[string]any { return r.translate(w, obj, []Field{alt}) }); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
+		if f.Header != "" {
+			if v := w.header.Get(f.Header); v != "" {
 				out[f.Property] = v
 			}
 			continue
@@ -104,6 +117,8 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 		}
 	}
 	switch f.Kind {
+	case "presence":
+		v = true
 	case "structure":
 		if nested, ok := v.(map[string]any); ok && len(f.Fields) > 0 {
 			v = r.translate(w, nested, f.Fields)
@@ -142,7 +157,7 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 					translated = append(translated, r.translate(w, nested, f.Fields))
 				}
 			}
-			v = translated
+			v = spread(f.Fields, translated)
 		}
 	}
 	v, ok = transform(f.Transform, v)
@@ -190,6 +205,19 @@ func entryList(names []string, entries map[string]any) []any {
 // number and boolean parse a string; text that does not parse stays text,
 // for the comparison to report rather than hide.
 func transform(name string, v any) (any, bool) {
+	if name == "text" {
+		// An integer the schema types as a string, as CloudFormation
+		// writes S3's object size bounds.
+		switch n := v.(type) {
+		case json.Number:
+			return string(n), true
+		case float64:
+			return strconv.FormatFloat(n, 'f', -1, 64), true
+		case int64:
+			return strconv.FormatInt(n, 10), true
+		}
+		return v, true
+	}
 	text, ok := v.(string)
 	if !ok {
 		return v, true
@@ -287,6 +315,13 @@ type walk struct {
 	// absent is set when a document selection found no element: the
 	// instance is gone.
 	absent bool
+	// follow is set when the call's page token is followed, and next is
+	// the token an answer carried for the next page.
+	follow bool
+	next   string
+	// header is the response's headers, which a header-bound member is
+	// read from.
+	header http.Header
 }
 
 // keeps reports whether a list element passes every match, reading each
@@ -329,4 +364,57 @@ func memberAt(obj map[string]any, path string) any {
 		v = m[name]
 	}
 	return v
+}
+
+// renderTemplate builds a template field from vars, in the form for the
+// region vars names; only when every part is known.
+func renderTemplate(f Field, vars map[string]string) (string, bool) {
+	tmpl := f.Member
+	if regional, ok := f.Regions[vars[regionPlaceholder]]; ok {
+		tmpl = regional
+	}
+	v := substitute(tmpl, vars).(string)
+	return v, !placeholderName.MatchString(v)
+}
+
+// firstAlternative is the value of f's first alternative the response
+// carries, translated by read; one read as a list is wrapped as one.
+func firstAlternative(f Field, read func(Field) map[string]any) (any, bool) {
+	for _, alt := range f.Alternatives {
+		v, ok := read(alt)[f.Property]
+		if !ok {
+			continue
+		}
+		if alt.AsList {
+			v = []any{v}
+		}
+		return v, true
+	}
+	return nil, false
+}
+
+// spread is list with each element whose fields spread a list made one
+// element per value of it; see Mapping.Spread. An element with no values
+// is left out, as one for no event.
+func spread(fields []Field, list []any) []any {
+	i := slices.IndexFunc(fields, func(f Field) bool { return f.Spread })
+	if i < 0 {
+		return list
+	}
+	name := fields[i].Property
+	out := make([]any, 0, len(list))
+	for _, item := range list {
+		m, ok := item.(map[string]any)
+		values, _ := m[name].([]any)
+		if !ok {
+			out = append(out, item)
+			continue
+		}
+		for _, v := range values {
+			one := maps.Clone(m)
+			one[name] = v
+			out = append(out, one)
+		}
+	}
+	return out
 }

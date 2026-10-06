@@ -15,6 +15,8 @@ func wireable(f Field) error {
 		return fmt.Errorf("%s is read through a selection or reshaping", f.Property)
 	case f.Kind == "template":
 		return fmt.Errorf("%s is built from %s, not read", f.Property, f.Member)
+	case f.Kind == "alternatives":
+		return fmt.Errorf("%s is read from the first of several members", f.Property)
 	case f.Transform != "":
 		return fmt.Errorf("%s is read through the %s transform", f.Property, f.Transform)
 	case f.Kind == "map" && len(f.Fields) > 0:

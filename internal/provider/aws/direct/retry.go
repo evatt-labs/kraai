@@ -2,6 +2,7 @@ package direct
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
@@ -59,22 +60,22 @@ func (p retryPolicy) allows(err error) bool {
 
 // sendRetrying is send, made again after a failure policy allows, up to
 // the SDK's attempt limit with its backoff.
-func (c *Client) sendRetrying(ctx context.Context, policy retryPolicy, r Reader, method, uri, target string, values []Binding) ([]byte, error) {
+func (c *Client) sendRetrying(ctx context.Context, policy retryPolicy, r Reader, method, uri, target string, values []Binding) ([]byte, http.Header, error) {
 	for attempt := 1; ; attempt++ {
-		body, err := c.sendOnce(ctx, r, method, uri, target, values)
+		body, header, err := c.sendOnce(ctx, r, method, uri, target, values)
 		if err == nil || attempt >= maxAttempts || !policy.allows(err) {
-			return body, err
+			return body, header, err
 		}
 		delay, derr := backoff.BackoffDelay(attempt, err)
 		if derr != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if c.RetryDelay != 0 {
 			delay = c.RetryDelay
 		}
 		select {
 		case <-ctx.Done():
-			return nil, ctx.Err()
+			return nil, nil, ctx.Err()
 		case <-time.After(delay):
 		}
 	}

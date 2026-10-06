@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"slices"
 	"sort"
@@ -26,6 +27,20 @@ const s3NS = ` xmlns="http://s3.amazonaws.com/doc/2006-03-01/"`
 // s3Bodies answers each bucket operation by the query literal its URI
 // carries, with what S3 sends for a bucket that sets every mapped feature.
 var s3Bodies = map[string]string{
+	"metadataConfiguration": `<GetBucketMetadataConfigurationResult` + s3NS + `><MetadataConfigurationResult>` +
+		`<DestinationResult><TableBucketType>aws</TableBucketType><TableBucketArn>arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3</TableBucketArn><TableNamespace>b_ns</TableNamespace></DestinationResult>` +
+		`<JournalTableConfigurationResult><TableStatus>ACTIVE</TableStatus><TableName>journal</TableName><TableArn>arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3/table/j</TableArn><RecordExpiration><Expiration>ENABLED</Expiration><Days>7</Days></RecordExpiration></JournalTableConfigurationResult>` +
+		`<InventoryTableConfigurationResult><ConfigurationState>DISABLED</ConfigurationState></InventoryTableConfigurationResult>` +
+		`</MetadataConfigurationResult></GetBucketMetadataConfigurationResult>`,
+	"notification": `<NotificationConfiguration` + s3NS + `>` +
+		`<TopicConfiguration><Id>t1</Id><Topic>arn:aws:sns:eu-west-1:111122223333:t</Topic><Event>s3:ObjectCreated:*</Event><Event>s3:ObjectRemoved:*</Event>` +
+		`<Filter><S3Key><FilterRule><Name>Prefix</Name><Value>in/</Value></FilterRule><FilterRule><Name>Suffix</Name><Value>.csv</Value></FilterRule></S3Key></Filter></TopicConfiguration>` +
+		`<QueueConfiguration><Id>q1</Id><Queue>arn:aws:sqs:eu-west-1:111122223333:q</Queue><Event>s3:ObjectRestore:Completed</Event></QueueConfiguration>` +
+		`<EventBridgeConfiguration></EventBridgeConfiguration></NotificationConfiguration>`,
+	"lifecycle": `<LifecycleConfiguration` + s3NS + `>` +
+		`<Rule><ID>r1</ID><Filter><And><Prefix>tmp/</Prefix><Tag><Key>d</Key><Value>4</Value></Tag><ObjectSizeGreaterThan>1024</ObjectSizeGreaterThan></And></Filter><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule>` +
+		`<Rule><ID>r2</ID><Filter><Prefix>old/</Prefix></Filter><Status>Enabled</Status><Transition><Days>40</Days><StorageClass>STANDARD_IA</StorageClass></Transition><NoncurrentVersionExpiration><NoncurrentDays>7</NoncurrentDays></NoncurrentVersionExpiration></Rule>` +
+		`</LifecycleConfiguration>`,
 	"versioning":        `<VersioningConfiguration` + s3NS + `><Status>Enabled</Status></VersioningConfiguration>`,
 	"accelerate":        `<AccelerateConfiguration` + s3NS + `><Status>Suspended</Status></AccelerateConfiguration>`,
 	"abac":              `<AbacStatus` + s3NS + `><Status>Enabled</Status></AbacStatus>`,
@@ -33,8 +48,20 @@ var s3Bodies = map[string]string{
 	"ownershipControls": `<OwnershipControls` + s3NS + `><Rule><ObjectOwnership>BucketOwnerPreferred</ObjectOwnership></Rule></OwnershipControls>`,
 	"publicAccessBlock": `<PublicAccessBlockConfiguration` + s3NS + `><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>false</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>false</RestrictPublicBuckets></PublicAccessBlockConfiguration>`,
 	"tagging":           `<Tagging` + s3NS + `><TagSet><Tag><Key>team</Key><Value>core</Value></Tag><Tag><Key>env</Key><Value>dev</Value></Tag></TagSet></Tagging>`,
-	"logging":           `<BucketLoggingStatus` + s3NS + `><LoggingEnabled><TargetBucket>logs</TargetBucket><TargetPrefix>b/</TargetPrefix><TargetObjectKeyFormat><PartitionedPrefix><PartitionDateSource>EventTime</PartitionDateSource></PartitionedPrefix></TargetObjectKeyFormat></LoggingEnabled></BucketLoggingStatus>`,
-	"cors":              `<CORSConfiguration` + s3NS + `><CORSRule><ID>web</ID><AllowedHeader>*</AllowedHeader><AllowedHeader>x-amz-meta-a</AllowedHeader><AllowedMethod>GET</AllowedMethod><AllowedOrigin>https://example.com</AllowedOrigin><ExposeHeader>ETag</ExposeHeader><MaxAgeSeconds>3000</MaxAgeSeconds></CORSRule></CORSConfiguration>`,
+	"metrics": `<ListMetricsConfigurationsResult` + s3NS + `><IsTruncated>false</IsTruncated>` +
+		`<MetricsConfiguration><Id>m1</Id><Filter><And><Prefix>data/</Prefix><Tag><Key>c</Key><Value>3</Value></Tag></And></Filter></MetricsConfiguration>` +
+		`<MetricsConfiguration><Id>m2</Id><Filter><Tag><Key>a</Key><Value>1</Value></Tag></Filter></MetricsConfiguration>` +
+		`<MetricsConfiguration><Id>m3</Id><Filter><AccessPointArn>arn:aws:s3:eu-west-1:111122223333:accesspoint/ap</AccessPointArn></Filter></MetricsConfiguration>` +
+		`</ListMetricsConfigurationsResult>`,
+	"analytics": `<ListBucketAnalyticsConfigurationResult` + s3NS + `><IsTruncated>false</IsTruncated>` +
+		`<AnalyticsConfiguration><Id>an1</Id><Filter><And><Prefix>logs/</Prefix><Tag><Key>a</Key><Value>1</Value></Tag><Tag><Key>b</Key><Value>2</Value></Tag></And></Filter><StorageClassAnalysis/></AnalyticsConfiguration>` +
+		`</ListBucketAnalyticsConfigurationResult>`,
+	"intelligent-tiering": `<ListBucketIntelligentTieringConfigurationsOutput` + s3NS + `><IsTruncated>false</IsTruncated>` +
+		`<IntelligentTieringConfiguration><Id>it1</Id><Filter><Prefix>cold/</Prefix></Filter><Status>Enabled</Status><Tiering><Days>90</Days><AccessTier>ARCHIVE_ACCESS</AccessTier></Tiering></IntelligentTieringConfiguration>` +
+		`</ListBucketIntelligentTieringConfigurationsOutput>`,
+	"inventory": `<ListInventoryConfigurationsResult` + s3NS + `><IsTruncated>false</IsTruncated></ListInventoryConfigurationsResult>`,
+	"logging":   `<BucketLoggingStatus` + s3NS + `><LoggingEnabled><TargetBucket>logs</TargetBucket><TargetPrefix>b/</TargetPrefix><TargetObjectKeyFormat><PartitionedPrefix><PartitionDateSource>EventTime</PartitionDateSource></PartitionedPrefix></TargetObjectKeyFormat></LoggingEnabled></BucketLoggingStatus>`,
+	"cors":      `<CORSConfiguration` + s3NS + `><CORSRule><ID>web</ID><AllowedHeader>*</AllowedHeader><AllowedHeader>x-amz-meta-a</AllowedHeader><AllowedMethod>GET</AllowedMethod><AllowedOrigin>https://example.com</AllowedOrigin><ExposeHeader>ETag</ExposeHeader><MaxAgeSeconds>3000</MaxAgeSeconds></CORSRule></CORSConfiguration>`,
 }
 
 type s3Request struct{ method, path, query, sha, auth string }
@@ -48,7 +75,13 @@ func s3Client(t *testing.T, answer func(query string) (int, string)) (*Client, f
 		mu.Lock()
 		seen = append(seen, s3Request{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, r.Header.Get("X-Amz-Content-Sha256"), r.Header.Get("Authorization")})
 		mu.Unlock()
-		status, body := answer(strings.TrimSuffix(strings.SplitN(r.URL.RawQuery, "&", 2)[0], "="))
+		query := strings.TrimSuffix(strings.SplitN(r.URL.RawQuery, "&", 2)[0], "=")
+		status, body := answer(query)
+		if status == http.StatusOK {
+			for k, v := range s3Headers[query] {
+				w.Header().Set(k, v)
+			}
+		}
 		w.WriteHeader(status)
 		_, _ = io.WriteString(w, body)
 	}))
@@ -89,6 +122,11 @@ func TestReadS3Bucket(t *testing.T) {
 	var want map[string]any
 	if err := json.Unmarshal([]byte(`{
 		"BucketName": "my.bucket/x",
+		"Arn": "arn:aws:s3:::my.bucket/x",
+		"DomainName": "my.bucket/x.s3.amazonaws.com",
+		"RegionalDomainName": "my.bucket/x.s3.eu-west-1.amazonaws.com",
+		"DualStackDomainName": "my.bucket/x.s3.dualstack.eu-west-1.amazonaws.com",
+		"WebsiteURL": "http://my.bucket/x.s3-website-eu-west-1.amazonaws.com",
 		"VersioningConfiguration": {"Status": "Enabled"},
 		"AccelerateConfiguration": {"AccelerationStatus": "Suspended"},
 		"AbacStatus": "Enabled",
@@ -99,6 +137,25 @@ func TestReadS3Bucket(t *testing.T) {
 		"OwnershipControls": {"Rules": [{"ObjectOwnership": "BucketOwnerPreferred"}]},
 		"PublicAccessBlockConfiguration": {"BlockPublicAcls": true, "IgnorePublicAcls": false, "BlockPublicPolicy": true, "RestrictPublicBuckets": false},
 		"Tags": [{"Key": "team", "Value": "core"}, {"Key": "env", "Value": "dev"}],
+		"LifecycleConfiguration": {"TransitionDefaultMinimumObjectSize": "all_storage_classes_128K", "Rules": [
+			{"Id": "r1", "Status": "Enabled", "ExpirationInDays": 30, "ObjectSizeGreaterThan": "1024", "TagFilters": [{"Key": "d", "Value": "4"}], "Prefix": "tmp/"},
+			{"Id": "r2", "Status": "Enabled", "Transitions": [{"StorageClass": "STANDARD_IA", "TransitionInDays": 40}], "NoncurrentVersionExpiration": {"NoncurrentDays": 7}, "Prefix": "old/"}]},
+		"NotificationConfiguration": {
+			"EventBridgeConfiguration": {"EventBridgeEnabled": true},
+			"TopicConfigurations": [
+				{"Event": "s3:ObjectCreated:*", "Topic": "arn:aws:sns:eu-west-1:111122223333:t", "Filter": {"S3Key": {"Rules": [{"Name": "Prefix", "Value": "in/"}, {"Name": "Suffix", "Value": ".csv"}]}}},
+				{"Event": "s3:ObjectRemoved:*", "Topic": "arn:aws:sns:eu-west-1:111122223333:t", "Filter": {"S3Key": {"Rules": [{"Name": "Prefix", "Value": "in/"}, {"Name": "Suffix", "Value": ".csv"}]}}}],
+			"QueueConfigurations": [{"Event": "s3:ObjectRestore:Completed", "Queue": "arn:aws:sqs:eu-west-1:111122223333:q"}]},
+		"MetadataConfiguration": {
+			"Destination":               {"TableBucketType": "aws", "TableBucketArn": "arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3", "TableNamespace": "b_ns"},
+			"JournalTableConfiguration":   {"TableName": "journal", "TableArn": "arn:aws:s3tables:eu-west-1:111122223333:bucket/aws-s3/table/j", "RecordExpiration": {"Expiration": "ENABLED", "Days": 7}},
+			"InventoryTableConfiguration": {"ConfigurationState": "DISABLED"}},
+		"MetricsConfigurations": [
+			{"Id": "m1", "Prefix": "data/", "TagFilters": [{"Key": "c", "Value": "3"}]},
+			{"Id": "m2", "TagFilters": [{"Key": "a", "Value": "1"}]},
+			{"Id": "m3", "AccessPointArn": "arn:aws:s3:eu-west-1:111122223333:accesspoint/ap"}],
+		"AnalyticsConfigurations": [{"Id": "an1", "Prefix": "logs/", "TagFilters": [{"Key": "a", "Value": "1"}, {"Key": "b", "Value": "2"}], "StorageClassAnalysis": {}}],
+		"IntelligentTieringConfigurations": [{"Id": "it1", "Prefix": "cold/", "Status": "Enabled", "Tierings": [{"AccessTier": "ARCHIVE_ACCESS", "Days": 90}]}],
 		"LoggingConfiguration": {"DestinationBucketName": "logs", "LogFilePrefix": "b/",
 			"TargetObjectKeyFormat": {"PartitionedPrefix": {"PartitionDateSource": "EventTime"}}},
 		"CorsConfiguration": {"CorsRules": [{"Id": "web", "AllowedHeaders": ["*", "x-amz-meta-a"], "AllowedMethods": ["GET"],
@@ -116,7 +173,7 @@ func TestReadS3Bucket(t *testing.T) {
 	}
 
 	empty := sha256.Sum256(nil)
-	wantQueries := []string{"abac=", "accelerate=", "cors=", "encryption=", "logging=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
+	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "lifecycle=", "logging=", "metadataConfiguration=", "metadataTable=", "metrics=&x-id=ListBucketMetricsConfigurations", "notification=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
 	var queries []string
 	for _, r := range requests() {
 		queries = append(queries, r.query)
@@ -173,10 +230,17 @@ func s3NotFound(code string) (int, string) {
 
 // s3Unset is the configurations TestReadS3Bucket's bucket does not have,
 // by subresource, and the code S3 answers for each.
+// s3Headers is the response headers S3 answers a subresource with,
+// beside its body.
+var s3Headers = map[string]map[string]string{
+	"lifecycle": {"x-amz-transition-default-minimum-object-size": "all_storage_classes_128K"},
+}
+
 var s3Unset = map[string]string{
-	"object-lock": "ObjectLockConfigurationNotFoundError",
-	"replication": "ReplicationConfigurationNotFoundError",
-	"website":     "NoSuchWebsiteConfiguration",
+	"metadataTable": "V1APIsNotAllowed",
+	"object-lock":   "ObjectLockConfigurationNotFoundError",
+	"replication":   "ReplicationConfigurationNotFoundError",
+	"website":       "NoSuchWebsiteConfiguration",
 }
 
 func TestReadS3BucketAbsence(t *testing.T) {
@@ -191,6 +255,10 @@ func TestReadS3BucketAbsence(t *testing.T) {
 			return notFound("OwnershipControlsNotFoundError")
 		case "publicAccessBlock":
 			return notFound("NoSuchPublicAccessBlockConfiguration")
+		case "lifecycle":
+			return notFound("NoSuchLifecycleConfiguration")
+		case "metadataConfiguration":
+			return notFound("MetadataConfigurationNotFound")
 		}
 		if code, unset := s3Unset[query]; unset {
 			return notFound(code)
@@ -201,7 +269,7 @@ func TestReadS3BucketAbsence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, property := range []string{"CorsConfiguration", "Tags", "OwnershipControls", "PublicAccessBlockConfiguration", "ObjectLockConfiguration", "ReplicationConfiguration", "WebsiteConfiguration"} {
+	for _, property := range []string{"CorsConfiguration", "Tags", "OwnershipControls", "PublicAccessBlockConfiguration", "ObjectLockConfiguration", "ReplicationConfiguration", "WebsiteConfiguration", "LifecycleConfiguration", "MetadataConfiguration", "MetadataTableConfiguration"} {
 		if v, present := got[property]; present {
 			t.Errorf("%s = %v, want it left out", property, v)
 		}
@@ -285,5 +353,128 @@ func TestS3EndpointParamsAreChecked(t *testing.T) {
 				t.Fatalf("errors = %s, want %q", got, c.refused)
 			}
 		})
+	}
+}
+
+// A template's form follows the region: S3's website endpoint keeps a dash
+// in the oldest regions and takes a dot in the rest.
+func TestTemplateRegions(t *testing.T) {
+	r := readers["AWS::S3::Bucket"]
+	i := slices.IndexFunc(r.Fields, func(f Field) bool { return f.Property == "WebsiteURL" })
+	if i < 0 {
+		t.Fatal("no WebsiteURL field")
+	}
+	for region, want := range map[string]string{
+		"us-east-1": "http://b.s3-website-us-east-1.amazonaws.com",
+		"us-east-2": "http://b.s3-website.us-east-2.amazonaws.com",
+		"eu-west-1": "http://b.s3-website-eu-west-1.amazonaws.com",
+		"eu-west-2": "http://b.s3-website.eu-west-2.amazonaws.com",
+	} {
+		got := r.translate(&walk{vars: map[string]string{"region": region, "BucketName": "b"}}, map[string]any{}, r.Fields[i:i+1])
+		if got["WebsiteURL"] != want {
+			t.Errorf("%s: WebsiteURL = %v, want %s", region, got["WebsiteURL"], want)
+		}
+	}
+}
+
+// inventoryPage is one page of ListBucketInventoryConfigurations: one
+// configuration, and the next page's token when there is one.
+func inventoryPage(id, next string) string {
+	truncation := "<IsTruncated>false</IsTruncated>"
+	if next != "" {
+		truncation = "<IsTruncated>true</IsTruncated><NextContinuationToken>" + next + "</NextContinuationToken>"
+	}
+	return `<ListInventoryConfigurationsResult` + s3NS + `><InventoryConfiguration><Id>` + id + `</Id><IsEnabled>true</IsEnabled>` +
+		`<Destination><S3BucketDestination><AccountId>111122223333</AccountId><Bucket>arn:aws:s3:::dest</Bucket><Format>CSV</Format></S3BucketDestination></Destination>` +
+		`<Filter><Prefix>` + id + `/</Prefix></Filter><IncludedObjectVersions>All</IncludedObjectVersions><Schedule><Frequency>Daily</Frequency></Schedule></InventoryConfiguration>` +
+		truncation + `</ListInventoryConfigurationsResult>`
+}
+
+// pagedS3Client answers every bucket call as TestReadS3Bucket's does,
+// and the inventory list from pages by the continuation token asked for.
+func pagedS3Client(t *testing.T, pages map[string]string) (*Client, func() []s3Request) {
+	t.Helper()
+	var mu sync.Mutex
+	var seen []s3Request
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		seen = append(seen, s3Request{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, "", ""})
+		mu.Unlock()
+		q := r.URL.Query()
+		if q.Has("inventory") {
+			_, _ = io.WriteString(w, pages[q.Get("continuation-token")])
+			return
+		}
+		first := strings.TrimSuffix(strings.SplitN(r.URL.RawQuery, "&", 2)[0], "=")
+		if code, unset := s3Unset[first]; unset {
+			status, body := s3NotFound(code)
+			w.WriteHeader(status)
+			_, _ = io.WriteString(w, body)
+			return
+		}
+		_, _ = io.WriteString(w, s3Bodies[first])
+	}))
+	t.Cleanup(srv.Close)
+	client := &Client{
+		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region: "eu-west-1", RetryDelay: time.Millisecond,
+		Endpoint: func(string) string { return srv.URL },
+		Now:      func() time.Time { return time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC) },
+	}
+	return client, func() []s3Request {
+		mu.Lock()
+		defer mu.Unlock()
+		return append([]s3Request(nil), seen...)
+	}
+}
+
+// A declared page token is followed: each page's configurations join one
+// list, and the next call sends the token the last answer gave.
+func TestReadFollowsDeclaredPages(t *testing.T) {
+	client, requests := pagedS3Client(t, map[string]string{"": inventoryPage("first", "t1"), "t1": inventoryPage("second", "")})
+	got, err := client.Read(context.Background(), "AWS::S3::Bucket", map[string]string{"BucketName": "b"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	list, _ := got["InventoryConfigurations"].([]any)
+	var ids []any
+	for _, c := range list {
+		ids = append(ids, c.(map[string]any)["Id"])
+	}
+	if !reflect.DeepEqual(ids, []any{"first", "second"}) {
+		t.Fatalf("InventoryConfigurations ids = %v, want [first second]; read %v", ids, got["InventoryConfigurations"])
+	}
+	want := map[string]any{"Id": "first", "Enabled": true, "IncludedObjectVersions": "All", "Prefix": "first/", "ScheduleFrequency": "Daily",
+		"Destination": map[string]any{"BucketAccountId": "111122223333", "BucketArn": "arn:aws:s3:::dest", "Format": "CSV"}}
+	if !reflect.DeepEqual(list[0], want) {
+		t.Fatalf("first configuration = %v, want %v", list[0], want)
+	}
+	var tokens []string
+	for _, r := range requests() {
+		if v, _ := url.ParseQuery(r.query); v.Has("inventory") {
+			tokens = append(tokens, v.Get("continuation-token"))
+		}
+	}
+	if !reflect.DeepEqual(tokens, []string{"", "t1"}) {
+		t.Fatalf("inventory calls sent tokens %q, want none then t1", tokens)
+	}
+}
+
+// A page that answers a token already followed is refused, not read
+// forever.
+func TestReadRefusesARepeatedPageToken(t *testing.T) {
+	client, requests := pagedS3Client(t, map[string]string{"": inventoryPage("first", "t1"), "t1": inventoryPage("second", "t1")})
+	_, err := client.Read(context.Background(), "AWS::S3::Bucket", map[string]string{"BucketName": "b"})
+	if err == nil || !strings.Contains(err.Error(), `answered page token "t1" again`) {
+		t.Fatalf("Read = %v, want the repeated token refused", err)
+	}
+	calls := 0
+	for _, r := range requests() {
+		if v, _ := url.ParseQuery(r.query); v.Has("inventory") {
+			calls++
+		}
+	}
+	if calls != 2 {
+		t.Fatalf("%d inventory calls, want 2: the second answer repeats the token", calls)
 	}
 }

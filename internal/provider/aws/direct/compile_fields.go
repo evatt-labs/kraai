@@ -45,13 +45,64 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			fail("%s%s is neither mapped nor skipped", at, name)
 			continue
 		}
+		if len(mapping.Alternatives) > 0 {
+			if mapping.Member != "" || len(mapping.Skip) > 0 || mapping.Transform != "" {
+				fail("%s%s reads alternatives, so it names no member, skip or transform of its own", at, name)
+				continue
+			}
+			f := Field{Property: name, Kind: "alternatives"}
+			for i, alt := range mapping.Alternatives {
+				if len(alt.Alternatives) > 0 {
+					fail("%s%s alternative %d reads alternatives of its own", at, name, i)
+					continue
+				}
+				if len(alt.Properties) == 0 && len(alt.Skip) == 0 {
+					alt.Properties, alt.Skip = mapping.Properties, mapping.Skip
+				}
+				prop := props[name]
+				if alt.AsList {
+					// The single structure is one element of the list.
+					items := schema.resolve(prop).Items
+					if items == nil {
+						fail("%s%s alternative %s is read as a list, but the schema does not type the property an array", at, name, alt.Member)
+						continue
+					}
+					prop = *items
+				}
+				asList := alt.AsList
+				alt.AsList = false
+				compiled := compileFields(model, schema, map[string]cfnProperty{name: prop}, structure, map[string]Mapping{name: alt}, nil, at, fail)
+				if len(compiled) != 1 {
+					continue
+				}
+				compiled[0].AsList = asList
+				f.Alternatives = append(f.Alternatives, compiled[0])
+			}
+			if len(f.Alternatives) < 2 {
+				fail("%s%s reads alternatives, but fewer than two compile", at, name)
+				continue
+			}
+			fields = append(fields, f)
+			continue
+		}
+		if mapping.AsList {
+			fail("%s%s is read as a list, which only an alternative is", at, name)
+		}
 		// A placeholder outside a selection makes the member a template.
 		if refs := placeholders(selections.ReplaceAllString(mapping.Member, "")); len(refs) > 0 && mapping.Member != "{"+refs[0]+"}" {
 			if !schema.types(props[name])["string"] {
 				fail("%s%s is built from %s, but the schema does not type it a string", at, name, mapping.Member)
 			}
-			fields = append(fields, Field{Property: name, Member: mapping.Member, Kind: "template"})
+			for region, tmpl := range mapping.Regions {
+				if !slices.Equal(placeholders(tmpl), placeholders(mapping.Member)) {
+					fail("%s%s is built in %s from %s, which names other values than %s", at, name, region, tmpl, mapping.Member)
+				}
+			}
+			fields = append(fields, Field{Property: name, Member: mapping.Member, Regions: mapping.Regions, Kind: "template"})
 			continue
+		}
+		if len(mapping.Regions) > 0 {
+			fail("%s%s names regions, but %s is not a template", at, name, mapping.Member)
 		}
 		if id, ok := strings.CutPrefix(mapping.Member, "{"); ok && strings.HasSuffix(id, "}") {
 			if !schema.types(props[name])["string"] {
@@ -162,6 +213,24 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		if len(via) > 0 {
 			f.Via = via
 		}
+		// Only an output's own members bind to the HTTP response outside
+		// the body; a header is read as the text it carries.
+		if trait := httpBinding(m); trait != "" {
+			var header string
+			_ = json.Unmarshal(m.Traits["smithy.api#httpHeader"], &header)
+			switch t := targetType(model.Shapes[m.Target].Type, m.Target); {
+			case trait != "smithy.api#httpHeader":
+				fail("%s%s maps to %s, which is bound to %s, not the body", at, name, mapping.Member, trait)
+			case len(via) > 0 || key != "" || mapping.Transform != "" || len(mapping.Properties) > 0 || len(mapping.TrueWhen) > 0:
+				fail("%s%s maps to the header %s, which is read as it is", at, name, header)
+			case t != "string" && t != "enum" || !schema.types(props[name])["string"]:
+				fail("%s%s maps to the header %s, which is read as a string, but one side is not", at, name, header)
+			default:
+				f.Kind, f.Header = "scalar", header
+				fields = append(fields, f)
+			}
+			continue
+		}
 		// valueTarget is the shape read: the map's value for a key.
 		valueTarget := m.Target
 		if key != "" {
@@ -206,6 +275,23 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				fail("%s%s transforms %s, which is not a string", at, name, mapping.Member)
 			}
 			parsed = mapping.Transform != "arnResource"
+		case "present":
+			if shape := model.Shapes[valueTarget]; shape.Type != "structure" || len(shape.Members) > 0 {
+				fail("%s%s reads %s as present, which is not a structure with no members", at, name, mapping.Member)
+			}
+			if !schema.types(props[name])["boolean"] {
+				fail("%s%s reads %s as present, but the schema does not type it a boolean", at, name, mapping.Member)
+			}
+			f.Kind = "presence"
+			fields = append(fields, f)
+			continue
+		case "text":
+			switch targetType(model.Shapes[valueTarget].Type, valueTarget) {
+			case "byte", "short", "integer", "long", "biginteger":
+			default:
+				fail("%s%s writes %s as text, which is not an integer", at, name, mapping.Member)
+			}
+			parsed = true
 		default:
 			if _, isPart := arnPartIndex(mapping.Transform); isPart {
 				if targetType(model.Shapes[valueTarget].Type, valueTarget) != "string" {
@@ -213,7 +299,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				}
 				break
 			}
-			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, urlJson, number and boolean", at, name, mapping.Transform)
+			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, urlJson, number, boolean, text and present", at, name, mapping.Transform)
 		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]
@@ -231,7 +317,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		target := model.Shapes[valueTarget]
 		switch {
 		case parsed:
-			want := map[string][]string{"json": {"object", "array", "string"}, "urlJson": {"object", "array", "string"}, "number": {"integer", "number"}, "boolean": {"boolean"}}[mapping.Transform]
+			want := map[string][]string{"json": {"object", "array", "string"}, "urlJson": {"object", "array", "string"}, "number": {"integer", "number"}, "boolean": {"boolean"}, "text": {"string"}}[mapping.Transform]
 			if !slices.ContainsFunc(want, func(t string) bool { return types[t] }) {
 				fail("%s%s is %v in the schema, which transform %s does not produce", at, name, sortedSet(types), mapping.Transform)
 			}
@@ -284,7 +370,17 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 					delete(nested, child)
 				}
 			}
+			var spread *Field
+			if sp := mapping.Spread; sp != nil {
+				spread = compileSpread(model, schema, f, nested, nestedStructure, sp, at+name, fail)
+				delete(nested, sp.Property)
+			}
 			f.Fields = compileFields(model, schema, nested, nestedStructure, mapping.Properties, mapping.Skip, at+name+".", fail)
+			if spread != nil {
+				f.Fields = append(f.Fields, *spread)
+			}
+		case mapping.Spread != nil:
+			fail("%s%s spreads %s, but it is not a list of structures on both sides", at, name, mapping.Spread.Member)
 		case len(mapping.Properties) > 0 || len(mapping.Skip) > 0:
 			fail("%s%s maps nested properties, but it is not a structure on both sides", at, name)
 		case nested != nil || nestedStructure != "":
@@ -480,4 +576,41 @@ func compileWrap(model *smithyModel, schema *cfnSchema, prop cfnProperty, mappin
 		return true
 	}
 	return false
+}
+
+// compileSpread checks a list's Spread: the list's elements carry Member,
+// a list of strings, and the schema's elements a string Property that no
+// other mapping reads. It returns the field reading Member.
+func compileSpread(model *smithyModel, schema *cfnSchema, list Field, nested map[string]cfnProperty, element string, sp *Spread, at string, fail func(string, ...any)) *Field {
+	if list.Kind != "list" {
+		fail("%s spreads %s, but it is not a list", at, sp.Member)
+		return nil
+	}
+	p, ok := nested[sp.Property]
+	if !ok || !schema.types(p)["string"] {
+		fail("%s spreads %s into %s, which is not a string property of its elements", at, sp.Member, sp.Property)
+		return nil
+	}
+	m, ok := model.Shapes[element].Members[sp.Member]
+	if !ok {
+		fail("%s spreads %s, which its elements do not have", at, sp.Member)
+		return nil
+	}
+	target := model.Shapes[m.Target]
+	el := ref(target.Member)
+	if t := targetType(model.Shapes[el].Type, el); targetType(target.Type, m.Target) != "list" || t != "string" && t != "enum" {
+		fail("%s spreads %s, which is not a list of strings", at, sp.Member)
+		return nil
+	}
+	return &Field{Property: sp.Property, Member: sp.Member, Kind: "list", Spread: true}
+}
+
+// httpBinding is the trait that binds member outside the body, if one does.
+func httpBinding(m smithyMember) string {
+	for _, trait := range []string{"smithy.api#httpHeader", "smithy.api#httpPrefixHeaders", "smithy.api#httpResponseCode"} {
+		if m.Traits[trait] != nil {
+			return trait
+		}
+	}
+	return ""
 }

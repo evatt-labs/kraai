@@ -49,7 +49,7 @@ func (c *Client) list(ctx context.Context, typeName string, r Reader, l *Lister)
 			t.Value = token
 			values = append(values, t)
 		}
-		out, err := c.call(ctx, r, l.Method, l.URI, l.Target, values)
+		out, _, err := c.call(ctx, r, l.Method, l.URI, l.Target, values)
 		if err != nil {
 			return nil, err
 		}

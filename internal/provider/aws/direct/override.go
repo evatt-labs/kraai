@@ -75,10 +75,12 @@ type Override struct {
 // addressed and walked as Read is, and the properties its response
 // carries.
 type Call struct {
-	Operation  string             `yaml:"operation"`
-	Identifier map[string]string  `yaml:"identifier,omitempty"`
-	Response   string             `yaml:"response,omitempty"`
-	Input      map[string]any     `yaml:"input,omitempty"`
+	Operation  string            `yaml:"operation"`
+	Identifier map[string]string `yaml:"identifier,omitempty"`
+	Response   string            `yaml:"response,omitempty"`
+	Input      map[string]any    `yaml:"input,omitempty"`
+	// Pages is Read.Pages, for this call.
+	Pages      *Pages             `yaml:"pages,omitempty"`
 	Properties map[string]Mapping `yaml:"properties"`
 	// AbsentErrors names the error codes that mean the call has nothing to
 	// read, such as no resource policy set, and leaves its properties
@@ -102,6 +104,10 @@ type Read struct {
 	// Model is the model file's path under models/ in
 	// github.com/aws/api-models-aws.
 	Model string `yaml:"model"`
+	// Pages names the page token members of an operation that pages its
+	// answer but whose model declares no pagination, such as S3's
+	// ListBucketMetricsConfigurations; the read follows every page.
+	Pages *Pages `yaml:"pages,omitempty"`
 	// Operation is the operation's name within that model.
 	Operation string `yaml:"operation"`
 	// Identifier binds each primary identifier property to the input
@@ -168,7 +174,11 @@ type List struct {
 // member of the operation's whole output with a leading "$.", for a value
 // the output carries beside the resource, such as its tags.
 type Mapping struct {
-	Member     string             `yaml:"member"`
+	Member string `yaml:"member"`
+	// Regions is, for a template member, the template for each region
+	// whose form differs, such as S3 website URLs, s3-website-REGION in
+	// the oldest regions and s3-website.REGION in the rest.
+	Regions    map[string]string  `yaml:"regions,omitempty"`
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
 	Skip       map[string]string  `yaml:"skip,omitempty"`
 	// Transform names a function applied to the value read: arnResource,
@@ -176,9 +186,26 @@ type Mapping struct {
 	// string counted from 0, such as 6 and 7 of a Lambda function's ARN for
 	// its name and alias, leaving the property unread when there is none;
 	// json, number or boolean, parsing a string the service returns for a
-	// property the schema types otherwise; or urlJson, parsing JSON a
+	// property the schema types otherwise; text, writing an integer the
+	// schema types as a string; present, true when a structure with no
+	// members is there, as S3 marks EventBridge delivery on; or urlJson,
+	// parsing JSON a
 	// service returns percent-encoded, as IAM does its policy documents.
 	Transform string `yaml:"transform,omitempty"`
+	// Alternatives reads the property from the first of several mappings
+	// the response carries, for a union the schema flattens, such as S3's
+	// filters: a prefix at Filter.Prefix or Filter.And.Prefix. Each takes
+	// this mapping's properties when it names none of its own; asList
+	// makes a single structure a one-element list, as Filter.Tag beside
+	// Filter.And.Tags.
+	Alternatives []Mapping `yaml:"alternatives,omitempty"`
+	// AsList is set on an alternative; see Alternatives.
+	AsList bool `yaml:"asList,omitempty"`
+	// Spread makes a list of structures one element per value of each
+	// element's list member, that value in the named property, for an API
+	// that lists what the schema gives one element each, such as S3
+	// notifications' Events beside the schema's one Event.
+	Spread *Spread `yaml:"spread,omitempty"`
 	// Wrap reads a list of strings as a list of structures, each holding
 	// the string as the property named, for names a further call made for
 	// each element fills out, such as the inline policies IAM lists by name.
@@ -237,7 +264,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
+	if len(m.Properties) == 0 && len(m.Alternatives) == 0 && !m.AsList && m.Spread == nil && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
 		return m.Member, nil
 	}
 	type plain Mapping
@@ -428,4 +455,19 @@ type Tags struct {
 type Lifecycle struct {
 	Create map[string]any `yaml:"create"`
 	Update map[string]any `yaml:"update"`
+}
+
+// Pages is a paged operation's token members: Input, sent to ask for the
+// next page, and Output, the answer's token for it, a dotted path when
+// nested; no Output token means the last page.
+type Pages struct {
+	Input  string `yaml:"input"`
+	Output string `yaml:"output"`
+}
+
+// Spread is Mapping.Spread: Member is the list each element carries, and
+// Property the schema property each of its values becomes.
+type Spread struct {
+	Property string `yaml:"property"`
+	Member   string `yaml:"member"`
 }

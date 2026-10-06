@@ -18,49 +18,49 @@ import (
 
 // call sends one signed request for an operation, placing each value by its
 // binding, and returns the decoded JSON response.
-func (c *Client) call(ctx context.Context, r Reader, method, uri, target string, values []Binding) (any, error) {
-	body, err := c.send(ctx, r, method, uri, target, values)
+func (c *Client) call(ctx context.Context, r Reader, method, uri, target string, values []Binding) (any, http.Header, error) {
+	body, header, err := c.send(ctx, r, method, uri, target, values)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var out any
 	dec := json.NewDecoder(bytes.NewReader(body))
 	dec.UseNumber()
 	if err := dec.Decode(&out); err != nil {
-		return nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
+		return nil, nil, fmt.Errorf("decoding the %s response: %w", r.Type, err)
 	}
-	return out, nil
+	return out, header, nil
 }
 
 // send sends a signed request and returns the body of a successful
 // response, retrying a transient failure.
-func (c *Client) send(ctx context.Context, r Reader, method, uri, target string, values []Binding) ([]byte, error) {
+func (c *Client) send(ctx context.Context, r Reader, method, uri, target string, values []Binding) ([]byte, http.Header, error) {
 	return c.sendRetrying(ctx, retryTransient, r, method, uri, target, values)
 }
 
-// sendOnce sends one signed request and returns the body of a successful
-// response.
-func (c *Client) sendOnce(ctx context.Context, r Reader, method, uri, target string, values []Binding) ([]byte, error) {
+// sendOnce sends one signed request and returns the body and headers of
+// a successful response.
+func (c *Client) sendOnce(ctx context.Context, r Reader, method, uri, target string, values []Binding) ([]byte, http.Header, error) {
 	req, err := c.request(ctx, r, method, uri, target, values)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
-		return nil, &sendError{err}
+		return nil, nil, &sendError{err}
 	}
 	defer func() { _ = resp.Body.Close() }()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, &sendError{err}
+		return nil, nil, &sendError{err}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		if isXML(r.Protocol) {
-			return nil, xmlAPIError(resp.StatusCode, body)
+			return nil, nil, xmlAPIError(resp.StatusCode, body)
 		}
-		return nil, apiError(resp, body)
+		return nil, nil, apiError(resp, body)
 	}
-	return body, nil
+	return body, resp.Header, nil
 }
 
 func (c *Client) request(ctx context.Context, r Reader, method, uri, target string, values []Binding) (*http.Request, error) {

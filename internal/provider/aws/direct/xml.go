@@ -121,7 +121,10 @@ func (r Reader) readXML(body []byte, w *walk) (props, captured map[string]any, b
 			}
 		}
 		if token != nil && token.text != "" {
-			return nil, nil, false, errIncomplete(r.Type)
+			if !w.follow {
+				return nil, nil, false, errIncomplete(r.Type)
+			}
+			w.next = token.text
 		}
 	}
 	root := node
@@ -177,6 +180,24 @@ func translateXML(w *walk, n *xmlNode, fields []Field) map[string]any {
 			}
 			continue
 		}
+		if f.Kind == "template" {
+			if v, ok := renderTemplate(f, w.vars); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
+		if f.Kind == "alternatives" {
+			if v, ok := firstAlternative(f, func(alt Field) map[string]any { return translateXML(w, n, []Field{alt}) }); ok {
+				out[f.Property] = v
+			}
+			continue
+		}
+		if f.Header != "" {
+			if v := w.header.Get(f.Header); v != "" {
+				out[f.Property] = v
+			}
+			continue
+		}
 		holders, projected := []*xmlNode{n}, false
 		for _, step := range f.Via {
 			var next []*xmlNode
@@ -228,6 +249,11 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 	}
 	var v any
 	switch f.Kind {
+	case "presence":
+		if n.child(f.XMLName) == nil {
+			return nil, false
+		}
+		v = true
 	case "structure":
 		c := n.child(f.XMLName)
 		if c == nil {
@@ -268,7 +294,7 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 		if f.Wrap != "" {
 			list = wrapped(f.Wrap, list)
 		}
-		v = list
+		v = spread(f.Fields, list)
 	case "map":
 		c := n.child(f.XMLName)
 		if c == nil {

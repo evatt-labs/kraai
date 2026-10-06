@@ -150,6 +150,10 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
+	if r.PageInput != nil {
+		b.WriteString("PageInput: &")
+		binding(b, *r.PageInput)
+	}
 	if len(r.PageToken) > 0 {
 		fmt.Fprintf(b, "PageToken: %#v,\n", r.PageToken)
 	}
@@ -325,6 +329,27 @@ func fields(b *bytes.Buffer, fs []Field) {
 // where the context does not already give the type.
 func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	fmt.Fprintf(b, "%s{Property: %q, Member: %q, Kind: %q", typeName, f.Property, f.Member, f.Kind)
+	if len(f.Regions) > 0 {
+		// fmt writes a map's keys sorted, so the output is the same each run.
+		fmt.Fprintf(b, ", Regions: %#v", f.Regions)
+	}
+	if f.AsList {
+		b.WriteString(", AsList: true")
+	}
+	if f.Spread {
+		b.WriteString(", Spread: true")
+	}
+	if f.Header != "" {
+		fmt.Fprintf(b, ", Header: %q", f.Header)
+	}
+	if len(f.Alternatives) > 0 {
+		b.WriteString(", Alternatives: []Field{")
+		for _, alt := range f.Alternatives {
+			fieldLiteral(b, alt, "")
+			b.WriteString(", ")
+		}
+		b.WriteString("}")
+	}
 	if len(f.Via) > 0 {
 		b.WriteString(", Via: []Step{")
 		for _, st := range f.Via {
