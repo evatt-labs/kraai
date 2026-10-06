@@ -9,9 +9,10 @@ set -euo pipefail
 #   dev/s3-fixtures.sh up   [--apply]
 #   dev/s3-fixtures.sh down [--apply]
 #
-# up also writes the KRAAI_LIFECYCLE_* export the S3 lifecycle vector
+# up also writes the KRAAI_LIFECYCLE_* exports the S3 lifecycle vector
 # reads to $ENV_OUT: the destination bucket, which accepts access logs from
-# kraai-lifecycle-* buckets.
+# kraai-lifecycle-* buckets and is their replication destination, the
+# topic they may send events to, and the replication role.
 #
 # Dry run unless --apply. The "bare" bucket has its public access block and
 # ownership controls deleted, the only way to observe the codes S3 answers
@@ -62,10 +63,10 @@ up() {
     {Sid:"tls",Effect:"Deny",Principal:"*",Action:"s3:*",Resource:[("arn:aws:s3:::"+$d),("arn:aws:s3:::"+$d+"/*")],Condition:{Bool:{"aws:SecureTransport":"false"}}}]}')
   run aws s3api put-bucket-policy --bucket "$dest" --policy "$dest_policy"
 
-  # A topic S3 may publish main's events to.
+  # A topic S3 may publish main's and the lifecycle buckets' events to.
   topic_arn="arn:aws:sns:${region}:${acct}:${topic_name}"
   run aws sns create-topic --region "$region" --name "$topic_name"
-  topic_policy=$(jq -cn --arg t "$topic_arn" --arg m "$main" --arg a "$acct" '{Version:"2012-10-17",Statement:[{Effect:"Allow",Principal:{Service:"s3.amazonaws.com"},Action:"sns:Publish",Resource:$t,Condition:{ArnLike:{"aws:SourceArn":("arn:aws:s3:::"+$m)},StringEquals:{"aws:SourceAccount":$a}}}]}')
+  topic_policy=$(jq -cn --arg t "$topic_arn" --arg m "$main" --arg a "$acct" '{Version:"2012-10-17",Statement:[{Effect:"Allow",Principal:{Service:"s3.amazonaws.com"},Action:"sns:Publish",Resource:$t,Condition:{ArnLike:{"aws:SourceArn":[("arn:aws:s3:::"+$m),"arn:aws:s3:::kraai-lifecycle-*"]},StringEquals:{"aws:SourceAccount":$a}}}]}')
   run aws sns set-topic-attributes --region "$region" --topic-arn "$topic_arn" --attribute-name Policy --attribute-value "$topic_policy"
 
   # A replication role S3 may assume, with no permissions: replication is
@@ -94,7 +95,11 @@ up() {
     {Id:"t1",TopicArn:$t,Events:["s3:ObjectCreated:*"],Filter:{Key:{FilterRules:[{Name:"prefix",Value:"in/"},{Name:"suffix",Value:".csv"}]}}},
     {Id:"t2",TopicArn:$t,Events:["s3:ObjectRemoved:*"]}],EventBridgeConfiguration:{}}')"
   if $apply; then
-    echo "export KRAAI_LIFECYCLE_LOG_BUCKET=$dest" >"$env_out"
+    {
+      echo "export KRAAI_LIFECYCLE_LOG_BUCKET=$dest"
+      echo "export KRAAI_LIFECYCLE_TOPIC_ARN=$topic_arn"
+      echo "export KRAAI_LIFECYCLE_REPLICATION_ROLE_ARN=$role_arn"
+    } >"$env_out"
     echo "wrote $env_out" >&2
   fi
   run aws s3api put-bucket-replication --bucket "$main" --replication-configuration "$(jq -cn --arg r "$role_arn" --arg d "$dest" '{Role:$r,Rules:[{ID:"rep1",Priority:1,Status:"Enabled",Filter:{Prefix:"rep/"},DeleteMarkerReplication:{Status:"Disabled"},Destination:{Bucket:("arn:aws:s3:::"+$d),StorageClass:"STANDARD_IA"}}]}')"

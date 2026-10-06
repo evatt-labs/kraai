@@ -155,7 +155,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 					f, found := readField(*r, property)
 					if !found {
 						fail("%s input %s sends {%s:wire}, which the read does not map", at, member, name)
-					} else if err := wireable(f); err != nil {
+					} else if err := (wireCheck{xml: isXML(r.Protocol), unsupported: o.Unsupported}).check(f, property, false); err != nil {
 						fail("%s input %s sends {%s:wire}, which cannot be mapped back: %v", at, member, name, err)
 					}
 				}

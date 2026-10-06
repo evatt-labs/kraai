@@ -161,7 +161,7 @@ func listsMatch(r Reader, changes, props map[string]any) bool {
 // service can leave out an entry set to its default, such as a parameter
 // group's parameter, which then reads as never set.
 func shown(r Reader, want, props map[string]any) map[string]any {
-	out, cloned := want, false
+	out, cloned := canonicalCase(r, withoutOffPresences(r, want)), false
 	for _, u := range r.Update {
 		m, isMap := want[u.ListProperty].(map[string]any)
 		if u.ListProperty == "" || !isMap {

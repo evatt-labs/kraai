@@ -67,6 +67,8 @@ type Reader struct {
 	// Unsupported is the override's unsupported paths and reasons: see
 	// Override.Unsupported.
 	Unsupported map[string]string
+	// CanonicalCase is Override.CanonicalCase.
+	CanonicalCase map[string][]string
 	// UnsupportedWhen is the override's conditional routes, by property.
 	UnsupportedWhen map[string]UnsupportedWhen
 	// WriteOnly is the schema's top-level write-only properties and objects
@@ -237,6 +239,8 @@ type Field struct {
 	// Spread marks the list field whose values each make one element of
 	// the enclosing list; see Mapping.Spread.
 	Spread bool
+	// Union is Mapping.Union, its paths split into member names.
+	Union *fieldUnion
 	// Header is the response header a member bound to one is read from,
 	// such as S3's x-amz-transition-default-minimum-object-size.
 	Header string

@@ -218,11 +218,11 @@ func TestWireable(t *testing.T) {
 		"a timestamp":         {Property: "P", Kind: "timestamp"},
 		"a map of structures": {Property: "P", Kind: "map", Fields: []Field{{Property: "Q", Member: "q", Kind: "scalar"}}},
 	} {
-		if wireable(f) == nil {
+		if (wireCheck{}).check(f, "P", false) == nil {
 			t.Errorf("%s: wireable = nil, want a refusal", name)
 		}
 	}
-	if err := wireable(Field{Property: "P", Kind: "structure", Fields: []Field{{Property: "Q", Member: "q", Kind: "scalar"}}}); err != nil {
+	if err := (wireCheck{}).check(Field{Property: "P", Kind: "structure", Fields: []Field{{Property: "Q", Member: "q", Kind: "scalar"}}}, "P", false); err != nil {
 		t.Errorf("a plain structure: %v", err)
 	}
 }

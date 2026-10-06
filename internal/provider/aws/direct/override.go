@@ -50,6 +50,11 @@ type Override struct {
 	// an instance in a given state, such as an S3 bucket's tags once ABAC
 	// is enabled, which S3 then takes only through S3 Control.
 	UnsupportedWhen map[string]UnsupportedWhen `yaml:"unsupportedWhen,omitempty"`
+	// CanonicalCase names, by dotted path with [] after a list, a string
+	// the service writes back in its own case, and its spellings: a wait
+	// takes a desired value equal to one but for case as that spelling,
+	// so a write the service took is seen, such as S3's filter rule names.
+	CanonicalCase map[string][]string `yaml:"canonicalCase,omitempty"`
 	// Lifecycle is the values the lifecycle harness creates an instance
 	// with, then sets one property at a time.
 	Lifecycle *Lifecycle `yaml:"lifecycle,omitempty"`
@@ -210,6 +215,9 @@ type Mapping struct {
 	// that lists what the schema gives one element each, such as S3
 	// notifications' Events beside the schema's one Event.
 	Spread *Spread `yaml:"spread,omitempty"`
+	// Union, on a structure whose properties read through alternatives,
+	// says how a write rebuilds the union they flatten; see Union.
+	Union *Union `yaml:"union,omitempty"`
 	// Wrap reads a list of strings as a list of structures, each holding
 	// the string as the property named, for names a further call made for
 	// each element fills out, such as the inline policies IAM lists by name.
@@ -268,7 +276,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Alternatives) == 0 && !m.AsList && m.Spread == nil && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
+	if len(m.Properties) == 0 && len(m.Alternatives) == 0 && !m.AsList && m.Spread == nil && m.Union == nil && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
 		return m.Member, nil
 	}
 	type plain Mapping
@@ -467,6 +475,16 @@ type Lifecycle struct {
 type Pages struct {
 	Input  string `yaml:"input"`
 	Output string `yaml:"output"`
+}
+
+// Union is how a write rebuilds a union read through alternatives, such
+// as S3's filters: a single condition is written at its alternative
+// outside And, two or more at their alternatives under And, and none as
+// an empty structure at Empty, when it is set. Both are dotted member
+// paths from the structure.
+type Union struct {
+	And   string `yaml:"and"`
+	Empty string `yaml:"empty,omitempty"`
 }
 
 // Spread is Mapping.Spread: Member is the list each element carries, and

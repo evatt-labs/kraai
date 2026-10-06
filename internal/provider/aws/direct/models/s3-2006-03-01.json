@@ -152,9 +152,6 @@
           "target": "com.amazonaws.s3#ListBucketMetricsConfigurations"
         },
         {
-          "target": "com.amazonaws.s3#PutBucketAbac"
-        },
-        {
           "target": "com.amazonaws.s3#PutBucketAccelerateConfiguration"
         },
         {
@@ -164,10 +161,19 @@
           "target": "com.amazonaws.s3#PutBucketEncryption"
         },
         {
+          "target": "com.amazonaws.s3#PutBucketLifecycleConfiguration"
+        },
+        {
           "target": "com.amazonaws.s3#PutBucketLogging"
         },
         {
+          "target": "com.amazonaws.s3#PutBucketNotificationConfiguration"
+        },
+        {
           "target": "com.amazonaws.s3#PutBucketOwnershipControls"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketReplication"
         },
         {
           "target": "com.amazonaws.s3#PutBucketTagging"
@@ -24441,6 +24447,20 @@
     "com.amazonaws.s3#BucketKeyEnabled": {
       "type": "boolean"
     },
+    "com.amazonaws.s3#BucketLifecycleConfiguration": {
+      "members": {
+        "Rules": {
+          "target": "com.amazonaws.s3#LifecycleRules",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Rule"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#BucketLocationConstraint": {
       "members": {
         "EU": {
@@ -28354,69 +28374,6 @@
       "traits": {},
       "type": "structure"
     },
-    "com.amazonaws.s3#PutBucketAbac": {
-      "input": {
-        "target": "com.amazonaws.s3#PutBucketAbacRequest"
-      },
-      "output": {
-        "target": "smithy.api#Unit"
-      },
-      "traits": {
-        "aws.protocols#httpChecksum": {
-          "requestAlgorithmMember": "ChecksumAlgorithm"
-        },
-        "smithy.api#http": {
-          "code": 200,
-          "method": "PUT",
-          "uri": "/{Bucket}?abac"
-        }
-      },
-      "type": "operation"
-    },
-    "com.amazonaws.s3#PutBucketAbacRequest": {
-      "members": {
-        "AbacStatus": {
-          "target": "com.amazonaws.s3#AbacStatus",
-          "traits": {
-            "smithy.api#httpPayload": {},
-            "smithy.api#required": {},
-            "smithy.api#xmlName": "AbacStatus"
-          }
-        },
-        "Bucket": {
-          "target": "com.amazonaws.s3#BucketName",
-          "traits": {
-            "smithy.api#httpLabel": {},
-            "smithy.api#required": {},
-            "smithy.rules#contextParam": {
-              "name": "Bucket"
-            }
-          }
-        },
-        "ChecksumAlgorithm": {
-          "target": "com.amazonaws.s3#ChecksumAlgorithm",
-          "traits": {
-            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
-          }
-        },
-        "ContentMD5": {
-          "target": "com.amazonaws.s3#ContentMD5",
-          "traits": {
-            "smithy.api#httpHeader": "Content-MD5"
-          }
-        },
-        "ExpectedBucketOwner": {
-          "target": "com.amazonaws.s3#AccountId",
-          "traits": {
-            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
-          }
-        }
-      },
-      "traits": {
-        "smithy.api#input": {}
-      },
-      "type": "structure"
-    },
     "com.amazonaws.s3#PutBucketAccelerateConfiguration": {
       "input": {
         "target": "com.amazonaws.s3#PutBucketAccelerateConfigurationRequest"
@@ -28617,6 +28574,88 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#PutBucketLifecycleConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketLifecycleConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#PutBucketLifecycleConfigurationOutput"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?lifecycle"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketLifecycleConfigurationOutput": {
+      "members": {
+        "TransitionDefaultMinimumObjectSize": {
+          "target": "com.amazonaws.s3#TransitionDefaultMinimumObjectSize",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-transition-default-minimum-object-size"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketLifecycleConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "LifecycleConfiguration": {
+          "target": "com.amazonaws.s3#BucketLifecycleConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#xmlName": "LifecycleConfiguration"
+          }
+        },
+        "TransitionDefaultMinimumObjectSize": {
+          "target": "com.amazonaws.s3#TransitionDefaultMinimumObjectSize",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-transition-default-minimum-object-size"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3#PutBucketLogging": {
       "input": {
         "target": "com.amazonaws.s3#PutBucketLoggingRequest"
@@ -28686,6 +28725,65 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#PutBucketNotificationConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketNotificationConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?notification"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketNotificationConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "NotificationConfiguration": {
+          "target": "com.amazonaws.s3#NotificationConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "NotificationConfiguration"
+          }
+        },
+        "SkipDestinationValidation": {
+          "target": "com.amazonaws.s3#SkipValidation",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-skip-destination-validation"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
     "com.amazonaws.s3#PutBucketOwnershipControls": {
       "input": {
         "target": "com.amazonaws.s3#PutBucketOwnershipControlsRequest"
@@ -28747,6 +28845,81 @@
             "smithy.api#httpPayload": {},
             "smithy.api#required": {},
             "smithy.api#xmlName": "OwnershipControls"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketReplication": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketReplicationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?replication"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketReplicationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "ReplicationConfiguration": {
+          "target": "com.amazonaws.s3#ReplicationConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "ReplicationConfiguration"
+          }
+        },
+        "Token": {
+          "target": "com.amazonaws.s3#ObjectLockToken",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-bucket-object-lock-token"
           }
         }
       },
@@ -29689,6 +29862,9 @@
         "smithy.api#xmlName": "SimplePrefix"
       },
       "type": "structure"
+    },
+    "com.amazonaws.s3#SkipValidation": {
+      "type": "boolean"
     },
     "com.amazonaws.s3#SourceSelectionCriteria": {
       "members": {

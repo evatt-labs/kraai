@@ -379,6 +379,11 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 			if spread != nil {
 				f.Fields = append(f.Fields, *spread)
 			}
+			if mapping.Union != nil {
+				f.Union = compileUnion(f.Fields, *mapping.Union, at+name, fail)
+			}
+		case mapping.Union != nil:
+			fail("%s%s rebuilds a union, but it is not a structure on both sides", at, name)
 		case mapping.Spread != nil:
 			fail("%s%s spreads %s, but it is not a list of structures on both sides", at, name, mapping.Spread.Member)
 		case len(mapping.Properties) > 0 || len(mapping.Skip) > 0:

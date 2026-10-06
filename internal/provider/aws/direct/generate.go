@@ -200,6 +200,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	if len(r.Unsupported) > 0 {
 		fmt.Fprintf(b, "Unsupported: %#v,\n", r.Unsupported)
 	}
+	if len(r.CanonicalCase) > 0 {
+		fmt.Fprintf(b, "CanonicalCase: %#v,\n", r.CanonicalCase)
+	}
 	if len(r.UnsupportedWhen) > 0 {
 		b.WriteString("UnsupportedWhen: map[string]UnsupportedWhen{")
 		for _, p := range sortedKeys(r.UnsupportedWhen) {
@@ -350,6 +353,9 @@ func fieldLiteral(b *bytes.Buffer, f Field, typeName string) {
 	}
 	if f.Spread {
 		b.WriteString(", Spread: true")
+	}
+	if f.Union != nil {
+		fmt.Fprintf(b, ", Union: &fieldUnion{And: %#v, Empty: %#v}", f.Union.And, f.Union.Empty)
 	}
 	if f.Header != "" {
 		fmt.Fprintf(b, ", Header: %q", f.Header)
