@@ -12,10 +12,18 @@ type decodedFS struct {
 	fs.FS
 	models  map[string]smithyModel
 	schemas map[string]cfnSchema
+	// ruleSets is each model's parsed endpoint rule set, which every call
+	// through the model resolves against; S3's is over 600 KB.
+	ruleSets map[string]parsedRuleSet
+}
+
+type parsedRuleSet struct {
+	rs  *ruleSet
+	err error
 }
 
 func withDecoded(files fs.FS) *decodedFS {
-	return &decodedFS{FS: files, models: map[string]smithyModel{}, schemas: map[string]cfnSchema{}}
+	return &decodedFS{FS: files, models: map[string]smithyModel{}, schemas: map[string]cfnSchema{}, ruleSets: map[string]parsedRuleSet{}}
 }
 
 // loadModel decodes the model in file, once per compilation when files is
@@ -62,4 +70,20 @@ func loadSchema(files fs.FS, file string) (cfnSchema, error) {
 		cache.schemas[file] = schema
 	}
 	return schema, nil
+}
+
+// loadRuleSet parses raw, the endpoint rule set of the model in file, once
+// per compilation when files is a decodedFS.
+func loadRuleSet(files fs.FS, file string, raw json.RawMessage) (*ruleSet, error) {
+	cache, cached := files.(*decodedFS)
+	if cached {
+		if p, ok := cache.ruleSets[file]; ok {
+			return p.rs, p.err
+		}
+	}
+	rs, err := parseRuleSet(raw)
+	if cached {
+		cache.ruleSets[file] = parsedRuleSet{rs, err}
+	}
+	return rs, err
 }
