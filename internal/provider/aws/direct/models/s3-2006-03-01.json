@@ -10,6 +10,16 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.s3#AbortIncompleteMultipartUpload": {
+      "members": {
+        "DaysAfterInitiation": {
+          "target": "com.amazonaws.s3#DaysAfterInitiation",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#AccessControlTranslation": {
       "members": {
         "Owner": {
@@ -76,6 +86,9 @@
         },
         {
           "target": "com.amazonaws.s3#GetBucketEncryption"
+        },
+        {
+          "target": "com.amazonaws.s3#GetBucketLifecycleConfiguration"
         },
         {
           "target": "com.amazonaws.s3#GetBucketLogging"
@@ -24386,7 +24399,16 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.s3#Date": {
+      "traits": {
+        "smithy.api#timestampFormat": "date-time"
+      },
+      "type": "timestamp"
+    },
     "com.amazonaws.s3#Days": {
+      "type": "integer"
+    },
+    "com.amazonaws.s3#DaysAfterInitiation": {
       "type": "integer"
     },
     "com.amazonaws.s3#DefaultRetention": {
@@ -24578,6 +24600,26 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.s3#ExpirationStatus": {
+      "members": {
+        "Disabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Disabled"
+          }
+        },
+        "Enabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Enabled"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#ExpiredObjectDeleteMarker": {
+      "type": "boolean"
     },
     "com.amazonaws.s3#ExposeHeader": {
       "type": "string"
@@ -24809,6 +24851,73 @@
       "type": "structure"
     },
     "com.amazonaws.s3#GetBucketEncryptionRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketLifecycleConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#GetBucketLifecycleConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#GetBucketLifecycleConfigurationOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?lifecycle"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#GetBucketLifecycleConfigurationOutput": {
+      "members": {
+        "Rules": {
+          "target": "com.amazonaws.s3#LifecycleRules",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Rule"
+          }
+        },
+        "TransitionDefaultMinimumObjectSize": {
+          "target": "com.amazonaws.s3#TransitionDefaultMinimumObjectSize",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-transition-default-minimum-object-size"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {},
+        "smithy.api#xmlName": "LifecycleConfiguration"
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketLifecycleConfigurationRequest": {
       "members": {
         "Bucket": {
           "target": "com.amazonaws.s3#BucketName",
@@ -25858,6 +25967,130 @@
     "com.amazonaws.s3#KeyPrefixEquals": {
       "type": "string"
     },
+    "com.amazonaws.s3#LifecycleExpiration": {
+      "members": {
+        "Date": {
+          "target": "com.amazonaws.s3#Date",
+          "traits": {}
+        },
+        "Days": {
+          "target": "com.amazonaws.s3#Days",
+          "traits": {}
+        },
+        "ExpiredObjectDeleteMarker": {
+          "target": "com.amazonaws.s3#ExpiredObjectDeleteMarker",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#LifecycleRule": {
+      "members": {
+        "AbortIncompleteMultipartUpload": {
+          "target": "com.amazonaws.s3#AbortIncompleteMultipartUpload"
+        },
+        "Expiration": {
+          "target": "com.amazonaws.s3#LifecycleExpiration",
+          "traits": {}
+        },
+        "Filter": {
+          "target": "com.amazonaws.s3#LifecycleRuleFilter",
+          "traits": {}
+        },
+        "ID": {
+          "target": "com.amazonaws.s3#ID",
+          "traits": {}
+        },
+        "NoncurrentVersionExpiration": {
+          "target": "com.amazonaws.s3#NoncurrentVersionExpiration"
+        },
+        "NoncurrentVersionTransitions": {
+          "target": "com.amazonaws.s3#NoncurrentVersionTransitionList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "NoncurrentVersionTransition"
+          }
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {
+            "smithy.api#deprecated": {}
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.s3#ExpirationStatus",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "Transitions": {
+          "target": "com.amazonaws.s3#TransitionList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Transition"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#LifecycleRuleAndOperator": {
+      "members": {
+        "ObjectSizeGreaterThan": {
+          "target": "com.amazonaws.s3#ObjectSizeGreaterThanBytes",
+          "traits": {}
+        },
+        "ObjectSizeLessThan": {
+          "target": "com.amazonaws.s3#ObjectSizeLessThanBytes",
+          "traits": {}
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.s3#TagSet",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#LifecycleRuleFilter": {
+      "members": {
+        "And": {
+          "target": "com.amazonaws.s3#LifecycleRuleAndOperator"
+        },
+        "ObjectSizeGreaterThan": {
+          "target": "com.amazonaws.s3#ObjectSizeGreaterThanBytes",
+          "traits": {}
+        },
+        "ObjectSizeLessThan": {
+          "target": "com.amazonaws.s3#ObjectSizeLessThanBytes",
+          "traits": {}
+        },
+        "Prefix": {
+          "target": "com.amazonaws.s3#Prefix",
+          "traits": {}
+        },
+        "Tag": {
+          "target": "com.amazonaws.s3#Tag",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#LifecycleRules": {
+      "member": {
+        "target": "com.amazonaws.s3#LifecycleRule"
+      },
+      "type": "list"
+    },
     "com.amazonaws.s3#ListBucketAnalyticsConfigurations": {
       "input": {
         "target": "com.amazonaws.s3#ListBucketAnalyticsConfigurationsRequest"
@@ -26358,6 +26591,44 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#NoncurrentVersionExpiration": {
+      "members": {
+        "NewerNoncurrentVersions": {
+          "target": "com.amazonaws.s3#VersionCount",
+          "traits": {}
+        },
+        "NoncurrentDays": {
+          "target": "com.amazonaws.s3#Days",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#NoncurrentVersionTransition": {
+      "members": {
+        "NewerNoncurrentVersions": {
+          "target": "com.amazonaws.s3#VersionCount",
+          "traits": {}
+        },
+        "NoncurrentDays": {
+          "target": "com.amazonaws.s3#Days",
+          "traits": {}
+        },
+        "StorageClass": {
+          "target": "com.amazonaws.s3#TransitionStorageClass",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#NoncurrentVersionTransitionList": {
+      "member": {
+        "target": "com.amazonaws.s3#NoncurrentVersionTransition"
+      },
+      "type": "list"
+    },
     "com.amazonaws.s3#NotFound": {
       "members": {},
       "traits": {
@@ -26464,6 +26735,12 @@
       },
       "traits": {},
       "type": "enum"
+    },
+    "com.amazonaws.s3#ObjectSizeGreaterThanBytes": {
+      "type": "long"
+    },
+    "com.amazonaws.s3#ObjectSizeLessThanBytes": {
+      "type": "long"
     },
     "com.amazonaws.s3#OwnerOverride": {
       "members": {
@@ -27311,6 +27588,88 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#Transition": {
+      "members": {
+        "Date": {
+          "target": "com.amazonaws.s3#Date",
+          "traits": {}
+        },
+        "Days": {
+          "target": "com.amazonaws.s3#Days",
+          "traits": {}
+        },
+        "StorageClass": {
+          "target": "com.amazonaws.s3#TransitionStorageClass",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#TransitionDefaultMinimumObjectSize": {
+      "members": {
+        "all_storage_classes_128K": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "all_storage_classes_128K"
+          }
+        },
+        "varies_by_storage_class": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "varies_by_storage_class"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#TransitionList": {
+      "member": {
+        "target": "com.amazonaws.s3#Transition"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.s3#TransitionStorageClass": {
+      "members": {
+        "DEEP_ARCHIVE": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DEEP_ARCHIVE"
+          }
+        },
+        "GLACIER": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GLACIER"
+          }
+        },
+        "GLACIER_IR": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "GLACIER_IR"
+          }
+        },
+        "INTELLIGENT_TIERING": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "INTELLIGENT_TIERING"
+          }
+        },
+        "ONEZONE_IA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ONEZONE_IA"
+          }
+        },
+        "STANDARD_IA": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "STANDARD_IA"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#Type": {
       "members": {
         "AmazonCustomerByEmail": {
@@ -27347,6 +27706,9 @@
     },
     "com.amazonaws.s3#Value": {
       "type": "string"
+    },
+    "com.amazonaws.s3#VersionCount": {
+      "type": "integer"
     },
     "com.amazonaws.s3#Years": {
       "type": "integer"

@@ -27,6 +27,10 @@ const s3NS = ` xmlns="http://s3.amazonaws.com/doc/2006-03-01/"`
 // s3Bodies answers each bucket operation by the query literal its URI
 // carries, with what S3 sends for a bucket that sets every mapped feature.
 var s3Bodies = map[string]string{
+	"lifecycle": `<LifecycleConfiguration` + s3NS + `>` +
+		`<Rule><ID>r1</ID><Filter><And><Prefix>tmp/</Prefix><Tag><Key>d</Key><Value>4</Value></Tag><ObjectSizeGreaterThan>1024</ObjectSizeGreaterThan></And></Filter><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule>` +
+		`<Rule><ID>r2</ID><Filter><Prefix>old/</Prefix></Filter><Status>Enabled</Status><Transition><Days>40</Days><StorageClass>STANDARD_IA</StorageClass></Transition><NoncurrentVersionExpiration><NoncurrentDays>7</NoncurrentDays></NoncurrentVersionExpiration></Rule>` +
+		`<TransitionDefaultMinimumObjectSize>all_storage_classes_128K</TransitionDefaultMinimumObjectSize></LifecycleConfiguration>`,
 	"versioning":        `<VersioningConfiguration` + s3NS + `><Status>Enabled</Status></VersioningConfiguration>`,
 	"accelerate":        `<AccelerateConfiguration` + s3NS + `><Status>Suspended</Status></AccelerateConfiguration>`,
 	"abac":              `<AbacStatus` + s3NS + `><Status>Enabled</Status></AbacStatus>`,
@@ -117,6 +121,9 @@ func TestReadS3Bucket(t *testing.T) {
 		"OwnershipControls": {"Rules": [{"ObjectOwnership": "BucketOwnerPreferred"}]},
 		"PublicAccessBlockConfiguration": {"BlockPublicAcls": true, "IgnorePublicAcls": false, "BlockPublicPolicy": true, "RestrictPublicBuckets": false},
 		"Tags": [{"Key": "team", "Value": "core"}, {"Key": "env", "Value": "dev"}],
+		"LifecycleConfiguration": {"TransitionDefaultMinimumObjectSize": "all_storage_classes_128K", "Rules": [
+			{"Id": "r1", "Status": "Enabled", "ExpirationInDays": 30, "ObjectSizeGreaterThan": "1024", "TagFilters": [{"Key": "d", "Value": "4"}], "Prefix": "tmp/"},
+			{"Id": "r2", "Status": "Enabled", "Transitions": [{"StorageClass": "STANDARD_IA", "TransitionInDays": 40}], "NoncurrentVersionExpiration": {"NoncurrentDays": 7}, "Prefix": "old/"}]},
 		"MetricsConfigurations": [
 			{"Id": "m1", "Prefix": "data/", "TagFilters": [{"Key": "c", "Value": "3"}]},
 			{"Id": "m2", "TagFilters": [{"Key": "a", "Value": "1"}]},
@@ -140,7 +147,7 @@ func TestReadS3Bucket(t *testing.T) {
 	}
 
 	empty := sha256.Sum256(nil)
-	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "logging=", "metrics=&x-id=ListBucketMetricsConfigurations", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
+	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "lifecycle=", "logging=", "metrics=&x-id=ListBucketMetricsConfigurations", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
 	var queries []string
 	for _, r := range requests() {
 		queries = append(queries, r.query)
@@ -215,6 +222,8 @@ func TestReadS3BucketAbsence(t *testing.T) {
 			return notFound("OwnershipControlsNotFoundError")
 		case "publicAccessBlock":
 			return notFound("NoSuchPublicAccessBlockConfiguration")
+		case "lifecycle":
+			return notFound("NoSuchLifecycleConfiguration")
 		}
 		if code, unset := s3Unset[query]; unset {
 			return notFound(code)
@@ -225,7 +234,7 @@ func TestReadS3BucketAbsence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, property := range []string{"CorsConfiguration", "Tags", "OwnershipControls", "PublicAccessBlockConfiguration", "ObjectLockConfiguration", "ReplicationConfiguration", "WebsiteConfiguration"} {
+	for _, property := range []string{"CorsConfiguration", "Tags", "OwnershipControls", "PublicAccessBlockConfiguration", "ObjectLockConfiguration", "ReplicationConfiguration", "WebsiteConfiguration", "LifecycleConfiguration"} {
 		if v, present := got[property]; present {
 			t.Errorf("%s = %v, want it left out", property, v)
 		}

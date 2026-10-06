@@ -257,6 +257,13 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				fail("%s%s transforms %s, which is not a string", at, name, mapping.Member)
 			}
 			parsed = mapping.Transform != "arnResource"
+		case "text":
+			switch targetType(model.Shapes[valueTarget].Type, valueTarget) {
+			case "byte", "short", "integer", "long", "biginteger":
+			default:
+				fail("%s%s writes %s as text, which is not an integer", at, name, mapping.Member)
+			}
+			parsed = true
 		default:
 			if _, isPart := arnPartIndex(mapping.Transform); isPart {
 				if targetType(model.Shapes[valueTarget].Type, valueTarget) != "string" {
@@ -264,7 +271,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				}
 				break
 			}
-			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, urlJson, number and boolean", at, name, mapping.Transform)
+			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, urlJson, number, boolean and text", at, name, mapping.Transform)
 		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]
@@ -282,7 +289,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 		target := model.Shapes[valueTarget]
 		switch {
 		case parsed:
-			want := map[string][]string{"json": {"object", "array", "string"}, "urlJson": {"object", "array", "string"}, "number": {"integer", "number"}, "boolean": {"boolean"}}[mapping.Transform]
+			want := map[string][]string{"json": {"object", "array", "string"}, "urlJson": {"object", "array", "string"}, "number": {"integer", "number"}, "boolean": {"boolean"}, "text": {"string"}}[mapping.Transform]
 			if !slices.ContainsFunc(want, func(t string) bool { return types[t] }) {
 				fail("%s%s is %v in the schema, which transform %s does not produce", at, name, sortedSet(types), mapping.Transform)
 			}

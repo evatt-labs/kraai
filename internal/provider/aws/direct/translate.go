@@ -195,6 +195,19 @@ func entryList(names []string, entries map[string]any) []any {
 // number and boolean parse a string; text that does not parse stays text,
 // for the comparison to report rather than hide.
 func transform(name string, v any) (any, bool) {
+	if name == "text" {
+		// An integer the schema types as a string, as CloudFormation
+		// writes S3's object size bounds.
+		switch n := v.(type) {
+		case json.Number:
+			return string(n), true
+		case float64:
+			return strconv.FormatFloat(n, 'f', -1, 64), true
+		case int64:
+			return strconv.FormatInt(n, 10), true
+		}
+		return v, true
+	}
 	text, ok := v.(string)
 	if !ok {
 		return v, true

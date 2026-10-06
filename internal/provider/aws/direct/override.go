@@ -186,7 +186,8 @@ type Mapping struct {
 	// string counted from 0, such as 6 and 7 of a Lambda function's ARN for
 	// its name and alias, leaving the property unread when there is none;
 	// json, number or boolean, parsing a string the service returns for a
-	// property the schema types otherwise; or urlJson, parsing JSON a
+	// property the schema types otherwise; text, writing an integer the
+	// schema types as a string; or urlJson, parsing JSON a
 	// service returns percent-encoded, as IAM does its policy documents.
 	Transform string `yaml:"transform,omitempty"`
 	// Alternatives reads the property from the first of several mappings
