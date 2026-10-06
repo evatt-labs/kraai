@@ -91,9 +91,11 @@ func (c *Client) UpdateResource(ctx context.Context, typeName, identifier string
 		}
 		// A change the direct calls cannot make is Cloud Control's, decided
 		// before any call: half of a direct update cannot be retried there.
-		if c.mutatesDirectly(typeName, changes) && c.directGiven(ctx, typeName, identifier, changes) {
-			directMutation(ctx, typeName, "update")
-			return c.updateDirect(ctx, typeName, identifier, changes)
+		if c.mutatesDirectly(typeName, changes) {
+			if current, ok := c.directGiven(ctx, typeName, identifier, changes); ok {
+				directMutation(ctx, typeName, "update")
+				return c.updateDirect(ctx, typeName, identifier, current, changes)
+			}
 		}
 	}
 	out, err := c.cc.UpdateResource(ctx, &cloudcontrol.UpdateResourceInput{
@@ -183,13 +185,16 @@ func patchChanges(typeName, identifier string, patch []byte) (map[string]any, er
 	return changes, nil
 }
 
-// updateDirect sets changes through the type's direct update calls. A
+// updateDirect sets changes through the type's direct update calls, from
+// current when the routing decision already read it. A
 // failed direct mutation is an error, never retried through Cloud Control:
 // half of it may have been made.
-func (c *Client) updateDirect(ctx context.Context, typeName, identifier string, changes map[string]any) (map[string]any, error) {
-	current, err := c.direct.ReadByID(ctx, typeName, identifier)
-	if err != nil {
-		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s %q to update it", typeName, identifier)
+func (c *Client) updateDirect(ctx context.Context, typeName, identifier string, current, changes map[string]any) (map[string]any, error) {
+	if current == nil {
+		var err error
+		if current, err = c.direct.ReadByID(ctx, typeName, identifier); err != nil {
+			return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading %s %q to update it", typeName, identifier)
+		}
 	}
 	if err := c.direct.Update(ctx, typeName, identifier, current, changes); err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "updating %s %q", typeName, identifier)
@@ -218,12 +223,19 @@ func (c *Client) mutatesDirectly(typeName string, properties map[string]any) boo
 
 // directGiven reports whether changes may be made directly given how the
 // instance reads, for a type that routes some changes by the instance's
-// state, such as an S3 bucket's tags once ABAC is enabled. A read that
-// fails leaves the change to Cloud Control.
-func (c *Client) directGiven(ctx context.Context, typeName, identifier string, changes map[string]any) bool {
+// state, such as an S3 bucket's tags once ABAC is enabled, and returns that
+// read for the update to start from. A read that fails leaves the change
+// to Cloud Control, and says so on the trace.
+func (c *Client) directGiven(ctx context.Context, typeName, identifier string, changes map[string]any) (map[string]any, bool) {
 	if !direct.RoutesOnState(typeName) {
-		return true
+		return nil, true
 	}
 	current, err := c.direct.ReadByID(ctx, typeName, identifier)
-	return err == nil && direct.CanMutateGiven(typeName, changes, current)
+	if err != nil {
+		trace.SpanFromContext(ctx).AddEvent("direct update fell back to Cloud Control", trace.WithAttributes(
+			attribute.String("kraai.type", typeName),
+			attribute.String("kraai.fallback_reason", "the read its routing depends on failed")))
+		return nil, false
+	}
+	return current, direct.CanMutateGiven(typeName, changes, current)
 }
