@@ -119,6 +119,17 @@ func applyFilters(name string, chain []string, v any, wireAs func(string, any) (
 // filter applies a template filter to a value.
 func filter(name string, v any) (any, bool) {
 	switch name {
+	case "locationConstraint":
+		// S3's LocationConstraint names the region a bucket is made in,
+		// except us-east-1, which it is in when none is named.
+		region, ok := v.(string)
+		if !ok {
+			return nil, false
+		}
+		if region == "us-east-1" {
+			return nil, true
+		}
+		return region, true
 	case "json":
 		// A property the schema types object or string may arrive as text.
 		if text, ok := v.(string); ok {

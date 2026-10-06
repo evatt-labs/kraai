@@ -22,10 +22,12 @@ type xmlPlan struct {
 }
 
 // xmlMember is one structure member: the key its value has on the wire
-// map, and how it is written.
+// map, and how it is written. An Attribute member has no plan: a value for
+// it is refused when written, since this client writes no XML attributes.
 type xmlMember struct {
-	Member string
-	Plan   *xmlPlan
+	Member    string
+	Plan      *xmlPlan
+	Attribute bool
 }
 
 // compileXMLPlan is how a value of target is written as the element name.
@@ -44,7 +46,7 @@ func compileXMLPlan(model *smithyModel, target, name string, flattened bool, see
 		for _, member := range sortedKeys(shape.Members) {
 			m := shape.Members[member]
 			if m.Traits["smithy.api#xmlAttribute"] != nil {
-				fail("%s.%s is an XML attribute, which this client does not write", target, member)
+				plan.Members = append(plan.Members, xmlMember{Member: member, Attribute: true})
 				continue
 			}
 			child := compileXMLPlan(model, m.Target, xmlName(member, m), m.Traits["smithy.api#xmlFlattened"] != nil, seen, fail)
@@ -113,6 +115,9 @@ func writeXML(b *bytes.Buffer, plan *xmlPlan, v any, root bool) error {
 		}
 		for _, m := range plan.Members {
 			if child, ok := obj[m.Member]; ok && child != nil {
+				if m.Attribute {
+					return fmt.Errorf("%s.%s is an XML attribute, which this client does not write", plan.Name, m.Member)
+				}
 				if err := writeXML(b, m.Plan, child, false); err != nil {
 					return err
 				}

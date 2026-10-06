@@ -20,6 +20,16 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.s3#AccelerateConfiguration": {
+      "members": {
+        "Status": {
+          "target": "com.amazonaws.s3#BucketAccelerateStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#AccessControlTranslation": {
       "members": {
         "Owner": {
@@ -75,6 +85,12 @@
     },
     "com.amazonaws.s3#AmazonS3": {
       "operations": [
+        {
+          "target": "com.amazonaws.s3#CreateBucket"
+        },
+        {
+          "target": "com.amazonaws.s3#DeleteBucket"
+        },
         {
           "target": "com.amazonaws.s3#GetBucketAbac"
         },
@@ -134,6 +150,39 @@
         },
         {
           "target": "com.amazonaws.s3#ListBucketMetricsConfigurations"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketAbac"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketAccelerateConfiguration"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketCors"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketEncryption"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketLogging"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketOwnershipControls"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketTagging"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketVersioning"
+        },
+        {
+          "target": "com.amazonaws.s3#PutBucketWebsite"
+        },
+        {
+          "target": "com.amazonaws.s3#PutObjectLockConfiguration"
+        },
+        {
+          "target": "com.amazonaws.s3#PutPublicAccessBlock"
         }
       ],
       "traits": {
@@ -24346,8 +24395,293 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#BucketCannedACL": {
+      "members": {
+        "authenticated_read": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "authenticated-read"
+          }
+        },
+        "private": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "private"
+          }
+        },
+        "public_read": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "public-read"
+          }
+        },
+        "public_read_write": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "public-read-write"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#BucketInfo": {
+      "members": {
+        "DataRedundancy": {
+          "target": "com.amazonaws.s3#DataRedundancy",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.s3#BucketType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#BucketKeyEnabled": {
       "type": "boolean"
+    },
+    "com.amazonaws.s3#BucketLocationConstraint": {
+      "members": {
+        "EU": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "EU"
+          }
+        },
+        "af_south_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "af-south-1"
+          }
+        },
+        "ap_east_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-east-1"
+          }
+        },
+        "ap_east_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-east-2"
+          }
+        },
+        "ap_northeast_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-northeast-1"
+          }
+        },
+        "ap_northeast_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-northeast-2"
+          }
+        },
+        "ap_northeast_3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-northeast-3"
+          }
+        },
+        "ap_south_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-south-1"
+          }
+        },
+        "ap_south_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-south-2"
+          }
+        },
+        "ap_southeast_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-southeast-1"
+          }
+        },
+        "ap_southeast_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-southeast-2"
+          }
+        },
+        "ap_southeast_3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-southeast-3"
+          }
+        },
+        "ap_southeast_4": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-southeast-4"
+          }
+        },
+        "ap_southeast_5": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-southeast-5"
+          }
+        },
+        "ap_southeast_6": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-southeast-6"
+          }
+        },
+        "ap_southeast_7": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ap-southeast-7"
+          }
+        },
+        "ca_central_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ca-central-1"
+          }
+        },
+        "ca_west_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ca-west-1"
+          }
+        },
+        "cn_north_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "cn-north-1"
+          }
+        },
+        "cn_northwest_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "cn-northwest-1"
+          }
+        },
+        "eu_central_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-central-1"
+          }
+        },
+        "eu_central_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-central-2"
+          }
+        },
+        "eu_north_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-north-1"
+          }
+        },
+        "eu_south_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-south-1"
+          }
+        },
+        "eu_south_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-south-2"
+          }
+        },
+        "eu_west_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-west-1"
+          }
+        },
+        "eu_west_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-west-2"
+          }
+        },
+        "eu_west_3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "eu-west-3"
+          }
+        },
+        "il_central_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "il-central-1"
+          }
+        },
+        "me_central_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "me-central-1"
+          }
+        },
+        "me_south_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "me-south-1"
+          }
+        },
+        "mx_central_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "mx-central-1"
+          }
+        },
+        "sa_east_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "sa-east-1"
+          }
+        },
+        "us_east_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "us-east-2"
+          }
+        },
+        "us_gov_east_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "us-gov-east-1"
+          }
+        },
+        "us_gov_west_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "us-gov-west-1"
+          }
+        },
+        "us_west_1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "us-west-1"
+          }
+        },
+        "us_west_2": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "us-west-2"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#BucketLoggingStatus": {
+      "members": {
+        "LoggingEnabled": {
+          "target": "com.amazonaws.s3#LoggingEnabled"
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.s3#BucketLogsPermission": {
       "members": {
@@ -24375,6 +24709,34 @@
     "com.amazonaws.s3#BucketName": {
       "type": "string"
     },
+    "com.amazonaws.s3#BucketNamespace": {
+      "members": {
+        "ACCOUNT_REGIONAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "account-regional"
+          }
+        },
+        "GLOBAL": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "global"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#BucketType": {
+      "members": {
+        "Directory": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Directory"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#BucketVersioningStatus": {
       "members": {
         "Enabled": {
@@ -24391,6 +24753,20 @@
         }
       },
       "type": "enum"
+    },
+    "com.amazonaws.s3#CORSConfiguration": {
+      "members": {
+        "CORSRules": {
+          "target": "com.amazonaws.s3#CORSRules",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "CORSRule"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.s3#CORSRule": {
       "members": {
@@ -24442,6 +24818,71 @@
       },
       "type": "list"
     },
+    "com.amazonaws.s3#ChecksumAlgorithm": {
+      "members": {
+        "CRC32": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CRC32"
+          }
+        },
+        "CRC32C": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CRC32C"
+          }
+        },
+        "CRC64NVME": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CRC64NVME"
+          }
+        },
+        "MD5": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MD5"
+          }
+        },
+        "SHA1": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHA1"
+          }
+        },
+        "SHA256": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHA256"
+          }
+        },
+        "SHA512": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SHA512"
+          }
+        },
+        "XXHASH128": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "XXHASH128"
+          }
+        },
+        "XXHASH3": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "XXHASH3"
+          }
+        },
+        "XXHASH64": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "XXHASH64"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#Condition": {
       "members": {
         "HttpErrorCodeReturnedEquals": {
@@ -24455,6 +24896,179 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#ContentMD5": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#CreateBucket": {
+      "errors": [
+        {
+          "target": "com.amazonaws.s3#BucketAlreadyExists"
+        },
+        {
+          "target": "com.amazonaws.s3#BucketAlreadyOwnedByYou"
+        }
+      ],
+      "input": {
+        "target": "com.amazonaws.s3#CreateBucketRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#CreateBucketOutput"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}"
+        },
+        "smithy.rules#staticContextParams": {
+          "DisableAccessPoints": {
+            "value": true
+          },
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#CreateBucketConfiguration": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketInfo",
+          "traits": {}
+        },
+        "Location": {
+          "target": "com.amazonaws.s3#LocationInfo",
+          "traits": {}
+        },
+        "LocationConstraint": {
+          "target": "com.amazonaws.s3#BucketLocationConstraint",
+          "traits": {}
+        },
+        "Tags": {
+          "target": "com.amazonaws.s3#TagSet",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#CreateBucketOutput": {
+      "members": {
+        "BucketArn": {
+          "target": "com.amazonaws.s3#S3RegionalOrS3ExpressBucketArnString",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-bucket-arn"
+          }
+        },
+        "Location": {
+          "target": "com.amazonaws.s3#Location",
+          "traits": {
+            "smithy.api#httpHeader": "Location"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#CreateBucketRequest": {
+      "members": {
+        "ACL": {
+          "target": "com.amazonaws.s3#BucketCannedACL",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-acl"
+          }
+        },
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "BucketNamespace": {
+          "target": "com.amazonaws.s3#BucketNamespace",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-bucket-namespace"
+          }
+        },
+        "CreateBucketConfiguration": {
+          "target": "com.amazonaws.s3#CreateBucketConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#xmlName": "CreateBucketConfiguration"
+          }
+        },
+        "GrantFullControl": {
+          "target": "com.amazonaws.s3#GrantFullControl",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-grant-full-control"
+          }
+        },
+        "GrantRead": {
+          "target": "com.amazonaws.s3#GrantRead",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-grant-read"
+          }
+        },
+        "GrantReadACP": {
+          "target": "com.amazonaws.s3#GrantReadACP",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-grant-read-acp"
+          }
+        },
+        "GrantWrite": {
+          "target": "com.amazonaws.s3#GrantWrite",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-grant-write"
+          }
+        },
+        "GrantWriteACP": {
+          "target": "com.amazonaws.s3#GrantWriteACP",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-grant-write-acp"
+          }
+        },
+        "ObjectLockEnabledForBucket": {
+          "target": "com.amazonaws.s3#ObjectLockEnabledForBucket",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-bucket-object-lock-enabled"
+          }
+        },
+        "ObjectOwnership": {
+          "target": "com.amazonaws.s3#ObjectOwnership",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-object-ownership"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#DataRedundancy": {
+      "members": {
+        "SingleAvailabilityZone": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SingleAvailabilityZone"
+          }
+        },
+        "SingleLocalZone": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SingleLocalZone"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.s3#Date": {
       "traits": {
@@ -24488,6 +25102,51 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#DeleteBucket": {
+      "input": {
+        "target": "com.amazonaws.s3#DeleteBucketRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 204,
+          "method": "DELETE",
+          "uri": "/{Bucket}"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#DeleteBucketRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
       "type": "structure"
     },
     "com.amazonaws.s3#DeleteMarkerReplication": {
@@ -25976,6 +26635,21 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#GrantFullControl": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#GrantRead": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#GrantReadACP": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#GrantWrite": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#GrantWriteACP": {
+      "type": "string"
+    },
     "com.amazonaws.s3#Grantee": {
       "members": {
         "DisplayName": {
@@ -27070,6 +27744,43 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#Location": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#LocationInfo": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.s3#LocationNameAsString",
+          "traits": {}
+        },
+        "Type": {
+          "target": "com.amazonaws.s3#LocationType",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#LocationNameAsString": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#LocationType": {
+      "members": {
+        "AvailabilityZone": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AvailabilityZone"
+          }
+        },
+        "LocalZone": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LocalZone"
+          }
+        }
+      },
+      "type": "enum"
+    },
     "com.amazonaws.s3#LoggingEnabled": {
       "members": {
         "TargetBucket": {
@@ -27095,6 +27806,26 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#MFA": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#MFADelete": {
+      "members": {
+        "Disabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Disabled"
+          }
+        },
+        "Enabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Enabled"
+          }
+        }
+      },
+      "type": "enum"
     },
     "com.amazonaws.s3#MFADeleteStatus": {
       "members": {
@@ -27427,6 +28158,9 @@
       },
       "type": "enum"
     },
+    "com.amazonaws.s3#ObjectLockEnabledForBucket": {
+      "type": "boolean"
+    },
     "com.amazonaws.s3#ObjectLockRetentionMode": {
       "members": {
         "COMPLIANCE": {
@@ -27453,6 +28187,9 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#ObjectLockToken": {
+      "type": "string"
     },
     "com.amazonaws.s3#ObjectNotInActiveTierError": {
       "members": {},
@@ -27615,6 +28352,778 @@
         }
       },
       "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketAbac": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketAbacRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?abac"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketAbacRequest": {
+      "members": {
+        "AbacStatus": {
+          "target": "com.amazonaws.s3#AbacStatus",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "AbacStatus"
+          }
+        },
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketAccelerateConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketAccelerateConfigurationRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm"
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?accelerate"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketAccelerateConfigurationRequest": {
+      "members": {
+        "AccelerateConfiguration": {
+          "target": "com.amazonaws.s3#AccelerateConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "AccelerateConfiguration"
+          }
+        },
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketCors": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketCorsRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?cors"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketCorsRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "CORSConfiguration": {
+          "target": "com.amazonaws.s3#CORSConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "CORSConfiguration"
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketEncryption": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketEncryptionRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?encryption"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketEncryptionRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "ServerSideEncryptionConfiguration": {
+          "target": "com.amazonaws.s3#ServerSideEncryptionConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "ServerSideEncryptionConfiguration"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketLogging": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketLoggingRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?logging"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketLoggingRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "BucketLoggingStatus": {
+          "target": "com.amazonaws.s3#BucketLoggingStatus",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "BucketLoggingStatus"
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketOwnershipControls": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketOwnershipControlsRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?ownershipControls"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketOwnershipControlsRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "OwnershipControls": {
+          "target": "com.amazonaws.s3#OwnershipControls",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "OwnershipControls"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketTagging": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketTaggingRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?tagging"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketTaggingRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "Tagging": {
+          "target": "com.amazonaws.s3#Tagging",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "Tagging"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketVersioning": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketVersioningRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?versioning"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketVersioningRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "MFA": {
+          "target": "com.amazonaws.s3#MFA",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-mfa"
+          }
+        },
+        "VersioningConfiguration": {
+          "target": "com.amazonaws.s3#VersioningConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "VersioningConfiguration"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutBucketWebsite": {
+      "input": {
+        "target": "com.amazonaws.s3#PutBucketWebsiteRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?website"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutBucketWebsiteRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "WebsiteConfiguration": {
+          "target": "com.amazonaws.s3#WebsiteConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "WebsiteConfiguration"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutObjectLockConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#PutObjectLockConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#PutObjectLockConfigurationOutput"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?object-lock"
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutObjectLockConfigurationOutput": {
+      "members": {
+        "RequestCharged": {
+          "target": "com.amazonaws.s3#RequestCharged",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-request-charged"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutObjectLockConfigurationRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "ObjectLockConfiguration": {
+          "target": "com.amazonaws.s3#ObjectLockConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#xmlName": "ObjectLockConfiguration"
+          }
+        },
+        "RequestPayer": {
+          "target": "com.amazonaws.s3#RequestPayer",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-request-payer"
+          }
+        },
+        "Token": {
+          "target": "com.amazonaws.s3#ObjectLockToken",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-bucket-object-lock-token"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#PutPublicAccessBlock": {
+      "input": {
+        "target": "com.amazonaws.s3#PutPublicAccessBlockRequest"
+      },
+      "output": {
+        "target": "smithy.api#Unit"
+      },
+      "traits": {
+        "aws.protocols#httpChecksum": {
+          "requestAlgorithmMember": "ChecksumAlgorithm",
+          "requestChecksumRequired": true
+        },
+        "smithy.api#http": {
+          "code": 200,
+          "method": "PUT",
+          "uri": "/{Bucket}?publicAccessBlock"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#PutPublicAccessBlockRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ChecksumAlgorithm": {
+          "target": "com.amazonaws.s3#ChecksumAlgorithm",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-sdk-checksum-algorithm"
+          }
+        },
+        "ContentMD5": {
+          "target": "com.amazonaws.s3#ContentMD5",
+          "traits": {
+            "smithy.api#httpHeader": "Content-MD5"
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        },
+        "PublicAccessBlockConfiguration": {
+          "target": "com.amazonaws.s3#PublicAccessBlockConfiguration",
+          "traits": {
+            "smithy.api#httpPayload": {},
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "PublicAccessBlockConfiguration"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
       "type": "structure"
     },
     "com.amazonaws.s3#QueueArn": {
@@ -27985,6 +29494,16 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#S3RegionalOrS3ExpressBucketArnString": {
+      "traits": {
+        "smithy.api#length": {
+          "max": 128,
+          "min": 1
+        },
+        "smithy.api#pattern": "^arn:[^:]+:(s3|s3express):"
+      },
+      "type": "string"
     },
     "com.amazonaws.s3#S3TablesArn": {
       "type": "string"
@@ -28378,6 +29897,18 @@
       },
       "type": "list"
     },
+    "com.amazonaws.s3#Tagging": {
+      "members": {
+        "TagSet": {
+          "target": "com.amazonaws.s3#TagSet",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#TargetBucket": {
       "type": "string"
     },
@@ -28622,6 +30153,44 @@
     },
     "com.amazonaws.s3#VersionCount": {
       "type": "integer"
+    },
+    "com.amazonaws.s3#VersioningConfiguration": {
+      "members": {
+        "MFADelete": {
+          "target": "com.amazonaws.s3#MFADelete",
+          "traits": {
+            "smithy.api#xmlName": "MfaDelete"
+          }
+        },
+        "Status": {
+          "target": "com.amazonaws.s3#BucketVersioningStatus",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#WebsiteConfiguration": {
+      "members": {
+        "ErrorDocument": {
+          "target": "com.amazonaws.s3#ErrorDocument",
+          "traits": {}
+        },
+        "IndexDocument": {
+          "target": "com.amazonaws.s3#IndexDocument",
+          "traits": {}
+        },
+        "RedirectAllRequestsTo": {
+          "target": "com.amazonaws.s3#RedirectAllRequestsTo",
+          "traits": {}
+        },
+        "RoutingRules": {
+          "target": "com.amazonaws.s3#RoutingRules",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.s3#Years": {
       "type": "integer"

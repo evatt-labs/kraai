@@ -77,7 +77,7 @@ type ChangeRoute struct {
 }
 
 // mutationFilters are the template filters a mutation's input may use.
-var mutationFilters = map[string]bool{"json": true, "entries": true, "pairs": true, "keys": true, "string": true, "wire": true, "only": true, "arnName": true, "arnParent": true}
+var mutationFilters = map[string]bool{"json": true, "entries": true, "pairs": true, "keys": true, "string": true, "wire": true, "only": true, "arnName": true, "arnParent": true, "locationConstraint": true}
 
 // mutationPlaceholder matches a placeholder, a property or a dotted path
 // into an object property, with any chain of filters.
@@ -144,7 +144,7 @@ func compileMutations(files fs.FS, lock Lock, o Override, r *Reader) []error {
 				}
 				for _, filter := range chain {
 					if !mutationFilters[filter] {
-						fail("%s input %s filters {%s} by %s; the filters are json, entries, pairs, keys, string, wire, only, arnName and arnParent", at, member, name, filter)
+						fail("%s input %s filters {%s} by %s; the filters are json, entries, pairs, keys, string, wire, only, arnName, arnParent and locationConstraint", at, member, name, filter)
 					}
 				}
 				if slices.Contains(chain, "wire") {

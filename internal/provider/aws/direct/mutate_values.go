@@ -226,12 +226,17 @@ func sendsChange(m MutationCall, address, values map[string]any) bool {
 // readField is the read mapping of property, from the read itself or one
 // of its further calls.
 func readField(r Reader, property string) (Field, bool) {
-	for _, f := range append(slices.Clone(r.Fields), alsoFields(r)...) {
-		if f.Property == property {
-			return f, true
+	fields := append(slices.Clone(r.Fields), alsoFields(r)...)
+	// A dotted path names a field inside an object property's fields.
+	var f Field
+	for step := range strings.SplitSeq(property, ".") {
+		i := slices.IndexFunc(fields, func(f Field) bool { return f.Property == step })
+		if i < 0 {
+			return Field{}, false
 		}
+		f, fields = fields[i], fields[i].Fields
 	}
-	return Field{}, false
+	return f, true
 }
 
 // alsoFields is every property the read's further calls map.

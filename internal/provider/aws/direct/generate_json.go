@@ -43,6 +43,10 @@ func xmlPlanLiteral(b *bytes.Buffer, p *xmlPlan) {
 	if p.Members != nil {
 		b.WriteString(", Members: []xmlMember{")
 		for _, m := range p.Members {
+			if m.Attribute {
+				fmt.Fprintf(b, "{Member: %q, Attribute: true}, ", m.Member)
+				continue
+			}
 			fmt.Fprintf(b, "{Member: %q, Plan: ", m.Member)
 			xmlPlanLiteral(b, m.Plan)
 			b.WriteString("}, ")
