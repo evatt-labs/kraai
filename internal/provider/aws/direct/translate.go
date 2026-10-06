@@ -3,6 +3,7 @@ package direct
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net/url"
 	"slices"
 	"strconv"
@@ -109,6 +110,8 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 		}
 	}
 	switch f.Kind {
+	case "presence":
+		v = true
 	case "structure":
 		if nested, ok := v.(map[string]any); ok && len(f.Fields) > 0 {
 			v = r.translate(w, nested, f.Fields)
@@ -147,7 +150,7 @@ func (r Reader) value(w *walk, holder map[string]any, f Field) (any, bool) {
 					translated = append(translated, r.translate(w, nested, f.Fields))
 				}
 			}
-			v = translated
+			v = spread(f.Fields, translated)
 		}
 	}
 	v, ok = transform(f.Transform, v)
@@ -378,4 +381,30 @@ func firstAlternative(f Field, read func(Field) map[string]any) (any, bool) {
 		return v, true
 	}
 	return nil, false
+}
+
+// spread is list with each element whose fields spread a list made one
+// element per value of it; see Mapping.Spread. An element with no values
+// is left out, as one for no event.
+func spread(fields []Field, list []any) []any {
+	i := slices.IndexFunc(fields, func(f Field) bool { return f.Spread })
+	if i < 0 {
+		return list
+	}
+	name := fields[i].Property
+	out := make([]any, 0, len(list))
+	for _, item := range list {
+		m, ok := item.(map[string]any)
+		values, _ := m[name].([]any)
+		if !ok {
+			out = append(out, item)
+			continue
+		}
+		for _, v := range values {
+			one := maps.Clone(m)
+			one[name] = v
+			out = append(out, one)
+		}
+	}
+	return out
 }

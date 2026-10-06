@@ -27,6 +27,11 @@ const s3NS = ` xmlns="http://s3.amazonaws.com/doc/2006-03-01/"`
 // s3Bodies answers each bucket operation by the query literal its URI
 // carries, with what S3 sends for a bucket that sets every mapped feature.
 var s3Bodies = map[string]string{
+	"notification": `<NotificationConfiguration` + s3NS + `>` +
+		`<TopicConfiguration><Id>t1</Id><Topic>arn:aws:sns:eu-west-1:111122223333:t</Topic><Event>s3:ObjectCreated:*</Event><Event>s3:ObjectRemoved:*</Event>` +
+		`<Filter><S3Key><FilterRule><Name>Prefix</Name><Value>in/</Value></FilterRule><FilterRule><Name>Suffix</Name><Value>.csv</Value></FilterRule></S3Key></Filter></TopicConfiguration>` +
+		`<QueueConfiguration><Id>q1</Id><Queue>arn:aws:sqs:eu-west-1:111122223333:q</Queue><Event>s3:ObjectRestore:Completed</Event></QueueConfiguration>` +
+		`<EventBridgeConfiguration></EventBridgeConfiguration></NotificationConfiguration>`,
 	"lifecycle": `<LifecycleConfiguration` + s3NS + `>` +
 		`<Rule><ID>r1</ID><Filter><And><Prefix>tmp/</Prefix><Tag><Key>d</Key><Value>4</Value></Tag><ObjectSizeGreaterThan>1024</ObjectSizeGreaterThan></And></Filter><Status>Enabled</Status><Expiration><Days>30</Days></Expiration></Rule>` +
 		`<Rule><ID>r2</ID><Filter><Prefix>old/</Prefix></Filter><Status>Enabled</Status><Transition><Days>40</Days><StorageClass>STANDARD_IA</StorageClass></Transition><NoncurrentVersionExpiration><NoncurrentDays>7</NoncurrentDays></NoncurrentVersionExpiration></Rule>` +
@@ -124,6 +129,12 @@ func TestReadS3Bucket(t *testing.T) {
 		"LifecycleConfiguration": {"TransitionDefaultMinimumObjectSize": "all_storage_classes_128K", "Rules": [
 			{"Id": "r1", "Status": "Enabled", "ExpirationInDays": 30, "ObjectSizeGreaterThan": "1024", "TagFilters": [{"Key": "d", "Value": "4"}], "Prefix": "tmp/"},
 			{"Id": "r2", "Status": "Enabled", "Transitions": [{"StorageClass": "STANDARD_IA", "TransitionInDays": 40}], "NoncurrentVersionExpiration": {"NoncurrentDays": 7}, "Prefix": "old/"}]},
+		"NotificationConfiguration": {
+			"EventBridgeConfiguration": {"EventBridgeEnabled": true},
+			"TopicConfigurations": [
+				{"Event": "s3:ObjectCreated:*", "Topic": "arn:aws:sns:eu-west-1:111122223333:t", "Filter": {"S3Key": {"Rules": [{"Name": "Prefix", "Value": "in/"}, {"Name": "Suffix", "Value": ".csv"}]}}},
+				{"Event": "s3:ObjectRemoved:*", "Topic": "arn:aws:sns:eu-west-1:111122223333:t", "Filter": {"S3Key": {"Rules": [{"Name": "Prefix", "Value": "in/"}, {"Name": "Suffix", "Value": ".csv"}]}}}],
+			"QueueConfigurations": [{"Event": "s3:ObjectRestore:Completed", "Queue": "arn:aws:sqs:eu-west-1:111122223333:q"}]},
 		"MetricsConfigurations": [
 			{"Id": "m1", "Prefix": "data/", "TagFilters": [{"Key": "c", "Value": "3"}]},
 			{"Id": "m2", "TagFilters": [{"Key": "a", "Value": "1"}]},
@@ -147,7 +158,7 @@ func TestReadS3Bucket(t *testing.T) {
 	}
 
 	empty := sha256.Sum256(nil)
-	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "lifecycle=", "logging=", "metrics=&x-id=ListBucketMetricsConfigurations", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
+	wantQueries := []string{"abac=", "accelerate=", "analytics=&x-id=ListBucketAnalyticsConfigurations", "cors=", "encryption=", "intelligent-tiering=&x-id=ListBucketIntelligentTieringConfigurations", "inventory=&x-id=ListBucketInventoryConfigurations", "lifecycle=", "logging=", "metrics=&x-id=ListBucketMetricsConfigurations", "notification=", "object-lock=", "ownershipControls=", "publicAccessBlock=", "replication=", "tagging=", "versioning=", "website="}
 	var queries []string
 	for _, r := range requests() {
 		queries = append(queries, r.query)

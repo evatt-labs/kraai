@@ -649,6 +649,90 @@ func init() {
 						},
 					},
 				},
+				{
+					Type:                  "AWS::S3::Bucket",
+					Protocol:              "restXml",
+					SigningName:           "s3",
+					Host:                  "s3.{region}.amazonaws.com",
+					DisableDoubleEncoding: true,
+					Method:                "GET",
+					URI:                   "/{Bucket}?notification",
+					Identifier: []Binding{
+						{Property: "BucketName", Member: "Bucket", Location: "label"},
+					},
+					AbsentErrors: []string{"NoSuchBucket"},
+					Fields: []Field{
+						{Property: "NotificationConfiguration", Member: ".", Kind: "structure",
+							Fields: []Field{
+								{Property: "EventBridgeConfiguration", Member: ".", Kind: "structure",
+									Fields: []Field{
+										{Property: "EventBridgeEnabled", Member: "EventBridgeConfiguration", Kind: "presence", Transform: "present", XMLName: "EventBridgeConfiguration"},
+									},
+								},
+								{Property: "LambdaConfigurations", Member: "LambdaFunctionConfigurations", Kind: "list", XMLName: "CloudFunctionConfiguration",
+									Fields: []Field{
+										{Property: "Filter", Member: "Filter", Kind: "structure", XMLName: "Filter",
+											Fields: []Field{
+												{Property: "S3Key", Member: "Key", Kind: "structure", XMLName: "S3Key",
+													Fields: []Field{
+														{Property: "Rules", Member: "FilterRules", Kind: "list", XMLName: "FilterRule",
+															Fields: []Field{
+																{Property: "Name", Member: "Name", Kind: "scalar", XMLName: "Name", Scalar: "string"},
+																{Property: "Value", Member: "Value", Kind: "scalar", XMLName: "Value", Scalar: "string"},
+															},
+														},
+													},
+												},
+											},
+										},
+										{Property: "Function", Member: "LambdaFunctionArn", Kind: "scalar", XMLName: "CloudFunction", Scalar: "string"},
+										{Property: "Event", Member: "Events", Kind: "list", Spread: true, XMLName: "Event", Scalar: "string"},
+									},
+								},
+								{Property: "QueueConfigurations", Member: "QueueConfigurations", Kind: "list", XMLName: "QueueConfiguration",
+									Fields: []Field{
+										{Property: "Filter", Member: "Filter", Kind: "structure", XMLName: "Filter",
+											Fields: []Field{
+												{Property: "S3Key", Member: "Key", Kind: "structure", XMLName: "S3Key",
+													Fields: []Field{
+														{Property: "Rules", Member: "FilterRules", Kind: "list", XMLName: "FilterRule",
+															Fields: []Field{
+																{Property: "Name", Member: "Name", Kind: "scalar", XMLName: "Name", Scalar: "string"},
+																{Property: "Value", Member: "Value", Kind: "scalar", XMLName: "Value", Scalar: "string"},
+															},
+														},
+													},
+												},
+											},
+										},
+										{Property: "Queue", Member: "QueueArn", Kind: "scalar", XMLName: "Queue", Scalar: "string"},
+										{Property: "Event", Member: "Events", Kind: "list", Spread: true, XMLName: "Event", Scalar: "string"},
+									},
+								},
+								{Property: "TopicConfigurations", Member: "TopicConfigurations", Kind: "list", XMLName: "TopicConfiguration",
+									Fields: []Field{
+										{Property: "Filter", Member: "Filter", Kind: "structure", XMLName: "Filter",
+											Fields: []Field{
+												{Property: "S3Key", Member: "Key", Kind: "structure", XMLName: "S3Key",
+													Fields: []Field{
+														{Property: "Rules", Member: "FilterRules", Kind: "list", XMLName: "FilterRule",
+															Fields: []Field{
+																{Property: "Name", Member: "Name", Kind: "scalar", XMLName: "Name", Scalar: "string"},
+																{Property: "Value", Member: "Value", Kind: "scalar", XMLName: "Value", Scalar: "string"},
+															},
+														},
+													},
+												},
+											},
+										},
+										{Property: "Topic", Member: "TopicArn", Kind: "scalar", XMLName: "Topic", Scalar: "string"},
+										{Property: "Event", Member: "Events", Kind: "list", Spread: true, XMLName: "Event", Scalar: "string"},
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	})

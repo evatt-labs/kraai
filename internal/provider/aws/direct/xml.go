@@ -243,6 +243,11 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 	}
 	var v any
 	switch f.Kind {
+	case "presence":
+		if n.child(f.XMLName) == nil {
+			return nil, false
+		}
+		v = true
 	case "structure":
 		c := n.child(f.XMLName)
 		if c == nil {
@@ -283,7 +288,7 @@ func xmlValue(w *walk, n *xmlNode, f Field) (any, bool) {
 		if f.Wrap != "" {
 			list = wrapped(f.Wrap, list)
 		}
-		v = list
+		v = spread(f.Fields, list)
 	case "map":
 		c := n.child(f.XMLName)
 		if c == nil {

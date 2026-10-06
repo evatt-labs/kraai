@@ -187,7 +187,9 @@ type Mapping struct {
 	// its name and alias, leaving the property unread when there is none;
 	// json, number or boolean, parsing a string the service returns for a
 	// property the schema types otherwise; text, writing an integer the
-	// schema types as a string; or urlJson, parsing JSON a
+	// schema types as a string; present, true when a structure with no
+	// members is there, as S3 marks EventBridge delivery on; or urlJson,
+	// parsing JSON a
 	// service returns percent-encoded, as IAM does its policy documents.
 	Transform string `yaml:"transform,omitempty"`
 	// Alternatives reads the property from the first of several mappings
@@ -199,6 +201,11 @@ type Mapping struct {
 	Alternatives []Mapping `yaml:"alternatives,omitempty"`
 	// AsList is set on an alternative; see Alternatives.
 	AsList bool `yaml:"asList,omitempty"`
+	// Spread makes a list of structures one element per value of each
+	// element's list member, that value in the named property, for an API
+	// that lists what the schema gives one element each, such as S3
+	// notifications' Events beside the schema's one Event.
+	Spread *Spread `yaml:"spread,omitempty"`
 	// Wrap reads a list of strings as a list of structures, each holding
 	// the string as the property named, for names a further call made for
 	// each element fills out, such as the inline policies IAM lists by name.
@@ -257,7 +264,7 @@ func (m *Mapping) UnmarshalYAML(node *yaml.Node) error {
 // MarshalYAML writes a mapping with no nested properties as its bare
 // member name, the form it is reviewed in.
 func (m Mapping) MarshalYAML() (any, error) {
-	if len(m.Properties) == 0 && len(m.Alternatives) == 0 && !m.AsList && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
+	if len(m.Properties) == 0 && len(m.Alternatives) == 0 && !m.AsList && m.Spread == nil && len(m.Skip) == 0 && m.Transform == "" && len(m.Where) == 0 && len(m.Entries) == 0 && len(m.Keyed) == 0 && len(m.TrueWhen) == 0 && len(m.Unless) == 0 && m.Wrap == "" && len(m.Extract) == 0 && m.Default == nil {
 		return m.Member, nil
 	}
 	type plain Mapping
@@ -456,4 +463,11 @@ type Lifecycle struct {
 type Pages struct {
 	Input  string `yaml:"input"`
 	Output string `yaml:"output"`
+}
+
+// Spread is Mapping.Spread: Member is the list each element carries, and
+// Property the schema property each of its values becomes.
+type Spread struct {
+	Property string `yaml:"property"`
+	Member   string `yaml:"member"`
 }

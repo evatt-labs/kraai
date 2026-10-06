@@ -257,6 +257,16 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				fail("%s%s transforms %s, which is not a string", at, name, mapping.Member)
 			}
 			parsed = mapping.Transform != "arnResource"
+		case "present":
+			if shape := model.Shapes[valueTarget]; shape.Type != "structure" || len(shape.Members) > 0 {
+				fail("%s%s reads %s as present, which is not a structure with no members", at, name, mapping.Member)
+			}
+			if !schema.types(props[name])["boolean"] {
+				fail("%s%s reads %s as present, but the schema does not type it a boolean", at, name, mapping.Member)
+			}
+			f.Kind = "presence"
+			fields = append(fields, f)
+			continue
 		case "text":
 			switch targetType(model.Shapes[valueTarget].Type, valueTarget) {
 			case "byte", "short", "integer", "long", "biginteger":
@@ -271,7 +281,7 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 				}
 				break
 			}
-			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, urlJson, number, boolean and text", at, name, mapping.Transform)
+			fail("%s%s names transform %q; it is one of arnResource, arnPart:N (N below 1000), json, urlJson, number, boolean, text and present", at, name, mapping.Transform)
 		}
 		_ = json.Unmarshal(m.Traits["smithy.api#jsonName"], &f.JSONName)
 		prop := props[name]
@@ -342,7 +352,17 @@ func compileFields(model *smithyModel, schema *cfnSchema, props map[string]cfnPr
 					delete(nested, child)
 				}
 			}
+			var spread *Field
+			if sp := mapping.Spread; sp != nil {
+				spread = compileSpread(model, schema, f, nested, nestedStructure, sp, at+name, fail)
+				delete(nested, sp.Property)
+			}
 			f.Fields = compileFields(model, schema, nested, nestedStructure, mapping.Properties, mapping.Skip, at+name+".", fail)
+			if spread != nil {
+				f.Fields = append(f.Fields, *spread)
+			}
+		case mapping.Spread != nil:
+			fail("%s%s spreads %s, but it is not a list of structures on both sides", at, name, mapping.Spread.Member)
 		case len(mapping.Properties) > 0 || len(mapping.Skip) > 0:
 			fail("%s%s maps nested properties, but it is not a structure on both sides", at, name)
 		case nested != nil || nestedStructure != "":
@@ -538,4 +558,31 @@ func compileWrap(model *smithyModel, schema *cfnSchema, prop cfnProperty, mappin
 		return true
 	}
 	return false
+}
+
+// compileSpread checks a list's Spread: the list's elements carry Member,
+// a list of strings, and the schema's elements a string Property that no
+// other mapping reads. It returns the field reading Member.
+func compileSpread(model *smithyModel, schema *cfnSchema, list Field, nested map[string]cfnProperty, element string, sp *Spread, at string, fail func(string, ...any)) *Field {
+	if list.Kind != "list" {
+		fail("%s spreads %s, but it is not a list", at, sp.Member)
+		return nil
+	}
+	p, ok := nested[sp.Property]
+	if !ok || !schema.types(p)["string"] {
+		fail("%s spreads %s into %s, which is not a string property of its elements", at, sp.Member, sp.Property)
+		return nil
+	}
+	m, ok := model.Shapes[element].Members[sp.Member]
+	if !ok {
+		fail("%s spreads %s, which its elements do not have", at, sp.Member)
+		return nil
+	}
+	target := model.Shapes[m.Target]
+	el := ref(target.Member)
+	if t := targetType(model.Shapes[el].Type, el); targetType(target.Type, m.Target) != "list" || t != "string" && t != "enum" {
+		fail("%s spreads %s, which is not a list of strings", at, sp.Member)
+		return nil
+	}
+	return &Field{Property: sp.Property, Member: sp.Member, Kind: "list", Spread: true}
 }

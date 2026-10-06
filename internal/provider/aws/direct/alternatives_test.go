@@ -61,3 +61,54 @@ func TestAlternativesAreChecked(t *testing.T) {
 		})
 	}
 }
+
+// TestSpreadAndPresenceAreChecked covers spreads and presence reads that
+// would read nothing or the wrong shape.
+func TestSpreadAndPresenceAreChecked(t *testing.T) {
+	m := func(target string) smithyMember { return smithyMember{Target: target} }
+	model := &smithyModel{Shapes: map[string]smithyShape{
+		"x#Out":    {Type: "structure", Members: map[string]smithyMember{"Topics": m("x#Topics"), "Marker": m("x#Marker"), "Topic": m("x#Topic")}},
+		"x#Topics": {Type: "list", Member: &smithyMember{Target: "x#Topic"}},
+		"x#Topic":  {Type: "structure", Members: map[string]smithyMember{"Arn": m("x#String"), "Events": m("x#Events"), "Id": m("x#String")}},
+		"x#Events": {Type: "list", Member: &smithyMember{Target: "x#Event"}},
+		"x#Event":  {Type: "enum"},
+		"x#Marker": {Type: "structure"},
+		"x#String": {Type: "string"},
+	}}
+	topic := cfnProperty{Type: "object", Properties: map[string]cfnProperty{"Topic": {Type: "string"}, "Event": {Type: "string"}}}
+	props := map[string]cfnProperty{"Topics": {Type: "array", Items: &topic}, "Enabled": {Type: "boolean"}}
+	topics := Mapping{Member: "Topics", Spread: &Spread{Property: "Event", Member: "Events"}, Properties: map[string]Mapping{"Topic": {Member: "Arn"}}}
+	enabled := Mapping{Member: "Marker", Transform: "present"}
+	cases := map[string]struct {
+		mapped  map[string]Mapping
+		refused string
+	}{
+		"one element per event, and a marker": {mapped: map[string]Mapping{"Topics": topics, "Enabled": enabled}},
+		"spreading a member that is not a list": {mapped: map[string]Mapping{"Topics": {Member: "Topics", Spread: &Spread{Property: "Event", Member: "Id"}, Properties: topics.Properties}, "Enabled": enabled},
+			refused: "Topics spreads Id, which is not a list of strings"},
+		"spreading into a property the schema lacks": {mapped: map[string]Mapping{"Topics": {Member: "Topics", Spread: &Spread{Property: "Kind", Member: "Events"}, Properties: topics.Properties}, "Enabled": enabled},
+			refused: "Topics spreads Events into Kind, which is not a string property of its elements"},
+		"spreading a single structure": {mapped: map[string]Mapping{"Topics": {Member: "Topic", Spread: &Spread{Property: "Event", Member: "Events"}, Properties: topics.Properties}, "Enabled": enabled},
+			refused: "Topics is [array] in the schema, but Topic is structure"},
+		"a structure with members read as present": {mapped: map[string]Mapping{"Topics": topics, "Enabled": {Member: "Topic", Transform: "present"}},
+			refused: "Enabled reads Topic as present, which is not a structure with no members"},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			var errs []string
+			fields := compileFields(model, &cfnSchema{}, props, "x#Out", c.mapped, nil, "", func(format string, args ...any) {
+				errs = append(errs, fmt.Sprintf(format, args...))
+			})
+			got := strings.Join(errs, "; ")
+			if c.refused == "" {
+				if got != "" || len(fields) != 2 {
+					t.Fatalf("fields %v, errors %q; want both compiled", fields, got)
+				}
+				return
+			}
+			if !strings.Contains(got, c.refused) {
+				t.Fatalf("errors = %q, want %q", got, c.refused)
+			}
+		})
+	}
+}

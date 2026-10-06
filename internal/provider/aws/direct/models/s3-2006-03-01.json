@@ -94,6 +94,9 @@
           "target": "com.amazonaws.s3#GetBucketLogging"
         },
         {
+          "target": "com.amazonaws.s3#GetBucketNotificationConfiguration"
+        },
+        {
           "target": "com.amazonaws.s3#GetBucketOwnershipControls"
         },
         {
@@ -24558,6 +24561,203 @@
       "traits": {},
       "type": "structure"
     },
+    "com.amazonaws.s3#Event": {
+      "members": {
+        "s3_IntelligentTiering": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:IntelligentTiering"
+          }
+        },
+        "s3_LifecycleExpiration_": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:LifecycleExpiration:*"
+          }
+        },
+        "s3_LifecycleExpiration_Delete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:LifecycleExpiration:Delete"
+          }
+        },
+        "s3_LifecycleExpiration_DeleteMarkerCreated": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:LifecycleExpiration:DeleteMarkerCreated"
+          }
+        },
+        "s3_LifecycleTransition": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:LifecycleTransition"
+          }
+        },
+        "s3_ObjectAcl_Put": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectAcl:Put"
+          }
+        },
+        "s3_ObjectAnnotation_": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectAnnotation:*"
+          }
+        },
+        "s3_ObjectAnnotation_Delete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectAnnotation:Delete"
+          }
+        },
+        "s3_ObjectAnnotation_Put": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectAnnotation:Put"
+          }
+        },
+        "s3_ObjectCreated_": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectCreated:*"
+          }
+        },
+        "s3_ObjectCreated_CompleteMultipartUpload": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectCreated:CompleteMultipartUpload"
+          }
+        },
+        "s3_ObjectCreated_Copy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectCreated:Copy"
+          }
+        },
+        "s3_ObjectCreated_Post": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectCreated:Post"
+          }
+        },
+        "s3_ObjectCreated_Put": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectCreated:Put"
+          }
+        },
+        "s3_ObjectRemoved_": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRemoved:*"
+          }
+        },
+        "s3_ObjectRemoved_Delete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRemoved:Delete"
+          }
+        },
+        "s3_ObjectRemoved_DeleteMarkerCreated": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRemoved:DeleteMarkerCreated"
+          }
+        },
+        "s3_ObjectRestore_": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRestore:*"
+          }
+        },
+        "s3_ObjectRestore_Completed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRestore:Completed"
+          }
+        },
+        "s3_ObjectRestore_Delete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRestore:Delete"
+          }
+        },
+        "s3_ObjectRestore_Post": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRestore:Post"
+          }
+        },
+        "s3_ObjectRetention_Put": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectRetention:Put"
+          }
+        },
+        "s3_ObjectTagging_": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectTagging:*"
+          }
+        },
+        "s3_ObjectTagging_Delete": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectTagging:Delete"
+          }
+        },
+        "s3_ObjectTagging_Put": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ObjectTagging:Put"
+          }
+        },
+        "s3_ReducedRedundancyLostObject": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:ReducedRedundancyLostObject"
+          }
+        },
+        "s3_Replication_": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:Replication:*"
+          }
+        },
+        "s3_Replication_OperationFailedReplication": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:Replication:OperationFailedReplication"
+          }
+        },
+        "s3_Replication_OperationMissedThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:Replication:OperationMissedThreshold"
+          }
+        },
+        "s3_Replication_OperationNotTracked": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:Replication:OperationNotTracked"
+          }
+        },
+        "s3_Replication_OperationReplicatedAfterThreshold": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "s3:Replication:OperationReplicatedAfterThreshold"
+          }
+        }
+      },
+      "traits": {},
+      "type": "enum"
+    },
+    "com.amazonaws.s3#EventBridgeConfiguration": {
+      "members": {},
+      "traits": {},
+      "type": "structure"
+    },
     "com.amazonaws.s3#EventHoldDuration": {
       "members": {
         "Days": {
@@ -24571,6 +24771,12 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#EventList": {
+      "member": {
+        "target": "com.amazonaws.s3#Event"
+      },
+      "type": "list"
     },
     "com.amazonaws.s3#ExistingObjectReplication": {
       "members": {
@@ -24629,6 +24835,47 @@
         "target": "com.amazonaws.s3#ExposeHeader"
       },
       "type": "list"
+    },
+    "com.amazonaws.s3#FilterRule": {
+      "members": {
+        "Name": {
+          "target": "com.amazonaws.s3#FilterRuleName",
+          "traits": {}
+        },
+        "Value": {
+          "target": "com.amazonaws.s3#FilterRuleValue",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#FilterRuleList": {
+      "member": {
+        "target": "com.amazonaws.s3#FilterRule"
+      },
+      "traits": {},
+      "type": "list"
+    },
+    "com.amazonaws.s3#FilterRuleName": {
+      "members": {
+        "prefix": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "prefix"
+          }
+        },
+        "suffix": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "suffix"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.s3#FilterRuleValue": {
+      "type": "string"
     },
     "com.amazonaws.s3#GetBucketAbac": {
       "input": {
@@ -24975,6 +25222,51 @@
       "type": "structure"
     },
     "com.amazonaws.s3#GetBucketLoggingRequest": {
+      "members": {
+        "Bucket": {
+          "target": "com.amazonaws.s3#BucketName",
+          "traits": {
+            "smithy.api#httpLabel": {},
+            "smithy.api#required": {},
+            "smithy.rules#contextParam": {
+              "name": "Bucket"
+            }
+          }
+        },
+        "ExpectedBucketOwner": {
+          "target": "com.amazonaws.s3#AccountId",
+          "traits": {
+            "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.s3#GetBucketNotificationConfiguration": {
+      "input": {
+        "target": "com.amazonaws.s3#GetBucketNotificationConfigurationRequest"
+      },
+      "output": {
+        "target": "com.amazonaws.s3#NotificationConfiguration"
+      },
+      "traits": {
+        "smithy.api#http": {
+          "code": 200,
+          "method": "GET",
+          "uri": "/{Bucket}?notification"
+        },
+        "smithy.rules#staticContextParams": {
+          "UseS3ExpressControlEndpoint": {
+            "value": true
+          }
+        }
+      },
+      "type": "operation"
+    },
+    "com.amazonaws.s3#GetBucketNotificationConfigurationRequest": {
       "members": {
         "Bucket": {
           "target": "com.amazonaws.s3#BucketName",
@@ -25967,6 +26259,42 @@
     "com.amazonaws.s3#KeyPrefixEquals": {
       "type": "string"
     },
+    "com.amazonaws.s3#LambdaFunctionArn": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#LambdaFunctionConfiguration": {
+      "members": {
+        "Events": {
+          "target": "com.amazonaws.s3#EventList",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Event"
+          }
+        },
+        "Filter": {
+          "target": "com.amazonaws.s3#NotificationConfigurationFilter"
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#NotificationId"
+        },
+        "LambdaFunctionArn": {
+          "target": "com.amazonaws.s3#LambdaFunctionArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "CloudFunction"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#LambdaFunctionConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.s3#LambdaFunctionConfiguration"
+      },
+      "type": "list"
+    },
     "com.amazonaws.s3#LifecycleExpiration": {
       "members": {
         "Date": {
@@ -26636,6 +26964,53 @@
       },
       "type": "structure"
     },
+    "com.amazonaws.s3#NotificationConfiguration": {
+      "members": {
+        "EventBridgeConfiguration": {
+          "target": "com.amazonaws.s3#EventBridgeConfiguration",
+          "traits": {}
+        },
+        "LambdaFunctionConfigurations": {
+          "target": "com.amazonaws.s3#LambdaFunctionConfigurationList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "CloudFunctionConfiguration"
+          }
+        },
+        "QueueConfigurations": {
+          "target": "com.amazonaws.s3#QueueConfigurationList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "QueueConfiguration"
+          }
+        },
+        "TopicConfigurations": {
+          "target": "com.amazonaws.s3#TopicConfigurationList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "TopicConfiguration"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#NotificationConfigurationFilter": {
+      "members": {
+        "Key": {
+          "target": "com.amazonaws.s3#S3KeyFilter",
+          "traits": {
+            "smithy.api#xmlName": "S3Key"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#NotificationId": {
+      "traits": {},
+      "type": "string"
+    },
     "com.amazonaws.s3#ObjectAlreadyInActiveTierError": {
       "members": {},
       "traits": {
@@ -26866,6 +27241,42 @@
       },
       "traits": {},
       "type": "structure"
+    },
+    "com.amazonaws.s3#QueueArn": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#QueueConfiguration": {
+      "members": {
+        "Events": {
+          "target": "com.amazonaws.s3#EventList",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Event"
+          }
+        },
+        "Filter": {
+          "target": "com.amazonaws.s3#NotificationConfigurationFilter"
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#NotificationId"
+        },
+        "QueueArn": {
+          "target": "com.amazonaws.s3#QueueArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "Queue"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#QueueConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.s3#QueueConfiguration"
+      },
+      "type": "list"
     },
     "com.amazonaws.s3#Redirect": {
       "members": {
@@ -27167,6 +27578,19 @@
         }
       },
       "type": "list"
+    },
+    "com.amazonaws.s3#S3KeyFilter": {
+      "members": {
+        "FilterRules": {
+          "target": "com.amazonaws.s3#FilterRuleList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "FilterRule"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
     },
     "com.amazonaws.s3#SSEKMS": {
       "members": {
@@ -27587,6 +28011,42 @@
         "smithy.api#httpError": 400
       },
       "type": "structure"
+    },
+    "com.amazonaws.s3#TopicArn": {
+      "type": "string"
+    },
+    "com.amazonaws.s3#TopicConfiguration": {
+      "members": {
+        "Events": {
+          "target": "com.amazonaws.s3#EventList",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Event"
+          }
+        },
+        "Filter": {
+          "target": "com.amazonaws.s3#NotificationConfigurationFilter"
+        },
+        "Id": {
+          "target": "com.amazonaws.s3#NotificationId"
+        },
+        "TopicArn": {
+          "target": "com.amazonaws.s3#TopicArn",
+          "traits": {
+            "smithy.api#required": {},
+            "smithy.api#xmlName": "Topic"
+          }
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.s3#TopicConfigurationList": {
+      "member": {
+        "target": "com.amazonaws.s3#TopicConfiguration"
+      },
+      "type": "list"
     },
     "com.amazonaws.s3#Transition": {
       "members": {

@@ -226,6 +226,9 @@ type Field struct {
 	// whose single structure becomes a one-element list.
 	Alternatives []Field
 	AsList       bool
+	// Spread marks the list field whose values each make one element of
+	// the enclosing list; see Mapping.Spread.
+	Spread bool
 	// Default is Mapping.Default.
 	Default any
 	// Extract is Mapping.Extract.

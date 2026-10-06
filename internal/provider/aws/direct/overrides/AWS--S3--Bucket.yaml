@@ -473,10 +473,83 @@ also:
                 member: AbortIncompleteMultipartUpload
                 properties:
                   DaysAfterInitiation: DaysAfterInitiation
+  - operation: GetBucketNotificationConfiguration
+    identifier:
+      BucketName: Bucket
+    absentErrors: [NoSuchBucket]
+    properties:
+      NotificationConfiguration:
+        member: .
+        properties:
+          EventBridgeConfiguration:
+            member: .
+            properties:
+              EventBridgeEnabled:
+                member: EventBridgeConfiguration
+                transform: present
+          TopicConfigurations:
+            member: TopicConfigurations
+            # One schema entry per event: Cloud Control keeps only the
+            # first of a configuration's events, dropping the rest.
+            spread:
+              property: Event
+              member: Events
+            properties:
+              Topic: TopicArn
+              Filter:
+                member: Filter
+                properties:
+                  S3Key:
+                    member: Key
+                    properties:
+                      Rules:
+                        member: FilterRules
+                        properties:
+                          Name: Name
+                          Value: Value
+          QueueConfigurations:
+            member: QueueConfigurations
+            # One schema entry per event: Cloud Control keeps only the
+            # first of a configuration's events, dropping the rest.
+            spread:
+              property: Event
+              member: Events
+            properties:
+              Queue: QueueArn
+              Filter:
+                member: Filter
+                properties:
+                  S3Key:
+                    member: Key
+                    properties:
+                      Rules:
+                        member: FilterRules
+                        properties:
+                          Name: Name
+                          Value: Value
+          LambdaConfigurations:
+            member: LambdaFunctionConfigurations
+            # One schema entry per event: Cloud Control keeps only the
+            # first of a configuration's events, dropping the rest.
+            spread:
+              property: Event
+              member: Events
+            properties:
+              Function: LambdaFunctionArn
+              Filter:
+                member: Filter
+                properties:
+                  S3Key:
+                    member: Key
+                    properties:
+                      Rules:
+                        member: FilterRules
+                        properties:
+                          Name: Name
+                          Value: Value
 skip:
   MetadataConfiguration: GetBucketMetadataConfiguration returns its tables in a result shape not mapped here, and its V1 counterpart is refused for accounts on the V2 API
   MetadataTableConfiguration: GetBucketMetadataTableConfiguration answers V1APIsNotAllowed for an account on the V2 metadata API
-  NotificationConfiguration: the API gives each configuration a list of Events where the schema has one Event per configuration, which no mapping here splits
 undeclaredErrors:
   NoSuchLifecycleConfiguration: S3's model declares no errors on GetBucketLifecycleConfiguration; it answers this for a bucket with no lifecycle configuration.
   NoSuchCORSConfiguration: S3's model declares no errors on GetBucketCors; it answers this for a bucket with no CORS configuration.
