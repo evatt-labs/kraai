@@ -319,14 +319,14 @@ func TestTemplateRegions(t *testing.T) {
 // inventoryPage is one page of ListBucketInventoryConfigurations: one
 // configuration, and the next page's token when there is one.
 func inventoryPage(id, next string) string {
-	token := "<IsTruncated>false</IsTruncated>"
+	truncation := "<IsTruncated>false</IsTruncated>"
 	if next != "" {
-		token = "<IsTruncated>true</IsTruncated><NextContinuationToken>" + next + "</NextContinuationToken>"
+		truncation = "<IsTruncated>true</IsTruncated><NextContinuationToken>" + next + "</NextContinuationToken>"
 	}
 	return `<ListInventoryConfigurationsResult` + s3NS + `><InventoryConfiguration><Id>` + id + `</Id><IsEnabled>true</IsEnabled>` +
 		`<Destination><S3BucketDestination><AccountId>111122223333</AccountId><Bucket>arn:aws:s3:::dest</Bucket><Format>CSV</Format></S3BucketDestination></Destination>` +
 		`<Filter><Prefix>` + id + `/</Prefix></Filter><IncludedObjectVersions>All</IncludedObjectVersions><Schedule><Frequency>Daily</Frequency></Schedule></InventoryConfiguration>` +
-		token + `</ListInventoryConfigurationsResult>`
+		truncation + `</ListInventoryConfigurationsResult>`
 }
 
 // pagedS3Client answers every bucket call as TestReadS3Bucket's does,

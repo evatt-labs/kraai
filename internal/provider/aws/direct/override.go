@@ -75,12 +75,12 @@ type Override struct {
 // addressed and walked as Read is, and the properties its response
 // carries.
 type Call struct {
-	Operation  string             `yaml:"operation"`
-	Identifier map[string]string  `yaml:"identifier,omitempty"`
-	Response   string             `yaml:"response,omitempty"`
-	Input      map[string]any     `yaml:"input,omitempty"`
+	Operation  string            `yaml:"operation"`
+	Identifier map[string]string `yaml:"identifier,omitempty"`
+	Response   string            `yaml:"response,omitempty"`
+	Input      map[string]any    `yaml:"input,omitempty"`
 	// Pages is Read.Pages, for this call.
-	Pages *Pages `yaml:"pages,omitempty"`
+	Pages      *Pages             `yaml:"pages,omitempty"`
 	Properties map[string]Mapping `yaml:"properties"`
 	// AbsentErrors names the error codes that mean the call has nothing to
 	// read, such as no resource policy set, and leaves its properties
