@@ -14,8 +14,9 @@ type Reader struct {
 	Protocol    string
 	SigningName string
 	// Host is the endpoint's host, with {region} standing for the client's
-	// region in a regional one; SigningRegion, when set, is the region a
-	// global endpoint is signed for.
+	// region in a regional one, or the bucket's when S3 redirects there;
+	// SigningRegion, when set, is the region a global endpoint is signed
+	// for.
 	Host, SigningRegion string
 	// DisableDoubleEncoding signs the path as sent, not escaped a second
 	// time, as an auth scheme with disableDoubleEncoding asks, such as S3's.
