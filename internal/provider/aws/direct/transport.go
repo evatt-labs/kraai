@@ -59,7 +59,7 @@ func (c *Client) sendOnce(ctx context.Context, r Reader, method, uri, target str
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		if isXML(r.Protocol) {
-			return nil, nil, xmlAPIError(resp.StatusCode, body)
+			return nil, nil, redirected(resp, xmlAPIError(resp.StatusCode, body))
 		}
 		return nil, nil, apiError(resp, body)
 	}
