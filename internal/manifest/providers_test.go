@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -184,7 +185,7 @@ func TestValidateRootReportsTheFirstBadKeyInSortedOrder(t *testing.T) {
 // A Loader built with no vocabulary cannot check anything, so it must say so
 // rather than load a manifest with that check silently skipped.
 func TestLoadWithoutAVocabularyFails(t *testing.T) {
-	_, err := (&Loader{}).Load("prod", nil)
+	_, err := (&Loader{}).Load(context.Background(), "prod", nil)
 	if err == nil {
 		t.Fatal("a Loader with no capability vocabulary loaded a manifest")
 	}

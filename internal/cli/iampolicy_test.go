@@ -49,7 +49,7 @@ func awsFixtureResolver(_ context.Context, fsys manifest.FS, envName string, set
 	if err != nil {
 		return nil, err
 	}
-	m, err := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), catalog).Load(envName, setArgs)
+	m, err := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), catalog).Load(context.Background(), envName, setArgs)
 	if err != nil {
 		return nil, err
 	}

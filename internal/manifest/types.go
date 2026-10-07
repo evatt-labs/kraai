@@ -13,8 +13,9 @@ type Manifest struct {
 	Root        Root
 	Services    map[string]Service
 	Environment Environment
-	// Values is the merged environments/<name>.values.yaml plus --set map.
-	// Free-form and exempt from schema validation, unlike every other field.
+	// Values is the merged environments/<name>.values.yaml plus --set map,
+	// with the environment's Terraform outputs under terraform. Free-form
+	// and exempt from schema validation, unlike every other field.
 	Values map[string]any
 	// Dir is the absolute path of the directory the manifest was read
 	// from, which a service's relative dir is taken against; empty for a
@@ -258,6 +259,26 @@ type Environment struct {
 	Naming    *Naming                    `yaml:"naming,omitempty"`
 	Routes    map[string][]Route         `yaml:"routes,omitempty"`
 	Resources map[string]ResourceImports `yaml:"resources,omitempty"`
+	// Terraform names the Terraform or OpenTofu roots whose root-module
+	// outputs the manifest's templates read, as terraform.<name>.<output>.
+	Terraform map[string]TerraformRoot `yaml:"terraform,omitempty"`
+}
+
+// TerraformRoot is where one root's outputs are read from: Dir, an
+// initialized root `output -json` is run in, or File, a file holding what
+// it prints, for a pipeline that exports outputs itself.
+type TerraformRoot struct {
+	// Dir is the root's directory, relative to the manifest directory or
+	// absolute. It may lie outside the manifest directory: the base
+	// Terraform owns is usually beside it.
+	Dir string `yaml:"dir,omitempty"`
+	// File is a file in the manifest directory.
+	File string `yaml:"file,omitempty"`
+	// Workspace selects a Dir root's workspace.
+	Workspace string `yaml:"workspace,omitempty"`
+	// Command is terraform or tofu, for a Dir root; empty is terraform
+	// when it is on PATH, and tofu otherwise.
+	Command string `yaml:"command,omitempty"`
 }
 
 // EnvironmentKindEphemeral and EnvironmentKindPersistent are Environment's

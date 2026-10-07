@@ -5,6 +5,7 @@ import (
 
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/resource"
+	"github.com/evatt-labs/kraai/internal/terraform"
 )
 
 // Resolved is everything a command needs from a manifest directory: the
@@ -18,14 +19,18 @@ type Resolved struct {
 // from base, the provider declarations, ordinarily Declarations. A
 // parameter rather than a reference so a test can supply its own without
 // importing a provider package or reaching a network.
+//
+// Every sensitive Terraform output the manifest reads is added to the
+// redact.Set ctx carries, so nothing the command prints carries it.
 func Resolve(
-	_ context.Context, fsys manifest.FS, envName string, setArgs []string, base []resource.Provider,
+	ctx context.Context, fsys manifest.FS, envName string, setArgs []string, base []resource.Provider,
 ) (*Resolved, error) {
 	catalog, err := resource.NewCatalog(base...)
 	if err != nil {
 		return nil, err
 	}
-	m, err := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), catalog).Load(envName, setArgs)
+	m, err := manifest.NewLoader(fsys, manifest.NewTemplateEngine(fsys), catalog).
+		WithTerraform(terraform.Exec).Load(ctx, envName, setArgs)
 	if err != nil {
 		return nil, err
 	}
