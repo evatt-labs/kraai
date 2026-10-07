@@ -64,7 +64,8 @@ type Status struct {
 	// tags more types, so a record below CurrentIdentityTagVersion still
 	// adopts an untagged resource of a type tagged since.
 	IdentityTagVersion int `json:"identityTagVersion,omitempty"`
-	// IdentityTagged is the first generation's record, read as version 1.
+	// IdentityTagged is the first generation's record, read as version 1,
+	// and still written beside the version for a kraai that reads only it.
 	IdentityTagged bool `json:"identityTagged,omitempty"`
 }
 

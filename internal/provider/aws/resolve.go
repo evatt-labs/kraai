@@ -169,7 +169,7 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 // carries no identity tag at all: one an earlier kraai found that way and
 // never tagged.
 func (r *resourceType) firstMatch(ctx context.Context, name string, candidates []string) (string, map[string]any, bool, error) {
-	adopting := r.adoptMatch != nil && r.tags != nil && resource.AdoptUntagged(ctx)
+	adopting := r.adoptMatch != nil && r.tags != nil && resource.AdoptsUntagged(ctx, r.taggedSince)
 	var adoptID string
 	var adoptProps map[string]any
 	for _, candidate := range candidates {

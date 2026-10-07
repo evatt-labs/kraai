@@ -73,7 +73,7 @@ func guard(
 		ctx = resource.WithSettledIndex(ctx)
 	}
 	if adoptsUntagged(status, found) {
-		ctx = resource.WithAdoptUntagged(ctx)
+		ctx = resource.WithTagVersion(ctx, status.TagVersion())
 	}
 	guarded, stop := lock.Keep(ctx, lease, leaseDuration, leaseRenewal)
 	return guarded, store, func() {
@@ -111,7 +111,7 @@ func withAdoption(ctx context.Context, store lock.Store, envName string) (contex
 		return nil, err
 	}
 	if adoptsUntagged(status, found) {
-		ctx = resource.WithAdoptUntagged(ctx)
+		ctx = resource.WithTagVersion(ctx, status.TagVersion())
 	}
 	return ctx, nil
 }
@@ -132,7 +132,8 @@ func recordStart(ctx context.Context, store lock.Store, envName string, m *manif
 	if !found {
 		// No kraai has run against this environment, so none left anything
 		// in it untagged: it never adopts.
-		status = lock.Status{Environment: envName, Kind: m.Environment.Kind, IdentityTagVersion: lock.CurrentIdentityTagVersion}
+		status = lock.Status{Environment: envName, Kind: m.Environment.Kind,
+			IdentityTagVersion: lock.CurrentIdentityTagVersion, IdentityTagged: true}
 	}
 	status.StartedAt = time.Now().UTC()
 	return store.WriteStatus(ctx, status)
@@ -176,6 +177,8 @@ func recordStatus(ctx context.Context, store lock.Store, envName string, m *mani
 		StartedAt:   started.StartedAt,
 		// Kept once set: a later failure does not unmark what was tagged.
 		IdentityTagVersion: tagVersionAfter(started, clean),
+		// For a kraai that reads only the first generation's field.
+		IdentityTagged: tagVersionAfter(started, clean) >= 1,
 	}
 	if ttl := m.Environment.TTLDuration(); ttl > 0 && m.Environment.Kind == manifest.EnvironmentKindEphemeral {
 		deadline := now.Add(ttl)

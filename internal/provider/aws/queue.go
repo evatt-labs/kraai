@@ -74,6 +74,9 @@ func newQueueResource(client ccAPI) *nativeResource {
 	n := newNativeResourceWith(client, nil, facts, resource.LookupByTag)
 	n.fromCapability = queueProperties
 	n.adoptMatch = queueMatch
+	// The queue was found by QueueName, untagged, until the second
+	// generation.
+	n.taggedSince = 2
 	return n
 }
 

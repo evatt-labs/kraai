@@ -42,15 +42,15 @@ func TestAdoptionFollowsTheStatusRecord(t *testing.T) {
 				t.Fatal(err)
 			}
 			release()
-			if got := resource.AdoptUntagged(ctx); got != c.adopt {
-				t.Fatalf("under the lock, AdoptUntagged = %v, want %v", got, c.adopt)
+			if got := resource.AdoptsUntagged(ctx, lock.CurrentIdentityTagVersion); got != c.adopt {
+				t.Fatalf("under the lock, AdoptsUntagged = %v, want %v", got, c.adopt)
 			}
 			planCtx, err := withAdoption(t.Context(), store, "env")
 			if err != nil {
 				t.Fatal(err)
 			}
-			if got := resource.AdoptUntagged(planCtx); got != c.adopt {
-				t.Fatalf("for plan, AdoptUntagged = %v, want %v", got, c.adopt)
+			if got := resource.AdoptsUntagged(planCtx, lock.CurrentIdentityTagVersion); got != c.adopt {
+				t.Fatalf("for plan, AdoptsUntagged = %v, want %v", got, c.adopt)
 			}
 		})
 	}
@@ -70,6 +70,11 @@ func TestRecordStatusMarksTheEnvironmentTagged(t *testing.T) {
 		status, _, _ := store.ReadStatus(t.Context(), "env")
 		if tagged := status.TagVersion() == lock.CurrentIdentityTagVersion; tagged != s.want {
 			t.Fatalf("after apply %d (clean %v), tag version = %d, want current %v", i, s.clean, status.TagVersion(), s.want)
+		}
+		// A kraai that reads only the first generation's field must not
+		// take a tagged environment for one that adopts.
+		if status.IdentityTagged != s.want {
+			t.Fatalf("after apply %d (clean %v), identityTagged = %v, want %v", i, s.clean, status.IdentityTagged, s.want)
 		}
 	}
 }

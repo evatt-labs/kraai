@@ -52,7 +52,7 @@ func TestQueueGetFindsItsTagOrAdoptsByName(t *testing.T) {
 		}
 	}
 	ctx := context.Background()
-	adopt := resource.WithAdoptUntagged(ctx)
+	adopt := resource.WithTagVersion(ctx, 0)
 	for name, c := range map[string]struct {
 		ctx       context.Context
 		ref       string

@@ -121,6 +121,12 @@ type resourceType struct {
 	// such an instance when none carries the tag.
 	adoptMatch matchFunc
 
+	// taggedSince is the generation of kraai's identity tagging (see
+	// lock.CurrentIdentityTagVersion) this type began carrying the tag at:
+	// only an environment applied before it may hold an untagged instance
+	// of its own. 0 is a type that always tagged, which never adopts.
+	taggedSince int
+
 	// listScope is non-nil exactly for a type whose list handler is
 	// parent-scoped, such as AWS::Lambda::Permission's, which requires the
 	// FunctionName whose permissions to list.
