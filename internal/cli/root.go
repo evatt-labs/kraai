@@ -77,7 +77,6 @@ func NewRootCommand() *cobra.Command {
 	root.AddCommand(newVersionCommand())
 	root.AddCommand(newEnvNameCommand())
 	root.AddCommand(newCapabilitiesCommand(assemble.Capabilities))
-	root.AddCommand(newPluginsCommand(assemble.ResolveWithDeclarations))
 	root.AddCommand(newPlanCommand(assemble.Registry, assemble.ResolveWithDeclarations, assemble.LockStore))
 	root.AddCommand(newIAMPolicyCommand(
 		assemble.Registry, assemble.ResolveWithDeclarations, assemble.AWSPolicyActions,

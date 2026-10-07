@@ -60,7 +60,6 @@ func runStatus(
 	if err != nil {
 		return err
 	}
-	defer func() { _ = resolved.Close(ctx) }()
 
 	store, err := stores(ctx, resolved.Manifest)
 	if err != nil {

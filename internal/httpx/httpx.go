@@ -48,10 +48,6 @@ func newTransport() *http.Transport {
 // a duration metric. tp and mp select the providers; nil means the globals,
 // as resource.Instrument does. Each call returns a distinct Client wired to
 // the one Transport.
-//
-// internal/plugin's egress client deliberately does not use this: its
-// transport is a security boundary that dials only vetted addresses, and
-// pooling a plugin's connections with trusted code's would defeat it.
 func NewClient(timeout time.Duration, tp trace.TracerProvider, mp metric.MeterProvider) *http.Client {
 	var opts []otelhttp.Option
 	if tp != nil {

@@ -8,17 +8,6 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
-// validateRootShape checks everything about kraai.yaml that does not depend
-// on knowing which capabilities exist — its version, and its `plugins:`
-// list. Split out so LoadRoot can run it during bootstrap, before there is a
-// Vocabulary to check the rest against.
-func (l *Loader) validateRootShape(root *Root) error {
-	if root.Version != 1 {
-		return kerrors.Validation("%s: version: must be 1, got %d", rootFile, root.Version)
-	}
-	return validatePlugins(root.Plugins)
-}
-
 // validateRoot checks kraai.yaml's version and every key under `providers:`.
 //
 // Iterates the map directly, in sorted key order, rather than through
@@ -28,8 +17,8 @@ func (l *Loader) validateRootShape(root *Root) error {
 // got as far as naming a vendor. Sorted so a manifest with more than one bad
 // key reports the same one first on every run.
 func (l *Loader) validateRoot(root *Root) error {
-	if err := l.validateRootShape(root); err != nil {
-		return err
+	if root.Version != 1 {
+		return kerrors.Validation("%s: version: must be 1, got %d", rootFile, root.Version)
 	}
 
 	written := make([]string, 0, len(root.Providers))

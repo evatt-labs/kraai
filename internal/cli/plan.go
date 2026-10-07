@@ -30,19 +30,11 @@ import (
 // exercised without any of it. The production wiring is in NewRootCommand.
 type RegistryAssembler func(ctx context.Context, m *manifest.Manifest) (*resource.Registry, error)
 
-// ManifestResolver loads a manifest directory end to end: the manifest, the
-// plugins it declares, and the capability catalog those plugins may have
-// extended.
-//
-// One dependency rather than the catalog-then-loader pair it replaced,
-// because the two can no longer be built independently — a plugin may
-// introduce a capability the manifest then names, so the vocabulary depends
-// on the manifest's plugin list and the manifest's validity depends on the
-// vocabulary. internal/assemble.Resolve owns that ordering; a command only
-// has to close what comes back.
+// ManifestResolver loads a manifest directory end to end: the manifest and
+// the capability catalog it was validated against.
 //
 // A function type for the same reason RegistryAssembler is: a test supplies a
-// manifest without compiling WASM or importing a provider package.
+// manifest without importing a provider package.
 type ManifestResolver func(
 	ctx context.Context, fsys manifest.FS, envName string, setArgs []string,
 ) (*assemble.Resolved, error)
@@ -119,17 +111,10 @@ func runPlan(
 		return err
 	}
 
-	// Resolving loads the manifest, loads the plugins it declares, and
-	// validates the one against a vocabulary the other may have extended —
-	// see internal/assemble.Resolve for why that has to happen in that order.
 	resolved, err := resolve(cmd.Context(), fsys, envName, setArgs)
 	if err != nil {
 		return err
 	}
-	// Tears down the plugin runtime on every exit from here, including the
-	// happy path: a command that returns without closing it leaks the wazero
-	// runtime and its pooled instances for the rest of the process.
-	defer func() { _ = resolved.Close(cmd.Context()) }()
 	m := resolved.Manifest
 
 	// Loaded before anything reads the cloud, so a policy that does not
