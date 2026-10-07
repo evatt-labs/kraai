@@ -105,6 +105,16 @@ example an HTTP fetch outside the shared egress guard, is disqualified no
 matter how good it is otherwise. Present real choices as options with
 evidence rather than picking silently.
 
+## Direction
+
+kraai is application environments on top of Terraform: Terraform or
+OpenTofu owns the shared base, and kraai creates and tears down the
+environments an application runs in on top of it
+([#499](https://github.com/evatt-labs/kraai/issues/499)). Judge every
+change by whether it serves that. Provider breadth and Terraform parity are
+out of scope, and WASM plugins and the Kubernetes client were removed for
+that reason; do not reintroduce them.
+
 ## Scope and honesty
 
 **Stay inside the task.** Other agents frequently work in this repo
