@@ -222,10 +222,12 @@ func Registrations(client *Client) []resource.Registration {
 			Capability: manifest.CapabilityCompute,
 			// No DependsOn on the function: the target ARN is built locally
 			// and PutTargets does not validate that the target exists.
-			// Schedule-triggered services only. Name is settable at create
-			// and renaming is a replacement. See eventsrule.go.
+			// Schedule-triggered services only. Found by tag: the schema's
+			// primary identifier is the rule's read-only ARN, not its Name,
+			// which is still set to the derived name and is replaced on
+			// change. See eventsrule.go.
 			Applies:  []resource.Applicability{resource.RequiresTrigger(manifest.TriggerSchedule)},
-			Lookup:   resource.LookupByName,
+			Lookup:   resource.LookupByTag,
 			Resource: newEventsRuleResource(client),
 		},
 		{

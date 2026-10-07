@@ -43,7 +43,7 @@ func TestRegisterWiresEveryType(t *testing.T) {
 		{Provider + "/" + TypeArtifactBucket, manifest.CapabilityCompute, nil, resource.LookupByName},
 		{Provider + "/" + TypeIAMRole, manifest.CapabilityCompute, nil, resource.LookupByName},
 		{Provider + "/" + TypeLambdaURL, manifest.CapabilityCompute, []string{key(TypeLambdaFunction)}, resource.LookupByAttr},
-		{Provider + "/" + TypeEventsRule, manifest.CapabilityCompute, nil, resource.LookupByName},
+		{Provider + "/" + TypeEventsRule, manifest.CapabilityCompute, nil, resource.LookupByTag},
 		{Provider + "/" + TypePermissionEventsRule, manifest.CapabilityCompute,
 			[]string{key(TypeLambdaFunction)}, resource.LookupByAttr},
 		{Provider + "/" + TypePermissionAPIGateway, manifest.CapabilityCompute,

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 
@@ -215,10 +216,25 @@ func TestTaggedResourcesReadsEveryPage(t *testing.T) {
 	}
 }
 
-// A plan of a manifest with task definitions needs the tagging API.
-func TestPolicyNamesTheTaggingAPIForTaskDefinitions(t *testing.T) {
-	if !slices.Contains(typeActions[typeECSTaskDefinition], "tag:GetResources") {
-		t.Fatalf("typeActions[%s] = %v", typeECSTaskDefinition, typeActions[typeECSTaskDefinition])
+// A plan of a manifest with any type the tagging index serves needs the
+// tagging API, and one with none does not.
+func TestPolicyNamesTheTaggingAPIForIndexedTypes(t *testing.T) {
+	cf := &fakeCF{out: &cloudformation.DescribeTypeOutput{Schema: aws.String(`{"handlers": {}}`)}}
+	for typeName := range indexedTypes {
+		actions, err := (&Client{cf: cf}).PolicyActions(context.Background(), []string{typeName})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !slices.Contains(actions, "tag:GetResources") {
+			t.Errorf("the policy for %s lacks tag:GetResources: %v", typeName, actions)
+		}
+	}
+	actions, err := (&Client{cf: cf}).PolicyActions(context.Background(), []string{TypeSQSQueue})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if slices.Contains(actions, "tag:GetResources") {
+		t.Errorf("the policy for a queue grants tag:GetResources it never calls: %v", actions)
 	}
 }
 
