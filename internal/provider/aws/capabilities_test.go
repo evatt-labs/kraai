@@ -249,28 +249,22 @@ func TestDatabaseBindingSchemaAcceptsAPostgresEntry(t *testing.T) {
 	}
 }
 
-func TestNetworkBindingSchemaAcceptsAPrivateBlock(t *testing.T) {
-	if err := networkBindingSchema.Validate(map[string]any{
-		"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": "10.90.2.0/24",
-	}); err != nil {
-		t.Fatalf("a network with a private block was rejected: %v", err)
+// A network entry names a VPC and at least two of its subnets, by id; the
+// address plan it used to declare is Terraform's now, and refused.
+func TestNetworkBindingSchema(t *testing.T) {
+	if err := networkBindingSchema.Validate(map[string]any{"binding": "NET", "vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "subnet-0b"}}); err != nil {
+		t.Fatalf("a VPC and two subnets were rejected: %v", err)
 	}
-	if err := networkBindingSchema.Validate(map[string]any{
-		"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": true,
-	}); err == nil {
-		t.Fatal("a non-string private block was accepted")
-	}
-}
-
-func TestNetworkBindingSchemaAcceptsTwoZones(t *testing.T) {
-	base := map[string]any{"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24"}
-	base["azs"] = []any{"us-west-1a", "us-west-1c"}
-	if err := networkBindingSchema.Validate(base); err != nil {
-		t.Fatalf("a network naming two zones was rejected: %v", err)
-	}
-	base["azs"] = []any{"us-west-1a"}
-	if err := networkBindingSchema.Validate(base); err == nil {
-		t.Fatal("a network naming one zone was accepted")
+	for name, entry := range map[string]map[string]any{
+		"one subnet":       {"binding": "NET", "vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a"}},
+		"no vpc":           {"binding": "NET", "subnetIds": []any{"subnet-0a", "subnet-0b"}},
+		"a cidr for a vpc": {"binding": "NET", "vpcId": "10.0.0.0/16", "subnetIds": []any{"subnet-0a", "subnet-0b"}},
+		"not subnet ids":   {"binding": "NET", "vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "10.0.1.0/24"}},
+		"the old shape":    {"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24"},
+	} {
+		if err := networkBindingSchema.Validate(entry); err == nil {
+			t.Errorf("%s: %v was accepted", name, entry)
+		}
 	}
 }
 

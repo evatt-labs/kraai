@@ -442,7 +442,9 @@ kind: ephemeral
 
 Name the root `kraai.yaml.j2` and it is rendered before parsing, then
 validated by the same strict schema. Values come from
-`environments/<name>.values.yaml`, overridden by `--set`.
+`environments/<name>.values.yaml`, overridden by `--set`. The `json` filter
+writes a list or map as JSON, which YAML reads as the same value:
+`subnetIds: {{ terraform.base.private_subnet_ids|json }}`.
 
 ```yaml
 # kraai.yaml.j2
@@ -792,12 +794,15 @@ yet been exercised against a live account
 ([#117](https://github.com/evatt-labs/kraai/issues/117)). AWS `database`
 (DynamoDB under `driver: dynamodb`, Aurora DSQL and Aurora Serverless v2 under `driver: postgres`), `keyvalue` (ElastiCache Serverless,
 `driver: redis`) and `queues` (SQS) plan against a live account and have not
-been applied from CI ([#232](https://github.com/evatt-labs/kraai/issues/232));
-a function inside a `network` binding reaches the cache, S3 and DynamoDB
-(the network carries gateway endpoints for both), and SQS, DSQL and the
-internet only when the binding declares a `private` block, which adds a NAT
-gateway billed by the hour
-([#244](https://github.com/evatt-labs/kraai/issues/244)). AWS `secrets`
+been applied from CI ([#232](https://github.com/evatt-labs/kraai/issues/232)).
+A `network` binding names a VPC and at least two of its subnets that
+Terraform owns, usually as `{{ terraform.base.vpc_id }}` and
+`{{ terraform.base.private_subnet_ids|json }}`; kraai creates one security
+group in it, which a function inside the network attaches and the Aurora
+clusters and caches in it admit, so a store is reachable from the
+service's functions and nothing else in the VPC. What a function reaches
+beyond the VPC, the internet or S3 and DynamoDB, is the subnets' routing,
+set by the VPC's owner. AWS `secrets`
 (SSM Parameter Store `SecureString` parameters) plans against a live
 account and has not been applied from CI either.
 Cloudflare offers two compute products and kraai implements neither — Workers

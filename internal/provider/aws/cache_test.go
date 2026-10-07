@@ -145,7 +145,7 @@ func TestCacheURLIsTLSFromThePublishedEndpoint(t *testing.T) {
 
 // Both keyvalue types apply only to a binding asking for redis, and both
 // read the network binding the entry names.
-func TestKeyValueRegistrationsApplyToRedisAndReadTheNetwork(t *testing.T) {
+func TestKeyValueRegistrationsApplyToRedisAndReadTheNetworkGroup(t *testing.T) {
 	reg := resource.NewRegistry()
 	if err := Register(reg, &Client{}); err != nil {
 		t.Fatalf("Register: %v", err)
@@ -157,14 +157,15 @@ func TestKeyValueRegistrationsApplyToRedisAndReadTheNetwork(t *testing.T) {
 	if err != nil || len(regs) != 2 {
 		t.Fatalf("Resolve(driver redis) = %v, %v; want the group and the cache", regs, err)
 	}
+	// The group reads the network's own group, to admit it; the cache takes
+	// the network's subnets from its declared config, which reads nothing.
 	for _, r := range regs {
-		if len(r.ReadsReferences) == 0 {
-			t.Errorf("%s reads nothing, want the network reference", r.Type)
+		want := []resource.ReferenceRead(nil)
+		if r.Type == TypeCacheSecurityGroup {
+			want = []resource.ReferenceRead{{Key: "network", Type: key(TypeNetworkSecurityGroup)}}
 		}
-		for _, read := range r.ReadsReferences {
-			if read.Key != "network" {
-				t.Errorf("%s reads %v, want only the network reference", r.Type, r.ReadsReferences)
-			}
+		if !reflect.DeepEqual(r.ReadsReferences, want) {
+			t.Errorf("%s reads %v, want %v", r.Type, r.ReadsReferences, want)
 		}
 	}
 	if _, err := reg.Resolve(manifest.CapabilityKeyValue, resource.ApplicabilityContext{

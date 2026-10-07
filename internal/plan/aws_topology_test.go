@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/naming"
 	awsprovider "github.com/evatt-labs/kraai/internal/provider/aws"
 	"github.com/evatt-labs/kraai/internal/provider/neon"
 	"github.com/evatt-labs/kraai/internal/provider/neonresource"
@@ -557,7 +558,7 @@ func TestPlan_AWSCacheOrdersAfterItsNetwork(t *testing.T) {
 	m.Root.Providers[manifest.CapabilityNetwork] = &manifest.Provider{Vendor: "aws"}
 	m.Root.Providers[manifest.CapabilityKeyValue] = &manifest.Provider{Vendor: "aws"}
 	api := m.Services["api"]
-	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{{"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24"}}
+	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{{"binding": "NET", "vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "subnet-0b"}}}
 	api.Bindings[manifest.CapabilityKeyValue] = []manifest.Binding{{"binding": "CACHE", "driver": "redis", "network": "NET"}}
 	api.References = map[string]map[string]string{"CACHE": {"network": "NET"}}
 	m.Services["api"] = api
@@ -573,18 +574,14 @@ func TestPlan_AWSCacheOrdersAfterItsNetwork(t *testing.T) {
 			waves[a.Type] = a.Wave
 		}
 	}
-	// Declared reads, not just wave numbers: the subnet happens to share a
-	// wave with the security group, so the cache would land after it even
-	// with the read edge missing.
-	for _, typ := range []string{awsprovider.TypeCacheSecurityGroup, awsprovider.TypeElastiCacheServerlessCache} {
-		if reads := findServiceAction(t, p, "api", typ).ReadsBindings; !slices.Contains(reads, "NET") {
-			t.Errorf("%s reads %v, want the NET network binding it references", typ, reads)
-		}
+	// The cache's group reads the network's group, to admit it.
+	if reads := findServiceAction(t, p, "api", awsprovider.TypeCacheSecurityGroup).ReadsBindings; !slices.Contains(reads, "NET") {
+		t.Errorf("the cache's group reads %v, want the NET network binding it references", reads)
 	}
 	for _, c := range []struct{ earlier, later string }{
-		{awsprovider.TypeVPC, awsprovider.TypeCacheSecurityGroup},
+		{awsprovider.TypeNetworkSecurityGroup, awsprovider.TypeCacheSecurityGroup},
 		{awsprovider.TypeCacheSecurityGroup, awsprovider.TypeElastiCacheServerlessCache},
-		{awsprovider.TypeSubnet, awsprovider.TypeElastiCacheServerlessCache},
+		{awsprovider.TypeNetworkSecurityGroup, awsprovider.TypeLambdaFunction},
 		{awsprovider.TypeElastiCacheServerlessCache, awsprovider.TypeLambdaFunction},
 	} {
 		e, ok := waves[c.earlier]
@@ -601,49 +598,60 @@ func TestPlan_AWSCacheOrdersAfterItsNetwork(t *testing.T) {
 	}
 }
 
-// TestPlan_AWSNetworkEgressOrdersTheFunctionBehindTheNAT pins the private
-// half of a network: the NAT gateway waits for the EIP, the public subnet
-// and the gateway attachment; the private route waits for the NAT and the
-// private table; the function, placed in the private subnet, waits for it.
-func TestPlan_AWSNetworkEgressOrdersTheFunctionBehindTheNAT(t *testing.T) {
+// A network binding plans only its security group: the VPC and subnets are
+// Terraform's, and nothing of them is created.
+func TestPlan_AWSNetworkPlansOnlyItsGroup(t *testing.T) {
 	reg := awsAPITopologyFixture(t)
 	m := kraaiAPIManifest()
 	m.Root.Providers[manifest.CapabilityNetwork] = &manifest.Provider{Vendor: "aws"}
 	api := m.Services["api"]
-	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{
-		{"binding": "NET", "cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": "10.90.2.0/24"},
-	}
+	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{{"binding": "NET", "vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "subnet-0b"}}}
 	m.Services["api"] = api
 
 	p, err := New(reg).Plan(context.Background(), m, envName)
 	if err != nil {
 		t.Fatalf("Plan: %v", err)
 	}
-	waves := map[string]int{}
+	var network []string
 	for _, a := range p.Actions {
-		if a.ServiceKey == "api" {
-			waves[a.Type] = a.Wave
+		if a.Binding == "NET" {
+			network = append(network, a.Type)
 		}
 	}
-	for _, c := range []struct{ earlier, later string }{
-		{awsprovider.TypeEIP, awsprovider.TypeNatGateway},
-		{awsprovider.TypeSubnet, awsprovider.TypeNatGateway},
-		{awsprovider.TypeVPCGatewayAttachment, awsprovider.TypeNatGateway},
-		{awsprovider.TypeNatGateway, awsprovider.TypePrivateRoute},
-		{awsprovider.TypePrivateRouteTable, awsprovider.TypePrivateRoute},
-		{awsprovider.TypePrivateSubnet, awsprovider.TypePrivateSubnetRouteTableAssociation},
-		{awsprovider.TypePrivateSubnet, awsprovider.TypeLambdaFunction},
-	} {
-		e, ok := waves[c.earlier]
-		if !ok {
-			t.Fatalf("%s was not planned (waves: %v)", c.earlier, waves)
+	if want := []string{awsprovider.TypeNetworkSecurityGroup}; !slices.Equal(network, want) {
+		t.Fatalf("the network plans %v, want %v", network, want)
+	}
+}
+
+// A store naming a network is handed the network binding's declared config,
+// which is where its subnets come from.
+func TestPlan_AWSStoreIsHandedItsNetworksConfig(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := kraaiAPIManifest()
+	m.Root.Providers[manifest.CapabilityNetwork] = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityKeyValue] = &manifest.Provider{Vendor: "aws"}
+	api := m.Services["api"]
+	network := manifest.Binding{"binding": "NET", "vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "subnet-0b"}}
+	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{network}
+	api.Bindings[manifest.CapabilityKeyValue] = []manifest.Binding{{"binding": "CACHE", "driver": "redis", "network": "NET"}}
+	api.References = map[string]map[string]string{"CACHE": {"network": "NET"}}
+	m.Services["api"] = api
+
+	items, err := New(reg).expand(m, envName, naming.NewNamer(""))
+	if err != nil {
+		t.Fatalf("expand: %v", err)
+	}
+	found := false
+	for _, it := range items {
+		if it.Type != awsprovider.TypeElastiCacheServerlessCache {
+			continue
 		}
-		l, ok := waves[c.later]
-		if !ok {
-			t.Fatalf("%s was not planned (waves: %v)", c.later, waves)
+		found = true
+		if want := map[string]map[string]any{"network": network.Config()}; !reflect.DeepEqual(it.spec.Referenced, want) {
+			t.Fatalf("the cache was handed %v, want %v", it.spec.Referenced, want)
 		}
-		if e >= l {
-			t.Errorf("%s (wave %d) must come before %s (wave %d)", c.earlier, e, c.later, l)
-		}
+	}
+	if !found {
+		t.Fatal("no cache was planned")
 	}
 }

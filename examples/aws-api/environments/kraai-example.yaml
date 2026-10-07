@@ -2,3 +2,10 @@ kind: ephemeral
 # Expires three days after its last apply: kraai status shows the deadline
 # and kraai gc will reap what is past it.
 ttl: 72h
+# The Terraform root this environment sits on, whose outputs the services'
+# templates read as terraform.base.<output>. Here the file
+# `terraform output -json` printed, so the example plans without a root;
+# with one, `dir: ../infra/network` runs that command in it instead.
+terraform:
+  base:
+    file: outputs/base.json
