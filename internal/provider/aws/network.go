@@ -140,7 +140,8 @@ const lambdaInterfacePrefix = "AWSLambdaVPCENI-"
 // Delete retries while the group is held by a network interface, up to
 // releaseTimeout, and fails on anything else at once. Each time, it first
 // deletes the interfaces Lambda has detached in the group, which nothing
-// else ever removes; one still attached is waited for.
+// else ever removes; one still attached is waited for. A group held by no
+// interface at all is held by another group's rule, which no wait frees.
 func (n *networkGroupResource) Delete(ctx context.Context, ref resource.Ref) error {
 	deadline := time.Now().Add(n.releaseTimeout)
 	for {
@@ -148,8 +149,12 @@ func (n *networkGroupResource) Delete(ctx context.Context, ref resource.Ref) err
 		if err == nil || !heldByAnInterface(err) {
 			return err
 		}
-		if rerr := n.releaseLambdaInterfaces(ctx, ref); rerr != nil {
+		remaining, known, rerr := n.releaseLambdaInterfaces(ctx, ref)
+		if rerr != nil {
 			return rerr
+		}
+		if known && remaining == 0 {
+			return err
 		}
 		if time.Now().After(deadline) {
 			return kerrors.Wrap(err, kerrors.CodeUnexpected,
@@ -260,33 +265,36 @@ func taggedLookup(client ccAPI, typeName string) *resourceType {
 
 // releaseLambdaInterfaces deletes the network interfaces Lambda left
 // detached in the group: available, carrying Lambda's description. The
-// group is kraai's own, made for this binding, so any function interface
-// in it was made for one of this environment's functions.
-func (n *networkGroupResource) releaseLambdaInterfaces(ctx context.Context, ref resource.Ref) error {
+// group is kraai's own, found by its identity tag and made for this
+// binding, so any function interface in it was made for one of this
+// environment's functions; and Lambda leaves one available only when no
+// function uses it, recreating one on demand, so deleting it costs nothing.
+// It returns how many interfaces were in the group, deleted ones included,
+// and whether it could ask at all.
+func (n *networkGroupResource) releaseLambdaInterfaces(ctx context.Context, ref resource.Ref) (int, bool, error) {
 	if n.interfaces == nil {
-		return nil
+		return 0, false, nil
 	}
 	state, err := n.Get(ctx, ref)
 	if err != nil || state == nil {
-		return err
+		return 0, false, err
 	}
 	groupID, _ := state.Attributes["GroupId"].(string)
 	if groupID == "" {
 		groupID = state.ID
 	}
+	found := 0
 	pages := ec2.NewDescribeNetworkInterfacesPaginator(n.interfaces, &ec2.DescribeNetworkInterfacesInput{
-		Filters: []ec2types.Filter{
-			{Name: aws.String("group-id"), Values: []string{groupID}},
-			{Name: aws.String("status"), Values: []string{string(ec2types.NetworkInterfaceStatusAvailable)}},
-		},
+		Filters: []ec2types.Filter{{Name: aws.String("group-id"), Values: []string{groupID}}},
 	})
 	for pages.HasMorePages() {
 		page, err := pages.NextPage(ctx)
 		if err != nil {
-			return kerrors.Wrap(err, kerrors.CodeUnexpected, "listing the network interfaces in %s", groupID)
+			return 0, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "listing the network interfaces in %s", groupID)
 		}
 		for _, eni := range page.NetworkInterfaces {
-			if !strings.HasPrefix(aws.ToString(eni.Description), lambdaInterfacePrefix) {
+			found++
+			if eni.Status != ec2types.NetworkInterfaceStatusAvailable || !strings.HasPrefix(aws.ToString(eni.Description), lambdaInterfacePrefix) {
 				continue
 			}
 			_, err := n.interfaces.DeleteNetworkInterface(ctx, &ec2.DeleteNetworkInterfaceInput{NetworkInterfaceId: eni.NetworkInterfaceId})
@@ -295,9 +303,9 @@ func (n *networkGroupResource) releaseLambdaInterfaces(ctx context.Context, ref 
 				continue
 			}
 			if err != nil {
-				return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting %s, a network interface Lambda left in %s", aws.ToString(eni.NetworkInterfaceId), groupID)
+				return 0, false, kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting %s, a network interface Lambda left in %s", aws.ToString(eni.NetworkInterfaceId), groupID)
 			}
 		}
 	}
-	return nil
+	return found, true, nil
 }

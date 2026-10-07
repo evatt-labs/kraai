@@ -802,7 +802,9 @@ group in it, which a function inside the network attaches and the Aurora
 clusters and caches in it admit, so a store is reachable from the
 service's functions and nothing else in the VPC. What a function reaches
 beyond the VPC, the internet or S3 and DynamoDB, is the subnets' routing,
-set by the VPC's owner. AWS `secrets`
+set by the VPC's owner. Destroying a function inside a network can take
+tens of minutes: Lambda releases its network interfaces slowly and leaves
+them detached in the group, and kraai deletes those before the group. AWS `secrets`
 (SSM Parameter Store `SecureString` parameters) plans against a live
 account and has not been applied from CI either.
 Cloudflare offers two compute products and kraai implements neither — Workers

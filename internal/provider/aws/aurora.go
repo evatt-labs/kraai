@@ -112,7 +112,7 @@ func registerAurora(client *Client) []resource.Registration {
 					translated := spec
 					translated.Config = map[string]any{
 						"DBSubnetGroupName":        spec.Name,
-						"DBSubnetGroupDescription": "kraai: the " + name + " network's subnets for the " + spec.Binding + " cluster",
+						"DBSubnetGroupDescription": "kraai: subnets of the " + name + " network for the " + spec.Binding + " cluster",
 						"SubnetIds":                network.subnetIDs,
 					}
 					return translated, nil

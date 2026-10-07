@@ -239,12 +239,12 @@ func (l *lambdaHeld) DeleteResource(ctx context.Context, typeName, identifier st
 
 // The interfaces Lambda left detached in the group are deleted, and then the
 // group; an interface Lambda did not make is left alone, and only the
-// group's detached interfaces are asked for.
+// group's interfaces are asked for.
 func TestNetworkGroupDeleteClearsLambdasInterfaces(t *testing.T) {
 	enis := &fakeInterfaces{enis: []ec2types.NetworkInterface{
-		{NetworkInterfaceId: aws.String("eni-lambda-1"), Description: aws.String("AWSLambdaVPCENI-env-svc")},
-		{NetworkInterfaceId: aws.String("eni-lambda-2"), Description: aws.String("AWSLambdaVPCENI-env-svc")},
-		{NetworkInterfaceId: aws.String("eni-other"), Description: aws.String("an operator's own")},
+		{NetworkInterfaceId: aws.String("eni-lambda-1"), Description: aws.String("AWSLambdaVPCENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
+		{NetworkInterfaceId: aws.String("eni-lambda-2"), Description: aws.String("AWSLambdaVPCENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
+		{NetworkInterfaceId: aws.String("eni-other"), Description: aws.String("an operator's own"), Status: ec2types.NetworkInterfaceStatusAvailable},
 	}}
 	fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
 		list: []string{"sg-1"}}
@@ -259,11 +259,36 @@ func TestNetworkGroupDeleteClearsLambdasInterfaces(t *testing.T) {
 	if len(fc.deleteCalls) != 1 {
 		t.Fatalf("%d group deletes reached the client, want 1", len(fc.deleteCalls))
 	}
-	want := []ec2types.Filter{
-		{Name: aws.String("group-id"), Values: []string{"sg-1"}},
-		{Name: aws.String("status"), Values: []string{"available"}},
-	}
+	want := []ec2types.Filter{{Name: aws.String("group-id"), Values: []string{"sg-1"}}}
 	if !reflect.DeepEqual(enis.filters, want) {
 		t.Fatalf("asked for %v, want %v", enis.filters, want)
+	}
+}
+
+// A group held by no interface is held by another group's rule, and its
+// delete fails at once rather than waiting for an interface that is not
+// there; one still attached is waited for, never deleted.
+func TestNetworkGroupDeleteKnowsWhatHoldsIt(t *testing.T) {
+	held := &direct.APIError{Status: 400, Code: "DependencyViolation", Message: "resource sg-1 has a dependent object"}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
+		list: []string{"sg-1"}}
+
+	none := &fakeInterfaces{}
+	res := registerNetwork(&heldClient{fakeClient: fc, held: 1000, err: held}, none)[0].Resource.(*networkGroupResource)
+	res.releaseWait, res.releaseTimeout = time.Millisecond, 100*time.Millisecond
+	if err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"}); !errors.Is(err, held) || strings.Contains(err.Error(), "still in use") {
+		t.Fatalf("Delete = %v, want the DependencyViolation itself, not a wait for an interface", err)
+	}
+
+	attached := &fakeInterfaces{enis: []ec2types.NetworkInterface{
+		{NetworkInterfaceId: aws.String("eni-busy"), Description: aws.String("AWSLambdaVPCENI-env-svc"), Status: ec2types.NetworkInterfaceStatusInUse},
+	}}
+	res = registerNetwork(&heldClient{fakeClient: fc, held: 1000, err: held}, attached)[0].Resource.(*networkGroupResource)
+	res.releaseWait, res.releaseTimeout = time.Millisecond, 20*time.Millisecond
+	if err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"}); err == nil || !strings.Contains(err.Error(), "still in use") {
+		t.Fatalf("Delete = %v, want it to wait out the attached interface", err)
+	}
+	if len(attached.deleted) != 0 {
+		t.Fatalf("deleted %v, an interface still attached", attached.deleted)
 	}
 }
