@@ -89,7 +89,6 @@ func runSecretSet(
 	if err != nil {
 		return err
 	}
-	defer func() { _ = resolved.Close(ctx) }()
 	m := resolved.Manifest
 
 	located, err := locate(m, envName, serviceKey, binding, entry)

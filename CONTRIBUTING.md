@@ -52,8 +52,7 @@ page](https://github.com/evatt-labs/kraai/wiki/Architecture) or a package's
 code to an external document and rot when it changes. Say the thing instead.
 
 The tree follows this as of September 2026, at about 28% of non-test lines.
-The one long doc block left is the plugin ABI contract, which is a
-compatibility surface. Do not reintroduce the old verbosity.
+Do not reintroduce the old verbosity.
 
 **A test that has never been seen to fail is not evidence.** For anything
 load-bearing, break the behaviour deliberately, watch the test fail, restore
@@ -101,13 +100,6 @@ environment access is the point of it.
 because the core is concurrent by design — waves execute in parallel,
 credentials cross between them, and registrations can declare mutual-exclusion
 scopes.
-
-Performance budgets live behind a build tag, because a wall-clock threshold
-inside a parallel suite measures the machine rather than the code:
-
-    go test -tags perf -run TestWarmCallOverheadBudget ./internal/plugin/
-
-Run that on an idle machine when you are looking for a regression, not in CI.
 
 ## Pull requests
 

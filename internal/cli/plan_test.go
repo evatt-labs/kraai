@@ -13,7 +13,6 @@ import (
 	"github.com/evatt-labs/kraai/internal/assemble"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
-	"github.com/evatt-labs/kraai/internal/plugin"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -458,13 +457,12 @@ func unreachableAssembler(context.Context, *manifest.Manifest) (*resource.Regist
 }
 
 // fixtureResolver is the ManifestResolver these tests inject: a real manifest
-// load against the fake catalog below, with no plugins.
+// load against the fake catalog below.
 //
 // Real loading on purpose — several tests here exist to prove the loader is
 // actually reached (that --set arrives, that a bad environment name is
 // rejected), which a resolver returning a canned manifest would quietly stop
-// covering. What it skips is only the plugin half, which needs a compiled
-// WASM module and is covered in internal/assemble against a real one.
+// covering.
 func fixtureResolver(
 	_ context.Context, fsys manifest.FS, envName string, setArgs []string,
 ) (*assemble.Resolved, error) {
@@ -476,11 +474,7 @@ func fixtureResolver(
 	if err != nil {
 		return nil, err
 	}
-	return &assemble.Resolved{
-		Manifest: m,
-		Catalog:  catalog,
-		Plugins:  &assemble.Plugins{Registry: plugin.NewRegistry()},
-	}, nil
+	return &assemble.Resolved{Manifest: m, Catalog: catalog}, nil
 }
 
 // fixtureCatalogAssembler declares exactly the capabilities this package's

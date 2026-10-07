@@ -136,9 +136,7 @@ func vendorsUsed(m *manifest.Manifest) (map[string]*manifest.Provider, error) {
 		if !isSupportedVendor(p.Vendor) {
 			return nil, kerrors.Validation(
 				"capability %q configures vendor %q, which kraai has no resource "+
-					"implementation for — vendors it can provision: %s. A plugin can declare a "+
-					"capability's vocabulary without implementing its resources, in which case a "+
-					"manifest may name the capability but cannot yet plan it",
+					"implementation for — vendors it can provision: %s",
 				capability, p.Vendor, strings.Join(supportedVendors, ", "))
 		}
 		if chosen, seen := out[p.Vendor]; !seen || (len(chosen.Settings) == 0 && len(p.Settings) > 0) {

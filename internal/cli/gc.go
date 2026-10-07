@@ -96,11 +96,9 @@ func runGC(
 		if store == nil {
 			store, err = stores(ctx, m)
 			if errors.Is(err, lock.ErrNoStore) {
-				_ = resolved.Close(ctx)
 				return kerrors.Validation("gc needs a store for the status records it reads, and %v", err)
 			}
 			if err != nil {
-				_ = resolved.Close(ctx)
 				return err
 			}
 		}
@@ -108,7 +106,6 @@ func runGC(
 		// only for one about to be destroyed.
 		policies := func() (*policy.Set, error) { return policy.Load(fsys, policyPaths, m.Environment.Policies) }
 		verdict.Action, verdict.Detail, err = reap(ctx, cmd.ErrOrStderr(), envName, m, store, dryRun, assembler, stores, policies)
-		_ = resolved.Close(ctx)
 		if err != nil {
 			verdict.Action, verdict.Detail = "failed", err.Error()
 			failed++

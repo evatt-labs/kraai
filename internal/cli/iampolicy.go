@@ -81,7 +81,6 @@ func runIAMPolicy(
 	if err != nil {
 		return err
 	}
-	defer func() { _ = resolved.Close(ctx) }()
 	m := resolved.Manifest
 
 	reg, err := assembler(ctx, m)
