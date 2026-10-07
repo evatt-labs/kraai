@@ -20,7 +20,7 @@ func (n *nativeResource) Create(ctx context.Context, spec resource.Spec) (*resou
 	if err != nil || n.lookup != resource.LookupByAttr {
 		return state, err
 	}
-	properties, err := nativeProperties(spec)
+	properties, err := n.properties(spec)
 	if err != nil {
 		return state, err
 	}

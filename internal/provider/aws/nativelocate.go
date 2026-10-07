@@ -17,7 +17,7 @@ import (
 // The first set the list handler accepts that the entry sets is used. A
 // value naming something that has not published yet is not known.
 func (n *nativeResource) Locate(spec resource.Spec) (string, string, bool, error) {
-	properties, err := nativeProperties(spec)
+	properties, err := n.properties(spec)
 	if err != nil {
 		return "", "", false, err
 	}
