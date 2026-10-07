@@ -486,7 +486,7 @@ func TestLambdaFunctionGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	}
 
 	fc := &fakeClient{
-		byIdentifier: map[string]map[string]any{"myenv-api": {"FunctionName": "myenv-api"}},
+		byIdentifier: map[string]map[string]any{"myenv-api": {"FunctionName": "myenv-api", "Tags": identityTags("myenv-api")}},
 		updateProps:  map[string]any{"FunctionName": "myenv-api"},
 		schema:       cfschema.Facts{HasUpdate: true},
 	}

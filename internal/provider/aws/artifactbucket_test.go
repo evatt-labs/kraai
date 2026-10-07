@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -38,16 +39,13 @@ func TestArtifactBucketResourceRewritesNameBothWays(t *testing.T) {
 	const realBucket = "myenv-api-artifacts"
 
 	fc := &fakeClient{
-		byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}},
+		byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket, "Tags": identityTags(realBucket)}},
 		createID:     realBucket,
-		createProps:  map[string]any{"BucketName": realBucket},
+		createProps:  map[string]any{"BucketName": realBucket, "Tags": identityTags(realBucket)},
 		schema:       cfschema.Facts{PrimaryIdentifier: []string{"/properties/BucketName"}},
 	}
 	fs3 := &fakeS3{listOut: []*s3.ListObjectsV2Output{{}}}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	t.Run("Get resolves the real bucket name but reports the service Ref", func(t *testing.T) {
 		state, err := bucket.Get(context.Background(), resource.Ref{Provider: Provider, Type: TypeArtifactBucket, Name: serviceName})
@@ -90,8 +88,11 @@ func TestArtifactBucketResourceRewritesNameBothWays(t *testing.T) {
 		if desired["BucketName"] != realBucket {
 			t.Fatalf("BucketName = %v, want %q", desired["BucketName"], realBucket)
 		}
-		if len(desired) != 1 {
-			t.Fatalf("desired state = %+v, want exactly {BucketName}: no generic compute keys leaked through", desired)
+		// The bucket's name and kraai's identity tag naming it, and nothing
+		// else: no generic compute keys leaked through.
+		want := map[string]any{"BucketName": realBucket, "Tags": identityTags(realBucket)}
+		if !reflect.DeepEqual(desired, want) {
+			t.Fatalf("desired state = %+v, want %+v", desired, want)
 		}
 	})
 
@@ -139,12 +140,9 @@ func TestArtifactBucketDeleteEmptiesBeforeDeleting(t *testing.T) {
 	const serviceName = "myenv-api"
 	const realBucket = "myenv-api-artifacts"
 
-	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket, "Tags": identityTags(realBucket)}}}
 	fs3 := &fakeS3{listOut: []*s3.ListObjectsV2Output{objectPage(3, false, "")}}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	if err := bucket.Delete(context.Background(), resource.Ref{Name: serviceName}); err != nil {
 		t.Fatalf("Delete: %v", err)
@@ -174,12 +172,9 @@ func TestArtifactBucketDeleteSurfacesEmptyingFailures(t *testing.T) {
 	const serviceName = "myenv-api"
 	const realBucket = "myenv-api-artifacts"
 
-	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket, "Tags": identityTags(realBucket)}}}
 	fs3 := &fakeS3{listErr: errors.New("access denied")}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	if err := bucket.Delete(context.Background(), resource.Ref{Name: serviceName}); err == nil {
 		t.Fatal("expected an emptying failure to be reported, not swallowed")
@@ -199,12 +194,9 @@ func TestArtifactBucketDeleteOnAbsentBucket(t *testing.T) {
 	const serviceName = "myenv-api"
 	const realBucket = "myenv-api-artifacts"
 
-	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket, "Tags": identityTags(realBucket)}}}
 	fs3 := &fakeS3{listErr: &s3types.NoSuchBucket{}}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	if err := bucket.Delete(context.Background(), resource.Ref{Name: serviceName}); err != nil {
 		t.Fatalf("Delete on an already-absent bucket: %v, want nil", err)
@@ -224,10 +216,7 @@ func TestArtifactBucketGetAbsentBucket(t *testing.T) {
 
 	fc := &fakeClient{} // byIdentifier empty: Cloud Control finds nothing.
 	fs3 := &fakeS3{}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
 	if err != nil {
@@ -272,10 +261,7 @@ func TestArtifactBucketGetForeignBucketReadsAsAbsent(t *testing.T) {
 	// This account's own ListBuckets does not include it — the live repro's
 	// `aws s3api list-buckets` returning [].
 	fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
 	if err != nil {
@@ -298,14 +284,11 @@ func TestArtifactBucketGetOwnedBucketIsGenuineNoChange(t *testing.T) {
 	const serviceName = "myenv-api"
 	const realBucket = "myenv-api-artifacts"
 
-	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket, "Tags": identityTags(realBucket)}}}
 	fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{
 		Buckets: []s3types.Bucket{{Name: aws.String(realBucket)}},
 	}}}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
 	if err != nil {
@@ -330,12 +313,9 @@ func TestArtifactBucketGetOwnershipCheckFailureIsNeverSilentlyAbsent(t *testing.
 	const serviceName = "myenv-api"
 	const realBucket = "myenv-api-artifacts"
 
-	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket, "Tags": identityTags(realBucket)}}}
 	fs3 := &fakeS3{listBucketsErr: errors.New("access denied")}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	state, err := bucket.Get(context.Background(), resource.Ref{Name: serviceName})
 	if err == nil {
@@ -370,10 +350,7 @@ func TestArtifactBucketDeleteRefusesForeignBucket(t *testing.T) {
 
 	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
 	fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}} // not in this account's own list
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	if err := bucket.Delete(context.Background(), resource.Ref{Name: serviceName}); err != nil {
 		t.Fatalf("Delete on a foreign-owned bucket: %v, want nil (nothing this account owns to delete)", err)
@@ -395,12 +372,9 @@ func TestArtifactBucketDeleteOwnershipCheckFailureIsNeverSilentlyPermitted(t *te
 	const serviceName = "myenv-api"
 	const realBucket = "myenv-api-artifacts"
 
-	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket}}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{realBucket: {"BucketName": realBucket, "Tags": identityTags(realBucket)}}}
 	fs3 := &fakeS3{listBucketsErr: errors.New("access denied")}
-	bucket := &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc},
-		client: &Client{s3: fs3},
-	}
+	bucket := artifactBucketOver(fc, &Client{s3: fs3})
 
 	if err := bucket.Delete(context.Background(), resource.Ref{Name: serviceName}); err == nil {
 		t.Fatal("expected a ListBuckets failure while checking ownership to be reported, not swallowed")
@@ -447,7 +421,7 @@ func TestBucketOwnedBy(t *testing.T) {
 	// foreign bucket as absent — the exact bug the artifact bucket fixed
 	// for itself, now closed for the other S3::Bucket registration too.
 	t.Run("the objects bucket reads a foreign bucket as absent", func(t *testing.T) {
-		fc := &fakeClient{byIdentifier: map[string]map[string]any{bucket: {"BucketName": bucket}}}
+		fc := &fakeClient{byIdentifier: map[string]map[string]any{bucket: {"BucketName": bucket, "Tags": identityTags(bucket)}}}
 		fs3 := &fakeS3{listBucketsOut: []*s3.ListBucketsOutput{{}}}
 		r := &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: fc,
 			owns: bucketOwnedBy(&Client{s3: fs3})}
@@ -466,4 +440,10 @@ func TestBucketOwnedBy(t *testing.T) {
 			t.Fatalf("deleteCalls = %v, want none against a stranger's bucket", fc.deleteCalls)
 		}
 	})
+}
+
+// identityTags is the array-shaped Tags of an instance kraai created as
+// name.
+func identityTags(name string) []any {
+	return []any{map[string]any{"Key": identityTagKey, "Value": name}}
 }

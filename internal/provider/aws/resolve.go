@@ -46,11 +46,22 @@ func (r *resourceType) Get(ctx context.Context, ref resource.Ref) (*resource.Sta
 		return nil, nil
 	}
 
-	return &resource.State{
+	state := &resource.State{
 		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
 		ID:         identifier,
 		Attributes: properties,
-	}, nil
+	}
+	if ref.Import == nil {
+		adopt, err := r.adopting(state, ref.Name)
+		if err != nil {
+			return nil, err
+		}
+		if adopt {
+			state.Adopt = true
+			state.Notes = []string{adoptionNote(r.typeName, ref.Name)}
+		}
+	}
+	return state, nil
 }
 
 // owned applies r.owns to a found instance, or reports it owned when there

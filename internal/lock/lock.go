@@ -57,6 +57,11 @@ type Status struct {
 	// asked about. Zero, as a record written before it existed has it,
 	// trusts nothing.
 	StartedAt time.Time `json:"startedAt,omitzero"`
+	// IdentityTagged is set by an apply that finished without a failure
+	// while kraai marked every resource it creates, and adopted every one an
+	// earlier kraai left unmarked, with its identity tag. Once set, an
+	// unmarked resource answering to a derived name is never adopted again.
+	IdentityTagged bool `json:"identityTagged,omitempty"`
 }
 
 // Store holds locks and status records for environments.

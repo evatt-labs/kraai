@@ -29,7 +29,7 @@ type eventsRuleResource struct {
 
 func newEventsRuleResource(client *Client) *eventsRuleResource {
 	e := &eventsRuleResource{
-		resourceType: &resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByName, client: client},
+		resourceType: withIdentity(&resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByName, client: client}),
 		client:       client,
 	}
 	e.resourceType.translate = e.translate

@@ -146,7 +146,7 @@ func registerAurora(client *Client) []resource.Registration {
 			// declare contribute no edge and publish nothing.
 			ReadsReferences: networkSubnetReads,
 			Resource: &auroraValidated{translated(
-				&resourceType{provider: Provider, typeName: TypeRDSDBSubnetGroup, lookup: resource.LookupByName, client: client},
+				withIdentity(&resourceType{provider: Provider, typeName: TypeRDSDBSubnetGroup, lookup: resource.LookupByName, client: client}),
 				func(spec resource.Spec) (resource.Spec, error) {
 					network, err := databaseNetwork(spec)
 					if err != nil {
@@ -242,7 +242,7 @@ type auroraClusterResource struct {
 }
 
 func newAuroraClusterResource(client *Client, subnetGroupKey, securityGroupKey string) *auroraClusterResource {
-	engine := &resourceType{provider: Provider, typeName: TypeRDSDBCluster, lookup: resource.LookupByName, client: client}
+	engine := withIdentity(&resourceType{provider: Provider, typeName: TypeRDSDBCluster, lookup: resource.LookupByName, client: client})
 	return &auroraClusterResource{
 		client: client,
 		translatedResource: translated(engine,

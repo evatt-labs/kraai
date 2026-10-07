@@ -69,8 +69,17 @@ func bucketOwnedBy(client *Client) ownsFunc {
 }
 
 func newArtifactBucketResource(client *Client) *artifactBucketResource {
+	return artifactBucketOver(client, client)
+}
+
+// artifactBucketOver is the artifact bucket reading resources through cc
+// and S3 through client: one in production, two in a test that fakes them.
+func artifactBucketOver(cc ccAPI, client *Client) *artifactBucketResource {
 	return &artifactBucketResource{
-		inner:  &resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: client},
+		// Owned by this account first, then tagged by kraai: a stranger's
+		// bucket of the global name reads as absent, not as one to adopt.
+		inner: withIdentity(&resourceType{provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: cc,
+			owns: bucketOwnedBy(client)}),
 		client: client,
 	}
 }
@@ -90,19 +99,11 @@ func bucketRef(ref resource.Ref) resource.Ref {
 func (a *artifactBucketResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
 	realRef := bucketRef(ref)
 
+	// The inner type's ownership check reads a bucket another account owns
+	// as absent and refuses one this account holds without kraai's tag.
 	state, err := a.inner.Get(ctx, realRef)
 	if err != nil || state == nil {
 		return state, err
-	}
-
-	owned, err := a.client.OwnsBucket(ctx, realRef.Name)
-	if err != nil {
-		return nil, err
-	}
-	if !owned {
-		recordForeignBucket(ctx, realRef.Name,
-			"artifact bucket exists but is not owned by this account; reporting it as absent so plan proposes creating it")
-		return nil, nil
 	}
 
 	// Reported under the caller's own Ref, the service-derived name,
@@ -140,30 +141,46 @@ func (a *artifactBucketResource) Create(ctx context.Context, spec resource.Spec)
 	return state, nil
 }
 
-// Update is refused: this bucket has no configuration to change in place.
-// Its only job is to exist and hold the objects lambda.go uploads.
-func (a *artifactBucketResource) Update(context.Context, resource.Ref, resource.Spec) (*resource.State, error) {
-	return nil, kerrors.Wrap(resource.ErrImmutable, kerrors.CodeValidation,
-		"an artifact bucket has no in-place configuration; replace it instead")
+// Update only tags a bucket being adopted: this bucket has no configuration
+// to change in place. Its only job is to exist and hold the objects
+// lambda.go uploads.
+func (a *artifactBucketResource) Update(ctx context.Context, ref resource.Ref, spec resource.Spec) (*resource.State, error) {
+	realRef := bucketRef(ref)
+	current, err := a.inner.Get(ctx, realRef)
+	if err != nil {
+		return nil, err
+	}
+	if current == nil || !a.inner.untagged(current.Attributes, realRef.Name) {
+		return nil, kerrors.Wrap(resource.ErrImmutable, kerrors.CodeValidation,
+			"an artifact bucket has no in-place configuration; replace it instead")
+	}
+	// No configuration: the update carries the bucket's own tags with
+	// kraai's added, and nothing else.
+	state, err := a.inner.Update(ctx, realRef, resource.Spec{Binding: spec.Binding, Name: realRef.Name, Config: map[string]any{}})
+	if err != nil {
+		return nil, err
+	}
+	state.Ref = ref
+	return state, nil
 }
 
 // Delete empties the real bucket before deleting it, since S3 refuses to
 // delete a non-empty bucket and this one always holds at least one artifact
-// by teardown time. Ownership is checked here as well as in Get, because
-// emptying is the destructive half and nothing guarantees Get ran first; a
-// bucket that is not ours is treated as already gone. EmptyBucket and the
-// engine's Delete both tolerate a bucket that no longer exists, so a retry
-// after a partial teardown takes the same path.
+// by teardown time. Ownership, this account's and kraai's tag, is checked
+// here as well as in Get, before emptying, because emptying is the
+// destructive half and nothing guarantees Get ran first: a bucket another
+// account owns is treated as already gone, and one this account holds
+// without kraai's tag is refused untouched. EmptyBucket and the engine's
+// Delete both tolerate a bucket that no longer exists, so a retry after a
+// partial teardown takes the same path.
 func (a *artifactBucketResource) Delete(ctx context.Context, ref resource.Ref) error {
 	realRef := bucketRef(ref)
 
-	owned, err := a.client.OwnsBucket(ctx, realRef.Name)
+	state, err := a.inner.Get(ctx, realRef)
 	if err != nil {
 		return err
 	}
-	if !owned {
-		recordForeignBucket(ctx, realRef.Name,
-			"artifact bucket is not owned by this account; skipping emptying and deletion")
+	if state == nil {
 		return nil
 	}
 

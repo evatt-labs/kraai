@@ -97,7 +97,7 @@ func TestIAMRoleDoesNotRequireLambdaOnlySettings(t *testing.T) {
 
 func TestIAMRoleUpdate(t *testing.T) {
 	fc := &fakeClient{
-		byIdentifier: map[string]map[string]any{"myenv-api": {"RoleName": "myenv-api"}},
+		byIdentifier: map[string]map[string]any{"myenv-api": {"RoleName": "myenv-api", "Tags": identityTags("myenv-api")}},
 		updateProps:  map[string]any{"RoleName": "myenv-api"},
 		schema:       cfschema.Facts{HasUpdate: true},
 	}
@@ -113,7 +113,7 @@ func TestIAMRoleUpdate(t *testing.T) {
 
 func TestIAMRoleGetAndDeletePassThroughUnchanged(t *testing.T) {
 	fc := &fakeClient{
-		byIdentifier: map[string]map[string]any{"myenv-api": {"RoleName": "myenv-api"}},
+		byIdentifier: map[string]map[string]any{"myenv-api": {"RoleName": "myenv-api", "Tags": identityTags("myenv-api")}},
 	}
 	role := newIAMRoleResourceForTest(fc)
 

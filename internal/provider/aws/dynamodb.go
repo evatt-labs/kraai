@@ -45,10 +45,10 @@ type dynamoTableResource struct {
 }
 
 func newDynamoTableResource(client ccAPI) *dynamoTableResource {
-	return &dynamoTableResource{resourceType: &resourceType{
+	return &dynamoTableResource{resourceType: withIdentity(&resourceType{
 		provider: Provider, typeName: TypeDynamoDBTable, lookup: resource.LookupByName, client: client,
 		translate: dynamoTableTranslate,
-	}}
+	})}
 }
 
 // keyAttribute is one key of a table as the binding declares it.

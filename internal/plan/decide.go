@@ -93,6 +93,9 @@ func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex,
 		return action
 	}
 	action.Current = state
+	if state != nil {
+		action.Notes = append(action.Notes, state.Notes...)
+	}
 
 	if state == nil {
 		// An import that does not resolve is a failure, never a create: a
@@ -146,6 +149,12 @@ func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex,
 		}
 	}
 
+	// Nothing differs, but an instance being adopted is updated to carry
+	// kraai's identity tag.
+	if state.Adopt {
+		action.Kind = ActionUpdate
+		return action
+	}
 	action.Kind = ActionNoChange
 	return action
 }

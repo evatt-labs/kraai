@@ -247,7 +247,8 @@ func newNativeResourceWith(cc ccAPI, schemas propertySchemaSource, facts cfschem
 			rt.match = tagMatcher(facts.TagProperty, facts.TagShape)
 			rt.matchIsTag = true
 		case resource.LookupByName:
-			rt.owns = taggedByKraai(facts)
+			rt.tags = &tagPlacement{property: facts.TagProperty, shape: facts.TagShape}
+			rt.owns = taggedByKraai(facts.TypeName, *rt.tags)
 		case resource.LookupByAPI, resource.LookupByAttr:
 		}
 	}
@@ -370,24 +371,6 @@ func sortedTags(value any) any {
 		return ka < kb
 	})
 	return out
-}
-
-// taggedByKraai is a byName type's ownership check. The identifier is the
-// derived name, so an instance answering to it without kraai's tag for that
-// name was made by someone else, and is refused rather than reported
-// absent: absent would plan a create the vendor then refuses, and owned
-// would let apply and destroy act on it.
-func taggedByKraai(facts cfschema.Facts) ownsFunc {
-	match := tagMatcher(facts.TagProperty, facts.TagShape)
-	return func(_ context.Context, identifier string, properties map[string]any) (bool, error) {
-		if match(properties, identifier) {
-			return true, nil
-		}
-		return false, kerrors.Validation(
-			"%s %q exists but carries no %s tag naming it, so kraai did not create it; "+
-				"adopt it under the environment's resources: block or remove it",
-			facts.TypeName, identifier, identityTagKey)
-	}
 }
 
 // tagMatcher and tagStamper read and write the identity tag in the shape

@@ -140,6 +140,13 @@ type State struct {
 	// Attributes are the type-specific fields a later wave may need: a
 	// connection host, a bucket name, a namespace id.
 	Attributes map[string]any
+	// Notes is what the instance as found tells the author beyond the
+	// action, such as that it will be adopted; the plan prints them.
+	Notes []string
+	// Adopt marks an instance kraai takes as its own though it lacks
+	// kraai's identity tag: the plan updates it, to add the tag, even where
+	// nothing else differs.
+	Adopt bool
 }
 
 // Resource is the contract every provisioned type implements.

@@ -132,10 +132,10 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 			// already the lowercase string ElastiCache stores it as.
 			Lookup: resource.LookupByName,
 			Resource: translated(
-				&resourceType{
+				withIdentity(&resourceType{
 					provider: Provider, typeName: TypeElastiCacheServerlessCache,
 					lookup: resource.LookupByName, client: client,
-				},
+				}),
 				func(spec resource.Spec) (resource.Spec, error) {
 					network, err := cacheNetwork(spec)
 					if err != nil {

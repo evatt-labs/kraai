@@ -64,13 +64,16 @@ func guard(
 		}
 		return nil, nil, nil, err
 	}
-	settled, err := settledIndex(ctx, store, envName)
+	status, found, err := store.ReadStatus(ctx, envName)
 	if err != nil {
 		_ = lease.Release(context.WithoutCancel(ctx))
 		return nil, nil, nil, err
 	}
-	if settled {
+	if settledIndex(status, found) {
 		ctx = resource.WithSettledIndex(ctx)
+	}
+	if adoptsUntagged(status, found) {
+		ctx = resource.WithAdoptUntagged(ctx)
 	}
 	guarded, stop := lock.Keep(ctx, lease, leaseDuration, leaseRenewal)
 	return guarded, store, func() {
@@ -83,12 +86,34 @@ func guard(
 // started longer ago than indexLag: only then may this run's lookups take
 // the index's miss as absence. No record, or one without a start, is
 // never settled.
-func settledIndex(ctx context.Context, store lock.Store, envName string) (bool, error) {
+func settledIndex(status lock.Status, found bool) bool {
+	return found && !status.StartedAt.IsZero() && time.Since(status.StartedAt) > indexLag
+}
+
+// adoptsUntagged reports whether a run against the environment adopts a
+// resource answering to a derived name without kraai's identity tag: only
+// when an earlier apply ran against it, which a record of a run refused
+// before its first change does not show, and no apply since has finished
+// cleanly while tagging, after which an untagged match is someone else's.
+func adoptsUntagged(status lock.Status, found bool) bool {
+	return found && !status.AppliedAt.IsZero() && !status.IdentityTagged
+}
+
+// withAdoption marks ctx for adoption when the environment's status record
+// allows it, for a run that reads the record without taking the lock. A
+// manifest with nowhere to keep a record adopts nothing.
+func withAdoption(ctx context.Context, store lock.Store, envName string) (context.Context, error) {
+	if store == nil {
+		return ctx, nil
+	}
 	status, found, err := store.ReadStatus(ctx, envName)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return found && !status.StartedAt.IsZero() && time.Since(status.StartedAt) > indexLag, nil
+	if adoptsUntagged(status, found) {
+		ctx = resource.WithAdoptUntagged(ctx)
+	}
+	return ctx, nil
 }
 
 // recordStart records, under the lock, that a mutating run is about to
@@ -127,7 +152,9 @@ func lockLost(ctx context.Context, envName string, err error) error {
 // was applied, by whom, how it went, and, for an ephemeral environment
 // with a ttl, the deadline after which it may be reaped. A nil store
 // records nothing.
-func recordStatus(ctx context.Context, store lock.Store, envName string, m *manifest.Manifest, outcome string) error {
+// clean is whether the apply finished without a failure, after which every
+// resource it planned carries kraai's identity tag.
+func recordStatus(ctx context.Context, store lock.Store, envName string, m *manifest.Manifest, outcome string, clean bool) error {
 	if store == nil {
 		return nil
 	}
@@ -145,6 +172,8 @@ func recordStatus(ctx context.Context, store lock.Store, envName string, m *mani
 		Holder:      env.Holder(),
 		Outcome:     outcome,
 		StartedAt:   started.StartedAt,
+		// Kept once set: a later failure does not unmark what was tagged.
+		IdentityTagged: started.IdentityTagged || clean,
 	}
 	if ttl := m.Environment.TTLDuration(); ttl > 0 && m.Environment.Kind == manifest.EnvironmentKindEphemeral {
 		deadline := now.Add(ttl)
