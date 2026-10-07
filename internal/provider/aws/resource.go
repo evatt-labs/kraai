@@ -89,10 +89,6 @@ type resourceType struct {
 	// matchIsTag is set when match compares kraai's identity tag and
 	// nothing else, so the tagging API answers the same question.
 	matchIsTag bool
-	// lister, when set, lists the type through its own service instead of
-	// Cloud Control, whose list omits instances of it. There is no falling
-	// back: Cloud Control's list is known to be wrong for such a type.
-	lister func(ctx context.Context) ([]string, error)
 
 	// stampTag writes this type's identity tag into the CreateResource
 	// desired state. Required for LookupByTag; also set by a type found

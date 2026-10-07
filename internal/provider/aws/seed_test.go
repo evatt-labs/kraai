@@ -3,17 +3,10 @@ package aws
 import (
 	"context"
 	"encoding/json"
-	"io"
-	"net/http"
-	"net/http/httptest"
 	"strings"
-	"sync"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/credentials"
-
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
-	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -60,47 +53,6 @@ func TestUpdateNeverSendsASecretsValue(t *testing.T) {
 				t.Fatalf("patch %+v, want the description alone", ops)
 			}
 		})
-	}
-}
-
-// The direct path is handed that patch, and UpdateSecret goes out without
-// a value: SecretString on the wire makes a new secret version.
-func TestDirectSecretUpdateSendsNoValue(t *testing.T) {
-	var mu sync.Mutex
-	bodies := map[string]string{}
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := io.ReadAll(r.Body)
-		op := r.Header.Get("X-Amz-Target")
-		op = op[strings.LastIndex(op, ".")+1:]
-		mu.Lock()
-		bodies[op] = string(body)
-		mu.Unlock()
-		w.Header().Set("Content-Type", "application/x-amz-json-1.1")
-		if op == "DescribeSecret" {
-			_, _ = io.WriteString(w, `{"ARN":"`+secretARN+`","Name":"app","Description":"new"}`)
-			return
-		}
-		_, _ = io.WriteString(w, `{}`)
-	}))
-	t.Cleanup(srv.Close)
-	c := &Client{direct: &direct.Client{HTTP: srv.Client(),
-		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region:      "us-east-1", Endpoint: func(string) string { return srv.URL }},
-		canMutate: func(string, map[string]any) bool { return true }}
-	testPollTimings()(c)
-
-	patch := secretUpdatePatch(t, map[string]any{"Name": "app", "Description": "new", "SecretString": "s3cret"})
-	if _, err := c.UpdateResource(context.Background(), secretType, secretARN, patch); err != nil {
-		t.Fatalf("UpdateResource: %v", err)
-	}
-	mu.Lock()
-	defer mu.Unlock()
-	sent, ok := bodies["UpdateSecret"]
-	if !ok {
-		t.Fatalf("calls %v, want UpdateSecret", bodies)
-	}
-	if strings.Contains(sent, "SecretString") || strings.Contains(sent, "s3cret") {
-		t.Fatalf("UpdateSecret sent %s, want no value", sent)
 	}
 }
 
