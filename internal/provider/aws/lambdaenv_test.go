@@ -235,7 +235,6 @@ func TestLambdaFunctionPublishesTheDSQLDatabaseURL(t *testing.T) {
 	}
 }
 
-
 // An Aurora binding's URL carries a password, so it reaches the function
 // through the credential channel: the cluster's producer, resolved at the
 // moment the environment is built.
