@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/evatt-labs/kraai/internal/kerrors"
 )
 
 // A sensitive Terraform output never leaves the command: here it is
@@ -39,5 +41,9 @@ func TestASensitiveOutputIsRedactedFromTheError(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "[sensitive terraform.base.token]") {
 		t.Fatalf("error %q, want the value named by where it came from", err)
+	}
+	// Redacting keeps the error's code, and so the exit code.
+	if code := kerrors.ExitCode(err); code != kerrors.CodeValidation.ExitCode() {
+		t.Fatalf("exit code %d, want validation's %d", code, kerrors.CodeValidation.ExitCode())
 	}
 }

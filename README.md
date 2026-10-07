@@ -511,8 +511,12 @@ A sensitive output is a secret: wherever kraai prints, it prints
 `[sensitive terraform.base.<name>]` in its place, including in errors that
 quote it. That redaction matches the value as written, as Terraform's own
 does; a value transformed before it is printed, or one shorter than four
-characters, is not recognised. `terraform` is reserved: a values file or
-`--set` may not set it.
+characters, is not recognised, and Terraform's own error output, printed
+when `output` fails, is passed through as it is. Every value inside a
+sensitive object or list is redacted, so prefer sensitive outputs that are
+single values. Like Terraform, kraai writes a sensitive value into whatever
+resource property a template puts it in. `terraform` is reserved: a values
+file or `--set` may not set it.
 
 ## Using it
 
