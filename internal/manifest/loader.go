@@ -108,6 +108,7 @@ func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
 		Services:    services,
 		Environment: *env,
 		Values:      values,
+		Dir:         pathOf(l.fs),
 	}, nil
 }
 

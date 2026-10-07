@@ -3,6 +3,7 @@ package manifest_test
 import (
 	"errors"
 	"io/fs"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -646,4 +647,20 @@ func TestLoad_UnknownTriggerIsValidationError(t *testing.T) {
 // would.
 func fsNotExistErr(name string) error {
 	return &fs.PathError{Op: "open", Path: name, Err: fs.ErrNotExist}
+}
+
+// A manifest read from a directory named relative to where kraai runs
+// records the absolute path it names, which a service's code is found from.
+func TestLoadRecordsTheManifestDirectory(t *testing.T) {
+	m, err := newRealLoader(t, "testdata/blueprint").Load("prod", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := filepath.Abs("testdata/blueprint")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Dir != want {
+		t.Fatalf("Dir = %q, want %q", m.Dir, want)
+	}
 }
