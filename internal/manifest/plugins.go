@@ -2,7 +2,6 @@ package manifest
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
@@ -76,14 +75,12 @@ func validatePlugins(plugins []Plugin) error {
 //
 // Iterates services, capabilities and bindings in sorted order so a manifest
 // with more than one bad entry reports the same one first on every run.
-func (l *Loader) validateImports(path string, env *Environment, known map[string]bool) error {
+func (l *Loader) validateImports(path string, env *Environment) error {
 	for _, svc := range sortedKeysOf(env.Resources) {
 		imports := env.Resources[svc]
 		for _, capability := range sortedKeysOf(imports) {
-			if !known[capability] {
-				return kerrors.Validation(
-					"%s: resources.%s.%s: no registered provider declares capability %q — declared: %s",
-					path, svc, capability, capability, strings.Join(l.vocabulary.Names(), ", "))
+			if err := l.checkCapability(fmt.Sprintf("%s: resources.%s.%s", path, svc, capability), capability); err != nil {
+				return err
 			}
 			refs := imports[capability]
 			for _, binding := range sortedKeysOf(refs) {

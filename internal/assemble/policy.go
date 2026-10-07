@@ -101,11 +101,7 @@ func AWSSecretsPolicyStatements(ctx context.Context, m *manifest.Manifest, envir
 // the same way a native binding's IAM grant re-derives an ARN locally
 // rather than waiting on a live value.
 func secretsEntryNames(m *manifest.Manifest, environmentName string) []string {
-	var prefix string
-	if m.Environment.Naming != nil {
-		prefix = m.Environment.Naming.Prefix
-	}
-	namer := naming.NewNamer(prefix)
+	namer := naming.NewNamer(m.Environment.NamePrefix())
 
 	seen := map[string]bool{}
 	var names []string

@@ -299,6 +299,15 @@ type Naming struct {
 	Prefix string `yaml:"prefix"`
 }
 
+// NamePrefix is the prefix every derived name in the environment carries,
+// empty when it sets no naming overlay.
+func (e Environment) NamePrefix() string {
+	if e.Naming == nil {
+		return ""
+	}
+	return e.Naming.Prefix
+}
+
 // Route is one entry of a service's `routes:` list on an environment
 // overlay: a hostname the service answers on. CustomDomain and Certificate
 // go together: a custom domain cannot be served without a certificate, and
