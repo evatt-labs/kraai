@@ -71,7 +71,7 @@ func TestEventsRuleCreateRequiresASchedule(t *testing.T) {
 
 func TestEventsRuleGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	fc := &fakeClient{
-		byIdentifier: map[string]map[string]any{"myenv-tick": {"Name": "myenv-tick"}},
+		byIdentifier: map[string]map[string]any{"myenv-tick": {"Name": "myenv-tick", "Tags": identityTags("myenv-tick")}},
 		updateProps:  map[string]any{"Name": "myenv-tick"},
 		schema:       cfschema.Facts{HasUpdate: true},
 	}

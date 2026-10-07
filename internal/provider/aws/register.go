@@ -95,10 +95,10 @@ func Registrations(client *Client) []resource.Registration {
 			// owns, so the engine asks this account's own ListBuckets before
 			// believing a bucket is ours.
 			Lookup: resource.LookupByName,
-			Resource: &resourceType{
+			Resource: withIdentity(&resourceType{
 				provider: Provider, typeName: TypeS3Bucket, lookup: resource.LookupByName, client: client,
 				owns: bucketOwnedBy(client),
-			},
+			}),
 		},
 		{
 			Provider: Provider, Type: TypeCloudFrontDistribution,

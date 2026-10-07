@@ -196,7 +196,8 @@ func runApply(
 	}
 	// Recorded whatever the outcome, failures included: a status that says
 	// the last apply failed is worth more than one that says nothing.
-	if err := recordStatus(ctx, store, envName, m, applySummaryLine(envName, countOutcomes(result))); err != nil {
+	counts := countOutcomes(result)
+	if err := recordStatus(ctx, store, envName, m, applySummaryLine(envName, counts), result != nil && counts.Failed == 0); err != nil {
 		return err
 	}
 

@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"maps"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/resource"
@@ -153,7 +154,10 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		}
 	}
 
-	patch, err := buildPatch(properties, withoutSeeds(r.typeName, spec.Config))
+	// A copy: the tag is written into it, never into the caller's Config.
+	desired := maps.Clone(withoutSeeds(r.typeName, spec.Config))
+	r.keepIdentityTag(desired, properties, ref.Name)
+	patch, err := buildPatch(properties, desired)
 	if err != nil {
 		return nil, err
 	}

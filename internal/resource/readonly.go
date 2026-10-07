@@ -33,3 +33,20 @@ func ReadOnly(ctx context.Context) bool {
 	readOnly, _ := ctx.Value(readOnlyKey{}).(bool)
 	return readOnly
 }
+
+type adoptUntaggedKey struct{}
+
+// WithAdoptUntagged marks ctx as a run against an environment kraai has
+// applied before it marked every resource it creates with its identity tag:
+// an instance that answers to a derived name without the tag is one an
+// earlier kraai made, and is adopted, tagged on this run, rather than
+// refused as someone else's.
+func WithAdoptUntagged(ctx context.Context) context.Context {
+	return context.WithValue(ctx, adoptUntaggedKey{}, true)
+}
+
+// AdoptUntagged reports whether ctx was marked by WithAdoptUntagged.
+func AdoptUntagged(ctx context.Context) bool {
+	adopt, _ := ctx.Value(adoptUntaggedKey{}).(bool)
+	return adopt
+}

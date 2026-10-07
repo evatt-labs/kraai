@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/evatt-labs/kraai/internal/assemble"
+	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/plan"
 	"github.com/evatt-labs/kraai/internal/policy"
@@ -45,7 +47,7 @@ type ManifestResolver func(
 	ctx context.Context, fsys manifest.FS, envName string, setArgs []string,
 ) (*assemble.Resolved, error)
 
-func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobra.Command {
+func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler) *cobra.Command {
 	var (
 		dir         string
 		setArgs     []string
@@ -65,7 +67,7 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPlan(cmd, args[0], dir, setArgs, policyPaths, jsonOut, detailedExitCode, assembler, resolve)
+			return runPlan(cmd, args[0], dir, setArgs, policyPaths, jsonOut, detailedExitCode, assembler, resolve, stores)
 		},
 	}
 
@@ -106,7 +108,7 @@ func newPlanCommand(assembler RegistryAssembler, resolve ManifestResolver) *cobr
 // CodeValidation.
 func runPlan(
 	cmd *cobra.Command, envName, dir string, setArgs, policyPaths []string, jsonOut, detailedExitCode bool,
-	assembler RegistryAssembler, resolve ManifestResolver,
+	assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler,
 ) error {
 	if err := checkEnvironmentName(envName); err != nil {
 		return err
@@ -141,6 +143,19 @@ func runPlan(
 
 	reg, err := assembler(ctx, m)
 	if err != nil {
+		return err
+	}
+
+	// Read, not locked: plan shows the adoption apply will make, from the
+	// same status record apply reads under its lock.
+	store, err := stores(ctx, m)
+	if errors.Is(err, lock.ErrNoStore) {
+		store, err = nil, nil
+	}
+	if err != nil {
+		return err
+	}
+	if ctx, err = withAdoption(ctx, store, envName); err != nil {
 		return err
 	}
 

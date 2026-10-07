@@ -58,7 +58,7 @@ func TestRecordStatusKeepsTheStart(t *testing.T) {
 	if err := store.WriteStatus(t.Context(), lock.Status{Environment: "env", StartedAt: started}); err != nil {
 		t.Fatal(err)
 	}
-	if err := recordStatus(t.Context(), store, "env", &manifest.Manifest{}, "applied"); err != nil {
+	if err := recordStatus(t.Context(), store, "env", &manifest.Manifest{}, "applied", true); err != nil {
 		t.Fatal(err)
 	}
 	status, _, _ := store.ReadStatus(t.Context(), "env")

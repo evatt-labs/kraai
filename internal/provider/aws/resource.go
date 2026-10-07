@@ -110,6 +110,11 @@ type resourceType struct {
 	// asserting ownership by hand.
 	owns ownsFunc
 
+	// tags, set by withIdentity on a byName type, is where its identity tag
+	// lives: kept through every update, and added to an instance an earlier
+	// kraai made without it.
+	tags *tagPlacement
+
 	// listScope is non-nil exactly for a type whose list handler is
 	// parent-scoped, such as AWS::Lambda::Permission's, which requires the
 	// FunctionName whose permissions to list.

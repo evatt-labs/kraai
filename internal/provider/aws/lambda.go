@@ -33,7 +33,7 @@ type lambdaFunctionResource struct {
 
 func newLambdaFunctionResource(client *Client) *lambdaFunctionResource {
 	l := &lambdaFunctionResource{
-		resourceType: &resourceType{provider: Provider, typeName: TypeLambdaFunction, lookup: resource.LookupByName, client: client},
+		resourceType: withIdentity(&resourceType{provider: Provider, typeName: TypeLambdaFunction, lookup: resource.LookupByName, client: client}),
 		client:       client,
 	}
 	l.resourceType.translate = l.translate

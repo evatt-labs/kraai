@@ -49,11 +49,11 @@ type domainNameResource struct {
 
 func newDomainNameResource(client *Client) *domainNameResource {
 	d := &domainNameResource{}
-	d.resourceType = &resourceType{
+	d.resourceType = withIdentity(&resourceType{
 		provider: Provider, typeName: TypeAPIGatewayV2DomainName,
 		lookup: resource.LookupByName, client: client,
 		translate: func(_ context.Context, spec resource.Spec) (resource.Spec, error) { return d.translate(spec) },
-	}
+	})
 	return d
 }
 

@@ -172,7 +172,7 @@ func requireCode(t *testing.T, err error, code kerrors.Code) *kerrors.KError {
 // and executes it with args, capturing stdout.
 func execPlan(t *testing.T, assembler RegistryAssembler, args []string) (string, error) {
 	t.Helper()
-	cmd := newPlanCommand(assembler, fixtureResolver)
+	cmd := newPlanCommand(assembler, fixtureResolver, noStores)
 	var out bytes.Buffer
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)
@@ -357,7 +357,7 @@ func TestRunPlan_SetFlagReachesLoader(t *testing.T) {
 }
 
 func TestNewPlanCommand_Flags(t *testing.T) {
-	cmd := newPlanCommand(unreachableAssembler, fixtureResolver)
+	cmd := newPlanCommand(unreachableAssembler, fixtureResolver, noStores)
 
 	dirFlag := cmd.Flags().Lookup("dir")
 	if dirFlag == nil || dirFlag.DefValue != "." {

@@ -45,10 +45,10 @@ type iamRoleResource struct {
 
 func newIAMRoleResource(client *Client) *iamRoleResource {
 	r := &iamRoleResource{client: client}
-	r.resourceType = &resourceType{
+	r.resourceType = withIdentity(&resourceType{
 		provider: Provider, typeName: TypeIAMRole, lookup: resource.LookupByName, client: client,
 		translate: r.translate,
-	}
+	})
 	return r
 }
 
