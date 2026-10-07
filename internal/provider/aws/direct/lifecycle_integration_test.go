@@ -73,13 +73,9 @@ func TestLifecycleParity(t *testing.T) {
 		if o.Lifecycle == nil {
 			continue
 		}
-		hash, err := OverrideHash(o.Type)
-		if err != nil {
-			t.Fatal(err)
-		}
-		e := TypeLifecycle{Type: o.Type, Date: time.Now().UTC().Format("2006-01-02"), Override: hash, Outcome: "parity"}
-		ran, skipped := false, false
 		r := readers[o.Type]
+		e := TypeLifecycle{Type: o.Type, Date: time.Now().UTC().Format("2006-01-02"), Reader: ReaderHash(r), Outcome: "parity"}
+		ran, skipped := false, false
 		observed := observing(client, append(slices.Clone(r.UndeclaredReadErrors), r.UndeclaredDeleteErrors...))
 		passed := t.Run(o.Type, func(t *testing.T) {
 			ran = true

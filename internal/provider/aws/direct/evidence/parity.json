@@ -24,7 +24,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "20331a006a2d69471aa8f99fe6c218fbbd43c4036068cc28165293a17c4b91df"
+      "reader": "6628e97f905b3a9794bd76c7900ce4335eeabb1d2f43e3243c2a4f3e1b9d196e"
     },
     {
       "type": "AWS::AppConfig::DeploymentStrategy",
@@ -43,7 +43,7 @@
         "Name",
         "ReplicateTo"
       ],
-      "override": "ab2e6ff66deff8231a69fa4c35259cd6d62685bd045b0daff9818dedf26c3bb9"
+      "reader": "ab4bc8a0bda7081d086e6313ac067088e794a2de7f117f03b5aa346611d6b658"
     },
     {
       "type": "AWS::AppConfig::Extension",
@@ -61,7 +61,7 @@
         "Parameters",
         "VersionNumber"
       ],
-      "override": "ad7475e28d8db790c82517898164a9fa73bd7eec6780a150c01a249fa3445d1c"
+      "reader": "e7c9ded4a2ef6eb62a19f891329f907ba7b6b777667e082c7c415d002b0cf98d"
     },
     {
       "type": "AWS::AppConfig::ExtensionAssociation",
@@ -71,7 +71,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0a67fae7457ca2e14496f70eb10d1e9efac47d85d22d79e29076f93032e13cc0"
+      "reader": "6728c48d7a36a32ff4899ac19567982b72539f23ac95327ec1bbb3051f6b0c19"
     },
     {
       "type": "AWS::AppIntegrations::EventIntegration",
@@ -81,7 +81,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "edae7d3d2a896e2f67411c200d0876d4618216b1676c438fff6b60c280eb9ce3"
+      "reader": "22c2bb92522b787fba2e43923347b23c23a1103114a11f3fa4c96c4b9d4aa9de"
     },
     {
       "type": "AWS::AppRunner::AutoScalingConfiguration",
@@ -99,7 +99,7 @@
         "MaxSize",
         "MinSize"
       ],
-      "override": "db40f75cfd376c0b33e83511a0e6d3fa2bc45cf8f9ba505c82fbcac556826c04"
+      "reader": "6bd7df947aec223a87bcd1ee9b426f162b84d7a639e847c19dd659f4263b5487"
     },
     {
       "type": "AWS::AppRunner::ObservabilityConfiguration",
@@ -115,7 +115,7 @@
         "ObservabilityConfigurationRevision",
         "TraceConfiguration"
       ],
-      "override": "3833cade8df5b19cf94a02fe196fdb0f47a083630ef91c1336b43a93b6fcdd00"
+      "reader": "8bee2abd7c2b7530c59ebd1851bfb8d8bad8438fd8648233cfd0ee742e7cf777"
     },
     {
       "type": "AWS::AppRunner::VpcConnector",
@@ -125,7 +125,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c294083ac4a63242c6a63b869bcab896eaa90d63eea7f6c8c56c1960c81fc94c"
+      "reader": "4dc854ef6223804e1e653cbc5b13c3092aa791e86a31153d7d165262c1359acc"
     },
     {
       "type": "AWS::AppRunner::VpcIngressConnection",
@@ -135,7 +135,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "75dbcaee48762876912d6b830e0e52f3ada03f56b1c3a357b4a5c0f98ba323a7"
+      "reader": "484ea1bd8a5cb9f943b84e91ae9209323d12551c50efa6f4590baf060799ca33"
     },
     {
       "type": "AWS::AppSync::DomainName",
@@ -145,7 +145,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ac5602934eaa23c091965a2d211d702332dbbd138ce5022ff13a54f161cf2d63"
+      "reader": "2b8cb483c2e3de25c65decbafa12ad1f58b4c772fc6dc00cb2122247aa348261"
     },
     {
       "type": "AWS::Athena::DataCatalog",
@@ -156,7 +156,7 @@
       "instances": 0,
       "compared": [],
       "note": "Cloud Control could not read any listed instance",
-      "override": "973e18fdc4ed7d464da7cc4104e31795c64f9b68856c0ff20ff348ed1c23a42e"
+      "reader": "4b9a72d08d0b5671fc229004865090f0030dd8e57956d392f49432b5ddcf54a5"
     },
     {
       "type": "AWS::Athena::NamedQuery",
@@ -166,7 +166,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d3f4d10ce6d50628d691294addd60feb5f6435a5a58a82fa60ead56010b63201"
+      "reader": "f82a3e01105d5372489cf78ffe1d49007c6f7beb1c69c4064253657a9f69d7ae"
     },
     {
       "type": "AWS::B2BI::Profile",
@@ -176,7 +176,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4a51eb316cad7ba5795681d656c8e1ea523d3306100738fd3d86ac002e9cdd4e"
+      "reader": "1fc88e0c911046ccf7d116bc7f25bbb915e19c8f91c452306196e86f14bca86f"
     },
     {
       "type": "AWS::BCM::ScheduledReport",
@@ -186,7 +186,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0345f0ba409ed2559a75f5d1f816bb8ae918065c7356a63e9245653717d10f65"
+      "reader": "eaabca44343010abd8f93153f4eb4c35ca9ceb0f7e122d89fa8cda5e7cc498e2"
     },
     {
       "type": "AWS::Backup::RestoreTestingPlan",
@@ -196,7 +196,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "fee4c5abf285f3ac353aae27f19ecded8ba707daef13ce32dd7e223a0d82ab6e"
+      "reader": "6dd91706220a13fad6e52e5054e95f4a69ec263681c5e4f087904d1113584a1c"
     },
     {
       "type": "AWS::BackupGateway::Hypervisor",
@@ -206,7 +206,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4b346789233d7f62e32b5d0617d9bc20a89858dd95277baba8fcf0f9258b0d33"
+      "reader": "f1079787a2c07f9787d1f87ded2c9a3b916a858160e07a5b159170f2144fa44a"
     },
     {
       "type": "AWS::Bedrock::AutomatedReasoningPolicy",
@@ -216,7 +216,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1548ae500a2d72005ca94195916651611272df7243b42f5c76ba03f2e67f7452"
+      "reader": "8dc15d5c473290db918cb8f258ed3c0880ac08c5d3a1efe3999ac59ccbada311"
     },
     {
       "type": "AWS::Bedrock::DataAutomationProject",
@@ -226,7 +226,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d96ffc32b3f8e757b758dcd5fe178e1f456b683a8c02465be722171312acdac0"
+      "reader": "b6143e64b78fe5703ddd138f0fb5a56bc1176d2b40faaa3c6c4324668f787f5a"
     },
     {
       "type": "AWS::Bedrock::IntelligentPromptRouter",
@@ -236,7 +236,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f21f7011d97853f1ceff08790d5ceeeab0662f0d46814a63a993d02aec58a2e5"
+      "reader": "0603f182eec7476474f8bc97088a80b665f2392a382923c7a9e0e2898a9273f0"
     },
     {
       "type": "AWS::Bedrock::Session",
@@ -246,7 +246,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0d4f3ece5cadfd83b29da8f0fbe18ce088d5fa2725c9af8472cd3208173f7e49"
+      "reader": "073e09480a07f03eb1d0ddd3ff602562d269364bddadb67e6603976e699d740d"
     },
     {
       "type": "AWS::BedrockAgentCore::ApiKeyCredentialProvider",
@@ -256,7 +256,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9146c4dd7a88a15b778d92eedc10aa010590c07f0659b067876e56096693f37e"
+      "reader": "c497bf6faec95f2c53b854420bceb8feb7613dc19b839856fa229857b843e790"
     },
     {
       "type": "AWS::BedrockAgentCore::BrowserProfile",
@@ -266,7 +266,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e06d86dc29e81b742dd74583d99389fec677a2d5893cc6d6285693f2f0281c29"
+      "reader": "69b215db10e3a6ff1b153064397a1eb86da6eeadde09d0be87f81f87f7d457b1"
     },
     {
       "type": "AWS::BedrockAgentCore::PolicyEngine",
@@ -276,7 +276,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "47986ab58ebe8554f8f19b03818f2346324d36a6771d8dc504da5de1d7f66e1b"
+      "reader": "1941c063786d40bcf5fa5f4e8bf4c8862b77989f92dd3a39d172ec41ecdf28e9"
     },
     {
       "type": "AWS::Cases::Domain",
@@ -286,7 +286,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "bb7b6aa0dd4886461ff9db6af132a595343d89d5bfc362667184c22f8234ce5e"
+      "reader": "0e2e964f02de3962c7f9ee647065443fd87080526063b58055ba9b782c21c456"
     },
     {
       "type": "AWS::CertificateManager::AcmeExternalAccountBinding",
@@ -297,7 +297,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "7e9d55f1a5b95c5a9109d918a841223ca1e4fc4422e851057a80676c097149d3"
+      "reader": "e39cf1624435744b49e7073a7b4cd918686988990ff43fbb4ee953ecfb6af261"
     },
     {
       "type": "AWS::Chatbot::CustomAction",
@@ -307,7 +307,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e23da31574ea8e7c1f9f4425efb6369058af2853becad3222092cea4308dac62"
+      "reader": "5f6f67cb3ea5fcfd5987a6d49903a8e928f80a24b576e73d70e32297aef20276"
     },
     {
       "type": "AWS::Chime::AppInstance",
@@ -317,7 +317,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "18222439e9ba8fabe16fcf8d74a4fe07fdad705b591162b102a5f2d3dfbac98e"
+      "reader": "65d931b12ac26f1ff8107869135b5ca680d87b52f1bdcfb1f6a009747ec98f9a"
     },
     {
       "type": "AWS::Chime::MediaInsightsPipelineConfiguration",
@@ -327,7 +327,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7fc7161e73af6c4910125c0751e9cfeb9af8200b4715db32d778e207d07e8d8e"
+      "reader": "b026c5e529459811330a1c90c745b79068e5ada8ece89de16d11a74a61c0660c"
     },
     {
       "type": "AWS::Chime::SipMediaApplication",
@@ -337,7 +337,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "659eae36989d5850d8f87881140cbae75e04fa90797063bccb9b1ad8fd27938f"
+      "reader": "8a804181bd75b4cd7a8cfd9be15c44edd0711babe8f16fbf919a41fca6a9b534"
     },
     {
       "type": "AWS::Chime::VoiceConnector",
@@ -347,7 +347,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7f5a52226b66ae9e5255a4f865b4a5eee85889bf2d3b8d179f822062aa5406f6"
+      "reader": "723d4cc34b683b74e905cbe540e7778fd1a844a7357b2abb24e84b3e29acafb5"
     },
     {
       "type": "AWS::CleanRoomsML::ConfiguredModelAlgorithm",
@@ -357,7 +357,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8433ff2e93ff09afad355696e66caed2b33dfe5d7d5066fa9bbbb561b52cfb7c"
+      "reader": "409fc300bea76f07f83409ea54e78dd97850680fd0f0aac83d025b23d61b52de"
     },
     {
       "type": "AWS::CleanRoomsML::TrainingDataset",
@@ -367,7 +367,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c3b8637fe826cd379f40c222e7f33836568183df7260bfca50c27e2357312cf2"
+      "reader": "6f69b79fbcaa34ff7270f55c9c676ee8a2625123b0f3f77f1e5fe625f558c664"
     },
     {
       "type": "AWS::CloudFormation::ChangeSet",
@@ -378,7 +378,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "5e4a6ed8d9cb92d9b4332671fd588d6716dc26c120b12b3433eda8c1468b9a5c"
+      "reader": "5ed9daeb794665382338232983c003a4e3cc3378849996857f66628c772ba64c"
     },
     {
       "type": "AWS::CloudFormation::GeneratedTemplate",
@@ -388,7 +388,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9823891be064107bc0d66679a841adae882e69c562d4d5e8b3ec5515bd91f336"
+      "reader": "57b915261e6895d3cc16830d18458622d4b86964e44d30af03823147a84aab1b"
     },
     {
       "type": "AWS::CloudFormation::ModuleDefaultVersion",
@@ -398,7 +398,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9154ae97f4afe6d8369db9e5a84ae6a4b0bacf5609bf7302fad3429587a3de67"
+      "reader": "7c76e628224b9f6c353c0b0780a4bf940ddb14ebdce09fff0912ba9663c8dfb3"
     },
     {
       "type": "AWS::CloudFront::CachePolicy",
@@ -412,7 +412,7 @@
         "Id",
         "LastModifiedTime"
       ],
-      "override": "5a87cf97974e7d5db0603634c4c96ed8bcd653b15ec7304bd1589dee6b506734"
+      "reader": "000493b2cb76d00b95a300375973f1db788ac1fe6271335a9f17e3e6d2d2f308"
     },
     {
       "type": "AWS::CloudWatch::Alarm",
@@ -444,7 +444,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "833223e45f893a3843fd1b936ba8ea744a2b505181eb14d0027bf5b20bf37ea7"
+      "reader": "f38bc3a3f86bdbd0befc530db4c8a0f5d0e44b6029f68fc254fff78906131ffd"
     },
     {
       "type": "AWS::CodeConnections::Connection",
@@ -454,7 +454,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f664bf2279b2c50f4c90376370e56549bf4ef36cc34a633e48b0f912795fc6e8"
+      "reader": "b0d6118ac9009ff0df6e4ab57bb662e2d4944f750c2879212de7b2907ff0bbc5"
     },
     {
       "type": "AWS::CodeDeploy::Application",
@@ -464,7 +464,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "40cca380a8615a51d0dc857190d5487d7fbd79c6b98197638d6365d654a30af1"
+      "reader": "5bcdd5b195fc815a18014cd64a054be29edba93d38f47b0f1af6250c71cb2213"
     },
     {
       "type": "AWS::CodeDeploy::DeploymentConfig",
@@ -479,7 +479,7 @@
         "MinimumHealthyHosts",
         "TrafficRoutingConfig"
       ],
-      "override": "6a9925e18f8993e3acdc4b77939638f4d961539cfbd9e5ca245c8ead0d4fb0fd"
+      "reader": "a42c6eb6c979750c02d314b4f812d24d156379a5e199a5883718bc56313db53c"
     },
     {
       "type": "AWS::CodeStarConnections::Connection",
@@ -489,7 +489,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1c0445443f61b60158422f5807331299a1332f76eef6bfe54b814214782dedaf"
+      "reader": "bfa3c468df40b8061d7e69be9796079086feb1a5e6596f32bf1b818628456355"
     },
     {
       "type": "AWS::Config::Connector",
@@ -499,7 +499,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "696430fdce50b9500e9cd578cf7bc6fe92f9aebe2ea08e150864d120f778b9dd"
+      "reader": "b84c93546101b5dea81a28883c1342ad5c6660943313e258be551cea5be8537a"
     },
     {
       "type": "AWS::CustomerProfiles::Domain",
@@ -509,7 +509,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3482e4f97037b7781384a0aac582be35f213d799269bc7b7d69d2e694bebe740"
+      "reader": "b4286a6d044c91814012c41d59f1f09cf7f993b4eec07dabc3759cfbf55ac361"
     },
     {
       "type": "AWS::DataBrew::Project",
@@ -519,7 +519,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6a712d366b22e4441c97ced161467693d0fa55fe71727bb24e494020912fe1eb"
+      "reader": "9d8fd136d2d9ab3fd9b2ae4b4553088b0c929cbdda654847eaf4b9d6c07e8ccd"
     },
     {
       "type": "AWS::DataBrew::Recipe",
@@ -529,7 +529,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6b019b5ebae69dbbf04da11775a7d82546f5ba93cbd6bc1756f5747d485ed9f7"
+      "reader": "2e5b72ca8033284768695e90e37b875202fce19f6fff51824b226035db197b16"
     },
     {
       "type": "AWS::DataBrew::Schedule",
@@ -539,7 +539,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5076da928ab6b827e59121446cbadf04768d4a9ab2cdcf797bb960d61690d817"
+      "reader": "607b343a97a985c171ba65f9caa418db9202525cb3c35090ee814cf1a10b86e3"
     },
     {
       "type": "AWS::DataExchange::DataSet",
@@ -549,7 +549,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f1e269fdcdf0646d0ebd33f5f7c25d931eac57983280170409e09c1efa2cc384"
+      "reader": "52ed79863ec3727e311db5fd98f94ba2f16b53d3350284ce2a3d6606016a94ca"
     },
     {
       "type": "AWS::DataSync::LocationEFS",
@@ -559,7 +559,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "13b36a2b09558e4936e1fc4f9ec88c0bcdca3103fffc58e82dded23360014f3b"
+      "reader": "110a0b5a88826ded03676bfc0e31a3b5fce90f102bd58d8af8a296aafbb1d0a0"
     },
     {
       "type": "AWS::DataSync::LocationFSxLustre",
@@ -569,7 +569,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0c89d38a6027d1f7f4b1e49f4adc6f626904455b71d9ac387dbde04124d05bb7"
+      "reader": "2226eef55a0ccf3cd95e68d15ee0da4fc52758c8e63a0e045f3cb82ce9db898b"
     },
     {
       "type": "AWS::DataSync::LocationFSxONTAP",
@@ -579,7 +579,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "321974b1b731e3840234bd24e2a29c3e84fe279ee315568434584c4a13894343"
+      "reader": "d88c8c616274572e5054fb4e0c9179773f98e8468d8ff21f6e3c3647be64ca6a"
     },
     {
       "type": "AWS::DataSync::LocationFSxOpenZFS",
@@ -589,7 +589,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4655d13d36294bbc4ae4e6d88bf59d15da944a2c56b6446f079a846543a6bd41"
+      "reader": "7d213efe789f8a590821c0b10c173beea6a963fce7e5957f3fa75466d9af8228"
     },
     {
       "type": "AWS::DataSync::LocationFSxWindows",
@@ -599,7 +599,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "04dea8655303efcb7aadfcb3dda4a03763c1b5722a4ff72810dda0c783794ab5"
+      "reader": "1e55ad19df62092eaecda25a6061d907b6a48b0474650564cddf8bd5e2da715e"
     },
     {
       "type": "AWS::DataSync::LocationHDFS",
@@ -609,7 +609,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7e813dbb073b3250944569f4e2cc58cb7c267fdeeaf7d774b0e3963beae30c58"
+      "reader": "19b9f0b24beb2d01eb430f8412cbd87b88bff6206123ba9c05f120c1029d8e45"
     },
     {
       "type": "AWS::DataSync::LocationNFS",
@@ -619,7 +619,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2bff381dbaa99327ac3cc03770d9e9b46d0dce006e9b86d5d79c047dcfbf308b"
+      "reader": "c36dcf22ead35414c309254cbf7de5c43085cc7b46ef5b1ca27391a8c007cead"
     },
     {
       "type": "AWS::DataSync::LocationS3",
@@ -629,7 +629,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ba5f345ec591ff92b33429d1772c56b85800b3537f2255990b7741e22db8ef04"
+      "reader": "97c029727449c7f5ec78199d4223ff214fa815c3f13633de28eaede2f89faa74"
     },
     {
       "type": "AWS::DataSync::LocationSMB",
@@ -639,7 +639,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "67af506464c6e0f7a858b87caf52c5710b315b61e83ce00e46eea7bd16913a5d"
+      "reader": "16b123de47f81ae92dbc11c4fff870dd91e75a2956de7845666320dfaf3147e8"
     },
     {
       "type": "AWS::DocDBElastic::Cluster",
@@ -649,7 +649,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "36ee5c29ce00bc8e87cd1261ea93c8faf8eee9839a0710e136706e364ccde6ce"
+      "reader": "1482847245c3a650a14a34bace0a6251cd53b2aa513e3363b84e60c67fd726e9"
     },
     {
       "type": "AWS::DocDBElastic::ClusterSnapshot",
@@ -659,7 +659,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "03c586acc2a0f6b961b1bb5d2752b7b6157a7179bcd94f8028ddff5f38ad94b1"
+      "reader": "4b7a8b55055b4d0b621857cdecde045d5cfed9ca2a5df4096bc2b99e7ee76e02"
     },
     {
       "type": "AWS::DynamoDB::Table",
@@ -690,7 +690,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "02ac4be1685e2c6b0a8a1a82773216b69fb85981c607b92bc4aeb05e00087371"
+      "reader": "ad6feb8d9b1f19e478a0e6a26192c966b9a0a6c747ba30a2d6bfdc4e53c83a9a"
     },
     {
       "type": "AWS::EC2::InternetGateway",
@@ -708,7 +708,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "f44a420795755bd26cc68904c1582b39d762e79b1cd8963606647659d97cc53d"
+      "reader": "7dd0fa4f0503328d5f357ae5b983116ce6d27df8c58ad89c46ed5fac3a6ae337"
     },
     {
       "type": "AWS::EC2::Route",
@@ -727,7 +727,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "8c1e41c7cf662d4e108852f455a264ea36fe83f85e6c126183a4137f92d024d7"
+      "reader": "77004e3fb6c4490f0bd112d54ebc4a0a66942fb0b549ddd9d701ffee922c322d"
     },
     {
       "type": "AWS::EC2::RouteTable",
@@ -746,7 +746,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "c842b84d87da4643a7063b93c19539029834467bc4c10b97476ce7b419ac17f3"
+      "reader": "cd8bfcfb9973bcf13479e587d858e6a5bdef02d95e09388ee8cd618a1cf40b97"
     },
     {
       "type": "AWS::EC2::SecurityGroup",
@@ -769,7 +769,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "c9eae3a5ea2571786eb5ac8647ffef58aee668ca1cc17a58fd343b6e18d06291"
+      "reader": "3f762aa1256c0bf507e725a0d1d7fb395e55cf83263f669e55bdb8c6212b1d11"
     },
     {
       "type": "AWS::EC2::Subnet",
@@ -798,7 +798,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "ad933ddc9dc4b82ba8f42e99f69e5ee4f57525604efa452fb68aa8efc3cad680"
+      "reader": "014eec69f092c88c2cc4f5170fcdec6d76d6d1d26edef686c59cfcd0689d6bef"
     },
     {
       "type": "AWS::EC2::SubnetRouteTableAssociation",
@@ -815,7 +815,7 @@
       "note": "Cloud Control could not read some listed instances",
       "absence": "parity",
       "probed": 1,
-      "override": "824143f618c15dc9526059ae4841db18c2ff623634ff06aa30cc85ce01d2b441"
+      "reader": "381c4ad6d966f09831ca9d935cc3243c7258b42e4269d970aa852553f9f57e3b"
     },
     {
       "type": "AWS::EC2::VPC",
@@ -841,7 +841,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "2c34e031125a78da69aa0d9e90b853dcfbb4e3dd532bfe34cd16b469e48743dc"
+      "reader": "6a5a2f2f87bfaed753b8c96e0c86ff3844819ebbc8ebddedaa2534f4204abb7c"
     },
     {
       "type": "AWS::EC2::VPCGatewayAttachment",
@@ -857,7 +857,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "9a006fb6db1a9b6c353b2d2bbe908c55126d0e3cfbf5516a177342dd9685dd10"
+      "reader": "b2679e15aec50212e6df884ce8c1324ebc73d519bcd18ec9ef41d6969f8ac7c3"
     },
     {
       "type": "AWS::ECS::Cluster",
@@ -877,7 +877,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "7c163a61172b6deee433fd4844a1ac995fd0bb7e8b1e181d8a6bba5375e5b87e"
+      "reader": "181bf8b0465b9df5059864e438e66d230980c7ced4b28fe40b8f7dfa6a10221f"
     },
     {
       "type": "AWS::ECS::DaemonTaskDefinition",
@@ -887,7 +887,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3aa6f8dd2434e2e27b64369e30e834bc2a54212669bc5e50698c65f91f102e32"
+      "reader": "95dd7ec1e0ee77de81351560ce111498f631fc67c9f29f110fcc87d4972a60cf"
     },
     {
       "type": "AWS::ECS::TaskDefinition",
@@ -914,7 +914,7 @@
       ],
       "absence": "parity",
       "probed": 20,
-      "override": "d14301cd1de10d25732218074102344ba224e3635aef2f963181a2b287403f97"
+      "reader": "ade909924c8d9cc271b7ce03e18c9c3e3d095e70e5334b8b3f88aa3349016594"
     },
     {
       "type": "AWS::EMR::SecurityConfiguration",
@@ -924,7 +924,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "60c9d48917384d434acb6720d76131bc9ba5f0f81a6b94f3a4f36d8f1b31ea57"
+      "reader": "e507e11feb50929b58c2754de29d89dbb74e765f421de2e87264368cb22627db"
     },
     {
       "type": "AWS::ElastiCache::SubnetGroup",
@@ -941,7 +941,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "e56590977af954e47d4f000b5af1426306e811451250ed7b60e91f34b98c828c"
+      "reader": "8372284c7bfe9ad9905ce15e4ce04b80a1988384e53f99dcc519482725583196"
     },
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
@@ -977,7 +977,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "227b3672474b9b3b24852d04b2a51f15a96499460d01719204ccbb144b0b9ce3"
+      "reader": "12e98e249d1f7c465ea465e56052589ac48496281eda0533815fbb9d90dec131"
     },
     {
       "type": "AWS::ElementalInference::Dictionary",
@@ -987,7 +987,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "391e2e33ab4b985ab7e79871f91785f10084c6fa9e72d5874ad290c24978070c"
+      "reader": "4cd1721f22dcf9b1c945ba3bc62a0a98953dde9a034415956a8b2f68509c125b"
     },
     {
       "type": "AWS::EntityResolution::IdNamespace",
@@ -997,7 +997,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3164c5acc7618e2661bd02c5f57f378db310e15b2323de1aa3ee02213c7877ed"
+      "reader": "57f25446085dd1f57d70d8aba48a7cc03122733c2da755e26cf01af4e27ab838"
     },
     {
       "type": "AWS::EntityResolution::SchemaMapping",
@@ -1007,7 +1007,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b4228052c3697d15f2f8811ffd4f254d4b6744cd7d00aab85fa34e3a182d119a"
+      "reader": "28b64b76e9862de462edb94a2f42a254ec0b05d071b5ecba02cd7c7e8a57debb"
     },
     {
       "type": "AWS::EventSchemas::Discoverer",
@@ -1017,7 +1017,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "867e7b28fd63fe82be4dd0404cc6744eb5fcdc065597d65c392200b4bd3b150b"
+      "reader": "37dc9597db5646616b3bed528cf844864b28e776461aadbce75bb2068834d45e"
     },
     {
       "type": "AWS::EventSchemas::Registry",
@@ -1027,7 +1027,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cd9865392c35099eff527da44f9247576dff59553c048aab13405d25cc47ec38"
+      "reader": "ec8fd99676a3025d8e29374ecd64d76be7c9592cfe34e376e93d7793382af5e8"
     },
     {
       "type": "AWS::Events::Endpoint",
@@ -1037,7 +1037,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "964abd9484bc5055f63109ad63d53392b22e360eca380c5efb50365234b9e7cc"
+      "reader": "a373d5d06dc5bdeb40819018fff4d6c8de9609193a05e8ae132afbcc7e5d667f"
     },
     {
       "type": "AWS::Events::EventBus",
@@ -1053,7 +1053,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "d7c50d69723b362df8f603ea3946ed56aa9e871f09850c29597954a3f9a1062f"
+      "reader": "7b594333f530a05b3f9e23854a113f3d50787880e3d060eeb8f631395bcbd709"
     },
     {
       "type": "AWS::Events::Rule",
@@ -1077,7 +1077,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "1bcdc157cddae219b98b88216317d77d2f573a148b91cca3b37d9c9dcf7871e3"
+      "reader": "6ab49f1677a862a264f3c4579abbfebeeaf6c154d6398c13ec9ebcae319563a6"
     },
     {
       "type": "AWS::Forecast::DatasetGroup",
@@ -1087,7 +1087,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "57f828d0f8ab7781c543a738b7da390c5b742b4574fc2d5463f082d064610485"
+      "reader": "a434676f3569f104625aa59fc5e597d4f477d1f4c21d76a7197352f045d5dfdc"
     },
     {
       "type": "AWS::GameLift::Alias",
@@ -1097,7 +1097,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7f34976e01c0b7517a31f48c31ea797f342ae5d44afcf4d573e79f4eee32a101"
+      "reader": "6afb806391d331d93beec32dbc9085a31bb0780fa04f755f1b64a7f24e370f99"
     },
     {
       "type": "AWS::GameLift::Build",
@@ -1107,7 +1107,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "862e30c679e7232b87b0ca51e5739bf0b2bc646e384ea200eb2026819aa9113b"
+      "reader": "c98a4adb4f105bf74b6a0dfe419185843fe72017c6ace3a1e2656d498dc79269"
     },
     {
       "type": "AWS::GameLift::ContainerGroupDefinition",
@@ -1117,7 +1117,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e0be1e6cf922ce3609cb7cf37c1cdbf6992fc8b3a4fe54d5407dfebccf14dc84"
+      "reader": "561f0e0c62ac0b7c1553cff9ca8504000541dc752922a4d27b9530944ceac4a4"
     },
     {
       "type": "AWS::GameLift::GameServerGroup",
@@ -1127,7 +1127,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "791a52d97f89bd335856d2a04eaec5cb68962373b92e0095949a644b9e3c1e8b"
+      "reader": "ad0811570c014d857dfb8af71a9f0c9675cc5ce8197a408f26922272597afb59"
     },
     {
       "type": "AWS::GlobalAccelerator::CrossAccountAttachment",
@@ -1137,7 +1137,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3ca2a71b42a6f84a5b7166921a61379c1988cdda586bd305ac27cfa8903495c2"
+      "reader": "9904a6fd65e20870aeffbbda94a121bed893e531ea4f8da40a1cc4ca7ea49551"
     },
     {
       "type": "AWS::Glue::CustomEntityType",
@@ -1147,7 +1147,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3a0260602528e8b5d05c6496c5f9b9a71021bc67918f81d4bebcaf98185e8982"
+      "reader": "2dd16931a4426e401c6b0e6de0802bb46cd216ec599122b5f57d7138509122e1"
     },
     {
       "type": "AWS::GreengrassV2::ComponentVersion",
@@ -1158,7 +1158,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "8dce599bb3919080f720308d32c92b5f35244d6d2b1110794845ccf9863b99ce"
+      "reader": "b95ec480c5908bed1c811489538fe5f0d35297f1b64ee467e77b4c8f3ebe8247"
     },
     {
       "type": "AWS::HealthAgent::Domain",
@@ -1168,7 +1168,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "89614b03d3173a0f02a34d32485e1d511ca1cfb486b158865e45a9d27a01372f"
+      "reader": "ae5ab6b3b93d6d4a27204eae9499740176de136f27d0ee9f108bb933665e71ca"
     },
     {
       "type": "AWS::HealthImaging::Datastore",
@@ -1178,7 +1178,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d40fbacf3dc25133f9bf3fd5f8db7d9a3b899010eb095538708651ca9ce6e6dc"
+      "reader": "4996683f6b22ad605d8cdc0fa80bf09fe7db37df2b37c7c57102b0f0b19b923f"
     },
     {
       "type": "AWS::IAM::Role",
@@ -1200,7 +1200,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
+      "reader": "3a30cf1b3dbaac802cac24d64315a72997041017a96721e16e114ba60886fe74"
     },
     {
       "type": "AWS::IVS::Channel",
@@ -1210,7 +1210,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3a19ff73b19a955aae0e79a74baf05f9672540f0e33ee08c15461b12b05805e7"
+      "reader": "20288ee476783558a98a281bbe1fc38bded98b19f1ffa62f9d9338c59645ea47"
     },
     {
       "type": "AWS::IVS::EncoderConfiguration",
@@ -1220,7 +1220,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "25034f9d3212cefe1df772674814c5b691156ca6e130ea20b1c32cd6f7dc153c"
+      "reader": "5a42d89ad344910adf850e1d8dd4fd012978143dd945a7c9dccffb5d9a94792f"
     },
     {
       "type": "AWS::IVS::IngestConfiguration",
@@ -1230,7 +1230,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e8b63b0a0a2bee5c0b041675b23af0a7d1194f85fa75fb4304b42cfaab545ee1"
+      "reader": "6e41455d73ecc2b965698960727d7c3fc675d62ff6663862ef56a9331488d8fa"
     },
     {
       "type": "AWS::IVS::PlaybackKeyPair",
@@ -1240,7 +1240,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "87411c18547b8ec5e78fb9f10b676cd91e7ad943dcc7ddd2cdf8f4ad51f0d07a"
+      "reader": "51f681b1a61083a81798660b1e5c592f37bb2e064ada598972791995dfdf1f63"
     },
     {
       "type": "AWS::IVS::PlaybackRestrictionPolicy",
@@ -1250,7 +1250,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "031e0c6a26f0f5e74f1a225e0259d02e87286ca39cd9e05c63eea0faf9b219d7"
+      "reader": "cb315f682aef2e72f3f3d6d05d1e0962ad476ad3f4105a4a33ef75749311844b"
     },
     {
       "type": "AWS::IVS::PublicKey",
@@ -1260,7 +1260,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "34dbd384383f157efbf1f61e3f24a67c73ae2476036a7afe4d49f5eaae9b011b"
+      "reader": "f1390e420d244a5dc436d1def669cc463de212990a1f4aad8a5a7d0536c1f9ef"
     },
     {
       "type": "AWS::IVS::RecordingConfiguration",
@@ -1270,7 +1270,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f5c4f6dc6ed47cc2a5c3762fbbc9c36b2196ffd14447328d9053aaac09a2f3e7"
+      "reader": "e5cc9066202aef537edc0c6245bc46bad413b8a81913b92bbff0f616546e776f"
     },
     {
       "type": "AWS::IVS::StorageConfiguration",
@@ -1280,7 +1280,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "212108a9ee3b94ba214a33444016e7b3a9540686b8946e0fce19d8405c0f94ed"
+      "reader": "6d8ce08721c157b8a81b9e1225f75b9209c3fc0f1bdadf30a757fa6a710cff95"
     },
     {
       "type": "AWS::IVS::StreamKey",
@@ -1291,7 +1291,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "349dc4ac7e49d8f52ced932483ea5128e55cfa0d732fe497f80d17cd0441b7ef"
+      "reader": "f0993b3e688e1ba146b97600af2aef4168f9c723412a457e7386ecd3b5979c8e"
     },
     {
       "type": "AWS::IVSChat::Room",
@@ -1301,7 +1301,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "35651a0e84600c1277e214aeb0f383ecc1f9d6c88a5fa73fd723d5c1300651ee"
+      "reader": "14335e45f15b59faa64c8391e11de76312689bdabbb11adb2c188509302cef66"
     },
     {
       "type": "AWS::ImageBuilder::LifecyclePolicy",
@@ -1311,7 +1311,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "baceace35bbbd774855abe18ad90b5b178aa4f7304b16889023811c117c7d359"
+      "reader": "720de7f712635fb85a9cedac5e2708fca6bdf1e2077fe294431d66693c0e934f"
     },
     {
       "type": "AWS::InternetMonitor::Monitor",
@@ -1321,7 +1321,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8d16ae967308a95e19314d81d2919e4e9c6da71a74272a7c9a06b8ad2ab2073b"
+      "reader": "cf8186361805e37215357d2a748f301614f7185b1fc54733d530373269c542d7"
     },
     {
       "type": "AWS::Invoicing::ProcurementPortalPreference",
@@ -1331,7 +1331,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "607fb08f2759b1d0fcbc83aff302dc9469f9ff3f7c816bd69afa4e8471a125a3"
+      "reader": "3aaf24ba1b8f647e9eb11071f6dd34e72fc144e69c4337df20c0ad63e8f4bf00"
     },
     {
       "type": "AWS::IoT::CustomMetric",
@@ -1342,7 +1342,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "2ff81341a3d50be0ce1c73e3c94aae6c52160e4ee6e39131dce54c9b23d9e5f2"
+      "reader": "8a0cfa72ff57bd7aa86170f04418b33f51c102cade523d89e3f4715996deb19a"
     },
     {
       "type": "AWS::IoT::Dimension",
@@ -1353,7 +1353,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "4ed827df593725d738d838fd5073e32b978b13a78ebc42e159ea5393c8468a9c"
+      "reader": "2d32739f2de634a140d6e1e72208dd176d3301019486f151de0abc183cdf9b70"
     },
     {
       "type": "AWS::IoT::FleetMetric",
@@ -1363,7 +1363,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9dff3cd854617d8f6108b7dec7997f44d32aa58d7d4e032de74d02dd5df70b73"
+      "reader": "a30bc2c38786e773930d6186d32e11cd60bf3965f07e1055fa77b2f094d4de1c"
     },
     {
       "type": "AWS::IoT::RoleAlias",
@@ -1373,7 +1373,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7ea1b1d7db06a313074fbc5ed46d31933230eed56d97ce46ebb3557d53a6b15c"
+      "reader": "12051340500333e6fdffb39aa0ea8ce0b641ad2ba1fd106f8a51ea92f123434f"
     },
     {
       "type": "AWS::IoT::ScheduledAudit",
@@ -1383,7 +1383,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5899b5d65f2fcb53f221b1ae6745c086d26ee868bcf1cc114c5fa4a01efd3e01"
+      "reader": "f7cb62adfb78d5198d633c3d8075471bf14b3dca337482f7a7f4ea6ea087a37d"
     },
     {
       "type": "AWS::IoT::SoftwarePackage",
@@ -1393,7 +1393,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ce5fb30a7d5247b0a993e10592f3c260045ef01695c6bfc21e8dafe854fc965e"
+      "reader": "c35f08a33484b1a2e2f6f32318d71f6fb1c65d85435aca6b81cb93d4c9ddffe0"
     },
     {
       "type": "AWS::IoT::TopicRuleDestination",
@@ -1403,7 +1403,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "fa3990c7a6694f733629516868ec764fe01d78ddc99be0b89ec1ea8f622ab20a"
+      "reader": "a891a9794f894663dadcd6fd130d27145093854e44125d8d3a0be65dbe1463b5"
     },
     {
       "type": "AWS::IoTCoreDeviceAdvisor::SuiteDefinition",
@@ -1413,7 +1413,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5bd566db4ee386324a5c84b2e607f20494439d2f1150b45e996fb59373024a91"
+      "reader": "3bae42771f59c7ded67aefb4431269169704d5c14a63f5fbff02dceb57156870"
     },
     {
       "type": "AWS::IoTFleetWise::Fleet",
@@ -1424,7 +1424,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "54e1078fd56d45ccd3687beaacaf174fba28fceb9ee2b250de9afc6f6c796196"
+      "reader": "d8b4a83f333932cb2edb73132898705204ed29d44a8efb3cdf8ba8edf69f3652"
     },
     {
       "type": "AWS::IoTFleetWise::StateTemplate",
@@ -1435,7 +1435,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "4040c7fe32466d92712f18d1a92a9c26a91fd046f3308bd569021aa72794252f"
+      "reader": "a4d9d24fc3d21b3c6c78a0d7ab7bd8e5fe6439769981b3c682549513b0875c75"
     },
     {
       "type": "AWS::IoTSiteWise::AccessPolicy",
@@ -1446,7 +1446,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "b7aba56fa095cf6dcf395343e14acb54c49e31b5607902e9bc0a1094c6cc6d19"
+      "reader": "0824c961bd543d694814ce6a819e4f4a664b310790ab5c10b5ea5131f27d0e11"
     },
     {
       "type": "AWS::IoTSiteWise::ComputationModel",
@@ -1456,7 +1456,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5a07c4f8aba080f31743ee4887d29296f32d63e5c10e9c9abae9b859937ca56e"
+      "reader": "31781d615dae0dd02f8f4a40b093ca7fb8220dfec2842c543b31cbb44e74f2a8"
     },
     {
       "type": "AWS::IoTSiteWise::Dashboard",
@@ -1467,7 +1467,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "6efcb1830f34d9310b1f91ecf94b6c2d42e9f232b2c412ff378e6e37717b4c36"
+      "reader": "cf4159116ff73833650f9976c00fb511297f9a1d881e5555979dfa10b735be48"
     },
     {
       "type": "AWS::IoTSiteWise::Portal",
@@ -1477,7 +1477,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "20efcfad2863107871c355c5b4ca358b67541161248ac76681ff2738f27d5574"
+      "reader": "4cf6c605f53c91606d43868e5b59147791d227631daa03a17e705495fd427516"
     },
     {
       "type": "AWS::IoTTwinMaker::Workspace",
@@ -1487,7 +1487,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4b86c04022e4d93c021c31c5763b754b7b8e294dfa9b6cea0f4f4ab395331a05"
+      "reader": "b1f925154e0645d2e432cb7b1bbbac0ab5b43f6f7480f97363c0c84e9aa5be11"
     },
     {
       "type": "AWS::IoTWireless::Destination",
@@ -1497,7 +1497,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2e58e5db0c7deafd9764d53888884d9c533ac572b46ef786ccb15636ebb19f9e"
+      "reader": "815660b8e4a73487114fb859580ffa720b048706727a2db49521e30d0f9caf2c"
     },
     {
       "type": "AWS::IoTWireless::DeviceProfile",
@@ -1507,7 +1507,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "46fc4e542dbb5ce99ec3d444991c4b6430c3bc332c2bc89c022cb0b481a50cd0"
+      "reader": "9e7b5a217461f928476e9cb18031b372406aa1cdde36fe42a7f0dcfe54f1f1bc"
     },
     {
       "type": "AWS::IoTWireless::NetworkAnalyzerConfiguration",
@@ -1517,7 +1517,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "94a470d460983f2b11bf60e162e4a1eec6756186cd7fd2846c97e3f1e32b7efc"
+      "reader": "e1f0ff65209a54031cef953fd6183833b8b29cc4a1cc3b9c349c83afd2f5f2ae"
     },
     {
       "type": "AWS::IoTWireless::ServiceProfile",
@@ -1527,7 +1527,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "14251829eab7fd62fbc1cb68f2df8b2f74e8475ef82923140695fbf80175ce2d"
+      "reader": "3849bb72d4a89253449bf76331b9116ef9ecd79f740abfb49364166f66c8eb7f"
     },
     {
       "type": "AWS::KafkaConnect::Connector",
@@ -1537,7 +1537,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "17d6b14f394dd371327ac7e7d284776fbd5192d08002fb56352f9d43edba478d"
+      "reader": "645494e10ad9b15e89b61692d6491aee839a865b1176cebfbf4dfc378371ddff"
     },
     {
       "type": "AWS::KendraRanking::ExecutionPlan",
@@ -1547,7 +1547,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8468a830ff20730e8595f4f63cdb904f7917c7048239705d7abe4021326fa519"
+      "reader": "622cc0572a7a658ceb9fa0e58317cf1913b335cf3b476219ff36994161876154"
     },
     {
       "type": "AWS::Kinesis::Channel",
@@ -1557,7 +1557,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "660a4873c7d0500191ad4b507f797a26152f97a5866da175fe16fee60b37a5b1"
+      "reader": "3b67fb709ab6dd188e37e94ac8af0b49d2a844301d1ae4be2b803288876366ca"
     },
     {
       "type": "AWS::Kinesis::StreamConsumer",
@@ -1568,7 +1568,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: GeneralServiceException",
-      "override": "d4f984c884fa1d8f2e7fce6e10ccec30263f622e99c7c26f08b96c1ab024129a"
+      "reader": "558f0659b57585d68848589d2f977c1e6b4ef9e4ff0c6c7a35fc07927c2c9708"
     },
     {
       "type": "AWS::LakeFormation::Tag",
@@ -1578,7 +1578,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2344a6e16f7dcc147c72b10a7f379cebafb81ee01733cf3d06091e4813932287"
+      "reader": "43caa3e5e41fd90764397cd9acff8b74835c5def6624b4d78b51c8990ad127fe"
     },
     {
       "type": "AWS::Lambda::CodeSigningConfig",
@@ -1588,7 +1588,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "718df860169772fe98e246dc282cbbcf07345b297c653148b4361cc94b5b7a8e"
+      "reader": "a04a579f11fb83b7372b74d852503f29748d0a4dc2839465461f4dc50765dba7"
     },
     {
       "type": "AWS::Lambda::Function",
@@ -1622,7 +1622,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "495ac870db075b62e31cfea0e27bde734cf1769a93b0cdbb80c1ac1bfc9cd6bc"
+      "reader": "4f483925d681d51a83f0e0c501010f1b9b7483753f40e68672664fd5b890d103"
     },
     {
       "type": "AWS::Lambda::MicrovmImage",
@@ -1632,7 +1632,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5aa5b50598b10a13787d61a8abf05be70e0447688976ea2cdb6cee0c458044f2"
+      "reader": "04c55d4dba3cb9c04c4d7bba926fa8fa13efff4bd3ed991941223d09a444a16a"
     },
     {
       "type": "AWS::Lambda::Permission",
@@ -1655,7 +1655,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "f3ca47ce4d72f1231d42dddfd705870a027dc5cce374c044ffd1afe3d5166cb2"
+      "reader": "0260a3a0965358adfcb7513be57ce470dd93f3788690f4dd55079da24ce3d0cd"
     },
     {
       "type": "AWS::Lambda::Url",
@@ -1674,7 +1674,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "554682f60370f6320d93cc6f14740de5050b3d480c7ef12ec752745a53df13d5"
+      "reader": "914494f96ba3c354e9065976dbdc636fe5e61fddfea2b6476cee13b8904f311f"
     },
     {
       "type": "AWS::LicenseManager::Grant",
@@ -1685,7 +1685,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "304c22d899e08852cfebbcdac1f88eeb3a47d192fa40f2acd3b943a825bede41"
+      "reader": "6d503dee4c86c8e13da5beef53d7ba7eb2d758c600a9857c5f939eb3e643df3c"
     },
     {
       "type": "AWS::LicenseManager::License",
@@ -1696,7 +1696,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "d710170aaba6adf3cfd049e5d8bd90d7e590aaf095b5447606119ab5a8902260"
+      "reader": "c09c0978ec50372de3dd6a86a92883d366a89e238779868ce87870c174bf8914"
     },
     {
       "type": "AWS::LicenseManager::LicenseAssetGroup",
@@ -1707,7 +1707,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "6e5b8b38dd1f8f4ef36d67435a1116c0508d6117466058dc9b177fd9c381df40"
+      "reader": "ff0c6b4fc620e01b0390ef599d7faf620dc1a5dd5d5ed7342b93e4814bb74db4"
     },
     {
       "type": "AWS::LicenseManager::LicenseAssetRuleSet",
@@ -1718,7 +1718,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "6e286540fb82ae68a18b2e6501d151c2fea73ea59912b460e52a74f28b766f91"
+      "reader": "01506c97dc4fb8bf1a2b3c41f598524872d9a06786b00040e392fb51bbf4c411"
     },
     {
       "type": "AWS::Logs::DeliverySource",
@@ -1728,7 +1728,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "872d14ba6f4051039187907c0e43756b373afdb6847c3970f2b12a9789574006"
+      "reader": "684ce56b1361aad54e4e1fb642408187cdf3fa8c75ce775c2802b64959affc6c"
     },
     {
       "type": "AWS::Logs::Integration",
@@ -1738,7 +1738,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0c3f6fb48f364a308245593f05bcefeccb57b7fb9436b7cbd32858bc48eec751"
+      "reader": "365787c908fefad3fd3251da6e97b90a12b886bb9339f1e29dd5e024518f2370"
     },
     {
       "type": "AWS::Logs::LogGroup",
@@ -1760,7 +1760,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "da24fc3739aa297da750bffc9d88a647319764993b0196e8fa42e8cbe2afd41f"
+      "reader": "b346e03c940fdbd0fe5d8e42eb48e001198aa00e9591d2324f910dd4d5999a10"
     },
     {
       "type": "AWS::Logs::ResourcePolicy",
@@ -1775,7 +1775,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "4496f0927f2f1daa8e309aaf80e423e07a3c496bcaf5718e651550bac4c0a50b"
+      "reader": "77df1cf844ee7f60a47aa095aa5d361792597beb85a9e05f4169a27bd7671318"
     },
     {
       "type": "AWS::Logs::ScheduledQuery",
@@ -1785,7 +1785,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ecf00cccd8fd9dbb6c642360417618eb9005090c0e8c065e59195388a91f536b"
+      "reader": "818c892f67edfc669997fbdec83a95972bc5cf11a456957c781f69f151b8a495"
     },
     {
       "type": "AWS::Logs::Transformer",
@@ -1795,7 +1795,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f734d446fb0eb218e6f9d7349dcc8a73e6e14e6b3130479852f70294608f4c0c"
+      "reader": "fbad2000554837edff404404316614a6d783f11cede627e43b708dde9f55452a"
     },
     {
       "type": "AWS::LookoutEquipment::InferenceScheduler",
@@ -1805,7 +1805,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7050dca3be0d15736310706772da363b96024fad81ff2c312be6e4303b89c460"
+      "reader": "d0b50efc3696cddbb5941322171803c95c8ae23abc6c784041ce45b916874082"
     },
     {
       "type": "AWS::M2::Application",
@@ -1815,7 +1815,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "aaf5511a5b00787358f0a5d39987d2b86dca43240e47ac034936287d7280b873"
+      "reader": "cd66dec74a841a6752470e90d57aab33fc7070374afde225545255c7491dd312"
     },
     {
       "type": "AWS::M2::Environment",
@@ -1825,7 +1825,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "bf9cacc03bebc385011bed0174abd4e4c2266380f6a8692ba0b17ff64f15075d"
+      "reader": "7d9f1daf7b9aa1dbbdf7f632c704edc6bc4e0166bff5ad8a8f588c55ebc27405"
     },
     {
       "type": "AWS::MGN::NetworkMigrationDefinition",
@@ -1835,7 +1835,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6453d4014fe4d77370514e7c9bd6c6ec550b0779671a1e8d83367f6ed247c017"
+      "reader": "32613877667da3bbbe9bf97a9158cc6fe65c39e4de2e15a6b7d4f0164af64226"
     },
     {
       "type": "AWS::MWAA::Environment",
@@ -1845,7 +1845,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "937d299c03371aa5caf0f01bcb0fa3b89840bd40e80244306995e1a659337aa9"
+      "reader": "498190c224d571812e6ba8ce4f3cd2480eb10565ef91d629986a0b8ebc512455"
     },
     {
       "type": "AWS::Macie::CustomDataIdentifier",
@@ -1856,7 +1856,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "b19ab19db5a5c30cbd645ff5d482106e9bf8e45319969993f895832aded4c451"
+      "reader": "bf482df77cb8f8cff17dcdec1002b9d3c138d904973767933be751486d2ba4d2"
     },
     {
       "type": "AWS::Macie::FindingsFilter",
@@ -1867,7 +1867,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "20b62291b34a99109c5d1f3277203954d13cab11c63744a30c00b1c3f03e556a"
+      "reader": "b3b06b03fd33c5912a6d8961f4107f6db5f3c8b075a3046216cc0db7bd6e263b"
     },
     {
       "type": "AWS::Macie::Member",
@@ -1878,7 +1878,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "27c732ecec56b4c08cfd8e00e90fbfe1bfae1815b088d6e63c654eb739f3b25a"
+      "reader": "29a7f4d0753daaa35bcd8f1d81c06da68dffec1295bb0c38abcd6483264b844b"
     },
     {
       "type": "AWS::MediaConnect::Bridge",
@@ -1888,7 +1888,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "96d6d98b80424f3960f194f73db2fc1c3fc6914d311b35a02c22ebda780b518b"
+      "reader": "8545a4d958cf51dd5a2f56e00e980b06b574da92aec916b168723a9f430311d3"
     },
     {
       "type": "AWS::MediaConnect::Gateway",
@@ -1898,7 +1898,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "fc60f9d9e8e286392efd9d41723a82c315407b29e77ecdb544d23142aa796eaf"
+      "reader": "fd338dfa56f565d2d38424118ef5a03487d4fcf93861acfb4c922b91af455b8f"
     },
     {
       "type": "AWS::MediaConvert::Queue",
@@ -1915,7 +1915,7 @@
         "PricingPlan",
         "Status"
       ],
-      "override": "e73907eed54e41379d7b2e9161071f3dfc74de51df91c09c2f64f67e3d684003"
+      "reader": "8c5487dfbb529d7d4c47eeb1bc63a163a34113794cfc19df807ca74b7fb4aef4"
     },
     {
       "type": "AWS::MediaLive::Cluster",
@@ -1925,7 +1925,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ad651bd30da6baa6d34f20ccc7ea134fba42936013082a5c44e23ec56a23752c"
+      "reader": "092f440d9625a1e584c0269c090127547cce21a1d2663f57f6d6e8208417861e"
     },
     {
       "type": "AWS::MediaLive::Network",
@@ -1935,7 +1935,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "eb7696ad50587bdb7282e35a4c348cbd31a6c9e9d399a28a5f8f3ce37d746ed4"
+      "reader": "bb2f93086457a9d2207c412d03e249040c0519bcca7cc520cddf5b0bad1b2e92"
     },
     {
       "type": "AWS::MediaLive::SdiSource",
@@ -1945,7 +1945,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0b24eae4672afe11fb09dfe013cc050f91ff4f822fc07ba464463c35325ae21b"
+      "reader": "5266d34a4ff0d9ea6b2b0c389fb07f872ff24a1b31e528c821f2ffd9d8c387fd"
     },
     {
       "type": "AWS::MediaPackage::Asset",
@@ -1956,7 +1956,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "3c677904dd1f01084c7e34c722f5334172d3c32724844cc74217f9431954c302"
+      "reader": "4c4c2f25961846937cfcc24188b1b5e9aad300fc3f6630dcf16a25550de996fe"
     },
     {
       "type": "AWS::MediaPackage::Channel",
@@ -1966,7 +1966,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "34285440ceb94c6d2fc5f292b0d9d196496775797608f72c3fbe1e10e21478c4"
+      "reader": "8b45bcb94760870490116d8977c5015446252fc7f8db50b47c59bc3c834cd478"
     },
     {
       "type": "AWS::MediaPackage::OriginEndpoint",
@@ -1976,7 +1976,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "edb1ab114b22f0a4f27a426e7b6ba525f6c0840c7344ce4b52408531402f2ec4"
+      "reader": "e0becb511da86a94f25d7feabef4c19439865547c64ac176bd50ef4ca1a08d34"
     },
     {
       "type": "AWS::MediaPackage::PackagingConfiguration",
@@ -1987,7 +1987,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "8188d3b2ef2400a8b12ad67576b613a3ff840e661ff88e36fe05c5185445f599"
+      "reader": "eff78d99a5648317019b38e7af722fe634c7d740b5dff2b51f84a31c394d4799"
     },
     {
       "type": "AWS::MediaPackage::PackagingGroup",
@@ -1997,7 +1997,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c453b958960a297896dbb11bb417152ce54481c2e34ae19a07402bd601efe5ac"
+      "reader": "a523bd07c756f0526911c4c438d49961dc8124d9a32c04f83f5cf512652aa817"
     },
     {
       "type": "AWS::MediaPackageV2::ChannelGroup",
@@ -2007,7 +2007,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "14b7de8d7bf52272f1fd8e60cba6312471e1fba9070326239c1b8ffe7de35dc9"
+      "reader": "4d214f70f6ae5373442ea8805e3ffe0bcabccdf7c7ade430ef1e53f824acd48b"
     },
     {
       "type": "AWS::MediaTailor::Channel",
@@ -2017,7 +2017,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5d9beb95650066c2c1e1be79a33ae4782c68efcbef264daeaea37386660b6959"
+      "reader": "a3823ebf2b4868904364272fb4ab93006fbf7f92725c7e1b2d98370d07a20ddc"
     },
     {
       "type": "AWS::MediaTailor::Function",
@@ -2027,7 +2027,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "aff1a2698da8df3232120fc315e677df6d93049b2a23c0041b81e4e8f20b624d"
+      "reader": "80a575803ddac4235827f48c1a79fe53c0bde6a96a9cb2e05a4fa040a82bb060"
     },
     {
       "type": "AWS::MediaTailor::SourceLocation",
@@ -2037,7 +2037,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7a38ff649ea83dd2b5ff64e46de8108e32060c6c17dc142b82decdef371ca07c"
+      "reader": "c4d07bf8082377fbd8db9b50865ee6381419c92c527a51b7a8003a8b2a5458ca"
     },
     {
       "type": "AWS::NetworkFirewall::ContainerAssociation",
@@ -2047,7 +2047,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c839822a505cb172b4b6b892460776ddd4b0ead8ab603cf812b50f31c9547e8a"
+      "reader": "f2d13d215a3d7d8ce17e901f49d09557b0c833dc33d3fddf76889c41112157fe"
     },
     {
       "type": "AWS::Notifications::EventRule",
@@ -2058,7 +2058,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "e320799df4e44dae7d066cc7eacb8c42ee232dd3a2ce987be98e868dc052a7d7"
+      "reader": "22a1f75342abc52c07847d0965f97fd2656028a531e6df8baaf915a8a78240a1"
     },
     {
       "type": "AWS::Notifications::NotificationConfiguration",
@@ -2068,7 +2068,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "44ff74ff7131ef654a9169de2f3f45dbc1ce4b00422f52f222231873f67758e7"
+      "reader": "0358037a0211145a6339e6bd953f1e2222ec721533d3943f8ec29366e66e33ea"
     },
     {
       "type": "AWS::NovaAct::WorkflowDefinition",
@@ -2078,7 +2078,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "13de8a917bcfe7b70ba6e5505f873f357f2b4f28e15614033f220ded43fe0ea8"
+      "reader": "4227b2de3b2c9db3a43198b0222cd6d35e73e96ca6438b071847963f3815d28c"
     },
     {
       "type": "AWS::ODB::OdbNetwork",
@@ -2089,7 +2089,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "65599d5b196b19741698fafc0fb0bc5263d7d09ed79b067f5c3aafe420c0c748"
+      "reader": "302a1149753538407f1da56c0198b045af9052ffe09897ded82a0fff447c5444"
     },
     {
       "type": "AWS::ODB::OdbPeeringConnection",
@@ -2100,7 +2100,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "8daa44f16a880d73a97d3b657502abcfcba6ca9a18ec5a77643dca5a88188be4"
+      "reader": "6ed20ab59794e59775fb5922b49254c69a37edf29bc5ecc7225e01efe394c72a"
     },
     {
       "type": "AWS::Omics::Configuration",
@@ -2110,7 +2110,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3d2f0e1547c142a68c941198c5c596e301556108413c3d5a7cf401320d0113ad"
+      "reader": "0b8636c0ff4f0a8f355f7f919ada11973bbd009815610c195555efbbd1dd3be8"
     },
     {
       "type": "AWS::Omics::RunCache",
@@ -2120,7 +2120,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "002c0dc741f8972f2dcde558fa805c0247be9a26b8b96b02d70f4b145686f512"
+      "reader": "caad88206be062d421f974e1c844699d54568cd12bb86b65271caab5fa53fd4b"
     },
     {
       "type": "AWS::Omics::RunGroup",
@@ -2130,7 +2130,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8bd15d666a290b3058b57a7368404cd50512942ae6659b289053ad15e7490064"
+      "reader": "19ba5205f5e20f1fa7bd08600ef210ab7a3c51ada7851a6910e2f002e4ea356a"
     },
     {
       "type": "AWS::Omics::Workflow",
@@ -2140,7 +2140,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8195fbfa04f176c566b4766abeaa7be124dec86806f4d1c7aa824f077f61f2fd"
+      "reader": "b2c9627bade69cd64ea25ea51bc7f19de8b3e80ffb7f902aa7797063da2ec4d5"
     },
     {
       "type": "AWS::OpenSearchServerless::SecurityConfig",
@@ -2151,7 +2151,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "ace314401dfd11aced02bfefb83328c58e856e3be4fea4c757532a7d771b4c72"
+      "reader": "9e716993d2a47f4c56e8d1ae5fb135b96169f3013fa4a3954da103808e822b67"
     },
     {
       "type": "AWS::Outposts::Outpost",
@@ -2161,7 +2161,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d66f7f15b29fee0677215279a9146859062c6b62dda1c3effd0867c962708717"
+      "reader": "332dfb77125e753cd63607dc3fee830be7b4511f82a12909a7746e679d0b411f"
     },
     {
       "type": "AWS::PCS::Cluster",
@@ -2171,7 +2171,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "464222997d3f1bc9ed1b613d161c90bdac5f45b9b7ccaee84f59cac9acdfcc40"
+      "reader": "70667105b7f297051a23a7c3aec923f1bc53b5c376e8e8f667a80b63d0adaf8a"
     },
     {
       "type": "AWS::PaymentCryptography::Alias",
@@ -2181,7 +2181,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ec8bbfdac24df665c3f9d58947d2a318b7af0aef57efd4bb1bbe49258d154e13"
+      "reader": "2f639ae9bd0036d00ea563f1b1c4b7a4b91872eca1d338284a9881991dec6ab9"
     },
     {
       "type": "AWS::Personalize::DatasetGroup",
@@ -2191,7 +2191,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "234c3a7c9ddcfb9e788738c339b850e766841e8d5a184bb49cec2f40e0564b63"
+      "reader": "82e60057a2cb8ba0a8bceb55dabd13fbf3113ce558b170fb9abe3149a59c467f"
     },
     {
       "type": "AWS::Personalize::EventTracker",
@@ -2201,7 +2201,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f3a58609f7e8dde70c13a9130122939a7c5a0fc45c7f5caeab6fe27726cbfb94"
+      "reader": "f06e2848b57b96cddb7250b7f6d61fe614fb28e2026d5f7e1d883a839a136bc2"
     },
     {
       "type": "AWS::Personalize::Filter",
@@ -2211,7 +2211,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b668161ef04b9f6731d885e4047efdae6e8522ceeba679882b26f5faab317e02"
+      "reader": "c7d330f3fbc4e5bd5790fdd185c9ce02f583e4176c8681383a4eaa31d861d92d"
     },
     {
       "type": "AWS::Personalize::Schema",
@@ -2221,7 +2221,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d6c019edf0631b4119dafec92c7ada95084a2b81763a9d4cad6f201d483a608a"
+      "reader": "969e6d37ca7a8418adbbf6c46e239356c9987c0153eacaa1ae2146aeeb8040ed"
     },
     {
       "type": "AWS::Personalize::Solution",
@@ -2231,7 +2231,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6eaa5ab88e18bf5e21284fdc381478a0d4a78176b0da9294f59a13bbca9ab7a2"
+      "reader": "806ca3d8f2aca8b57dd60c4f2ea068a6d501d90e5c3c11e1788d47fe1b5ff23f"
     },
     {
       "type": "AWS::Pinpoint::InAppTemplate",
@@ -2241,7 +2241,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0c415c7b3a6327e83d3dd04ced00f410b57ac7256c596153323fba3353ede273"
+      "reader": "148a1d628d5c0eb32ecbe493c715abf63a18fcaf88b38bf644663c51a3986df6"
     },
     {
       "type": "AWS::Pipes::Pipe",
@@ -2251,7 +2251,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "95e8753d50a1c7e1ddf5c1d99074f08fe1cc83b5cb0fbcd9e3471cd5374f528c"
+      "reader": "47102a9a2da1355c9aae3c1691cc5a34befcf59b798cdefbd055f87aa9f870cd"
     },
     {
       "type": "AWS::Proton::EnvironmentAccountConnection",
@@ -2261,7 +2261,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "764040b2521df9d2caf14b1f6327daa1d888f71e996c95542fa5a0625db1bb37"
+      "reader": "00e84e1c51cdbb986ed9df3e83e31ac1a5a21072d7995e0d1b37ffb69179b184"
     },
     {
       "type": "AWS::Proton::EnvironmentTemplate",
@@ -2271,7 +2271,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2043f2842acfab9f28b0175a9b1176b2132853ff125e4afbd112be0d8a638050"
+      "reader": "e85bbfc3934fce2b07608aac704251d6abb9b69b196e0c61c8d0ec068c71875e"
     },
     {
       "type": "AWS::Proton::ServiceTemplate",
@@ -2281,7 +2281,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c00f0b1b85301d2cc4c6a72c600e214e815e3de815f7f45c4d64d5d3627c7d49"
+      "reader": "5dbcf36a1af2bcf34182944e3f46bbc83ae45ce4ed9e44e9246fd10e33c12ca7"
     },
     {
       "type": "AWS::QBusiness::Application",
@@ -2291,7 +2291,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "58e9205bc47ea3dc127f6405e6731c097bebeef7453e89f528eae3be79748a22"
+      "reader": "fa5c8b363358994c90996651b845270b411fa051734e05887e9a4780df27f2e2"
     },
     {
       "type": "AWS::RDS::DBClusterParameterGroup",
@@ -2309,7 +2309,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "e24ede4b84fc02a064d497de5e9aed9fc282d73c8ca1ec9ba2075b236d547125"
+      "reader": "253f0a28d176d79210c9210491878e50e8aedcaa60dfae4db648625a45c543aa"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",
@@ -2327,7 +2327,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "5705128f86e8d158bc2f0d8b3f05a5fafb99f0a7a49d86fcd609e0fc713238ec"
+      "reader": "7e873d5767b9e71cc96893c1e62410c2a00adf1230532c26d59ca082717016a6"
     },
     {
       "type": "AWS::ResilienceHubV2::Policy",
@@ -2337,7 +2337,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "191cfc2730db3b9fbd6ffbe63188c15f2e37b6072932f786768baafa6273f81b"
+      "reader": "2c00ec4bdaa4ed9797b824510155e01623a87a6e3fd77b7edbf881d8402a3996"
     },
     {
       "type": "AWS::ResilienceHubV2::System",
@@ -2347,7 +2347,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c85154018822d2738ba72f1919c6c177aabcc6fd13df8deca947c82a88ddf439"
+      "reader": "12a59b6811ef7ee0c74b7f8ceb6690bf46e95eff0919083d2068882b9420b465"
     },
     {
       "type": "AWS::RolesAnywhere::Profile",
@@ -2357,7 +2357,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a17638334c3814fbfdb3cf03b92e942538369fa2ef9c823d845fa4f4bbd3ca54"
+      "reader": "0db9580d6146299c2fe7222198a28eae87aeb3618b53734a5ca351e12e0df61b"
     },
     {
       "type": "AWS::Route53Profiles::Profile",
@@ -2367,7 +2367,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b2a344e20e4835a948bee5b7c58b2d979fd214a5f5973097780602a57bf836e6"
+      "reader": "01298ea32049e94391785675e3dcd042e09598fc3b07fff4a7abbbfbcbc4b9ea"
     },
     {
       "type": "AWS::Route53Profiles::ProfileAssociation",
@@ -2377,7 +2377,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6a5752e8f6a9a2e4f3e363ebc2927029b02a7b970592716c6123290f18bfb0ef"
+      "reader": "7b09d0039db9ca9ecb3e1f8be3a589a4ce6776bfc1cf4145fe38870fef689767"
     },
     {
       "type": "AWS::Route53Profiles::ProfileResourceAssociation",
@@ -2388,7 +2388,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "5ced5ab9be5796df1b18484403616b97bf67a107ec76231c4db4aaf50b62839f"
+      "reader": "a8a51f45e2f50930bbcb6f6b0f77d65afff342603c3a146cd26f8a16470cf00f"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::Cell",
@@ -2398,7 +2398,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "965facedb69026cccc0f18b7e929da857a7ceb4791af7249971354ea0df3c00a"
+      "reader": "0fed8c85308e5034cc3c8b0d67fd76147e9aee2eaad3ee8829d06ddd2f42c306"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::RecoveryGroup",
@@ -2408,7 +2408,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f29d0bbf23680478846778ce634228c99adc3a509bcb8052556f5358f7dfe7cb"
+      "reader": "de1074003f5ce02537f2a37ceedd579ba8345b6f55cc68a0166586123899e95c"
     },
     {
       "type": "AWS::Route53RecoveryReadiness::ResourceSet",
@@ -2418,7 +2418,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "92f362060bb344518474197840625bebc320d6aa195b0492b846433e766467da"
+      "reader": "39161a9dcc1d3ce79aacaa178c8559bbcafd20a1a1cf8692a91daacb56038cb5"
     },
     {
       "type": "AWS::Route53Resolver::FirewallDomainList",
@@ -2429,7 +2429,7 @@
       "instances": 0,
       "compared": [],
       "note": "Cloud Control could not read any listed instance",
-      "override": "16eb4e937f66eeab6f45872b99c53a9110b4640491213c10b0ed77a8aa521297"
+      "reader": "fe49ab6329412e8a018393f3bb47142a08ac7340d4dc53e218ca1c892cee2a24"
     },
     {
       "type": "AWS::Route53Resolver::FirewallRuleGroupAssociation",
@@ -2439,7 +2439,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8797fd97b643eaa64b6af850b5e930e69f280fb812179cd11d83a987642a6468"
+      "reader": "1749479bbbb96380089d19c4ed616b679668768a4834ad7befec9a8d14d942ec"
     },
     {
       "type": "AWS::Route53Resolver::OutpostResolver",
@@ -2449,7 +2449,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "d3608924ded9e84fad67a33846aa7e51155d6017d1ad1152060e7eb7b99d19e7"
+      "reader": "a9a14cd11bdab18301a3f83aca9cdd0941f460cd4df2a0188eed7e4a1d54338b"
     },
     {
       "type": "AWS::Route53Resolver::ResolverQueryLoggingConfig",
@@ -2459,7 +2459,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "3fddd0aea6ad636cd4c4051683a91af972a8dd1e2cc7dadd9ab3eff242344ba4"
+      "reader": "5ef3fc2cb0c668a84895a5537cdf3b20349240855f3d605e733c85a65c3910f7"
     },
     {
       "type": "AWS::Route53Resolver::ResolverQueryLoggingConfigAssociation",
@@ -2469,7 +2469,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "0387aef8d4861cdeb49258e695ac42bef700251269fadea0c1862deb6405a5a4"
+      "reader": "d2f266e3f08102f460bc9b432019b81cd141dc295773beb5212623fa3cbfb254"
     },
     {
       "type": "AWS::S3::Bucket",
@@ -2519,7 +2519,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "9a68eb63dfffa0438c2fb409af1f1162edfd246e02976c164e8c4831f2b7c479"
+      "reader": "5b1e20af1aad1a31754759fe7beab1c8aa03b8a1ab4d77db05aca291c045c62b"
     },
     {
       "type": "AWS::S3Vectors::VectorBucket",
@@ -2529,7 +2529,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "301b3e4ceee7bffeb04bde4644fe875f124133c7ec11c48147a407b2146649da"
+      "reader": "b4e1f39a90e8cc0a082b46a3cc8401fe6e3e62c0def29082dc93a2153e8e98fe"
     },
     {
       "type": "AWS::SES::ContactList",
@@ -2539,7 +2539,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "16ad0f1b955fb6c92c3638843ae591b3c6d5bafc75ca89d4f37f173d8b8aeeb4"
+      "reader": "8316ec5afb5e53164f69925e23f7cd7e1f6260057639964f028499ba59b5c5bd"
     },
     {
       "type": "AWS::SES::CustomVerificationEmailTemplate",
@@ -2549,7 +2549,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cb3794f371b6440a028712ddee383864bca3991d399676310ff48dd12d254fef"
+      "reader": "5ebaf42250922cdad2cc80455524b729f375573303cd8ae667e8967e2d807324"
     },
     {
       "type": "AWS::SES::MailManagerAddressList",
@@ -2559,7 +2559,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a0c5018c160c76d742b2e87f422c86dd563c28d25ba8bd8ff2e5c6244ba96384"
+      "reader": "b3ea47f79a58dd6e71b66d8005014e38a8d353b9daf07020c3fe529f0064924c"
     },
     {
       "type": "AWS::SES::MailManagerRuleSet",
@@ -2569,7 +2569,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c5b7a666e6024d6ebaec11b514d9b5634964e6bd84aa885690c76d0436c8b662"
+      "reader": "ef4116afb0ba37b0a08ebc468a2f54edfdd70939aa4a4d97c2b7b7914e62eca0"
     },
     {
       "type": "AWS::SES::MailManagerTrafficPolicy",
@@ -2579,7 +2579,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c397588851b63d0a076bf7fb0095c960cbed2bceb5cc011a0f1ca100bda43183"
+      "reader": "ee45941506e8bbe2913ad27f5ca5f0b23e4d1d1474a14b768cd6a5ae86fab377"
     },
     {
       "type": "AWS::SQS::Queue",
@@ -2607,7 +2607,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "de4d6d10211d0ef46af202f79babd5cac230202a76d84790a1e90dedbe9a9407"
+      "reader": "1c62fea1fc217b01a2b50a51ec63c483cc10f415562269cb2c12038c23c80be0"
     },
     {
       "type": "AWS::SSM::Association",
@@ -2617,7 +2617,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a46279ac9c7fc06856463b1ba78b2269732a80d782626b8055e34306fa7f856d"
+      "reader": "e977fe440cd7d6e00dcd07110339877e6bda28d1e8d369a050423770e502767b"
     },
     {
       "type": "AWS::SSM::MaintenanceWindow",
@@ -2627,7 +2627,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ee648af6c22dd2373c98ddc430b06381cd323966981c78a68dded96fa8e673a5"
+      "reader": "4ba2f0d49b41f8af9f209a6ec78e29283c2156d8c9747fd8c04e67e7c7b956cb"
     },
     {
       "type": "AWS::SSM::Parameter",
@@ -2646,7 +2646,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+      "reader": "67c960db8ae8c4151a9ebb5c6c9c6f5a442b40ce94705b3d40f97123c3e2119a"
     },
     {
       "type": "AWS::SSM::ServiceSetting",
@@ -2657,7 +2657,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "0484bc01a48d9af22314ce0afdd56977d1398f7017a3c5bc2142f01292f677d9"
+      "reader": "597b6620073672aa60bcd9719d647d63b08cada973dd2b5bd41ab8bf5a7cfa95"
     },
     {
       "type": "AWS::SSMQuickSetup::ConfigurationManager",
@@ -2667,7 +2667,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f2e346e48eb0a01a9cf92468a969785082abf89494621c0d97a420a80cf473b6"
+      "reader": "ea50399910192f3308d92dbe0d982385628923ce72b29b0fb0cf6ac706ae7448"
     },
     {
       "type": "AWS::SSO::Application",
@@ -2678,7 +2678,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "f3d67fa9eeebdebfde6c882ca86812dc792dd48db94c2d2e6cc7ce655ee54eb8"
+      "reader": "d10b3f6dab6c8697613fe5586e8e4b13e1d3ee4a249370da177b5e81b0ce6c72"
     },
     {
       "type": "AWS::SSO::Instance",
@@ -2688,7 +2688,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7014cace9dbd6a04e50ea1c642a19a0a3c8f4227bf783e9dfb4a985469159b85"
+      "reader": "cd6597d496cf3d0177ace4bcee37276f86546643c14503b79af2058314f002d8"
     },
     {
       "type": "AWS::SageMaker::Algorithm",
@@ -2698,7 +2698,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "92374cc752dfa6c33ea2b1b6f3c07dbcc625807db514ee70f6030b84e683e463"
+      "reader": "aa13708f93535c3648f4074e8492327d2055d330dde245481f108113e33e6f37"
     },
     {
       "type": "AWS::SageMaker::ClusterSchedulerConfig",
@@ -2708,7 +2708,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1f2abf04cab5c7844c9a25abc539f2e5205aae5bc1933d6ae8f7184d21acd3af"
+      "reader": "3cabcb36e05b904842e6cb098b24a144e75fb091348656749b00b7cf0a808592"
     },
     {
       "type": "AWS::SageMaker::CodeRepository",
@@ -2718,7 +2718,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9a4c155c87e2da2620fb53480374f297bf9578324f27e94a66f913ba27976c5a"
+      "reader": ""
     },
     {
       "type": "AWS::SageMaker::DeviceFleet",
@@ -2729,7 +2729,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: UnsupportedActionException",
-      "override": "e7b3026917d896e509d63da90c70562ca7fed023de6c2c4bebf79455246e6a32"
+      "reader": "85b4c6524a4bc304850f8ef52f15fe065f378976b4d24526ddfdb37d19e1f4d2"
     },
     {
       "type": "AWS::SageMaker::FeatureGroup",
@@ -2739,7 +2739,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c7d858d1552ad2bfb88a3cca5163d5e2cc819b06b03f5a6c36ed5a383063244f"
+      "reader": "d990e1dc33afcf492ef31d669e0c9ab6fbfb0d831e95a265cbc74132f8529bfd"
     },
     {
       "type": "AWS::SageMaker::Hub",
@@ -2749,7 +2749,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "53f885865e337a43ac697619a2957e564675b9db0fc3b7abbe9bfe27bc38abb1"
+      "reader": "8fc9c3b048667b47fa21c9a024a0d1b35db776e5fe514db6bd4906ad3edfd558"
     },
     {
       "type": "AWS::SageMaker::HumanTaskUi",
@@ -2759,7 +2759,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "5a6f32e867ed761ba2bf6051e28a63ab656bddad600d719c952012c05bd0a3fb"
+      "reader": "7a97b935bc26abb7402b43310125ae2a71b7b17b13e92cd78b86e7616bf1afe6"
     },
     {
       "type": "AWS::SageMaker::MlflowTrackingServer",
@@ -2769,7 +2769,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2a751fad5f0625a0f36d2beddbc43f4a24a5690caa2ba73dfff9c300b9924fc1"
+      "reader": "c82e3db6450f4ff7674ed0b035348d3cb4af2e66cf921af86ed0f28b26e0898c"
     },
     {
       "type": "AWS::SageMaker::Model",
@@ -2779,7 +2779,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c7a60c2e6afd5cd29ee4657a60a4bf699dea383646115362522f1a17381fe7a5"
+      "reader": ""
     },
     {
       "type": "AWS::SageMaker::ModelPackage",
@@ -2789,7 +2789,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "716a658043d55890c2307a6db7a598e80ef9a96a15c6f57138abba83fcd217bb"
+      "reader": "5565b189f4dc4e75a8cdea6972df5c76353784f9044370999a781f78741cb531"
     },
     {
       "type": "AWS::SageMaker::NotebookInstanceLifecycleConfig",
@@ -2799,7 +2799,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "bee1ff669085ee73213e15919336b999dee341c470a56484646f3ebc7d2ee445"
+      "reader": ""
     },
     {
       "type": "AWS::SageMaker::ProcessingJob",
@@ -2809,7 +2809,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "37f8bbf1db8501323d6e8ce68a467c601d2007d3b429dc68ae3c1990d48592f3"
+      "reader": "771a0f49041ccf22787a7f5a6f6640b38084f7ccf4da0d76622a583b722df2ef"
     },
     {
       "type": "AWS::SageMaker::Project",
@@ -2819,7 +2819,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "fbc98d8619ef9c5d6d047e4afb2b17c7d3fbf85d2d7f6e1e8aea80f20f8852af"
+      "reader": ""
     },
     {
       "type": "AWS::SageMaker::StudioLifecycleConfig",
@@ -2829,7 +2829,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a421cf697d3a2ba89a21d90e8427dda30b89b47f93358da018985f58cf6c1eb2"
+      "reader": "71b8ff9d86a55e2d3dd1a8e9c723a39586fd6653d9f1246f25b991b7d027efea"
     },
     {
       "type": "AWS::SageMaker::TrialComponent",
@@ -2839,7 +2839,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "032cf4dbe787734b9800d4e542ef01f1bd591162ce50cb67d99b54bf267c8903"
+      "reader": "412ed899087fc5338bc419f5ba64c456dbb3d78aa6430e2887fdc40b64a26fe1"
     },
     {
       "type": "AWS::Scheduler::Schedule",
@@ -2849,7 +2849,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "8aee62f138bc17c015fbcbb08fbdb42b4edf190e0dcff89775b1795ac9ee9e36"
+      "reader": "c93d23808cdaa508368d32db158776e75d4308233d0e0ab9ad077a12fcb970d3"
     },
     {
       "type": "AWS::Scheduler::ScheduleGroup",
@@ -2866,7 +2866,7 @@
       "differing": [
         "Arn"
       ],
-      "override": "1f38d8f1dcd1ad4bee9d3775e8d8a1f5b894523c6f4825a4db5d2cc0a133f397"
+      "reader": "22b32c12b85a559d4622f4f933569261344adb57edcb4b24679023139e59c39f"
     },
     {
       "type": "AWS::SecretsManager::Secret",
@@ -2884,7 +2884,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
+      "reader": "0662fce95db9665bd47b85d7efab560427a9fc87fea4c838085fdb285977641a"
     },
     {
       "type": "AWS::SecurityAgent::Application",
@@ -2894,7 +2894,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "cb77be9e175f5a7b3a0ac24eca1a5cec1da208da1f5213d6366cdbb0d4631c7d"
+      "reader": "443382c2e92650682df7fd8e5cb7e8b520ae3a710cd8d2d242669d72bb7988c7"
     },
     {
       "type": "AWS::SecurityHub::AggregatorV2",
@@ -2905,7 +2905,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AlreadyExistsException",
-      "override": "ed15dc2fc5d6a6f5bd5505120047bf30923fc37ad156c7329a37eb544aa87cdf"
+      "reader": "a3dac8be0bdaba42d75c2ab40521304cc5b72b4743c91b05a02d472417e5f611"
     },
     {
       "type": "AWS::SecurityHub::FindingAggregator",
@@ -2916,7 +2916,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: ResourceNotFoundException",
-      "override": "15d6c38d1f3bee3b205ee448d700401ae634a6b7801aa5eeead5448bee68fe8a"
+      "reader": "1cfce7ae1d1a201de2d37424c64179b073ef85150df1df275dfca8f69b540f7f"
     },
     {
       "type": "AWS::ServerlessRepo::Application",
@@ -2926,7 +2926,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e959ec0a9a987a7c7ce01948ae754df02f9ebce1714db2ae6fbee2979f543a09"
+      "reader": "ad7bce8ed16b49c64d9212889b6eb25600d2b930d496a1189ea0c4638135cb9e"
     },
     {
       "type": "AWS::ServiceCatalog::TagOption",
@@ -2936,7 +2936,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2e54b09be527d8862bd80ef736373f75bbaf276aa0cae8964da31179176265d5"
+      "reader": "aae60ff368f5308a7a72267eeb76737270068d68eb773922a6c27a12c664d62e"
     },
     {
       "type": "AWS::ServiceDiscovery::HttpNamespace",
@@ -2946,7 +2946,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "bf212d0f08f79c4ca8c7c1fc1d50edcd587ed71faf2dffb2c956c33f4d0e44bc"
+      "reader": "2f66172bfeb0a6e368eba021a26973610cf7119b232c4ed4f07b3d6f5c9969ab"
     },
     {
       "type": "AWS::Shield::ProtectionGroup",
@@ -2957,7 +2957,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: ResourceNotFoundException",
-      "override": "5d4dd10fb145df0b49ded467a79b0f03418ea12a5187367ce6059307feedd7b1"
+      "reader": "656d8e91f8fbe0bf837cf332318621ee8970bc7ada3d0d7888e976574da18ffa"
     },
     {
       "type": "AWS::Signer::SigningProfile",
@@ -2967,7 +2967,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e8750f92c811dca9291d7adee0f89f372e25de50a736eb8cfdfd83317ffd4ca4"
+      "reader": "74cae5d15b0b0f8250b93798231e69f92cec1be374d97a481a18954902a4534b"
     },
     {
       "type": "AWS::Timestream::InfluxDBCluster",
@@ -2977,7 +2977,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2ec7ddbcdf022dd177169139f16552ca6d15a9b75d7476070adee8ec01b424b4"
+      "reader": "4f66edc52f38737bdae58a52b3d1d094937030d1722a2ff8686d792d44922451"
     },
     {
       "type": "AWS::Timestream::InfluxDBInstance",
@@ -2987,7 +2987,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "4786a73682a49bd62e528887929be7741551e32910f153b69abd9aab2641dad9"
+      "reader": "410607bc3fcc7130e60c17c2fbcedd722e024b29dbbfe42b4b407be424abf3b0"
     },
     {
       "type": "AWS::Transfer::Certificate",
@@ -2997,7 +2997,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "445a08abaec68ad4478edbcb6c90c85a872a41f58b6ed3f147b3a4c52f5ffbb8"
+      "reader": "0bbe8dc7c2bec74d4d94d9e3ba9180bcf9583704ab488fdb5f88600b631ddb73"
     },
     {
       "type": "AWS::Transfer::Profile",
@@ -3007,7 +3007,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "6e6d7c87a1cb4edf240132b8e876948d7459a5370fa4c7a2cf87414ea763545c"
+      "reader": "a57fcb9e668edb207e06abc12acdcbd11b553996a8bdd6e6adc85ad275f956c7"
     },
     {
       "type": "AWS::Transfer::Server",
@@ -3017,7 +3017,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "e38a6f0676cad2294cdabea2c619068e569bf3ac04e0a0aa793645ecfb81f454"
+      "reader": "f2012317763bbea5e564b1b51aeef79a7bea1797d1ac526ee8bc79cb16af1be3"
     },
     {
       "type": "AWS::Transfer::Workflow",
@@ -3027,7 +3027,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "18472ab1e66dbbabf0a88767dc8a2591f8f9626192c4db488d991466f341f158"
+      "reader": "8a45d9d13583f340b39d703cc3524c0d28efc6c0e60b24e87c9e3188a793b45a"
     },
     {
       "type": "AWS::VerifiedPermissions::PolicyStoreAlias",
@@ -3037,7 +3037,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "2aa8d94e9a79e08d6be12e0ff1ee441bd1658eb1e78d1e6bdd9a1c1400b17109"
+      "reader": "4793d5fdc3ca25dc1b7522f54f10aca53a5ae7f205a90e954c3694996a2e0cc6"
     },
     {
       "type": "AWS::VoiceID::Domain",
@@ -3048,7 +3048,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: AccessDeniedException",
-      "override": "d4c802ed9473ca026c78e2f6a26372e7e69e39234cee00965cf1bdbb556bec56"
+      "reader": "57b275433d6b19d762d5ef3de62a3f3d0276b52a39298e911d02f49fc13a873a"
     },
     {
       "type": "AWS::VpcLattice::AccessLogSubscription",
@@ -3059,7 +3059,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "0389cf7bef45e8a271bce1e358b5a785531f25753f30fc21b64af32fb205b389"
+      "reader": "4950212350e2ce0ffee7b0c21808944f59243c17b96c57bf99207930b473e3a6"
     },
     {
       "type": "AWS::VpcLattice::DomainVerification",
@@ -3069,7 +3069,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f544cf04ace4ea826fbbd027ee1844de3e22fd388a03e91567d7875a8d8031e5"
+      "reader": "63f216d7882aaa4682f70d395ed67cfb680ca436774b357a94ed4e68e19cde2f"
     },
     {
       "type": "AWS::VpcLattice::Service",
@@ -3079,7 +3079,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "1b25d27be62c82a09843418da6d520c683d22b20869881c6e2d4cc33c0db2be9"
+      "reader": "a84c854d93c39973d02f85e2205cf73a8d0eae032da1df19df0b205c62dcc17c"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetwork",
@@ -3089,7 +3089,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "55b9bd11252d70a8b6a31a4ca2d8b0cb2c5a96b181b730c8462cbfd6dc29614f"
+      "reader": "e06b75707941edc71002389c1929be0dddb281e55c9a9eb6b1ef5e582bf14a65"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkResourceAssociation",
@@ -3099,7 +3099,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f49a76b030dd5651e98d79e333b96218466ac1d8da380a1252e9c8631178132f"
+      "reader": "d9fdc4475411d75ded177e862b0618cc5a1ebba6a44e19f8062369e1cbb4f1b9"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkServiceAssociation",
@@ -3110,7 +3110,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "75a689d41bdb56f7d3e390c2d41ffe62305d5421d8c81fa286cff00f01a77110"
+      "reader": "0a4510e0c4e3f5b7397d40d5d0e0df2f3dda298ae16932f5bbcff59b8baa9250"
     },
     {
       "type": "AWS::VpcLattice::ServiceNetworkVpcAssociation",
@@ -3121,7 +3121,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "56834ddd712d63f1af8e3811c5ecc9051052ea379c80cf38b903a662572de675"
+      "reader": "c8d96e8b451ed21449365b32be8d274555f9d7af059de874d4c50223202cef16"
     },
     {
       "type": "AWS::WellArchitected::AgentProfile",
@@ -3131,7 +3131,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "b4bd5b1cd46021bf2ea655fba2d77b02aacca3481d5d5f47f49b2c0ce0bedae5"
+      "reader": "1e9cec24bb1392bf6c67551f3ee44b4a0eefea816063c5f0cc3f6d7d517245b6"
     },
     {
       "type": "AWS::WellArchitected::Profile",
@@ -3141,7 +3141,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7ac8489bb13e37e48246acf47913adf05c71f2dd88db8f7772753737499fba02"
+      "reader": "3297f175ba36db8e84e850b417df98ff1bdeeb3aaff9c2db401969e240fecb4f"
     },
     {
       "type": "AWS::WellArchitected::ReviewTemplate",
@@ -3151,7 +3151,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "c1d82722772850ed2ce3701024710c7211cf11eb2002fde9f915cbb58178a58c"
+      "reader": "a3c34b121b6d3b65be41576eb38f619d36b2024093fbccfd7f7f6f052525b88d"
     },
     {
       "type": "AWS::WellArchitected::Workload",
@@ -3161,7 +3161,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "613871d1d292d48cbc3f9acfcd2af27342fa1f7b3a59aa83df6cc22bd61a2682"
+      "reader": "8a248420063de23f5139a069ccc4a275cfeb1cbd545274aff4f3e2a8de332688"
     },
     {
       "type": "AWS::Wickr::Network",
@@ -3171,7 +3171,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "083087089a42c9306b139a34db8a34de397c733acb2c2ee38c67129238e948ae"
+      "reader": "4ba836fdb138880062f1a48494b844d7725e3e98752dfb125407a2f2bd8a4d9e"
     },
     {
       "type": "AWS::WorkSpacesWeb::BrowserSettings",
@@ -3181,7 +3181,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "f560b87ef7cb3c956dc7dc9e5b3bd9db170036dc1a3cd19957a9096eb4c9b2f4"
+      "reader": "6f5fa6da80bb2ca5b7609f52e5a1f3b506e59ba1b9756e5e8b3a04a66bb2c850"
     },
     {
       "type": "AWS::WorkSpacesWeb::DataProtectionSettings",
@@ -3191,7 +3191,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "ef9c7537efd18325175a4f8dc382fb42298cb95bcae06dbf22f3ecfec652e3d5"
+      "reader": "e67c6bc0d781bac3fef89bb69e48992ea616dbcb662cbb94c7b4f95a118da329"
     },
     {
       "type": "AWS::WorkSpacesWeb::IdentityProvider",
@@ -3202,7 +3202,7 @@
       "instances": 0,
       "compared": null,
       "note": "Cloud Control could not list the type: InvalidRequestException",
-      "override": "471f8f0a07344ecd5815a1a3cf0248207d48b524e3fe5b59a054c85ef6c59e99"
+      "reader": "d5fa261b2dc907023b552a04a66936c6aa5e3f812f6efa67b9c4e05f734322f7"
     },
     {
       "type": "AWS::WorkSpacesWeb::IpAccessSettings",
@@ -3212,7 +3212,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "9129cf17f02fda6d0ef46975b541d2e4065355248c84318d333a180173418048"
+      "reader": "0d18168d281c7413f57435c10fb6f87e198d98f0c0f0bab8bdd5f4909ed7c86e"
     },
     {
       "type": "AWS::WorkSpacesWeb::NetworkSettings",
@@ -3222,7 +3222,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "a3d24f3886c2f3f7faeec1f53208089d7741ceb24815876bd582d194bb513101"
+      "reader": "8e865e83d649cb2cfb6d0a3c192012e85c916321c46b330d113365038f35022d"
     },
     {
       "type": "AWS::WorkSpacesWeb::UserAccessLoggingSettings",
@@ -3232,7 +3232,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "7cf309b132bad8ada036fff83e00876cf1e5316c92e76f4ced1a30be772d17a0"
+      "reader": "2dac390acf6368e11a1dda5bada4d2ff9c3c90690384651a81d8b174eea59f23"
     },
     {
       "type": "AWS::WorkspacesInstances::WorkspaceInstance",
@@ -3242,7 +3242,7 @@
       "outcome": "no-instances",
       "instances": 0,
       "compared": [],
-      "override": "04a227337c501f31e3a6313b327e8eade9153a54a563d5fe3144ce6dbcabd3aa"
+      "reader": "f10fbcce137ca238b33e9e82890497d9266431458f3e7aaa5a84827b1775e543"
     },
     {
       "type": "AWS::XRay::Group",
@@ -3256,7 +3256,7 @@
         "GroupName",
         "InsightsConfiguration"
       ],
-      "override": "53ef54d3b0108dc5e2b902bf5239dad1068a2049c5361f876187380d5f181f08"
+      "reader": "2c1cdbcd60d0560c0384187bcfb492809a9d4c19ba1e4ad23114543ce3ee54c2"
     }
   ]
 }
