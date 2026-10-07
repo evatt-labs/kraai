@@ -48,29 +48,18 @@ func (c *Client) GetResource(ctx context.Context, typeName, identifier string) (
 	return properties, true, nil
 }
 
-// fetchResource sends one GetResource and remembers its answer. A type
-// whose direct reader is proven to agree with Cloud Control (see
-// direct.CanRead) is read through its own service instead: faster, and
-// outside Cloud Control's GetResource throttle. Any direct failure but a
-// proven absence falls back to Cloud Control, so the direct path can only
-// ever save a call, never change an answer.
+// fetchResource reads one instance and remembers the answer. A type whose
+// direct reader is proven to agree with Cloud Control (see readsDirectly)
+// is read through its own service first: faster, and outside Cloud
+// Control's GetResource throttle. Any direct failure but a proven absence
+// falls back to Cloud Control, so the direct path can only ever save a
+// call, never change an answer.
 func (c *Client) fetchResource(ctx context.Context, typeName, identifier string) (readEntry, error) {
-	if c.direct != nil && direct.CanRead(typeName) {
-		props, err := c.direct.ReadByID(ctx, typeName, identifier)
-		if errors.Is(err, direct.ErrAbsent) {
-			c.reads.putGet(typeName, identifier, "", false)
-			return readEntry{}, nil
-		}
-		var raw []byte
+	if c.readsDirectly(typeName) {
+		raw, found, err := directAPI{c}.read(ctx, typeName, identifier)
 		if err == nil {
-			// Stored as JSON, as Cloud Control's properties are, so every
-			// caller decodes a direct read exactly as it decodes one of
-			// Cloud Control's.
-			raw, err = json.Marshal(props)
-		}
-		if err == nil {
-			c.reads.putGet(typeName, identifier, string(raw), true)
-			return readEntry{properties: string(raw), found: true}, nil
+			c.reads.putGet(typeName, identifier, string(raw), found)
+			return readEntry{properties: string(raw), found: found}, nil
 		}
 		// The answer stays right, only slower; the event makes a direct
 		// path that always falls back visible in a trace. The service's
@@ -85,27 +74,12 @@ func (c *Client) fetchResource(ctx context.Context, typeName, identifier string)
 			attribute.String("kraai.fallback_reason", reason),
 		))
 	}
-	out, err := c.cc.GetResource(ctx, &cloudcontrol.GetResourceInput{
-		TypeName:   aws.String(typeName),
-		Identifier: aws.String(identifier),
-	})
+	raw, found, err := cloudControl{c}.read(ctx, typeName, identifier)
 	if err != nil {
-		var notFound *cctypes.ResourceNotFoundException
-		if errors.As(err, &notFound) {
-			c.reads.putGet(typeName, identifier, "", false)
-			return readEntry{}, nil
-		}
-		return readEntry{}, kerrors.Wrap(err, kerrors.CodeUnexpected, "getting %s %q", typeName, identifier)
+		return readEntry{}, err
 	}
-	if out.ResourceDescription == nil || out.ResourceDescription.Properties == nil {
-		return readEntry{}, kerrors.Validation("GetResource for %s %q returned no properties", typeName, identifier)
-	}
-	properties := *out.ResourceDescription.Properties
-	if !json.Valid([]byte(properties)) {
-		return readEntry{}, kerrors.Validation("GetResource for %s %q returned properties that are not JSON", typeName, identifier)
-	}
-	c.reads.putGet(typeName, identifier, properties, true)
-	return readEntry{properties: properties, found: true}, nil
+	c.reads.putGet(typeName, identifier, string(raw), found)
+	return readEntry{properties: string(raw), found: found}, nil
 }
 
 // ListResources returns the primary identifier of every instance of

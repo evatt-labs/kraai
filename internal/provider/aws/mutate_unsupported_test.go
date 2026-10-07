@@ -104,3 +104,40 @@ func TestUpdateNamingAnUnsupportedPropertyFallsBackToCloudControl(t *testing.T) 
 		}
 	})
 }
+
+// A type that routes some changes by the instance's state, as an S3
+// bucket's tags under ABAC are, reads the instance before deciding; when
+// that read fails the change is Cloud Control's, and nothing is written
+// directly.
+func TestUpdateRoutedByStateGoesToCloudControlWhenTheReadFails(t *testing.T) {
+	var mu sync.Mutex
+	var writes int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.ReadAll(r.Body)
+		if r.Method != http.MethodGet {
+			mu.Lock()
+			writes++
+			mu.Unlock()
+		}
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = io.WriteString(w, `<Error><Code>AccessDenied</Code><Message>refused</Message></Error>`)
+	}))
+	t.Cleanup(srv.Close)
+	done := &cctypes.ProgressEvent{OperationStatus: cctypes.OperationStatusSuccess, Identifier: aws.String("b"), ResourceModel: aws.String(`{"BucketName":"b"}`)}
+	cc := &fakeCC{
+		updateOut: &cloudcontrol.UpdateResourceOutput{ProgressEvent: &cctypes.ProgressEvent{RequestToken: aws.String("tok")}},
+		statusOut: []*cloudcontrol.GetResourceRequestStatusOutput{{ProgressEvent: done}},
+	}
+	c := &Client{cc: cc, direct: &direct.Client{HTTP: srv.Client(),
+		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region:      "us-east-1", Endpoint: func(string) string { return srv.URL }},
+		canMutate: func(string, map[string]any) bool { return true }}
+	testPollTimings()(c)
+	patch := `[{"op":"replace","path":"/Tags","value":[{"Key":"team","Value":"core"}]}]`
+	if _, err := c.UpdateResource(context.Background(), TypeS3Bucket, "b", []byte(patch)); err != nil {
+		t.Fatalf("UpdateResource: %v", err)
+	}
+	if len(cc.updateReq) != 1 || writes != 0 {
+		t.Fatalf("Cloud Control updates %d, direct writes %d; want the update sent to Cloud Control and nothing written directly", len(cc.updateReq), writes)
+	}
+}
