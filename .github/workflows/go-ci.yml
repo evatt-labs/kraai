@@ -33,6 +33,9 @@ jobs:
 
       - run: go build ./...
       - run: go vet ./...
+      # The live harnesses build only under this tag, so nothing else
+      # notices when a change breaks them.
+      - run: go vet -tags integration ./...
 
       # Coverage runs WITHOUT -race, deliberately. The race detector costs
       # roughly 10x here (measured: 3.9s -> 37.7s for this suite), and this
