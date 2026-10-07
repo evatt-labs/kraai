@@ -10,11 +10,6 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// defaultConcurrency bounds mutating calls within one wave when the caller
-// sets no limit. Mirrors plan.defaultConcurrency: goroutines are cheap,
-// provider rate limits are not.
-const defaultConcurrency = 10
-
 // Applier executes plans against a fixed registry.
 type Applier struct {
 	registry     *resource.Registry
@@ -46,7 +41,7 @@ func WithAllowReplace(allow bool) Option {
 
 // New builds an Applier against reg.
 func New(reg *resource.Registry, opts ...Option) *Applier {
-	a := &Applier{registry: reg, concurrency: defaultConcurrency}
+	a := &Applier{registry: reg, concurrency: plan.DefaultConcurrency}
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -72,7 +67,7 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 	}
 
 	results := make([]ActionResult, len(p.Actions))
-	byWave := indexByWave(p.Actions)
+	byWave := p.ByWave()
 
 	outputs := resource.NewOutputs()
 	secrets := newSecretIndex()
@@ -106,23 +101,6 @@ func (a *Applier) Apply(ctx context.Context, p *plan.Plan) (*Result, error) {
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "applying was cancelled")
 	}
 	return &Result{Results: results}, nil
-}
-
-// indexByWave groups action indices by wave, preserving each action's
-// position in actions/results so per-action output stays aligned however
-// the plan was ordered. Indexed directly by wave number.
-func indexByWave(actions []plan.Action) [][]int {
-	maxWave := 0
-	for _, a := range actions {
-		if a.Wave > maxWave {
-			maxWave = a.Wave
-		}
-	}
-	out := make([][]int, maxWave+1)
-	for i, a := range actions {
-		out[a.Wave] = append(out[a.Wave], i)
-	}
-	return out
 }
 
 // skipWave marks every action at idxs as OutcomeSkipped: an earlier wave
@@ -241,7 +219,9 @@ func (a *Applier) mutate(
 	locker *resource.ScopeLocker,
 ) (*resource.State, Outcome, error) {
 	res := reg.Resource
-	scope := reg.ScopeFor(spec)
+	// The plan's Spec, before Secrets and Attributes are filled in, so
+	// destroy, which has neither, derives the same scope.
+	scope := reg.ScopeFor(act.Spec)
 
 	switch act.Kind { //nolint:exhaustive // plan.ActionFailed is handled by the default below, which documents why: preflight already refuses the whole run if any ActionFailed is present, so this default exists for a plan.ActionKind this package does not know about, not for ActionFailed specifically
 	case plan.ActionCreate:

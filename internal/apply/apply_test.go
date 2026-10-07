@@ -242,12 +242,12 @@ func bindingName(i int) string {
 
 func TestWithConcurrency_IgnoresNonPositive(t *testing.T) {
 	a := New(resource.NewRegistry(), WithConcurrency(0))
-	if a.concurrency != defaultConcurrency {
-		t.Fatalf("concurrency = %d, want default %d for a non-positive override", a.concurrency, defaultConcurrency)
+	if a.concurrency != plan.DefaultConcurrency {
+		t.Fatalf("concurrency = %d, want default %d for a non-positive override", a.concurrency, plan.DefaultConcurrency)
 	}
 	a = New(resource.NewRegistry(), WithConcurrency(-5))
-	if a.concurrency != defaultConcurrency {
-		t.Fatalf("concurrency = %d, want default %d for a negative override", a.concurrency, defaultConcurrency)
+	if a.concurrency != plan.DefaultConcurrency {
+		t.Fatalf("concurrency = %d, want default %d for a negative override", a.concurrency, plan.DefaultConcurrency)
 	}
 	a = New(resource.NewRegistry(), WithConcurrency(4))
 	if a.concurrency != 4 {

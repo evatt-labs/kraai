@@ -9,10 +9,11 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// defaultConcurrency bounds Get calls within one wave when the caller sets
+// DefaultConcurrency bounds the provider calls within one wave, Get when
+// planning and mutations when applying or destroying, when the caller sets
 // no limit. Modest on purpose: a first-time caller should not discover a
 // sane limit by being rate-limited.
-const defaultConcurrency = 10
+const DefaultConcurrency = 10
 
 // getter is the only capability Plan needs from a resource.Resource.
 // Narrowing to it makes the package's read-only promise a compile-time
@@ -45,7 +46,7 @@ func WithConcurrency(n int) Option {
 
 // New builds a Planner against reg.
 func New(reg *resource.Registry, opts ...Option) *Planner {
-	p := &Planner{registry: reg, concurrency: defaultConcurrency}
+	p := &Planner{registry: reg, concurrency: DefaultConcurrency}
 	for _, opt := range opts {
 		opt(p)
 	}

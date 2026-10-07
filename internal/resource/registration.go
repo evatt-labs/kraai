@@ -74,7 +74,9 @@ type Registration struct {
 	// which this type's mutating calls must not overlap; ScopeLocker enforces
 	// it. Nil means unscoped. A function of the Spec rather than a fixed
 	// value so two instances scoped to different values, Neon branches in
-	// two projects, still run concurrently.
+	// two projects, still run concurrently. It is given the plan's Spec,
+	// without Secrets or Attributes, so apply and destroy derive the same
+	// scope.
 	Scope func(spec Spec) string
 	// Resource implements the verbs.
 	Resource Resource

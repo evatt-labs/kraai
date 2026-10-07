@@ -109,6 +109,23 @@ type Plan struct {
 	Actions []Action
 }
 
+// ByWave groups the indices of p's actions by wave, indexed by wave number,
+// each index keeping its action's position so per-action results stay
+// aligned however the plan was ordered.
+func (p *Plan) ByWave() [][]int {
+	maxWave := 0
+	for _, a := range p.Actions {
+		if a.Wave > maxWave {
+			maxWave = a.Wave
+		}
+	}
+	out := make([][]int, maxWave+1)
+	for i, a := range p.Actions {
+		out[a.Wave] = append(out[a.Wave], i)
+	}
+	return out
+}
+
 // HasChanges reports whether applying this plan would create, update or
 // replace anything.
 func (p *Plan) HasChanges() bool {

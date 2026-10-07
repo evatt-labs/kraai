@@ -500,12 +500,12 @@ func TestDestroy_ScopedRegistration_DifferentScopesRunConcurrently(t *testing.T)
 
 func TestWithConcurrency_IgnoresNonPositive(t *testing.T) {
 	d := New(resource.NewRegistry(), WithConcurrency(0))
-	if d.concurrency != defaultConcurrency {
-		t.Fatalf("concurrency = %d, want default %d for a non-positive override", d.concurrency, defaultConcurrency)
+	if d.concurrency != plan.DefaultConcurrency {
+		t.Fatalf("concurrency = %d, want default %d for a non-positive override", d.concurrency, plan.DefaultConcurrency)
 	}
 	d = New(resource.NewRegistry(), WithConcurrency(-5))
-	if d.concurrency != defaultConcurrency {
-		t.Fatalf("concurrency = %d, want default %d for a negative override", d.concurrency, defaultConcurrency)
+	if d.concurrency != plan.DefaultConcurrency {
+		t.Fatalf("concurrency = %d, want default %d for a negative override", d.concurrency, plan.DefaultConcurrency)
 	}
 	d = New(resource.NewRegistry(), WithConcurrency(4))
 	if d.concurrency != 4 {
@@ -558,29 +558,6 @@ func TestDestroy_ContextCancelledMidRun_DeleteObservesCancellation(t *testing.T)
 		t.Errorf("result = %+v, want nil: the context was cancelled during the run", result)
 	}
 	requireCode(t, err, kerrors.CodeUnexpected)
-}
-
-// --- indexByWave ---
-
-func TestIndexByWave(t *testing.T) {
-	actions := []plan.Action{
-		action("api", "DB", "neon", "branch", 0, plan.ActionNoChange),
-		action("api", "CACHE", "cf", "kv", 1, plan.ActionNoChange),
-		action("api", "api", "cf", "worker", 2, plan.ActionNoChange),
-	}
-	got := indexByWave(actions)
-	if len(got) != 3 {
-		t.Fatalf("indexByWave() has %d wave(s), want 3", len(got))
-	}
-	if len(got[0]) != 1 || got[0][0] != 0 {
-		t.Fatalf("wave 0 = %v, want [0]", got[0])
-	}
-	if len(got[1]) != 1 || got[1][0] != 1 {
-		t.Fatalf("wave 1 = %v, want [1]", got[1])
-	}
-	if len(got[2]) != 1 || got[2][0] != 2 {
-		t.Fatalf("wave 2 = %v, want [2]", got[2])
-	}
 }
 
 // --- Outcome / Result ---
