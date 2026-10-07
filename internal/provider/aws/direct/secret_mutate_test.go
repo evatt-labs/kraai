@@ -180,12 +180,6 @@ func targets(r Reader) []string {
 		add(u.Remove)
 		add(u.Change)
 	}
-	if r.List != nil {
-		out = append(out, r.List.Target)
-	}
-	if r.Probe != nil {
-		out = append(out, r.Probe.Target)
-	}
 	return out
 }
 

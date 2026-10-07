@@ -64,7 +64,6 @@ func compileCall(files fs.FS, lock Lock, o Override, only, captured map[string]b
 	c.response()
 	c.fields()
 	c.absent()
-	c.lists()
 	c.jsonNames()
 	return c.r, c.errs
 }
@@ -362,4 +361,13 @@ func (c *callCompiler) identifier() {
 			c.fail("the composite identifier %v is not bound property by property", c.schema.PrimaryIdentifier)
 		}
 	}
+}
+
+// smithyPaginated is the paginated trait: token members in and out, the
+// items path, and the page size member.
+type smithyPaginated struct {
+	InputToken  string `json:"inputToken"`
+	OutputToken string `json:"outputToken"`
+	Items       string `json:"items"`
+	PageSize    string `json:"pageSize"`
 }

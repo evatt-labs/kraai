@@ -250,3 +250,30 @@ func TestHostAndSigningAreKeptApart(t *testing.T) {
 		})
 	}
 }
+
+// bodyPages is a client over a server answering each awsJson request with
+// respond, given the page token the request carries in its body, and
+// recording each request's target and body.
+func bodyPages(t *testing.T, respond func(token string) (int, string)) (*Client, *[]string) {
+	t.Helper()
+	var seen []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		seen = append(seen, r.Header.Get("X-Amz-Target")+" "+string(raw))
+		var in struct {
+			NextToken string `json:"nextToken"`
+		}
+		_ = json.Unmarshal(raw, &in)
+		status, body := respond(in.NextToken)
+		w.WriteHeader(status)
+		_, _ = io.WriteString(w, body)
+	}))
+	t.Cleanup(srv.Close)
+	return &Client{
+		HTTP:        srv.Client(),
+		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region:      "us-east-1",
+		Endpoint:    func(string) string { return srv.URL },
+		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
+	}, &seen
+}

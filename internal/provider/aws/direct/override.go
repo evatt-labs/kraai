@@ -18,12 +18,6 @@ type Override struct {
 	// mutation retries, for a read to show a mutation and for the instance
 	// to settle, for a service whose changes take longer than two minutes.
 	Wait string `yaml:"wait,omitempty"`
-	// List, when set, names the operation that lists every instance.
-	List *List `yaml:"list,omitempty"`
-	// Probe lists identifiers Cloud Control reads as absent although the
-	// service still describes them, such as deregistered revisions, for
-	// the read-parity harness to prove the direct read agrees.
-	Probe *List `yaml:"probe,omitempty"`
 	// Properties maps each readable CloudFormation property to where the
 	// response carries it.
 	Properties map[string]Mapping `yaml:"properties,omitempty"`
@@ -156,20 +150,6 @@ type Read struct {
 	// paths, that a further call's input may use as {Name}: a value only
 	// the read's own response carries, such as the ARN a tag call takes.
 	Capture map[string]string `yaml:"capture,omitempty"`
-}
-
-// List names the operation that lists every instance of a type, for a type
-// whose Cloud Control list is known to omit some. Pagination is read from
-// the operation's paginated trait, never written here.
-type List struct {
-	Operation string `yaml:"operation"`
-	// Item is the member of each listed item carrying the primary
-	// identifier; it must be the member the read binds it to. Omitted when
-	// each listed item is the identifier itself, a list of strings.
-	Item string `yaml:"item,omitempty"`
-	// Input fixes input members to a value on every call, such as a filter
-	// that would otherwise default to excluding what kraai created.
-	Input map[string]string `yaml:"input,omitempty"`
 }
 
 // Mapping is where one property's value is in the response: a member of

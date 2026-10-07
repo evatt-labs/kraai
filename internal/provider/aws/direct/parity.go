@@ -188,11 +188,10 @@ type TypeEvidence struct {
 	// Observed is every error code listed in the override's
 	// undeclaredErrors that a direct read in this run answered for absence.
 	Observed []string `json:"observed,omitempty"`
-	// Absence is parity when every probed identifier Cloud Control reads
-	// as absent also reads as absent directly, differs when one reads as
-	// present, direct-unreadable when a direct read fails rather than
-	// reporting absence, and empty when the type has no probe or none was
-	// found.
+	// Absence is parity when every absentIds identifier Cloud Control
+	// reads as absent also reads as absent directly, differs when one reads
+	// as present, direct-unreadable when a direct read fails rather than
+	// reporting absence, and empty when the type declares none.
 	Absence string `json:"absence,omitempty"`
 	// Probed is how many such identifiers were read.
 	Probed int `json:"probed,omitempty"`

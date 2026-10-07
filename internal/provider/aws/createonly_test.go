@@ -33,8 +33,8 @@ func TestDiffCreateOnlySources(t *testing.T) {
 		current  any
 		want     resource.Difference
 	}{
-		{"override createOnly", "AWS::Logs::LogGroup", "LogGroupClass", "INFREQUENT_ACCESS", "STANDARD", resource.Immutable},
-		{"override createOnly on a target group", "AWS::ElasticLoadBalancingV2::TargetGroup", "TargetControlPort", float64(1), float64(2), resource.Immutable},
+		{"observed createOnly", "AWS::Logs::LogGroup", "LogGroupClass", "INFREQUENT_ACCESS", "STANDARD", resource.Immutable},
+		{"observed createOnly on a target group", "AWS::ElasticLoadBalancingV2::TargetGroup", "TargetControlPort", float64(1), float64(2), resource.Immutable},
 		{"override promotes a conditional property", "AWS::Events::Rule", "EventBusName", "other", "default", resource.Immutable},
 		{"conditional VPC tenancy", "AWS::EC2::VPC", "InstanceTenancy", "default", "dedicated", resource.Mutable},
 		{"conditional engine", "AWS::RDS::DBInstance", "Engine", "postgres", "mysql", resource.Mutable},

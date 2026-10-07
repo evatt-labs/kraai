@@ -44,11 +44,23 @@ func (r *resourceType) translated(ctx context.Context, spec resource.Spec) (reso
 }
 
 // createOnly is every property whose change is a replacement: the schema's
-// create-only ones and the ones the type's direct override declares. The
-// schema's conditionally create-only ones are not: CloudFormation tries an
-// update and replaces only when the service cannot make it.
+// create-only ones, the ones the type's direct override declares, and
+// observedCreateOnly's. The schema's conditionally create-only ones are
+// not: CloudFormation tries an update and replaces only when the service
+// cannot make it.
 func (r *resourceType) createOnly(schema cfschema.Facts) []string {
-	return slices.Concat(schema.CreateOnly, direct.CreateOnly(r.typeName))
+	return slices.Concat(schema.CreateOnly, direct.CreateOnly(r.typeName), observedCreateOnly[r.typeName])
+}
+
+// observedCreateOnly is, by type with no direct override, the pointers of the
+// properties a schema leaves updatable that no update can change, each
+// observed.
+var observedCreateOnly = map[string][]string{
+	// Cloud Control refuses a change: NotUpdatable, "LogGroupClass is a
+	// Create-Only Property".
+	"AWS::Logs::LogGroup": {"/properties/LogGroupClass"},
+	// Only CreateTargetGroup takes it: no ELBv2 call changes it.
+	"AWS::ElasticLoadBalancingV2::TargetGroup": {"/properties/TargetControlPort"},
 }
 
 // compare is Diff after translation: spec.Config is already the vendor's

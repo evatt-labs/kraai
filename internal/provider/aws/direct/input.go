@@ -158,3 +158,11 @@ func queryKey(model *smithyModel, protocol, member string, m smithyMember) strin
 	}
 	return key + ".1"
 }
+
+func sortedStrings(s []string) []string {
+	m := map[string]bool{}
+	for _, v := range s {
+		m[v] = true
+	}
+	return sortedKeys(m)
+}

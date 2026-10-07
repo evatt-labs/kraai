@@ -46,12 +46,6 @@ type override struct {
 		Model     string `yaml:"model"`
 		Operation string `yaml:"operation"`
 	} `yaml:"read"`
-	List *struct {
-		Operation string `yaml:"operation"`
-	} `yaml:"list"`
-	Probe *struct {
-		Operation string `yaml:"operation"`
-	} `yaml:"probe"`
 	Also []struct {
 		Operation string `yaml:"operation"`
 	} `yaml:"also"`
@@ -143,12 +137,6 @@ func run() error {
 	ops := map[string][]string{}
 	for _, o := range overrides {
 		ops[o.Read.Model] = append(ops[o.Read.Model], o.Read.Operation)
-		if o.List != nil {
-			ops[o.Read.Model] = append(ops[o.Read.Model], o.List.Operation)
-		}
-		if o.Probe != nil {
-			ops[o.Read.Model] = append(ops[o.Read.Model], o.Probe.Operation)
-		}
 		if o.Create != nil {
 			ops[o.Read.Model] = append(ops[o.Read.Model], o.Create.Operation)
 		}
