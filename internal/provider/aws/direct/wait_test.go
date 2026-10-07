@@ -46,141 +46,121 @@ func compileEdited(t *testing.T, typeName string, edit func(*Override)) (Reader,
 	return Reader{}, nil
 }
 
-// busyCluster is an ECS cluster that reports UPDATE_IN_PROGRESS for a
-// number of reads after each change, and an attachment that reports
-// CREATING for some, recording each call with whether it was made while
-// the cluster was busy.
-type busyCluster struct {
-	mu sync.Mutex
-	// clusterReads and attachmentReads are how many further reads answer
-	// the cluster, and one attachment, as busy; afterChange is what a
-	// change sets clusterReads to.
-	clusterReads, attachmentReads, afterChange int
-	settings, configuration                    any
-	events                                     []string
+// busyTable is a DynamoDB table that reports UPDATING for a number of reads
+// after each change, and an index that reports CREATING for some, recording
+// each UpdateTable with whether it was made while the table was busy and
+// each table read with the status it answered.
+type busyTable struct {
+	mu    sync.Mutex
+	table *tableFake
+	// events is the reads and calls in order.
+	events []string
 }
 
-func (f *busyCluster) busy() bool { return f.clusterReads > 0 || f.attachmentReads > 0 }
+// busyTableFake is a table that is up, busy for tableReads further reads
+// and with an index still being built for indexReads of them.
+func busyTableFake(tableReads, indexReads int) *busyTable {
+	f := newTableFake().existing()
+	f.busy, f.gsiBusy, f.status = tableReads, indexReads, "UPDATING"
+	return &busyTable{table: f}
+}
 
-func (f *busyCluster) serve(t *testing.T) *Client {
+func (f *busyTable) serve(t *testing.T) *Client {
 	t.Helper()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		raw, _ := io.ReadAll(r.Body)
-		var in map[string]any
-		_ = json.Unmarshal(raw, &in)
 		op := r.Header.Get("X-Amz-Target")
 		op = op[strings.LastIndex(op, ".")+1:]
 		f.mu.Lock()
 		defer f.mu.Unlock()
+		violations := len(f.table.violations)
+		status, body := f.table.serve(op, string(raw))
 		switch op {
-		case "DescribeClusters":
-			status, attachment := "UPDATE_COMPLETE", "CREATED"
-			if f.clusterReads > 0 {
-				f.clusterReads--
-				status = "UPDATE_IN_PROGRESS"
+		case "DescribeTable":
+			var out struct{ Table struct{ TableStatus string } }
+			_ = json.Unmarshal([]byte(body), &out)
+			index := "ACTIVE"
+			if strings.Contains(body, `"IndexStatus":"CREATING"`) {
+				index = "CREATING"
 			}
-			if f.attachmentReads > 0 {
-				f.attachmentReads--
-				attachment = "CREATING"
-			}
-			f.events = append(f.events, "read "+status+"/"+attachment)
-			c := map[string]any{"clusterArn": "arn:aws:ecs:us-east-1:1:cluster/c", "clusterName": "c", "status": "ACTIVE",
-				"attachmentsStatus": status, "attachments": []any{map[string]any{"id": "a1", "status": "CREATED"}, map[string]any{"id": "a2", "status": attachment}}}
-			if f.settings != nil {
-				c["settings"] = f.settings
-			}
-			if f.configuration != nil {
-				c["configuration"] = f.configuration
-			}
-			body, _ := json.Marshal(map[string]any{"clusters": []any{c}})
-			_, _ = w.Write(body)
-		case "UpdateClusterSettings", "UpdateCluster":
-			f.events = append(f.events, fmt.Sprintf("%s busy=%v", op, f.busy()))
-			if op == "UpdateClusterSettings" {
-				f.settings = in["settings"]
-			} else {
-				f.configuration = in["configuration"]
-			}
-			f.clusterReads = f.afterChange
-			_, _ = io.WriteString(w, `{}`)
-		default:
-			w.WriteHeader(400)
-			_, _ = io.WriteString(w, `{"__type":"UnexpectedOperation"}`)
+			f.events = append(f.events, "read "+out.Table.TableStatus+"/"+index)
+		case "UpdateTable":
+			f.events = append(f.events, fmt.Sprintf("%s busy=%v", op, len(f.table.violations) > violations))
 		}
+		w.WriteHeader(status)
+		_, _ = io.WriteString(w, body)
 	}))
 	t.Cleanup(srv.Close)
 	return &Client{HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, Poll: 5 * time.Millisecond}
 }
 
-// clusterClient is f's client with the real cluster override, compiled with
-// the type's wait and a busy condition over every attachment, installed
-// for the test. The client sets no Wait, so the override's governs.
-func clusterClient(t *testing.T, f *busyCluster, wait string) *Client {
+// tableClient is f's client with the real table override, compiled with the
+// type's wait, installed for the test. The client sets no Wait, so the
+// override's governs.
+func tableClient(t *testing.T, f *busyTable, wait string) *Client {
 	t.Helper()
-	r, errs := compileEdited(t, clusterType, func(o *Override) {
-		o.Wait = wait
-		o.Read.Busy["attachments[].status"] = []string{"CREATING", "DELETING"}
-	})
+	r, errs := compileEdited(t, ddbTableType, func(o *Override) { o.Wait = wait })
 	if len(errs) > 0 {
 		t.Fatalf("compile: %v", errs)
 	}
-	old := readers[clusterType]
-	readers[clusterType] = r
-	t.Cleanup(func() { readers[clusterType] = old })
+	old := readers[ddbTableType]
+	readers[ddbTableType] = r
+	t.Cleanup(func() { readers[ddbTableType] = old })
 	return f.serve(t)
 }
 
-var clusterChanges = map[string]any{
-	"ClusterSettings": []any{map[string]any{"Name": "containerInsights", "Value": "disabled"}},
-	"Configuration":   map[string]any{"ExecuteCommandConfiguration": map[string]any{"Logging": "DEFAULT"}},
+// tableChanges are two properties that are each their own call.
+var tableChanges = map[string]any{
+	"TableClass":                "STANDARD_INFREQUENT_ACCESS",
+	"DeletionProtectionEnabled": false,
 }
 
-func updateCluster(ctx context.Context, client *Client, changes map[string]any) error {
-	return client.Update(ctx, clusterType, "c", map[string]any{}, changes)
+func updateTable(ctx context.Context, client *Client, changes map[string]any) error {
+	return client.Update(ctx, ddbTableType, "t", map[string]any{}, changes)
 }
 
 func callsOf(events []string) []string {
 	return slices.DeleteFunc(slices.Clone(events), func(e string) bool { return strings.HasPrefix(e, "read ") })
 }
 
-// An update waits out a cluster that is busy before its first call, and
+// An update waits out a table that is busy before its first call, and
 // again before the second, which a service refusing a change to an instance
 // still changing would otherwise fail.
 func TestUpdateSettlesBeforeEachCall(t *testing.T) {
-	f := &busyCluster{clusterReads: 3, afterChange: 3}
-	client := clusterClient(t, f, "5s")
-	if err := updateCluster(context.Background(), client, clusterChanges); err != nil {
+	f := busyTableFake(3, 0)
+	client := tableClient(t, f, "5s")
+	if err := updateTable(context.Background(), client, tableChanges); err != nil {
 		t.Fatalf("%v\nevents: %v", err, f.events)
 	}
-	if got := callsOf(f.events); !slices.Equal(got, []string{"UpdateClusterSettings busy=false", "UpdateCluster busy=false"}) {
+	if got := callsOf(f.events); !slices.Equal(got, []string{"UpdateTable busy=false", "UpdateTable busy=false"}) {
 		t.Fatalf("calls = %v, want two, neither made while busy\nevents: %v", got, f.events)
 	}
 }
 
-// A call waits for an attachment still being created although the cluster
-// reads complete, which only a condition over every element sees.
+// A call waits for an index still being created although the table reads
+// complete, which only a condition over every element sees.
 func TestUpdateSettlesOnAnyElement(t *testing.T) {
-	f := &busyCluster{attachmentReads: 3}
-	client := clusterClient(t, f, "5s")
-	if err := updateCluster(context.Background(), client, map[string]any{"ClusterSettings": clusterChanges["ClusterSettings"]}); err != nil {
+	f := busyTableFake(0, 3)
+	client := tableClient(t, f, "5s")
+	if err := updateTable(context.Background(), client, map[string]any{"TableClass": tableChanges["TableClass"]}); err != nil {
 		t.Fatalf("%v\nevents: %v", err, f.events)
 	}
-	if got := callsOf(f.events); !slices.Equal(got, []string{"UpdateClusterSettings busy=false"}) {
-		t.Fatalf("calls = %v, want one, made once the attachment was created\nevents: %v", got, f.events)
+	if got := callsOf(f.events); !slices.Equal(got, []string{"UpdateTable busy=false"}) {
+		t.Fatalf("calls = %v, want one, made once the index was created\nevents: %v", got, f.events)
 	}
 }
 
 // A create that has just waited for the instance to settle makes its first
 // update call without reading again; the next waits as any does.
 func TestApplyOfASettledInstanceMakesItsFirstCallAtOnce(t *testing.T) {
-	f := &busyCluster{afterChange: 2}
-	client := clusterClient(t, f, "5s")
-	err := client.apply(context.Background(), readers[clusterType], map[string]any{"ClusterName": "c"}, map[string]any{}, clusterChanges, true)
+	f := busyTableFake(0, 0)
+	client := tableClient(t, f, "5s")
+	err := client.apply(context.Background(), readers[ddbTableType], map[string]any{"TableName": "t"}, map[string]any{}, tableChanges, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"UpdateClusterSettings busy=false", "read UPDATE_IN_PROGRESS/CREATED", "read UPDATE_IN_PROGRESS/CREATED", "read UPDATE_COMPLETE/CREATED", "UpdateCluster busy=false"}
+	want := []string{"UpdateTable busy=false", "read UPDATING/ACTIVE", "read UPDATING/ACTIVE", "read ACTIVE/ACTIVE", "UpdateTable busy=false"}
 	if !slices.Equal(f.events, want) {
 		t.Fatalf("events = %v, want %v", f.events, want)
 	}
@@ -189,13 +169,13 @@ func TestApplyOfASettledInstanceMakesItsFirstCallAtOnce(t *testing.T) {
 // An instance that never settles is not changed, and the error says so
 // after the override's wait, not the client's default.
 func TestUpdateOfAnUnsettledInstanceTimesOut(t *testing.T) {
-	f := &busyCluster{clusterReads: 1 << 30}
-	client := clusterClient(t, f, "100ms")
+	f := busyTableFake(1<<30, 0)
+	client := tableClient(t, f, "100ms")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := updateCluster(ctx, client, clusterChanges)
+	err := updateTable(ctx, client, tableChanges)
 	if err == nil || !strings.Contains(err.Error(), "was still busy after 100ms") {
-		t.Fatalf("error = %v, want one saying the cluster was still busy after 100ms", err)
+		t.Fatalf("error = %v, want one saying the table was still busy after 100ms", err)
 	}
 	if got := callsOf(f.events); len(got) > 0 {
 		t.Fatalf("calls = %v, want none", got)
@@ -204,25 +184,25 @@ func TestUpdateOfAnUnsettledInstanceTimesOut(t *testing.T) {
 
 // A client's own wait wins over the type's.
 func TestClientWaitOverridesTheTypes(t *testing.T) {
-	f := &busyCluster{clusterReads: 1 << 30}
-	client := clusterClient(t, f, "1h")
+	f := busyTableFake(1<<30, 0)
+	client := tableClient(t, f, "1h")
 	client.Wait = 50 * time.Millisecond
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := updateCluster(ctx, client, clusterChanges)
+	err := updateTable(ctx, client, tableChanges)
 	if err == nil || !strings.Contains(err.Error(), "was still busy after 50ms") {
-		t.Fatalf("error = %v, want one saying the cluster was still busy after 50ms", err)
+		t.Fatalf("error = %v, want one saying the table was still busy after 50ms", err)
 	}
 }
 
 // The type's wait is also the ceiling of the wait for a read to show a
 // change.
 func TestTypeWaitBoundsTheVisibilityWait(t *testing.T) {
-	f := &busyCluster{}
-	client := clusterClient(t, f, "100ms")
+	f := busyTableFake(0, 0)
+	client := tableClient(t, f, "100ms")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := client.waitFor(ctx, clusterType, "c", func(map[string]any, error) bool { return false })
+	err := client.waitFor(ctx, ddbTableType, "t", func(map[string]any, error) bool { return false })
 	if err == nil || !strings.Contains(err.Error(), "was not visible after 100ms") {
 		t.Fatalf("error = %v, want one giving up after 100ms", err)
 	}
@@ -238,19 +218,23 @@ func TestTypeWaitBoundsACallsRetries(t *testing.T) {
 		calls++
 		mu.Unlock()
 		w.WriteHeader(400)
-		_, _ = io.WriteString(w, `{"__type":"UpdateInProgressException","message":"busy"}`)
+		_, _ = io.WriteString(w, `{"__type":"ContinuousBackupsUnavailableException","message":"busy"}`)
 	}))
 	t.Cleanup(srv.Close)
-	r, errs := compileEdited(t, clusterType, func(o *Override) { o.Wait = "100ms" })
+	r, errs := compileEdited(t, ddbTableType, func(o *Override) { o.Wait = "100ms" })
 	if len(errs) > 0 {
 		t.Fatal(errs)
+	}
+	i := slices.IndexFunc(r.Update, func(m MutationCall) bool { return m.Operation == "UpdateContinuousBackups" })
+	if i < 0 || len(r.Update[i].RetryErrors) == 0 {
+		t.Fatalf("no UpdateContinuousBackups call with retry errors in %d update calls", len(r.Update))
 	}
 	client := &Client{HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, Poll: 10 * time.Millisecond}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err := client.mutate(ctx, r, r.Update[0], map[string]any{"ClusterName": "c", "ClusterSettings": []any{}})
-	if err == nil || !strings.Contains(err.Error(), "UpdateInProgressException") {
+	_, err := client.mutate(ctx, r, r.Update[i], map[string]any{"TableName": "t", "PointInTimeRecoverySpecification": map[string]any{"PointInTimeRecoveryEnabled": true}})
+	if err == nil || !strings.Contains(err.Error(), "ContinuousBackupsUnavailableException") {
 		t.Fatalf("error = %v, want the service's refusal", err)
 	}
 	mu.Lock()
@@ -270,7 +254,7 @@ func TestCompileRefusesABadWait(t *testing.T) {
 		"1h30m": "",
 	} {
 		t.Run(wait, func(t *testing.T) {
-			r, errs := compileEdited(t, clusterType, func(o *Override) { o.Wait = wait })
+			r, errs := compileEdited(t, ddbTableType, func(o *Override) { o.Wait = wait })
 			if want == "" {
 				if len(errs) > 0 || r.Wait != 90*time.Minute {
 					t.Fatalf("errors = %v, wait = %s, want none and 1h30m", errs, r.Wait)

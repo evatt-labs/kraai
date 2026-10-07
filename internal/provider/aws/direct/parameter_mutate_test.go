@@ -29,6 +29,9 @@ type fakeParameter struct {
 	meta   map[string]any
 	tags   map[string]any
 	calls  map[string][]map[string]any
+	// hidden is a tag the read leaves out, as a service can an entry set to
+	// its default; stuck is one a removal leaves in place.
+	hidden, stuck string
 }
 
 func (f *fakeParameter) serve(t *testing.T) *Client {
@@ -99,6 +102,9 @@ func (f *fakeParameter) serve(t *testing.T) *Client {
 			}
 			list := []any{}
 			for _, k := range sortedKeys(f.tags) {
+				if k == f.hidden {
+					continue
+				}
 				list = append(list, map[string]any{"Key": k, "Value": f.tags[k]})
 			}
 			answer(map[string]any{"TagList": list})
@@ -110,7 +116,9 @@ func (f *fakeParameter) serve(t *testing.T) *Client {
 			answer(map[string]any{})
 		case "RemoveTagsFromResource":
 			for _, k := range in["TagKeys"].([]any) {
-				delete(f.tags, k.(string))
+				if k != f.stuck {
+					delete(f.tags, k.(string))
+				}
 			}
 			answer(map[string]any{})
 		case "DeleteParameter":
@@ -326,5 +334,42 @@ func TestPairsFilter(t *testing.T) {
 	}
 	if _, err := applyFilters("Tags", []string{"pairs"}, []any{map[string]any{"Key": "a", "Value": "1"}}, nil); err == nil {
 		t.Fatal("pairs of a list = nil error, want a refusal")
+	}
+}
+
+// A property the call requires and sends together with the change must have
+// been read: left out, the call would be refused, so the update is, before
+// any call.
+func TestUpdateParameterRefusesAnUnreadRequiredValue(t *testing.T) {
+	f := existingParameter()
+	client := f.serve(t)
+	current := map[string]any{"Name": "kraai-e-param", "Type": "String", "DataType": "text"}
+	err := client.Update(context.Background(), parameterType, "kraai-e-param", current, map[string]any{"Description": "second"})
+	if err == nil || !strings.Contains(err.Error(), "sends Value with what changed, but it was not read") {
+		t.Fatalf("Update = %v, want the unread value named", err)
+	}
+	if n := len(f.calls["PutParameter"]); n != 0 {
+		t.Fatalf("PutParameter called %d times, want 0", n)
+	}
+}
+
+// A refused create's error names the operation and the service's reason,
+// never the value that was sent.
+func TestParameterErrorsDoNotCarryTheValue(t *testing.T) {
+	const value = "s3cret-value-1f9c"
+	f := existingParameter()
+	client := f.serve(t)
+	_, err := client.Create(context.Background(), parameterType, map[string]any{
+		"Type": "SecureString", "Value": value,
+		"Tags": map[string]any{"kraai:resource-name": "kraai-e-param"},
+	})
+	if err == nil || !strings.Contains(err.Error(), "PutParameter") || !strings.Contains(err.Error(), "ParameterAlreadyExists") {
+		t.Fatalf("Create = %v, want the operation and the refusal", err)
+	}
+	if strings.Contains(err.Error(), value) {
+		t.Fatalf("the error carries the value: %v", err)
+	}
+	if got := f.calls["PutParameter"]; len(got) != 1 || got[0]["Value"] != value {
+		t.Fatalf("PutParameter calls = %v, want the one that carried the value", got)
 	}
 }

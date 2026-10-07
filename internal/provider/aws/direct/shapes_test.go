@@ -67,77 +67,53 @@ func TestReadSQSQueue(t *testing.T) {
 	}
 }
 
-// A log group's tags are a map, its policies JSON strings, and its resource
-// policy the one of several listed for the ARN the read captured.
-func TestReadLogGroupPolicies(t *testing.T) {
-	const arn = "arn:aws:logs:us-east-1:1:log-group:/g"
-	client, seen := targetServer(t, map[string]string{
-		"DescribeLogGroups":       `{"logGroups":[{"logGroupName":"/g","logGroupClass":"STANDARD","arn":"` + arn + `:*","logGroupArn":"` + arn + `"}]}`,
-		"ListTagsForResource":     `{"tags":{"team":"cloud"}}`,
-		"GetDataProtectionPolicy": `{"policyDocument":"{\"Name\":\"p\"}"}`,
-		"DescribeIndexPolicies":   `{"indexPolicies":[{"policyDocument":"{\"Fields\":[\"a\"]}"}]}`,
-		"DescribeResourcePolicies": `{"resourcePolicies":[{"resourceArn":"arn:aws:logs:us-east-1:1:log-group:/other","policyDocument":"{}"},` +
-			`{"resourceArn":"` + arn + `","policyDocument":"{\"Version\":\"2012-10-17\"}"}]}`,
-	})
-	got, err := client.Read(context.Background(), "AWS::Logs::LogGroup", map[string]string{"LogGroupName": "/g"})
-	if err != nil {
-		t.Fatal(err)
+// A list of name/value structures is read as a map, by a call carrying a
+// fixed input. No kept type reads that shape under a query protocol, so one
+// is registered here.
+func TestReadKeyedListAsMap(t *testing.T) {
+	const typeName = "Test::Query::Parameters"
+	readers[typeName] = Reader{
+		Type: typeName, Protocol: "awsQuery", SigningName: "rds", Host: "rds.{region}.amazonaws.com",
+		Action: "DescribeThings", Version: "2014-10-31", Wrapper: "DescribeThingsResult",
+		Identifier: []Binding{{Property: "Name", Member: "Name", Location: "form", Name: "Name"}},
+		Response:   []Step{{Name: "Things", List: true, Item: "Thing"}},
+		Fields:     []Field{{Property: "Name", Member: "Name", Kind: "scalar", XMLName: "Name", Scalar: "string"}},
+		Also: []Reader{{
+			Type: typeName, Protocol: "awsQuery", SigningName: "rds", Host: "rds.{region}.amazonaws.com",
+			Action: "DescribeThingParameters", Version: "2014-10-31", Wrapper: "DescribeThingParametersResult",
+			Input: []Binding{
+				{Location: "form", Member: "Name", Name: "Name", Value: "{Name}"},
+				{Location: "form", Member: "Source", Name: "Source", Value: "user"},
+			},
+			Fields: []Field{{Property: "Parameters", Member: "Parameters", Kind: "list", XMLName: "Parameters", Item: "Parameter", Keyed: []string{"ParameterName", "ParameterValue"}}},
+		}},
 	}
-	want := map[string]any{
-		"LogGroupName": "/g", "LogGroupClass": "STANDARD", "Arn": arn + ":*",
-		"Tags":                   []any{map[string]any{"Key": "team", "Value": "cloud"}},
-		"DataProtectionPolicy":   map[string]any{"Name": "p"},
-		"FieldIndexPolicies":     []any{map[string]any{"Fields": []any{"a"}}},
-		"ResourcePolicyDocument": map[string]any{"Version": "2012-10-17"},
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Read = %#v\nwant   %#v", got, want)
-	}
-	if !strings.Contains(seen["ListTagsForResource"], `"resourceArn":"`+arn+`"`) {
-		t.Fatalf("tags request = %s, want the captured ARN", seen["ListTagsForResource"])
-	}
-}
-
-// Index policies are asked for only on a standard log group; the service
-// refuses the call on any other class.
-func TestReadLogGroupSkipsIndexPoliciesOffStandard(t *testing.T) {
-	const arn = "arn:aws:logs:us-east-1:1:log-group:/ia"
-	client, seen := targetServer(t, map[string]string{
-		"DescribeLogGroups":        `{"logGroups":[{"logGroupName":"/ia","logGroupClass":"INFREQUENT_ACCESS","arn":"` + arn + `:*","logGroupArn":"` + arn + `"}]}`,
-		"ListTagsForResource":      `{}`,
-		"GetDataProtectionPolicy":  `{}`,
-		"DescribeResourcePolicies": `{"resourcePolicies":[]}`,
-	})
-	if _, err := client.Read(context.Background(), "AWS::Logs::LogGroup", map[string]string{"LogGroupName": "/ia"}); err != nil {
-		t.Fatal(err)
-	}
-	if _, asked := seen["DescribeIndexPolicies"]; asked {
-		t.Fatal("DescribeIndexPolicies was called for an infrequent-access log group")
-	}
-}
-
-// A cluster parameter group's parameters are a list of name/value
-// structures read as a map.
-func TestReadDBClusterParameters(t *testing.T) {
+	t.Cleanup(func() { delete(readers, typeName) })
 	client, forms := xmlServerBy(t, map[string]string{
-		"DescribeDBClusterParameterGroups": dbClusterParameterGroupXML,
-		"ListTagsForResource":              tagsXML,
-		"DescribeDBClusterParameters": `<DescribeDBClusterParametersResponse><DescribeDBClusterParametersResult><Parameters>
+		"DescribeThings": `<DescribeThingsResponse><DescribeThingsResult><Things><Thing><Name>my-params</Name></Thing></Things></DescribeThingsResult></DescribeThingsResponse>`,
+		"DescribeThingParameters": `<DescribeThingParametersResponse><DescribeThingParametersResult><Parameters>
 <Parameter><ParameterName>timezone</ParameterName><ParameterValue>UTC</ParameterValue></Parameter>
 <Parameter><ParameterName>work_mem</ParameterName><ParameterValue>4096</ParameterValue></Parameter>
-</Parameters></DescribeDBClusterParametersResult></DescribeDBClusterParametersResponse>`,
+</Parameters></DescribeThingParametersResult></DescribeThingParametersResponse>`,
 	})
-	got, err := client.Read(context.Background(), dbClusterParameterGroups, map[string]string{"DBClusterParameterGroupName": "my-params"})
+	got, err := client.Read(context.Background(), typeName, map[string]string{"Name": "my-params"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if want := map[string]any{"timezone": "UTC", "work_mem": "4096"}; !reflect.DeepEqual(got["Parameters"], want) {
 		t.Fatalf("Parameters = %#v, want %#v", got["Parameters"], want)
 	}
+	var asked bool
 	for _, f := range *forms {
-		if f.Get("Action") == "DescribeDBClusterParameters" && f.Get("Source") != "user" {
-			t.Fatalf("parameters request = %v, want Source=user", f)
+		if f.Get("Action") == "DescribeThingParameters" {
+			asked = true
+			if f.Get("Source") != "user" || f.Get("Name") != "my-params" {
+				t.Fatalf("parameters request = %v, want Source=user and the name", f)
+			}
 		}
+	}
+	if !asked {
+		t.Fatalf("no parameters request among %v", *forms)
 	}
 }
 

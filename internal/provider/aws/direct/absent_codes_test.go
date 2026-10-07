@@ -15,8 +15,7 @@ var notFoundShaped = regexp.MustCompile(`(?i)NotFound|NoSuch|DoesNotExist|NonExi
 // notAbsence is each read's not-found-shaped code that does not mean the
 // instance is gone, and why.
 var notAbsence = map[string]map[string]string{
-	"AWS::ElasticLoadBalancingV2::TargetGroup": {"LoadBalancerNotFound": "the load balancer a filter names, not the target group"},
-	"AWS::SSM::Parameter":                      {"ParameterVersionNotFound": "a version the read does not ask for"},
+	"AWS::SSM::Parameter": {"ParameterVersionNotFound": "a version the read does not ask for"},
 }
 
 // TestReadsListTheirNotFoundCodes holds every read to listing each error

@@ -14,26 +14,26 @@ import (
 )
 
 func TestCompileRefusesACall(t *testing.T) {
-	const file = "AWS--ElasticLoadBalancingV2--TargetGroup.yaml"
+	const file = "AWS--IAM--Role.yaml"
 	cases := map[string]struct {
 		old, replacement, want string
 	}{
-		"a property mapped by two calls": {"      TargetGroupAttributes:\n        member: Attributes",
-			"      Tags:\n        member: Attributes", "Tags is mapped by more than one call"},
-		"a property mapped by the read and a call": {"  TargetGroupName: TargetGroupName\n",
-			"  TargetGroupName: TargetGroupName\n  Tags: TargetGroupName\n", "Tags is mapped by more than one call"},
-		"a call that maps nothing": {"    properties:\n      TargetGroupAttributes:\n        member: Attributes\n        properties:\n          Key: Key\n          Value: Value\n",
-			"    properties: {}\n", "DescribeTargetGroupAttributes maps no property"},
-		"an unknown transform": {"transform: arnResource", "transform: upper", `names transform "upper"`},
-		"a transform of a non-string": {"    member: TargetGroupArn\n    transform: arnResource",
-			"    member: Port\n    transform: arnResource", "transforms Port, which is not a string"},
-		"a list step through a structure": {"member: TargetHealthDescriptions[].Target",
-			"member: TargetHealthDescriptions[].Target[].Id", "but Target is not a list"},
-		"a list walked without []": {"member: TargetHealthDescriptions[].Target",
-			"member: TargetHealthDescriptions.Target", "but TargetHealthDescriptions is a list; mark it TargetHealthDescriptions[]"},
-		"a projection onto a property that is not an array": {"      Targets:\n        member: TargetHealthDescriptions[].Target",
-			"      TargetGroupName:\n        member: TargetHealthDescriptions[].Target", "maps through a list, but the schema does not declare it an array"},
-		"a call's operation the model lacks": {"operation: DescribeTargetHealth", "operation: DescribeTargetHealthy", "also[2] DescribeTargetHealthy"},
+		"a property mapped by two calls": {"      ManagedPolicyArns:\n        member: AttachedPolicies[].PolicyArn",
+			"      Tags:\n        member: AttachedPolicies[].PolicyArn", "Tags is mapped by more than one call"},
+		"a property mapped by the read and a call": {"  RoleName: RoleName\n  Tags:\n",
+			"  RoleName: RoleName\n  ManagedPolicyArns: RoleName\n  Tags:\n", "ManagedPolicyArns is mapped by more than one call"},
+		"a call that maps nothing": {"    properties:\n      ManagedPolicyArns:\n        member: AttachedPolicies[].PolicyArn\n",
+			"    properties: {}\n", "ListAttachedRolePolicies maps no property"},
+		"an unknown transform": {"transform: urlJson", "transform: upper", `names transform "upper"`},
+		"a transform of a non-string": {"    member: AssumeRolePolicyDocument\n    transform: urlJson",
+			"    member: MaxSessionDuration\n    transform: urlJson", "transforms MaxSessionDuration, which is not a string"},
+		"a list step through a scalar": {"member: AttachedPolicies[].PolicyArn",
+			"member: AttachedPolicies[].PolicyArn[].Id", "but PolicyArn is not a list"},
+		"a list walked without []": {"member: AttachedPolicies[].PolicyArn",
+			"member: AttachedPolicies.PolicyArn", "but AttachedPolicies is a list; mark it AttachedPolicies[]"},
+		"a projection onto a property that is not an array": {"      ManagedPolicyArns:\n        member: AttachedPolicies[].PolicyArn",
+			"      Description:\n        member: AttachedPolicies[].PolicyArn", "maps through a list, but the schema does not declare it an array"},
+		"a call's operation the model lacks": {"operation: ListRolePolicies", "operation: ListRolePolicys", "also[1] ListRolePolicys"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -65,20 +65,20 @@ func TestAFurtherCallFindingNothingIsNotAbsence(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		raw, _ := io.ReadAll(r.Body)
 		form, _ := url.ParseQuery(string(raw))
-		if form.Get("Action") == "DescribeTags" {
-			_, _ = io.WriteString(w, `<DescribeTagsResponse><DescribeTagsResult><TagDescriptions/></DescribeTagsResult></DescribeTagsResponse>`)
+		if form.Get("Action") == "DescribeNetworkAcls" {
+			_, _ = io.WriteString(w, `<DescribeNetworkAclsResponse><networkAclSet/></DescribeNetworkAclsResponse>`)
 			return
 		}
-		_, _ = io.WriteString(w, targetGroupXML)
+		_, _ = io.WriteString(w, subnetXML)
 	}))
 	t.Cleanup(srv.Close)
 	client := &Client{
 		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region: "us-east-1", Endpoint: func(string) string { return srv.URL },
 	}
-	_, err := client.Read(context.Background(), targetGroups, map[string]string{"TargetGroupArn": "arn:tg"})
-	if err == nil || errors.Is(err, ErrAbsent) {
-		t.Fatalf("Read = %v, want an error that is not ErrAbsent", err)
+	_, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "subnet-1"})
+	if err == nil || errors.Is(err, ErrAbsent) || !strings.Contains(err.Error(), "call DescribeNetworkAcls found no instance") {
+		t.Fatalf("Read = %v, want the further call's error, not ErrAbsent", err)
 	}
 }
 

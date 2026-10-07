@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	subnets      = "AWS::EC2::Subnet"
-	targetGroups = "AWS::ElasticLoadBalancingV2::TargetGroup"
+	subnets = "AWS::EC2::Subnet"
+	roles   = "AWS::IAM::Role"
 )
 
 // xmlServer answers every request with status and body, recording each
@@ -164,88 +164,77 @@ func TestReadAmbiguousSelectionFails(t *testing.T) {
 	}
 }
 
-const targetGroupXML = `<DescribeTargetGroupsResponse xmlns="http://elasticloadbalancing.amazonaws.com/doc/2015-12-01/">
-  <DescribeTargetGroupsResult>
-    <TargetGroups>
-      <member>
-        <TargetGroupArn>arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc</TargetGroupArn>
-        <TargetGroupName>tg</TargetGroupName>
-        <Port>80</Port>
-        <HealthCheckIntervalSeconds>30</HealthCheckIntervalSeconds>
-        <LoadBalancerArns><member>arn:lb1</member><member>arn:lb2</member></LoadBalancerArns>
-        <Matcher><HttpCode>200</HttpCode></Matcher>
-      </member>
-    </TargetGroups>
-  </DescribeTargetGroupsResult>
+const roleXML = `<GetRoleResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/">
+  <GetRoleResult>
+    <Role>
+      <Path>/</Path>
+      <RoleName>kraai-role</RoleName>
+      <RoleId>AROAEXAMPLE</RoleId>
+      <Arn>arn:aws:iam::123456789012:role/kraai-role</Arn>
+      <MaxSessionDuration>3600</MaxSessionDuration>
+      <Description>a &amp; b</Description>
+      <AssumeRolePolicyDocument>%7B%22Version%22%3A%222012-10-17%22%7D</AssumeRolePolicyDocument>
+      <PermissionsBoundary><PermissionsBoundaryType>Policy</PermissionsBoundaryType><PermissionsBoundaryArn>arn:aws:iam::123456789012:policy/pb</PermissionsBoundaryArn></PermissionsBoundary>
+      <RoleLastUsed><Region>us-east-1</Region></RoleLastUsed>
+    </Role>
+  </GetRoleResult>
   <ResponseMetadata><RequestId>r</RequestId></ResponseMetadata>
-</DescribeTargetGroupsResponse>`
+</GetRoleResponse>`
 
-// awsQuery: the identifier inside the list's member element, the output
-// inside its Result wrapper, numbers typed, a list of scalars, and one
-// member mapped to two properties.
+// awsQuery: the output inside its Result wrapper, numbers typed, a list of
+// scalars, a path through a nested structure, text decoded, and a call made
+// once for each element a list read returned.
 func TestReadAWSQuery(t *testing.T) {
 	byAction := map[string]string{
-		"DescribeTargetGroups": targetGroupXML,
-		"DescribeTags": `<DescribeTagsResponse><DescribeTagsResult><TagDescriptions><member>
-			<ResourceArn>arn:tg</ResourceArn><Tags><member><Key>k</Key><Value>v</Value></member></Tags>
-		</member></TagDescriptions></DescribeTagsResult></DescribeTagsResponse>`,
-		"DescribeTargetGroupAttributes": `<DescribeTargetGroupAttributesResponse><DescribeTargetGroupAttributesResult><Attributes>
-			<member><Key>stickiness.enabled</Key><Value>false</Value></member>
-		</Attributes></DescribeTargetGroupAttributesResult></DescribeTargetGroupAttributesResponse>`,
-		"DescribeTargetHealth": `<DescribeTargetHealthResponse><DescribeTargetHealthResult><TargetHealthDescriptions>
-			<member><Target><Id>i-1</Id><Port>80</Port></Target><TargetHealth><State>healthy</State></TargetHealth></member>
-			<member><Target><Id>i-2</Id><Port>81</Port></Target></member>
-		</TargetHealthDescriptions></DescribeTargetHealthResult></DescribeTargetHealthResponse>`,
+		"GetRole": roleXML,
+		"ListAttachedRolePolicies": `<ListAttachedRolePoliciesResponse><ListAttachedRolePoliciesResult><AttachedPolicies>
+			<member><PolicyName>a</PolicyName><PolicyArn>arn:aws:iam::aws:policy/A</PolicyArn></member>
+			<member><PolicyName>b</PolicyName><PolicyArn>arn:aws:iam::aws:policy/B</PolicyArn></member>
+		</AttachedPolicies><IsTruncated>false</IsTruncated></ListAttachedRolePoliciesResult></ListAttachedRolePoliciesResponse>`,
+		"ListRolePolicies": `<ListRolePoliciesResponse><ListRolePoliciesResult><PolicyNames>
+			<member>inline-1</member><member>inline-2</member>
+		</PolicyNames><IsTruncated>false</IsTruncated></ListRolePoliciesResult></ListRolePoliciesResponse>`,
+		"GetRolePolicy": `<GetRolePolicyResponse><GetRolePolicyResult><RoleName>kraai-role</RoleName><PolicyName>x</PolicyName>
+			<PolicyDocument>%7B%22Version%22%3A%222012-10-17%22%7D</PolicyDocument></GetRolePolicyResult></GetRolePolicyResponse>`,
 	}
-	var (
-		mu    sync.Mutex
-		forms []url.Values
-	)
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		raw, _ := io.ReadAll(r.Body)
-		form, _ := url.ParseQuery(string(raw))
-		mu.Lock()
-		forms = append(forms, form)
-		mu.Unlock()
-		_, _ = io.WriteString(w, byAction[form.Get("Action")])
-	}))
-	t.Cleanup(srv.Close)
-	client := &Client{
-		HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, RetryDelay: time.Millisecond,
-	}
-	got, err := client.Read(context.Background(), targetGroups, map[string]string{"TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc"})
+	client, forms := xmlServerBy(t, byAction)
+	got, err := client.Read(context.Background(), roles, map[string]string{"RoleName": "kraai-role"})
 	if err != nil {
 		t.Fatal(err)
 	}
+	policy := map[string]any{"Version": "2012-10-17"}
 	want := map[string]any{
-		"TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc", "TargetGroupName": "tg", "Name": "tg",
-		"TargetGroupFullName": "targetgroup/tg/abc",
-		"Port":                json.Number("80"), "HealthCheckIntervalSeconds": json.Number("30"),
-		"LoadBalancerArns":      []any{"arn:lb1", "arn:lb2"},
-		"Matcher":               map[string]any{"HttpCode": "200"},
-		"Tags":                  []any{map[string]any{"Key": "k", "Value": "v"}},
-		"TargetGroupAttributes": []any{map[string]any{"Key": "stickiness.enabled", "Value": "false"}},
-		"Targets": []any{
-			map[string]any{"Id": "i-1", "Port": json.Number("80")},
-			map[string]any{"Id": "i-2", "Port": json.Number("81")},
+		"Arn": "arn:aws:iam::123456789012:role/kraai-role", "RoleName": "kraai-role", "RoleId": "AROAEXAMPLE", "Path": "/",
+		"Description": "a & b", "MaxSessionDuration": json.Number("3600"), "AssumeRolePolicyDocument": policy,
+		"PermissionsBoundary": "arn:aws:iam::123456789012:policy/pb",
+		"ManagedPolicyArns":   []any{"arn:aws:iam::aws:policy/A", "arn:aws:iam::aws:policy/B"},
+		"Policies": []any{
+			map[string]any{"PolicyName": "inline-1", "PolicyDocument": policy},
+			map[string]any{"PolicyName": "inline-2", "PolicyDocument": policy},
 		},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Read = %#v\nwant   %#v", got, want)
 	}
-	id := "arn:aws:elasticloadbalancing:us-east-1:1:targetgroup/tg/abc"
+	const v = "2010-05-08"
 	wantForms := []url.Values{
-		{"Action": {"DescribeTargetGroups"}, "Version": {"2015-12-01"}, "TargetGroupArns.member.1": {id}},
-		{"Action": {"DescribeTags"}, "Version": {"2015-12-01"}, "ResourceArns.member.1": {id}},
-		{"Action": {"DescribeTargetGroupAttributes"}, "Version": {"2015-12-01"}, "TargetGroupArn": {id}},
-		{"Action": {"DescribeTargetHealth"}, "Version": {"2015-12-01"}, "TargetGroupArn": {id}},
+		{"Action": {"GetRole"}, "Version": {v}, "RoleName": {"kraai-role"}},
+		{"Action": {"GetRolePolicy"}, "Version": {v}, "RoleName": {"kraai-role"}, "PolicyName": {"inline-1"}},
+		{"Action": {"GetRolePolicy"}, "Version": {v}, "RoleName": {"kraai-role"}, "PolicyName": {"inline-2"}},
+		{"Action": {"ListAttachedRolePolicies"}, "Version": {v}, "RoleName": {"kraai-role"}},
+		{"Action": {"ListRolePolicies"}, "Version": {v}, "RoleName": {"kraai-role"}},
 	}
 	// The read comes first; the further calls are made together, in no
 	// particular order.
-	sort.Slice(forms[1:], func(i, j int) bool { return forms[1+i].Get("Action") < forms[1+j].Get("Action") })
-	if !reflect.DeepEqual(forms, wantForms) {
-		t.Fatalf("forms = %v\nwant    %v", forms, wantForms)
+	rest := (*forms)[1:]
+	sort.Slice(rest, func(i, j int) bool {
+		if a, b := rest[i].Get("Action"), rest[j].Get("Action"); a != b {
+			return a < b
+		}
+		return rest[i].Get("PolicyName") < rest[j].Get("PolicyName")
+	})
+	if !reflect.DeepEqual(*forms, wantForms) {
+		t.Fatalf("forms = %v\nwant    %v", *forms, wantForms)
 	}
 }
 
@@ -264,8 +253,8 @@ func TestReadXMLWantsExactlyOne(t *testing.T) {
 			}
 		})
 	}
-	client, _ := xmlServer(t, 200, `<DescribeTargetGroupsResponse><Other/></DescribeTargetGroupsResponse>`)
-	if _, err := client.Read(context.Background(), targetGroups, map[string]string{"TargetGroupArn": "a"}); err == nil || !strings.Contains(err.Error(), "no DescribeTargetGroupsResult") {
+	client, _ := xmlServer(t, 200, `<GetRoleResponse><Other/></GetRoleResponse>`)
+	if _, err := client.Read(context.Background(), roles, map[string]string{"RoleName": "a"}); err == nil || !strings.Contains(err.Error(), "no GetRoleResult") {
 		t.Fatalf("Read without the wrapper = %v", err)
 	}
 }
@@ -275,12 +264,12 @@ func TestReadXMLErrors(t *testing.T) {
 		typeName, body, code string
 	}{
 		"ec2Query": {subnets, `<Response><Errors><Error><Code>UnauthorizedOperation</Code><Message>gone</Message></Error></Errors><RequestID>r</RequestID></Response>`, "UnauthorizedOperation"},
-		"awsQuery": {targetGroups, `<ErrorResponse><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>gone</Message></Error></ErrorResponse>`, "AccessDenied"},
+		"awsQuery": {roles, `<ErrorResponse><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>gone</Message></Error></ErrorResponse>`, "AccessDenied"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			client, _ := xmlServer(t, 400, c.body)
-			_, err := client.Read(context.Background(), c.typeName, map[string]string{"SubnetId": "a", "TargetGroupArn": "a"})
+			_, err := client.Read(context.Background(), c.typeName, map[string]string{"SubnetId": "a", "RoleName": "a"})
 			var apiErr *APIError
 			if !errors.As(err, &apiErr) || apiErr.Code != c.code || apiErr.Message != "gone" || apiErr.Status != 400 {
 				t.Fatalf("error = %#v", err)
@@ -384,7 +373,6 @@ func TestCompileRefusesUnderXML(t *testing.T) {
 		old, replacement, want string
 	}{
 		"a list step on a structure": {"response: Subnets[]", "response: Subnets[].Tags[].Key[]", "is not a list"},
-		"a list":                     {"response: Subnets[]", "response: Subnets[]\nlist:\n  operation: DescribeSubnets", "a list under ec2Query is not supported yet"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -396,7 +384,45 @@ func TestCompileRefusesUnderXML(t *testing.T) {
 	}
 }
 
-const cachePolicies = "AWS::CloudFront::CachePolicy"
+const cachePolicies = "Test::RestXML::CachePolicy"
+
+// registerCachePolicy registers a restXml reader shaped as CloudFront's
+// cache policy read is: the identifier in the path, the payload the body
+// itself, and lists wrapped in a Quantity and Items structure. No kept type
+// reads that shape; S3 answers a bare payload with flattened lists.
+func registerCachePolicy(t *testing.T) {
+	t.Helper()
+	str := func(property, name string) Field {
+		return Field{Property: property, Member: name, Kind: "scalar", XMLName: name, Scalar: "string"}
+	}
+	readers[cachePolicies] = Reader{
+		Type: cachePolicies, Protocol: "restXml", SigningName: "cloudfront", Host: "cloudfront.{region}.amazonaws.com",
+		Method: "GET", URI: "/2020-05-31/cache-policy/{Id}",
+		Identifier:   []Binding{{Property: "Id", Member: "Id", Location: "label"}},
+		AbsentErrors: []string{"NoSuchCachePolicy"},
+		Fields: []Field{
+			str("Id", "Id"),
+			{Property: "LastModifiedTime", Member: "LastModifiedTime", Kind: "timestamp", XMLName: "LastModifiedTime", Scalar: "timestamp"},
+			{Property: "CachePolicyConfig", Member: "CachePolicyConfig", Kind: "structure", XMLName: "CachePolicyConfig", Fields: []Field{
+				str("Name", "Name"),
+				{Property: "MinTTL", Member: "MinTTL", Kind: "scalar", XMLName: "MinTTL", Scalar: "number"},
+				{Property: "ParametersInCacheKeyAndForwardedToOrigin", Member: "ParametersInCacheKeyAndForwardedToOrigin", Kind: "structure",
+					XMLName: "ParametersInCacheKeyAndForwardedToOrigin", Fields: []Field{
+						{Property: "EnableAcceptEncodingGzip", Member: "EnableAcceptEncodingGzip", Kind: "scalar", XMLName: "EnableAcceptEncodingGzip", Scalar: "boolean"},
+						{Property: "HeadersConfig", Member: "HeadersConfig", Kind: "structure", XMLName: "HeadersConfig", Fields: []Field{
+							str("HeaderBehavior", "HeaderBehavior"),
+							{Property: "Headers", Member: "Items", Kind: "list", Via: []Step{{Name: "Headers"}}, XMLName: "Items", Item: "Name", Scalar: "string"},
+						}},
+						{Property: "CookiesConfig", Member: "CookiesConfig", Kind: "structure", XMLName: "CookiesConfig", Fields: []Field{
+							str("CookieBehavior", "CookieBehavior"),
+							{Property: "Cookies", Member: "Items", Kind: "list", Via: []Step{{Name: "Cookies"}}, XMLName: "Items", Item: "Name", Scalar: "string"},
+						}},
+					}},
+			}},
+		},
+	}
+	t.Cleanup(func() { delete(readers, cachePolicies) })
+}
 
 const cachePolicyXML = `<?xml version="1.0"?>
 <CachePolicy xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/">
@@ -419,6 +445,7 @@ const cachePolicyXML = `<?xml version="1.0"?>
 // restXml: a GET with the identifier in the path, the body the payload
 // itself, and lists read through their Quantity and Items wrapper.
 func TestReadRestXML(t *testing.T) {
+	registerCachePolicy(t)
 	var got []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		raw, _ := io.ReadAll(r.Body)
@@ -455,6 +482,7 @@ func TestReadRestXML(t *testing.T) {
 }
 
 func TestReadRestXMLError(t *testing.T) {
+	registerCachePolicy(t)
 	serve := func(status int, code string) *Client {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(status)
@@ -478,14 +506,15 @@ func TestReadRestXMLError(t *testing.T) {
 }
 
 func TestCompileRefusesAMemberPath(t *testing.T) {
-	const file = "AWS--CloudFront--CachePolicy.yaml"
+	const file = "AWS--IAM--Role.yaml"
+	const path = "PermissionsBoundary: PermissionsBoundary.PermissionsBoundaryArn"
 	cases := map[string]struct {
 		old, replacement, want string
 	}{
-		"a step that is not a member":     {"Headers: Headers.Items", "Headers: Nope.Items", "Nope is not a structure member"},
-		"a step that is not a structure":  {"Headers: Headers.Items", "Headers: HeaderBehavior.Items", "HeaderBehavior is not a structure member"},
-		"a last step the structure lacks": {"Headers: Headers.Items", "Headers: Headers.Names", "maps to Headers.Names, which"},
-		"a path to the wrong type":        {"Headers: Headers.Items", "Headers: Headers.Quantity", "Headers is [array] in the schema, but Headers.Quantity is integer"},
+		"a step that is not a member":     {path, "PermissionsBoundary: Nope.PermissionsBoundaryArn", "Nope is not a structure member"},
+		"a step that is not a structure":  {path, "PermissionsBoundary: Description.PermissionsBoundaryArn", "Description is not a structure member"},
+		"a last step the structure lacks": {path, "PermissionsBoundary: PermissionsBoundary.Nope", "maps to PermissionsBoundary.Nope, which"},
+		"a path to the wrong type":        {path, "PermissionsBoundary: MaxSessionDuration", "PermissionsBoundary is [string] in the schema, but MaxSessionDuration is integer"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {

@@ -6,13 +6,13 @@ import (
 )
 
 func TestOverrideCreateOnlyIsExposedAsSchemaPointers(t *testing.T) {
-	for typeName, want := range map[string]string{
-		"AWS::Logs::LogGroup":                      "/properties/LogGroupClass",
-		"AWS::ElasticLoadBalancingV2::TargetGroup": "/properties/TargetControlPort",
-		"AWS::Events::Rule":                        "/properties/EventBusName",
+	for typeName, want := range map[string][]string{
+		"AWS::Events::Rule":    {"/properties/EventBusName"},
+		"AWS::DynamoDB::Table": {"/properties/KeySchema", "/properties/LocalSecondaryIndexes"},
+		"AWS::S3::Bucket":      {"/properties/ObjectLockEnabled"},
 	} {
-		if got := CreateOnly(typeName); !slices.Equal(got, []string{want}) {
-			t.Errorf("CreateOnly(%s) = %v, want [%s]", typeName, got, want)
+		if got := CreateOnly(typeName); !slices.Equal(got, want) {
+			t.Errorf("CreateOnly(%s) = %v, want %v", typeName, got, want)
 		}
 	}
 	if got := CreateOnly("AWS::EC2::VPC"); got != nil {

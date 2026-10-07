@@ -5,55 +5,57 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"testing"
 )
 
 func TestCompare(t *testing.T) {
+	const role, api, table = "AWS::IAM::Role", "AWS::ApiGatewayV2::Api", "AWS::DynamoDB::Table"
 	cases := map[string]struct {
 		typeName   string
 		cc, direct string
 		want       []string
 	}{
-		"identical": {"AWS::CodeDeploy::DeploymentConfig",
-			`{"ComputePlatform":"Server","MinimumHealthyHosts":{"Type":"HOST_COUNT","Value":1}}`,
-			`{"ComputePlatform":"Server","MinimumHealthyHosts":{"Type":"HOST_COUNT","Value":1}}`, nil},
-		"numbers by value": {"AWS::AppConfig::DeploymentStrategy", `{"GrowthFactor":100}`, `{"GrowthFactor":100.0}`, nil},
-		"a different number": {"AWS::AppConfig::DeploymentStrategy", `{"GrowthFactor":100}`, `{"GrowthFactor":100.5}`,
-			[]string{"GrowthFactor"}},
-		"a skipped property": {"AWS::XRay::Group", `{"GroupName":"Default","Tags":[]}`, `{"GroupName":"Default"}`, nil},
-		"a property only Cloud Control has": {"AWS::XRay::Group", `{"GroupName":"Default","FilterExpression":"x"}`, `{"GroupName":"Default"}`,
-			[]string{"FilterExpression"}},
-		"a property the schema does not declare": {"AWS::XRay::Group", `{"GroupName":"Default","Id":"x"}`, `{"GroupName":"Default"}`, nil},
-		"a property only the direct read has": {"AWS::XRay::Group", `{"GroupName":"Default"}`, `{"GroupName":"Default","FilterExpression":"x"}`,
-			[]string{"FilterExpression"}},
-		"a nested difference": {"AWS::CodeDeploy::DeploymentConfig",
-			`{"MinimumHealthyHosts":{"Type":"HOST_COUNT","Value":1}}`, `{"MinimumHealthyHosts":{"Type":"FLEET_PERCENT","Value":1}}`,
-			[]string{"MinimumHealthyHosts.Type"}},
-		"a list element": {"AWS::Bedrock::IntelligentPromptRouter",
-			`{"Models":[{"ModelArn":"a"},{"ModelArn":"b"}]}`, `{"Models":[{"ModelArn":"a"},{"ModelArn":"c"}]}`,
-			[]string{"Models[1].ModelArn"}},
-		"a list of another length": {"AWS::Bedrock::IntelligentPromptRouter",
-			`{"Models":[{"ModelArn":"a"}]}`, `{"Models":[{"ModelArn":"a"},{"ModelArn":"b"}]}`, []string{"Models"}},
-		"a string that looks like a number": {"AWS::XRay::Group", `{"GroupName":"1"}`, `{"GroupName":1}`, []string{"GroupName"}},
-		"an unordered list in another order": {"AWS::ECS::TaskDefinition",
-			`{"ContainerDefinitions":[{"Environment":[{"Name":"A","Value":"1"},{"Name":"B","Value":"2"}]}]}`,
-			`{"ContainerDefinitions":[{"Environment":[{"Name":"B","Value":"2"},{"Name":"A","Value":"1"}]}]}`, nil},
-		"an unordered list with another element": {"AWS::ECS::TaskDefinition",
-			`{"ContainerDefinitions":[{"Environment":[{"Name":"A","Value":"1"},{"Name":"B","Value":"2"}]}]}`,
-			`{"ContainerDefinitions":[{"Environment":[{"Name":"B","Value":"2"},{"Name":"A","Value":"9"}]}]}`,
-			[]string{"ContainerDefinitions[0].Environment[0].Value"}},
-		"an ordered list in another order": {"AWS::ECS::TaskDefinition",
-			`{"ContainerDefinitions":[{"Command":["a","b"]}]}`, `{"ContainerDefinitions":[{"Command":["b","a"]}]}`,
-			[]string{"ContainerDefinitions[0].Command[0]", "ContainerDefinitions[0].Command[1]"}},
-		"an empty list and an empty map against absent": {"AWS::ECS::TaskDefinition",
-			`{"InferenceAccelerators":[],"ContainerDefinitions":[{"Name":"x","DockerLabels":{}}]}`,
-			`{"ContainerDefinitions":[{"Name":"x"}]}`, nil},
-		"a list against absent": {"AWS::ECS::TaskDefinition",
-			`{"ContainerDefinitions":[{"Name":"x","Links":["y"]}]}`, `{"ContainerDefinitions":[{"Name":"x"}]}`,
-			[]string{"ContainerDefinitions[0].Links"}},
-		"an empty string against absent": {"AWS::XRay::Group", `{"GroupName":"Default","FilterExpression":""}`, `{"GroupName":"Default"}`,
-			[]string{"FilterExpression"}},
+		"identical": {api,
+			`{"Name":"a","CorsConfiguration":{"AllowOrigins":["x"],"MaxAge":60}}`,
+			`{"Name":"a","CorsConfiguration":{"AllowOrigins":["x"],"MaxAge":60}}`, nil},
+		"numbers by value": {role, `{"MaxSessionDuration":3600}`, `{"MaxSessionDuration":3600.0}`, nil},
+		"a different number": {role, `{"MaxSessionDuration":3600}`, `{"MaxSessionDuration":3600.5}`,
+			[]string{"MaxSessionDuration"}},
+		"a property only Cloud Control has": {role, `{"RoleName":"r","Description":"x"}`, `{"RoleName":"r"}`,
+			[]string{"Description"}},
+		"a property the schema does not declare": {role, `{"RoleName":"r","Id":"x"}`, `{"RoleName":"r"}`, nil},
+		"a property only the direct read has": {role, `{"RoleName":"r"}`, `{"RoleName":"r","Description":"x"}`,
+			[]string{"Description"}},
+		"a nested difference": {api,
+			`{"CorsConfiguration":{"MaxAge":60}}`, `{"CorsConfiguration":{"MaxAge":61}}`,
+			[]string{"CorsConfiguration.MaxAge"}},
+		"a list element": {api,
+			`{"CorsConfiguration":{"AllowOrigins":["a","b"]}}`, `{"CorsConfiguration":{"AllowOrigins":["a","c"]}}`,
+			[]string{"CorsConfiguration.AllowOrigins[1]"}},
+		"a list of another length": {api,
+			`{"CorsConfiguration":{"AllowOrigins":["a"]}}`, `{"CorsConfiguration":{"AllowOrigins":["a","b"]}}`,
+			[]string{"CorsConfiguration.AllowOrigins"}},
+		"a string that looks like a number": {role, `{"RoleName":"1"}`, `{"RoleName":1}`, []string{"RoleName"}},
+		"an unordered list in another order": {table,
+			`{"VectorIndexes":[{"IndexName":"i","SearchSchema":[{"AttributeName":"a","SearchSchemaElementType":"1"},{"AttributeName":"b","SearchSchemaElementType":"2"}]}]}`,
+			`{"VectorIndexes":[{"IndexName":"i","SearchSchema":[{"AttributeName":"b","SearchSchemaElementType":"2"},{"AttributeName":"a","SearchSchemaElementType":"1"}]}]}`, nil},
+		"an unordered list with another element": {table,
+			`{"VectorIndexes":[{"IndexName":"i","SearchSchema":[{"AttributeName":"a","SearchSchemaElementType":"1"},{"AttributeName":"b","SearchSchemaElementType":"2"}]}]}`,
+			`{"VectorIndexes":[{"IndexName":"i","SearchSchema":[{"AttributeName":"b","SearchSchemaElementType":"2"},{"AttributeName":"a","SearchSchemaElementType":"9"}]}]}`,
+			[]string{"VectorIndexes[0].SearchSchema[0].SearchSchemaElementType"}},
+		"an ordered list in another order": {api,
+			`{"CorsConfiguration":{"AllowOrigins":["a","b"]}}`, `{"CorsConfiguration":{"AllowOrigins":["b","a"]}}`,
+			[]string{"CorsConfiguration.AllowOrigins[0]", "CorsConfiguration.AllowOrigins[1]"}},
+		"an empty list and an empty map against absent": {role,
+			`{"Tags":[],"Policies":[{"PolicyName":"p","PolicyDocument":{}}]}`,
+			`{"Policies":[{"PolicyName":"p"}]}`, nil},
+		"a list against absent": {api,
+			`{"CorsConfiguration":{"AllowOrigins":["a"],"AllowHeaders":["y"]}}`, `{"CorsConfiguration":{"AllowOrigins":["a"]}}`,
+			[]string{"CorsConfiguration.AllowHeaders"}},
+		"an empty string against absent": {role, `{"RoleName":"r","Description":""}`, `{"RoleName":"r"}`,
+			[]string{"Description"}},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -84,6 +86,34 @@ func TestCompare(t *testing.T) {
 	}
 	if _, err := Compare("AWS::Nope::Thing", nil, nil); err == nil {
 		t.Fatal("a type with no override was compared")
+	}
+}
+
+// No kept override skips a property, so the skip normalization is tried on
+// the skip tree an override would build: a skipped property is not compared
+// at any depth, and a sibling still is.
+func TestCompareSkipsASkippedProperty(t *testing.T) {
+	skip := skipTree(map[string]Mapping{
+		"Nested": {Properties: map[string]Mapping{"Inner": {}}, Skip: map[string]string{"Deep": "not read"}},
+	}, map[string]string{"Tags": "not read"})
+	a := map[string]any{"Name": "x", "Tags": []any{"t"}, "Nested": map[string]any{"Deep": "1", "Inner": "same"}}
+	b := map[string]any{"Name": "x", "Nested": map[string]any{"Deep": "2", "Inner": "same"}}
+	var out []Difference
+	diff("", a, b, skip, &out)
+	if len(out) != 0 {
+		t.Fatalf("differences = %v, want none for skipped properties", out)
+	}
+	b["Nested"].(map[string]any)["Inner"] = "other"
+	b["Name"] = "y"
+	out = nil
+	diff("", a, b, skip, &out)
+	var got []string
+	for _, d := range out {
+		got = append(got, d.Property)
+	}
+	sort.Strings(got)
+	if want := []string{"Name", "Nested.Inner"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("differences = %v, want %v", got, want)
 	}
 }
 
