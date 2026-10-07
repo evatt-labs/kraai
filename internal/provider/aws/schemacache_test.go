@@ -46,7 +46,7 @@ func TestSchemaCacheServesAFreshCopyWithoutACall(t *testing.T) {
 	c, path := newCachingClient(t, cf)
 
 	for range 3 {
-		facts, err := c.DescribeType(context.Background(), TypeSQSQueue)
+		facts, err := c.describeLive(context.Background(), TypeSQSQueue)
 		if err != nil || facts.IdentityProperty != "QueueName" {
 			t.Fatalf("DescribeType = %+v, %v", facts, err)
 		}
@@ -62,7 +62,7 @@ func TestSchemaCacheServesAFreshCopyWithoutACall(t *testing.T) {
 	next := &countingCF{schema: cachedQueueSchema}
 	c2 := &Client{cf: next, region: "us-east-1"}
 	WithSchemaCache(filepath.Dir(filepath.Dir(path)), time.Hour)(c2)
-	if _, err := c2.DescribeType(context.Background(), TypeSQSQueue); err != nil || next.calls != 0 {
+	if _, err := c2.describeLive(context.Background(), TypeSQSQueue); err != nil || next.calls != 0 {
 		t.Fatalf("second run: calls=%d, err=%v", next.calls, err)
 	}
 }
@@ -100,12 +100,12 @@ func TestSchemaCacheRefetchesAStaleOrCorruptCopy(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			cf := &countingCF{schema: cachedQueueSchema}
 			c, path := newCachingClient(t, cf)
-			if _, err := c.DescribeType(context.Background(), TypeSQSQueue); err != nil {
+			if _, err := c.describeLive(context.Background(), TypeSQSQueue); err != nil {
 				t.Fatal(err)
 			}
 			spoil(t, path)
 
-			if _, err := c.DescribeType(context.Background(), TypeSQSQueue); err != nil {
+			if _, err := c.describeLive(context.Background(), TypeSQSQueue); err != nil {
 				t.Fatalf("DescribeType: %v", err)
 			}
 			if cf.calls != 2 {
@@ -123,7 +123,7 @@ func TestSchemaCacheSkipsWhatItMustNotKeep(t *testing.T) {
 		cf := &countingCF{schema: `{"typeName":"MongoDB::Atlas::Cluster"}`}
 		c, _ := newCachingClient(t, cf)
 		for range 2 {
-			if _, err := c.DescribeType(context.Background(), "MongoDB::Atlas::Cluster"); err != nil {
+			if _, err := c.describeLive(context.Background(), "MongoDB::Atlas::Cluster"); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -149,7 +149,7 @@ func TestSchemaCacheSkipsWhatItMustNotKeep(t *testing.T) {
 		cf := &countingCF{schema: cachedQueueSchema}
 		c := &Client{cf: cf, region: "us-east-1"}
 		for range 2 {
-			if _, err := c.DescribeType(context.Background(), TypeSQSQueue); err != nil {
+			if _, err := c.describeLive(context.Background(), TypeSQSQueue); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -172,7 +172,7 @@ func TestPropertySchemaValidatesTheTypesProperties(t *testing.T) {
 	if err := schema.Validate(map[string]any{"QueueNme": "q"}); err == nil {
 		t.Error("an undefined property was accepted")
 	}
-	if _, err := c.DescribeType(context.Background(), TypeSQSQueue); err != nil || cf.calls != 1 {
+	if _, err := c.describeLive(context.Background(), TypeSQSQueue); err != nil || cf.calls != 1 {
 		t.Fatalf("validation and facts did not share one fetch: calls=%d, err=%v", cf.calls, err)
 	}
 }
