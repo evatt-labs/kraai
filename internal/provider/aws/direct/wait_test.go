@@ -338,8 +338,9 @@ func TestReadDynamoDBBusyOfAnyIndex(t *testing.T) {
 // Under an XML protocol a condition over every element holds when any
 // element has one of the values.
 func TestReadXMLBusyOfAnyElement(t *testing.T) {
-	r, errs := compileEdited(t, associationsType, func(o *Override) {
-		o.Read.Busy = map[string][]string{"Associations[].AssociationState.State": {"associating"}}
+	r, errs := fixtureAssociation.compile(t, [2]string{
+		"Associations[RouteTableAssociationId={Id}].AssociationState.State: [associating]",
+		"Associations[].AssociationState.State: [associating]",
 	})
 	if len(errs) > 0 {
 		t.Fatal(errs)

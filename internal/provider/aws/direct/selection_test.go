@@ -86,10 +86,11 @@ func TestCompileRefusesASelectionItCannotRead(t *testing.T) {
 // What the composite identifiers and gateway attachments the overrides
 // declare must be, or the compiler refuses them before any call is made.
 func TestCompileRefusesWhatACompositeIdentifierNeeds(t *testing.T) {
-	const route, attachment = "AWS--EC2--Route.yaml", "AWS--EC2--VPCGatewayAttachment.yaml"
+	route, attachment := fixtureRoute, fixtureAttachment
 	alternatives := "{DestinationCidrBlock|DestinationIpv6CidrBlock|DestinationPrefixListId}"
 	for name, c := range map[string]struct {
-		file, old, replacement, want string
+		fixture                ec2Fixture
+		old, replacement, want string
 	}{
 		"an alternative that is no property":       {route, alternatives, "{DestinationCidrBlock|Nope}", "Nope must be a property the input sends"},
 		"an alternative the create does not send":  {route, alternatives, "{DestinationCidrBlock|CidrBlock}", "CidrBlock must be a property the input sends"},
@@ -102,9 +103,8 @@ func TestCompileRefusesWhatACompositeIdentifierNeeds(t *testing.T) {
 		"a before call that names no property":     {attachment, "InternetGatewayId: \"{CurrentInternetGatewayId}\"\n        VpcId: \"{VpcId}\"\n      absentErrors", "InternetGatewayId: \"{Nope}\"\n        VpcId: \"{VpcId}\"\n      absentErrors", "names {Nope}, which is not a property"},
 	} {
 		t.Run(name, func(t *testing.T) {
-			_, err := compileAll(edit(t, c.file, c.old, c.replacement))
-			if err == nil || !strings.Contains(err.Error(), c.want) {
-				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
+			if _, errs := c.fixture.compile(t, [2]string{c.old, c.replacement}); !containsErr(errs, c.want) {
+				t.Fatalf("errors = %v\nwant one containing %q", errs, c.want)
 			}
 		})
 	}
